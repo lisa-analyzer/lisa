@@ -1,12 +1,5 @@
 package it.unive.lisa.outputs.serializableGraph;
 
-import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.NaryExpression;
-import it.unive.lisa.program.cfg.statement.NaryStatement;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -15,8 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+
+import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.NaryStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 /**
  * Utility class to build {@link SerializableGraph}s from {@link CFG}s.
@@ -51,7 +52,8 @@ public class SerializableCFG {
 	 *
 	 * @return the serializable version of that cfg
 	 */
-	public static SerializableGraph fromCFG(CFG source, Function<Statement, SerializableValue> descriptionGenerator) {
+	public static SerializableGraph fromCFG(CFG source,
+			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
 		String name = source.getDescriptor().getFullSignatureWithParNames();
 		String desc;
 		if (source instanceof AnalyzedCFG<?, ?, ?, ?> && !((AnalyzedCFG<?, ?, ?, ?>) source).getId().isStartingId())
@@ -67,9 +69,10 @@ public class SerializableCFG {
 			Map<Statement, List<Statement>> inners = new IdentityHashMap<>();
 			node.accept(new InnerNodeExtractor(), inners);
 			for (Statement inner : inners.keySet())
-				addNode(nodes, descrs, inner, inners.getOrDefault(inner, Collections.emptyList()),
+				addNode(source, nodes, descrs, inner, inners.getOrDefault(inner, Collections.emptyList()),
 						descriptionGenerator);
-			addNode(nodes, descrs, node, inners.getOrDefault(node, Collections.emptyList()), descriptionGenerator);
+			addNode(source, nodes, descrs, node, inners.getOrDefault(node, Collections.emptyList()),
+					descriptionGenerator);
 		}
 
 		for (Statement src : source.getNodes())
@@ -81,16 +84,17 @@ public class SerializableCFG {
 	}
 
 	private static void addNode(
+			CFG source,
 			SortedSet<SerializableNode> nodes,
 			SortedSet<SerializableNodeDescription> descrs,
 			Statement node,
 			List<Statement> inners,
-			Function<Statement, SerializableValue> descriptionGenerator) {
+			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
 		List<Integer> innerIds = inners.stream().map(st -> st.getOffset()).collect(Collectors.toList());
 		SerializableNode n = new SerializableNode(node.getOffset(), innerIds, node.toString());
 		nodes.add(n);
 		if (descriptionGenerator != null) {
-			SerializableValue value = descriptionGenerator.apply(node);
+			SerializableValue value = descriptionGenerator.apply(source, node);
 			if (value != null)
 				descrs.add(new SerializableNodeDescription(node.getOffset(), value));
 		}

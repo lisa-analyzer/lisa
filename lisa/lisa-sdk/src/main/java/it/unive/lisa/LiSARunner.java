@@ -3,6 +3,7 @@ package it.unive.lisa;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
@@ -22,6 +23,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
@@ -40,6 +42,8 @@ import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -187,10 +191,21 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		if (conf.serializeResults || type != GraphType.NONE) {
 			int nfiles = fileManager.createdFiles().size();
 
+			BiFunction<CFG,
+					Statement,
+					SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding
+							? (cfg, st) -> ((OptimizedAnalyzedCFG<A, H, V, T>) cfg)
+									.getUnwindedAnalysisStateAfter(st)
+									.representation()
+									.toSerializableValue()
+							: (cfg, st) -> ((AnalyzedCFG<A, H, V, T>) cfg)
+									.getAnalysisStateAfter(st)
+									.representation()
+									.toSerializableValue();
+
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 				for (AnalyzedCFG<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
-					SerializableGraph graph = result.toSerializableGraph(
-							st -> result.getAnalysisStateAfter(st).representation().toSerializableValue());
+					SerializableGraph graph = result.toSerializableGraph(labeler);
 					String filename = cfg.getDescriptor().getFullSignatureWithParNames();
 					if (!result.getId().isStartingId())
 						// we use the string for compatibility with older file

@@ -5,6 +5,7 @@ import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -79,16 +80,21 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
+		// new fixpoint iteration: restart
+		this.results = null;
 
 		for (CFG cfg : IterationLogger.iterate(LOG, app.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
 				if (results == null) {
-					CFGResults<A, H, V, T> value = new CFGResults<>(new AnalyzedCFG<>(cfg, ID, entryState));
+					AnalyzedCFG<A, H, V, T> graph = conf.optimize
+							? new OptimizedAnalyzedCFG<>(cfg, ID, entryState.bottom(), this)
+							: new AnalyzedCFG<>(cfg, ID, entryState);
+					CFGResults<A, H, V, T> value = new CFGResults<>(graph);
 					this.results = new FixpointResults<>(value.top());
 				}
-				AnalysisState<A, H, V, T> prepared = entryState;
 
+				AnalysisState<A, H, V, T> prepared = entryState;
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
 					Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(),
 							arg.getLocation());

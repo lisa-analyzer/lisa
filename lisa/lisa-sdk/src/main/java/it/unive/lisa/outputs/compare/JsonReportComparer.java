@@ -72,9 +72,9 @@ public class JsonReportComparer {
 
 	private static final String NO_DESC = "%s graph does not have a desciption for node %d: %s";
 
-	private static final String DESC_DIFF = "Different desciption for node %d (%s):\n%s";
+	private static final String DESC_DIFF = "Different desciption for node %d (%s)";
 
-	private static final String DESC_DIFF_VERBOSE = "Different desciption for node %d (%s)";
+	private static final String DESC_DIFF_VERBOSE = "Different desciption for node %d (%s):\n%s";
 
 	/**
 	 * An enumeration defining the different type of reports that can be issued.
@@ -282,6 +282,10 @@ public class JsonReportComparer {
 		 * @param actual   the file from the actual report
 		 * 
 		 * @return whether or not a difference was found in the files
+		 * 
+		 * @throws UnsupportedOperationException if file comparisons are not
+		 *                                           supported for the given
+		 *                                           file type
 		 */
 		default boolean customFileCompare(File expected, File actual) {
 			throw new UnsupportedOperationException(format(CANNOT_COMPARE, expected.toString(), actual.toString()));

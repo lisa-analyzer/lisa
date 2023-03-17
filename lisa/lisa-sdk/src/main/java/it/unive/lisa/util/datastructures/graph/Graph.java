@@ -1,14 +1,15 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
 
 /**
  * Interface of a generic graph structure.
@@ -178,7 +179,7 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	/**
 	 * Yields an instance of {@link SerializableGraph} built from this one. The
 	 * default implementation of this method is equivalent to invoking
-	 * {@link #toSerializableGraph(Function)} with {@code null} as argument.
+	 * {@link #toSerializableGraph(BiFunction)} with {@code null} as argument.
 	 * 
 	 * @return a {@link SerializableGraph} instance
 	 */
@@ -197,7 +198,7 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return a {@link SerializableGraph} instance
 	 */
-	SerializableGraph toSerializableGraph(Function<N, SerializableValue> descriptionGenerator);
+	SerializableGraph toSerializableGraph(BiFunction<G, N, SerializableValue> descriptionGenerator);
 
 	/**
 	 * Checks if this graph is effectively equal to the given one, that is, if

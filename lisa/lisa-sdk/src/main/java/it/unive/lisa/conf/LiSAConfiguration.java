@@ -200,8 +200,8 @@ public class LiSAConfiguration extends BaseConfiguration {
 	public boolean serializeResults;
 
 	/**
-	 * Sets whether or not a json report file, named {@code report.json}, should
-	 * be created and dumped in the working directory at the end of the
+	 * Sets whether or not a json report file, named {@value LiSA#REPORT_NAME},
+	 * should be created and dumped in the working directory at the end of the
 	 * analysis. This file will contain all the {@link Warning}s that have been
 	 * generated, as well as a list of produced files. To customize where the
 	 * report should be generated, use {@link #workdir}. Defaults to
@@ -278,6 +278,16 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * hotspots.
 	 */
 	public Predicate<Statement> hotspots = null;
+
+	/**
+	 * When {@link #optimize} is {@code true}, this field controls whether or
+	 * not optimized results are automatically unwinded before dumping them to
+	 * output files. Note that, if this field is {@code false} and
+	 * {@link #optimize} is {@code true}, the post-state of every node that is
+	 * not a widening point or that is not matched by {@link #hotspots} will
+	 * appear as bottom states. Defaults to {@code true}.
+	 */
+	public boolean dumpForcesUnwinding = false;
 
 	@Override
 	public String toString() {

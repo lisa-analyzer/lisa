@@ -6,6 +6,7 @@ import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -94,6 +95,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			throws FixpointException {
 		this.fixpointWorkingSet = fixpointWorkingSet;
 		this.conf = conf;
+		// new fixpoint execution: reset
+		this.results = null;
 
 		if (app.getEntryPoints().isEmpty())
 			throw new NoEntryPointException();
@@ -124,10 +127,13 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			for (CFG cfg : IterationLogger.iterate(LOG, app.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {
 					if (results == null) {
-						CFGResults<A, H, V,
-								T> value = new CFGResults<>(new AnalyzedCFG<>(cfg, token.empty(), entryState));
+						AnalyzedCFG<A, H, V, T> graph = conf.optimize
+								? new OptimizedAnalyzedCFG<>(cfg, empty, entryState.bottom(), this)
+								: new AnalyzedCFG<>(cfg, empty, entryState);
+						CFGResults<A, H, V, T> value = new CFGResults<>(graph);
 						this.results = new FixpointResults<>(value.top());
 					}
+					
 					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 					results.putResult(cfg, empty,
 							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(fixpointWorkingSet), conf, empty));

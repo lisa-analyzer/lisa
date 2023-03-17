@@ -269,6 +269,7 @@ public class EqualityContractVerificationTest {
 		verify(LiSAConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(FixpointConfiguration.class);
 		verify(ConfigurableComponent.class);
+		verify(CronConfiguration.class, Warning.NONFINAL_FIELDS);
 	}
 
 	@Test
