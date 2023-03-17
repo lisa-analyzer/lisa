@@ -159,12 +159,6 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 			for (Entry<ExecutionTrace, A> trace : this) {
 				A state = trace.getValue();
 				ExecutionTrace tokens = trace.getKey();
-
-				Satisfiability sat = state.satisfies(expression, src);
-				if (!sat.mightBeTrue())
-					// we only keep traces that can escape the loop
-					continue;
-
 				A assume = state.assume(expression, src, dest);
 				if (assume.isBottom())
 					// we only keep traces that can escape the loop

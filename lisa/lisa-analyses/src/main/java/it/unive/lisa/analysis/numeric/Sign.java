@@ -330,68 +330,65 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public ValueEnvironment<Sign> assumeBinaryExpression(
-			ValueEnvironment<Sign> environment, BinaryOperator operator, ValueExpression left,
-			ValueExpression right, ProgramPoint src, ProgramPoint dest) throws SemanticException {
-		if (operator == ComparisonEq.INSTANCE)
-			if (left instanceof Identifier)
-				environment = environment.assign((Identifier) left, right, src);
-			else if (right instanceof Identifier)
-				environment = environment.assign((Identifier) right, left, src);
-			else
-				return environment;
-		else if (operator == ComparisonGe.INSTANCE)
-			if (left instanceof Identifier) {
-				Sign rightSign = eval(right, environment, src);
-				if (rightSign.isPositive())
-					environment = environment.assign((Identifier) left, right, src);
-			} else if (right instanceof Identifier) {
-				Sign leftSign = eval(left, environment, src);
-				if (leftSign.isNegative())
-					environment = environment.assign((Identifier) right, left, src);
-			} else
-				return environment;
-		else if (operator == ComparisonLe.INSTANCE)
-			if (left instanceof Identifier) {
-				Sign rightSign = eval(right, environment, src);
-				if (rightSign.isNegative())
-					environment = environment.assign((Identifier) left, right, src);
-			} else if (right instanceof Identifier) {
-				Sign leftSign = eval(left, environment, src);
-				if (leftSign.isPositive())
-					environment = environment.assign((Identifier) right, left, src);
-			} else
-				return environment;
-		else if (operator == ComparisonLt.INSTANCE)
-			if (left instanceof Identifier) {
-				Sign rightSign = eval(right, environment, src);
-				if (rightSign.isNegative() || rightSign.isZero())
-					// x < 0/-
-					environment = environment.assign((Identifier) left,
-							new Constant(right.getStaticType(), -1, right.getCodeLocation()), src);
-			} else if (right instanceof Identifier) {
-				Sign leftSign = eval(left, environment, src);
-				if (leftSign.isPositive() || leftSign.isZero())
-					// 0/+ < x
-					environment = environment.assign((Identifier) right,
-							new Constant(left.getStaticType(), 1, left.getCodeLocation()), src);
-			} else
-				return environment;
-		else if (operator == ComparisonGt.INSTANCE)
-			if (left instanceof Identifier) {
-				Sign rightSign = eval(right, environment, src);
-				if (rightSign.isPositive() || rightSign.isZero())
-					// x > +/0
-					environment = environment.assign((Identifier) left,
-							new Constant(right.getStaticType(), 1, right.getCodeLocation()), src);
-			} else if (right instanceof Identifier) {
-				Sign leftSign = eval(left, environment, src);
-				if (leftSign.isNegative() || leftSign.isZero())
-					// -/0 > x
-					environment = environment.assign((Identifier) right,
-							new Constant(left.getStaticType(), -1, right.getCodeLocation()), src);
-			} else
-				return environment;
+			ValueEnvironment<Sign> environment,
+			BinaryOperator operator,
+			ValueExpression left,
+			ValueExpression right,
+			ProgramPoint src,
+			ProgramPoint dest)
+			throws SemanticException {
+		Identifier id;
+		Sign eval;
+		boolean rightIsExpr;
+		if (left instanceof Identifier) {
+			eval = eval(right, environment, src);
+			id = (Identifier) left;
+			rightIsExpr = true;
+		} else if (right instanceof Identifier) {
+			eval = eval(left, environment, src);
+			id = (Identifier) right;
+			rightIsExpr = false;
+		} else
+			return environment;
 
-		return environment;
+		Sign starting = environment.getState(id);
+		if (eval.isBottom() || starting.isBottom())
+			return environment.bottom();
+
+		Sign update = null;
+		if (operator == ComparisonEq.INSTANCE)
+			update = eval;
+		else if (operator == ComparisonGe.INSTANCE) {
+			if (rightIsExpr && eval.isPositive())
+				update = eval;
+			else if (!rightIsExpr && eval.isNegative())
+				update = eval;
+		} else if (operator == ComparisonLe.INSTANCE) {
+			if (rightIsExpr && eval.isNegative())
+				update = eval;
+			else if (!rightIsExpr && eval.isPositive())
+				update = eval;
+		} else if (operator == ComparisonLt.INSTANCE) {
+			if (rightIsExpr && (eval.isNegative() || eval.isZero()))
+				// x < 0/-
+				update = NEG;
+			else if (!rightIsExpr && (eval.isPositive() || eval.isZero()))
+				// 0/+ < x
+				update = POS;
+		} else if (operator == ComparisonGt.INSTANCE) {
+			if (rightIsExpr && (eval.isPositive() || eval.isZero()))
+				// x > +/0
+				update = POS;
+			else if (!rightIsExpr && (eval.isNegative() || eval.isZero()))
+				// -/0 > x
+				update = NEG;
+		}
+
+		if (update == null)
+			return environment;
+		else if (update.isBottom())
+			return environment.bottom();
+		else
+			return environment.putState(id, update);
 	}
 }

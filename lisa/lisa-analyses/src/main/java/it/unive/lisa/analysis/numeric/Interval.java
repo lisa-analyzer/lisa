@@ -389,9 +389,13 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 
 	@Override
 	public ValueEnvironment<Interval> assumeBinaryExpression(
-			ValueEnvironment<Interval> environment, BinaryOperator operator, ValueExpression left,
-			ValueExpression right, ProgramPoint src, ProgramPoint dest) throws SemanticException {
-
+			ValueEnvironment<Interval> environment,
+			BinaryOperator operator,
+			ValueExpression left,
+			ValueExpression right,
+			ProgramPoint src,
+			ProgramPoint dest)
+			throws SemanticException {
 		Identifier id;
 		Interval eval;
 		boolean rightIsExpr;
@@ -406,40 +410,46 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 		} else
 			return environment;
 
-		if (eval.isBottom())
+		Interval starting = environment.getState(id);
+		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
 
-		Interval starting = environment.getState(id);
 		boolean lowIsMinusInfinity = eval.interval.lowIsMinusInfinity();
 		Interval low_inf = new Interval(eval.interval.getLow(), MathNumber.PLUS_INFINITY);
 		Interval lowp1_inf = new Interval(eval.interval.getLow().add(MathNumber.ONE), MathNumber.PLUS_INFINITY);
 		Interval inf_high = new Interval(MathNumber.MINUS_INFINITY, eval.interval.getHigh());
 		Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY, eval.interval.getHigh().subtract(MathNumber.ONE));
 
+		Interval update = null;
 		if (operator == ComparisonEq.INSTANCE)
-			return environment.putState(id, eval);
+			update = eval;
 		else if (operator == ComparisonGe.INSTANCE)
 			if (rightIsExpr)
-				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(low_inf));
+				update = lowIsMinusInfinity ? null : starting.glb(low_inf);
 			else
-				return environment.putState(id, starting.glb(inf_high));
+				update = starting.glb(inf_high);
 		else if (operator == ComparisonGt.INSTANCE)
 			if (rightIsExpr)
-				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(lowp1_inf));
+				update = lowIsMinusInfinity ? null : starting.glb(lowp1_inf);
 			else
-				return environment.putState(id, lowIsMinusInfinity ? eval : starting.glb(inf_highm1));
+				update = lowIsMinusInfinity ? eval : starting.glb(inf_highm1);
 		else if (operator == ComparisonLe.INSTANCE)
 			if (rightIsExpr)
-				return environment.putState(id, starting.glb(inf_high));
+				update = starting.glb(inf_high);
 			else
-				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(low_inf));
+				update = lowIsMinusInfinity ? null : starting.glb(low_inf);
 		else if (operator == ComparisonLt.INSTANCE)
 			if (rightIsExpr)
-				return environment.putState(id, lowIsMinusInfinity ? eval : starting.glb(inf_highm1));
+				update = lowIsMinusInfinity ? eval : starting.glb(inf_highm1);
 			else
-				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(lowp1_inf));
-		else
+				update = lowIsMinusInfinity ? null : starting.glb(lowp1_inf);
+
+		if (update == null)
 			return environment;
+		else if (update.isBottom())
+			return environment.bottom();
+		else
+			return environment.putState(id, update);
 	}
 
 	@Override

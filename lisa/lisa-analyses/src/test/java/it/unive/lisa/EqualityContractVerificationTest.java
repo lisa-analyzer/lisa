@@ -436,8 +436,9 @@ public class EqualityContractVerificationTest {
 				continue;
 			else if (FunctionalLattice.class.isAssignableFrom(subject)
 					|| SetLattice.class.isAssignableFrom(subject)
-					|| InverseSetLattice.class.isAssignableFrom(subject))
-				// fields function and elements can be null
+					|| InverseSetLattice.class.isAssignableFrom(subject)
+					|| NonInterference.class == subject)
+				// fields function and elements and guards can be null
 				verify(subject, Warning.NONFINAL_FIELDS);
 			else if (subject == StaticTypes.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("types"));

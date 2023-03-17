@@ -142,8 +142,13 @@ public class NonRedundantPowersetOfInterval
 
 	@Override
 	public ValueEnvironment<NonRedundantPowersetOfInterval> assumeBinaryExpression(
-			ValueEnvironment<NonRedundantPowersetOfInterval> environment, BinaryOperator operator, ValueExpression left,
-			ValueExpression right, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+			ValueEnvironment<NonRedundantPowersetOfInterval> environment,
+			BinaryOperator operator,
+			ValueExpression left,
+			ValueExpression right,
+			ProgramPoint src,
+			ProgramPoint dest)
+			throws SemanticException {
 		Identifier id;
 		NonRedundantPowersetOfInterval eval;
 		boolean rightIsExpr;
@@ -158,13 +163,13 @@ public class NonRedundantPowersetOfInterval
 		} else
 			return environment;
 
-		if (eval.isBottom())
+		NonRedundantPowersetOfInterval starting = environment.getState(id);
+		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
 
 		SortedSet<Interval> newSet = new TreeSet<>();
-		NonRedundantPowersetOfInterval starting = environment.getState(id);
 
-		for (Interval startingInterval : starting.elementsSet) {
+		for (Interval startingInterval : starting.elementsSet)
 			for (Interval interval : eval.elementsSet) {
 				boolean lowIsMinusInfinity = interval.interval.lowIsMinusInfinity();
 				Interval low_inf = new Interval(interval.interval.getLow(), MathNumber.PLUS_INFINITY);
@@ -174,43 +179,46 @@ public class NonRedundantPowersetOfInterval
 				Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY,
 						interval.interval.getHigh().subtract(MathNumber.ONE));
 
-				if (operator == ComparisonEq.INSTANCE) {
+				if (operator == ComparisonEq.INSTANCE)
 					newSet.add(interval);
-				} else if (operator == ComparisonGe.INSTANCE) {
-					if (rightIsExpr) {
+				else if (operator == ComparisonGe.INSTANCE)
+					if (rightIsExpr)
 						if (lowIsMinusInfinity)
 							newSet.add(startingInterval);
 						else
 							newSet.add(startingInterval.glb(low_inf));
-					} else
+					else
 						newSet.add(startingInterval.glb(inf_high));
-				} else if (operator == ComparisonGt.INSTANCE) {
+				else if (operator == ComparisonGt.INSTANCE)
 					if (rightIsExpr)
 						newSet.add(startingInterval.glb(lowp1_inf));
 					else
 						newSet.add(lowIsMinusInfinity ? interval : startingInterval.glb(inf_highm1));
-				} else if (operator == ComparisonLe.INSTANCE) {
+				else if (operator == ComparisonLe.INSTANCE)
 					if (rightIsExpr)
 						newSet.add(startingInterval.glb(inf_high));
 					else if (lowIsMinusInfinity)
 						newSet.add(startingInterval);
 					else
 						newSet.add(startingInterval.glb(low_inf));
-				} else if (operator == ComparisonLt.INSTANCE) {
+				else if (operator == ComparisonLt.INSTANCE)
 					if (rightIsExpr)
 						newSet.add(lowIsMinusInfinity ? interval : startingInterval.glb(inf_highm1));
 					else if (lowIsMinusInfinity)
 						newSet.add(startingInterval);
 					else
 						newSet.add(startingInterval.glb(lowp1_inf));
-				} else
+				else
 					newSet.add(startingInterval);
 			}
-		}
-		NonRedundantPowersetOfInterval intervals = new NonRedundantPowersetOfInterval(newSet).removeRedundancy()
+
+		NonRedundantPowersetOfInterval intervals = new NonRedundantPowersetOfInterval(newSet)
+				.removeRedundancy()
 				.removeOverlapping();
-		environment = environment.putState(id, intervals);
-		return environment;
+		if (intervals.isBottom())
+			return environment.bottom();
+		else
+			return environment.putState(id, intervals);
 	}
 
 	@Override
