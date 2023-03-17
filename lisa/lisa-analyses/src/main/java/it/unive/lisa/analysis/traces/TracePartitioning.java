@@ -171,7 +171,11 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 				result.put(nextTrace, prev == null ? assume : assume.lub(prev));
 			}
 
-		return new TracePartitioning<>(lattice, result.isEmpty() ? null : result);
+		if (result.isEmpty())
+			// no traces pass the condition, so this branch is unreachable
+			return bottom();
+
+		return new TracePartitioning<>(lattice, result);
 	}
 
 	private static ExecutionTrace generateTraceFor(ExecutionTrace trace, ControlFlowStructure struct, ProgramPoint src,
