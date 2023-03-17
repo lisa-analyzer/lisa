@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using an
@@ -39,7 +40,7 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * @return the automaton
 	 */
 	public static RegexAutomaton topString() {
-		State q0 = new State(0, true, false);
+		State q0 = new State(0, true, true);
 		State q1 = new State(1, false, true);
 
 		SortedSet<State> states = new TreeSet<>();
@@ -278,6 +279,41 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		}
 
 		return new RegexAutomaton(exStates, exTransitions).minimize();
+	}
+
+	@Override
+	public RegexAutomaton intersection(RegexAutomaton other) {
+		if (this == other)
+			return this;
+
+		int code = 0;
+		Map<State, Pair<State, State>> stateMapping = new HashMap<>();
+		SortedSet<State> newStates = new TreeSet<>();
+		SortedSet<Transition<RegularExpression>> newDelta = new TreeSet<Transition<RegularExpression>>();
+
+		for (State s1 : states)
+			for (State s2 : other.states) {
+				State s = new State(code++, s1.isInitial() && s2.isInitial(), s1.isFinal() && s2.isFinal());
+				stateMapping.put(s, Pair.of(s1, s2));
+				newStates.add(s);
+			}
+
+		for (Transition<RegularExpression> t1 : getTransitions()) {
+			for (Transition<RegularExpression> t2 : other.getTransitions()) {
+				State from = getStateFromPair(stateMapping, Pair.of(t1.getSource(), t2.getSource()));
+				State to = getStateFromPair(stateMapping, Pair.of(t1.getDestination(), t2.getDestination()));
+
+				if (t1.getSymbol().equals(t2.getSymbol()))
+					newDelta.add(new Transition<RegularExpression>(from, to, t1.getSymbol()));
+				else if (t1.getSymbol() == TopAtom.INSTANCE && t2.getSymbol() != TopAtom.INSTANCE)
+					newDelta.add(new Transition<RegularExpression>(from, to, t2.getSymbol()));
+				else if (t1.getSymbol() != TopAtom.INSTANCE && t2.getSymbol() == TopAtom.INSTANCE)
+					newDelta.add(new Transition<RegularExpression>(from, to, t1.getSymbol()));
+			}
+		}
+
+		RegexAutomaton result = from(newStates, newDelta).minimize();
+		return result;
 	}
 
 	/**

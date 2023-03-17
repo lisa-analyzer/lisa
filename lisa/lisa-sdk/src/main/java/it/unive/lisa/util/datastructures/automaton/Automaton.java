@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -388,9 +389,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the set of states that can be reached
 	 */
-	private SortedSet<State> nextStatesNFA(Set<State> set, T sym) {
+	public SortedSet<State> nextStatesNFA(Set<State> set, T sym) {
 		SortedSet<State> solution = new TreeSet<>();
-
 		for (State s : set)
 			for (Transition<T> t : getOutgoingTransitionsFrom(s))
 				if (t.getSymbol().equals(sym))
@@ -761,15 +761,47 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		if (this == other)
 			return (A) this;
 
-		// !(!(first) u !(second))
-		Set<T> sigma = commonAlphabet(other);
-		A notFirst = complement(sigma);
-		A notSecond = other.complement(sigma);
-		A union = notFirst.union(notSecond);
-		A result = union.complement(null);
-		// the last operation of the complement is minimization, and thus the
-		// result is already minimized
-		return result;
+		int code = 0;
+		Map<State, Pair<State, State>> stateMapping = new HashMap<>();
+		SortedSet<State> newStates = new TreeSet<>();
+		SortedSet<Transition<T>> newDelta = new TreeSet<Transition<T>>();
+
+		for (State s1 : states)
+			for (State s2 : other.states) {
+				State s = new State(code++, s1.isInitial() && s2.isInitial(), s1.isFinal() && s2.isFinal());
+				stateMapping.put(s, Pair.of(s1, s2));
+				newStates.add(s);
+			}
+
+		for (Transition<T> t1 : transitions) {
+			for (Transition<T> t2 : other.transitions) {
+				if (t1.getSymbol().equals(t2.getSymbol())) {
+					State from = getStateFromPair(stateMapping, Pair.of(t1.getSource(), t2.getSource()));
+					State to = getStateFromPair(stateMapping, Pair.of(t1.getDestination(), t2.getDestination()));
+					newDelta.add(new Transition<T>(from, to, t1.getSymbol()));
+				}
+			}
+		}
+
+		return from(newStates, newDelta).minimize();
+	}
+
+	/**
+	 * Given a pair of states, yields the state associated to the pair in the
+	 * given state mapping.
+	 * 
+	 * @param mapping the mapping
+	 * @param pair    the pair of states
+	 * 
+	 * @return the state associated to the pair in the given state mapping
+	 */
+	protected State getStateFromPair(Map<State, Pair<State, State>> mapping, Pair<State, State> pair) {
+		for (Entry<State, Pair<State, State>> entry : mapping.entrySet())
+			if (entry.getValue().getLeft().equals(pair.getLeft())
+					&& entry.getValue().getRight().equals(pair.getRight()))
+				return entry.getKey();
+
+		return null;
 	}
 
 	/**
@@ -1659,7 +1691,23 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return the factors automaton
 	 */
 	public A factors() {
-		return prefix().suffix();
+		SortedSet<State> newStates = new TreeSet<>();
+		Map<Integer, State> nameToStates = new HashMap<Integer, State>();
+		SortedSet<Transition<T>> newDelta = new TreeSet<>();
+
+		for (State s : states) {
+			State mock = new State(s.getId(), true, true);
+			newStates.add(mock);
+			nameToStates.put(s.getId(), mock);
+		}
+
+		for (Transition<T> t : transitions)
+			newDelta.add(new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
+
+		return from(newStates, newDelta).minimize();
 	}
 
 	/**

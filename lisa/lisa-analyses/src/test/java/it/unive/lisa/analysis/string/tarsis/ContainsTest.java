@@ -199,6 +199,72 @@ public class ContainsTest {
 	}
 
 	@Test
+	public void test06() throws SemanticException {
+		Tarsis t1 = new Tarsis(RegexAutomaton.topString());
+		Tarsis t2 = new Tarsis(RegexAutomaton.string("a"));
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+	}
+
+	@Test
+	public void test07() throws SemanticException {
+		Tarsis t1 = new Tarsis(RegexAutomaton.string("a"));
+		Tarsis t2 = new Tarsis(RegexAutomaton.topString());
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+	}
+
+	@Test
+	public void test08() throws SemanticException {
+		Tarsis t1 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
+		Tarsis t2 = new Tarsis(RegexAutomaton.string("a"));
+		assertEquals(SemanticDomain.Satisfiability.SATISFIED,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+	}
+
+	@Test
+	public void test09() throws SemanticException {
+		Tarsis t1 = new Tarsis(RegexAutomaton.string("a"));
+		Tarsis t2 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
+
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+	}
+
+	@Test
+	public void test10() throws SemanticException {
+		Tarsis t1 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
+		Tarsis t2 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("b")));
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+	}
+
+	@Test
+	public void test11() throws SemanticException {
+		Tarsis t1 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
+		Tarsis t2 = new Tarsis(RegexAutomaton.string("ba"));
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+	}
+
+	@Test
+	public void test12() throws SemanticException {
+		Tarsis t1 = new Tarsis(RegexAutomaton.string("ba"));
+		Tarsis t2 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+	}
+
+	// TODO to check
+	@Test
+	public void test13() throws SemanticException {
+		Tarsis t1 = new Tarsis(RegexAutomaton.string("ba"));
+		Tarsis t2 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("c")));
+		assertEquals(SemanticDomain.Satisfiability.NOT_SATISFIED,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+	}
+
+	@Test
 	public void containsTestSelfContains() {
 		Tarsis a = new Tarsis(RegexAutomaton.string("abc"));
 
