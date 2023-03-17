@@ -4,7 +4,8 @@ import it.unive.lisa.conf.LiSAConfiguration;
 
 /**
  * An extended {@link LiSAConfiguration} that also holds test configuration
- * keys.
+ * keys. This configuration disables optimizations
+ * ({@link LiSAConfiguration#optimize}) by default.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -39,4 +40,8 @@ public class CronConfiguration extends LiSAConfiguration {
 	 * and the results will be checked to be equal to the non-optimized version.
 	 */
 	public boolean compareWithOptimization = true;
+
+	public CronConfiguration() {
+		optimize = false;
+	}
 }

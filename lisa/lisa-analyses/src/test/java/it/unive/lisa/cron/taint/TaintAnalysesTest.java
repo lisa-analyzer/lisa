@@ -26,6 +26,7 @@ import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -43,7 +44,7 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 				LiSAFactory.getDefaultFor(HeapDomain.class),
 				new ValueEnvironment<>(new Taint()),
 				LiSAFactory.getDefaultFor(TypeDomain.class));
-		conf.jsonOutput = true;
+		conf.serializeResults = true;
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -51,6 +52,7 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 		conf.testDir = "taint";
 		conf.testSubDir = "2val";
 		conf.programFile = "taint.imp";
+		conf.hotspots = st -> st instanceof Expression && ((Expression) st).getParentStatement() instanceof Call;
 		perform(conf);
 	}
 
@@ -61,7 +63,7 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 				LiSAFactory.getDefaultFor(HeapDomain.class),
 				new ValueEnvironment<>(new ThreeLevelsTaint()),
 				LiSAFactory.getDefaultFor(TypeDomain.class));
-		conf.jsonOutput = true;
+		conf.serializeResults = true;
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -69,18 +71,24 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 		conf.testDir = "taint";
 		conf.testSubDir = "3val";
 		conf.programFile = "taint.imp";
+		conf.hotspots = st -> st instanceof Expression && ((Expression) st).getParentStatement() instanceof Call;
 		perform(conf);
 	}
 
-	private static class TaintCheck<T extends BaseTaint<T>> implements
-			SemanticCheck<SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-					MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> {
+	private static class TaintCheck<T extends BaseTaint<T>>
+			implements SemanticCheck<
+					SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
+					MonolithicHeap,
+					ValueEnvironment<T>,
+					TypeEnvironment<InferredTypes>> {
 
 		@Override
 		public boolean visit(
 				CheckToolWithAnalysisResults<
 						SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-						MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> tool,
+						MonolithicHeap,
+						ValueEnvironment<T>,
+						TypeEnvironment<InferredTypes>> tool,
 				CFG graph, Statement node) {
 			if (!(node instanceof UnresolvedCall))
 				return true;
@@ -107,6 +115,7 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 										MonolithicHeap, ValueEnvironment<T>,
 										TypeEnvironment<InferredTypes>> post = result
 												.getAnalysisStateAfter(call.getParameters()[i]);
+
 								try {
 									for (SymbolicExpression e : post.rewrite(post.getComputedExpressions(), node)) {
 										T stack = post

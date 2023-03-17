@@ -19,6 +19,7 @@ import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -29,17 +30,17 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testConfidentialityNI() throws AnalysisSetupException {
-		SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-				TypeEnvironment<InferredTypes>> s = new SimpleAbstractState<>(
-						new MonolithicHeap(),
-						new InferenceSystem<>(new NonInterference()),
-						new TypeEnvironment<>(new InferredTypes()));
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = s;
+		conf.abstractState = new SimpleAbstractState<>(
+				new MonolithicHeap(),
+				new InferenceSystem<>(new NonInterference()),
+				new TypeEnvironment<>(new InferredTypes()));
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/confidentiality";
 		conf.programFile = "program.imp";
+		conf.hotspots = st -> st instanceof Assignment
+				|| (st instanceof Expression && ((Expression) st).getParentStatement() instanceof Assignment);
 		perform(conf);
 	}
 
@@ -54,6 +55,8 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/integrity";
 		conf.programFile = "program.imp";
+		conf.hotspots = st -> st instanceof Assignment
+				|| (st instanceof Expression && ((Expression) st).getParentStatement() instanceof Assignment);
 		perform(conf);
 	}
 
@@ -70,6 +73,8 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/interproc";
 		conf.programFile = "program.imp";
+		conf.hotspots = st -> st instanceof Assignment
+				|| (st instanceof Expression && ((Expression) st).getParentStatement() instanceof Assignment);
 		perform(conf);
 	}
 

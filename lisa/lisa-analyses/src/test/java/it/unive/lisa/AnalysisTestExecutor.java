@@ -71,7 +71,6 @@ public abstract class AnalysisTestExecutor {
 		setupWorkdir(conf, actualPath);
 
 		conf.jsonOutput = true;
-		conf.optimize = false;
 
 		// save disk space!
 		System.clearProperty("lisa.json.indent");
@@ -89,7 +88,7 @@ public abstract class AnalysisTestExecutor {
 
 		compare(conf, expectedPath, actualPath, expFile, actFile, false);
 
-		if (conf.compareWithOptimization) {
+		if (conf.compareWithOptimization && !conf.optimize) {
 			System.out.println("### Testing " + testMethod + " with optimization enabled");
 
 			// we parse the program again since the analysis might have
