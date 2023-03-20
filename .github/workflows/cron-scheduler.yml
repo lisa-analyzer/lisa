@@ -25,11 +25,18 @@ jobs:
             echo "+- Skipping branch $source"
             continue
           fi
-          curl --silent --show-error -L https://api.github.com/repos/$GITHUB_REPOSITORY/commits?sha=$source | jq -r '[.[]][0]' > commit.json
-          date="$(jq -r '.commit.author.date' commit.json)"
+          echo "+- Acquiring last commit information"
+          curl --silent --show-error -L https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$source > commit-raw.json 
+          head -n2 commit-raw.json | tail -n1
+          echo "+- Extracting last commit date"
+          date="$(jq -r '.commit.author.date' commit-raw.json)"
+          echo "+-- $date"
+          echo "+- Converting to timestamp"
           timestamp=$(date -u -d "$date" +%s)
+          echo "+-- $timestamp"
+          echo "+- Evaluating elapsed days"
           days=$(( ( $(date -u +%s) - $timestamp ) / 86400 ))
-          echo "+- Last commit was $days days ago"
+          echo "+-- Last commit was $days days ago"
           if [ $days -lt 1 ]; then
             echo "+- Launching cron tests on $source"
             curl --silent --show-error -X POST -H "Accept: application/vnd.github.v3+json" \
