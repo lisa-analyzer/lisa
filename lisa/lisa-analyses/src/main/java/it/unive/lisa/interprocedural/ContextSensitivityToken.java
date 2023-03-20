@@ -9,6 +9,11 @@ import it.unive.lisa.analysis.ScopeToken;
 public interface ContextSensitivityToken extends ScopeId {
 
 	/**
+	 * An empty array of {@link ScopeToken}s.
+	 */
+	static final ScopeToken[] NO_TOKENS = new ScopeToken[0];
+
+	/**
 	 * A token without any context sensitivity.
 	 * 
 	 * @return an empty context sensitive token
@@ -29,9 +34,23 @@ public interface ContextSensitivityToken extends ScopeId {
 	/**
 	 * Creates a context sensitive token popping the scope on top of the stack.
 	 * 
+	 * @param c the {@link ScopeToken} to be popped from the top of the context
+	 *              sensitive
+	 * 
 	 * @return a token without the this token's top scope
 	 */
-	ContextSensitivityToken popToken();
+	ContextSensitivityToken popToken(ScopeToken c);
+
+	/**
+	 * Whether or not the limit of the call chain has been reached (where
+	 * {@code true} means that nothing can be pushed anymore <i>and</i> no
+	 * further scoping can be applied starting from this token). When this
+	 * method returns {@code true}, the result of further calls cannot be
+	 * evaluated.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	boolean limitReached();
 
 	@Override
 	default ScopeId startingId() {

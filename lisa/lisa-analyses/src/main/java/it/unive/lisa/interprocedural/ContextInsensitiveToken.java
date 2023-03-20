@@ -4,28 +4,38 @@ import it.unive.lisa.analysis.ScopeToken;
 
 /**
  * A context sensitive token that is always the same (aka, do not track any
- * information about the call stack).
+ * information about the call stack). All results for a given cfg will be lubbed
+ * together regardless of the call site.
  */
-public class ContextInsensitiveToken implements ContextSensitivityToken {
+public class ContextInsensitiveToken extends SlidingStackToken<Object> {
 
-	private static final ContextInsensitiveToken singleton = new ContextInsensitiveToken();
+	private static final Object FLAG = new Object();
 
 	private ContextInsensitiveToken() {
+		super();
+	}
+	
+	private ContextInsensitiveToken(ContextInsensitiveToken parent) {
+		super(parent);
 	}
 
 	@Override
-	public ContextSensitivityToken empty() {
-		return this;
+	public ContextInsensitiveToken empty() {
+		return new ContextInsensitiveToken();
 	}
 
 	@Override
-	public ContextSensitivityToken pushToken(ScopeToken c) {
-		return this;
+	public ContextInsensitiveToken pushToken(ScopeToken c) {
+		ContextInsensitiveToken res = new ContextInsensitiveToken(this);
+		res.pushStackForToken(c, FLAG);
+		return res;
 	}
 
 	@Override
-	public ContextSensitivityToken popToken() {
-		return this;
+	public ContextInsensitiveToken popToken(ScopeToken c) {
+		ContextInsensitiveToken res = new ContextInsensitiveToken(this);
+		res.popStackForToken(c, FLAG);
+		return res;
 	}
 
 	@Override
@@ -39,6 +49,6 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	 * @return an instance of the class
 	 */
 	public static ContextInsensitiveToken getSingleton() {
-		return singleton;
+		return new ContextInsensitiveToken();
 	}
 }

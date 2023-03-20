@@ -71,10 +71,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	private FixpointConfiguration conf;
 
 	/**
-	 * Builds the analysis, using {@link SingleScopeToken}s.
+	 * Builds the analysis, using {@link LastScopeToken}s.
 	 */
 	public ContextBasedAnalysis() {
-		this(SingleScopeToken.getSingleton());
+		this(LastScopeToken.getSingleton());
 	}
 
 	/**
@@ -238,7 +238,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			result = result.lub(tmp.popScope(scope));
 		}
 
-		token = token.popToken();
+		token = token.popToken(scope);
 
 		callgraph.registerCall(call);
 

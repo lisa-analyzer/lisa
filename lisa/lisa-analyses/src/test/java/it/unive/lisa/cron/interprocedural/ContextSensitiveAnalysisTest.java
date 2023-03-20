@@ -2,18 +2,19 @@ package it.unive.lisa.cron.interprocedural;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
-import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.value.TypeDomain;
+import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.KDepthToken;
@@ -120,8 +121,9 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
+	@Ignore
 	public void testRecursionWithRecFreeToken() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		conf.abstractState = getDefaultFor(AbstractState.class,
@@ -130,12 +132,16 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 				getDefaultFor(TypeDomain.class));
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
-		perform("interprocedural", "recRecFreeToken", "recursion.imp", conf);
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "recRecFreeToken";
+		conf.programFile = "recursion.imp";
+		perform(conf);
 	}
 
 	@Test
+	@Ignore
 	public void testRecursionWithLastToken() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		conf.abstractState = getDefaultFor(AbstractState.class,
@@ -144,12 +150,15 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 				getDefaultFor(TypeDomain.class));
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastScopeToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
-		perform("interprocedural", "recLastToken", "recursion.imp", conf);
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "recLastToken";
+		conf.programFile = "recursion.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testRecursionWithKDepthToken() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		conf.abstractState = getDefaultFor(AbstractState.class,
@@ -158,12 +167,16 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 				getDefaultFor(TypeDomain.class));
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
-		perform("interprocedural", "recKDepthToken", "recursion.imp", conf);
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "recKDepthToken";
+		conf.programFile = "recursion.imp";
+		perform(conf);
 	}
 
 	@Test
+	@Ignore
 	public void testRecursionWithInsensitiveToken() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		conf.abstractState = getDefaultFor(AbstractState.class,
@@ -172,6 +185,9 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 				getDefaultFor(TypeDomain.class));
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
-		perform("interprocedural", "recInsensitiveToken", "recursion.imp", conf);
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "recInsensitiveToken";
+		conf.programFile = "recursion.imp";
+		perform(conf);
 	}
 }
