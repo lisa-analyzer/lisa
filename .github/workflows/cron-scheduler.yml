@@ -28,11 +28,8 @@ jobs:
           echo "+- Acquiring last commit information"
           curl --silent --show-error -L https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$source > commit-raw.json 
           head -n3 commit-raw.json 
-          echo "+- Parsing json commit data"
-          jq -r '[.[]][0]' commit-raw.json > commit.json
-          head -n3 commit.json 
           echo "+- Extracting last commit date"
-          date="$(jq -r '.commit.author.date' commit.json)"
+          date="$(jq -r '.commit.author.date' commit-raw.json)"
           echo "+-- $date"
           echo "+- Converting to timestamp"
           timestamp=$(date -u -d "$date" +%s)
