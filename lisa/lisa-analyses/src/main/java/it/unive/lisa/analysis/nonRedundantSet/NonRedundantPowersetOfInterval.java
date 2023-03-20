@@ -117,7 +117,7 @@ public class NonRedundantPowersetOfInterval
 	 * 
 	 * @return the middle point of the interval
 	 */
-	public MathNumber middlePoint(Interval interval) {
+	protected MathNumber middlePoint(Interval interval) {
 		if (interval.interval.isFinite())
 			return interval.interval.getLow().add(interval.interval.getHigh()).divide(new MathNumber(2));
 		else if (interval.interval.getHigh().isFinite() && !interval.interval.getLow().isFinite())
@@ -126,18 +126,6 @@ public class NonRedundantPowersetOfInterval
 			return interval.interval.getLow().subtract(MathNumber.ONE);
 		// both infinite
 		return MathNumber.ZERO;
-	}
-
-	@Override
-	public NonRedundantPowersetOfInterval top() {
-		SortedSet<Interval> topSet = new TreeSet<>();
-		topSet.add(Interval.TOP);
-		return new NonRedundantPowersetOfInterval(topSet);
-	}
-
-	@Override
-	public NonRedundantPowersetOfInterval bottom() {
-		return new NonRedundantPowersetOfInterval();
 	}
 
 	@Override
@@ -219,37 +207,6 @@ public class NonRedundantPowersetOfInterval
 			return environment.bottom();
 		else
 			return environment.putState(id, intervals);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((elementsSet == null) ? 0 : elementsSet.hashCode());
-		result = prime * result + ((valueDomain == null) ? 0 : valueDomain.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		NonRedundantPowersetOfInterval other = (NonRedundantPowersetOfInterval) obj;
-		if (elementsSet == null) {
-			if (other.elementsSet != null)
-				return false;
-		} else if (!elementsSet.equals(other.elementsSet))
-			return false;
-		if (valueDomain == null) {
-			if (other.valueDomain != null)
-				return false;
-		} else if (!valueDomain.equals(other.valueDomain))
-			return false;
-		return true;
 	}
 
 	@Override

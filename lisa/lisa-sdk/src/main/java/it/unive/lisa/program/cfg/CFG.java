@@ -404,49 +404,78 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					WorkingSet<Statement> ws,
 					FixpointConfiguration conf,
 					ScopeId id) throws FixpointException {
-		Fixpoint<CFG, Statement, Edge,
-				CompoundState<A, H, V, T>> fix = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE
-						? new OptimizedFixpoint<>(this, false, conf.hotspots)
-						: new Fixpoint<>(this, false);
+		// we disable optimizations for ascending phases if there is a
+		// descending one: the latter will need full results to start applying
+		// glbs/narrowings from a post-fixpoint
+		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
+		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = isOptimized
+				? new OptimizedFixpoint<>(this, false, conf.hotspots)
+				: new Fixpoint<>(this, false);
 		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, conf.wideningThreshold, interprocedural);
 
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
 		StatementStore<A, H, V, T> bot = new StatementStore<>(singleton.bottom());
 		startingPoints.forEach((st, state) -> starting.put(st, CompoundState.of(state, bot)));
-		Map<Statement, CompoundState<A, H, V, T>> ascendingResult = fix.fixpoint(starting, ws, asc);
+		Map<Statement, CompoundState<A, H, V, T>> ascending = fix.fixpoint(starting, ws, asc);
 
-		Map<Statement, CompoundState<A, H, V, T>> fixpoint;
+		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
+			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
 
-		if (conf.descendingPhaseType != DescendingPhaseType.NONE)
-			fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new Fixpoint<>(this, true);
-
+		fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new Fixpoint<>(this, true);
+		Map<Statement, CompoundState<A, H, V, T>> descending;
 		switch (conf.descendingPhaseType) {
 		case GLB:
-			DescendingGLBFixpoint<A, H, V,
-					T> desc = new DescendingGLBFixpoint<>(this, conf.glbThreshold, interprocedural);
-			fixpoint = fix.fixpoint(starting, ws, desc, ascendingResult);
+			DescendingGLBFixpoint<A, H, V, T> dg = new DescendingGLBFixpoint<>(
+					this,
+					conf.glbThreshold,
+					interprocedural);
+			descending = fix.fixpoint(starting, ws, dg, ascending);
 			break;
 		case NARROWING:
-			DescendingNarrowingFixpoint<A, H, V, T> desc2 = new DescendingNarrowingFixpoint<>(this, interprocedural);
-			fixpoint = fix.fixpoint(starting, ws, desc2, ascendingResult);
+			DescendingNarrowingFixpoint<A, H, V, T> dn = new DescendingNarrowingFixpoint<>(this, interprocedural);
+			descending = fix.fixpoint(starting, ws, dn, ascending);
 			break;
 		case NONE:
 		default:
-			fixpoint = ascendingResult;
+			// should never happen
+			descending = ascending;
 			break;
 		}
 
-		HashMap<Statement, AnalysisState<A, H, V, T>> finalResults = new HashMap<>(fixpoint.size());
-		for (Entry<Statement, CompoundState<A, H, V, T>> e : fixpoint.entrySet()) {
+		return flatten(conf.optimize, singleton, startingPoints, interprocedural, id, descending);
+	}
+
+	private <V extends ValueDomain<V>,
+			T extends TypeDomain<T>,
+			A extends AbstractState<A, H, V, T>,
+			H extends HeapDomain<H>> AnalyzedCFG<A, H, V, T> flatten(
+					boolean isOptimized,
+					AnalysisState<A, H, V, T> singleton,
+					Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					ScopeId id,
+					Map<Statement, CompoundState<A, H, V, T>> fixpointResults) {
+		Map<Statement, AnalysisState<A, H, V, T>> finalResults = new HashMap<>(fixpointResults.size());
+		for (Entry<Statement, CompoundState<A, H, V, T>> e : fixpointResults.entrySet()) {
 			finalResults.put(e.getKey(), e.getValue().postState);
 			for (Entry<Statement, AnalysisState<A, H, V, T>> ee : e.getValue().intermediateStates)
 				finalResults.put(ee.getKey(), ee.getValue());
 		}
 
-		return conf.optimize
-				? new OptimizedAnalyzedCFG<A, H, V, T>(this, id, singleton, startingPoints, finalResults,
+		return isOptimized
+				? new OptimizedAnalyzedCFG<A, H, V, T>(
+						this,
+						id,
+						singleton,
+						startingPoints,
+						finalResults,
 						interprocedural)
-				: new AnalyzedCFG<>(this, id, singleton, startingPoints, finalResults);
+				: new AnalyzedCFG<>(
+						this,
+						id,
+						singleton,
+						startingPoints,
+						finalResults);
 	}
 
 	@Override

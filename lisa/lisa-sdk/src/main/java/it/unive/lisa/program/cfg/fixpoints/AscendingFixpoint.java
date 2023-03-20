@@ -57,27 +57,22 @@ public class AscendingFixpoint<A extends AbstractState<A, H, V, T>,
 	public CompoundState<A, H, V, T> operation(Statement node,
 			CompoundState<A, H, V, T> approx,
 			CompoundState<A, H, V, T> old) throws SemanticException {
-		CompoundState<A, H, V, T> result;
-
 		// optimization: never apply widening on normal instructions,
 		// save time and precision and only apply to widening points
-		if (widenAfter == 0 || !wideningPoints.contains(node))
-			result = old.lub(approx);
-		else {
-			int lub = lubs.computeIfAbsent(node, st -> widenAfter);
-			if (lub > 0)
-				result = old.lub(approx);
-			else
-				result = CompoundState.of(
-						old.postState.widening(approx.postState),
-						// no need to widen the intermediate expressions as
-						// well: we force convergence on the final post state
-						// only, to recover as much precision as possible
-						old.intermediateStates.lub(approx.intermediateStates));
-			lubs.put(node, --lub);
-		}
+		if (widenAfter <= 0 || !wideningPoints.contains(node))
+			return old.lub(approx);
 
-		return result;
+		int lub = lubs.computeIfAbsent(node, st -> widenAfter);
+		if (lub == 0)
+			return CompoundState.of(
+					old.postState.widening(approx.postState),
+					// no need to widen the intermediate expressions as
+					// well: we force convergence on the final post state
+					// only, to recover as much precision as possible
+					old.intermediateStates.lub(approx.intermediateStates));
+
+		lubs.put(node, --lub);
+		return old.lub(approx);
 	}
 
 	@Override

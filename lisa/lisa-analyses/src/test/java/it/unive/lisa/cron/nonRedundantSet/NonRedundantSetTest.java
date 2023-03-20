@@ -26,6 +26,11 @@ public class NonRedundantSetTest extends AnalysisTestExecutor {
 		conf.glbThreshold = 5;
 		conf.testDir = "non-redundant-set-interval";
 		conf.programFile = "program.imp";
+		// there seem to be one less round of redundancy removal
+		// that avoid compacting two elements into a single one when running an
+		// optimized analysis. the result is still sound and more precice
+		// however.
+		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 }

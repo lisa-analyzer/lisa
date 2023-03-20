@@ -12,6 +12,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -194,6 +195,37 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	@Override
 	public String toString() {
 		return representation().toString();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((elementsSet == null) ? 0 : elementsSet.hashCode());
+		result = prime * result + ((valueDomain == null) ? 0 : valueDomain.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		NonRedundantPowersetOfInterval other = (NonRedundantPowersetOfInterval) obj;
+		if (elementsSet == null) {
+			if (other.elementsSet != null)
+				return false;
+		} else if (!elementsSet.equals(other.elementsSet))
+			return false;
+		if (valueDomain == null) {
+			if (other.valueDomain != null)
+				return false;
+		} else if (!valueDomain.equals(other.valueDomain))
+			return false;
+		return true;
 	}
 
 	/**
@@ -384,6 +416,18 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 			for (E sRight : right.elementsSet)
 				sat = sat.lub(valueDomain.satisfiesBinaryExpression(operator, sLeft, sRight, pp));
 		return sat;
+	}
+
+	@Override
+	public C top() {
+		SortedSet<E> topSet = new TreeSet<>();
+		topSet.add(valueDomain.top());
+		return mk(topSet);
+	}
+
+	@Override
+	public C bottom() {
+		return mk(Collections.emptySortedSet());
 	}
 
 	@Override

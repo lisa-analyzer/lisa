@@ -53,13 +53,13 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A, H, V, T>,
 		// save time and precision and only apply to widening points
 		if (!wideningPoints.contains(node))
 			return old.glb(approx);
-		else
-			return CompoundState.of(
-					old.postState.narrowing(approx.postState),
-					// no need to narrow the intermediate expressions as
-					// well: we force convergence on the final post state
-					// only, to recover as much precision as possible
-					old.intermediateStates.glb(approx.intermediateStates));
+
+		return CompoundState.of(
+				old.postState.narrowing(approx.postState),
+				// no need to narrow the intermediate expressions as
+				// well: we force convergence on the final post state
+				// only, to recover as much precision as possible
+				old.intermediateStates.glb(approx.intermediateStates));
 	}
 
 	@Override
