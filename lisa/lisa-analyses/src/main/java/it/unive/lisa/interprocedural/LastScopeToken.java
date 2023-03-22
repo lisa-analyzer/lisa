@@ -3,6 +3,7 @@ package it.unive.lisa.interprocedural;
 import java.util.Objects;
 
 import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A context sensitive token representing a single {@link ScopeToken}. The token
@@ -11,16 +12,16 @@ import it.unive.lisa.analysis.ScopeToken;
  * regardless of the call stack. This corresponds to having a
  * {@link KDepthToken} with {@code k = 1}.
  */
-public class LastScopeToken extends SlidingStackToken<ScopeToken> {
+public class LastScopeToken extends SlidingStackToken<CFGCall> {
 
-	private final ScopeToken token;
+	private final CFGCall token;
 
-	private LastScopeToken(ScopeToken token) {
+	private LastScopeToken(CFGCall token) {
 		super();
 		this.token = token;
 	}
 
-	private LastScopeToken(LastScopeToken parent, ScopeToken token) {
+	private LastScopeToken(LastScopeToken parent, CFGCall token) {
 		super(parent);
 		this.token = token;
 	}
@@ -31,16 +32,16 @@ public class LastScopeToken extends SlidingStackToken<ScopeToken> {
 	}
 
 	@Override
-	public LastScopeToken pushToken(ScopeToken c) {
+	public LastScopeToken pushCall(CFGCall c) {
 		LastScopeToken res = new LastScopeToken(this, c);
-		res.pushStackForToken(c, res.token);
+		res.registerCallStack(c, res.token);
 		return res;
 	}
 
 	@Override
-	public LastScopeToken popToken(ScopeToken c) {
+	public LastScopeToken popCall(CFGCall c) {
 		LastScopeToken res = new LastScopeToken(this, null);
-		res.popStackForToken(c, token);
+		res.unregisterCallStack(c, token);
 		return res;
 	}
 

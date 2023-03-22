@@ -5,16 +5,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A context sensitive token representing an entire call chain up to a fixed
  * length {@code k}, specified in the singleton creation
  * ({@link #getSingleton(int)}).
  */
-public class KDepthToken extends SlidingStackToken<List<ScopeToken>> {
+public class KDepthToken extends SlidingStackToken<List<CFGCall>> {
 
-	private final List<ScopeToken> tokens;
+	private final List<CFGCall> tokens;
 
 	private final int k;
 
@@ -24,7 +24,7 @@ public class KDepthToken extends SlidingStackToken<List<ScopeToken>> {
 		this.tokens = Collections.emptyList();
 	}
 
-	private KDepthToken(KDepthToken parent, int k, List<ScopeToken> tokens, ScopeToken newToken) {
+	private KDepthToken(KDepthToken parent, int k, List<CFGCall> tokens, CFGCall newToken) {
 		super(parent);
 		this.k = k;
 		int oldlen = tokens.size();
@@ -40,7 +40,7 @@ public class KDepthToken extends SlidingStackToken<List<ScopeToken>> {
 		}
 	}
 
-	private KDepthToken(KDepthToken parent, int k, List<ScopeToken> tokens) {
+	private KDepthToken(KDepthToken parent, int k, List<CFGCall> tokens) {
 		super(parent);
 		this.k = k;
 		int oldsize = tokens.size();
@@ -58,18 +58,18 @@ public class KDepthToken extends SlidingStackToken<List<ScopeToken>> {
 	}
 
 	@Override
-	public ContextSensitivityToken pushToken(ScopeToken c) {
+	public ContextSensitivityToken pushCall(CFGCall c) {
 		KDepthToken res = new KDepthToken(this, k, tokens, c);
-		res.pushStackForToken(c, res.tokens);
+		res.registerCallStack(c, res.tokens);
 		return res;
 	}
 
 	@Override
-	public ContextSensitivityToken popToken(ScopeToken c) {
+	public ContextSensitivityToken popCall(CFGCall c) {
 		if (tokens.isEmpty())
 			return this;
 		KDepthToken res = new KDepthToken(this, k, tokens);
-		res.popStackForToken(c, tokens);
+		res.unregisterCallStack(c, tokens);
 		return res;
 	}
 

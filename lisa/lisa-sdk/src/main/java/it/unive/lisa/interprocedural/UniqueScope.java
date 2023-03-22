@@ -1,6 +1,6 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A {@link ScopeId} for analyses that do not make distinction between different
@@ -16,7 +16,7 @@ public class UniqueScope implements ScopeId {
 	}
 
 	@Override
-	public ScopeId push(ScopeToken scopeToken) {
+	public ScopeId push(CFGCall scopeToken) {
 		return this;
 	}
 

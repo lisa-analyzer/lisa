@@ -1,6 +1,6 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A context sensitive token that is always the same (aka, do not track any
@@ -14,7 +14,7 @@ public class ContextInsensitiveToken extends SlidingStackToken<Object> {
 	private ContextInsensitiveToken() {
 		super();
 	}
-	
+
 	private ContextInsensitiveToken(ContextInsensitiveToken parent) {
 		super(parent);
 	}
@@ -25,16 +25,16 @@ public class ContextInsensitiveToken extends SlidingStackToken<Object> {
 	}
 
 	@Override
-	public ContextInsensitiveToken pushToken(ScopeToken c) {
+	public ContextInsensitiveToken pushCall(CFGCall c) {
 		ContextInsensitiveToken res = new ContextInsensitiveToken(this);
-		res.pushStackForToken(c, FLAG);
+		res.registerCallStack(c, FLAG);
 		return res;
 	}
 
 	@Override
-	public ContextInsensitiveToken popToken(ScopeToken c) {
+	public ContextInsensitiveToken popCall(CFGCall c) {
 		ContextInsensitiveToken res = new ContextInsensitiveToken(this);
-		res.popStackForToken(c, FLAG);
+		res.unregisterCallStack(c, FLAG);
 		return res;
 	}
 

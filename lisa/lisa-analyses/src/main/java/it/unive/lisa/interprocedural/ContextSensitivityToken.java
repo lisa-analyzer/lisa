@@ -1,17 +1,12 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A token for interprocedural analysis that tunes the level of context
  * sensitivity.
  */
 public interface ContextSensitivityToken extends ScopeId {
-
-	/**
-	 * An empty array of {@link ScopeToken}s.
-	 */
-	static final ScopeToken[] NO_TOKENS = new ScopeToken[0];
 
 	/**
 	 * A token without any context sensitivity.
@@ -21,25 +16,23 @@ public interface ContextSensitivityToken extends ScopeId {
 	ContextSensitivityToken empty();
 
 	/**
-	 * Creates a context sensitive token with the given scope on the top of the
+	 * Creates a context sensitive token with the given call on the top of the
 	 * stack.
 	 * 
-	 * @param c the {@link ScopeToken} to be pushed at the top of the context
-	 *              sensitive
+	 * @param c the {@link CFGCall} to be pushed at the top of the token
 	 * 
-	 * @return a token with the given scope on the top of the call stack
+	 * @return a token with the given call on the top of the call stack
 	 */
-	ContextSensitivityToken pushToken(ScopeToken c);
+	ContextSensitivityToken pushCall(CFGCall c);
 
 	/**
-	 * Creates a context sensitive token popping the scope on top of the stack.
+	 * Creates a context sensitive token popping the call on top of the stack.
 	 * 
-	 * @param c the {@link ScopeToken} to be popped from the top of the context
-	 *              sensitive
+	 * @param c the {@link CFGCall} to be popped from the top of the token
 	 * 
-	 * @return a token without the this token's top scope
+	 * @return a token without the this token's top call
 	 */
-	ContextSensitivityToken popToken(ScopeToken c);
+	ContextSensitivityToken popCall(CFGCall c);
 
 	/**
 	 * Whether or not the limit of the call chain has been reached (where
@@ -58,8 +51,8 @@ public interface ContextSensitivityToken extends ScopeId {
 	}
 
 	@Override
-	default ScopeId push(ScopeToken scopeToken) {
-		return pushToken(scopeToken);
+	default ScopeId push(CFGCall c) {
+		return pushCall(c);
 	}
 
 	@Override

@@ -263,7 +263,7 @@ public class OptimizedAnalyzedCFG<
 				throws SemanticException {
 			FixpointResults<A, H, V, T> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
-			ScopeId id = getId().push(scope);
+			ScopeId id = getId().push(call);
 			AnalysisState<A, H, V, T> state = entryState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A, H, V, T> res = precomputed.getState(target).getState(id).getExitState();

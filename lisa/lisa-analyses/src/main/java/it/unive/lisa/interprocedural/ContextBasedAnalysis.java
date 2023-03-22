@@ -190,7 +190,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
 		ScopeToken scope = new ScopeToken(call);
-		token = token.pushToken(scope);
+		// FIXME should this be part of the interprocedural analysis?
+		token = token.pushCall(call);
 		AnalysisState<A, H, V, T> result = entryState.bottom();
 
 		for (CFG cfg : call.getTargetedCFGs()) {
@@ -238,8 +239,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			result = result.lub(tmp.popScope(scope));
 		}
 
-		token = token.popToken(scope);
-
+		token = token.popCall(call);
 		callgraph.registerCall(call);
 
 		return result;

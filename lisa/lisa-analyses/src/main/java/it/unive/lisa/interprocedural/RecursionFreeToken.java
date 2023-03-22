@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A context sensitive token representing an entire call chain until a recursion
@@ -16,7 +16,7 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 
 	private static final RecursionFreeToken SINGLETON = new RecursionFreeToken();
 
-	private final List<ScopeToken> tokens;
+	private final List<CFGCall> tokens;
 	private final boolean foundRecursion;
 
 	private RecursionFreeToken() {
@@ -24,14 +24,14 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 		foundRecursion = false;
 	}
 
-	private RecursionFreeToken(List<ScopeToken> tokens, ScopeToken newToken) {
+	private RecursionFreeToken(List<CFGCall> tokens, CFGCall newToken) {
 		this.tokens = new ArrayList<>(tokens.size() + 1);
 		tokens.stream().forEach(this.tokens::add);
 		this.tokens.add(newToken);
 		foundRecursion = false;
 	}
 
-	private RecursionFreeToken(List<ScopeToken> tokens) {
+	private RecursionFreeToken(List<CFGCall> tokens) {
 		int oldsize = tokens.size();
 		if (oldsize == 1)
 			this.tokens = Collections.emptyList();
@@ -53,7 +53,7 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken pushToken(ScopeToken c) {
+	public ContextSensitivityToken pushCall(CFGCall c) {
 		// we try to prevent recursions here: it's better
 		// to look for them starting from the end of the array
 		for (int i = tokens.size() - 1; i >= 0; i--)
@@ -63,12 +63,12 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken popToken(ScopeToken c) {
+	public ContextSensitivityToken popCall(CFGCall c) {
 		if (tokens.isEmpty())
 			return this;
 		return new RecursionFreeToken(tokens);
 	}
-	
+
 	@Override
 	public boolean limitReached() {
 		return foundRecursion;
