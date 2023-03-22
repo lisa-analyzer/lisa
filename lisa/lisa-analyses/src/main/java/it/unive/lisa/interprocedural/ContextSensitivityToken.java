@@ -34,17 +34,6 @@ public interface ContextSensitivityToken extends ScopeId {
 	 */
 	ContextSensitivityToken popCall(CFGCall c);
 
-	/**
-	 * Whether or not the limit of the call chain has been reached (where
-	 * {@code true} means that nothing can be pushed anymore <i>and</i> no
-	 * further scoping can be applied starting from this token). When this
-	 * method returns {@code true}, the result of further calls cannot be
-	 * evaluated.
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	boolean limitReached();
-
 	@Override
 	default ScopeId startingId() {
 		return empty();

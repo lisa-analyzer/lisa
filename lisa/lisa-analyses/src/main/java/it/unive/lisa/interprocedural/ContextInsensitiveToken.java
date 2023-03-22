@@ -7,16 +7,10 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * information about the call stack). All results for a given cfg will be lubbed
  * together regardless of the call site.
  */
-public class ContextInsensitiveToken extends SlidingStackToken<Object> {
-
-	private static final Object FLAG = new Object();
+public class ContextInsensitiveToken implements ContextSensitivityToken {
 
 	private ContextInsensitiveToken() {
 		super();
-	}
-
-	private ContextInsensitiveToken(ContextInsensitiveToken parent) {
-		super(parent);
 	}
 
 	@Override
@@ -26,16 +20,12 @@ public class ContextInsensitiveToken extends SlidingStackToken<Object> {
 
 	@Override
 	public ContextInsensitiveToken pushCall(CFGCall c) {
-		ContextInsensitiveToken res = new ContextInsensitiveToken(this);
-		res.registerCallStack(c, FLAG);
-		return res;
+		return this;
 	}
 
 	@Override
 	public ContextInsensitiveToken popCall(CFGCall c) {
-		ContextInsensitiveToken res = new ContextInsensitiveToken(this);
-		res.unregisterCallStack(c, FLAG);
-		return res;
+		return this;
 	}
 
 	@Override

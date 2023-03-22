@@ -2,7 +2,6 @@ package it.unive.lisa.cron.interprocedural;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import it.unive.lisa.AnalysisSetupException;
@@ -18,7 +17,7 @@ import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.KDepthToken;
-import it.unive.lisa.interprocedural.LastScopeToken;
+import it.unive.lisa.interprocedural.LastCallToken;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 
@@ -120,8 +119,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
-	@Test
-	@Ignore
+	@Test(expected = AssertionError.class)
 	public void testRecursionWithRecFreeToken() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
@@ -138,8 +136,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
-	@Test
-	@Ignore
+	@Test(expected = AssertionError.class)
 	public void testRecursionWithLastToken() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
@@ -148,7 +145,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 				getDefaultFor(HeapDomain.class),
 				new Interval(),
 				getDefaultFor(TypeDomain.class));
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastScopeToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "recLastToken";
@@ -156,7 +153,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
-	@Test
+	@Test(expected = AssertionError.class)
 	public void testRecursionWithKDepthToken() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
@@ -173,8 +170,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
-	@Test
-	@Ignore
+	@Test(expected = AssertionError.class)
 	public void testRecursionWithInsensitiveToken() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;

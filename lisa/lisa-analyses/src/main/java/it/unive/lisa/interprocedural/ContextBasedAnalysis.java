@@ -29,6 +29,7 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -64,17 +65,19 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private ContextSensitivityToken token;
 
-	private final Collection<CFG> fixpointTriggers;
-
 	private Class<? extends WorkingSet<Statement>> fixpointWorkingSet;
 
 	private FixpointConfiguration conf;
 
+	private final Collection<CFG> fixpointTriggers;
+
+	private final Map<CFGCall, Collection<ContextSensitivityToken>> callStacks;
+
 	/**
-	 * Builds the analysis, using {@link LastScopeToken}s.
+	 * Builds the analysis, using {@link LastCallToken}s.
 	 */
 	public ContextBasedAnalysis() {
-		this(LastScopeToken.getSingleton());
+		this(LastCallToken.getSingleton());
 	}
 
 	/**
@@ -86,6 +89,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	public ContextBasedAnalysis(ContextSensitivityToken token) {
 		this.token = token.empty();
 		fixpointTriggers = new HashSet<>();
+		callStacks = new HashMap<>();
 	}
 
 	@Override
@@ -122,9 +126,11 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	private void fixpointAux(AnalysisState<A, H, V, T> entryState) throws AnalysisExecutionException {
 		int iter = 0;
 		ContextSensitivityToken empty = token.empty();
+
 		Collection<CFG> entryPoints = new TreeSet<>(
 				(c1, c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
 		entryPoints.addAll(app.getEntryPoints());
+
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
@@ -182,6 +188,33 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		return Pair.of(analysisresult.getEntryState(), analysisresult.getExitState());
 	}
 
+	/**
+	 * Registers the given call stack for the given call.
+	 * 
+	 * @param c     the call that the stack is associated with
+	 * @param stack the stack to register
+	 * 
+	 * @return whether or not the stack has been registered (if {@code false},
+	 *             the stack already exists for the given call)
+	 */
+	protected boolean registerCallStack(CFGCall c, ContextSensitivityToken stack) {
+		return callStacks.computeIfAbsent(c, tk -> new HashSet<>()).add(stack);
+	}
+
+	/**
+	 * Removes the given stack from the ones registered for the given call.
+	 * 
+	 * @param c     the call that the stack is associated with
+	 * @param stack the stack to unregister
+	 */
+	protected void unregisterCallStack(CFGCall c, ContextSensitivityToken stack) {
+		Collection<ContextSensitivityToken> stacks = callStacks.get(c);
+		if (stacks.size() == 1)
+			callStacks.remove(c);
+		else
+			stacks.remove(stack);
+	}
+
 	@Override
 	public AnalysisState<A, H, V, T> getAbstractResultOf(
 			CFGCall call,
@@ -190,8 +223,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
 		ScopeToken scope = new ScopeToken(call);
-		// FIXME should this be part of the interprocedural analysis?
 		token = token.pushCall(call);
+		if (!registerCallStack(call, token))
+			throw new SemanticException("Recursion found at '" + call + "' : " + token);
 		AnalysisState<A, H, V, T> result = entryState.bottom();
 
 		for (CFG cfg : call.getTargetedCFGs()) {
@@ -239,6 +273,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			result = result.lub(tmp.popScope(scope));
 		}
 
+		unregisterCallStack(call, token);
 		token = token.popCall(call);
 		callgraph.registerCall(call);
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
  * A context sensitive token representing an entire call chain until a recursion
@@ -16,35 +17,30 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 
 	private static final RecursionFreeToken SINGLETON = new RecursionFreeToken();
 
-	private final List<CFGCall> tokens;
-	private final boolean foundRecursion;
+	private final List<CFGCall> calls;
 
 	private RecursionFreeToken() {
-		tokens = Collections.emptyList();
-		foundRecursion = false;
+		calls = Collections.emptyList();
 	}
 
 	private RecursionFreeToken(List<CFGCall> tokens, CFGCall newToken) {
-		this.tokens = new ArrayList<>(tokens.size() + 1);
-		tokens.stream().forEach(this.tokens::add);
-		this.tokens.add(newToken);
-		foundRecursion = false;
+		this.calls = new ArrayList<>(tokens.size() + 1);
+		tokens.stream().forEach(this.calls::add);
+		this.calls.add(newToken);
 	}
 
 	private RecursionFreeToken(List<CFGCall> tokens) {
 		int oldsize = tokens.size();
 		if (oldsize == 1)
-			this.tokens = Collections.emptyList();
+			this.calls = Collections.emptyList();
 		else {
-			this.tokens = new ArrayList<>(oldsize - 1);
-			tokens.stream().limit(oldsize - 1).forEach(this.tokens::add);
+			this.calls = new ArrayList<>(oldsize - 1);
+			tokens.stream().limit(oldsize - 1).forEach(this.calls::add);
 		}
-		foundRecursion = false;
 	}
 
 	private RecursionFreeToken(RecursionFreeToken other) {
-		tokens = other.tokens;
-		foundRecursion = true;
+		calls = other.calls;
 	}
 
 	@Override
@@ -56,22 +52,17 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	public ContextSensitivityToken pushCall(CFGCall c) {
 		// we try to prevent recursions here: it's better
 		// to look for them starting from the end of the array
-		for (int i = tokens.size() - 1; i >= 0; i--)
-			if (tokens.get(i).equals(c))
+		for (int i = calls.size() - 1; i >= 0; i--)
+			if (calls.get(i).equals(c))
 				return new RecursionFreeToken(this);
-		return new RecursionFreeToken(tokens, c);
+		return new RecursionFreeToken(calls, c);
 	}
 
 	@Override
 	public ContextSensitivityToken popCall(CFGCall c) {
-		if (tokens.isEmpty())
+		if (calls.isEmpty())
 			return this;
-		return new RecursionFreeToken(tokens);
-	}
-
-	@Override
-	public boolean limitReached() {
-		return foundRecursion;
+		return new RecursionFreeToken(calls);
 	}
 
 	/**
@@ -85,7 +76,10 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 
 	@Override
 	public String toString() {
-		return tokens.toString();
+		if (calls.isEmpty())
+			return "<empty>";
+		return "[" + calls.stream().map(call -> call.getLocation())
+				.collect(new CollectionUtilities.StringCollector<>(", ")) + "]";
 	}
 
 	@Override
@@ -95,11 +89,11 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		RecursionFreeToken that = (RecursionFreeToken) o;
-		return Objects.equals(tokens, that.tokens);
+		return Objects.equals(calls, that.calls);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(tokens);
+		return Objects.hashCode(calls);
 	}
 }

@@ -1,5 +1,16 @@
 package it.unive.lisa.conf;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Predicate;
+
+import org.apache.commons.io.FilenameUtils;
+
 import it.unive.lisa.LiSA;
 import it.unive.lisa.LiSAFactory;
 import it.unive.lisa.analysis.AbstractState;
@@ -14,20 +25,10 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.workset.DuplicateFreeFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.file.FileManager;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
@@ -347,8 +348,8 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 					String val;
 					if (Collection.class.isAssignableFrom(field.getType()))
-						val = StringUtils.join(((Collection<?>) value).stream().map(e -> e.getClass().getSimpleName())
-								.sorted().collect(Collectors.toList()), ", ");
+						val = ((Collection<?>) value).stream().map(e -> e.getClass().getSimpleName())
+								.sorted().collect(new CollectionUtilities.StringCollector<>(", "));
 					else if (Class.class.isAssignableFrom(field.getType()))
 						val = ((Class<?>) value).getSimpleName();
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))

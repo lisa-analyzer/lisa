@@ -6,49 +6,47 @@ import java.util.List;
 import java.util.Objects;
 
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
  * A context sensitive token representing an entire call chain up to a fixed
  * length {@code k}, specified in the singleton creation
  * ({@link #getSingleton(int)}).
  */
-public class KDepthToken extends SlidingStackToken<List<CFGCall>> {
+public class KDepthToken implements ContextSensitivityToken {
 
-	private final List<CFGCall> tokens;
+	private final List<CFGCall> calls;
 
 	private final int k;
 
 	private KDepthToken(int k) {
-		super();
 		this.k = k;
-		this.tokens = Collections.emptyList();
+		this.calls = Collections.emptyList();
 	}
 
-	private KDepthToken(KDepthToken parent, int k, List<CFGCall> tokens, CFGCall newToken) {
-		super(parent);
+	private KDepthToken(int k, List<CFGCall> tokens, CFGCall newToken) {
 		this.k = k;
 		int oldlen = tokens.size();
 		if (oldlen == k) {
-			this.tokens = new ArrayList<>(k);
+			this.calls = new ArrayList<>(k);
 			// we skip the oldest one
-			tokens.stream().skip(1).forEach(this.tokens::add);
-			this.tokens.add(newToken);
+			tokens.stream().skip(1).forEach(this.calls::add);
+			this.calls.add(newToken);
 		} else {
-			this.tokens = new ArrayList<>(tokens.size() + 1);
-			tokens.stream().forEach(this.tokens::add);
-			this.tokens.add(newToken);
+			this.calls = new ArrayList<>(tokens.size() + 1);
+			tokens.stream().forEach(this.calls::add);
+			this.calls.add(newToken);
 		}
 	}
 
-	private KDepthToken(KDepthToken parent, int k, List<CFGCall> tokens) {
-		super(parent);
+	private KDepthToken(int k, List<CFGCall> tokens) {
 		this.k = k;
 		int oldsize = tokens.size();
 		if (oldsize == 1)
-			this.tokens = Collections.emptyList();
+			this.calls = Collections.emptyList();
 		else {
-			this.tokens = new ArrayList<>(oldsize - 1);
-			tokens.stream().limit(oldsize - 1).forEach(this.tokens::add);
+			this.calls = new ArrayList<>(oldsize - 1);
+			tokens.stream().limit(oldsize - 1).forEach(this.calls::add);
 		}
 	}
 
@@ -59,18 +57,14 @@ public class KDepthToken extends SlidingStackToken<List<CFGCall>> {
 
 	@Override
 	public ContextSensitivityToken pushCall(CFGCall c) {
-		KDepthToken res = new KDepthToken(this, k, tokens, c);
-		res.registerCallStack(c, res.tokens);
-		return res;
+		return new KDepthToken(k, calls, c);
 	}
 
 	@Override
 	public ContextSensitivityToken popCall(CFGCall c) {
-		if (tokens.isEmpty())
+		if (calls.isEmpty())
 			return this;
-		KDepthToken res = new KDepthToken(this, k, tokens);
-		res.unregisterCallStack(c, tokens);
-		return res;
+		return new KDepthToken(k, calls);
 	}
 
 	/**
@@ -86,7 +80,10 @@ public class KDepthToken extends SlidingStackToken<List<CFGCall>> {
 
 	@Override
 	public String toString() {
-		return tokens.toString();
+		if (calls.isEmpty())
+			return "<empty>";
+		return "[" + calls.stream().map(call -> call.getLocation())
+				.collect(new CollectionUtilities.StringCollector<>(", ")) + "]";
 	}
 
 	@Override
@@ -97,12 +94,12 @@ public class KDepthToken extends SlidingStackToken<List<CFGCall>> {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		KDepthToken that = (KDepthToken) o;
-		return Objects.equals(tokens, that.tokens);
+		return Objects.equals(calls, that.calls);
 	}
 
 	@Override
 	public int hashCode() {
 		// we ignore k as it does not matter for equality
-		return Objects.hashCode(tokens);
+		return Objects.hashCode(calls);
 	}
 }
