@@ -3,7 +3,6 @@ package it.unive.lisa.interprocedural;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
@@ -83,17 +82,35 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		RecursionFreeToken that = (RecursionFreeToken) o;
-		return Objects.equals(calls, that.calls);
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		if (calls == null)
+			result = prime * result;
+		else
+			for (CFGCall call : calls)
+				// we use the hashcode of the location as the hashcode of the
+				// call is based on the ones of its targets, and a CFG hashcode
+				// is not consistent between executions - this is a problem as
+				// this object's hashcode is used as suffix in some filenames
+				result = prime * result + call.getLocation().hashCode();
+		return result;
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hashCode(calls);
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RecursionFreeToken other = (RecursionFreeToken) obj;
+		if (calls == null) {
+			if (other.calls != null)
+				return false;
+		} else if (!calls.equals(other.calls))
+			return false;
+		return true;
 	}
 }

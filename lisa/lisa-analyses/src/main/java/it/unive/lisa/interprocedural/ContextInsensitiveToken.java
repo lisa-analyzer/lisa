@@ -41,4 +41,17 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	public static ContextInsensitiveToken getSingleton() {
 		return new ContextInsensitiveToken();
 	}
+
+	@Override
+	public int hashCode() {
+		// we provide a deterministic hashcode as it is used for generating
+		// filenames of the output files
+		return ContextInsensitiveToken.class.getName().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		// instances are still unique
+		return this == obj;
+	}
 }

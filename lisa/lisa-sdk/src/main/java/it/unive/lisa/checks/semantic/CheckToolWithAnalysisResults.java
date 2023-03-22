@@ -1,7 +1,12 @@
 package it.unive.lisa.checks.semantic;
 
+import java.util.Collection;
+import java.util.Map;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -11,11 +16,10 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * An extension of {@link CheckTool} that also contains the results of the
@@ -124,13 +128,20 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * {@link CallGraph} that has been built during the analysis. Yields
 	 * {@code null} if the call cannot be resolved (i.e. an exception happened).
 	 * 
-	 * @param call the call to resolve
+	 * @param call   the call to resolve
+	 * @param result the result that contains the post states of each parameter
 	 * 
 	 * @return the resolved version of the given call, or {@code null}
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public Call getResolvedVersion(UnresolvedCall call) {
+	public Call getResolvedVersion(UnresolvedCall call, AnalyzedCFG<A, H, V, T> result) throws SemanticException {
+		StatementStore<A, H, V, T> store = new StatementStore<>(result.getEntryState().bottom());
+		for (Expression e : call.getParameters())
+			store.put(e, result.getAnalysisStateAfter(e));
+
 		try {
-			return callgraph.resolve(call, null, null);
+			return callgraph.resolve(call, call.parameterTypes(store), null);
 		} catch (CallResolutionException e) {
 			return null;
 		}

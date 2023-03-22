@@ -1,7 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
@@ -50,17 +48,34 @@ public class LastCallToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (o == null || getClass() != o.getClass())
+		if (obj == null)
 			return false;
-		LastCallToken that = (LastCallToken) o;
-		return Objects.equals(call, that.call);
+		if (getClass() != obj.getClass())
+			return false;
+		LastCallToken other = (LastCallToken) obj;
+		if (call == null) {
+			if (other.call != null)
+				return false;
+		} else if (!call.equals(other.call))
+			return false;
+		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(call);
+		final int prime = 31;
+		int result = 1;
+		if (call == null)
+			result = prime * result;
+		else
+			// we use the hashcode of the location as the hashcode of the
+			// call is based on the ones of its targets, and a CFG hashcode
+			// is not consistent between executions - this is a problem as
+			// this object's hashcode is used as suffix in some filenames
+			result = prime * result + call.getLocation().hashCode();
+		return result;
 	}
 }

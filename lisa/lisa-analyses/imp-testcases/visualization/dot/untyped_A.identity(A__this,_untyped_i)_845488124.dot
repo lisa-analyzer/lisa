@@ -1,0 +1,14 @@
+digraph {
+	labelloc="t";
+	label="untyped A::identity(A* this, untyped i)";
+	"node0" [shape="rect",color="black",label=<i3 = 1<BR/><BR/>{ expressions: [i3],<BR/>state: { heap: monolith,<BR/>type: { ['imp-testcases/visualization/program.imp':31:37]:one: [int32],<BR/>i: [int32],<BR/>i3: [int32],<BR/>this: #TOP# },<BR/>value: { ['imp-testcases/visualization/program.imp':31:37]:one: [10, 10],<BR/>i: [10, 10],<BR/>i3: [1, 1],<BR/>this: _|_ }<BR/> }<BR/> }<BR/>>];
+	"node3" [shape="rect",color="black",peripheries="2",label=<return i<BR/><BR/>{ expressions: [ret_value@identity],<BR/>state: { heap: monolith,<BR/>type: { ['imp-testcases/visualization/program.imp':31:37]:one: [int32],<BR/>i: [int32],<BR/>i3: [int32],<BR/>ret_value@identity: [int32],<BR/>this: #TOP# },<BR/>value: { ['imp-testcases/visualization/program.imp':31:37]:one: [10, 10],<BR/>i: [10, 10],<BR/>i3: [1, 1],<BR/>ret_value@identity: [10, 10],<BR/>this: _|_ }<BR/> }<BR/> }<BR/>>];
+	"node0" -> "node3" [color="black"];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}
