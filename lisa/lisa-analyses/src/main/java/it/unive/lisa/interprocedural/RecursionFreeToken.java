@@ -1,11 +1,10 @@
 package it.unive.lisa.interprocedural;
 
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
  * A context sensitive token representing an entire call chain until a recursion

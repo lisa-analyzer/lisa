@@ -28,7 +28,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -267,15 +266,7 @@ public class OptimizedAnalyzedCFG<
 			AnalysisState<A, H, V, T> state = entryState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A, H, V, T> res = precomputed.getState(target).getState(id).getExitState();
-
-				// store the return value of the call inside the meta variable
-				AnalysisState<A, H, V, T> tmp = entryState.bottom();
-				Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
-				for (SymbolicExpression ret : res.getComputedExpressions())
-					tmp = tmp.lub(res.assign(meta, ret, call));
-
-				// save the resulting state
-				state = state.lub(tmp.popScope(scope));
+				state = state.lub(unscope(call, scope, res));
 			}
 			return state;
 		}

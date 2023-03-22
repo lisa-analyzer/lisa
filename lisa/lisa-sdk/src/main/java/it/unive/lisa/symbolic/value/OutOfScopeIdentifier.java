@@ -2,7 +2,6 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -22,15 +21,14 @@ public class OutOfScopeIdentifier extends Identifier {
 	/**
 	 * Builds the identifier outside the scope.
 	 *
-	 * @param id          the current identifier
-	 * @param scope       the method call that caused the identifier to exit the
-	 *                        scope
-	 * @param annotations the annotations of this variable
-	 * @param location    the code location of the statement that has generated
-	 *                        this expression
+	 * @param id       the current identifier
+	 * @param scope    the method call that caused the identifier to exit the
+	 *                     scope
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
-	public OutOfScopeIdentifier(Identifier id, ScopeToken scope, Annotations annotations, CodeLocation location) {
-		super(id.getStaticType(), scope.toString() + ":" + id.getName(), id.isWeak(), annotations, location);
+	public OutOfScopeIdentifier(Identifier id, ScopeToken scope, CodeLocation location) {
+		super(id.getStaticType(), scope.toString() + ":" + id.getName(), id.isWeak(), id.getAnnotations(), location);
 		this.id = id;
 		this.scope = scope;
 		if (id.hasRuntimeTypes())
@@ -39,7 +37,7 @@ public class OutOfScopeIdentifier extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
-		return new OutOfScopeIdentifier(this, token, getAnnotations(), getCodeLocation());
+		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override

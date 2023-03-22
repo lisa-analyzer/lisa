@@ -11,8 +11,11 @@ import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import it.unive.lisa.program.annotations.matcher.BasicAnnotationMatcher;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
@@ -297,6 +300,30 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 
 	private NonInterference mkHighLow() {
 		return top();
+	}
+
+	@Override
+	public InferredPair<NonInterference> evalSkip(Skip skip, NonInterference state, ProgramPoint pp)
+			throws SemanticException {
+		return new InferredPair<>(this, bottom(), state(state, pp));
+	}
+
+	@Override
+	public InferredPair<NonInterference> evalPushAny(PushAny pushAny, NonInterference state, ProgramPoint pp)
+			throws SemanticException {
+		return new InferredPair<>(this, top(), state(state, pp));
+	}
+
+	@Override
+	public InferredPair<NonInterference> evalTypeConv(BinaryExpression conv, NonInterference left,
+			NonInterference right, NonInterference state, ProgramPoint pp) throws SemanticException {
+		return new InferredPair<>(this, left, state(state, pp));
+	}
+
+	@Override
+	public InferredPair<NonInterference> evalTypeCast(BinaryExpression cast, NonInterference left,
+			NonInterference right, NonInterference state, ProgramPoint pp) throws SemanticException {
+		return new InferredPair<>(this, left, state(state, pp));
 	}
 
 	@Override

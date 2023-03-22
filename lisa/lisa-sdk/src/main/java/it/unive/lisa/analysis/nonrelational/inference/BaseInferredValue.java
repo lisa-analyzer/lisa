@@ -134,8 +134,8 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 
 		@Override
 		public InferredPair<T> visit(Skip expression, Object... params) throws SemanticException {
-			T bot = singleton.bottom();
-			return new InferredPair<>(bot, bot, bot);
+			return singleton.evalSkip(expression, ((InferenceSystem<T>) params[0]).getExecutionState(),
+					(ProgramPoint) params[1]);
 		}
 
 		@Override
@@ -260,6 +260,23 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	default InferredPair<T> evalIdentifier(Identifier id, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		return new InferredPair<>((T) this, environment.getState(id), environment.getExecutionState());
+	}
+
+	/**
+	 * Yields the evaluation of a skip expression.
+	 * 
+	 * @param skip  the skip expression to be evaluated
+	 * @param state the current execution state
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
+	 * 
+	 * @return the evaluation of the skip expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default InferredPair<T> evalSkip(Skip skip, T state, ProgramPoint pp) throws SemanticException {
+		T bot = bottom();
+		return new InferredPair<>(bot, bot, bot);
 	}
 
 	/**

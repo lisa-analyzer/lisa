@@ -9,13 +9,13 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * A worst-case {@link OpenCallPolicy}, where the whole analysis state becomes
- * top and all information is lost. The return value, if any, is stored in a
- * variable named {@value OpenCallPolicy#RETURNED_VARIABLE_NAME}.
+ * top and all information is lost. The return value, if any, is stored in the
+ * call's meta variable.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -43,7 +43,7 @@ public class WorstCasePolicy implements OpenCallPolicy {
 		if (call.getStaticType().isVoidType())
 			return poststate.smallStepSemantics(new Skip(call.getLocation()), call);
 		else {
-			Variable var = new Variable(call.getStaticType(), RETURNED_VARIABLE_NAME, call.getLocation());
+			Identifier var = call.getMetaVariable();
 			return poststate.smallStepSemantics(var, call);
 		}
 	}

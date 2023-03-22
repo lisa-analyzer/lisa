@@ -195,7 +195,9 @@ public final class CollectionUtilities {
 	}
 
 	/**
-	 * A {@link Collector} that yields a {@link String}.
+	 * A {@link Collector} that yields a {@link String} built by concatenating
+	 * the values returned by {@link Object#toString()} when invoked on the
+	 * elements of the stream.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 * 
@@ -205,6 +207,11 @@ public final class CollectionUtilities {
 
 		private final String separator;
 
+		/**
+		 * Builds the collector.
+		 * 
+		 * @param separator the separator to use when concatenating items.
+		 */
 		public StringCollector(String separator) {
 			this.separator = separator;
 		}
