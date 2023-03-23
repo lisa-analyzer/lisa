@@ -201,8 +201,9 @@ public abstract class NaryStatement extends Statement {
 		AnalysisState<A, H, V, T> result = statementSemantics(interprocedural, eval, computed, expressions);
 
 		for (Expression sub : subExpressions)
-			if (!sub.getMetaVariables().isEmpty())
-				result = result.forgetIdentifiers(sub.getMetaVariables());
+			// we forget the meta variables now as the values are popped from
+			// the stack here
+			result = result.forgetIdentifiers(sub.getMetaVariables());
 		return result;
 	}
 

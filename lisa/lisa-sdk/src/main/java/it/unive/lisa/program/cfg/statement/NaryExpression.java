@@ -15,10 +15,12 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
@@ -238,9 +240,13 @@ public abstract class NaryExpression extends Expression {
 				T> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
 		AnalysisState<A, H, V, T> result = expressionSemantics(interprocedural, eval, computed, expressions);
 
-		for (Expression sub : subExpressions)
-			if (!sub.getMetaVariables().isEmpty())
-				result = result.forgetIdentifiers(sub.getMetaVariables());
+		Collection<Identifier> vars = getMetaVariables();
+		for (Expression sub : subExpressions) {
+			// we propagate the meta variables backward
+			Collection<Identifier> subvars = sub.getMetaVariables();
+			vars.addAll(subvars);
+			subvars.clear();
+		}
 		return result;
 	}
 

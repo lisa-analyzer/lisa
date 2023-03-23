@@ -70,6 +70,8 @@ public abstract class CFGFixpoint<A extends AbstractState<A, H, V, T>,
 		StatementStore<A, H, V, T> expressions = new StatementStore<>(entrystate.postState.bottom());
 		AnalysisState<A, H, V, T> approx = node.semantics(entrystate.postState, interprocedural, expressions);
 		if (node instanceof Expression)
+			// we forget the meta variables now as the values are popped from
+			// the stack here
 			approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables());
 		return CompoundState.of(approx, expressions);
 	}
