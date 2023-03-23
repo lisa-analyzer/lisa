@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * A context sensitive token representing an entire call chain up to a fixed
  * length {@code k}, specified in the singleton creation
@@ -22,47 +24,19 @@ public class KDepthToken implements ContextSensitivityToken {
 		this.calls = Collections.emptyList();
 	}
 
-	private KDepthToken(int k, List<CFGCall> tokens, CFGCall newToken) {
+	private KDepthToken(int k, List<Pair<CFGCall, ContextSensitivityToken>> tokens, CFGCall newToken) {
 		this.k = k;
 		int oldlen = tokens.size();
-		if (oldlen == k) {
-			this.calls = new ArrayList<>(k);
-			// we skip the oldest one
-			tokens.stream().skip(1).forEach(this.calls::add);
+		if (oldlen < k) {
+			this.calls = new ArrayList<>(oldlen + 1);
+			tokens.stream().forEach(t -> this.calls.add(t.getLeft()));
 			this.calls.add(newToken);
 		} else {
-			this.calls = new ArrayList<>(tokens.size() + 1);
-			tokens.stream().forEach(this.calls::add);
+			this.calls = new ArrayList<>(k);
+			// we only keep the last k-1 elements
+			tokens.stream().skip(oldlen - k + 1).forEach(t -> this.calls.add(t.getLeft()));
 			this.calls.add(newToken);
 		}
-	}
-
-	private KDepthToken(int k, List<CFGCall> tokens) {
-		this.k = k;
-		int oldsize = tokens.size();
-		if (oldsize == 1)
-			this.calls = Collections.emptyList();
-		else {
-			this.calls = new ArrayList<>(oldsize - 1);
-			tokens.stream().limit(oldsize - 1).forEach(this.calls::add);
-		}
-	}
-
-	@Override
-	public ContextSensitivityToken empty() {
-		return new KDepthToken(k);
-	}
-
-	@Override
-	public ContextSensitivityToken pushCall(CFGCall c) {
-		return new KDepthToken(k, calls, c);
-	}
-
-	@Override
-	public ContextSensitivityToken popCall(CFGCall c) {
-		if (calls.isEmpty())
-			return this;
-		return new KDepthToken(k, calls);
 	}
 
 	/**
@@ -118,5 +92,35 @@ public class KDepthToken implements ContextSensitivityToken {
 				// this object's hashcode is used as suffix in some filenames
 				result = prime * result + call.getLocation().hashCode();
 		return result;
+	}
+
+	@Override
+	public ScopeId startingId() {
+		return getSingleton(k);
+	}
+
+	@Override
+	public boolean isStartingId() {
+		return calls.isEmpty();
+	}
+
+	@Override
+	public ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c) {
+		return new KDepthToken(k, stack, c);
+	}
+
+	@Override
+	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
+		// this variant is called less often, so it's better to put the overhead
+		// for creating an intermediate list here - we cannot have two
+		// constructors due to type erasure :(
+		List<Pair<CFGCall, ContextSensitivityToken>> updated = new ArrayList<>(stack.size());
+		stack.stream().forEach(t -> updated.add(Pair.of(t, null)));
+		return new KDepthToken(k, updated, c);
+	}
+
+	@Override
+	public List<CFGCall> getKnownCalls() {
+		return calls;
 	}
 }

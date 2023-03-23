@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * A context sensitive token representing an entire call chain until a recursion
  * is encountered. This corresponds to having an unlimited {@link KDepthToken},
- * that only stops when a token that is already part of the chain is pushed.
+ * that will thus not ensure termination on recursions.
  */
 public class RecursionFreeToken implements ContextSensitivityToken {
 
@@ -21,46 +23,10 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 		calls = Collections.emptyList();
 	}
 
-	private RecursionFreeToken(List<CFGCall> tokens, CFGCall newToken) {
+	private RecursionFreeToken(List<Pair<CFGCall, ContextSensitivityToken>> tokens, CFGCall newToken) {
 		this.calls = new ArrayList<>(tokens.size() + 1);
-		tokens.stream().forEach(this.calls::add);
+		tokens.stream().forEach(t -> this.calls.add(t.getKey()));
 		this.calls.add(newToken);
-	}
-
-	private RecursionFreeToken(List<CFGCall> tokens) {
-		int oldsize = tokens.size();
-		if (oldsize == 1)
-			this.calls = Collections.emptyList();
-		else {
-			this.calls = new ArrayList<>(oldsize - 1);
-			tokens.stream().limit(oldsize - 1).forEach(this.calls::add);
-		}
-	}
-
-	private RecursionFreeToken(RecursionFreeToken other) {
-		calls = other.calls;
-	}
-
-	@Override
-	public ContextSensitivityToken empty() {
-		return new RecursionFreeToken();
-	}
-
-	@Override
-	public ContextSensitivityToken pushCall(CFGCall c) {
-		// we try to prevent recursions here: it's better
-		// to look for them starting from the end of the array
-		for (int i = calls.size() - 1; i >= 0; i--)
-			if (calls.get(i).equals(c))
-				return new RecursionFreeToken(this);
-		return new RecursionFreeToken(calls, c);
-	}
-
-	@Override
-	public ContextSensitivityToken popCall(CFGCall c) {
-		if (calls.isEmpty())
-			return this;
-		return new RecursionFreeToken(calls);
 	}
 
 	/**
@@ -111,5 +77,35 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 		} else if (!calls.equals(other.calls))
 			return false;
 		return true;
+	}
+
+	@Override
+	public ScopeId startingId() {
+		return getSingleton();
+	}
+
+	@Override
+	public boolean isStartingId() {
+		return calls.isEmpty();
+	}
+
+	@Override
+	public ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c) {
+		return new RecursionFreeToken(stack, c);
+	}
+
+	@Override
+	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
+		// this variant is called less often, so it's better to put the overhead
+		// for creating an intermediate list here - we cannot have two
+		// constructors due to type erasure :(
+		List<Pair<CFGCall, ContextSensitivityToken>> updated = new ArrayList<>(stack.size());
+		stack.stream().forEach(t -> updated.add(Pair.of(t, null)));
+		return new RecursionFreeToken(updated, c);
+	}
+
+	@Override
+	public List<CFGCall> getKnownCalls() {
+		return calls;
 	}
 }

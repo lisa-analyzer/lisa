@@ -1,31 +1,22 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A context sensitive token that is always the same (aka, do not track any
  * information about the call stack). All results for a given cfg will be lubbed
- * together regardless of the call site.
+ * together regardless of the call site. This corresponds to having a
+ * {@link KDepthToken} with {@code k = 0}.
  */
 public class ContextInsensitiveToken implements ContextSensitivityToken {
 
 	private ContextInsensitiveToken() {
 		super();
-	}
-
-	@Override
-	public ContextInsensitiveToken empty() {
-		return new ContextInsensitiveToken();
-	}
-
-	@Override
-	public ContextInsensitiveToken pushCall(CFGCall c) {
-		return this;
-	}
-
-	@Override
-	public ContextInsensitiveToken popCall(CFGCall c) {
-		return this;
 	}
 
 	@Override
@@ -53,5 +44,30 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	public boolean equals(Object obj) {
 		// instances are still unique
 		return this == obj;
+	}
+
+	@Override
+	public ScopeId startingId() {
+		return getSingleton();
+	}
+
+	@Override
+	public boolean isStartingId() {
+		return true;
+	}
+
+	@Override
+	public ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c) {
+		return this;
+	}
+
+	@Override
+	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
+		return this;
+	}
+
+	@Override
+	public List<CFGCall> getKnownCalls() {
+		return Collections.emptyList();
 	}
 }

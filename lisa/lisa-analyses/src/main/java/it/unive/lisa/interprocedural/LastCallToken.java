@@ -1,5 +1,10 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
@@ -16,21 +21,6 @@ public class LastCallToken implements ContextSensitivityToken {
 
 	private LastCallToken(CFGCall call) {
 		this.call = call;
-	}
-
-	@Override
-	public LastCallToken empty() {
-		return new LastCallToken(null);
-	}
-
-	@Override
-	public LastCallToken pushCall(CFGCall c) {
-		return new LastCallToken(c);
-	}
-
-	@Override
-	public LastCallToken popCall(CFGCall c) {
-		return new LastCallToken(null);
 	}
 
 	/**
@@ -77,5 +67,30 @@ public class LastCallToken implements ContextSensitivityToken {
 			// this object's hashcode is used as suffix in some filenames
 			result = prime * result + call.getLocation().hashCode();
 		return result;
+	}
+
+	@Override
+	public ScopeId startingId() {
+		return getSingleton();
+	}
+
+	@Override
+	public boolean isStartingId() {
+		return call == null;
+	}
+
+	@Override
+	public ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c) {
+		return new LastCallToken(c);
+	}
+
+	@Override
+	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
+		return new LastCallToken(c);
+	}
+
+	@Override
+	public List<CFGCall> getKnownCalls() {
+		return call == null ? Collections.emptyList() : Collections.singletonList(call);
 	}
 }
