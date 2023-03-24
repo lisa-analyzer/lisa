@@ -197,11 +197,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 				WorkingSet.of(fixpointWorkingSet),
 				conf,
 				token);
-		if (recursionStart != -1)
-			// avoid storing result until the recursion is complete
-			return fixpointResult;
 		Pair<Boolean, AnalyzedCFG<A, H, V, T>> res = results.putResult(cfg, token, fixpointResult);
-		if (Boolean.TRUE.equals(res.getLeft()))
+		if (recursionStart == -1 && Boolean.TRUE.equals(res.getLeft()))
+			// avoid re-evaluating the triggers until the recursion is complete
 			fixpointTriggers.add(cfg);
 		return res.getRight();
 	}
