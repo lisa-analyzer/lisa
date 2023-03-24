@@ -1,10 +1,8 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A token for interprocedural analysis that tunes the level of context

@@ -1,12 +1,10 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A context sensitive token representing a single {@link ScopeToken}. The token

@@ -1,0 +1,36 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_tests.directRecursion(tests__this,_untyped_n)_-1245949114.json", "untyped_tests.directRecursion(tests__this,_untyped_n)_-2109682861.json", "untyped_tests.directRecursion(tests__this,_untyped_n)_-240006733.json", "untyped_tests.directRecursion(tests__this,_untyped_n)_-270289677.json", "untyped_tests.directRecursion(tests__this,_untyped_n)_-383152488.json", "untyped_tests.directRecursion(tests__this,_untyped_n)_-59335258.json", "untyped_tests.main(tests__this,_untyped_a).json" ],
+  "info" : {
+    "cfgs" : "2",
+    "duration" : "1s 231ms",
+    "end" : "2023-03-24T11:14:13.510+01:00",
+    "expressions" : "16",
+    "files" : "7",
+    "globals" : "0",
+    "members" : "2",
+    "programs" : "1",
+    "start" : "2023-03-24T11:14:12.279+01:00",
+    "statements" : "6",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/directRecursion/kdepth"
+  }
+}

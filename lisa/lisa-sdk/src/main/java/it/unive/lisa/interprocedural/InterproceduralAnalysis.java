@@ -16,10 +16,15 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.MultiCall;
+import it.unive.lisa.program.cfg.statement.call.NativeCall;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -259,9 +264,51 @@ public interface InterproceduralAnalysis<
 	 * @return {@code true} if that condition holds
 	 */
 	default boolean returnsVoid(Call call, AnalysisState<A, H, V, T> returned) {
-		return call.getStaticType().isVoidType()
-				|| (call.getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty())
-				|| (returned.getComputedExpressions().size() == 1
-						&& returned.getComputedExpressions().iterator().next() instanceof Skip);
+		if (call.getStaticType().isVoidType())
+			return true;
+
+		if (!call.getStaticType().isUntyped())
+			return false;
+
+		if (call instanceof CFGCall) {
+			CFGCall cfgcall = (CFGCall) call;
+			Collection<CFG> targets = cfgcall.getTargetedCFGs();
+			if (!targets.isEmpty())
+				return !targets.iterator()
+						.next()
+						.getNormalExitpoints()
+						.stream()
+						// returned values will be stored in meta variables
+						.anyMatch(st -> st instanceof MetaVariableCreator);
+		}
+
+		if (call instanceof NativeCall) {
+			NativeCall nativecall = (NativeCall) call;
+			Collection<NativeCFG> targets = nativecall.getTargetedConstructs();
+			if (!targets.isEmpty())
+				// native cfgs will always rewrite to expressions and return a
+				// value
+				return false;
+		}
+
+		if (call instanceof TruncatedParamsCall)
+			return returnsVoid(((TruncatedParamsCall) call).getInnerCall(), returned);
+
+		if (call instanceof MultiCall) {
+			MultiCall multicall = (MultiCall) call;
+			Collection<Call> targets = multicall.getCalls();
+			if (!targets.isEmpty())
+				// we get the return type from one of its targets
+				return returnsVoid(targets.iterator().next(), returned);
+		}
+
+		if (returned != null)
+			if (returned.getComputedExpressions().isEmpty())
+				return true;
+			else if (returned.getComputedExpressions().size() == 1
+					&& returned.getComputedExpressions().iterator().next() instanceof Skip)
+				return true;
+
+		return false;
 	}
 }

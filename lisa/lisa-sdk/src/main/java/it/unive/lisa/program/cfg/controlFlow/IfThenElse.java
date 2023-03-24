@@ -113,7 +113,9 @@ public class IfThenElse extends ControlFlowStructure {
 	@Override
 	public Collection<Statement> getTargetedStatements() {
 		Collection<Statement> targeted = new HashSet<>(cfgMatrix.followersOf(getCondition()));
-		targeted.add(getFirstFollower());
+		Statement follower = getFirstFollower();
+		if (follower != null)
+			targeted.add(follower);
 		return targeted;
 	}
 }

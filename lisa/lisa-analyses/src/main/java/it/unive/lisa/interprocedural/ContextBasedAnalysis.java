@@ -1,15 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.DefaultParameters;
@@ -34,8 +24,17 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.TreeSet;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -150,14 +149,22 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			// starting from the callers of the cfgs that needed a lub,
 			// find out the complete set of cfgs that might need to be
 			// processed again
-			VisitOnceFIFOWorkingSet<CFG> ws = VisitOnceFIFOWorkingSet.mk();
-			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg).stream().filter(CFG.class::isInstance)
-					.map(CFG.class::cast).forEach(ws::push));
+			VisitOnceWorkingSet<CFG> ws = VisitOnceFIFOWorkingSet.mk();
+			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg)
+					.stream()
+					.filter(CFG.class::isInstance)
+					.map(CFG.class::cast)
+					.forEach(ws::push));
 			while (!ws.isEmpty())
-				callgraph.getCallers(ws.pop()).stream().filter(CFG.class::isInstance).map(CFG.class::cast)
+				callgraph.getCallers(ws.pop())
+						.stream()
+						.filter(CFG.class::isInstance)
+						.map(CFG.class::cast)
 						.forEach(ws::push);
 
-			ws.getSeen().forEach(results::forget);
+			Collection<CFG> seen = ws.getSeen();
+			seen.removeAll(fixpointTriggers);
+			seen.forEach(results::forget);
 
 			iter++;
 		} while (!fixpointTriggers.isEmpty());
@@ -274,12 +281,18 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			ContextSensitivityToken token)
 			throws SemanticException {
 		if (recursionStart == -1) {
-			LOG.info("Found recursion at '" + call + "' with token " + token);
+			LOG.info("Found recursion at '" + call.getLocation() + "' with token " + token);
 			recursionStart = recPos;
-			recursiveApprox = state.bottom();
+			if (returnsVoid(call, null))
+				recursiveApprox = state.bottom();
+			else
+				recursiveApprox = new AnalysisState<>(
+						state.getState().bottom(),
+						call.getMetaVariable(),
+						state.getAliasing().bottom());
 			recursionCount = 0;
 		} else {
-			LOG.info(ordinal(recursionCount + 2) + " evaluation of recursive chain at '" + call);
+			LOG.info(ordinal(recursionCount + 2) + " evaluation of recursive chain at '" + call.getLocation());
 			if (conf.wideningThreshold < 0)
 				recursiveApprox = previousApprox.lub(recursiveApprox);
 

@@ -1,0 +1,15 @@
+class tests {
+
+	directRecursion(n) {
+		if (n <= 1) 
+			return 1;
+		else {
+			def x = n - 1;
+			return this.directRecursion(x) + n;
+		}
+	}
+	
+	main(a) {
+		def x = this.directRecursion(a);
+    }
+}

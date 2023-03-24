@@ -1,0 +1,11 @@
+class tests {
+	
+	infiniteDirectRecursion(n) {
+		def x = n - 1;
+		return this.infiniteDirectRecursion(x) + n;
+	}
+	
+	main(a) {
+		def w = this.infiniteDirectRecursion(a);
+    }
+}
