@@ -1,11 +1,11 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
  * A context sensitive token representing an entire call chain up to a fixed
@@ -23,17 +23,17 @@ public class KDepthToken implements ContextSensitivityToken {
 		this.calls = Collections.emptyList();
 	}
 
-	private KDepthToken(int k, List<Pair<CFGCall, ContextSensitivityToken>> tokens, CFGCall newToken) {
+	private KDepthToken(int k, List<CFGCall> tokens, CFGCall newToken) {
 		this.k = k;
 		int oldlen = tokens.size();
 		if (oldlen < k) {
 			this.calls = new ArrayList<>(oldlen + 1);
-			tokens.stream().forEach(t -> this.calls.add(t.getLeft()));
+			tokens.stream().forEach(this.calls::add);
 			this.calls.add(newToken);
 		} else {
 			this.calls = new ArrayList<>(k);
 			// we only keep the last k-1 elements
-			tokens.stream().skip(oldlen - k + 1).forEach(t -> this.calls.add(t.getLeft()));
+			tokens.stream().skip(oldlen - k + 1).forEach(this.calls::add);
 			this.calls.add(newToken);
 		}
 	}
@@ -104,18 +104,8 @@ public class KDepthToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c) {
-		return new KDepthToken(k, stack, c);
-	}
-
-	@Override
 	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
-		// this variant is called less often, so it's better to put the overhead
-		// for creating an intermediate list here - we cannot have two
-		// constructors due to type erasure :(
-		List<Pair<CFGCall, ContextSensitivityToken>> updated = new ArrayList<>(stack.size());
-		stack.stream().forEach(t -> updated.add(Pair.of(t, null)));
-		return new KDepthToken(k, updated, c);
+		return new KDepthToken(k, stack, c);
 	}
 
 	@Override

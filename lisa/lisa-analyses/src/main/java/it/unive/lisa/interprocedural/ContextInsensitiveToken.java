@@ -1,9 +1,9 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A context sensitive token that is always the same (aka, do not track any
@@ -52,11 +52,6 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	@Override
 	public boolean isStartingId() {
 		return true;
-	}
-
-	@Override
-	public ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c) {
-		return this;
 	}
 
 	@Override

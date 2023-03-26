@@ -1,8 +1,8 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A token for interprocedural analysis that tunes the level of context
@@ -10,18 +10,6 @@ import org.apache.commons.lang3.tuple.Pair;
  * some of the calls appearing in it.
  */
 public interface ContextSensitivityToken extends ScopeId {
-
-	/**
-	 * Creates a context sensitive token with the starting from the given stack,
-	 * that represents the current call stack complete with each call's token.
-	 * The call {@code c} is the new one being pushed on the stack.
-	 * 
-	 * @param stack the stack to use as base
-	 * @param c     the {@link CFGCall} to be pushed at the top of the token
-	 * 
-	 * @return the created token
-	 */
-	ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c);
 
 	/**
 	 * Creates a context sensitive token with the starting from the given (and

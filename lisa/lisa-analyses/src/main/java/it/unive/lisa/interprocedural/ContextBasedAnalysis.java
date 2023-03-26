@@ -58,7 +58,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private final Collection<CFG> fixpointTriggers;
 
-	private final LinkedList<Pair<CFGCall, ContextSensitivityToken>> callStack;
+	private final LinkedList<CFGCall> callStack;
 
 	private FixpointResults<A, H, V, T> results;
 
@@ -227,11 +227,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	 *             {@code <c, stack>} pair is returned
 	 */
 	protected int registerCallStack(CFGCall c, ContextSensitivityToken stack) {
-		Pair<CFGCall, ContextSensitivityToken> entry = Pair.of(c, stack);
-		int last = callStack.lastIndexOf(entry);
+		int last = callStack.lastIndexOf(c);
 		if (last != -1)
 			return last;
-		callStack.addLast(entry);
+		callStack.addLast(c);
 		return -1;
 	}
 
@@ -245,17 +244,13 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	 *                               {@code <c, stack>} pair
 	 */
 	protected void unregisterCallStack(CFGCall c, ContextSensitivityToken stack) throws SemanticException {
-		Pair<CFGCall, ContextSensitivityToken> last = callStack.removeLast();
-		if (!last.equals(Pair.of(c, stack)))
+		CFGCall last = callStack.removeLast();
+		if (!last.equals(c))
 			throw new SemanticException("Top of the call stack ('"
-					+ last.getLeft()
-					+ "' with stack hash "
-					+ last.getRight().hashCode()
-					+ ") does not match the call that is returning ("
+					+ last
+					+ "') does not match the call that is returning ('"
 					+ c
-					+ " with stack hash "
-					+ stack.hashCode()
-					+ ")");
+					+ "')");
 	}
 
 	private AnalysisState<A, H, V, T> recursiveApprox, previousApprox;
@@ -320,14 +315,14 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			ExpressionSet<SymbolicExpression>[] parameters,
 			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
-		ContextSensitivityToken token = tokenCreator.pushOnFullStack(callStack, call);
+		ContextSensitivityToken token = tokenCreator.pushOnStack(callStack, call);
 		int recPos = registerCallStack(call, token);
 		if (recPos != -1)
 			// if we already reached this call with the same token, then
 			// this is a recursion and we have to use a separate fixpoint
 			// to compute its result
 			return handleRecursion(recPos, call, entryState, token);
-		
+
 		callgraph.registerCall(call);
 
 		ScopeToken scope = new ScopeToken(call);

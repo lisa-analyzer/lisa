@@ -1,11 +1,11 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
  * A context sensitive token representing an entire call chain until a recursion
@@ -22,9 +22,9 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 		calls = Collections.emptyList();
 	}
 
-	private RecursionFreeToken(List<Pair<CFGCall, ContextSensitivityToken>> tokens, CFGCall newToken) {
+	private RecursionFreeToken(List<CFGCall> tokens, CFGCall newToken) {
 		this.calls = new ArrayList<>(tokens.size() + 1);
-		tokens.stream().forEach(t -> this.calls.add(t.getKey()));
+		tokens.stream().forEach(this.calls::add);
 		this.calls.add(newToken);
 	}
 
@@ -89,18 +89,8 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c) {
-		return new RecursionFreeToken(stack, c);
-	}
-
-	@Override
 	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
-		// this variant is called less often, so it's better to put the overhead
-		// for creating an intermediate list here - we cannot have two
-		// constructors due to type erasure :(
-		List<Pair<CFGCall, ContextSensitivityToken>> updated = new ArrayList<>(stack.size());
-		stack.stream().forEach(t -> updated.add(Pair.of(t, null)));
-		return new RecursionFreeToken(updated, c);
+		return new RecursionFreeToken(stack, c);
 	}
 
 	@Override

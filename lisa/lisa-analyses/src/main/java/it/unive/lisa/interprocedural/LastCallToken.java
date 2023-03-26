@@ -1,10 +1,10 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * A context sensitive token representing a single {@link ScopeToken}. The token
@@ -75,11 +75,6 @@ public class LastCallToken implements ContextSensitivityToken {
 	@Override
 	public boolean isStartingId() {
 		return call == null;
-	}
-
-	@Override
-	public ContextSensitivityToken pushOnFullStack(List<Pair<CFGCall, ContextSensitivityToken>> stack, CFGCall c) {
-		return new LastCallToken(c);
 	}
 
 	@Override
