@@ -327,6 +327,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			// this is a recursion and we have to use a separate fixpoint
 			// to compute its result
 			return handleRecursion(recPos, call, entryState, token);
+		
+		callgraph.registerCall(call);
 
 		ScopeToken scope = new ScopeToken(call);
 		AnalysisState<A, H, V, T> result = entryState.bottom();
@@ -401,8 +403,6 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		} while (isActiveRecursionHead);
 
 		unregisterCallStack(call, token);
-		callgraph.registerCall(call);
-
 		return result;
 	}
 }

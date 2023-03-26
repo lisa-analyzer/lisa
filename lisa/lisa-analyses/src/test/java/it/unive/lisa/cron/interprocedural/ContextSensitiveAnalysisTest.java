@@ -185,7 +185,6 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	@Ignore
 	public void testLoopKDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
@@ -207,7 +206,6 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	@Ignore
 	public void testLoopLast() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
@@ -229,7 +227,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	@Ignore
+	@Ignore("The function called by main is the same that starts the loop, and this prevents the second fixpoint iteration form analyzing the rest")
 	public void testLoopInsensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
