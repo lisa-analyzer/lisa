@@ -40,11 +40,6 @@ public class LiSARunInfo {
 		private int expressions = 0;
 
 		@Override
-		public boolean visit(Void tool, CFG graph) {
-			return true;
-		}
-
-		@Override
 		public boolean visit(Void tool, CFG graph, Statement node) {
 			if (node instanceof Expression) {
 				if (((Expression) node).getRootStatement() == node)
@@ -53,11 +48,6 @@ public class LiSARunInfo {
 					expressions++;
 			} else
 				statements++;
-			return true;
-		}
-
-		@Override
-		public boolean visit(Void tool, CFG graph, Edge edge) {
 			return true;
 		}
 	}

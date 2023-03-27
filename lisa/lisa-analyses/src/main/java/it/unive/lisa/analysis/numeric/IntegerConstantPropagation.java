@@ -232,15 +232,25 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 
 	@Override
 	public ValueEnvironment<IntegerConstantPropagation> assumeBinaryExpression(
-			ValueEnvironment<IntegerConstantPropagation> environment, BinaryOperator operator, ValueExpression left,
-			ValueExpression right, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+			ValueEnvironment<IntegerConstantPropagation> environment,
+			BinaryOperator operator,
+			ValueExpression left,
+			ValueExpression right,
+			ProgramPoint src,
+			ProgramPoint dest)
+			throws SemanticException {
 		if (operator == ComparisonEq.INSTANCE)
-			if (left instanceof Identifier)
-				environment = environment.assign((Identifier) left, right, src);
-			else if (right instanceof Identifier)
-				environment = environment.assign((Identifier) right, left, src);
-			else
-				return environment;
+			if (left instanceof Identifier) {
+				IntegerConstantPropagation eval = eval(right, environment, src);
+				if (eval.isBottom())
+					return environment.bottom();
+				return environment.putState((Identifier) left, eval);
+			} else if (right instanceof Identifier) {
+				IntegerConstantPropagation eval = eval(left, environment, src);
+				if (eval.isBottom())
+					return environment.bottom();
+				return environment.putState((Identifier) right, eval);
+			}
 		return environment;
 	}
 }

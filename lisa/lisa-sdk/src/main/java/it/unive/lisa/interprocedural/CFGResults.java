@@ -1,7 +1,7 @@
 package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
@@ -13,9 +13,9 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A {@link FunctionalLattice} from {@link ContextSensitivityToken}s to
- * {@link CFGWithAnalysisResults}s. This class is meant to store fixpoint
- * results on each token generated during the interprocedural analysis.
+ * A {@link FunctionalLattice} from {@link ScopeId}s to {@link AnalyzedCFG}s.
+ * This class is meant to store fixpoint results on each token generated during
+ * the interprocedural analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -32,7 +32,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		extends FunctionalLattice<CFGResults<A, H, V, T>, ContextSensitivityToken, CFGWithAnalysisResults<A, H, V, T>> {
+		extends FunctionalLattice<CFGResults<A, H, V, T>, ScopeId, AnalyzedCFG<A, H, V, T>> {
 
 	/**
 	 * Builds a new result.
@@ -40,20 +40,20 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 * @param lattice a singleton instance used for retrieving top and bottom
 	 *                    values
 	 */
-	public CFGResults(CFGWithAnalysisResults<A, H, V, T> lattice) {
+	public CFGResults(AnalyzedCFG<A, H, V, T> lattice) {
 		super(lattice);
 	}
 
-	private CFGResults(CFGWithAnalysisResults<A, H, V, T> lattice,
-			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V, T>> function) {
+	private CFGResults(AnalyzedCFG<A, H, V, T> lattice,
+			Map<ScopeId, AnalyzedCFG<A, H, V, T>> function) {
 		super(lattice, function);
 	}
 
 	/**
 	 * Stores the result of a fixpoint computation on a cfg, if needed. This
-	 * method returns a pair of a boolean and a {@link CFGWithAnalysisResults},
-	 * where ({@code prev} is the {@link CFGWithAnalysisResults} already present
-	 * for the given {@code token}):
+	 * method returns a pair of a boolean and a {@link AnalyzedCFG}, where
+	 * ({@code prev} is the {@link AnalyzedCFG} already present for the given
+	 * {@code token}):
 	 * <ul>
 	 * <li>if no {@code prev} was stored for {@code token}, than that token is
 	 * mapped to {@code result} and this method returns
@@ -68,16 +68,15 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 * The value returned by this method is intended to be a hint that a new
 	 * fixpoint computation is needed to ensure that the results are stable.
 	 * 
-	 * @param token  the {@link ContextSensitivityToken} that identifying the
-	 *                   result
-	 * @param result the {@link CFGWithAnalysisResults} to store
+	 * @param token  the {@link ScopeId} that identifying the result
+	 * @param result the {@link AnalyzedCFG} to store
 	 * 
 	 * @return {@code true} if the previous result has been updated, if any
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(ContextSensitivityToken token,
-			CFGWithAnalysisResults<A, H, V, T> result)
+	public Pair<Boolean, AnalyzedCFG<A, H, V, T>> putResult(ScopeId token,
+			AnalyzedCFG<A, H, V, T> result)
 			throws SemanticException {
 		if (function == null) {
 			// no previous result
@@ -86,7 +85,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 			return Pair.of(false, result);
 		}
 
-		CFGWithAnalysisResults<A, H, V, T> previousResult = function.get(token);
+		AnalyzedCFG<A, H, V, T> previousResult = function.get(token);
 		if (previousResult == null) {
 			// no previous result
 			function.put(token, result);
@@ -106,7 +105,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 			return Pair.of(false, previousResult);
 		} else {
 			// result and previous are not comparable
-			CFGWithAnalysisResults<A, H, V, T> lub = previousResult.lub(result);
+			AnalyzedCFG<A, H, V, T> lub = previousResult.lub(result);
 			function.put(token, lub);
 			return Pair.of(true, lub);
 		}
@@ -115,22 +114,21 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Yields {@code true} if a result exists for the given {@code token}.
 	 * 
-	 * @param token the {@link ContextSensitivityToken} that identifying the
-	 *                  result
+	 * @param token the {@link ScopeId} that identifying the result
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean contains(ContextSensitivityToken token) {
+	public boolean contains(ScopeId token) {
 		return function != null && function.containsKey(token);
 	}
 
 	/**
 	 * Yields all the results stored in this object, for any possible
-	 * {@link ContextSensitivityToken} used.
+	 * {@link ScopeId} used.
 	 * 
 	 * @return the results
 	 */
-	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAll() {
+	public Collection<AnalyzedCFG<A, H, V, T>> getAll() {
 		return function == null ? Collections.emptySet() : function.values();
 	}
 
@@ -145,8 +143,8 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public CFGResults<A, H, V, T> mk(CFGWithAnalysisResults<A, H, V, T> lattice,
-			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V, T>> function) {
+	public CFGResults<A, H, V, T> mk(AnalyzedCFG<A, H, V, T> lattice,
+			Map<ScopeId, AnalyzedCFG<A, H, V, T>> function) {
 		return new CFGResults<>(lattice, function);
 	}
 }

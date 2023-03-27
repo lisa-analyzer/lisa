@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * The type-system based implementation of the non interference analysis.
@@ -69,7 +70,7 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 
 	private final byte integrity;
 
-	private final Map<ProgramPoint, NonInterference> guards;
+	private Map<ProgramPoint, NonInterference> guards;
 
 	/**
 	 * Builds a new instance of non interference, referring to the top element
@@ -90,7 +91,7 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	public NonInterference(byte confidentiality, byte integrity) {
 		this.confidentiality = confidentiality;
 		this.integrity = integrity;
-		this.guards = new IdentityHashMap<>();
+		this.guards = null;
 	}
 
 	@Override
@@ -155,6 +156,12 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 
 	@Override
 	public NonInterference lubAux(NonInterference other) throws SemanticException {
+		NonInterference ni = combine(other);
+		addGuards(other, ni);
+		return ni;
+	}
+
+	private NonInterference combine(NonInterference other) {
 		// HL
 		// | \
 		// HH LL
@@ -164,11 +171,28 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 		// BB
 		byte confidentiality = isHighConfidentiality() || other.isHighConfidentiality() ? NI_HIGH : NI_LOW;
 		byte integrity = isLowIntegrity() || other.isLowIntegrity() ? NI_LOW : NI_HIGH;
-		return new NonInterference(confidentiality, integrity);
+		NonInterference ni = new NonInterference(confidentiality, integrity);
+		return ni;
+	}
+
+	private void addGuards(NonInterference other, NonInterference ni) throws SemanticException {
+		if (guards != null)
+			ni.guards = new IdentityHashMap<>(guards);
+		if (other.guards != null)
+			if (ni.guards == null)
+				ni.guards = new IdentityHashMap<>(other.guards);
+			else
+				for (Entry<ProgramPoint, NonInterference> guard : other.guards.entrySet())
+					ni.guards.put(guard.getKey(),
+							guard.getValue().combine(ni.guards.getOrDefault(guard.getKey(), bottom())));
 	}
 
 	@Override
 	public boolean lessOrEqualAux(NonInterference other) throws SemanticException {
+		return compare(other) && compareGuards(other);
+	}
+
+	private boolean compare(NonInterference other) {
 		// HL
 		// | \
 		// HH LL
@@ -179,6 +203,19 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 		boolean confidentiality = isLowConfidentiality() || this.confidentiality == other.confidentiality;
 		boolean integrity = isHighIntegrity() || this.integrity == other.integrity;
 		return confidentiality && integrity;
+	}
+
+	private boolean compareGuards(NonInterference other) throws SemanticException {
+		if (guards == null)
+			return true;
+		if (other.guards == null)
+			return false;
+
+		NonInterference val;
+		for (Entry<ProgramPoint, NonInterference> guard : guards.entrySet())
+			if ((val = other.guards.get(guard.getKey())) == null || !guard.getValue().compare(val))
+				return false;
+		return true;
 	}
 
 	@Override
@@ -213,6 +250,11 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	}
 
 	@Override
+	public String toString() {
+		return representation().toString();
+	}
+
+	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
@@ -220,16 +262,24 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	}
 
 	private NonInterference state(NonInterference state, ProgramPoint pp) throws SemanticException {
+		if (state.guards == null || state.guards.isEmpty())
+			// we return LH since that is the lowest non-error state
+			return mkLowHigh();
 		Map<ProgramPoint, NonInterference> guards = new IdentityHashMap<>();
 		for (ProgramPoint guard : pp.getCFG().getGuards(pp))
 			guards.put(guard, state.guards.getOrDefault(guard, bottom()));
-		NonInterference res = bottom();
+
+		// we start at LH since that is the lowest non-error state
+		NonInterference res = mkLowHigh();
 		for (NonInterference guard : guards.values())
-			res = res.lub(guard);
+			// we combine instead of lub to avoid populating nested guards
+			res = res.combine(guard);
 
 		// we have to create a new one here, otherwise we would end up
-		// adding those entries to one of the
+		// adding those entries to one of the bottom element
+		res.guards = new IdentityHashMap<>();
 		guards.forEach(res.guards::put);
+
 		return res;
 	}
 
@@ -283,7 +333,7 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	@Override
 	public InferredPair<NonInterference> evalIdentifier(Identifier id,
 			InferenceSystem<NonInterference> environment, ProgramPoint pp) throws SemanticException {
-		return new InferredPair<>(this, variable(id, null), state(environment.getExecutionState(), pp));
+		return new InferredPair<>(this, variable(id, pp), state(environment.getExecutionState(), pp));
 	}
 
 	@Override
@@ -315,8 +365,14 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 			ValueExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		InferredPair<NonInterference> eval = eval(expression, environment, src);
 		NonInterference inf = eval.getInferred();
-		eval.getState().guards.forEach(inf.guards::put);
+		inf.guards = new IdentityHashMap<>();
+		if (eval.getState().guards != null)
+			eval.getState().guards.forEach(inf.guards::put);
 		inf.guards.put(src, inf);
-		return new InferenceSystem<>(environment, inf);
+		// inf itself might be wrong, e.g. when the condition is constant
+		// but there is an outer condition that uses low/high variables.
+		// state will compute the lub of all the guards of dest
+		NonInterference state = state(inf, dest);
+		return new InferenceSystem<>(environment, state);
 	}
 }

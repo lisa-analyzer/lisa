@@ -4,7 +4,7 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -40,6 +40,8 @@ import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
@@ -51,6 +53,7 @@ import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -85,6 +88,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.reflections.Reflections;
@@ -357,8 +362,8 @@ public class SemanticsSanityTest {
 		if (root == ValueCartesianProduct.class)
 			return new ValueEnvironment<>(new Sign());
 		if (root == ValueNonRedundantSet.class)
-			if (param == Set.class)
-				return new HashSet<ValueEnvironment<Sign>>();
+			if (param == SortedSet.class)
+				return new TreeSet<ValueEnvironment<Sign>>();
 			else if (param == boolean.class)
 				return true;
 			else if (param == ValueDomain.class)
@@ -371,10 +376,14 @@ public class SemanticsSanityTest {
 			return cfg;
 		if (param == AnalysisState.class)
 			return as;
-		if (param == CFGWithAnalysisResults.class)
-			return new CFGWithAnalysisResults<>(cfg, as);
+		if (param == AnalyzedCFG.class)
+			return new AnalyzedCFG<>(cfg, new UniqueScope(), as);
 		if (param == CFGResults.class)
-			return new CFGResults<>(new CFGWithAnalysisResults<>(cfg, as));
+			return new CFGResults<>(new AnalyzedCFG<>(cfg, new UniqueScope(), as));
+		if (param == InterproceduralAnalysis.class)
+			return interprocedural;
+		if (param == ScopeId.class)
+			return new UniqueScope();
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);
@@ -383,12 +392,13 @@ public class SemanticsSanityTest {
 	@SuppressWarnings("unchecked")
 	private <T> int buildDomainsInstances(Set<Class<? extends T>> classes, Set<T> instances, List<String> failures) {
 		int total = 0;
-		Constructor<?> nullary, unary, binary, ternary;
-		nullary = unary = binary = ternary = null;
+		Constructor<?> nullary, unary, binary, ternary, quaternary;
+		nullary = unary = binary = ternary = quaternary = null;
 		T instance;
 		for (Class<? extends T> clazz : classes)
 			if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())
 					&& !Satisfiability.class.isAssignableFrom(clazz)
+					&& !CompoundState.class.isAssignableFrom(clazz)
 					// some testing domain that we do not care about end up here
 					&& !clazz.getName().contains("Test")) {
 				total++;
@@ -401,6 +411,8 @@ public class SemanticsSanityTest {
 						binary = c;
 					else if (c.getParameterCount() == 3)
 						ternary = c;
+					else if (c.getParameterCount() == 4)
+						quaternary = c;
 				}
 
 				try {
@@ -421,6 +433,13 @@ public class SemanticsSanityTest {
 						Object param2 = domainFor(clazz, types[1]);
 						Object param3 = domainFor(clazz, types[2]);
 						instance = (T) ternary.newInstance(param1, param2, param3);
+					} else if (quaternary != null) {
+						Class<?>[] types = quaternary.getParameterTypes();
+						Object param1 = domainFor(clazz, types[0]);
+						Object param2 = domainFor(clazz, types[1]);
+						Object param3 = domainFor(clazz, types[2]);
+						Object param4 = domainFor(clazz, types[3]);
+						instance = (T) quaternary.newInstance(param1, param2, param3, param4);
 					} else {
 						failures.add(clazz.getName());
 						System.err.println("No suitable consturctor found for " + clazz.getName());

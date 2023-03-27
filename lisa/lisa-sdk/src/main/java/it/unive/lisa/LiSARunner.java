@@ -1,9 +1,9 @@
 package it.unive.lisa;
 
-import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
@@ -13,6 +13,9 @@ import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -20,6 +23,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
@@ -38,6 +42,7 @@ import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -100,6 +105,9 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		Collection<CFG> allCFGs = app.getAllCFGs();
 
+		if (conf.optimize)
+			allCFGs.forEach(CFG::computeBasicBlocks);
+
 		AtomicBoolean htmlViewer = new AtomicBoolean(false), subnodes = new AtomicBoolean(false);
 		if (conf.serializeInputs)
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input cfgs", "cfgs")) {
@@ -140,7 +148,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		if (state != null) {
 			analyze(allCFGs, fileManager, htmlViewer, subnodes);
-			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
+			Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 
@@ -171,7 +179,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						interproc.fixpoint(
 								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
 								(Class<? extends WorkingSet<Statement>>) conf.fixpointWorkingSet,
-								conf.wideningThreshold, conf.descendingPhaseType, conf.descendingGlbThreshold);
+								new FixpointConfiguration(conf));
 					} catch (FixpointException e) {
 						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
 						throw new AnalysisExecutionException(FIXPOINT_EXCEPTION_MESSAGE, e);
@@ -182,13 +190,26 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		if (conf.serializeResults || type != GraphType.NONE) {
 			int nfiles = fileManager.createdFiles().size();
 
+			BiFunction<CFG,
+					Statement,
+					SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding
+							? (cfg, st) -> ((OptimizedAnalyzedCFG<A, H, V, T>) cfg)
+									.getUnwindedAnalysisStateAfter(st)
+									.representation()
+									.toSerializableValue()
+							: (cfg, st) -> ((AnalyzedCFG<A, H, V, T>) cfg)
+									.getAnalysisStateAfter(st)
+									.representation()
+									.toSerializableValue();
+
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
-				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
-					SerializableGraph graph = result.toSerializableGraph(
-							st -> result.getAnalysisStateAfter(st).representation().toSerializableValue());
+				for (AnalyzedCFG<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
+					SerializableGraph graph = result.toSerializableGraph(labeler);
 					String filename = cfg.getDescriptor().getFullSignatureWithParNames();
-					if (result.getId() != null)
-						filename += "_" + result.getId().hashCode();
+					if (!result.getId().isStartingId())
+						// we use the string for compatibility with older file
+						// names
+						filename += "_" + result.getId().toString().hashCode();
 
 					try {
 						if (conf.serializeResults)

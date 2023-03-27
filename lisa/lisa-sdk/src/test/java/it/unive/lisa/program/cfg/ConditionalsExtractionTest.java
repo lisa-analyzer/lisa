@@ -88,7 +88,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a1, ret));
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
@@ -109,7 +109,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new TrueEdge(condition, ret));
 		cfg.addEdge(new FalseEdge(condition, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
@@ -139,7 +139,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a1, a2));
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
@@ -173,7 +173,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a2, ret));
 		cfg.addEdge(new SequentialEdge(a3, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
@@ -219,7 +219,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a5, a6));
 		cfg.addEdge(new SequentialEdge(a6, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
@@ -249,7 +249,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new FalseEdge(condition, a2));
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
@@ -278,7 +278,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new FalseEdge(condition, a2));
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
@@ -324,7 +324,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new FalseEdge(condition, a6));
 		cfg.addEdge(new SequentialEdge(a6, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
@@ -376,7 +376,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(loop_a2, loop_condition));
 		cfg.addEdge(new FalseEdge(loop_condition, ret));
 
-		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
 		assertEquals("Incorrect number of structures: " + extracted.size(), 2, extracted.size());
 
 		Iterator<ControlFlowStructure> it = extracted.iterator();
@@ -426,6 +426,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new FalseEdge(condition, a2));
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
+		cfg.extractControlFlowStructures(new ControlFlowExtractor());
 		assertTrue("No guards registered for inner expression", cfg.getGuards(inner).contains(condition));
 		assertTrue("No guards registered for resolved call", cfg.getGuards(resolved).contains(condition));
 	}

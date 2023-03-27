@@ -2,6 +2,7 @@ package it.unive.lisa.util.collections.workset;
 
 import it.unive.lisa.AnalysisSetupException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 
 /**
  * A working set, containing items to be processed.
@@ -73,4 +74,11 @@ public interface WorkingSet<E> {
 	 * @return {@code true} if that condition holds
 	 */
 	boolean isEmpty();
+
+	/**
+	 * Yields the elements currently in this working set.
+	 * 
+	 * @return the elements
+	 */
+	Collection<E> getContents();
 }

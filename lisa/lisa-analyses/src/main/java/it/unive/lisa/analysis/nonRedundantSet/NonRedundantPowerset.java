@@ -12,6 +12,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 
 /**
@@ -50,7 +52,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 *                        or not
 	 * @param valueDomain an instance of the underlying lattice
 	 */
-	public NonRedundantPowerset(Set<T> elements, boolean isTop, T valueDomain) {
+	public NonRedundantPowerset(SortedSet<T> elements, boolean isTop, T valueDomain) {
 		super(elements, isTop);
 		this.valueDomain = valueDomain;
 	}
@@ -70,7 +72,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected C removeRedundancy() throws SemanticException {
-		Set<T> newElementsSet = new HashSet<T>();
+		Set<T> newElementsSet = new TreeSet<>();
 		for (T element : this.elements) {
 			if (!element.isBottom()) {
 				boolean toRemove = false;
@@ -86,12 +88,12 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C top() {
-		return mk(new HashSet<T>(), true, this.valueDomain);
+		return mk(new TreeSet<>(), true, this.valueDomain);
 	}
 
 	@Override
 	public C bottom() {
-		return mk(new HashSet<T>(), false, this.valueDomain);
+		return mk(new TreeSet<>(), false, this.valueDomain);
 	}
 
 	@Override
@@ -120,7 +122,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	@Override
 	public C glbAux(C other)
 			throws SemanticException {
-		Set<T> glbSet = new HashSet<T>();
+		Set<T> glbSet = new TreeSet<>();
 		for (T s1 : this.elements)
 			for (T s2 : other.elements)
 				glbSet.add(s1.glb(s2));
@@ -152,7 +154,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 				completeLub = completeLub.lub(element);
 			}
 		}
-		Set<T> newSet = new HashSet<T>();
+		Set<T> newSet = new TreeSet<>();
 		if (completeLub != null)
 			newSet.add(completeLub);
 		return mk(newSet);
@@ -189,7 +191,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected C extrapolationHeuristic(C other) throws SemanticException {
-		Set<T> extrapolatedSet = new HashSet<T>();
+		Set<T> extrapolatedSet = new TreeSet<>();
 		for (T s1 : this.elements) {
 			for (T s2 : other.elements) {
 				if (s1.lessOrEqual(s2) && !s2.lessOrEqual(s1))
@@ -290,7 +292,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C assign(I id, E expression, ProgramPoint pp) throws SemanticException {
-		Set<T> newElements = new HashSet<T>();
+		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.assign(id, expression, pp));
 		}
@@ -299,7 +301,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException {
-		Set<T> newElements = new HashSet<T>();
+		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.smallStepSemantics(expression, pp));
 		}
@@ -308,7 +310,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
-		Set<T> newElements = new HashSet<T>();
+		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.assume(expression, src, dest));
 		}
@@ -317,7 +319,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C forgetIdentifier(Identifier id) throws SemanticException {
-		Set<T> newElements = new HashSet<T>();
+		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.forgetIdentifier(id));
 		}
@@ -326,7 +328,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
-		Set<T> newElements = new HashSet<T>();
+		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.forgetIdentifiersIf(test));
 		}
@@ -335,7 +337,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C pushScope(ScopeToken token) throws SemanticException {
-		Set<T> newElements = new HashSet<T>();
+		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.pushScope(token));
 		}
@@ -344,7 +346,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C popScope(ScopeToken token) throws SemanticException {
-		Set<T> newElements = new HashSet<T>();
+		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.popScope(token));
 		}
@@ -375,13 +377,14 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C mk(Set<T> set) {
+		SortedSet<T> sorted = set instanceof SortedSet ? (SortedSet<T>) set : new TreeSet<>(set);
 		if (set.isEmpty())
-			return mk(set, false, this.valueDomain);
+			return mk(sorted, false, this.valueDomain);
 		for (T elem : set) {
 			if (elem.isTop())
-				return mk(new HashSet<T>(), true, this.valueDomain);
+				return mk(new TreeSet<>(), true, this.valueDomain);
 		}
-		return mk(set, false, this.valueDomain);
+		return mk(sorted, false, this.valueDomain);
 	}
 
 	/**
@@ -397,7 +400,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * @return a new concrete instance of {@link NonRedundantPowerset} with the
 	 *             given configuration passed
 	 */
-	public abstract C mk(Set<T> set, boolean isTop, T valueDomain);
+	public abstract C mk(SortedSet<T> set, boolean isTop, T valueDomain);
 
 	@Override
 	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {

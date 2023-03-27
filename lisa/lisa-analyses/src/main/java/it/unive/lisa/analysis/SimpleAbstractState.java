@@ -97,7 +97,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		H heap = heapState.assign(id, expression, pp);
 		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
-		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -106,7 +106,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		for (ValueExpression expr : exprs) {
 			T tmp = type.assign(id, expr, pp);
 
-			Set<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getRuntimeTypesOf(expr, pp);
 			id.setRuntimeTypes(rt);
 			expr.setRuntimeTypes(rt);
 
@@ -123,7 +123,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		H heap = heapState.smallStepSemantics(expression, pp);
 		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
-		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -132,7 +132,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		for (ValueExpression expr : exprs) {
 			T tmp = type.smallStepSemantics(expr, pp);
 
-			Set<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getRuntimeTypesOf(expr, pp);
 			expr.setRuntimeTypes(rt);
 
 			// if the expression is a memory allocation, its type is registered
@@ -147,14 +147,14 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
-	private SimpleAbstractState<H, V, T> applySubstitiontion(H heap, V value, T type, ProgramPoint pp)
+	private SimpleAbstractState<H, V, T> applySubstitution(H heap, V value, T type, ProgramPoint pp)
 			throws SemanticException {
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty()) {
 			for (HeapReplacement repl : heap.getSubstitution()) {
 				Set<Type> runtimeTypes;
 				Set<Type> allTypes = new HashSet<Type>();
 				for (Identifier source : repl.getSources()) {
-					runtimeTypes = type.smallStepSemantics(source, pp).getInferredRuntimeTypes();
+					runtimeTypes = type.smallStepSemantics(source, pp).getRuntimeTypesOf(source, pp);
 					source.setRuntimeTypes(runtimeTypes);
 					allTypes.addAll(runtimeTypes);
 				}
@@ -183,9 +183,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
 			throws SemanticException {
 		H heap = heapState.assume(expression, src, dest);
-		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, src);
+		if (heap.isBottom())
+			return bottom();
 
-		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, src);
+		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, src);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, src);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -193,12 +195,15 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
 			T tmp = type.smallStepSemantics(expr, src);
-			Set<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getRuntimeTypesOf(expr, src);
 			expr.setRuntimeTypes(rt);
 
 			typeRes = typeRes.lub(type.assume(expr, src, dest));
 			valueRes = valueRes.lub(value.assume(expr, src, dest));
 		}
+
+		if (typeRes.isBottom() || valueRes.isBottom())
+			return bottom();
 
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
@@ -214,7 +219,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		Satisfiability valuesat = Satisfiability.BOTTOM;
 		for (ValueExpression expr : rewritten) {
 			T tmp = typeState.smallStepSemantics(expr, pp);
-			Set<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getRuntimeTypesOf(expr, pp);
 			expr.setRuntimeTypes(rt);
 
 			Satisfiability sat = typeState.satisfies(expr, pp);
@@ -360,6 +365,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public DomainRepresentation representation() {
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+		if (isTop())
+			return Lattice.topRepresentation();
+
 		DomainRepresentation h = heapState.representation();
 		DomainRepresentation t = typeState.representation();
 		DomainRepresentation v = valueState.representation();

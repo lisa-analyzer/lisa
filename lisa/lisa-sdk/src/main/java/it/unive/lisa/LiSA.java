@@ -3,6 +3,7 @@ package it.unive.lisa;
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.TimerLogger;
@@ -27,6 +28,11 @@ import org.joda.time.DateTime;
 public class LiSA {
 
 	private static final Logger LOG = LogManager.getLogger(LiSA.class);
+
+	/**
+	 * The name of the json report that LiSA can optionally dump.
+	 */
+	public static final String REPORT_NAME = "report.json";
 
 	/**
 	 * The {@link FileManager} instance that will be used during analyses
@@ -100,12 +106,12 @@ public class LiSA {
 
 		LiSAReport report = new LiSAReport(conf, stats, warnings, fileManager.createdFiles());
 		if (conf.jsonOutput) {
-			LOG.info("Dumping analysis report to 'report.json'");
+			LOG.info("Dumping analysis report to '" + REPORT_NAME + "'");
 			try {
-				fileManager.mkOutputFile("report.json", writer -> {
+				fileManager.mkOutputFile(REPORT_NAME, writer -> {
 					JsonReport json = new JsonReport(report);
 					json.dump(writer);
-					LOG.info("Report file dumped to report.json");
+					LOG.info("Report file dumped to '" + REPORT_NAME + "'");
 				});
 			} catch (IOException e) {
 				LOG.error("Unable to dump report file", e);

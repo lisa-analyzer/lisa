@@ -4,7 +4,7 @@ import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.LiSAConfiguration;
+import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
@@ -16,11 +16,12 @@ public class CharInclusionAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testCharInclusion() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new CharInclusion(),
 				new TypeEnvironment<>(new InferredTypes()));
-
-		perform("char-inclusion", "program.imp", conf);
+		conf.testDir = "char-inclusion";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 }

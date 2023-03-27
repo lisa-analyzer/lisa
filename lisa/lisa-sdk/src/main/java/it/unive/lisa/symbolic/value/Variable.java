@@ -42,7 +42,7 @@ public class Variable extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
-		return new OutOfScopeIdentifier(this, token, getCodeLocation());
+		return new OutOfScopeIdentifier(this, token, getAnnotations(), getCodeLocation());
 	}
 
 	@Override

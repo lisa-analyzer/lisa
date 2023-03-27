@@ -467,7 +467,7 @@ public final class LiSAFactory {
 					.map(e -> e.getKey().getName() + (e.getValue().length == 0 ? ""
 							: " (with default parameters: " + StringUtils.join(e.getValue(), ", ") + ")"))
 					.toArray(String[]::new);
-			result += " possible implementations: " + alternatives;
+			result += " possible implementations: " + StringUtils.join(alternatives, ", ");
 			return result;
 		}
 	}

@@ -1,6 +1,7 @@
 package it.unive.lisa;
 
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
 

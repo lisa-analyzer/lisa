@@ -1,10 +1,8 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -12,6 +10,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Application;
@@ -62,49 +61,37 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
-	 * {@link CFGWithAnalysisResults} for each {@link CFG} contained in this
-	 * analysis. Each result is computed with
-	 * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis, WorkingSet, int)}
+	 * {@link AnalyzedCFG} for each {@link CFG} contained in this analysis. Each
+	 * result is computed with
+	 * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis, WorkingSet, FixpointConfiguration, ScopeId)}
 	 * or one of its overloads. Results of individual cfgs are then available
 	 * through {@link #getAnalysisResultsOf(CFG)}.
 	 * 
-	 * @param entryState             the entry state for the {@link CFG}s that
-	 *                                   are the entrypoints of the computation
-	 * @param fixpointWorkingSet     the concrete class of {@link WorkingSet} to
-	 *                                   be used in fixpoints.
-	 * @param wideningThreshold      the number of fixpoint iteration on a given
-	 *                                   node after which calls to
-	 *                                   {@link Lattice#lub(Lattice)} gets
-	 *                                   replaced with
-	 *                                   {@link Lattice#widening(Lattice)}.
-	 * @param descendingPhase        the type of descending phase algorithm that
-	 *                                   will be used during fixpoint
-	 *                                   calculation
-	 * @param descendingGlbThreshold the number of fixpoint iteration on a given
-	 *                                   node during descending phase after
-	 *                                   which calls to
-	 *                                   {@link Lattice#glb(Lattice)} does not
-	 *                                   do anything
+	 * @param entryState         the entry state for the {@link CFG}s that are
+	 *                               the entrypoints of the computation
+	 * @param fixpointWorkingSet the concrete class of {@link WorkingSet} to be
+	 *                               used in fixpoints.
+	 * @param conf               the {@link FixpointConfiguration} containing
+	 *                               the parameters tuning fixpoint behavior
 	 * 
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
 	void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold)
+			FixpointConfiguration conf)
 			throws FixpointException;
 
 	/**
 	 * Yields the results of the given analysis, identified by its class, on the
-	 * given {@link CFG}. Results are provided as
-	 * {@link CFGWithAnalysisResults}.
+	 * given {@link CFG}. Results are provided as {@link AnalyzedCFG}.
 	 * 
 	 * @param cfg the cfg whose fixpoint results needs to be retrieved
 	 *
 	 * @return the result of the fixpoint computation of {@code valueDomain}
 	 *             over {@code cfg}
 	 */
-	Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(CFG cfg);
+	Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg);
 
 	/**
 	 * Computes an analysis state that abstracts the execution of the possible
@@ -182,4 +169,12 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 */
 	Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
 			throws CallResolutionException;
+
+	/**
+	 * Yields the results of the fixpoint computation over the whole
+	 * application.
+	 * 
+	 * @return the results of the fixpoint
+	 */
+	FixpointResults<A, H, V, T> getFixpointResults();
 }

@@ -23,7 +23,7 @@ import it.unive.lisa.symbolic.value.Identifier;
  */
 public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 		E extends SymbolicExpression,
-		F extends FunctionalLattice<F, Identifier, T>>
+		F extends Environment<F, E, T>>
 		extends NonRelationalElement<T, E, F> {
 
 	/**

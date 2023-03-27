@@ -2,7 +2,7 @@ package it.unive.lisa.cron.traces;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.LiSAConfiguration;
+import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.LiSAFactory;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -16,7 +16,7 @@ public class TracePartitioningTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testTracePartitioning() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.abstractState = new TracePartitioning<>(
 				new SimpleAbstractState<>(
 						LiSAFactory.getDefaultFor(HeapDomain.class),
@@ -25,7 +25,9 @@ public class TracePartitioningTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		int prev = TracePartitioning.MAX_LOOP_ITERATIONS;
 		TracePartitioning.MAX_LOOP_ITERATIONS = 3;
-		perform("traces", "traces.imp", conf);
+		conf.testDir = "traces";
+		conf.programFile = "traces.imp";
+		perform(conf);
 		TracePartitioning.MAX_LOOP_ITERATIONS = prev;
 	}
 }

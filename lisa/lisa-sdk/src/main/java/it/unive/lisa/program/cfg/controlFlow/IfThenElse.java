@@ -109,4 +109,11 @@ public class IfThenElse extends ControlFlowStructure {
 	public String toString() {
 		return "if-then-else[" + getCondition() + "]";
 	}
+
+	@Override
+	public Collection<Statement> getTargetedStatements() {
+		Collection<Statement> targeted = new HashSet<>(cfgMatrix.followersOf(getCondition()));
+		targeted.add(getFirstFollower());
+		return targeted;
+	}
 }

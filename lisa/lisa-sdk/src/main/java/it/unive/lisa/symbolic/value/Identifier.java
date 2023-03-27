@@ -31,20 +31,6 @@ public abstract class Identifier extends ValueExpression {
 	/**
 	 * Builds the identifier.
 	 * 
-	 * @param staticType the static type of this expression
-	 * @param name       the name of the identifier
-	 * @param weak       whether or not this identifier is weak, meaning that it
-	 *                       should only receive weak assignments
-	 * @param location   the code location of the statement that has generated
-	 *                       this identifier
-	 */
-	protected Identifier(Type staticType, String name, boolean weak, CodeLocation location) {
-		this(staticType, name, weak, new Annotations(), location);
-	}
-
-	/**
-	 * Builds the identifier.
-	 * 
 	 * @param staticType  the static type of this expression
 	 * @param name        the name of the identifier
 	 * @param weak        whether or not this identifier is weak, meaning that

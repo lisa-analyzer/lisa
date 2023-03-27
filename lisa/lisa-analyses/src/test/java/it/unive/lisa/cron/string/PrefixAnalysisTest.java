@@ -4,7 +4,7 @@ import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.LiSAConfiguration;
+import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
@@ -16,10 +16,12 @@ public class PrefixAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testPrefix() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Prefix(),
 				new TypeEnvironment<>(new InferredTypes()));
-		perform("prefix", "program.imp", conf);
+		conf.testDir = "prefix";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 }

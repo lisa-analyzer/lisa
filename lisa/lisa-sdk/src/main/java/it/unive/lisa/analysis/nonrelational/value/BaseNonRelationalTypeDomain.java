@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.nonrelational.value;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -31,7 +32,7 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 /**
  * Base implementation for {@link NonRelationalTypeDomain}s. This class extends
  * {@link BaseLattice} and implements
- * {@link NonRelationalTypeDomain#eval(it.unive.lisa.symbolic.SymbolicExpression, it.unive.lisa.analysis.lattices.FunctionalLattice, ProgramPoint)}
+ * {@link NonRelationalTypeDomain#eval(SymbolicExpression, Environment, ProgramPoint)}
  * by taking care of the recursive computation of inner expressions evaluation.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -555,6 +556,12 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 	@Override
 	default TypeEnvironment<T> assume(TypeEnvironment<T> environment, ValueExpression expression,
 			ProgramPoint src, ProgramPoint dest) throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 

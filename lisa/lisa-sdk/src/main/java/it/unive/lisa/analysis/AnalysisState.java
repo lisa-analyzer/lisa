@@ -174,22 +174,56 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 		return new AnalysisState<>(s, new ExpressionSet<>(expression), aliasing);
 	}
 
-	private ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+	/**
+	 * Uses the {@link HeapDomain} contained in this state to rewrite the given
+	 * expression. Every expression contained in the result can be safely cast
+	 * to {@link ValueExpression}.
+	 * 
+	 * @param expression the expression to rewrite
+	 * @param pp         the program point where the rewrite happens
+	 * 
+	 * @return the rewritten expressions
+	 * 
+	 * @throws SemanticException if something goes wrong while rewriting
+	 */
+	public ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		Set<SymbolicExpression> rewritten = new HashSet<>();
 		@SuppressWarnings("unchecked")
-		ExpressionSet<ValueExpression> tmp = getState().getDomainInstance(HeapDomain.class).rewrite(expression, pp);
-		tmp.elements()
-				.stream()
-				.map(SymbolicExpression.class::cast)
-				.forEach(rewritten::add);
+		H heap = (H) getState().getDomainInstance(HeapDomain.class);
+		rewritten.addAll(heap.rewrite(expression, pp).elements());
+		return new ExpressionSet<>(rewritten);
+	}
+
+	/**
+	 * Uses the {@link HeapDomain} contained in this state to rewrite the given
+	 * expressions. Every expression contained in the result can be safely cast
+	 * to {@link ValueExpression}.
+	 * 
+	 * @param expressions the expressions to rewrite
+	 * @param pp          the program point where the rewrite happens
+	 * 
+	 * @return the rewritten expressions
+	 * 
+	 * @throws SemanticException if something goes wrong while rewriting
+	 */
+	public ExpressionSet<SymbolicExpression> rewrite(ExpressionSet<SymbolicExpression> expressions, ProgramPoint pp)
+			throws SemanticException {
+		Set<SymbolicExpression> rewritten = new HashSet<>();
+		@SuppressWarnings("unchecked")
+		H heap = (H) getState().getDomainInstance(HeapDomain.class);
+		for (SymbolicExpression expression : expressions)
+			rewritten.addAll(heap.rewrite(expression, pp).elements());
 		return new ExpressionSet<>(rewritten);
 	}
 
 	@Override
 	public AnalysisState<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
 			throws SemanticException {
-		return new AnalysisState<>(state.assume(expression, src, dest), computedExpressions, aliasing);
+		A assume = state.assume(expression, src, dest);
+		if (assume.isBottom())
+			return bottom();
+		return new AnalysisState<>(assume, computedExpressions, aliasing);
 	}
 
 	@Override
@@ -330,6 +364,11 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public DomainRepresentation representation() {
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+		if (isTop())
+			return Lattice.topRepresentation();
+
 		DomainRepresentation stateRepr = state.representation();
 		DomainRepresentation exprRepr = computedExpressions.representation();
 		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr));

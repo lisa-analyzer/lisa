@@ -3,6 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -28,45 +29,67 @@ import java.util.Map;
  * @param <T> the type of {@link TypeDomain} embedded into the computed abstract
  *                state
  */
-public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
+public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		extends CFG implements Lattice<CFGWithAnalysisResults<A, H, V, T>> {
-
-	private static final String CANNOT_JOIN_ERROR = "Cannot join graphs with different IDs: '%s' and '%s'";
-
-	private static final String CANNOT_LUB_ERROR = "Cannot perform the least upper bound of two graphs with different descriptor";
-
-	private static final String CANNOT_GLB_ERROR = "Cannot perform the greatest lower bound of two graphs with different descriptor";
+		extends CFG
+		implements BaseLattice<AnalyzedCFG<A, H, V, T>> {
 
 	/**
-	 * The map storing the analysis results
+	 * Error message for the inability to lub two graphs.
 	 */
-	private final StatementStore<A, H, V, T> results;
+	protected static final String CANNOT_LUB_ERROR = "Cannot lub two graphs with different descriptor or different IDs";
 
 	/**
-	 * The map storing the entry state of each entry point
+	 * Error message for the inability to glb two graphs.
 	 */
-	private final StatementStore<A, H, V, T> entryStates;
+	protected static final String CANNOT_GLB_ERROR = "Cannot glb two graphs with different descriptor or different IDs";
 
 	/**
-	 * An optional string meant to identify this specific result, based on how
-	 * it has been produced
+	 * Error message for the inability to widen two graphs.
 	 */
-	private String id;
+	protected static final String CANNOT_WIDEN_ERROR = "Cannot widen two graphs with different descriptor or different IDs";
+
+	/**
+	 * Error message for the inability to narrow two graphs.
+	 */
+	protected static final String CANNOT_NARROW_ERROR = "Cannot perform narrow two graphs with different descriptor or different IDs";
+
+	/**
+	 * Error message for the inability to compare two graphs.
+	 */
+	protected static final String CANNOT_COMPARE_ERROR = "Cannot compare two graphs with different descriptor or different IDs";
+
+	/**
+	 * The map storing the analysis results.
+	 */
+	protected final StatementStore<A, H, V, T> results;
+
+	/**
+	 * The map storing the entry state of each entry point.
+	 */
+	protected final StatementStore<A, H, V, T> entryStates;
+
+	/**
+	 * An id meant to identify this specific result, based on how it has been
+	 * produced.
+	 */
+	protected final ScopeId id;
 
 	/**
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
 	 * 
 	 * @param cfg       the original control flow graph
+	 * @param id        a {@link ScopeId} meant to identify this specific result
+	 *                      based on how it has been produced
 	 * @param singleton an instance of the {@link AnalysisState} containing the
 	 *                      abstract state of the analysis that was executed,
 	 *                      used to retrieve top and bottom values
 	 */
-	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V, T> singleton) {
-		this(cfg, singleton, Collections.emptyMap(), Collections.emptyMap());
+	public AnalyzedCFG(CFG cfg, ScopeId id, AnalysisState<A, H, V, T> singleton) {
+		this(cfg, id, singleton, Collections.emptyMap(), Collections.emptyMap());
 	}
 
 	/**
@@ -74,13 +97,17 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * and fixpoint computation results.
 	 * 
 	 * @param cfg         the original control flow graph
+	 * @param id          a {@link ScopeId} meant to identify this specific
+	 *                        result based on how it has been produced
 	 * @param singleton   an instance of the {@link AnalysisState} containing
 	 *                        the abstract state of the analysis that was
 	 *                        executed, used to retrieve top and bottom values
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V, T> singleton,
+	public AnalyzedCFG(CFG cfg,
+			ScopeId id,
+			AnalysisState<A, H, V, T> singleton,
 			Map<Statement, AnalysisState<A, H, V, T>> entryStates,
 			Map<Statement, AnalysisState<A, H, V, T>> results) {
 		super(cfg);
@@ -88,6 +115,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		results.forEach(this.results::put);
 		this.entryStates = new StatementStore<>(singleton);
 		entryStates.forEach(this.entryStates::put);
+		this.id = id;
 	}
 
 	/**
@@ -95,34 +123,29 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * and fixpoint computation results.
 	 * 
 	 * @param cfg         the original control flow graph
+	 * @param id          a {@link ScopeId} meant to identify this specific
+	 *                        result based on how it has been produced
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public CFGWithAnalysisResults(CFG cfg, StatementStore<A, H, V, T> entryStates,
+	public AnalyzedCFG(CFG cfg,
+			ScopeId id,
+			StatementStore<A, H, V, T> entryStates,
 			StatementStore<A, H, V, T> results) {
 		super(cfg);
 		this.results = results;
 		this.entryStates = entryStates;
+		this.id = id;
 	}
 
 	/**
-	 * Yields a string meant to identify this specific result, based on how it
-	 * has been produced. This method might return {@code null}.
+	 * Yields an id meant to identify this specific result, based on how it has
+	 * been produced. This method might return {@code null}.
 	 * 
 	 * @return the identifier of this result
 	 */
-	public String getId() {
+	public ScopeId getId() {
 		return id;
-	}
-
-	/**
-	 * Sets the string meant to identify this specific result, based on how it
-	 * has been produced.
-	 * 
-	 * @param id the identifier of this result (might be {@code null})
-	 */
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	/**
@@ -186,90 +209,84 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		return result;
 	}
 
-	/**
-	 * Joins two {@link CFGWithAnalysisResults} together. The difference between
-	 * this method and {@link #lub(CFGWithAnalysisResults)} is that this method
-	 * does not set the ID of the resulting cfg.
-	 * 
-	 * @param other the other cfg
-	 * 
-	 * @return the least upper bound of the two cfgs without its id set
-	 * 
-	 * @throws SemanticException if something goes wrong during the join
-	 */
-	public CFGWithAnalysisResults<A, H, V, T> join(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
+	@Override
+	public AnalyzedCFG<A, H, V, T> lubAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
-		return new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
+		return new AnalyzedCFG<>(
+				this,
+				id,
+				entryStates.lub(other.entryStates),
 				results.lub(other.results));
 	}
 
 	@Override
-	public CFGWithAnalysisResults<A, H, V, T> lub(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException(CANNOT_LUB_ERROR);
-
-		CFGWithAnalysisResults<A, H, V, T> lub = new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
-				results.lub(other.results));
-		lub.setId(joinIDs(other));
-		return lub;
-	}
-
-	@Override
-	public CFGWithAnalysisResults<A, H, V, T> glb(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
+	public AnalyzedCFG<A, H, V, T> glbAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_GLB_ERROR);
 
-		CFGWithAnalysisResults<A, H, V, T> glb = new CFGWithAnalysisResults<>(this, entryStates.glb(other.entryStates),
+		return new AnalyzedCFG<>(
+				this,
+				id,
+				entryStates.glb(other.entryStates),
 				results.glb(other.results));
-		glb.setId(joinIDs(other));
-		return glb;
 	}
 
 	@Override
-	public CFGWithAnalysisResults<A, H, V, T> widening(CFGWithAnalysisResults<A, H, V, T> other)
-			throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException(CANNOT_LUB_ERROR);
+	public AnalyzedCFG<A, H, V, T> wideningAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
+			throw new SemanticException(CANNOT_WIDEN_ERROR);
 
-		CFGWithAnalysisResults<A, H, V, T> widen = new CFGWithAnalysisResults<>(
+		return new AnalyzedCFG<>(
 				this,
+				id,
 				entryStates.widening(other.entryStates),
 				results.widening(other.results));
-		widen.setId(joinIDs(other));
-		return widen;
-	}
-
-	private String joinIDs(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
-		// we accept merging only if the ids are the same
-		if (id == null) {
-			if (other.id == null)
-				return null;
-
-			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
-		}
-
-		if (other.id == null)
-			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
-
-		if (!id.equals(other.id))
-			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
-
-		return id;
 	}
 
 	@Override
-	public boolean lessOrEqual(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException(CANNOT_LUB_ERROR);
+	public AnalyzedCFG<A, H, V, T> narrowingAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
+			throw new SemanticException(CANNOT_NARROW_ERROR);
+
+		return new AnalyzedCFG<>(
+				this,
+				id,
+				entryStates.narrowing(other.entryStates),
+				results.narrowing(other.results));
+	}
+
+	@Override
+	public boolean lessOrEqualAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
+			throw new SemanticException(CANNOT_COMPARE_ERROR);
 
 		return entryStates.lessOrEqual(other.entryStates) && results.lessOrEqual(other.results);
 	}
 
+	/**
+	 * Yields whether or not the {@link #id} of this graph and the given one are
+	 * the same.
+	 * 
+	 * @param other the other graph
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	protected boolean sameIDs(AnalyzedCFG<A, H, V, T> other) {
+		if (id == null) {
+			if (other.id == null)
+				return true;
+			return false;
+		} else if (other.id == null)
+			return false;
+		else
+			return id.equals(other.id);
+	}
+
 	@Override
-	public CFGWithAnalysisResults<A, H, V, T> top() {
-		return new CFGWithAnalysisResults<>(this, entryStates.top(), results.top());
+	public AnalyzedCFG<A, H, V, T> top() {
+		return new AnalyzedCFG<>(this, id.startingId(), entryStates.top(), results.top());
 	}
 
 	@Override
@@ -278,8 +295,8 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public CFGWithAnalysisResults<A, H, V, T> bottom() {
-		return new CFGWithAnalysisResults<>(this, entryStates.bottom(), results.bottom());
+	public AnalyzedCFG<A, H, V, T> bottom() {
+		return new AnalyzedCFG<>(this, id.startingId(), entryStates.bottom(), results.bottom());
 	}
 
 	@Override
@@ -305,7 +322,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CFGWithAnalysisResults<?, ?, ?, ?> other = (CFGWithAnalysisResults<?, ?, ?, ?>) obj;
+		AnalyzedCFG<?, ?, ?, ?> other = (AnalyzedCFG<?, ?, ?, ?>) obj;
 		if (entryStates == null) {
 			if (other.entryStates != null)
 				return false;

@@ -5,12 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.LiSAConfiguration;
-import it.unive.lisa.LiSAConfiguration.GraphType;
+import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
@@ -21,8 +21,8 @@ import org.junit.Test;
 
 public class VisualizationTest extends AnalysisTestExecutor {
 
-	private static LiSAConfiguration config() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+	private static CronConfiguration config() throws AnalysisSetupException {
+		CronConfiguration conf = new CronConfiguration();
 		conf.abstractState = getDefaultFor(AbstractState.class,
 				getDefaultFor(HeapDomain.class),
 				getDefaultFor(ValueDomain.class),
@@ -51,43 +51,61 @@ public class VisualizationTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testInputSerialization() throws AnalysisSetupException {
-		LiSAConfiguration conf = config();
+		CronConfiguration conf = config();
 		conf.serializeInputs = true;
-		perform("visualization", "inputs", "program.imp", conf);
+		conf.testDir = "visualization";
+		conf.testSubDir = "inputs";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testDOT() throws AnalysisSetupException {
-		LiSAConfiguration conf = config();
+		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.DOT;
-		perform("visualization", "dot", "program.imp", conf);
+		conf.testDir = "visualization";
+		conf.testSubDir = "dot";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testGRAPHML() throws AnalysisSetupException {
-		LiSAConfiguration conf = config();
+		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.GRAPHML;
-		perform("visualization", "graphml", "program.imp", conf);
+		conf.testDir = "visualization";
+		conf.testSubDir = "graphml";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testGRAPHML_WITH_SUBNODES() throws AnalysisSetupException {
-		LiSAConfiguration conf = config();
+		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.GRAPHML_WITH_SUBNODES;
-		perform("visualization", "graphml-sub", "program.imp", conf);
+		conf.testDir = "visualization";
+		conf.testSubDir = "graphml-sub";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testHTML() throws AnalysisSetupException {
-		LiSAConfiguration conf = config();
+		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.HTML;
-		perform("visualization", "html", "program.imp", conf);
+		conf.testDir = "visualization";
+		conf.testSubDir = "html";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testHTML_WITH_SUBNODES() throws AnalysisSetupException {
-		LiSAConfiguration conf = config();
+		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
-		perform("visualization", "html-sub", "program.imp", conf);
+		conf.testDir = "visualization";
+		conf.testSubDir = "html-sub";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 }

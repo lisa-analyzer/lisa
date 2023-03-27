@@ -3,8 +3,12 @@ package it.unive.lisa.util.datastructures.graph;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
 import java.util.Collection;
-import java.util.function.Function;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
 
 /**
  * Interface of a generic graph structure.
@@ -174,7 +178,7 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	/**
 	 * Yields an instance of {@link SerializableGraph} built from this one. The
 	 * default implementation of this method is equivalent to invoking
-	 * {@link #toSerializableGraph(Function)} with {@code null} as argument.
+	 * {@link #toSerializableGraph(BiFunction)} with {@code null} as argument.
 	 * 
 	 * @return a {@link SerializableGraph} instance
 	 */
@@ -193,7 +197,7 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return a {@link SerializableGraph} instance
 	 */
-	SerializableGraph toSerializableGraph(Function<N, SerializableValue> descriptionGenerator);
+	SerializableGraph toSerializableGraph(BiFunction<G, N, SerializableValue> descriptionGenerator);
 
 	/**
 	 * Checks if this graph is effectively equal to the given one, that is, if
@@ -233,5 +237,35 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 		for (E edge : getEdges())
 			if (!edge.accept(visitor, tool))
 				return;
+	}
+
+	/**
+	 * Yields all the nodes that are part of cycles in the graph that are also
+	 * reachable from outside the cycle itself (that is, if they are also
+	 * entrypoints or if they have an incoming back-edge).
+	 * 
+	 * @return the nodes that are cycle entries
+	 */
+	public default Collection<N> getCycleEntries() {
+		Collection<N> result = new HashSet<>();
+
+		@SuppressWarnings("unchecked")
+		Map<N, Set<N>> dominators = new Dominators<G, N, E>().build((G) this);
+		Collection<N> entries = getEntrypoints();
+		for (N node : getNodes()) {
+			// a loop entry node will have at least two predecessors: a normal
+			// one and a back-edge predecessor
+			Collection<N> preds = predecessorsOf(node);
+			boolean normal = entries.contains(node), back = false;
+			for (N pred : preds)
+				if (dominators.get(pred).contains(node))
+					back = true;
+				else
+					normal = true;
+			if (normal && back)
+				result.add(node);
+		}
+
+		return result;
 	}
 }

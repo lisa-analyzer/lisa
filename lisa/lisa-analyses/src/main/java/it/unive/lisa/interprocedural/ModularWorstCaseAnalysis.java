@@ -2,10 +2,10 @@ package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.FallbackImplementation;
-import it.unive.lisa.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -13,6 +13,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
@@ -31,11 +32,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,6 +52,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
+	private static final ScopeId ID = new UniqueScope();
+
 	/**
 	 * The application.
 	 */
@@ -66,32 +65,36 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	private OpenCallPolicy policy;
 
 	/**
-	 * The cash of the fixpoints' results. {@link Map#keySet()} will contain all
-	 * the cfgs that have been added. If a key's values's
-	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
-	 * has not be computed yet.
+	 * The cash of the fixpoints' results.
 	 */
-	private final Map<CFG, Optional<CFGWithAnalysisResults<A, H, V, T>>> results;
+	private FixpointResults<A, H, V, T> results;
 
 	/**
 	 * Builds the interprocedural analysis.
 	 */
 	public ModularWorstCaseAnalysis() {
-		this.results = new ConcurrentHashMap<>();
 	}
 
 	@Override
 	public void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold,
-			DescendingPhaseType descendingPhase,
-			int descendingGlbThreshold)
+			FixpointConfiguration conf)
 			throws FixpointException {
+		// new fixpoint iteration: restart
+		this.results = null;
+
 		for (CFG cfg : IterationLogger.iterate(LOG, app.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
-				AnalysisState<A, H, V, T> prepared = entryState;
+				if (results == null) {
+					AnalyzedCFG<A, H, V, T> graph = conf.optimize
+							? new OptimizedAnalyzedCFG<>(cfg, ID, entryState.bottom(), this)
+							: new AnalyzedCFG<>(cfg, ID, entryState);
+					CFGResults<A, H, V, T> value = new CFGResults<>(graph);
+					this.results = new FixpointResults<>(value.top());
+				}
 
+				AnalysisState<A, H, V, T> prepared = entryState;
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
 					Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(),
 							arg.getLocation());
@@ -99,17 +102,15 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 							cfg.getGenericProgramPoint());
 				}
 
-				results.put(cfg, Optional
-						.of(cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet),
-								wideningThreshold, descendingPhase, descendingGlbThreshold)));
+				results.putResult(cfg, ID, cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), conf, ID));
 			} catch (SemanticException | AnalysisSetupException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
 	}
 
 	@Override
-	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
-		return Collections.singleton(results.get(cfg).orElse(null));
+	public Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
+		return results.getState(cfg).getAll();
 	}
 
 	@Override
@@ -145,5 +146,10 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		return new OpenCall(call);
+	}
+
+	@Override
+	public FixpointResults<A, H, V, T> getFixpointResults() {
+		return results;
 	}
 }
