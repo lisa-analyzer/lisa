@@ -13,8 +13,8 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * The finite non redundant powerset of {@link Interval} abstract domain
@@ -33,7 +33,7 @@ public class NonRedundantPowersetOfInterval
 	 * Constructs an empty non redundant set of intervals.
 	 */
 	public NonRedundantPowersetOfInterval() {
-		super(new HashSet<Interval>(), new Interval());
+		super(new TreeSet<>(), Interval.BOTTOM);
 	}
 
 	/**
@@ -41,8 +41,8 @@ public class NonRedundantPowersetOfInterval
 	 * 
 	 * @param elements the set of intervals
 	 */
-	public NonRedundantPowersetOfInterval(Set<Interval> elements) {
-		super(elements, new Interval());
+	public NonRedundantPowersetOfInterval(SortedSet<Interval> elements) {
+		super(elements, Interval.BOTTOM);
 	}
 
 	/**
@@ -64,33 +64,41 @@ public class NonRedundantPowersetOfInterval
 	@Override
 	protected NonRedundantPowersetOfInterval EgliMilnerConnector(NonRedundantPowersetOfInterval other)
 			throws SemanticException {
-		Set<Interval> newElementsSet = new HashSet<Interval>();
-		Set<Interval> notCoverSet = new HashSet<Interval>();
+		SortedSet<Interval> newElementsSet = new TreeSet<>();
+		SortedSet<Interval> notCoverSet = new TreeSet<>();
+
+		// first side of the union
 		for (Interval s2 : other.elementsSet) {
 			boolean existsLower = false;
-			for (Interval s1 : elementsSet) {
+			for (Interval s1 : elementsSet)
 				if (s1.lessOrEqual(s2)) {
 					existsLower = true;
 					break;
 				}
-			}
 			if (existsLower)
 				newElementsSet.add(s2);
 			else
 				notCoverSet.add(s2);
 		}
+
+		// second side of the union
 		for (Interval s2 : notCoverSet) {
 			MathNumber middlePoint = middlePoint(s2);
 			MathNumber closestValue = middlePoint;
-			Interval closest = new Interval();
+			MathNumber closestDiff = closestValue.subtract(middlePoint).abs();
+			Interval closest = Interval.TOP;
 			for (Interval s1 : elementsSet) {
-				if ((closestValue.compareTo(middlePoint)) == 0) {
+				if (closestValue.compareTo(middlePoint) == 0) {
 					closest = s1;
 					closestValue = middlePoint(s1);
-				} else if (middlePoint(s1).subtract(middlePoint).abs()
-						.compareTo(closestValue.subtract(middlePoint).abs()) < 0) {
-					closest = s1;
-					closestValue = middlePoint(s1);
+					closestDiff = closestValue.subtract(middlePoint).abs();
+				} else {
+					MathNumber s1Diff = middlePoint(s1).subtract(middlePoint).abs();
+					if (s1Diff.compareTo(closestDiff) < 0) {
+						closest = s1;
+						closestValue = middlePoint(s1);
+						closestDiff = closestValue.subtract(middlePoint).abs();
+					}
 				}
 			}
 			newElementsSet.add(s2.lub(closest));
@@ -109,33 +117,26 @@ public class NonRedundantPowersetOfInterval
 	 * 
 	 * @return the middle point of the interval
 	 */
-	public MathNumber middlePoint(Interval interval) {
+	protected MathNumber middlePoint(Interval interval) {
 		if (interval.interval.isFinite())
 			return interval.interval.getLow().add(interval.interval.getHigh()).divide(new MathNumber(2));
 		else if (interval.interval.getHigh().isFinite() && !interval.interval.getLow().isFinite())
 			return interval.interval.getHigh();
 		else if (!interval.interval.getHigh().isFinite() && interval.interval.getLow().isFinite())
-			return interval.interval.getLow();
+			return interval.interval.getLow().subtract(MathNumber.ONE);
+		// both infinite
 		return MathNumber.ZERO;
 	}
 
 	@Override
-	public NonRedundantPowersetOfInterval top() {
-		Set<Interval> topSet = new HashSet<Interval>();
-		topSet.add(Interval.TOP);
-		return new NonRedundantPowersetOfInterval(topSet);
-	}
-
-	@Override
-	public NonRedundantPowersetOfInterval bottom() {
-		return new NonRedundantPowersetOfInterval();
-	}
-
-	@Override
 	public ValueEnvironment<NonRedundantPowersetOfInterval> assumeBinaryExpression(
-			ValueEnvironment<NonRedundantPowersetOfInterval> environment, BinaryOperator operator, ValueExpression left,
-			ValueExpression right, ProgramPoint src, ProgramPoint dest) throws SemanticException {
-
+			ValueEnvironment<NonRedundantPowersetOfInterval> environment,
+			BinaryOperator operator,
+			ValueExpression left,
+			ValueExpression right,
+			ProgramPoint src,
+			ProgramPoint dest)
+			throws SemanticException {
 		Identifier id;
 		NonRedundantPowersetOfInterval eval;
 		boolean rightIsExpr;
@@ -150,13 +151,13 @@ public class NonRedundantPowersetOfInterval
 		} else
 			return environment;
 
-		if (eval.isBottom())
+		NonRedundantPowersetOfInterval starting = environment.getState(id);
+		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
 
-		NonRedundantPowersetOfInterval newSet = bottom();
-		NonRedundantPowersetOfInterval starting = environment.getState(id);
+		SortedSet<Interval> newSet = new TreeSet<>();
 
-		for (Interval startingInterval : starting.elementsSet) {
+		for (Interval startingInterval : starting.elementsSet)
 			for (Interval interval : eval.elementsSet) {
 				boolean lowIsMinusInfinity = interval.interval.lowIsMinusInfinity();
 				Interval low_inf = new Interval(interval.interval.getLow(), MathNumber.PLUS_INFINITY);
@@ -166,77 +167,50 @@ public class NonRedundantPowersetOfInterval
 				Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY,
 						interval.interval.getHigh().subtract(MathNumber.ONE));
 
-				if (operator == ComparisonEq.INSTANCE) {
+				if (operator == ComparisonEq.INSTANCE)
 					newSet.add(interval);
-				} else if (operator == ComparisonGe.INSTANCE) {
-					if (rightIsExpr) {
+				else if (operator == ComparisonGe.INSTANCE)
+					if (rightIsExpr)
 						if (lowIsMinusInfinity)
-							continue;
+							newSet.add(startingInterval);
 						else
 							newSet.add(startingInterval.glb(low_inf));
-					} else
+					else
 						newSet.add(startingInterval.glb(inf_high));
-				} else if (operator == ComparisonGt.INSTANCE) {
+				else if (operator == ComparisonGt.INSTANCE)
 					if (rightIsExpr)
 						newSet.add(startingInterval.glb(lowp1_inf));
 					else
 						newSet.add(lowIsMinusInfinity ? interval : startingInterval.glb(inf_highm1));
-				} else if (operator == ComparisonLe.INSTANCE) {
+				else if (operator == ComparisonLe.INSTANCE)
 					if (rightIsExpr)
 						newSet.add(startingInterval.glb(inf_high));
 					else if (lowIsMinusInfinity)
-						continue;
+						newSet.add(startingInterval);
 					else
 						newSet.add(startingInterval.glb(low_inf));
-				} else if (operator == ComparisonLt.INSTANCE) {
+				else if (operator == ComparisonLt.INSTANCE)
 					if (rightIsExpr)
 						newSet.add(lowIsMinusInfinity ? interval : startingInterval.glb(inf_highm1));
 					else if (lowIsMinusInfinity)
-						continue;
+						newSet.add(startingInterval);
 					else
 						newSet.add(startingInterval.glb(lowp1_inf));
-				} else
+				else
 					newSet.add(startingInterval);
 			}
-		}
-		newSet = newSet.removeRedundancy().removeOverlapping();
-		environment = environment.putState(id, newSet);
-		return environment;
+
+		NonRedundantPowersetOfInterval intervals = new NonRedundantPowersetOfInterval(newSet)
+				.removeRedundancy()
+				.removeOverlapping();
+		if (intervals.isBottom())
+			return environment.bottom();
+		else
+			return environment.putState(id, intervals);
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((elementsSet == null) ? 0 : elementsSet.hashCode());
-		result = prime * result + ((valueDomain == null) ? 0 : valueDomain.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		NonRedundantPowersetOfInterval other = (NonRedundantPowersetOfInterval) obj;
-		if (elementsSet == null) {
-			if (other.elementsSet != null)
-				return false;
-		} else if (!elementsSet.equals(other.elementsSet))
-			return false;
-		if (valueDomain == null) {
-			if (other.valueDomain != null)
-				return false;
-		} else if (!valueDomain.equals(other.valueDomain))
-			return false;
-		return true;
-	}
-
-	@Override
-	protected NonRedundantPowersetOfInterval mk(Set<Interval> elements) {
+	protected NonRedundantPowersetOfInterval mk(SortedSet<Interval> elements) {
 		return new NonRedundantPowersetOfInterval(elements);
 	}
 

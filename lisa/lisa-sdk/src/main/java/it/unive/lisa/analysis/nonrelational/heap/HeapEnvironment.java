@@ -12,7 +12,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalHeapDomain}, that maps
@@ -28,7 +27,8 @@ import org.apache.commons.lang3.tuple.Pair;
  *                instances are mapped in this environment
  */
 public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
-		extends Environment<HeapEnvironment<T>, SymbolicExpression, T, T> implements HeapDomain<HeapEnvironment<T>> {
+		extends Environment<HeapEnvironment<T>, SymbolicExpression, T>
+		implements HeapDomain<HeapEnvironment<T>> {
 
 	/**
 	 * The substitution
@@ -89,23 +89,6 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	@Override
 	public List<HeapReplacement> getSubstitution() {
 		return substitution;
-	}
-
-	@Override
-	public Pair<T, T> eval(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		T eval = lattice.eval(expression, this, pp);
-		return Pair.of(eval, eval);
-	}
-
-	@Override
-	public HeapEnvironment<T> assignAux(Identifier id, SymbolicExpression expression, Map<Identifier, T> function,
-			T value, T eval, ProgramPoint pp) {
-		return new HeapEnvironment<>(lattice, function, eval.getSubstitution());
-	}
-
-	@Override
-	public HeapEnvironment<T> assumeSatisfied(T eval) {
-		return new HeapEnvironment<>(lattice, function, eval.getSubstitution());
 	}
 
 	@Override

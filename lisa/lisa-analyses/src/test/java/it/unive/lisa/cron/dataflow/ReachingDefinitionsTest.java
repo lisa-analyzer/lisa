@@ -4,7 +4,7 @@ import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.LiSAConfiguration;
+import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -15,12 +15,14 @@ public class ReachingDefinitionsTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testReachingDefinitions() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class,
 				getDefaultFor(HeapDomain.class),
 				new ReachingDefinitions(),
 				getDefaultFor(TypeDomain.class));
-		perform("reaching-definitions", "reaching-definitions.imp", conf);
+		conf.testDir = "reaching-definitions";
+		conf.programFile = "reaching-definitions.imp";
+		perform(conf);
 	}
 }

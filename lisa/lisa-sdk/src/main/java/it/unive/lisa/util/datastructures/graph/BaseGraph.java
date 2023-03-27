@@ -5,7 +5,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * A generic {@link Graph}, backed by an {@link AdjacencyMatrix}.<br>
@@ -158,7 +158,7 @@ public abstract class BaseGraph<G extends BaseGraph<G, N, E>, N extends Node<G, 
 	}
 
 	@Override
-	public SerializableGraph toSerializableGraph(Function<N, SerializableValue> descriptionGenerator) {
+	public SerializableGraph toSerializableGraph(BiFunction<G, N, SerializableValue> descriptionGenerator) {
 		throw new UnsupportedOperationException(getClass().getName() + " does not provide a serialization logic");
 	}
 

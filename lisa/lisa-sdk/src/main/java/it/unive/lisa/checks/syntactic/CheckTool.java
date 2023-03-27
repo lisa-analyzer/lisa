@@ -1,6 +1,5 @@
 package it.unive.lisa.checks.syntactic;
 
-import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
@@ -8,6 +7,7 @@ import it.unive.lisa.checks.warnings.GlobalWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.UnitWarning;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;

@@ -1,7 +1,7 @@
 package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
@@ -49,22 +49,20 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 
 	/**
 	 * Stores the result of a fixpoint computation on a cfg. This method returns
-	 * the result of calling
-	 * {@link CFGResults#putResult(ContextSensitivityToken, CFGWithAnalysisResults)}
+	 * the result of calling {@link CFGResults#putResult(ScopeId, AnalyzedCFG)}
 	 * with the given {@code token} and {@code result} on the {@link CFGResults}
 	 * instance corresponding to {@code cfg}.
 	 * 
 	 * @param cfg    the {@link CFG} on which the result has been computed
-	 * @param token  the {@link ContextSensitivityToken} that identifying the
-	 *                   result
-	 * @param result the {@link CFGWithAnalysisResults} to store
+	 * @param token  the {@link ScopeId} that identifying the result
+	 * @param result the {@link AnalyzedCFG} to store
 	 * 
 	 * @return the result of the update operation on the individual cfg result
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(CFG cfg, ContextSensitivityToken token,
-			CFGWithAnalysisResults<A, H, V, T> result)
+	public Pair<Boolean, AnalyzedCFG<A, H, V, T>> putResult(CFG cfg, ScopeId token,
+			AnalyzedCFG<A, H, V, T> result)
 			throws SemanticException {
 		if (function == null)
 			function = mkNewFunction(null, false);

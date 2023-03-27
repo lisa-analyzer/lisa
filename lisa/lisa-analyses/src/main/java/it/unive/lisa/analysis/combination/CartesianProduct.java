@@ -92,8 +92,8 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	@Override
 	public String toString() {
 		if (left instanceof Environment && right instanceof Environment) {
-			Environment<?, ?, ?, ?> leftEnv = (Environment<?, ?, ?, ?>) left;
-			Environment<?, ?, ?, ?> rightEnv = (Environment<?, ?, ?, ?>) right;
+			Environment<?, ?, ?> leftEnv = (Environment<?, ?, ?>) left;
+			Environment<?, ?, ?> rightEnv = (Environment<?, ?, ?>) right;
 			if (!leftEnv.isTop() && !leftEnv.isBottom()) {
 				StringBuilder result = new StringBuilder();
 				for (Identifier x : leftEnv.getKeys())

@@ -1,5 +1,7 @@
-package it.unive.lisa;
+package it.unive.lisa.conf;
 
+import it.unive.lisa.LiSA;
+import it.unive.lisa.LiSAFactory;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -12,7 +14,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.DuplicateFreeFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.file.FileManager;
 import java.lang.reflect.Field;
@@ -21,8 +23,8 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +34,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LiSAConfiguration {
+public class LiSAConfiguration extends BaseConfiguration {
 
 	/**
 	 * The type of graphs that can be dumped by LiSA.
@@ -118,7 +120,7 @@ public class LiSAConfiguration {
 	 * The default number of maximum time glb can be called on a node during the
 	 * descending phase of fixpoint algorithm.
 	 */
-	public static final int DEFAULT_DESCENDING_GLB_THRESHOLD = 5;
+	public static final int DEFAULT_GLB_THRESHOLD = 5;
 
 	/**
 	 * The collection of {@link SyntacticCheck}s to execute. These checks will
@@ -198,8 +200,8 @@ public class LiSAConfiguration {
 	public boolean serializeResults;
 
 	/**
-	 * Sets whether or not a json report file, named {@code report.json}, should
-	 * be created and dumped in the working directory at the end of the
+	 * Sets whether or not a json report file, named {@value LiSA#REPORT_NAME},
+	 * should be created and dumped in the working directory at the end of the
 	 * analysis. This file will contain all the {@link Warning}s that have been
 	 * generated, as well as a list of produced files. To customize where the
 	 * report should be generated, use {@link #workdir}. Defaults to
@@ -220,17 +222,19 @@ public class LiSAConfiguration {
 	 * The number of fixpoint iteration on a given node after which calls to
 	 * {@link Lattice#lub(Lattice)} gets replaced with
 	 * {@link Lattice#widening(Lattice)}. Defaults to
-	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
+	 * {@link #DEFAULT_WIDENING_THRESHOLD}. Note that widening is only invoked
+	 * on widening points (that is, on loop guards) to reduce cost and increase
+	 * precision. Use to always apply lubs.
 	 */
 	public int wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 
 	/**
-	 * The number of fixpoint iteration on a given node after which calls to
-	 * {@link Lattice#lub(Lattice)} gets replaced with
-	 * {@link Lattice#widening(Lattice)}. Defaults to
-	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
+	 * The number of descending fixpoint iteration on a given node where
+	 * {@link Lattice#glb(Lattice)} can be applied. After the threshold is
+	 * reached, no more glbs will be applied on that node and the descending
+	 * chain will stop. Defaults to {@link #DEFAULT_GLB_THRESHOLD}.
 	 */
-	public int descendingGlbThreshold = DEFAULT_WIDENING_THRESHOLD;
+	public int glbThreshold = DEFAULT_GLB_THRESHOLD;
 
 	/**
 	 * the type of descending phase that will be applied by the fixpoint
@@ -240,9 +244,9 @@ public class LiSAConfiguration {
 
 	/**
 	 * The concrete class of {@link WorkingSet} to be used in fixpoints.
-	 * Defaults to {@link FIFOWorkingSet}.
+	 * Defaults to {@link DuplicateFreeFIFOWorkingSet}.
 	 */
-	public Class<?> fixpointWorkingSet = FIFOWorkingSet.class;
+	public Class<?> fixpointWorkingSet = DuplicateFreeFIFOWorkingSet.class;
 
 	/**
 	 * The {@link OpenCallPolicy} to be used for computing the result of
@@ -250,42 +254,40 @@ public class LiSAConfiguration {
 	 */
 	public OpenCallPolicy openCallPolicy = WorstCasePolicy.INSTANCE;
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		try {
-			for (Field field : LiSAConfiguration.class.getFields())
-				if (!Modifier.isStatic(field.getModifiers()))
-					result = prime * result + Objects.hashCode(field.get(this));
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new IllegalStateException("Cannot access one of this class' public fields", e);
-		}
-		return result;
-	}
+	/**
+	 * If {@code true}, will cause the analysis to optimize fixpoint executions.
+	 * This means that (i) basic blocks will be computed for each cfg, (ii)
+	 * fixpoint computations will discard post-states of statements that are not
+	 * ending a basic block, (iii) after the fixpoint terminates, only the
+	 * pre-state of the cfg entrypoints and the post-states of widening points
+	 * will be stored, discarding everything else. When the pre- or post-state
+	 * of a non-widening point is queried, a fast fixpoint iteration will be ran
+	 * to unwind (that is, re-propagate) the results and compute the missing
+	 * states. Note that results are <b>not</b> unwinded for dumping results.
+	 * Defaults to {@code true}.
+	 */
+	public boolean optimize = true;
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		LiSAConfiguration other = (LiSAConfiguration) obj;
-		try {
-			for (Field field : LiSAConfiguration.class.getFields())
-				if (!Modifier.isStatic(field.getModifiers())) {
-					Object value = field.get(this);
-					Object ovalue = field.get(other);
-					if (!Objects.equals(value, ovalue))
-						return false;
-				}
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new IllegalStateException("Cannot access one of this class' public fields", e);
-		}
-		return true;
-	}
+	/**
+	 * When {@link #optimize} is {@code true}, this predicate will be used to
+	 * determine additional statements (also considering intermediate ones) for
+	 * which the fixpoint results must be kept. This is useful for avoiding
+	 * result unwinding due to {@link SemanticCheck}s querying for the
+	 * post-state of statements. Note that statements for which
+	 * {@link Statement#stopsExecution()} is {@code true} are always considered
+	 * hotspots.
+	 */
+	public Predicate<Statement> hotspots = null;
+
+	/**
+	 * When {@link #optimize} is {@code true}, this field controls whether or
+	 * not optimized results are automatically unwinded before dumping them to
+	 * output files. Note that, if this field is {@code false} and
+	 * {@link #optimize} is {@code true}, the post-state of every node that is
+	 * not a widening point or that is not matched by {@link #hotspots} will
+	 * appear as bottom states. Defaults to {@code true}.
+	 */
+	public boolean dumpForcesUnwinding = false;
 
 	@Override
 	public String toString() {
@@ -311,6 +313,9 @@ public class LiSAConfiguration {
 						res.append(": ").append(((Class<?>) value).getSimpleName());
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
 						res.append(": ").append(((OpenCallPolicy) value).getClass().getSimpleName());
+					else if (Predicate.class.isAssignableFrom(field.getType()))
+						// not sure how we can get more details reliably
+						res.append(": ").append(value == null ? "unset" : "set");
 					else
 						res.append(": ").append(String.valueOf(value));
 				}
@@ -348,6 +353,9 @@ public class LiSAConfiguration {
 						val = ((Class<?>) value).getSimpleName();
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
 						val = ((OpenCallPolicy) value).getClass().getSimpleName();
+					else if (Predicate.class.isAssignableFrom(field.getType()))
+						// not sure how we can get more details reliably
+						val = value == null ? "unset" : "set";
 					else
 						val = String.valueOf(value);
 					bag.put(key, val);

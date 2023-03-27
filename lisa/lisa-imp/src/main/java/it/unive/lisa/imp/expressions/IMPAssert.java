@@ -14,6 +14,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryStatement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 
 /**
@@ -47,7 +48,15 @@ public class IMPAssert extends UnaryStatement {
 					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		Type type = state.getDomainInstance(TypeDomain.class).getInferredDynamicType();
+		Type type = null;
+		T typedom = (T) state.getDomainInstance(TypeDomain.class);
+		for (SymbolicExpression e : state.rewrite(expr, this)) {
+			Type inferred = typedom.getDynamicTypeOf((ValueExpression) e, this);
+			if (type == null)
+				type = inferred;
+			else
+				type = type.commonSupertype(inferred);
+		}
 		if (!type.isBooleanType())
 			return state.bottom();
 		return state.smallStepSemantics(new Skip(getLocation()), this);

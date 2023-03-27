@@ -33,6 +33,11 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	}
 
 	@Override
+	public boolean isStartingId() {
+		return tokens == null || tokens.isEmpty();
+	}
+
+	@Override
 	public ContextSensitivityToken pushToken(ScopeToken c) {
 		if (tokens.contains(c))
 			return this;

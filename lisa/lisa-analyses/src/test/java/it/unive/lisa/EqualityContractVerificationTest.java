@@ -3,8 +3,9 @@ package it.unive.lisa;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
@@ -25,6 +26,8 @@ import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.traces.ExecutionTrace;
 import it.unive.lisa.analysis.traces.TraceToken;
 import it.unive.lisa.analysis.types.StaticTypes;
+import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -63,6 +66,7 @@ import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
+import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.NaryStatement;
@@ -85,9 +89,12 @@ import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import it.unive.lisa.util.collections.externalSet.UniversalExternalSet;
 import it.unive.lisa.util.collections.workset.ConcurrentFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.ConcurrentLIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.DuplicateFreeFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.DuplicateFreeLIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceLIFOWorkingSet;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
@@ -262,7 +269,9 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testConfiguration() {
 		verify(LiSAConfiguration.class, Warning.NONFINAL_FIELDS);
+		verify(FixpointConfiguration.class);
 		verify(ConfigurableComponent.class);
+		verify(CronConfiguration.class, Warning.NONFINAL_FIELDS);
 	}
 
 	@Test
@@ -289,7 +298,10 @@ public class EqualityContractVerificationTest {
 		verify(ConcurrentLIFOWorkingSet.class);
 		verify(FIFOWorkingSet.class);
 		verify(LIFOWorkingSet.class);
-		verify(VisitOnceWorkingSet.class);
+		verify(VisitOnceFIFOWorkingSet.class);
+		verify(VisitOnceLIFOWorkingSet.class);
+		verify(DuplicateFreeFIFOWorkingSet.class);
+		verify(DuplicateFreeLIFOWorkingSet.class);
 	}
 
 	@Test
@@ -424,12 +436,13 @@ public class EqualityContractVerificationTest {
 				continue;
 			else if (FunctionalLattice.class.isAssignableFrom(subject)
 					|| SetLattice.class.isAssignableFrom(subject)
-					|| InverseSetLattice.class.isAssignableFrom(subject))
-				// fields function and elements can be null
+					|| InverseSetLattice.class.isAssignableFrom(subject)
+					|| NonInterference.class == subject)
+				// fields function and elements and guards can be null
 				verify(subject, Warning.NONFINAL_FIELDS);
 			else if (subject == StaticTypes.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("types"));
-			else if (subject != CFGWithAnalysisResults.class)
+			else if (subject != AnalyzedCFG.class && subject != OptimizedAnalyzedCFG.class)
 				// we test the cfg separately
 				verify(subject);
 	}
@@ -438,9 +451,14 @@ public class EqualityContractVerificationTest {
 	public void testAnalysisObjects() {
 		verify(HeapReplacement.class);
 		verify(ScopeToken.class);
+		verify(CompoundState.class);
 		// we consider only fields that compose the results
 		// id is mutable
-		verify(CFGWithAnalysisResults.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+		verify(AnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+				Warning.NONFINAL_FIELDS);
+		// we do not consider the expanded results or interprocedural
+		// as they do not identify the results
+		verify(OptimizedAnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
 				Warning.NONFINAL_FIELDS);
 
 		verify(ExecutionTrace.class);
@@ -497,7 +515,7 @@ public class EqualityContractVerificationTest {
 		for (Class<? extends Unit> unit : scanner.getSubTypesOf(Unit.class))
 			verify(unit, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		for (Class<? extends CodeMember> cm : scanner.getSubTypesOf(CodeMember.class))
-			if (!CFGWithAnalysisResults.class.isAssignableFrom(cm))
+			if (!AnalyzedCFG.class.isAssignableFrom(cm))
 				verify(cm, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 	}
 

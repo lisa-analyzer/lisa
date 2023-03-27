@@ -630,6 +630,15 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	@Override
 	default InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint src,
 			ProgramPoint dest) throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return new InferenceSystem<>(
+					environment.lattice,
+					environment.function,
+					eval(expression, environment, src).getState());
+
 		return environment;
 	}
 }

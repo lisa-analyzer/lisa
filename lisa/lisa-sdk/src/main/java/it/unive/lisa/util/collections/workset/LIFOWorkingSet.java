@@ -1,5 +1,6 @@
 package it.unive.lisa.util.collections.workset;
 
+import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -54,6 +55,11 @@ public final class LIFOWorkingSet<E> implements WorkingSet<E> {
 	@Override
 	public boolean isEmpty() {
 		return ws.isEmpty();
+	}
+
+	@Override
+	public Collection<E> getContents() {
+		return ws;
 	}
 
 	@Override

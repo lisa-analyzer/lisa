@@ -84,4 +84,11 @@ public class Loop extends ControlFlowStructure {
 	public String toString() {
 		return "loop[" + getCondition() + "]";
 	}
+
+	@Override
+	public Collection<Statement> getTargetedStatements() {
+		Collection<Statement> targeted = new HashSet<>(cfgMatrix.followersOf(getCondition()));
+		targeted.add(getCondition());
+		return targeted;
+	}
 }

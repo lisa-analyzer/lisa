@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * This class expands the {@link NonRedundantPowerset} class fixing the type of
@@ -25,12 +25,12 @@ public class ValueNonRedundantSet<T extends ValueDomain<T>>
 	 * @param valueDomain an element representing the types of elements in the
 	 *                        set
 	 */
-	public ValueNonRedundantSet(Set<T> elements, boolean isTop, T valueDomain) {
+	public ValueNonRedundantSet(SortedSet<T> elements, boolean isTop, T valueDomain) {
 		super(elements, isTop, valueDomain);
 	}
 
 	@Override
-	public ValueNonRedundantSet<T> mk(Set<T> set, boolean isTop, T valueDomain) {
+	public ValueNonRedundantSet<T> mk(SortedSet<T> set, boolean isTop, T valueDomain) {
 		return new ValueNonRedundantSet<>(set, isTop, valueDomain);
 	}
 

@@ -2,7 +2,6 @@ package it.unive.lisa.checks.syntactic;
 
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
@@ -12,6 +11,7 @@ import it.unive.lisa.checks.warnings.GlobalWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.UnitWarning;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;

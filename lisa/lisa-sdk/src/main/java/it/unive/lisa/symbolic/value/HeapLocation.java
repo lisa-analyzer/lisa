@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -26,7 +27,7 @@ public class HeapLocation extends Identifier {
 	 *                       this expression
 	 */
 	public HeapLocation(Type staticType, String name, boolean weak, CodeLocation location) {
-		super(staticType, name, weak, location);
+		super(staticType, name, weak, new Annotations(), location);
 	}
 
 	@Override

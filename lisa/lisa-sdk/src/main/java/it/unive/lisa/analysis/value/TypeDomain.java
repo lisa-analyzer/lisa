@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.value;
 
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import java.util.Set;
 
@@ -14,19 +16,25 @@ import java.util.Set;
 public interface TypeDomain<T extends TypeDomain<T>> extends ValueDomain<T> {
 
 	/**
-	 * Yields the runtime types that this analysis inferred for the last
-	 * computed expression.
+	 * Yields the runtime types that this analysis infers for the given
+	 * expression.
+	 * 
+	 * @param e  the expression to type
+	 * @param pp the program point where the types are required
 	 * 
 	 * @return the runtime types
 	 */
-	Set<Type> getInferredRuntimeTypes();
+	Set<Type> getRuntimeTypesOf(ValueExpression e, ProgramPoint pp);
 
 	/**
-	 * Yields the dynamic type that this analysis inferred for the last computed
+	 * Yields the dynamic type that this analysis infers for the given
 	 * expression. The dynamic type is the least common supertype of all its
 	 * runtime types.
 	 * 
+	 * @param e  the expression to type
+	 * @param pp the program point where the types are required
+	 * 
 	 * @return the dynamic type
 	 */
-	Type getInferredDynamicType();
+	Type getDynamicTypeOf(ValueExpression e, ProgramPoint pp);
 }

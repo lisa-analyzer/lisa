@@ -1,34 +1,30 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.nonrelational.Environment;
+import it.unive.lisa.analysis.nonrelational.VariableLift;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * An inference system that model standard derivation systems (e.g., types
- * systems, small step semantics, big step semantics, ...). An inference system
- * is an {@link Environment} that work on {@link InferredValue}s, and that
- * exposes the last inferred value ({@link #getInferredValue()}) and the
- * execution state ({@link #getExecutionState()}).
+ * An inference system that model standard derivation systems. An inference
+ * system is a {@link VariableLift} that works on {@link InferredValue}s, and
+ * that exposes an execution state ({@link #getExecutionState()}).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <T> the type of {@link InferredValue} in this inference system
  */
 public class InferenceSystem<T extends InferredValue<T>>
-		extends Environment<InferenceSystem<T>, ValueExpression, T, InferredPair<T>>
+		extends VariableLift<InferenceSystem<T>, ValueExpression, T>
 		implements ValueDomain<InferenceSystem<T>> {
 
-	private final InferredPair<T> inferred;
+	private final T state;
 
 	/**
 	 * Builds an empty inference system.
@@ -38,7 +34,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 */
 	public InferenceSystem(T domain) {
 		super(domain);
-		inferred = new InferredPair<>(domain.bottom(), domain.bottom(), domain.bottom());
+		state = domain.bottom();
 	}
 
 	/**
@@ -49,7 +45,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 * @param state the new execution state
 	 */
 	public InferenceSystem(InferenceSystem<T> other, T state) {
-		this(other.lattice, other.function, new InferredPair<>(other.lattice, other.inferred.getInferred(), state));
+		this(other.lattice, other.function, state);
 	}
 
 	/**
@@ -62,17 +58,43 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 *                     operations to retrieve top and bottom values
 	 * @param function the function representing the mapping contained in the
 	 *                     new environment; can be {@code null}
-	 * @param inferred the inferred pair for the last computed expression, that
-	 *                     is left on the top of the stack
+	 * @param state    the execution state after the last computed expression
 	 */
-	public InferenceSystem(T domain, Map<Identifier, T> function, InferredPair<T> inferred) {
+	public InferenceSystem(T domain, Map<Identifier, T> function, T state) {
 		super(domain, function);
-		this.inferred = inferred;
+		this.state = state;
 	}
 
 	@Override
 	public InferenceSystem<T> mk(T lattice, Map<Identifier, T> function) {
-		return new InferenceSystem<>(lattice, function, inferred);
+		return new InferenceSystem<>(lattice, function, state);
+	}
+
+	@Override
+	public InferenceSystem<T> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		if (isBottom())
+			return this;
+
+		// If id cannot be tracked by the underlying
+		// lattice, return this
+		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
+			return this;
+
+		Map<Identifier, T> func = mkNewFunction(function, false);
+		InferredPair<T> eval = lattice.eval(expression, this, pp);
+		T value = eval.getInferred();
+		T v = lattice.variable(id, pp);
+		if (!v.isBottom())
+			// some domains might provide fixed representations
+			// for some variables
+			value = v;
+		if (id.isWeak() && function != null && function.containsKey(id))
+			// if we have a weak identifier for which we already have
+			// information, we we perform a weak assignment
+			value = value.lub(getState(id));
+		func.put(id, value);
+		return new InferenceSystem<>(lattice, func, eval.getState());
 	}
 
 	/**
@@ -82,85 +104,91 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 * @return the execution state
 	 */
 	public T getExecutionState() {
-		return inferred.getState();
-	}
-
-	/**
-	 * Yields the inferred value of the last {@link SymbolicExpression} handled
-	 * by this domain, either through
-	 * {@link #assign(Identifier, SymbolicExpression, ProgramPoint)} or
-	 * {@link #smallStepSemantics(ValueExpression, ProgramPoint)}.
-	 * 
-	 * @return the value inferred for the last expression
-	 */
-	public T getInferredValue() {
-		return inferred.getInferred();
-	}
-
-	@Override
-	public Pair<T, InferredPair<T>> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
-		InferredPair<T> eval = lattice.eval(expression, this, pp);
-		return Pair.of(eval.getInferred(), eval);
-	}
-
-	@Override
-	public InferenceSystem<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
-			T value, InferredPair<T> eval, ProgramPoint pp) {
-		return new InferenceSystem<>(lattice, function, new InferredPair<>(lattice, value, eval.getState()));
+		return state;
 	}
 
 	@Override
 	public InferenceSystem<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		if (isBottom())
 			return this;
-		return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, pp));
+		return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, pp).getState());
+	}
+
+	@Override
+	public InferenceSystem<T> assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
+		if (isBottom())
+			return this;
+
+		Satisfiability sat = lattice.satisfies(expression, this, src);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return bottom();
+
+		if (sat == Satisfiability.SATISFIED)
+			return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, src).getState());
+
+		return lattice.assume(this, expression, src, dest);
+	}
+
+	/**
+	 * Evaluates the given expression to an abstract value.
+	 * 
+	 * @param expression the expression to evaluate
+	 * @param pp         the program point where the evaluation happens
+	 * 
+	 * @return the abstract result of the evaluation
+	 * 
+	 * @throws SemanticException if an error happens during the evaluation
+	 */
+	public T eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		return lattice.eval(expression, this, pp).getInferred();
 	}
 
 	@Override
 	public InferenceSystem<T> top() {
-		return new InferenceSystem<>(lattice.top(), null, inferred.top());
+		return new InferenceSystem<>(lattice.top(), null, state.top());
 	}
 
 	@Override
 	public InferenceSystem<T> bottom() {
-		return new InferenceSystem<>(lattice.bottom(), null, inferred.bottom());
+		return new InferenceSystem<>(lattice.bottom(), null, state.bottom());
 	}
 
 	@Override
 	public boolean isTop() {
-		return super.isTop() && inferred.isTop();
+		return super.isTop() && state.isTop();
 	}
 
 	@Override
 	public boolean isBottom() {
-		return super.isBottom() && inferred.isBottom();
+		return super.isBottom() && state.isBottom();
 	}
 
 	@Override
 	public InferenceSystem<T> lubAux(InferenceSystem<T> other)
 			throws SemanticException {
 		InferenceSystem<T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
-		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.lub(other.inferred));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.lub(other.state));
 	}
 
 	@Override
 	public InferenceSystem<T> wideningAux(InferenceSystem<T> other) throws SemanticException {
 		InferenceSystem<
 				T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
-		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.widening(other.inferred));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.widening(other.state));
 	}
 
 	@Override
 	public InferenceSystem<T> glbAux(InferenceSystem<T> other) throws SemanticException {
 		InferenceSystem<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
-		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.glb(other.inferred));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.glb(other.state));
 	}
 
 	@Override
 	public InferenceSystem<T> narrowingAux(InferenceSystem<T> other) throws SemanticException {
 		InferenceSystem<
 				T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
-		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.narrowing(other.inferred));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.narrowing(other.state));
 	}
 
 	@Override
@@ -168,20 +196,14 @@ public class InferenceSystem<T extends InferredValue<T>>
 		if (!super.lessOrEqualAux(other))
 			return false;
 
-		return inferred.lessOrEqual(other.inferred);
-	}
-
-	@Override
-	public InferenceSystem<T> assumeSatisfied(InferredPair<T> eval) {
-		return new InferenceSystem<>(lattice, function,
-				new InferredPair<>(lattice, eval.getInferred(), eval.getState()));
+		return state.lessOrEqual(other.state);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((inferred == null) ? 0 : inferred.hashCode());
+		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		return result;
 	}
 
@@ -194,10 +216,10 @@ public class InferenceSystem<T extends InferredValue<T>>
 		if (getClass() != obj.getClass())
 			return false;
 		InferenceSystem<?> other = (InferenceSystem<?>) obj;
-		if (inferred == null) {
-			if (other.inferred != null)
+		if (state == null) {
+			if (other.state != null)
 				return false;
-		} else if (!inferred.equals(other.inferred))
+		} else if (!state.equals(other.state))
 			return false;
 		return true;
 	}
@@ -207,6 +229,6 @@ public class InferenceSystem<T extends InferredValue<T>>
 		if (isBottom() || isTop())
 			return super.representation();
 
-		return new ObjectRepresentation(Map.of("map", super.representation(), "inferred", inferred.representation()));
+		return new ObjectRepresentation(Map.of("map", super.representation(), "state", state.representation()));
 	}
 }
