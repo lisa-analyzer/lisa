@@ -1,5 +1,20 @@
 package it.unive.lisa.interprocedural.callgraph;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.symbols.Aliases;
 import it.unive.lisa.analysis.symbols.NameSymbol;
 import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
@@ -27,19 +42,7 @@ import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrate
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.BaseGraph;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import it.unive.lisa.util.datastructures.graph.algorithms.SCCs;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve
@@ -52,7 +55,8 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNode, CallGraphEdge>
+public abstract class BaseCallGraph
+		extends BaseGraph<BaseCallGraph, CallGraphNode, CallGraphEdge>
 		implements CallGraph {
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
@@ -482,5 +486,32 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	@Override
 	public Collection<Call> getCallSites(CodeMember cm) {
 		return callsites.getOrDefault(cm, Collections.emptyList());
+	}
+
+	@Override
+	public Collection<Collection<CodeMember>> getRecursions() {
+		Collection<Collection<CallGraphNode>> sccs = new SCCs<
+				BaseCallGraph,
+				CallGraphNode,
+				CallGraphEdge>().build(this);
+		return sccs.stream()
+				.map(nodes -> nodes.stream()
+						.map(node -> node.getCodeMember())
+						.collect(Collectors.toSet()))
+				.collect(Collectors.toSet());
+	}
+
+	@Override
+	public Collection<Collection<CodeMember>> getRecursionsContaining(CodeMember cm) {
+		Collection<Collection<CallGraphNode>> sccs = new SCCs<
+				BaseCallGraph,
+				CallGraphNode,
+				CallGraphEdge>().build(this);
+		return sccs.stream()
+				.map(nodes -> nodes.stream()
+						.map(node -> node.getCodeMember())
+						.collect(Collectors.toSet()))
+				.filter(members -> members.contains(cm))
+				.collect(Collectors.toSet());
 	}
 }

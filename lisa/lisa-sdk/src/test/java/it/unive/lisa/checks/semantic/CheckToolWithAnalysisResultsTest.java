@@ -97,6 +97,16 @@ public class CheckToolWithAnalysisResultsTest {
 				throws CallResolutionException {
 			return null;
 		}
+
+		@Override
+		public Collection<Collection<CodeMember>> getRecursions() {
+			return null;
+		}
+
+		@Override
+		public Collection<Collection<CodeMember>> getRecursionsContaining(CodeMember cm) {
+			return null;
+		}
 	};
 
 	private static Warning build(CheckTool tool, Object target, String message) {

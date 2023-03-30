@@ -1,5 +1,15 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.DefaultParameters;
@@ -18,23 +28,14 @@ import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.TreeSet;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -56,7 +57,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private final ContextSensitivityToken tokenCreator;
 
-	private final Collection<CFG> fixpointTriggers;
+	private final Collection<CodeMember> fixpointTriggers;
 
 	private final LinkedList<CFGCall> callStack;
 
@@ -149,22 +150,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			// starting from the callers of the cfgs that needed a lub,
 			// find out the complete set of cfgs that might need to be
 			// processed again
-			VisitOnceWorkingSet<CFG> ws = VisitOnceFIFOWorkingSet.mk();
-			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg)
-					.stream()
-					.filter(CFG.class::isInstance)
-					.map(CFG.class::cast)
-					.forEach(ws::push));
-			while (!ws.isEmpty())
-				callgraph.getCallers(ws.pop())
-						.stream()
-						.filter(CFG.class::isInstance)
-						.map(CFG.class::cast)
-						.forEach(ws::push);
-
-			Collection<CFG> seen = ws.getSeen();
-			seen.removeAll(fixpointTriggers);
-			seen.forEach(results::forget);
+			Collection<CodeMember> toRemove = callgraph.getCallersTransitively(fixpointTriggers);
+			toRemove.removeAll(fixpointTriggers);
+			toRemove.stream().filter(CFG.class::isInstance).map(CFG.class::cast).forEach(results::forget);
 
 			iter++;
 		} while (!fixpointTriggers.isEmpty());
@@ -205,8 +193,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 				conf,
 				token);
 		Pair<Boolean, AnalyzedCFG<A, H, V, T>> res = results.putResult(cfg, token, fixpointResult);
-		if (recursionStart == -1 && Boolean.TRUE.equals(res.getLeft()))
-			// avoid re-evaluating the triggers until the recursion is complete
+		if (recursionMembers == null && Boolean.TRUE.equals(res.getLeft()))
+			// recursion members will be all added at the end of the recursion
 			fixpointTriggers.add(cfg);
 		return res.getRight();
 	}
@@ -254,30 +242,35 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	private AnalysisState<A, H, V, T> recursiveApprox, previousApprox;
-	private int recursionCount, recursionStart = -1;
+	private int recursionCount;
+	private Collection<CodeMember> recursionMembers;
 
 	/**
 	 * Determines the result of the recursive call {@code call}.
 	 * 
-	 * @param recPos the position in the call stack of the call that started the
-	 *                   recursion
-	 * @param call   the recursive call
-	 * @param state  a singleton instance of the analysis state
-	 * @param token  the token causing the recursion
+	 * @param call  the recursive call
+	 * @param state a singleton instance of the analysis state
+	 * @param token the token causing the recursion
 	 * 
 	 * @return the result of the call
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	protected AnalysisState<A, H, V, T> handleRecursion(
-			int recPos,
 			CFGCall call,
 			AnalysisState<A, H, V, T> state,
 			ContextSensitivityToken token)
 			throws SemanticException {
-		if (recursionStart == -1) {
+		if (recursionMembers == null) {
 			LOG.info("Found recursion at '" + call.getLocation() + "' with token " + token);
-			recursionStart = recPos;
+
+			Collection<Collection<CodeMember>> allRecs = callgraph.getRecursionsContaining(call.getCFG());
+			if (allRecs.isEmpty())
+				throw new SemanticException("No loop found in the callgraph despite the active recursion");
+			if (allRecs.size() > 1)
+				throw new SemanticException("Members in multiple recursions are not supported");
+			recursionMembers = allRecs.iterator().next();
+
 			if (returnsVoid(call, null))
 				recursiveApprox = state.bottom();
 			else
@@ -297,15 +290,16 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 				recursionCount++;
 				recursiveApprox = previousApprox.lub(recursiveApprox);
 			}
+
+			if (previousApprox != null && recursiveApprox.lessOrEqual(previousApprox)) {
+				recursiveApprox = previousApprox = null;
+				recursionCount = 0;
+				fixpointTriggers.addAll(recursionMembers);
+				recursionMembers = null;
+			}
 		}
 
-		AnalysisState<A, H, V, T> approx = recursiveApprox;
-		if (previousApprox != null && recursiveApprox.lessOrEqual(previousApprox)) {
-			recursionStart = -1;
-			recursiveApprox = previousApprox = null;
-			recursionCount = 0;
-		}
-		return approx;
+		return recursiveApprox;
 	}
 
 	@Override
@@ -315,15 +309,18 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			ExpressionSet<SymbolicExpression>[] parameters,
 			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
-		ContextSensitivityToken token = tokenCreator.pushOnStack(callStack, call);
-		int recPos = registerCallStack(call, token);
-		if (recPos != -1)
-			// if we already reached this call with the same token, then
-			// this is a recursion and we have to use a separate fixpoint
-			// to compute its result
-			return handleRecursion(recPos, call, entryState, token);
-
 		callgraph.registerCall(call);
+		ContextSensitivityToken token = tokenCreator.pushOnStack(callStack, call);
+		int last = registerCallStack(call, token);
+		if (recursionMembers == null && call.getTargetedCFGs().stream().anyMatch(call.getCFG()::equals)
+				|| callgraph.getCalleesTransitively(call.getTargets()).contains(call.getCFG())) {
+			if (last == -1)
+				unregisterCallStack(call, token);
+			// this calls introduces a loop in the call graph -> recursion
+			// we need a special fixpoint to compute its result
+			// TODO this might be an expensive check
+			return handleRecursion(call, entryState, token);
+		}
 
 		ScopeToken scope = new ScopeToken(call);
 		AnalysisState<A, H, V, T> result = entryState.bottom();
@@ -356,7 +353,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 						locals);
 
 				AnalysisState<A, H, V, T> exitState;
-				if (recursionStart == -1 && states != null && prepared.getLeft().lessOrEqual(states.getEntryState()))
+				if (recursionMembers == null && states != null
+						&& prepared.getLeft().lessOrEqual(states.getEntryState()))
 					// no need to compute the fixpoint: we already have an
 					// (over-)approximation of the result computed starting from
 					// an over-approximation of the entry state
@@ -387,7 +385,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			// - recursionStart != callStack.head.position
 			// otherwise, this is the exact call that starts the
 			// recursion, and we have to repeat the fixpoint
-			isActiveRecursionHead = recursionStart != -1 && callStack.size() - 1 == recursionStart;
+			isActiveRecursionHead = recursionMembers != null && !recursionMembers.contains(call.getCFG());
 
 			if (isActiveRecursionHead) {
 				// store the result of this computation to use it at the start
