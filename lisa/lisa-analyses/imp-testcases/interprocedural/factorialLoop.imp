@@ -1,0 +1,29 @@
+class factorialLoop {
+
+	factorialLoop(n) {
+		if (n <= 1)
+			return 1;
+		else if (n == 2)
+			return 2;
+		else if (n == 3)
+			return 6;
+		else {
+			def x = n - 1;
+			return this.factorialLoopAux1(x) * n;
+		}
+	}
+	
+	factorialLoopAux1(n) {
+		def x = n - 1;
+		return this.factorialLoopAux2(x) * n;
+	}
+	
+	factorialLoopAux2(n) {
+		def x = n - 1;
+		return this.factorialLoop(x) * n;
+	}
+	
+	main(a) {
+		def z = this.factorialLoop(a);
+    }
+}

@@ -1,4 +1,4 @@
-class tests {
+class fibonacci {
 
 	fib(n) {
 		if (n == 0)

@@ -1,0 +1,15 @@
+class factorial {
+
+	factorial(n) {
+		if (n <= 1) 
+			return 1;
+		else {
+			def x = n - 1;
+			return this.factorial(x) * n;
+		}
+	}
+	
+	main(a) {
+		def x = this.factorial(a);
+    }
+}
