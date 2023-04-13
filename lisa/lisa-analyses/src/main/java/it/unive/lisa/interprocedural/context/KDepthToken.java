@@ -1,9 +1,10 @@
-package it.unive.lisa.interprocedural;
+package it.unive.lisa.interprocedural.context;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
 

@@ -1,4 +1,4 @@
-package it.unive.lisa.interprocedural.recursion;
+package it.unive.lisa.interprocedural.context.recursion;
 
 import java.util.HashSet;
 import java.util.LinkedList;

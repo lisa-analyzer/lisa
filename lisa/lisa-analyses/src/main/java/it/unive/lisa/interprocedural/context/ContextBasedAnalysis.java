@@ -1,4 +1,4 @@
-package it.unive.lisa.interprocedural;
+package it.unive.lisa.interprocedural.context;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -30,8 +30,12 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
-import it.unive.lisa.interprocedural.recursion.Recursion;
-import it.unive.lisa.interprocedural.recursion.RecursionNode;
+import it.unive.lisa.interprocedural.CFGResults;
+import it.unive.lisa.interprocedural.CallGraphBasedAnalysis;
+import it.unive.lisa.interprocedural.FixpointResults;
+import it.unive.lisa.interprocedural.NoEntryPointException;
+import it.unive.lisa.interprocedural.context.recursion.Recursion;
+import it.unive.lisa.interprocedural.context.recursion.RecursionNode;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.cfg.CFG;

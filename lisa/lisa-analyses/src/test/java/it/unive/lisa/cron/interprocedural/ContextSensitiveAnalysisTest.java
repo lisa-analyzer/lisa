@@ -13,9 +13,9 @@ import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.interprocedural.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.context.RecursionFreeToken;
 
 public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 

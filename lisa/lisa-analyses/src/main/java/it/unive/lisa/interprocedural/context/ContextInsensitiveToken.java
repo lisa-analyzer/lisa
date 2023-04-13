@@ -1,5 +1,6 @@
-package it.unive.lisa.interprocedural;
+package it.unive.lisa.interprocedural.context;
 
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**

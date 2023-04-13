@@ -11,11 +11,11 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.interprocedural.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.ContextInsensitiveToken;
-import it.unive.lisa.interprocedural.KDepthToken;
-import it.unive.lisa.interprocedural.LastCallToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
+import it.unive.lisa.interprocedural.context.KDepthToken;
+import it.unive.lisa.interprocedural.context.LastCallToken;
 
 public class RecursionsTest extends AnalysisTestExecutor {
 
