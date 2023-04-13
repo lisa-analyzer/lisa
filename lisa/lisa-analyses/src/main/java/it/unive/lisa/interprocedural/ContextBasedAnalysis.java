@@ -3,7 +3,6 @@ package it.unive.lisa.interprocedural;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -55,15 +54,13 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private static final Logger LOG = LogManager.getLogger(ContextBasedAnalysis.class);
 
-	private final ContextSensitivityToken tokenCreator;
-
 	private final Collection<CodeMember> fixpointTriggers;
-
-	private final LinkedList<CFGCall> callStack;
 
 	private FixpointResults<A, H, V, T> results;
 
 	private Class<? extends WorkingSet<Statement>> fixpointWorkingSet;
+	
+	private ContextSensitivityToken token;
 
 	private FixpointConfiguration conf;
 
@@ -81,9 +78,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	 *                  context sensitivity
 	 */
 	public ContextBasedAnalysis(ContextSensitivityToken token) {
-		this.tokenCreator = token;
+		this.token = token;
 		fixpointTriggers = new HashSet<>();
-		callStack = new LinkedList<>();
 	}
 
 	@Override
@@ -119,7 +115,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private void fixpointAux(AnalysisState<A, H, V, T> entryState) throws AnalysisExecutionException {
 		int iter = 0;
-		ContextSensitivityToken empty = (ContextSensitivityToken) tokenCreator.startingId();
+		ContextSensitivityToken empty = (ContextSensitivityToken) token.startingId();
 
 		Collection<CFG> entryPoints = new TreeSet<>(
 				(c1, c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
@@ -204,43 +200,6 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		return results;
 	}
 
-	/**
-	 * Registers the given call stack for the given call.
-	 * 
-	 * @param c     the call that the stack is associated with
-	 * @param stack the stack to register
-	 * 
-	 * @return {@code -1} if the call has been added to the stack, otherwise the
-	 *             stack is not modified and the position of the same
-	 *             {@code <c, stack>} pair is returned
-	 */
-	protected int registerCallStack(CFGCall c, ContextSensitivityToken stack) {
-		int last = callStack.lastIndexOf(c);
-		if (last != -1)
-			return last;
-		callStack.addLast(c);
-		return -1;
-	}
-
-	/**
-	 * Removes the given stack from the ones registered for the given call.
-	 * 
-	 * @param c     the call that the stack is associated with
-	 * @param stack the stack to unregister
-	 * 
-	 * @throws SemanticException if the top of the call stack does not match the
-	 *                               {@code <c, stack>} pair
-	 */
-	protected void unregisterCallStack(CFGCall c, ContextSensitivityToken stack) throws SemanticException {
-		CFGCall last = callStack.removeLast();
-		if (!last.equals(c))
-			throw new SemanticException("Top of the call stack ('"
-					+ last
-					+ "') does not match the call that is returning ('"
-					+ c
-					+ "')");
-	}
-
 	private AnalysisState<A, H, V, T> recursiveApprox, previousApprox;
 	private int recursionCount;
 	private Collection<CodeMember> recursionMembers;
@@ -310,15 +269,12 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
 		callgraph.registerCall(call);
-		ContextSensitivityToken token = tokenCreator.pushOnStack(callStack, call);
-		int last = registerCallStack(call, token);
+		ContextSensitivityToken callerToken = token;
+		token = token.push(call);
 		if (recursionMembers == null && call.getTargetedCFGs().stream().anyMatch(call.getCFG()::equals)
 				|| callgraph.getCalleesTransitively(call.getTargets()).contains(call.getCFG())) {
-			if (last == -1)
-				unregisterCallStack(call, token);
 			// this calls introduces a loop in the call graph -> recursion
 			// we need a special fixpoint to compute its result
-			// TODO this might be an expensive check
 			return handleRecursion(call, entryState, token);
 		}
 
@@ -395,7 +351,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			}
 		} while (isActiveRecursionHead);
 
-		unregisterCallStack(call, token);
+		token = callerToken;
 		return result;
 	}
 }

@@ -22,9 +22,9 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 		calls = Collections.emptyList();
 	}
 
-	private RecursionFreeToken(List<CFGCall> tokens, CFGCall newToken) {
-		this.calls = new ArrayList<>(tokens.size() + 1);
-		tokens.stream().forEach(this.calls::add);
+	private RecursionFreeToken(RecursionFreeToken source, CFGCall newToken) {
+		this.calls = new ArrayList<>(source.calls.size() + 1);
+		source.calls.forEach(this.calls::add);
 		this.calls.add(newToken);
 	}
 
@@ -89,12 +89,7 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
-		return new RecursionFreeToken(stack, c);
-	}
-
-	@Override
-	public List<CFGCall> getKnownCalls() {
-		return calls;
+	public ContextSensitivityToken push(CFGCall c) {
+		return new RecursionFreeToken(this, c);
 	}
 }

@@ -1,8 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collections;
-import java.util.List;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
@@ -78,12 +75,7 @@ public class LastCallToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
+	public ContextSensitivityToken push(CFGCall c) {
 		return new LastCallToken(c);
-	}
-
-	@Override
-	public List<CFGCall> getKnownCalls() {
-		return call == null ? Collections.emptyList() : Collections.singletonList(call);
 	}
 }

@@ -1,8 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collections;
-import java.util.List;
-
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
@@ -55,12 +52,7 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
+	public ContextSensitivityToken push(CFGCall c) {
 		return this;
-	}
-
-	@Override
-	public List<CFGCall> getKnownCalls() {
-		return Collections.emptyList();
 	}
 }

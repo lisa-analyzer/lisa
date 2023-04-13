@@ -23,17 +23,17 @@ public class KDepthToken implements ContextSensitivityToken {
 		this.calls = Collections.emptyList();
 	}
 
-	private KDepthToken(int k, List<CFGCall> tokens, CFGCall newToken) {
+	private KDepthToken(int k, KDepthToken source, CFGCall newToken) {
 		this.k = k;
-		int oldlen = tokens.size();
+		int oldlen = source.calls.size();
 		if (oldlen < k) {
 			this.calls = new ArrayList<>(oldlen + 1);
-			tokens.stream().forEach(this.calls::add);
+			source.calls.forEach(this.calls::add);
 			this.calls.add(newToken);
 		} else {
 			this.calls = new ArrayList<>(k);
 			// we only keep the last k-1 elements
-			tokens.stream().skip(oldlen - k + 1).forEach(this.calls::add);
+			source.calls.stream().skip(oldlen - k + 1).forEach(this.calls::add);
 			this.calls.add(newToken);
 		}
 	}
@@ -104,12 +104,7 @@ public class KDepthToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken pushOnStack(List<CFGCall> stack, CFGCall c) {
-		return new KDepthToken(k, stack, c);
-	}
-
-	@Override
-	public List<CFGCall> getKnownCalls() {
-		return calls;
+	public ContextSensitivityToken push(CFGCall c) {
+		return new KDepthToken(k, this, c);
 	}
 }
