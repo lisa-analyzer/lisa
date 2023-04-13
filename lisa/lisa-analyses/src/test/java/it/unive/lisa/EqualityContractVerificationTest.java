@@ -36,6 +36,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
 import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.context.KDepthToken;
+import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
@@ -485,6 +486,7 @@ public class EqualityContractVerificationTest {
 		verify(CallGraphNode.class, verifier -> verifier.withIgnoredFields("graph"));
 		verify(CFGResults.class, Warning.NONFINAL_FIELDS);
 		verify(FixpointResults.class, Warning.NONFINAL_FIELDS);
+		verify(Recursion.class);
 		Reflections scanner = mkReflections();
 		for (Class<? extends ContextSensitivityToken> token : scanner.getSubTypesOf(ContextSensitivityToken.class))
 			if (token == KDepthToken.class)

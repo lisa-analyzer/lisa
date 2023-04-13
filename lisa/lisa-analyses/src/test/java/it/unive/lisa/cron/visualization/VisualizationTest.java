@@ -14,7 +14,6 @@ import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.RecursionFreeToken;
-
 import java.util.Collection;
 import java.util.HashSet;
 import org.junit.AfterClass;

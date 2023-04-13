@@ -1,5 +1,10 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,7 +19,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -22,17 +26,13 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * A call to one or more of the CFGs under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGCall extends CallWithResult implements MetaVariableCreator, CanRemoveReceiver {
+public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 
 	/**
 	 * The targets of this call

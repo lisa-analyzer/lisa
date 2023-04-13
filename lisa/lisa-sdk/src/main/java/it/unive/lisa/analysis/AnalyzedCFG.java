@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -8,9 +13,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -339,5 +341,26 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 		} else if (!results.equals(other.results))
 			return false;
 		return true;
+	}
+
+	public AnalyzedCFG<A, H, V, T> withModifiedEntryState(AnalysisState<A, H, V, T> entry) throws SemanticException {
+		StatementStore<A, H, V, T> newEntries = new StatementStore<>(entry.top());
+		StatementStore<A, H, V, T> newResults = new StatementStore<>(entry.top());
+
+		// out of scope identifiers are relative to the entry state
+		// we forget them all and replace them with the ones in entry
+		// TODO this is a best effort: we might have an identifier scoped by
+		// a call and then by another scoper. This will stay in the states
+		// of this graph and will cause some confusion
+		for (Entry<Statement, AnalysisState<A, H, V, T>> entryState : entryStates)
+			newEntries.put(entryState.getKey(), entryState.getValue()
+					.forgetIdentifiersIf(i -> i.isScopedByCall())
+					.lub(entry));
+		for (Entry<Statement, AnalysisState<A, H, V, T>> result : results)
+			newResults.put(result.getKey(), result.getValue()
+					.forgetIdentifiersIf(i -> i.isScopedByCall())
+					.lub(entry));
+
+		return new AnalyzedCFG<>(this, id, newEntries, newResults);
 	}
 }

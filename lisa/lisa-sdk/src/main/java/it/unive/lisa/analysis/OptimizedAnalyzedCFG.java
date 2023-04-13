@@ -250,7 +250,7 @@ public class OptimizedAnalyzedCFG<
 
 		@Override
 		public Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
-			return interprocedural.getAnalysisResultsOf(cfg);
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -362,5 +362,26 @@ public class OptimizedAnalyzedCFG<
 	@Override
 	public OptimizedAnalyzedCFG<A, H, V, T> bottom() {
 		return new OptimizedAnalyzedCFG<>(this, id.startingId(), entryStates.bottom(), results.bottom(), null, null);
+	}
+
+	@Override
+	public AnalyzedCFG<A, H, V, T> withModifiedEntryState(AnalysisState<A, H, V, T> entry) throws SemanticException {
+		AnalyzedCFG<A, H, V, T> sup = super.withModifiedEntryState(entry);
+		StatementStore<A, H, V, T> newExpanded = null; 
+		
+		if (expanded != null) {
+			// out of scope identifiers are relative to the entry state
+			// we forget them all and replace them with the ones in entry
+			// TODO this is a best effort: we might have an identifier scoped by
+			// a call and then by another scoper. This will stay in the states
+			// of this graph and will cause some confusion
+			newExpanded = new StatementStore<>(entry.top());
+			for (Entry<Statement, AnalysisState<A, H, V, T>> result : expanded)
+				newExpanded.put(result.getKey(), result.getValue()
+						.forgetIdentifiersIf(i -> i.isScopedByCall())
+						.lub(entry));
+		}
+
+		return new OptimizedAnalyzedCFG<>(this, id, sup.entryStates, sup.results, newExpanded, interprocedural);
 	}
 }

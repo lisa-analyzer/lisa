@@ -34,7 +34,8 @@ import java.util.Set;
 public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
-		T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
+		T extends TypeDomain<T>>
+		implements InterproceduralAnalysis<A, H, V, T> {
 
 	/**
 	 * The call graph used to resolve method calls.
@@ -50,6 +51,15 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	 * The policy to evaluate results of open calls.
 	 */
 	protected OpenCallPolicy policy;
+
+	public CallGraphBasedAnalysis() {
+	}
+
+	protected CallGraphBasedAnalysis(CallGraphBasedAnalysis<A, H, V, T> other) {
+		this.callgraph = other.callgraph;
+		this.app = other.app;
+		this.policy = other.policy;
+	}
 
 	@Override
 	public void init(Application app, CallGraph callgraph, OpenCallPolicy policy)

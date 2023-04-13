@@ -1,8 +1,7 @@
 package it.unive.lisa.analysis.lattices;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.Lattice;
+import java.util.Map;
 
 public class GenericMapLattice<K, V extends Lattice<V>>
 		extends FunctionalLattice<GenericMapLattice<K, V>, K, V> {

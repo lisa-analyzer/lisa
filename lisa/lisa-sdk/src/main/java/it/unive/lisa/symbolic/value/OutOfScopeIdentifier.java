@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
@@ -45,6 +46,11 @@ public class OutOfScopeIdentifier extends Identifier {
 		if (getScope().equals(token))
 			return this.id;
 		return null;
+	}
+
+	@Override
+	public boolean isScopedByCall() {
+		return scope.getScoper() instanceof Call;
 	}
 
 	/**
