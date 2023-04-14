@@ -45,7 +45,9 @@ public class SCCs<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends E
 
 	/**
 	 * Yields the last computed strongly connected components through
-	 * {@link #build(Graph)}.
+	 * {@link #build(Graph)}. Note that, depending on the method used for
+	 * computing them, the returned value might contain <b>all</b> components,
+	 * including trivial single-node ones.
 	 * 
 	 * @return a set containing all the strongly connected components
 	 */
@@ -56,6 +58,32 @@ public class SCCs<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends E
 	/**
 	 * Builds the strongly connected components for the given graph. The
 	 * returned value can also be accessed later through {@link #getSCCs()}.
+	 * Note that the returned value does not contain trivial single-node
+	 * components. This also holds for the value returned by {@link #getSCCs()}.
+	 * 
+	 * @param graph the graph whose sccs are to be computed
+	 * 
+	 * @return the set of non trivial sccs
+	 */
+	public Collection<Collection<N>> buildNonTrivial(G graph) {
+		build(graph);
+		Collection<Collection<N>> toRemove = new HashSet<>();
+		for (Collection<N> scc : sccs) {
+			N first = scc.iterator().next();
+			if (scc.size() == 1 && !graph.followersOf(first).contains(first))
+				// only one node with no self loops
+				toRemove.add(scc);
+		}
+		sccs.removeAll(toRemove);
+		return sccs;
+	}
+
+	/**
+	 * Builds the strongly connected components for the given graph. The
+	 * returned value can also be accessed later through {@link #getSCCs()}.
+	 * Note that the returned value contains <b>all</b> components, including
+	 * trivial single-node ones. This also holds for the value returned by
+	 * {@link #getSCCs()}.
 	 * 
 	 * @param graph the graph whose sccs are to be computed
 	 * 

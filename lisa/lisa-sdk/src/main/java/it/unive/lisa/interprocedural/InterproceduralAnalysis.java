@@ -56,7 +56,10 @@ public interface InterproceduralAnalysis<
 		T extends TypeDomain<T>> {
 
 	/**
-	 * Initializes the interprocedural analysis of the given program.
+	 * Initializes the interprocedural analysis of the given program. A call to
+	 * this method should effectively re-initialize the interprocedural analysis
+	 * as if it is yet to be used. This is useful when the same instance is used
+	 * in multiple analyses.
 	 *
 	 * @param callgraph the callgraph used to resolve method calls
 	 * @param app       the application to analyze

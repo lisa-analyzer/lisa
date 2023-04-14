@@ -1,0 +1,36 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_factorialLoop.factorialLoop(factorialLoop__this,_untyped_n).json", "untyped_factorialLoop.factorialLoopAux1(factorialLoop__this,_untyped_n).json", "untyped_factorialLoop.factorialLoopAux2(factorialLoop__this,_untyped_n).json", "untyped_factorialLoop.main(factorialLoop__this,_untyped_a).json" ],
+  "info" : {
+    "cfgs" : "4",
+    "duration" : "1s 30ms",
+    "end" : "2023-04-16T18:15:40.112+02:00",
+    "expressions" : "40",
+    "files" : "4",
+    "globals" : "0",
+    "members" : "4",
+    "programs" : "1",
+    "start" : "2023-04-16T18:15:39.082+02:00",
+    "statements" : "14",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/factorialLoop/insensitive"
+  }
+}

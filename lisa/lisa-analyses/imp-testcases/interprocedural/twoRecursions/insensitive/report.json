@@ -1,0 +1,36 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_tests.aux1(tests__this,_untyped_x,_untyped_b,_untyped_n).json", "untyped_tests.aux2(tests__this,_untyped_x,_untyped_b,_untyped_n).json", "untyped_tests.main(tests__this,_untyped_a,_untyped_b).json", "untyped_tests.rec(tests__this,_untyped_n,_untyped_b).json" ],
+  "info" : {
+    "cfgs" : "4",
+    "duration" : "1s 203ms",
+    "end" : "2023-04-17T23:13:06.343+02:00",
+    "expressions" : "40",
+    "files" : "4",
+    "globals" : "0",
+    "members" : "4",
+    "programs" : "1",
+    "start" : "2023-04-17T23:13:05.140+02:00",
+    "statements" : "11",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/twoRecursions/insensitive"
+  }
+}

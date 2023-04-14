@@ -74,7 +74,8 @@ public class CheckToolWithAnalysisResultsTest {
 		}
 
 		@Override
-		public void init(Application program) throws CallGraphConstructionException {
+		public void init(Application app) throws CallGraphConstructionException {
+			super.init(app);
 		}
 
 		@Override

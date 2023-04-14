@@ -72,7 +72,7 @@ public abstract class Identifier extends ValueExpression {
 	public boolean isScopedByCall() {
 		return false;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

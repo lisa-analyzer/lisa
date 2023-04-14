@@ -18,15 +18,21 @@ import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.CallGraphBasedAnalysis;
 import it.unive.lisa.interprocedural.FixpointResults;
+import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.NoEntryPointException;
+import it.unive.lisa.interprocedural.OpenCallPolicy;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.context.recursion.RecursionSolver;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -38,8 +44,7 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -73,17 +78,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	private final Collection<CodeMember> triggers;
 
 	/**
-	 * The recursions that have been found during the current iteration, and
-	 * that must be solved before beginning the next one.
+	 * Whether or not a new recursion has been discovered in the latest fixpoint
+	 * iteration.
 	 */
-	private final Set<Recursion<A, H, V, T>> recursions;
-
-	/**
-	 * The entry state (pre-states and parameters states) of each call that has
-	 * yet to return. This is needed for retrieving the entry state at the start
-	 * of a recursion when one is found.
-	 */
-	private final Map<Call, Pair<ContextSensitivityToken, CompoundState<A, H, V, T>>> ongoingCalls;
+	private boolean pendingRecursions;
 
 	/**
 	 * The results computed by this analysis.
@@ -121,19 +119,31 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	public ContextBasedAnalysis(ContextSensitivityToken token) {
 		this.token = token;
 		triggers = new HashSet<>();
-		recursions = new HashSet<>();
-		ongoingCalls = new IdentityHashMap<>();
 	}
 
 	protected ContextBasedAnalysis(ContextBasedAnalysis<A, H, V, T> other) {
 		super(other);
 		this.conf = other.conf;
-		this.ongoingCalls = other.ongoingCalls;
-		this.recursions = other.recursions;
 		this.results = other.results;
 		this.token = other.token;
 		this.triggers = other.triggers;
 		this.workingSet = other.workingSet;
+		this.pendingRecursions = false;
+	}
+
+	@Override
+	public void init(
+			Application app,
+			CallGraph callgraph,
+			OpenCallPolicy policy)
+			throws InterproceduralAnalysisException {
+		super.init(app, callgraph, policy);
+		this.conf = null;
+		this.results = null;
+		this.token = token.startingId();
+		this.workingSet = null;
+		this.pendingRecursions = false;
+		this.triggers.clear();
 	}
 
 	@Override
@@ -164,6 +174,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		do {
 			LOG.info("Performing {} fixpoint iteration", StringUtilities.ordinal(iter + 1));
 			triggers.clear();
+			pendingRecursions = false;
+
 			for (CFG cfg : IterationLogger.iterate(LOG, entryPoints, "Processing entrypoints", "entries"))
 				try {
 					if (results == null) {
@@ -174,6 +186,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 						this.results = new FixpointResults<>(value.top());
 					}
 
+					token = empty;
 					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 					results.putResult(cfg, empty,
 							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
@@ -183,39 +196,61 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 					throw new AnalysisExecutionException("Error while computing fixpoint for entrypoint " + cfg, e);
 				}
 
-			if (!recursions.isEmpty()) {
-				Set<Recursion<A, H, V, T>> compacted = new HashSet<>();
+			if (pendingRecursions) {
+				Set<Recursion<A, H, V, T>> recursions = new HashSet<>();
 
-				for (Recursion<A, H, V, T> recursion : recursions) {
-					Set<Recursion<A, H, V, T>> eqclass = new HashSet<>();
-					eqclass.add(recursion);
-					for (Recursion<A, H, V, T> rec2 : recursions)
-						if (!recursion.equals(rec2) && recursion.canBeMergedWith(rec2))
-							eqclass.add(rec2);
-					recursions.removeAll(eqclass);
-					if (eqclass.size() == 1)
-						compacted.add(eqclass.iterator().next());
-					else {
-						Recursion<A, H, V, T> compact = null;
-						for (Recursion<A, H, V, T> rr : eqclass)
-							if (compact == null)
-								compact = rr;
+				for (Collection<CodeMember> rec : callgraph.getRecursions()) {
+					// these are the calls that start the recursion by invoking
+					// one of its members
+					Collection<Call> starters = callgraph.getCallSites(rec).stream()
+							.filter(site -> !rec.contains(site.getCFG()))
+							.collect(Collectors.toSet());
+
+					for (Call starter : starters) {
+						// these are the head of the recursion: members invoked
+						// from outside of it
+						Set<CFG> heads = callgraph.getCallees(starter.getCFG()).stream()
+								.filter(callee -> rec.contains(callee))
+								.filter(CFG.class::isInstance)
+								.map(CFG.class::cast)
+								.collect(Collectors.toSet());
+						Set<Pair<ContextSensitivityToken, CompoundState<A, H, V, T>>> entries = new HashSet<>();
+						for (Entry<ScopeId, AnalyzedCFG<A, H, V, T>> res : results.get(starter.getCFG())) {
+							StatementStore<A, H, V, T> params = new StatementStore<>(entryState.bottom());
+							Expression[] parameters = starter.getParameters();
+							if (conf.optimize)
+								for (Expression actual : parameters)
+									params.put(actual, ((OptimizedAnalyzedCFG<A, H, V, T>) res.getValue())
+											.getUnwindedAnalysisStateAfter(actual));
 							else
-								compact = compact.merge(rr);
-						compacted.add(compact);
+								for (Expression actual : parameters)
+									params.put(actual, res.getValue().getAnalysisStateAfter(actual));
+
+							entries.add(Pair.of((ContextSensitivityToken) res.getKey(),
+									CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
+						}
+
+						for (CFG head : heads)
+							for (Pair<ContextSensitivityToken, CompoundState<A, H, V, T>> entry : entries) {
+								Recursion<A, H, V, T> recursion = new Recursion<>(
+										starter,
+										head,
+										rec,
+										entry.getLeft(),
+										entry.getRight());
+								recursions.add(recursion);
+							}
 					}
 				}
 
 				try {
-					for (Recursion<A, H, V, T> rec : compacted) {
+					for (Recursion<A, H, V, T> rec : recursions) {
 						new RecursionSolver<>(this, rec).solve();
 						triggers.addAll(rec.getInvolvedCFGs());
 					}
 				} catch (SemanticException e) {
 					throw new AnalysisExecutionException("Unable to solve one or more recursions", e);
 				}
-
-				recursions.clear();
 			}
 
 			// starting from the callers of the cfgs that needed a lub,
@@ -273,59 +308,13 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		return true;
 	}
 
+	protected boolean shouldCheckForRecursions() {
+		return true;
+	}
+
 	@Override
 	public FixpointResults<A, H, V, T> getFixpointResults() {
 		return results;
-	}
-
-	private void computeRecursionsEndingWith(
-			CFGCall call,
-			AnalysisState<A, H, V, T> entryState,
-			ContextSensitivityToken token)
-			throws SemanticException {
-		for (Collection<CodeMember> rec : callgraph.getRecursionsContaining(call.getCFG())) {
-			Collection<CodeMember> remaining = new HashSet<>(rec);
-
-			// we begin from the tail of the recursion
-			CFG iterator = call.getCFG();
-			remaining.remove(iterator);
-
-			// we follow callsites back to where the recursion begins
-			while (!remaining.isEmpty()) {
-				Set<Call> sites = callgraph.getCallSites(iterator).stream()
-						.filter(site -> remaining.contains(site.getCFG()))
-						.collect(Collectors.toSet());
-
-				if (sites.isEmpty())
-					throw new SemanticException("Recursion with no valid entry point found");
-				else {
-					iterator = sites.iterator().next().getCFG();
-					for (Call site : sites)
-						if (!site.getCFG().equals(iterator))
-							throw new SemanticException("Recursion with non-linear path found");
-
-					remaining.remove(iterator);
-				}
-			}
-
-			// iterator will now contain the entry node of the recursion
-			Collection<Call> callsites = callgraph.getCallSites(iterator);
-			Set<Call> sites = callsites.stream()
-					.filter(site -> !rec.contains(site.getCFG()))
-					.filter(ongoingCalls::containsKey)
-					.collect(Collectors.toSet());
-			for (Call site : sites) {
-				Recursion<A, H, V, T> recursion = new Recursion<>(
-						site,
-						(CFG) iterator,
-						Map.of(call, token),
-						rec,
-						ongoingCalls.get(site).getLeft(),
-						ongoingCalls.get(site).getRight());
-				if (recursions.add(recursion))
-					LOG.info("Found recursion at " + site.getLocation());
-			}
-		}
 	}
 
 	protected Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepareEntryState(
@@ -366,16 +355,14 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
 		callgraph.registerCall(call);
-		ContextSensitivityToken callerToken = token;
-		token = token.push(call);
 
-		if (call.getTargetedCFGs().stream().anyMatch(call.getCFG()::equals)
-				|| callgraph.getCalleesTransitively(call.getTargets()).contains(call.getCFG())) {
+		if (shouldCheckForRecursions() && (call.getTargetedCFGs().stream().anyMatch(call.getCFG()::equals)
+				|| callgraph.getCalleesTransitively(call.getTargets()).contains(call.getCFG()))) {
 			// this calls introduces a loop in the call graph -> recursion
 			// we need a special fixpoint to compute its result
 			// we compute that at the end of each fixpoint iteration
-			computeRecursionsEndingWith(call, entryState, token);
-			token = callerToken;
+			pendingRecursions = true;
+			LOG.info("Found recursion at " + call.getLocation());
 
 			// we return bottom for now
 			if (returnsVoid(call, null))
@@ -387,8 +374,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 						entryState.getAliasing().bottom());
 		}
 
-		Call callsite = call.getSource() == null ? call : call.getSource();
-		ongoingCalls.put(callsite, Pair.of(token, CompoundState.of(entryState, expressions)));
+		ContextSensitivityToken callerToken = token;
+		token = token.push(call);
 		ScopeToken scope = new ScopeToken(call);
 		AnalysisState<A, H, V, T> result = entryState.bottom();
 
@@ -427,7 +414,6 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			result = result.lub(unscope(call, scope, exitState));
 		}
 
-		ongoingCalls.remove(callsite);
 		token = callerToken;
 		return result;
 	}

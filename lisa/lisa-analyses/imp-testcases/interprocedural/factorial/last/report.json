@@ -1,16 +1,16 @@
 {
   "warnings" : [ ],
-  "files" : [ "report.json", "untyped_tests.directRecursion(tests__this,_untyped_n)_-270289677.json", "untyped_tests.directRecursion(tests__this,_untyped_n)_-270289832.json", "untyped_tests.main(tests__this,_untyped_a).json" ],
+  "files" : [ "report.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_-1504338471.json", "untyped_factorial.main(factorial__this,_untyped_a).json" ],
   "info" : {
     "cfgs" : "2",
-    "duration" : "784ms",
-    "end" : "2023-03-24T11:21:44.696+01:00",
+    "duration" : "825ms",
+    "end" : "2023-04-14T12:13:02.586+02:00",
     "expressions" : "16",
-    "files" : "3",
+    "files" : "2",
     "globals" : "0",
     "members" : "2",
     "programs" : "1",
-    "start" : "2023-03-24T11:21:43.912+01:00",
+    "start" : "2023-04-14T12:13:01.761+02:00",
     "statements" : "6",
     "units" : "1",
     "version" : "0.1b7",
@@ -31,6 +31,6 @@
     "serializeResults" : "true",
     "syntacticChecks" : "",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs/interprocedural/directRecursion/last"
+    "workdir" : "test-outputs/interprocedural/factorial/last"
   }
 }

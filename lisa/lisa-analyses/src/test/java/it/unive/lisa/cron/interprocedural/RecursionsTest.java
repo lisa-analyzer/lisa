@@ -14,8 +14,11 @@ import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.LastCallToken;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RecursionsTest extends AnalysisTestExecutor {
 
 	@Test
@@ -31,11 +34,11 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/kdepth";
 		conf.programFile = "fibonacci.imp";
-		// during the first evaluation of the recursive chain, having a bottom
-		// value means that + can also be rewritten as strcat. This does not
-		// happen when the full chain is computed (when unwinding the results)
-		// and will thus cause a diff in results due to the missing expression
-//		conf.compareWithOptimization = false;
+		// as the test uses addition, there is a spurious x strcat y placed in
+		// the computed expressions in the first fixpoint round as the types of
+		// x and y cannot be determined (the state is bottom). This does not
+		// happen when unwinding the results, causing a difference.
+		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 
@@ -52,11 +55,11 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/last";
 		conf.programFile = "fibonacci.imp";
-		// during the first evaluation of the recursive chain, having a bottom
-		// value means that + can also be rewritten as strcat. This does not
-		// happen when the full chain is computed (when unwinding the results)
-		// and will thus cause a diff in results due to the missing expression
-//		conf.compareWithOptimization = false;
+		// as the test uses addition, there is a spurious x strcat y placed in
+		// the computed expressions in the first fixpoint round as the types of
+		// x and y cannot be determined (the state is bottom). This does not
+		// happen when unwinding the results, causing a difference.
+		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 
@@ -73,11 +76,11 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/insensitive";
 		conf.programFile = "fibonacci.imp";
-		// during the first evaluation of the recursive chain, having a bottom
-		// value means that + can also be rewritten as strcat. This does not
-		// happen when the full chain is computed (when unwinding the results)
-		// and will thus cause a diff in results due to the missing expression
-//		conf.compareWithOptimization = false;
+		// as the test uses addition, there is a spurious x strcat y placed in
+		// the computed expressions in the first fixpoint round as the types of
+		// x and y cannot be determined (the state is bottom). This does not
+		// happen when unwinding the results, causing a difference.
+		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 
@@ -142,6 +145,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion2/kdepth";
 		conf.programFile = "infiniteRecursion2.imp";
+		// note: the result of this recursion is bottom as it never terminates
 		perform(conf);
 	}
 
@@ -158,6 +162,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion2/last";
 		conf.programFile = "infiniteRecursion2.imp";
+		// note: the result of this recursion is bottom as it never terminates
 		perform(conf);
 	}
 
@@ -174,6 +179,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion2/insensitive";
 		conf.programFile = "infiniteRecursion2.imp";
+		// note: the result of this recursion is bottom as it never terminates
 		perform(conf);
 	}
 
@@ -190,6 +196,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion1/kdepth";
 		conf.programFile = "infiniteRecursion1.imp";
+		// note: the result of this recursion is bottom as it never terminates
 		perform(conf);
 	}
 
@@ -206,6 +213,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion1/last";
 		conf.programFile = "infiniteRecursion1.imp";
+		// note: the result of this recursion is bottom as it never terminates
 		perform(conf);
 	}
 
@@ -222,6 +230,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion1/insensitive";
 		conf.programFile = "infiniteRecursion1.imp";
+		// note: the result of this recursion is bottom as it never terminates
 		perform(conf);
 	}
 
@@ -332,8 +341,8 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
-		conf.testSubDir = "factorial/kdepth";
-		conf.programFile = "factorial.imp";
+		conf.testSubDir = "twoRecursions/kdepth";
+		conf.programFile = "twoRecursions.imp";
 		perform(conf);
 	}
 

@@ -21,6 +21,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
+import it.unive.lisa.type.Untyped;
 
 /**
  * An expression modeling the plus operation ({@code +}) that, in some
@@ -94,11 +95,12 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 				if (op == null)
 					continue;
 
+				Type t = Type.commonSupertype(
+						op.typeInference(types, left.getRuntimeTypes(types), right.getRuntimeTypes(types)),
+						Untyped.INSTANCE);
 				result = result.lub(state.smallStepSemantics(
 						new BinaryExpression(
-								op == StringConcat.INSTANCE
-										? StringType.INSTANCE
-										: getStaticType(),
+								t,
 								left,
 								right,
 								op,

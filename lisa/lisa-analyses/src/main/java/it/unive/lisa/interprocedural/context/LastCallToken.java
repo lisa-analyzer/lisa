@@ -1,7 +1,6 @@
 package it.unive.lisa.interprocedural.context;
 
 import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
@@ -66,7 +65,7 @@ public class LastCallToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ScopeId startingId() {
+	public ContextSensitivityToken startingId() {
 		return getSingleton();
 	}
 

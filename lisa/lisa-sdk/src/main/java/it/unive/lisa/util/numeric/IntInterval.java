@@ -38,24 +38,24 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	}
 
 	/**
-	 * Builds a new interval.
+	 * Builds a new interval. Order of the bounds is adjusted (i.e., if
+	 * {@code low} is greater then {@code high}, then the interval
+	 * {@code [high, low]} is created).
 	 * 
 	 * @param low  the lower bound
 	 * @param high the upper bound
-	 * 
-	 * @throws IllegalArgumentException if {@code low > high}
 	 */
 	public IntInterval(int low, int high) {
 		this(new MathNumber(low), new MathNumber(high));
 	}
 
 	/**
-	 * Builds a new interval.
+	 * Builds a new interval. Order of the bounds is adjusted (i.e., if
+	 * {@code low} is greater then {@code high}, then the interval
+	 * {@code [high, low]} is created).
 	 * 
 	 * @param low  the lower bound (if {@code null}, -inf will be used)
 	 * @param high the upper bound (if {@code null}, +inf will be used)
-	 * 
-	 * @throws IllegalArgumentException if {@code low > high}
 	 */
 	public IntInterval(Integer low, Integer high) {
 		this(low == null ? MathNumber.MINUS_INFINITY : new MathNumber(low),
@@ -63,19 +63,21 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	}
 
 	/**
-	 * Builds a new interval.
+	 * Builds a new interval. Order of the bounds is adjusted (i.e., if
+	 * {@code low} is greater then {@code high}, then the interval
+	 * {@code [high, low]} is created).
 	 * 
 	 * @param low  the lower bound
 	 * @param high the upper bound
-	 * 
-	 * @throws IllegalArgumentException if {@code low > high}
 	 */
 	public IntInterval(MathNumber low, MathNumber high) {
-		if (low.compareTo(high) > 0)
-			throw new IllegalArgumentException("Lower bound is bigger than higher bound");
-
-		this.low = low;
-		this.high = high;
+		if (low.compareTo(high) <= 0) {
+			this.low = low;
+			this.high = high;
+		} else {
+			this.low = high;
+			this.high = low;
+		}
 	}
 
 	/**
@@ -278,9 +280,9 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 
 		if (!other.includes(ZERO))
 			return mul(new IntInterval(MathNumber.ONE.divide(other.high), MathNumber.ONE.divide(other.low)));
-		else if (other.high.is(0))
+		else if (other.high.isZero())
 			return mul(new IntInterval(MathNumber.MINUS_INFINITY, MathNumber.ONE.divide(other.low)));
-		else if (other.low.is(0))
+		else if (other.low.isZero())
 			return mul(new IntInterval(MathNumber.ONE.divide(other.high), MathNumber.PLUS_INFINITY));
 		else if (ignoreZero)
 			return mul(new IntInterval(MathNumber.ONE.divide(other.low), MathNumber.ONE.divide(other.high)));

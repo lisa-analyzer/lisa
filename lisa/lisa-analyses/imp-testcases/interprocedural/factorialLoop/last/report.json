@@ -1,17 +1,17 @@
 {
   "warnings" : [ ],
-  "files" : [ "report.json", "untyped_tests.loop(tests__this,_untyped_n)_1721405270.json", "untyped_tests.loop(tests__this,_untyped_n)_1721406355.json", "untyped_tests.loopAux1(tests__this,_untyped_n)_1721409734.json", "untyped_tests.loopAux2(tests__this,_untyped_n)_1721408959.json", "untyped_tests.main(tests__this,_untyped_a).json" ],
+  "files" : [ "report.json", "untyped_factorialLoop.factorialLoop(factorialLoop__this,_untyped_n)_-1303134381.json", "untyped_factorialLoop.factorialLoopAux1(factorialLoop__this,_untyped_n)_-1303131002.json", "untyped_factorialLoop.factorialLoopAux2(factorialLoop__this,_untyped_n)_-1303131777.json", "untyped_factorialLoop.main(factorialLoop__this,_untyped_a).json" ],
   "info" : {
     "cfgs" : "4",
-    "duration" : "1s 343ms",
-    "end" : "2023-03-24T18:47:23.763+01:00",
-    "expressions" : "34",
-    "files" : "5",
+    "duration" : "1s 342ms",
+    "end" : "2023-04-16T18:13:37.288+02:00",
+    "expressions" : "40",
+    "files" : "4",
     "globals" : "0",
     "members" : "4",
     "programs" : "1",
-    "start" : "2023-03-24T18:47:22.420+01:00",
-    "statements" : "10",
+    "start" : "2023-04-16T18:13:35.946+02:00",
+    "statements" : "14",
     "units" : "1",
     "version" : "0.1b7",
     "warnings" : "0"
@@ -31,6 +31,6 @@
     "serializeResults" : "true",
     "syntacticChecks" : "",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs/interprocedural/loop/last"
+    "workdir" : "test-outputs/interprocedural/factorialLoop/last"
   }
 }

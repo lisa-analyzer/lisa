@@ -12,12 +12,12 @@ class tests {
 		}
 	}
 	
-	aux1(n,b) {
-		return rec(x,b) + n;
+	aux1(x,b,n) {
+		return this.rec(x,b) - n;
 	}
 	
-	aux2(n,b) {
-		return rec(x,b) + n + 1;
+	aux2(x,b,n) {
+		return this.rec(x,b) - n - 1;
 	}
 	
 	main(a,b) {

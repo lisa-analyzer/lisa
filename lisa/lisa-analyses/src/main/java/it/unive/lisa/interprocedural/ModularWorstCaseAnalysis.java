@@ -145,6 +145,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 			throws InterproceduralAnalysisException {
 		this.app = app;
 		this.policy = policy;
+		this.results = null;
 	}
 
 	@Override

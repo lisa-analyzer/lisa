@@ -10,7 +10,11 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  */
 public interface ContextSensitivityToken extends ScopeId {
 
-	// we redefine this just to give a more specific return type
+	// we redefine these just to give a more specific return type
+
+	@Override
+	ContextSensitivityToken startingId();
+
 	@Override
 	ContextSensitivityToken push(CFGCall c);
 }

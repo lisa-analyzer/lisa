@@ -1,6 +1,5 @@
 package it.unive.lisa.interprocedural.context;
 
-import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ScopeId startingId() {
+	public ContextSensitivityToken startingId() {
 		return getSingleton();
 	}
 

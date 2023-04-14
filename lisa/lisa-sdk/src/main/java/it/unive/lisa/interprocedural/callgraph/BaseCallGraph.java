@@ -26,8 +26,6 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.datastructures.graph.BaseGraph;
-import it.unive.lisa.util.datastructures.graph.algorithms.SCCs;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,7 +35,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,9 +50,7 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph
-		extends BaseGraph<BaseCallGraph, CallGraphNode, CallGraphEdge>
-		implements CallGraph {
+public abstract class BaseCallGraph extends CallGraph {
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
@@ -67,7 +62,10 @@ public abstract class BaseCallGraph
 
 	@Override
 	public void init(Application app) throws CallGraphConstructionException {
+		super.init(app);
 		this.app = app;
+		this.callsites.clear();
+		this.resolvedCache.clear();
 	}
 
 	@Override
@@ -470,46 +468,7 @@ public abstract class BaseCallGraph
 			throws CallResolutionException;
 
 	@Override
-	public Collection<CodeMember> getCallees(CodeMember cm) {
-		return followersOf(new CallGraphNode(this, cm)).stream().map(CallGraphNode::getCodeMember)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public Collection<CodeMember> getCallers(CodeMember cm) {
-		return predecessorsOf(new CallGraphNode(this, cm)).stream().map(CallGraphNode::getCodeMember)
-				.collect(Collectors.toList());
-	}
-
-	@Override
 	public Collection<Call> getCallSites(CodeMember cm) {
 		return callsites.getOrDefault(cm, Collections.emptyList());
-	}
-
-	@Override
-	public Collection<Collection<CodeMember>> getRecursions() {
-		Collection<Collection<CallGraphNode>> sccs = new SCCs<
-				BaseCallGraph,
-				CallGraphNode,
-				CallGraphEdge>().build(this);
-		return sccs.stream()
-				.map(nodes -> nodes.stream()
-						.map(node -> node.getCodeMember())
-						.collect(Collectors.toSet()))
-				.collect(Collectors.toSet());
-	}
-
-	@Override
-	public Collection<Collection<CodeMember>> getRecursionsContaining(CodeMember cm) {
-		Collection<Collection<CallGraphNode>> sccs = new SCCs<
-				BaseCallGraph,
-				CallGraphNode,
-				CallGraphEdge>().build(this);
-		return sccs.stream()
-				.map(nodes -> nodes.stream()
-						.map(node -> node.getCodeMember())
-						.collect(Collectors.toSet()))
-				.filter(members -> members.contains(cm))
-				.collect(Collectors.toSet());
 	}
 }

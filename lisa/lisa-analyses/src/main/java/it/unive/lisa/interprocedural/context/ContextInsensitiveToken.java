@@ -1,6 +1,5 @@
 package it.unive.lisa.interprocedural.context;
 
-import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
@@ -10,6 +9,8 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * {@link KDepthToken} with {@code k = 0}.
  */
 public class ContextInsensitiveToken implements ContextSensitivityToken {
+
+	private static final ContextInsensitiveToken SINGLETON = new ContextInsensitiveToken();
 
 	private ContextInsensitiveToken() {
 		super();
@@ -26,7 +27,7 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	 * @return an instance of the class
 	 */
 	public static ContextInsensitiveToken getSingleton() {
-		return new ContextInsensitiveToken();
+		return SINGLETON;
 	}
 
 	@Override
@@ -43,8 +44,8 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ScopeId startingId() {
-		return getSingleton();
+	public ContextSensitivityToken startingId() {
+		return SINGLETON;
 	}
 
 	@Override

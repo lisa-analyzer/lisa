@@ -231,6 +231,14 @@ public class OptimizedAnalyzedCFG<
 		});
 	}
 
+	public boolean hasPostStateOf(Statement st) {
+		return results.getKeys().contains(st);
+	}
+
+	public void storePostStateOf(Statement st, AnalysisState<A, H, V, T> postState) {
+		results.put(st, postState);
+	}
+
 	private class PrecomputedAnalysis implements InterproceduralAnalysis<A, H, V, T> {
 
 		@Override
@@ -238,6 +246,7 @@ public class OptimizedAnalyzedCFG<
 				CallGraph callgraph,
 				OpenCallPolicy policy)
 				throws InterproceduralAnalysisException {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -260,6 +269,10 @@ public class OptimizedAnalyzedCFG<
 				ExpressionSet<SymbolicExpression>[] parameters,
 				StatementStore<A, H, V, T> expressions)
 				throws SemanticException {
+			Call source = call.getSource() == null ? call : call.getSource();
+			if (results.getKeys().contains(source))
+				return results.getState(source);
+
 			FixpointResults<A, H, V, T> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
 			ScopeId id = getId().push(call);
@@ -362,26 +375,5 @@ public class OptimizedAnalyzedCFG<
 	@Override
 	public OptimizedAnalyzedCFG<A, H, V, T> bottom() {
 		return new OptimizedAnalyzedCFG<>(this, id.startingId(), entryStates.bottom(), results.bottom(), null, null);
-	}
-
-	@Override
-	public AnalyzedCFG<A, H, V, T> withModifiedEntryState(AnalysisState<A, H, V, T> entry) throws SemanticException {
-		AnalyzedCFG<A, H, V, T> sup = super.withModifiedEntryState(entry);
-		StatementStore<A, H, V, T> newExpanded = null; 
-		
-		if (expanded != null) {
-			// out of scope identifiers are relative to the entry state
-			// we forget them all and replace them with the ones in entry
-			// TODO this is a best effort: we might have an identifier scoped by
-			// a call and then by another scoper. This will stay in the states
-			// of this graph and will cause some confusion
-			newExpanded = new StatementStore<>(entry.top());
-			for (Entry<Statement, AnalysisState<A, H, V, T>> result : expanded)
-				newExpanded.put(result.getKey(), result.getValue()
-						.forgetIdentifiersIf(i -> i.isScopedByCall())
-						.lub(entry));
-		}
-
-		return new OptimizedAnalyzedCFG<>(this, id, sup.entryStates, sup.results, newExpanded, interprocedural);
 	}
 }
