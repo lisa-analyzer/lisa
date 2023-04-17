@@ -35,6 +35,23 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * A recursion solver that applies the iterates of the recursion starting from
+ * bottom. This solver operates by restarting the recursion from
+ * {@link Recursion#getInvocation()} a number of times, until the results of all
+ * the members stabilize.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the type of {@link AbstractState} contained into the analysis
+ *                state
+ * @param <H> the type of {@link HeapDomain} contained into the computed
+ *                abstract state
+ * @param <V> the type of {@link ValueDomain} contained into the computed
+ *                abstract state
+ * @param <T> the type of {@link TypeDomain} contained into the computed
+ *                abstract state
+ */
 public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
@@ -55,6 +72,13 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 
 	private ContextSensitivityToken headToken;
 
+	/**
+	 * Builds the solver.
+	 * 
+	 * @param backing   the analysis that backs this solver, and that can be
+	 *                      used to query call results
+	 * @param recursion the recursion to solve
+	 */
 	public RecursionSolver(ContextBasedAnalysis<A, H, V, T> backing, Recursion<A, H, V, T> recursion) {
 		super(backing);
 		this.recursion = recursion;
@@ -62,7 +86,7 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 
 		// the return value of each back call must be the same as the one
 		// starting the recursion, as they invoke the same cfg
-		returnsVoid = returnsVoid(recursion.getStart(), null);
+		returnsVoid = returnsVoid(recursion.getInvocation(), null);
 	}
 
 	@Override
@@ -94,12 +118,12 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 			ExpressionSet<SymbolicExpression>[] parameters,
 			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
-		boolean inRecursion = recursion.getInvolvedCFGs().contains(call.getCFG());
+		boolean inRecursion = recursion.getMembers().contains(call.getCFG());
 		if (headToken == null && inRecursion)
 			// this is the first time we handle a call from within the recursion
 			headToken = token;
 
-		if (inRecursion && call.getTargetedCFGs().contains(recursion.getHead())) {
+		if (inRecursion && call.getTargetedCFGs().contains(recursion.getRecursionHead())) {
 			// this is a back call
 			finalEntryStates.put(call, Pair.of(entryState, token));
 
@@ -126,7 +150,7 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 	@Override
 	protected boolean canShortcut(CFG cfg) {
 		// we want to compute the recursive chain with no shortcuts
-		return !recursion.getInvolvedCFGs().contains(cfg);
+		return !recursion.getMembers().contains(cfg);
 	}
 
 	@Override
@@ -134,9 +158,14 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 		return false;
 	}
 
+	/**
+	 * Solves the recursion by applying its iterates starting from bottom.
+	 * 
+	 * @throws SemanticException if an exception happens during the computation
+	 */
 	public void solve() throws SemanticException {
 		int recursionCount = 0;
-		Call start = recursion.getStart();
+		Call start = recursion.getInvocation();
 		Collection<CFGCall> ends = finalEntryStates.keySet();
 		CompoundState<A, H, V, T> entryState = recursion.getEntryState();
 
@@ -206,7 +235,7 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 				// any additional work
 				if (!caller.hasPostStateOf(source)) {
 					// we take the value returned to the start of the recursion
-					AnalysisState<A, H, V, T> exit = results.get(recursion.getHead())
+					AnalysisState<A, H, V, T> exit = results.get(recursion.getRecursionHead())
 							.get(headToken)
 							.getExitState();
 

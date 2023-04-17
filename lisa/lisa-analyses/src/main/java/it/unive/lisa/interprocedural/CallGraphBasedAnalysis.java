@@ -52,9 +52,17 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	 */
 	protected OpenCallPolicy policy;
 
-	public CallGraphBasedAnalysis() {
+	/**
+	 * Builds the analysis.
+	 */
+	protected CallGraphBasedAnalysis() {
 	}
 
+	/**
+	 * Builds the analysis by copying the given one.
+	 * 
+	 * @param other the original analysis to copy
+	 */
 	protected CallGraphBasedAnalysis(CallGraphBasedAnalysis<A, H, V, T> other) {
 		this.callgraph = other.callgraph;
 		this.app = other.app;

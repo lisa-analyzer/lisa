@@ -231,10 +231,25 @@ public class OptimizedAnalyzedCFG<
 		});
 	}
 
+	/**
+	 * Yields whether or not the non-unwinded results of this cfg contain the
+	 * poststate of the given statement.
+	 * 
+	 * @param st the statement
+	 * 
+	 * @return whether or not a poststate for {@code st} exists
+	 */
 	public boolean hasPostStateOf(Statement st) {
 		return results.getKeys().contains(st);
 	}
 
+	/**
+	 * Stores the given poststate for the statement in the non-unwinded results
+	 * of this cfg, overwriting any existing value.
+	 * 
+	 * @param st        the statement
+	 * @param postState the poststate
+	 */
 	public void storePostStateOf(Statement st, AnalysisState<A, H, V, T> postState) {
 		results.put(st, postState);
 	}

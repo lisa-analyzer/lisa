@@ -69,6 +69,12 @@ public abstract class Identifier extends ValueExpression {
 		return weak;
 	}
 
+	/**
+	 * Yields {@code true} if this is an {@link OutOfScopeIdentifier} whose
+	 * outer-most scope was introduced by a call.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean isScopedByCall() {
 		return false;
 	}

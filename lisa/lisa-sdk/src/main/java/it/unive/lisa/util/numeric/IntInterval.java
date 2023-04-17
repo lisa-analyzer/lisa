@@ -71,7 +71,10 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * @param high the upper bound
 	 */
 	public IntInterval(MathNumber low, MathNumber high) {
-		if (low.compareTo(high) <= 0) {
+		if (low.isNaN() || high.isNaN()) {
+			this.low = MathNumber.NaN;
+			this.high = MathNumber.NaN;
+		} else if (low.compareTo(high) <= 0) {
 			this.low = low;
 			this.high = high;
 		} else {

@@ -34,6 +34,7 @@ import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
+import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
@@ -199,6 +200,10 @@ public class EqualityContractVerificationTest {
 					&& !Modifier.isInterface(clazz.getModifiers())
 					&& !tested.contains(clazz)
 					&& definesEqualsHashcode(clazz)
+					// ContextInsensitiveToken is designed for reference
+					// equality, but we fix the hashcode as it is still used in
+					// some filenames
+					&& clazz != ContextInsensitiveToken.class
 					// some testing classes that we do not care about end up
 					// here
 					&& !clazz.getName().contains("Test"))
@@ -492,7 +497,8 @@ public class EqualityContractVerificationTest {
 			if (token == KDepthToken.class)
 				// k is just a bound on the maximum length, it does not matter
 				verify(token, verifier -> verifier.withIgnoredFields("k"));
-			else
+			else if (token != ContextInsensitiveToken.class)
+				// there always is a unique instance of ContextInsensitiveToken
 				verify(token);
 	}
 

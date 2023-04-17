@@ -25,16 +25,24 @@ public class IntIntervalTest {
 	}
 
 	private static void test(Integer x1, Integer x2, Integer y1, Integer y2, Integer e1, Integer e2, String symbol,
-			BiFunction<IntInterval, IntInterval, IntInterval> operator) {
+			BiFunction<IntInterval, IntInterval, IntInterval> operator, boolean expectNaN) {
 		IntInterval x = new IntInterval(x1, x2);
 		IntInterval y = new IntInterval(y1, y2);
 		IntInterval actual = operator.apply(x, y);
-		IntInterval expected = new IntInterval(e1, e2);
+		IntInterval expected;
+		if (expectNaN)
+			expected = new IntInterval(MathNumber.NaN, MathNumber.NaN);
+		else
+			expected = new IntInterval(e1, e2);
 		assertEquals(x + " " + symbol + " " + y + " = " + expected + " (got " + actual + ")", expected, actual);
 	}
 
 	private static void mul(Integer x1, Integer x2, Integer y1, Integer y2, Integer e1, Integer e2) {
-		test(x1, x2, y1, y2, e1, e2, "*", IntInterval::mul);
+		test(x1, x2, y1, y2, e1, e2, "*", IntInterval::mul, false);
+	}
+
+	private static void mul(Integer x1, Integer x2, Integer y1, Integer y2) {
+		test(x1, x2, y1, y2, null, null, "*", IntInterval::mul, true);
 	}
 
 	@Test
@@ -51,16 +59,16 @@ public class IntIntervalTest {
 		mul(1, 2, -2, -1, -4, -1);
 		mul(1, 2, -2, 1, -4, 2);
 		mul(1, 2, 1, 2, 1, 4);
-		mul(null, 0, null, 0, 0, null);
-		mul(null, 0, null, null, null, null);
-		mul(null, 0, 0, null, null, 0);
+		mul(null, 0, null, 0);
+		mul(null, 0, null, null);
+		mul(null, 0, 0, null);
 		mul(null, 0, 0, 0, 0, 0);
-		mul(null, null, null, 0, null, null);
+		mul(null, null, null, 0);
 		mul(null, null, null, null, null, null);
-		mul(null, null, 0, null, null, null);
+		mul(null, null, 0, null);
 		mul(null, null, 0, 0, 0, 0);
-		mul(0, null, null, 0, null, 0);
-		mul(0, null, null, null, null, null);
+		mul(0, null, null, 0);
+		mul(0, null, null, null);
 		mul(0, null, 0, null, 0, null);
 		mul(0, null, 0, 0, 0, 0);
 		mul(0, 0, null, 0, 0, 0);
@@ -71,7 +79,11 @@ public class IntIntervalTest {
 
 	private static void div(Integer x1, Integer x2, Integer y1, Integer y2, Integer e1, Integer e2,
 			boolean ignoreZero) {
-		test(x1, x2, y1, y2, e1, e2, "/", (l, r) -> l.div(r, ignoreZero, false));
+		test(x1, x2, y1, y2, e1, e2, "/", (l, r) -> l.div(r, ignoreZero, false), false);
+	}
+
+	private static void div(Integer x1, Integer x2, Integer y1, Integer y2, boolean ignoreZero) {
+		test(x1, x2, y1, y2, null, null, "/", (l, r) -> l.div(r, ignoreZero, false), true);
 	}
 
 	@Test
@@ -88,14 +100,14 @@ public class IntIntervalTest {
 		div(1, 2, -2, -1, -2, 0, false);
 		div(1, 2, -2, 1, null, null, false);
 		div(1, 2, 1, 2, 0, 2, false);
-		div(null, 0, null, 0, 0, null, false);
-		div(null, 0, null, null, null, null, false);
-		div(null, 0, 0, null, null, 0, false);
-		div(null, null, null, 0, null, null, false);
-		div(null, null, null, null, null, null, false);
-		div(null, null, 0, null, null, null, false);
-		div(0, null, null, 0, null, 0, false);
-		div(0, null, null, null, null, null, false);
+		div(null, 0, null, 0, false);
+		div(null, 0, null, null, false);
+		div(null, 0, 0, null, false);
+		div(null, null, null, 0, false);
+		div(null, null, null, null, false);
+		div(null, null, 0, null, false);
+		div(0, null, null, 0, false);
+		div(0, null, null, null, false);
 		div(0, null, 0, null, 0, null, false);
 		div(0, 0, null, 0, 0, 0, false);
 		div(0, 0, null, null, 0, 0, false);
@@ -116,13 +128,13 @@ public class IntIntervalTest {
 		div(1, 2, -2, -1, -2, 0, true);
 		div(1, 2, -2, 1, -1, 2, true);
 		div(1, 2, 1, 2, 0, 2, true);
-		div(null, 0, null, 0, 0, null, true);
+		div(null, 0, null, 0, true);
 		div(null, 0, null, null, 0, 0, true);
-		div(null, 0, 0, null, null, 0, true);
-		div(null, null, null, 0, null, null, true);
+		div(null, 0, 0, null, true);
+		div(null, null, null, 0, true);
 		div(null, null, null, null, 0, 0, true);
-		div(null, null, 0, null, null, null, true);
-		div(0, null, null, 0, null, 0, true);
+		div(null, null, 0, null, true);
+		div(0, null, null, 0, true);
 		div(0, null, null, null, 0, 0, true);
 		div(0, null, 0, null, 0, null, true);
 		div(0, 0, null, 0, 0, 0, true);

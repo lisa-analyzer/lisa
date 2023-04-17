@@ -54,7 +54,9 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
- * tuned by the kind of {@link ContextSensitivityToken} used.
+ * tuned by the kind of {@link ContextSensitivityToken} used. Recursions are
+ * approximated applying the iterates of the recursion starting from bottom and
+ * using the same widening threshold of cfg fixpoints.
  * 
  * @param <A> the abstract state of the analysis
  * @param <H> the heap domain
@@ -121,6 +123,11 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		triggers = new HashSet<>();
 	}
 
+	/**
+	 * Builds the analysis by copying the given one.
+	 * 
+	 * @param other the original analysis to copy
+	 */
 	protected ContextBasedAnalysis(ContextBasedAnalysis<A, H, V, T> other) {
 		super(other);
 		this.conf = other.conf;
@@ -234,10 +241,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 							for (Pair<ContextSensitivityToken, CompoundState<A, H, V, T>> entry : entries) {
 								Recursion<A, H, V, T> recursion = new Recursion<>(
 										starter,
-										head,
-										rec,
 										entry.getLeft(),
-										entry.getRight());
+										entry.getRight(),
+										head,
+										rec);
 								recursions.add(recursion);
 							}
 					}
@@ -246,7 +253,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 				try {
 					for (Recursion<A, H, V, T> rec : recursions) {
 						new RecursionSolver<>(this, rec).solve();
-						triggers.addAll(rec.getInvolvedCFGs());
+						triggers.addAll(rec.getMembers());
 					}
 				} catch (SemanticException e) {
 					throw new AnalysisExecutionException("Unable to solve one or more recursions", e);
@@ -304,10 +311,25 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		return res.getRight();
 	}
 
+	/**
+	 * Whether or not this analysis can avoid computing a fixpoint for the given
+	 * cfg when it is invoked by a call, and shortcut to the result for the same
+	 * token if it exists and if it was produced with a greater entry state.
+	 *
+	 * @param cfg the cfg under evaluation
+	 * 
+	 * @return {@code true} if that condition holds (defaults to {@code true})
+	 */
 	protected boolean canShortcut(CFG cfg) {
 		return true;
 	}
 
+	/**
+	 * Whether or not this analysis should look for recursions when evaluating
+	 * calls, immediately returning bottom when one is found.
+	 * 
+	 * @return {@code true} if that condition holds (defaults to {@code true})
+	 */
 	protected boolean shouldCheckForRecursions() {
 		return true;
 	}
@@ -317,7 +339,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		return results;
 	}
 
-	protected Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepareEntryState(
+	private Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepareEntryState(
 			CFGCall call,
 			AnalysisState<A, H, V, T> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
