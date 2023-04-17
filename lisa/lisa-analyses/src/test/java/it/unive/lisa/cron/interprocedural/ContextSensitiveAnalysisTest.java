@@ -13,7 +13,7 @@ import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.RecursionFreeToken;
+import it.unive.lisa.interprocedural.context.FullStackToken;
 import org.junit.Test;
 
 public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
@@ -74,7 +74,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 				getDefaultFor(HeapDomain.class),
 				new Sign(),
 				getDefaultFor(TypeDomain.class));
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "RTAContextSensitive4";

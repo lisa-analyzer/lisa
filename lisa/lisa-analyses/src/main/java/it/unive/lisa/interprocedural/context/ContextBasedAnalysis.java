@@ -61,7 +61,7 @@ import org.apache.logging.log4j.Logger;
  * @param <V> the value domain
  * @param <T> the type domain
  */
-@DefaultParameters({ RecursionFreeToken.class })
+@DefaultParameters({ FullStackToken.class })
 public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,

@@ -7,21 +7,22 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A context sensitive token representing an entire call chain until a recursion
- * is encountered. This corresponds to having an unlimited {@link KDepthToken},
- * that will thus not ensure termination on recursions.
+ * A context sensitive token representing an entire call chain, regardless of
+ * its length. This corresponds to having an unlimited {@link KDepthToken}, that
+ * will thus never merge results for of different calls due to matching
+ * contexts.
  */
-public class RecursionFreeToken implements ContextSensitivityToken {
+public class FullStackToken implements ContextSensitivityToken {
 
-	private static final RecursionFreeToken SINGLETON = new RecursionFreeToken();
+	private static final FullStackToken SINGLETON = new FullStackToken();
 
 	private final List<CFGCall> calls;
 
-	private RecursionFreeToken() {
+	private FullStackToken() {
 		calls = Collections.emptyList();
 	}
 
-	private RecursionFreeToken(RecursionFreeToken source, CFGCall newToken) {
+	private FullStackToken(FullStackToken source, CFGCall newToken) {
 		this.calls = new ArrayList<>(source.calls.size() + 1);
 		source.calls.forEach(this.calls::add);
 		this.calls.add(newToken);
@@ -32,7 +33,7 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 	 * 
 	 * @return an empty token
 	 */
-	public static RecursionFreeToken getSingleton() {
+	public static FullStackToken getSingleton() {
 		return SINGLETON;
 	}
 
@@ -68,7 +69,7 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RecursionFreeToken other = (RecursionFreeToken) obj;
+		FullStackToken other = (FullStackToken) obj;
 		if (calls == null) {
 			if (other.calls != null)
 				return false;
@@ -89,6 +90,6 @@ public class RecursionFreeToken implements ContextSensitivityToken {
 
 	@Override
 	public ContextSensitivityToken push(CFGCall c) {
-		return new RecursionFreeToken(this, c);
+		return new FullStackToken(this, c);
 	}
 }
