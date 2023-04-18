@@ -1,0 +1,36 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_infiniteRecursion.infiniteRecursion(infiniteRecursion__this,_untyped_n)_345334468.json", "untyped_infiniteRecursion.infiniteRecursionAux1(infiniteRecursion__this,_untyped_n)_-1834196494.json", "untyped_infiniteRecursion.infiniteRecursionAux2(infiniteRecursion__this,_untyped_n)_-680179425.json", "untyped_infiniteRecursion.main(infiniteRecursion__this,_untyped_a).json" ],
+  "info" : {
+    "cfgs" : "4",
+    "duration" : "89ms",
+    "end" : "2023-04-18T15:22:47.054+02:00",
+    "expressions" : "25",
+    "files" : "4",
+    "globals" : "0",
+    "members" : "4",
+    "programs" : "1",
+    "start" : "2023-04-18T15:22:46.965+02:00",
+    "statements" : "8",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/infiniteRecursion2/full"
+  }
+}
