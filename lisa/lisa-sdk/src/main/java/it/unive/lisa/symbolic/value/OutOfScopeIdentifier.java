@@ -37,6 +37,11 @@ public class OutOfScopeIdentifier extends Identifier {
 	}
 
 	@Override
+	public boolean canBeScoped() {
+		return true;
+	}
+
+	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
 		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
@@ -50,7 +55,7 @@ public class OutOfScopeIdentifier extends Identifier {
 
 	@Override
 	public boolean isScopedByCall() {
-		return scope.getScoper() instanceof Call;
+		return scope.getScoper() instanceof Call || (id instanceof OutOfScopeIdentifier && id.isScopedByCall());
 	}
 
 	/**

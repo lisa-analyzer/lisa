@@ -41,9 +41,11 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -250,8 +252,23 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 					}
 				}
 
+				List<Recursion<A, H, V, T>> orderedRecursions = new ArrayList<>(recursions.size());
+				for (Recursion<A, H, V, T> rec : recursions) {
+					int pos = 0;
+					for (; pos < orderedRecursions.size(); pos++)
+						if (orderedRecursions.get(pos).getMembers().contains(rec.getInvocation().getCFG()))
+							// as the recursion at pos contains the member
+							// invoking rec, rec must be solved before the
+							// recursion at pos
+							break;
+					// if no match is found, add() will place the element at the
+					// end (pos == size())
+					// otherwise, elements will be shifted
+					orderedRecursions.add(pos, rec);
+				}
+
 				try {
-					for (Recursion<A, H, V, T> rec : recursions) {
+					for (Recursion<A, H, V, T> rec : orderedRecursions) {
 						new RecursionSolver<>(this, rec).solve();
 						triggers.addAll(rec.getMembers());
 					}

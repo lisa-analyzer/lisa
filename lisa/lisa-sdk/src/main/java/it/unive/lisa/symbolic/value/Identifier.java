@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
@@ -70,14 +71,28 @@ public abstract class Identifier extends ValueExpression {
 	}
 
 	/**
-	 * Yields {@code true} if this is an {@link OutOfScopeIdentifier} whose
-	 * outer-most scope was introduced by a call.
+	 * Yields {@code true} if this is an {@link OutOfScopeIdentifier} whose (i)
+	 * scope was introduced by a call, or (ii) inner identifier is an
+	 * {@link OutOfScopeIdentifier} such that {@code inner.isScopedByCall()}
+	 * holds.
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
 	public boolean isScopedByCall() {
 		return false;
 	}
+
+	/**
+	 * Yields {@code true} if a call to {@link #pushScope(ScopeToken)} on this
+	 * identifier yields a new {@link OutOfScopeIdentifier} associated with the
+	 * given scope, that can then be removed by {@link #popScope(ScopeToken)}.
+	 * If this method returns {@code false}, then {@link #pushScope(ScopeToken)}
+	 * and {@link #popScope(ScopeToken)} will always return this identifier
+	 * instead.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public abstract boolean canBeScoped();
 
 	@Override
 	public int hashCode() {

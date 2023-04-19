@@ -196,10 +196,12 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 						// we transfer the return value
 						res = res.lub(post.assign(meta, variable, start));
 
-				// we don't keep variables that are in scope here:
-				// those will not be in scope at the recursion closure
-				// except for the return value of the specific call
-				res = res.forgetIdentifiersIf(i -> !i.isScopedByCall() && !i.equals(meta));
+				// we only keep variables that can be affected by the recursive
+				// chain: the whole recursion return value, and all variables
+				// that are not sensible to scoping. All other variables are
+				// subjected to push and pop operations and cannot be
+				// considered a contribution of the recursive call.
+				res = res.forgetIdentifiersIf(i -> i.canBeScoped() && !i.equals(meta));
 				recursiveApprox = recursiveApprox.putState(end, res);
 			}
 

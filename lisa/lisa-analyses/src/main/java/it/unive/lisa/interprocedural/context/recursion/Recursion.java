@@ -165,4 +165,9 @@ public class Recursion<
 	public Collection<CodeMember> getMembers() {
 		return members;
 	}
+
+	@Override
+	public String toString() {
+		return members.toString() + " (started at " + start.getLocation() + ")";
+	}
 }

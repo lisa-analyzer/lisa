@@ -66,6 +66,11 @@ public class HeapLocation extends Identifier {
 	}
 
 	@Override
+	public boolean canBeScoped() {
+		return false;
+	}
+
+	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
 		return this;
 	}
