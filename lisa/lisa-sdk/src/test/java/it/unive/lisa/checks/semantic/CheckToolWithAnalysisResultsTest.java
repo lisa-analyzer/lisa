@@ -74,7 +74,8 @@ public class CheckToolWithAnalysisResultsTest {
 		}
 
 		@Override
-		public void init(Application program) throws CallGraphConstructionException {
+		public void init(Application app) throws CallGraphConstructionException {
+			super.init(app);
 		}
 
 		@Override
@@ -95,6 +96,16 @@ public class CheckToolWithAnalysisResultsTest {
 		@Override
 		public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
 				throws CallResolutionException {
+			return null;
+		}
+
+		@Override
+		public Collection<Collection<CodeMember>> getRecursions() {
+			return null;
+		}
+
+		@Override
+		public Collection<Collection<CodeMember>> getRecursionsContaining(CodeMember cm) {
 			return null;
 		}
 	};

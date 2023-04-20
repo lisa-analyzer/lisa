@@ -1,0 +1,35 @@
+class tests {
+
+	inner(n,b) {
+		if (n <= 1) 
+			return 1;
+		else if (b) {
+			def x = n - 1;
+			return this.aux1(x,b,n);
+		} else {
+			def x = n - 1;
+			return this.aux2(x,b,n);
+		}
+	}
+	
+	aux1(x,b,n) {
+		return this.inner(x,b) - n;
+	}
+	
+	aux2(x,b,n) {
+		return this.inner(x,b) - n - 1;
+	}
+	
+	outer(n,b) {
+		if (n <= 0) 
+			return 1;
+		else {
+			def x = this.inner(n,b) - 1;
+			return this.outer(x,b) * n;
+		}
+	}
+	
+	main(a,b) {
+		def x = this.outer(a,b);
+    }
+}

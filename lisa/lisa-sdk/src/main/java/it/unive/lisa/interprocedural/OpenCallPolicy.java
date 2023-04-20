@@ -20,11 +20,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 public interface OpenCallPolicy {
 
 	/**
-	 * The name of the variable storing the return value of the call, if any.
-	 */
-	public static final String RETURNED_VARIABLE_NAME = "open_call_return";
-
-	/**
 	 * Applies the policy to the given open call.
 	 * 
 	 * @param <A>        the type of {@link AbstractState} contained into the

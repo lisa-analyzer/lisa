@@ -23,6 +23,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -193,6 +194,8 @@ public class BaseInferredValueTest {
 			return (R) new Sample();
 		if (param == ProgramPoint.class)
 			return (R) new FakePP();
+		if (param == Skip.class)
+			return (R) new Skip(SyntheticLocation.INSTANCE);
 
 		throw new UnsupportedOperationException(mtd + ": No default value for type " + param.getName());
 	}

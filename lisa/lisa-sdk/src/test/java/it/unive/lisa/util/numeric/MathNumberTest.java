@@ -7,7 +7,6 @@ import static it.unive.lisa.util.numeric.MathNumber.ONE;
 import static it.unive.lisa.util.numeric.MathNumber.PLUS_INFINITY;
 import static it.unive.lisa.util.numeric.MathNumber.ZERO;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -30,31 +29,31 @@ public class MathNumberTest {
 		assertEquals("-inf + 0 != +inf", MINUS_INFINITY, MINUS_INFINITY.add(ZERO));
 
 		assertEquals("+inf + +inf != +inf", PLUS_INFINITY, PLUS_INFINITY.add(PLUS_INFINITY));
-		assertEquals("+inf + -inf != +inf", PLUS_INFINITY, PLUS_INFINITY.add(MINUS_INFINITY));
-		assertEquals("-inf + +inf != +inf", PLUS_INFINITY, MINUS_INFINITY.add(PLUS_INFINITY));
+		assertEquals("+inf + -inf != NaN", NaN, PLUS_INFINITY.add(MINUS_INFINITY));
+		assertEquals("-inf + +inf != NaN", NaN, MINUS_INFINITY.add(PLUS_INFINITY));
 		assertEquals("-inf + -inf != -inf", MINUS_INFINITY, MINUS_INFINITY.add(MINUS_INFINITY));
 	}
 
 	@Test
 	public void testSubtractionCornerCases() {
-		assertEquals("+n - +inf != +inf", PLUS_INFINITY, ONE.subtract(PLUS_INFINITY));
+		assertEquals("+n - +inf != -inf", MINUS_INFINITY, ONE.subtract(PLUS_INFINITY));
 		assertEquals("+inf - +n != +inf", PLUS_INFINITY, PLUS_INFINITY.subtract(ONE));
-		assertEquals("-n - +inf != +inf", PLUS_INFINITY, MINUS_ONE.subtract(PLUS_INFINITY));
+		assertEquals("-n - +inf != -inf", MINUS_INFINITY, MINUS_ONE.subtract(PLUS_INFINITY));
 		assertEquals("+inf - -n != +inf", PLUS_INFINITY, PLUS_INFINITY.subtract(MINUS_ONE));
-		assertEquals("0 - +inf != +inf", PLUS_INFINITY, ZERO.subtract(PLUS_INFINITY));
+		assertEquals("0 - +inf != -inf", MINUS_INFINITY, ZERO.subtract(PLUS_INFINITY));
 		assertEquals("+inf - 0 != +inf", PLUS_INFINITY, PLUS_INFINITY.subtract(ZERO));
 
-		assertEquals("+n - -inf != +inf", MINUS_INFINITY, ONE.subtract(MINUS_INFINITY));
+		assertEquals("+n - -inf != +inf", PLUS_INFINITY, ONE.subtract(MINUS_INFINITY));
 		assertEquals("-inf - +n != +inf", MINUS_INFINITY, MINUS_INFINITY.subtract(ONE));
-		assertEquals("-n - -inf != +inf", MINUS_INFINITY, MINUS_ONE.subtract(MINUS_INFINITY));
+		assertEquals("-n - -inf != +inf", PLUS_INFINITY, MINUS_ONE.subtract(MINUS_INFINITY));
 		assertEquals("-inf - -n != +inf", MINUS_INFINITY, MINUS_INFINITY.subtract(MINUS_ONE));
-		assertEquals("0 - -inf != +inf", MINUS_INFINITY, ZERO.subtract(MINUS_INFINITY));
+		assertEquals("0 - -inf != +inf", PLUS_INFINITY, ZERO.subtract(MINUS_INFINITY));
 		assertEquals("-inf - 0 != +inf", MINUS_INFINITY, MINUS_INFINITY.subtract(ZERO));
 
-		assertEquals("+inf - +inf != +inf", PLUS_INFINITY, PLUS_INFINITY.subtract(PLUS_INFINITY));
+		assertEquals("+inf - +inf != NaN", NaN, PLUS_INFINITY.subtract(PLUS_INFINITY));
 		assertEquals("+inf - -inf != +inf", PLUS_INFINITY, PLUS_INFINITY.subtract(MINUS_INFINITY));
-		assertEquals("-inf - +inf != +inf", PLUS_INFINITY, MINUS_INFINITY.subtract(PLUS_INFINITY));
-		assertEquals("-inf - -inf != -inf", MINUS_INFINITY, MINUS_INFINITY.subtract(MINUS_INFINITY));
+		assertEquals("-inf - +inf != -inf", MINUS_INFINITY, MINUS_INFINITY.subtract(PLUS_INFINITY));
+		assertEquals("-inf - -inf != NaN", NaN, MINUS_INFINITY.subtract(MINUS_INFINITY));
 	}
 
 	@Test
@@ -63,32 +62,20 @@ public class MathNumberTest {
 		assertEquals("+inf * +n != +inf", PLUS_INFINITY, PLUS_INFINITY.multiply(ONE));
 		assertEquals("-n * +inf != +inf", MINUS_INFINITY, MINUS_ONE.multiply(PLUS_INFINITY));
 		assertEquals("+inf * -n != +inf", MINUS_INFINITY, PLUS_INFINITY.multiply(MINUS_ONE));
-		assertEquals("0 * +inf != +inf", ZERO, ZERO.multiply(PLUS_INFINITY));
-		assertEquals("+inf * 0 != +inf", ZERO, PLUS_INFINITY.multiply(ZERO));
+		assertEquals("0 * +inf != NaN", NaN, ZERO.multiply(PLUS_INFINITY));
+		assertEquals("+inf * 0 != NaN", NaN, PLUS_INFINITY.multiply(ZERO));
 
 		assertEquals("+n * -inf != +inf", MINUS_INFINITY, ONE.multiply(MINUS_INFINITY));
 		assertEquals("-inf * +n != +inf", MINUS_INFINITY, MINUS_INFINITY.multiply(ONE));
 		assertEquals("-n * -inf != +inf", PLUS_INFINITY, MINUS_ONE.multiply(MINUS_INFINITY));
 		assertEquals("-inf * -n != +inf", PLUS_INFINITY, MINUS_INFINITY.multiply(MINUS_ONE));
-		assertEquals("0 * -inf != +inf", ZERO, ZERO.multiply(MINUS_INFINITY));
-		assertEquals("-inf * 0 != +inf", ZERO, MINUS_INFINITY.multiply(ZERO));
+		assertEquals("0 * -inf != NaN", NaN, ZERO.multiply(MINUS_INFINITY));
+		assertEquals("-inf * 0 != NaN", NaN, MINUS_INFINITY.multiply(ZERO));
 
 		assertEquals("+inf * +inf != +inf", PLUS_INFINITY, PLUS_INFINITY.multiply(PLUS_INFINITY));
 		assertEquals("+inf * -inf != +inf", MINUS_INFINITY, PLUS_INFINITY.multiply(MINUS_INFINITY));
 		assertEquals("-inf * +inf != +inf", MINUS_INFINITY, MINUS_INFINITY.multiply(PLUS_INFINITY));
 		assertEquals("-inf * -inf != -inf", PLUS_INFINITY, MINUS_INFINITY.multiply(MINUS_INFINITY));
-	}
-
-	private static void assertThrows(String op, Runnable operator) {
-		boolean thrown = false;
-		try {
-			operator.run();
-		} catch (ArithmeticException e) {
-			if (e.getMessage().equals("MathInt divide by zero"))
-				thrown = true;
-		}
-		if (!thrown)
-			fail(op + " did not throw an exception");
 	}
 
 	@Test
@@ -98,14 +85,14 @@ public class MathNumberTest {
 		assertEquals("-n / +inf != +inf", ZERO, MINUS_ONE.divide(PLUS_INFINITY));
 		assertEquals("+inf / -n != +inf", MINUS_INFINITY, PLUS_INFINITY.divide(MINUS_ONE));
 		assertEquals("0 / +inf != +inf", ZERO, ZERO.divide(PLUS_INFINITY));
-		assertThrows("+inf / 0", () -> PLUS_INFINITY.divide(ZERO));
+		assertEquals("+inf / 0 != nan", NaN, PLUS_INFINITY.divide(ZERO));
 
 		assertEquals("+n / -inf != +inf", ZERO, ONE.divide(MINUS_INFINITY));
 		assertEquals("-inf / +n != +inf", MINUS_INFINITY, MINUS_INFINITY.divide(ONE));
 		assertEquals("-n / -inf != +inf", ZERO, MINUS_ONE.divide(MINUS_INFINITY));
 		assertEquals("-inf / -n != +inf", PLUS_INFINITY, MINUS_INFINITY.divide(MINUS_ONE));
 		assertEquals("0 / -inf != +inf", ZERO, ZERO.divide(MINUS_INFINITY));
-		assertThrows("-inf / 0", () -> MINUS_INFINITY.divide(ZERO));
+		assertEquals("-inf / 0 != NaN", NaN, MINUS_INFINITY.divide(ZERO));
 
 		assertEquals("+inf / +inf != +inf", NaN, PLUS_INFINITY.divide(PLUS_INFINITY));
 		assertEquals("+inf / -inf != +inf", NaN, PLUS_INFINITY.divide(MINUS_INFINITY));

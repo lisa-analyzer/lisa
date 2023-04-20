@@ -33,6 +33,7 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Set;
+import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -83,7 +84,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 		// new fixpoint iteration: restart
 		this.results = null;
 
-		for (CFG cfg : IterationLogger.iterate(LOG, app.getAllCFGs(), "Computing fixpoint over the whole program",
+		Collection<CFG> all = new TreeSet<>((c1, c2) -> c1.getDescriptor().getLocation()
+				.compareTo(c2.getDescriptor().getLocation()));
+		all.addAll(app.getAllCFGs());
+
+		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
 				if (results == null) {
@@ -140,6 +145,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 			throws InterproceduralAnalysisException {
 		this.app = app;
 		this.policy = policy;
+		this.results = null;
 	}
 
 	@Override

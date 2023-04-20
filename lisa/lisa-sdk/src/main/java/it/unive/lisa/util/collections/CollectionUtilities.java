@@ -2,6 +2,7 @@ package it.unive.lisa.util.collections;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
@@ -190,6 +191,59 @@ public final class CollectionUtilities {
 		@Override
 		public Set<Characteristics> characteristics() {
 			return Set.of(Characteristics.IDENTITY_FINISH);
+		}
+	}
+
+	/**
+	 * A {@link Collector} that yields a {@link String} built by concatenating
+	 * the values returned by {@link Object#toString()} when invoked on the
+	 * elements of the stream.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <E> the type of the elements to be sorted
+	 */
+	public static class StringCollector<E> implements Collector<E, StringBuilder, String> {
+
+		private final String separator;
+
+		/**
+		 * Builds the collector.
+		 * 
+		 * @param separator the separator to use when concatenating items.
+		 */
+		public StringCollector(String separator) {
+			this.separator = separator;
+		}
+
+		@Override
+		public Supplier<StringBuilder> supplier() {
+			return () -> new StringBuilder();
+		}
+
+		@Override
+		public BiConsumer<StringBuilder, E> accumulator() {
+			return (builder, e) -> {
+				if (builder.length() == 0)
+					builder.append(e);
+				else
+					builder.append(separator).append(e);
+			};
+		}
+
+		@Override
+		public BinaryOperator<StringBuilder> combiner() {
+			return (result, partial) -> result.append(partial);
+		}
+
+		@Override
+		public Function<StringBuilder, String> finisher() {
+			return builder -> builder.toString();
+		}
+
+		@Override
+		public Set<Characteristics> characteristics() {
+			return Collections.emptySet();
 		}
 	}
 }

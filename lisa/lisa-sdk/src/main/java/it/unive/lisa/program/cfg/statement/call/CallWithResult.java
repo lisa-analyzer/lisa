@@ -99,31 +99,15 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 		// metavariable
 		AnalysisState<A, H, V, T> returned = compute(state, interprocedural, expressions, params);
 
-		if (getStaticType().isVoidType() ||
-				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||
-				(returned.getComputedExpressions().size() == 1
-						&& returned.getComputedExpressions().iterator().next() instanceof Skip))
+		if (interprocedural.returnsVoid(this, returned))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
 			return returned.smallStepSemantics(new Skip(getLocation()), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
-			// It might be the case it chose a
-			// target with void return type
 			getMetaVariables().add((Identifier) expr);
-
 		getMetaVariables().add(meta);
-
-		AnalysisState<A, H, V, T> result = returned.bottom();
-		for (SymbolicExpression expr : returned.getComputedExpressions()) {
-			// We need to perform this evaluation of the identifier not pushed
-			// with the scope since otherwise the value associated with the
-			// returned variable would be lost
-			AnalysisState<A, H, V, T> tmp = returned.assign(meta, expr, this);
-			result = result.lub(tmp.smallStepSemantics(meta, this));
-		}
-
-		return result;
+		return returned;
 	}
 }

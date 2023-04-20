@@ -2,6 +2,7 @@ package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
@@ -120,6 +121,20 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 */
 	public boolean contains(ScopeId token) {
 		return function != null && function.containsKey(token);
+	}
+
+	/**
+	 * Yields the recorded result for the given {@code token}. This differs from
+	 * {@link #getState(Object)} as it returns {@code null} instead of
+	 * {@link Lattice#bottom()} if there is no recorded result for the given
+	 * token.
+	 * 
+	 * @param token the {@link ScopeId} that identifying the result
+	 * 
+	 * @return the result, or {@code null}
+	 */
+	public AnalyzedCFG<A, H, V, T> get(ScopeId token) {
+		return function == null ? null : function.get(token);
 	}
 
 	/**

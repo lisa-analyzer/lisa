@@ -14,7 +14,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -32,7 +31,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGCall extends CallWithResult implements MetaVariableCreator, CanRemoveReceiver {
+public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 
 	/**
 	 * The targets of this call

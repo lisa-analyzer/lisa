@@ -384,6 +384,8 @@ public class SemanticsSanityTest {
 			return interprocedural;
 		if (param == ScopeId.class)
 			return new UniqueScope();
+		if (param == Lattice.class)
+			return new Sign();
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);

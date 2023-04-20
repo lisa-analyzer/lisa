@@ -59,7 +59,7 @@ public class AscendingFixpoint<A extends AbstractState<A, H, V, T>,
 			CompoundState<A, H, V, T> old) throws SemanticException {
 		// optimization: never apply widening on normal instructions,
 		// save time and precision and only apply to widening points
-		if (widenAfter <= 0 || !wideningPoints.contains(node))
+		if (widenAfter < 0 || !wideningPoints.contains(node))
 			return old.lub(approx);
 
 		int lub = lubs.computeIfAbsent(node, st -> widenAfter);

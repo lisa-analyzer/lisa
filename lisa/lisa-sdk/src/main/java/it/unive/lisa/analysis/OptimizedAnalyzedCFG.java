@@ -28,7 +28,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -232,6 +231,29 @@ public class OptimizedAnalyzedCFG<
 		});
 	}
 
+	/**
+	 * Yields whether or not the non-unwinded results of this cfg contain the
+	 * poststate of the given statement.
+	 * 
+	 * @param st the statement
+	 * 
+	 * @return whether or not a poststate for {@code st} exists
+	 */
+	public boolean hasPostStateOf(Statement st) {
+		return results.getKeys().contains(st);
+	}
+
+	/**
+	 * Stores the given poststate for the statement in the non-unwinded results
+	 * of this cfg, overwriting any existing value.
+	 * 
+	 * @param st        the statement
+	 * @param postState the poststate
+	 */
+	public void storePostStateOf(Statement st, AnalysisState<A, H, V, T> postState) {
+		results.put(st, postState);
+	}
+
 	private class PrecomputedAnalysis implements InterproceduralAnalysis<A, H, V, T> {
 
 		@Override
@@ -239,6 +261,7 @@ public class OptimizedAnalyzedCFG<
 				CallGraph callgraph,
 				OpenCallPolicy policy)
 				throws InterproceduralAnalysisException {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -251,7 +274,7 @@ public class OptimizedAnalyzedCFG<
 
 		@Override
 		public Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
-			return interprocedural.getAnalysisResultsOf(cfg);
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -261,21 +284,17 @@ public class OptimizedAnalyzedCFG<
 				ExpressionSet<SymbolicExpression>[] parameters,
 				StatementStore<A, H, V, T> expressions)
 				throws SemanticException {
+			Call source = call.getSource() == null ? call : call.getSource();
+			if (results.getKeys().contains(source))
+				return results.getState(source);
+
 			FixpointResults<A, H, V, T> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
-			ScopeId id = getId().push(scope);
+			ScopeId id = getId().push(call);
 			AnalysisState<A, H, V, T> state = entryState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A, H, V, T> res = precomputed.getState(target).getState(id).getExitState();
-
-				// store the return value of the call inside the meta variable
-				AnalysisState<A, H, V, T> tmp = entryState.bottom();
-				Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
-				for (SymbolicExpression ret : res.getComputedExpressions())
-					tmp = tmp.lub(res.assign(meta, ret, call));
-
-				// save the resulting state
-				state = state.lub(tmp.popScope(scope));
+				state = state.lub(unscope(call, scope, res));
 			}
 			return state;
 		}

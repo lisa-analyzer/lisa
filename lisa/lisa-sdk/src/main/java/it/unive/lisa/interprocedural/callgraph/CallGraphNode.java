@@ -9,9 +9,9 @@ import it.unive.lisa.util.datastructures.graph.Node;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CallGraphNode implements Node<BaseCallGraph, CallGraphNode, CallGraphEdge> {
+public class CallGraphNode implements Node<CallGraph, CallGraphNode, CallGraphEdge> {
 
-	private final BaseCallGraph graph;
+	private final CallGraph graph;
 	private final CodeMember cm;
 
 	/**
@@ -20,7 +20,7 @@ public class CallGraphNode implements Node<BaseCallGraph, CallGraphNode, CallGra
 	 * @param graph the parent graph
 	 * @param cm    the code member represented by this node
 	 */
-	public CallGraphNode(BaseCallGraph graph, CodeMember cm) {
+	public CallGraphNode(CallGraph graph, CodeMember cm) {
 		this.graph = graph;
 		this.cm = cm;
 	}
@@ -39,12 +39,12 @@ public class CallGraphNode implements Node<BaseCallGraph, CallGraphNode, CallGra
 	 * 
 	 * @return the parent graph
 	 */
-	public BaseCallGraph getGraph() {
+	public CallGraph getGraph() {
 		return graph;
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<BaseCallGraph, CallGraphNode, CallGraphEdge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CallGraph, CallGraphNode, CallGraphEdge, V> visitor, V tool) {
 		return visitor.visit(tool, graph, this);
 	}
 

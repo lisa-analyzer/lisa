@@ -1,7 +1,7 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
  * An identifier for an {@link InterproceduralAnalysis} to distinguish different
@@ -28,11 +28,11 @@ public interface ScopeId {
 	boolean isStartingId();
 
 	/**
-	 * Transforms the current scope id by appending the given scope token.
+	 * Transforms the current scope id by appending the given call.
 	 * 
-	 * @param scopeToken the token to append
+	 * @param c the call to append
 	 * 
 	 * @return the (optionally) updated id
 	 */
-	ScopeId push(ScopeToken scopeToken);
+	ScopeId push(CFGCall c);
 }

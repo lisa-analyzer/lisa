@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -114,8 +115,9 @@ public abstract class SymbolicExpression {
 
 	/**
 	 * Pushes a new scope, identified by the give token, in the expression. This
-	 * causes all {@link Variable}s to become {@link OutOfScopeIdentifier}s
-	 * associated with the given token.
+	 * causes all {@link Identifier}s where {@link Identifier#canBeScoped()}
+	 * holds to become {@link OutOfScopeIdentifier}s associated with the given
+	 * token.
 	 *
 	 * @param token the token identifying the scope to push
 	 * 
@@ -129,8 +131,11 @@ public abstract class SymbolicExpression {
 	/**
 	 * Pops the scope identified by the given token from the expression. This
 	 * causes all the invisible variables (i.e. {@link OutOfScopeIdentifier}s)
-	 * mapped to the given scope to become visible (i.e. {@link Variable}s)
-	 * again.
+	 * mapped to the given scope to become visible (e.g. {@link Variable}s)
+	 * again. Note that invoking this method on {@link Identifier}s where
+	 * {@link Identifier#canBeScoped()} holds will return {@code null} if (i)
+	 * the identifier is not scoped, or (ii) the identifier is scoped by a
+	 * different token.
 	 *
 	 * @param token the token of the scope to be restored
 	 * 

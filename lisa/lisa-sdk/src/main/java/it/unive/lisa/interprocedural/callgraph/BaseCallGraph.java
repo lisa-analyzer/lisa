@@ -26,15 +26,15 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.datastructures.graph.BaseGraph;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,8 +50,7 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNode, CallGraphEdge>
-		implements CallGraph {
+public abstract class BaseCallGraph extends CallGraph {
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
@@ -59,11 +58,14 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 	private final Map<CodeMember, Collection<Call>> callsites = new HashMap<>();
 
-	private final Map<UnresolvedCall, Call> resolvedCache = new IdentityHashMap<>();
+	private final Map<UnresolvedCall, Map<List<Set<Type>>, Call>> resolvedCache = new IdentityHashMap<>();
 
 	@Override
 	public void init(Application app) throws CallGraphConstructionException {
+		super.init(app);
 		this.app = app;
+		this.callsites.clear();
+		this.resolvedCache.clear();
 	}
 
 	@Override
@@ -91,7 +93,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	@SuppressWarnings("unchecked")
 	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
 			throws CallResolutionException {
-		Call cached = resolvedCache.get(call);
+		List<Set<Type>> typeList = Arrays.asList(types);
+		Call cached = resolvedCache.getOrDefault(call, Map.of()).get(typeList);
 		if (cached != null)
 			return cached;
 
@@ -178,7 +181,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 		resolved.setOffset(call.getOffset());
 		resolved.setSource(call);
-		resolvedCache.put(call, resolved);
+		resolvedCache.computeIfAbsent(call, c -> new HashMap<>()).put(typeList, resolved);
 
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
@@ -463,18 +466,6 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 */
 	public abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
 			throws CallResolutionException;
-
-	@Override
-	public Collection<CodeMember> getCallees(CodeMember cm) {
-		return followersOf(new CallGraphNode(this, cm)).stream().map(CallGraphNode::getCodeMember)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public Collection<CodeMember> getCallers(CodeMember cm) {
-		return predecessorsOf(new CallGraphNode(this, cm)).stream().map(CallGraphNode::getCodeMember)
-				.collect(Collectors.toList());
-	}
 
 	@Override
 	public Collection<Call> getCallSites(CodeMember cm) {

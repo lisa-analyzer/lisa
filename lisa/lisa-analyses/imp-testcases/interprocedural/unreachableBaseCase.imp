@@ -1,0 +1,22 @@
+class tests {
+
+	rec(n) {
+		if (n <= 0)
+			return 0;
+		else {
+			def y = n - 1;
+			return this.rec(y) - 1;
+		}
+	}
+	
+	init(x) {
+		if (x <= 0)
+			return 0;
+		else
+			return this.rec(x);
+	}
+	
+	main(x) {
+		def z = this.init(x);
+    }
+}
