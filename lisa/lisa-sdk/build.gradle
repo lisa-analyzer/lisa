@@ -40,3 +40,5 @@ tasks.register('generateVersionInfo', Copy) {
 }
 
 compileJava.dependsOn generateVersionInfo
+sourcesJar.dependsOn generateVersionInfo
+
