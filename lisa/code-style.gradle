@@ -39,15 +39,13 @@ spotless {
     
         // use the eclipse formatting with the one provided with the project
         eclipse().configFile(new File(rootProject.projectDir, 'spotless-formatting.xml'))
-    
+
+		target 'src/**/*.java'    
         // ignore generated code
-        target project.fileTree(project.projectDir) {
-            include '**/*.java'
-            exclude '**/build/generated/**'
-            exclude '**/build/generated-src/**'
-            exclude '**/target/generated-sources/**'
-            exclude '**/VersionInfo.java'
-        }
+        targetExclude '**/build/generated/**/*.java'
+        targetExclude '**/build/generated-src/**/*.java'
+        targetExclude '**/target/generated-sources/**/*.java'
+        targetExclude '**/VersionInfo.java'
     }
     antlr4 {
         target 'src/*/antlr/**/*.g4'
