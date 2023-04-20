@@ -228,6 +228,14 @@ public class LiSAConfiguration extends BaseConfiguration {
 	public int wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 
 	/**
+	 * The number of fixpoint iteration over a recursive call chain after which
+	 * calls to {@link Lattice#lub(Lattice)} gets replaced with
+	 * {@link Lattice#widening(Lattice)} to stabilize the results. Defaults to
+	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
+	 */
+	public int recursionWideningThreshold = DEFAULT_WIDENING_THRESHOLD;
+
+	/**
 	 * The number of descending fixpoint iteration on a given node where
 	 * {@link Lattice#glb(Lattice)} can be applied. After the threshold is
 	 * reached, no more glbs will be applied on that node and the descending

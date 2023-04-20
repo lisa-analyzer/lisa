@@ -17,6 +17,11 @@ public class FixpointConfiguration extends BaseConfiguration {
 	public final int wideningThreshold;
 
 	/**
+	 * Holder of {@link LiSAConfiguration#recursionWideningThreshold}.
+	 */
+	public final int recursionWideningThreshold;
+
+	/**
 	 * Holder of {@link LiSAConfiguration#glbThreshold}.
 	 */
 	public final int glbThreshold;
@@ -43,6 +48,7 @@ public class FixpointConfiguration extends BaseConfiguration {
 	 */
 	public FixpointConfiguration(LiSAConfiguration parent) {
 		this.wideningThreshold = parent.wideningThreshold;
+		this.recursionWideningThreshold = parent.recursionWideningThreshold;
 		this.glbThreshold = parent.glbThreshold;
 		this.descendingPhaseType = parent.descendingPhaseType;
 		this.optimize = parent.optimize;

@@ -55,9 +55,10 @@ public class BaseCasesFinder<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Builds the solver.
 	 * 
-	 * @param backing   the analysis that backs this solver, and that can be
-	 *                      used to query call results
-	 * @param recursion the recursion to solve
+	 * @param backing     the analysis that backs this solver, and that can be
+	 *                        used to query call results
+	 * @param recursion   the recursion to solve
+	 * @param returnsVoid whether or not the recursion returns void
 	 */
 	public BaseCasesFinder(
 			ContextBasedAnalysis<A, H, V, T> backing,

@@ -190,9 +190,9 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 			for (CFGCall end : ends)
 				recursiveApprox = recursiveApprox.putState(end, transferToCallsite(start, end, post));
 
-			if (conf.wideningThreshold < 0)
+			if (conf.recursionWideningThreshold < 0)
 				recursiveApprox = previousApprox.lub(recursiveApprox);
-			else if (recursionCount == conf.wideningThreshold)
+			else if (recursionCount == conf.recursionWideningThreshold)
 				recursiveApprox = previousApprox.widening(recursiveApprox);
 			else {
 				recursionCount++;
