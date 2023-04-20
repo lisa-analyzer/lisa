@@ -128,6 +128,11 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
+	public String toString() {
+		return representation().toString();
+	}
+
+	@Override
 	public DomainRepresentation representation() {
 		if (isTop())
 			return Lattice.topRepresentation();

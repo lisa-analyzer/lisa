@@ -2,6 +2,7 @@ package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
@@ -79,6 +80,20 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	 */
 	public boolean contains(CFG cfg) {
 		return function != null && function.containsKey(cfg);
+	}
+
+	/**
+	 * Yields the recorded result for the given {@code cfg}. This differs from
+	 * {@link #getState(Object)} as it returns {@code null} instead of
+	 * {@link Lattice#bottom()} if there is no recorded result for the given
+	 * cfg.
+	 * 
+	 * @param cfg the {@link CFG} whose result is to be checked
+	 * 
+	 * @return the result, or {@code null}
+	 */
+	public CFGResults<A, H, V, T> get(CFG cfg) {
+		return function == null ? null : function.get(cfg);
 	}
 
 	@Override

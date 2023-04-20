@@ -24,6 +24,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
@@ -198,7 +199,7 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			if (left.isZero())
 				return right.opposite();
 			else if (right.isZero())
-				return left.opposite();
+				return left;
 			else if (left.equals(right))
 				return top();
 			else
@@ -213,6 +214,10 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 				// +/+ = +
 				// -/- = +
 				return left.isTop() ? left : POS;
+			else if (!left.isTop() && left.equals(right.opposite()))
+				// +/- = -
+				// -/+ = -
+				return NEG;
 			else
 				return top();
 		else if (operator instanceof ModuloOperator)
@@ -280,7 +285,7 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 		else if (operator == ComparisonLt.INSTANCE)
 			// e1 < e2 -> !(e1 >= e2) && !(e1 == e2)
 			return left.gt(right).negate().and(left.eq(right).negate());
-		else if (operator == ComparisonLe.INSTANCE)
+		else if (operator == ComparisonNe.INSTANCE)
 			return left.eq(right).negate();
 		else
 			return Satisfiability.UNKNOWN;

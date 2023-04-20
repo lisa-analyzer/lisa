@@ -95,9 +95,6 @@ public class IMPNewObj extends NaryExpression {
 				type.toString(), fullExpressions);
 		AnalysisState<A, H, V, T> sem = call.expressionSemantics(interprocedural, tmp, fullParams, expressions);
 
-		if (!call.getMetaVariables().isEmpty())
-			sem = sem.forgetIdentifiers(call.getMetaVariables());
-
 		// now remove the instrumented receiver
 		expressions.forget(paramThis);
 		for (SymbolicExpression v : callstate.getComputedExpressions())

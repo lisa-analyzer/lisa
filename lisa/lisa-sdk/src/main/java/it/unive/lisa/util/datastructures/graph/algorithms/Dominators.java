@@ -40,7 +40,7 @@ public class Dominators<G extends Graph<G, N, E>, N extends Node<G, N, E>, E ext
 	}
 
 	/**
-	 * Yelds the last computed dominators through {@link #build(Graph)}. The
+	 * Yields the last computed dominators through {@link #build(Graph)}. The
 	 * returned value is a map going from each node of the given graph to the
 	 * set of nodes that dominates it.
 	 * 

@@ -107,4 +107,13 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	public Collection<CodeMember> getTargets() {
 		return ((ResolvedCall) call).getTargets();
 	}
+
+	/**
+	 * Yields the original call that this one was created from.
+	 * 
+	 * @return the call
+	 */
+	public Call getInnerCall() {
+		return call;
+	}
 }

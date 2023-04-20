@@ -31,11 +31,13 @@ import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
-import it.unive.lisa.interprocedural.ContextInsensitiveToken;
-import it.unive.lisa.interprocedural.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
+import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
+import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
+import it.unive.lisa.interprocedural.context.KDepthToken;
+import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
@@ -198,6 +200,10 @@ public class EqualityContractVerificationTest {
 					&& !Modifier.isInterface(clazz.getModifiers())
 					&& !tested.contains(clazz)
 					&& definesEqualsHashcode(clazz)
+					// ContextInsensitiveToken is designed for reference
+					// equality, but we fix the hashcode as it is still used in
+					// some filenames
+					&& clazz != ContextInsensitiveToken.class
 					// some testing classes that we do not care about end up
 					// here
 					&& !clazz.getName().contains("Test"))
@@ -337,8 +343,9 @@ public class EqualityContractVerificationTest {
 	public void testTypes() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Type> type : scanner.getSubTypesOf(Type.class))
-			// type token is the only one with an eclipse-like equals
-			verify(type, type == TypeTokenType.class, Warning.STRICT_INHERITANCE);
+			if (!type.getName().contains("BaseCallGraphTest"))
+				// type token is the only one with an eclipse-like equals
+				verify(type, type == TypeTokenType.class, Warning.STRICT_INHERITANCE);
 	}
 
 	@Test
@@ -484,11 +491,14 @@ public class EqualityContractVerificationTest {
 		verify(CallGraphNode.class, verifier -> verifier.withIgnoredFields("graph"));
 		verify(CFGResults.class, Warning.NONFINAL_FIELDS);
 		verify(FixpointResults.class, Warning.NONFINAL_FIELDS);
+		verify(Recursion.class);
 		Reflections scanner = mkReflections();
 		for (Class<? extends ContextSensitivityToken> token : scanner.getSubTypesOf(ContextSensitivityToken.class))
-			if (token == ContextInsensitiveToken.class)
-				verify(token, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
-			else
+			if (token == KDepthToken.class)
+				// k is just a bound on the maximum length, it does not matter
+				verify(token, verifier -> verifier.withIgnoredFields("k"));
+			else if (token != ContextInsensitiveToken.class)
+				// there always is a unique instance of ContextInsensitiveToken
 				verify(token);
 	}
 

@@ -1,0 +1,21 @@
+class infiniteRecursion {
+
+	infiniteRecursion(n) {
+		def x = n - 1;
+		return this.infiniteRecursionAux1(x);
+	}
+	
+	infiniteRecursionAux1(n) {
+		def x = n - 2;
+		return this.infiniteRecursionAux2(x);
+	}
+	
+	infiniteRecursionAux2(n) {
+		def x = n + 1;
+		return this.infiniteRecursion(x);
+	}
+	
+	main(a) {
+		def k = this.infiniteRecursion(a);
+    }
+}

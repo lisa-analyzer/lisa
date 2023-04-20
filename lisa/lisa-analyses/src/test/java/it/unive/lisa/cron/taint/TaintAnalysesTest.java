@@ -20,9 +20,9 @@ import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
-import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
@@ -94,30 +94,31 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 				return true;
 
 			UnresolvedCall call = (UnresolvedCall) node;
-			Call resolved = (Call) tool.getResolvedVersion(call);
 
-			if (resolved instanceof CFGCall) {
-				CFGCall cfg = (CFGCall) resolved;
-				for (CodeMember n : cfg.getTargets()) {
-					Parameter[] parameters = n.getDescriptor().getFormals();
-					for (int i = 0; i < parameters.length; i++)
-						if (parameters[i].getAnnotations().contains(BaseTaint.CLEAN_MATCHER))
-							for (AnalyzedCFG<
-									SimpleAbstractState<
-											MonolithicHeap,
-											ValueEnvironment<T>,
+			try {
+				for (AnalyzedCFG<
+						SimpleAbstractState<
+								MonolithicHeap,
+								ValueEnvironment<T>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						ValueEnvironment<T>,
+						TypeEnvironment<InferredTypes>> result : tool.getResultOf(call.getCFG())) {
+
+					Call resolved = (Call) tool.getResolvedVersion(call, result);
+					if (resolved instanceof CFGCall) {
+						CFGCall cfg = (CFGCall) resolved;
+						for (CodeMember n : cfg.getTargets()) {
+							Parameter[] parameters = n.getDescriptor().getFormals();
+							for (int i = 0; i < parameters.length; i++)
+								if (parameters[i].getAnnotations().contains(BaseTaint.CLEAN_MATCHER)) {
+									AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>,
 											TypeEnvironment<InferredTypes>>,
-									MonolithicHeap,
-									ValueEnvironment<T>,
-									TypeEnvironment<InferredTypes>> result : tool.getResultOf(call.getCFG())) {
-								AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>,
-										TypeEnvironment<InferredTypes>>,
-										MonolithicHeap, ValueEnvironment<T>,
-										TypeEnvironment<InferredTypes>> post = result
-												.getAnalysisStateAfter(call.getParameters()[i]);
-
-								try {
-									for (SymbolicExpression e : post.rewrite(post.getComputedExpressions(), node)) {
+											MonolithicHeap, ValueEnvironment<T>,
+											TypeEnvironment<InferredTypes>> post = result
+													.getAnalysisStateAfter(call.getParameters()[i]);
+									for (SymbolicExpression e : post.rewrite(post.getComputedExpressions(),
+											node)) {
 										T stack = post
 												.getState()
 												.getValueState()
@@ -127,11 +128,12 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 										else if (stack.isPossiblyTainted())
 											tool.warnOn(call, "Parameter " + i + " is possibly tainted");
 									}
-								} catch (SemanticException e1) {
-									e1.printStackTrace();
 								}
-							}
+						}
+					}
 				}
+			} catch (SemanticException e1) {
+				e1.printStackTrace();
 			}
 
 			return true;

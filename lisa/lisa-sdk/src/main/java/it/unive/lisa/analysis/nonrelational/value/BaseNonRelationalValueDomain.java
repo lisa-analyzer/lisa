@@ -126,7 +126,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 
 		@Override
 		public T visit(Skip expression, Object... params) throws SemanticException {
-			return singleton.bottom();
+			return singleton.evalSkip(expression, (ProgramPoint) params[1]);
 		}
 
 		@Override
@@ -252,6 +252,21 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	default T evalIdentifier(Identifier id, ValueEnvironment<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		return environment.getState(id);
+	}
+
+	/**
+	 * Yields the evaluation of a skip expression.
+	 * 
+	 * @param skip the skip expression to be evaluated
+	 * @param pp   the program point that where this operation is being
+	 *                 evaluated
+	 * 
+	 * @return the evaluation of the skip expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default T evalSkip(Skip skip, ProgramPoint pp) throws SemanticException {
+		return bottom();
 	}
 
 	/**

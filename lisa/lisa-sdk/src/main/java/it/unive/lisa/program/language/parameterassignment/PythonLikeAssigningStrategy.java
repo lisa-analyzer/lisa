@@ -118,6 +118,8 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 			prepared = temp;
 		}
 
+		// we remove expressions from the stack
+		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet<>(), prepared.getAliasing());
 		return Pair.of(prepared, slots);
 	}
 

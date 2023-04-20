@@ -207,9 +207,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					SerializableGraph graph = result.toSerializableGraph(labeler);
 					String filename = cfg.getDescriptor().getFullSignatureWithParNames();
 					if (!result.getId().isStartingId())
-						// we use the string for compatibility with older file
-						// names
-						filename += "_" + result.getId().toString().hashCode();
+						filename += "_" + result.getId().hashCode();
 
 					try {
 						if (conf.serializeResults)

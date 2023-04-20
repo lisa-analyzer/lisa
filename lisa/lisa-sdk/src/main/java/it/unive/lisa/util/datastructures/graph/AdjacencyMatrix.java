@@ -506,4 +506,11 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 			return "ins: " + ingoing + ", outs: " + outgoing;
 		}
 	}
+
+	/**
+	 * Empties this matrix, removing all the nodes and the edges in it.
+	 */
+	public void clear() {
+		matrix.clear();
+	}
 }

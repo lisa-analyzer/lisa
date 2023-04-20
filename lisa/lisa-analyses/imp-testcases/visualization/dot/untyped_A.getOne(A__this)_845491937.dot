@@ -1,0 +1,21 @@
+digraph {
+	labelloc="t";
+	label="untyped A::getOne(A* this)";
+	"node0" [shape="rect",color="black",label=<rec = new tests()<BR/><BR/>{ expressions: [rec],<BR/>state: { heap: monolith,<BR/>type: { heap[w]:heap: [tests],<BR/>rec: [tests*] },<BR/>value: #TOP# }<BR/> }<BR/>>];
+	"node3" [shape="rect",color="gray",label=<x = open(rec)<BR/><BR/>{ expressions: [x],<BR/>state: { heap: monolith,<BR/>type: { x: #TOP# },<BR/>value: { x: [-Inf, +Inf] }<BR/> }<BR/> }<BR/>>];
+	"node7" [shape="rect",color="gray",label=<&lt;(x, 10)<BR/><BR/>{ expressions: [x &lt; 10],<BR/>state: { heap: monolith,<BR/>type: { x: #TOP# },<BR/>value: { x: [-Inf, +Inf] }<BR/> }<BR/> }<BR/>>];
+	"node10" [shape="rect",color="gray",label=<x = +(x, 1)<BR/><BR/>{ expressions: [x],<BR/>state: { heap: monolith,<BR/>type: { x: [float32, int32] },<BR/>value: { x: [-Inf, 10] }<BR/> }<BR/> }<BR/>>];
+	"node15" [shape="rect",color="black",peripheries="2",label=<return 1<BR/><BR/>{ expressions: [ret_value@getOne],<BR/>state: { heap: monolith,<BR/>type: { ret_value@getOne: [int32],<BR/>x: #TOP# },<BR/>value: { ret_value@getOne: [1, 1],<BR/>x: [10, +Inf] }<BR/> }<BR/> }<BR/>>];
+	"node0" -> "node3" [color="black"];
+	"node3" -> "node7" [color="black"];
+	"node7" -> "node10" [color="blue",style="dashed"];
+	"node7" -> "node15" [color="red",style="dashed"];
+	"node10" -> "node7" [color="black"];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}

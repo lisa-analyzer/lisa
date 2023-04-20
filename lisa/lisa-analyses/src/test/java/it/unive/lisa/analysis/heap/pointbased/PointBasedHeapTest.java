@@ -10,7 +10,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -379,7 +378,7 @@ public class PointBasedHeapTest {
 						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 		PointBasedHeap xPushedScopeAssign = topHeap.assign(
-				new OutOfScopeIdentifier(x, token, new Annotations(), loc1),
+				new OutOfScopeIdentifier(x, token, loc1),
 				new HeapReference(untyped,
 						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);

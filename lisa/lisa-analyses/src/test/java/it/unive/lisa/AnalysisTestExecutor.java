@@ -1,6 +1,7 @@
 package it.unive.lisa;
 
 import static java.nio.file.Files.copy;
+import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.delete;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -81,9 +82,14 @@ public abstract class AnalysisTestExecutor {
 		File actFile = Paths.get(actualPath.toString(), LiSA.REPORT_NAME).toFile();
 
 		if (!expFile.exists()) {
-			// no baseline defined, we end the test here
-			System.out.println("No '" + LiSA.REPORT_NAME + "' found in the expected folder, exiting...");
-			return;
+			boolean update = "true".equals(System.getProperty("lisa.cron.update")) || conf.forceUpdate;
+			if (!update) {
+				System.out.println("No '" + LiSA.REPORT_NAME + "' found in the expected folder, exiting...");
+				return;
+			} else {
+				System.out.println("No '" + LiSA.REPORT_NAME + "' found in the expected folder, copying results...");
+				copyFiles(expectedPath, actualPath, expFile, actFile);
+			}
 		}
 
 		compare(conf, expectedPath, actualPath, expFile, actFile, false);
@@ -152,6 +158,38 @@ public abstract class AnalysisTestExecutor {
 		}
 	}
 
+	private void copyFiles(
+			Path expectedPath,
+			Path actualPath,
+			File expFile,
+			File actFile) {
+		try (FileReader r = new FileReader(actFile)) {
+			JsonReport actual = JsonReport.read(r);
+
+			createDirectories(expectedPath);
+
+			copy(actFile.toPath(), expFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			System.err.println("- Copied " + LiSA.REPORT_NAME);
+
+			for (String file : actual.getFiles()) {
+				Path f = Paths.get(file);
+				if (!f.getFileName().toString().equals(LiSA.REPORT_NAME)) {
+					Path path = Paths.get(expectedPath.toString(), f.toString());
+					createDirectories(path.getParent());
+					copy(Paths.get(actualPath.toString(), f.toString()), path);
+					System.err.println("- Copied (new) " + f);
+				}
+			}
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace(System.err);
+			fail("File not found: " + e.getMessage());
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+			fail("Unable to compare reports: " + e.getMessage());
+		}
+	}
+
 	private void regen(Path expectedPath, Path actualPath, File expFile, File actFile, Accumulator acc)
 			throws IOException {
 		boolean updateReport = acc.changedWarnings || acc.changedConf || acc.changedInfos
@@ -167,8 +205,9 @@ public abstract class AnalysisTestExecutor {
 		}
 		for (Path f : acc.addedFilePaths)
 			if (!f.getFileName().toString().equals(LiSA.REPORT_NAME)) {
-				copy(Paths.get(actualPath.toString(), f.toString()),
-						Paths.get(expectedPath.toString(), f.toString()));
+				Path path = Paths.get(expectedPath.toString(), f.toString());
+				createDirectories(path.getParent());
+				copy(Paths.get(actualPath.toString(), f.toString()), path);
 				System.err.println("- Copied (new) " + f);
 			}
 		for (Path f : acc.changedFileName) {

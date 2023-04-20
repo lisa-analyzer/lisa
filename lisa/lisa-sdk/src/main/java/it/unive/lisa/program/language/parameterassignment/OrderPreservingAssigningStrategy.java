@@ -51,6 +51,8 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 			prepared = temp;
 		}
 
+		// we remove expressions from the stack
+		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet<>(), prepared.getAliasing());
 		return Pair.of(prepared, parameters);
 	}
 

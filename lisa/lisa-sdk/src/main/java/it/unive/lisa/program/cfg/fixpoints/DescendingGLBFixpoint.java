@@ -54,7 +54,7 @@ public class DescendingGLBFixpoint<A extends AbstractState<A, H, V, T>,
 	public CompoundState<A, H, V, T> operation(Statement node,
 			CompoundState<A, H, V, T> approx,
 			CompoundState<A, H, V, T> old) throws SemanticException {
-		if (maxGLBs <= 0)
+		if (maxGLBs < 0)
 			return old;
 
 		int glb = glbs.computeIfAbsent(node, st -> maxGLBs);

@@ -41,8 +41,13 @@ public class Variable extends Identifier {
 	}
 
 	@Override
+	public boolean canBeScoped() {
+		return true;
+	}
+
+	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
-		return new OutOfScopeIdentifier(this, token, getAnnotations(), getCodeLocation());
+		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override

@@ -1,0 +1,16 @@
+class fibonacci {
+
+	fib(n) {
+		if (n <= 2)
+			return 1;
+		else {
+			def x = n - 1;
+			def y = n - 2;
+			return this.fib(x) + this.fib(y);
+		}
+	}
+
+	main(a) {
+		def y = this.fib(a);
+    }
+}

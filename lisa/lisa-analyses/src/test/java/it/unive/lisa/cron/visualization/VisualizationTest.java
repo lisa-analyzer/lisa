@@ -11,9 +11,9 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.LiSAConfiguration.GraphType;
-import it.unive.lisa.interprocedural.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.context.FullStackToken;
 import java.util.Collection;
 import java.util.HashSet;
 import org.junit.AfterClass;
@@ -27,7 +27,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 				getDefaultFor(HeapDomain.class),
 				getDefaultFor(ValueDomain.class),
 				getDefaultFor(TypeDomain.class));
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		return conf;
 	}
