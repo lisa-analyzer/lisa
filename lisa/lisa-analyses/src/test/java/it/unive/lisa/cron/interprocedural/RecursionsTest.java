@@ -561,4 +561,68 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.programFile = "nestedRecursions.imp";
 		perform(conf);
 	}
+
+	@Test
+	public void testUnreachableBaseCaseFullStack() throws AnalysisSetupException {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "unreachableBaseCase/full";
+		conf.programFile = "unreachableBaseCase.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testUnreachableBaseCaseKDepth() throws AnalysisSetupException {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "unreachableBaseCase/kdepth";
+		conf.programFile = "unreachableBaseCase.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testUnreachableBaseCaseLast() throws AnalysisSetupException {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "unreachableBaseCase/last";
+		conf.programFile = "unreachableBaseCase.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testUnreachableBaseCaseInsensitive() throws AnalysisSetupException {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "unreachableBaseCase/insensitive";
+		conf.programFile = "unreachableBaseCase.imp";
+		perform(conf);
+	}
 }

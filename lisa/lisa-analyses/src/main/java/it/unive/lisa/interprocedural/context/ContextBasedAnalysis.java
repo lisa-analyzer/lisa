@@ -322,10 +322,13 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 				WorkingSet.of(workingSet),
 				conf,
 				token);
-		Pair<Boolean, AnalyzedCFG<A, H, V, T>> res = results.putResult(cfg, token, fixpointResult);
-		if (Boolean.TRUE.equals(res.getLeft()))
-			triggers.add(cfg);
-		return res.getRight();
+		if (shouldStoreFixpointResults()) {
+			Pair<Boolean, AnalyzedCFG<A, H, V, T>> res = results.putResult(cfg, token, fixpointResult);
+			if (shouldStoreFixpointResults() && Boolean.TRUE.equals(res.getLeft()))
+				triggers.add(cfg);
+			fixpointResult = res.getRight();
+		}
+		return fixpointResult;
 	}
 
 	/**
@@ -348,6 +351,17 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	 * @return {@code true} if that condition holds (defaults to {@code true})
 	 */
 	protected boolean shouldCheckForRecursions() {
+		return true;
+	}
+
+	/**
+	 * Whether or not this analysis should store the results of fixpoint
+	 * executions for them to be returned as part of
+	 * {@link #getFixpointResults()}.
+	 * 
+	 * @return {@code true} if that condition holds (defaults to {@code true})
+	 */
+	protected boolean shouldStoreFixpointResults() {
 		return true;
 	}
 

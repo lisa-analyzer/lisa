@@ -1,0 +1,36 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_tests.init(tests__this,_untyped_x)_1748710429.json", "untyped_tests.main(tests__this,_untyped_x).json", "untyped_tests.rec(tests__this,_untyped_n)_124157764.json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "586ms",
+    "end" : "2023-04-20T12:26:07.704+02:00",
+    "expressions" : "22",
+    "files" : "3",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2023-04-20T12:26:07.118+02:00",
+    "statements" : "9",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/unreachableBaseCase/full"
+  }
+}
