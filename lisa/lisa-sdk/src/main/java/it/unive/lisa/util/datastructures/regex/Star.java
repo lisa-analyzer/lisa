@@ -1,11 +1,12 @@
 package it.unive.lisa.util.datastructures.regex;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing a loop, repeated an arbitrary number
@@ -233,5 +234,10 @@ public final class Star extends RegularExpression {
 	@Override
 	protected int compareToAux(RegularExpression other) {
 		return op.compareTo(other.asStar().op);
+	}
+
+	@Override
+	public RegularExpression repeat(int n) {
+		return this;
 	}
 }

@@ -1,11 +1,12 @@
 package it.unive.lisa.util.datastructures.regex;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing a single string.
@@ -78,7 +79,7 @@ public class Atom extends RegularExpression {
 
 	@Override
 	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+	T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
 		return isEmpty() ? factory.emptyString() : factory.singleString(string);
 	}
 
@@ -180,5 +181,17 @@ public class Atom extends RegularExpression {
 	@Override
 	protected int compareToAux(RegularExpression other) {
 		return string.compareTo(other.asAtom().string);
+	}
+
+	@Override
+	public RegularExpression repeat(int n) {
+		if (n == 0)
+			return Atom.EPSILON;
+
+		RegularExpression r = Atom.EPSILON;
+		for (int i = 0; i < n; i++)
+			r = new Comp(r, this);
+		r.simplify();
+		return r;
 	}
 }

@@ -1,10 +1,11 @@
 package it.unive.lisa.util.datastructures.regex;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing an or between two other regular
@@ -276,5 +277,10 @@ public final class Or extends RegularExpression {
 		if ((cmp = first.compareTo(other.asOr().first)) != 0)
 			return cmp;
 		return second.compareTo(other.asOr().second);
+	}
+
+	@Override
+	public RegularExpression repeat(int n) {
+		return new Or(first.repeat(n), second.repeat(n));
 	}
 }

@@ -1,11 +1,12 @@
 package it.unive.lisa.util.datastructures.regex;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing the sequential composition of two
@@ -287,5 +288,17 @@ public final class Comp extends RegularExpression {
 		if ((cmp = first.compareTo(other.asComp().first)) != 0)
 			return cmp;
 		return second.compareTo(other.asComp().second);
+	}
+	
+	@Override
+	public RegularExpression repeat(int n) {
+		if (n == 0)
+			return Atom.EPSILON;
+
+		RegularExpression r = Atom.EPSILON;
+		for (int i = 0; i < n; i++)
+			r = new Comp(r, this);
+		r.simplify();
+		return r;
 	}
 }

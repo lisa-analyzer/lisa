@@ -1,11 +1,12 @@
 package it.unive.lisa.util.datastructures.regex;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A regular expression that can be recognized by an {@link Automaton}, or that
@@ -310,6 +311,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 */
 	protected abstract Set<PartialSubstring> substringAux(int charsToSkip, int missingChars);
 
+	public abstract RegularExpression repeat(int n);
+	
 	/**
 	 * Yields {@code true} if and only if this regular expression corresponds to
 	 * the empty string or to no strings at all.
