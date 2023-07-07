@@ -311,7 +311,7 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 */
 	protected abstract Set<PartialSubstring> substringAux(int charsToSkip, int missingChars);
 
-	public abstract RegularExpression repeat(int n);
+	public abstract RegularExpression repeat(long n);
 	
 	/**
 	 * Yields {@code true} if and only if this regular expression corresponds to

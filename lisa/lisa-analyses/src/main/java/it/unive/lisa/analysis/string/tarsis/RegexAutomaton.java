@@ -183,7 +183,7 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 
 	@Override
 	public RegexAutomaton emptyLanguage() {
-		return emptyLanguage();
+		return emptyLang();
 	}
 
 	@Override
@@ -461,7 +461,7 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * @param n the number of repetitions
 	 * @return an automaton that corresponds to the {@code n}-time concatenation of {@code this}
 	 */
-	public RegexAutomaton repeat(int n) {
+	public RegexAutomaton repeat(long n) {
 		if (n == 0)
 			return emptyString();		
 		return toRegex().repeat(n).toAutomaton(this);

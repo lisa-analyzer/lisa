@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.ContainsCharProvider;
@@ -25,6 +26,8 @@ import it.unive.lisa.util.datastructures.regex.RegularExpression;
 import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
+
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -403,5 +406,22 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 
 		return satisfiesBinaryExpression(StringContains.INSTANCE, this,
 				new Tarsis(RegexAutomaton.string(String.valueOf(c))), null);
+	}
+
+	public Tarsis repeat(Interval intv) throws MathNumberConversionException {
+		if (intv.isTop() || a.hasCycle())
+			return new Tarsis(a.kleene());
+		else if (intv.interval.isFinite()) {
+			if (intv.interval.isSingleton())
+				return new Tarsis(a.repeat(intv.interval.getHigh().toLong()));
+			else {
+				RegexAutomaton result = a.emptyLanguage();
+
+				for (Long i : intv.interval)
+					result = result.union(a.repeat(i));
+				return new Tarsis(result);
+			}
+		} else
+			return new Tarsis(a.repeat(intv.interval.getLow().toLong()).concat(a.kleene()));
 	}
 }

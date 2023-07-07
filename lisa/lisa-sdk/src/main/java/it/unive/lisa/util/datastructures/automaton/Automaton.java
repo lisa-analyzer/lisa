@@ -1866,6 +1866,17 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 					t.getSymbol()));
 		return from(newStates, newDelta).minimize();
 	}
+	
+	
+	public A kleene() {
+		SortedSet<State> newStates = new TreeSet<>(this.states);
+		SortedSet<Transition<T>> newDelta = new TreeSet<>(this.transitions);
+		
+		for (State f : getFinalStates())
+			newDelta.add(new Transition<>(f, getInitialState(), epsilon()));
+		
+		return from(newStates, newDelta).minimize();		
+	}
 
 	@Override
 	public int hashCode() {

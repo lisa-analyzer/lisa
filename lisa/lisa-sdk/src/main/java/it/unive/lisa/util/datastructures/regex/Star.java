@@ -237,7 +237,7 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression repeat(int n) {
+	public RegularExpression repeat(long n) {
 		return this;
 	}
 }

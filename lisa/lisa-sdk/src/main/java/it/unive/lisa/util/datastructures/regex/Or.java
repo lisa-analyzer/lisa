@@ -280,7 +280,7 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression repeat(int n) {
+	public RegularExpression repeat(long n) {
 		return new Or(first.repeat(n), second.repeat(n));
 	}
 }

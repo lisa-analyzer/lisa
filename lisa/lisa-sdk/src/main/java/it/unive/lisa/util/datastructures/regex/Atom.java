@@ -184,12 +184,12 @@ public class Atom extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression repeat(int n) {
+	public RegularExpression repeat(long n) {
 		if (n == 0)
 			return Atom.EPSILON;
 
 		RegularExpression r = Atom.EPSILON;
-		for (int i = 0; i < n; i++)
+		for (long i = 0; i < n; i++)
 			r = new Comp(r, this);
 		r.simplify();
 		return r;
