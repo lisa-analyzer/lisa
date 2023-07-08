@@ -410,7 +410,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 
 	public Tarsis repeat(Interval intv) throws MathNumberConversionException {
 		if (intv.isTop() || a.hasCycle())
-			return new Tarsis(a.kleene());
+			return new Tarsis(a.star());
 		else if (intv.interval.isFinite()) {
 			if (intv.interval.isSingleton())
 				return new Tarsis(a.repeat(intv.interval.getHigh().toLong()));
@@ -422,6 +422,6 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 				return new Tarsis(result);
 			}
 		} else
-			return new Tarsis(a.repeat(intv.interval.getLow().toLong()).concat(a.kleene()));
+			return new Tarsis(a.repeat(intv.interval.getLow().toLong()).concat(a.star()));
 	}
 }

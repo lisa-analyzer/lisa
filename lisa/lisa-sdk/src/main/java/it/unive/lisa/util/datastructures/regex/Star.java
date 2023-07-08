@@ -23,7 +23,7 @@ public final class Star extends RegularExpression {
 	 * 
 	 * @param op the inner regular expression
 	 */
-	Star(RegularExpression op) {
+	public Star(RegularExpression op) {
 		this.op = op;
 	}
 

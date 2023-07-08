@@ -37,7 +37,7 @@ import org.apache.commons.lang3.tuple.Triple;
  *                this class have on their transitions
  */
 public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionSymbol<T>>
-		implements AutomataFactory<A, T> {
+implements AutomataFactory<A, T> {
 
 	/**
 	 * The states of this automaton.
@@ -1053,7 +1053,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 
 				for (Transition<T> t : transitions)
 					result.append("\t").append(st).append(" [").append(t.getSymbol()).append("] -> ")
-							.append(t.getDestination()).append("\n");
+					.append(t.getDestination()).append("\n");
 			}
 		}
 
@@ -1865,17 +1865,6 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 					nameToStates.get(t.getDestination().getId()),
 					t.getSymbol()));
 		return from(newStates, newDelta).minimize();
-	}
-	
-	
-	public A kleene() {
-		SortedSet<State> newStates = new TreeSet<>(this.states);
-		SortedSet<Transition<T>> newDelta = new TreeSet<>(this.transitions);
-		
-		for (State f : getFinalStates())
-			newDelta.add(new Transition<>(f, getInitialState(), epsilon()));
-		
-		return from(newStates, newDelta).minimize();		
 	}
 
 	@Override

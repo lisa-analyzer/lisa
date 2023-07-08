@@ -32,7 +32,7 @@ public final class Comp extends RegularExpression {
 	 * @param first  the first regular expression
 	 * @param second the second regular expression
 	 */
-	Comp(RegularExpression first, RegularExpression second) {
+	public Comp(RegularExpression first, RegularExpression second) {
 		this.first = first;
 		this.second = second;
 	}
@@ -298,7 +298,6 @@ public final class Comp extends RegularExpression {
 		RegularExpression r = Atom.EPSILON;
 		for (long i = 0; i < n; i++)
 			r = new Comp(r, this);
-		r.simplify();
-		return r;
+		return r.simplify();
 	}
 }
