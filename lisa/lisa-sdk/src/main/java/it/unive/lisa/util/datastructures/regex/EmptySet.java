@@ -137,4 +137,9 @@ public final class EmptySet extends RegularExpression {
 	public RegularExpression repeat(long n) {
 		return this;
 	}
+
+	@Override
+	public RegularExpression trim() {
+		return this;
+	}
 }

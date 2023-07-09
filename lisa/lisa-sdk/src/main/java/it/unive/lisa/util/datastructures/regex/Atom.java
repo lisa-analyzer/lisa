@@ -194,4 +194,9 @@ public class Atom extends RegularExpression {
 		r.simplify();
 		return r;
 	}
+
+	@Override
+	public RegularExpression trim() {
+		return new Atom(this.string.trim());
+	}
 }

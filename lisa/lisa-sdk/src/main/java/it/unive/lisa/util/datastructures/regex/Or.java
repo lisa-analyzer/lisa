@@ -283,4 +283,9 @@ public final class Or extends RegularExpression {
 	public RegularExpression repeat(long n) {
 		return new Or(first.repeat(n), second.repeat(n)).simplify();
 	}
+
+	@Override
+	public RegularExpression trim() {
+		return new Or(first.trim(), second.trim());
+	}
 }

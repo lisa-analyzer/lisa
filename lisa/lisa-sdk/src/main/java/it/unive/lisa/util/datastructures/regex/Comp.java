@@ -300,4 +300,14 @@ public final class Comp extends RegularExpression {
 			r = new Comp(r, this);
 		return r.simplify();
 	}
+
+	@Override
+	public RegularExpression trim() {
+
+		RegularExpression trimFirst = first.trim().simplify();
+		if (trimFirst.isEmpty())
+			return second.trim();
+		else
+			return new Comp(trimFirst, second).simplify();
+	}
 }

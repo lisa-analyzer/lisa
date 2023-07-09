@@ -466,4 +466,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 			return emptyString();		
 		return toRegex().simplify().repeat(n).toAutomaton(this).minimize();
 	}
+	
+	public RegexAutomaton trim() {
+		return toRegex().trim().toAutomaton(this);			
+	}
 }

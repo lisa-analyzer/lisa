@@ -313,6 +313,7 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 
 	public abstract RegularExpression repeat(long n);
 	
+	public abstract RegularExpression trim();
 	/**
 	 * Yields {@code true} if and only if this regular expression corresponds to
 	 * the empty string or to no strings at all.

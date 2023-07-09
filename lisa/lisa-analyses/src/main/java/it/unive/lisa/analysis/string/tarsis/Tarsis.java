@@ -424,4 +424,8 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 		} else
 			return new Tarsis(a.repeat(intv.interval.getLow().toLong()).concat(a.star()));
 	}
+	
+	public Tarsis trim() {
+		return new Tarsis(this.a.trim());
+	}
 }
