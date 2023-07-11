@@ -14,10 +14,12 @@ public class TrimTest {
 		RegexAutomaton ws = RegexAutomaton.string("   ");
 		RegexAutomaton epsilon = RegexAutomaton.string("");
 		RegexAutomaton abc_with_ws = RegexAutomaton.string("   a b c   ");
+		RegexAutomaton empty_star = RegexAutomaton.string("   ").star();
 
 		Tarsis a = new Tarsis(abc);
 		Tarsis b = new Tarsis(ws);
 		Tarsis c = new Tarsis(abc_with_ws);
+		Tarsis d = new Tarsis(empty_star);
 
 		// "abc".trim() = "abc"
 		assertTrue(a.trim().getAutomaton().isEqualTo(abc));
@@ -27,5 +29,8 @@ public class TrimTest {
 
 		// "   a b c   ".trim() = "a b c"
 		assertTrue(c.trim().getAutomaton().isEqualTo(RegexAutomaton.string("a b c")));
+
+		// ("   ")*.trim() = ""
+		assertTrue(d.trim().getAutomaton().isEqualTo(RegexAutomaton.emptyStr()));
 	}
 }

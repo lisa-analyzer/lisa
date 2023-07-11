@@ -92,7 +92,7 @@ public final class Star extends RegularExpression {
 
 	@Override
 	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+	T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
 		return op.toAutomaton(factory).star();
 	}
 
@@ -243,6 +243,10 @@ public final class Star extends RegularExpression {
 
 	@Override
 	public RegularExpression trim() {
-		return new Star(op.trim());
+		RegularExpression trimOp = op.trim().simplify();
+		if (trimOp.isEmpty())
+			return trimOp;
+		else
+			return new Star(trimOp);
 	}
 }
