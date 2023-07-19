@@ -1,12 +1,11 @@
 package it.unive.lisa.util.datastructures.regex;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing the sequential composition of two
@@ -289,7 +288,7 @@ public final class Comp extends RegularExpression {
 			return cmp;
 		return second.compareTo(other.asComp().second);
 	}
-	
+
 	@Override
 	public RegularExpression repeat(long n) {
 		if (n == 0)
@@ -303,11 +302,32 @@ public final class Comp extends RegularExpression {
 
 	@Override
 	public RegularExpression trim() {
-
-		RegularExpression trimFirst = first.trim().simplify();
-		if (trimFirst.isEmpty())
+		RegularExpression trimLeftFirst = first.trimLeft().simplify();
+		if (trimLeftFirst.isEmpty())
 			return second.trim();
+
+		RegularExpression trimRightSecond = second.trimRight().simplify();
+		if (trimRightSecond.isEmpty())
+			return first.trim();
+
+		return new Comp(trimLeftFirst, trimRightSecond).simplify();
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		RegularExpression trimLeftFirst = this.first.trimLeft().simplify();
+		if (trimLeftFirst.isEmpty())
+			return this.second.trimLeft();
 		else
-			return new Comp(trimFirst, second).simplify();
+			return new Comp(trimLeftFirst, second);
+	}
+
+	@Override
+	public RegularExpression trimRight() {
+		RegularExpression trimRightSecond = this.second.trimRight().simplify();
+		if (trimRightSecond.isEmpty())
+			return this.first.trimRight();
+		else
+			return new Comp(this.first, trimRightSecond);
 	}
 }

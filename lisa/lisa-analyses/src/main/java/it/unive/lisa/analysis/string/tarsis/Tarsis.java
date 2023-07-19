@@ -27,7 +27,6 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
-
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -424,7 +423,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 		} else
 			return new Tarsis(a.repeat(intv.interval.getLow().toLong()).concat(a.star()));
 	}
-	
+
 	public Tarsis trim() {
 		return new Tarsis(this.a.trim());
 	}

@@ -457,17 +457,21 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	}
 
 	/**
-	 * Yields an automaton that corresponds to the {@code n}-time concatenation of {@code this}.
+	 * Yields an automaton that corresponds to the {@code n}-time concatenation
+	 * of {@code this}.
+	 * 
 	 * @param n the number of repetitions
-	 * @return an automaton that corresponds to the {@code n}-time concatenation of {@code this}
+	 * 
+	 * @return an automaton that corresponds to the {@code n}-time concatenation
+	 *             of {@code this}
 	 */
 	public RegexAutomaton repeat(long n) {
 		if (n == 0)
-			return emptyString();		
+			return emptyString();
 		return toRegex().simplify().repeat(n).toAutomaton(this).minimize();
 	}
-	
+
 	public RegexAutomaton trim() {
-		return toRegex().trim().toAutomaton(this);			
+		return toRegex().simplify().trim().toAutomaton(this);
 	}
 }

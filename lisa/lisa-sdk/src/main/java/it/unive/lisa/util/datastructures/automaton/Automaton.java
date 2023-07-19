@@ -37,7 +37,7 @@ import org.apache.commons.lang3.tuple.Triple;
  *                this class have on their transitions
  */
 public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionSymbol<T>>
-implements AutomataFactory<A, T> {
+		implements AutomataFactory<A, T> {
 
 	/**
 	 * The states of this automaton.
@@ -1053,7 +1053,7 @@ implements AutomataFactory<A, T> {
 
 				for (Transition<T> t : transitions)
 					result.append("\t").append(st).append(" [").append(t.getSymbol()).append("] -> ")
-					.append(t.getDestination()).append("\n");
+							.append(t.getDestination()).append("\n");
 			}
 		}
 

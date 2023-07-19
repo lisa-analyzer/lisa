@@ -1,12 +1,11 @@
 package it.unive.lisa.util.datastructures.regex;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing a sequence of unknown characters of

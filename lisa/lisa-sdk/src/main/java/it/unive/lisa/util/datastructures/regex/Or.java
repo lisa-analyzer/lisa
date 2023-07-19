@@ -1,11 +1,10 @@
 package it.unive.lisa.util.datastructures.regex;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing an or between two other regular
@@ -287,5 +286,16 @@ public final class Or extends RegularExpression {
 	@Override
 	public RegularExpression trim() {
 		return new Or(first.trim(), second.trim());
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		return new Or(first.trimLeft(), second.trimLeft());
+
+	}
+
+	@Override
+	public RegularExpression trimRight() {
+		return new Or(first.trimRight(), second.trimRight());
 	}
 }

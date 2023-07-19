@@ -1,11 +1,10 @@
 package it.unive.lisa.util.datastructures.regex;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing the empty set of strings.
@@ -140,6 +139,16 @@ public final class EmptySet extends RegularExpression {
 
 	@Override
 	public RegularExpression trim() {
+		return this;
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		return this;
+	}
+
+	@Override
+	public RegularExpression trimRight() {
 		return this;
 	}
 }

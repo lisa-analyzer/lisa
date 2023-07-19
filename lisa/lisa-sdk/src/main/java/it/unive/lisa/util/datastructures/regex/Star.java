@@ -1,12 +1,11 @@
 package it.unive.lisa.util.datastructures.regex;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing a loop, repeated an arbitrary number
@@ -92,7 +91,7 @@ public final class Star extends RegularExpression {
 
 	@Override
 	public <A extends Automaton<A, T>,
-	T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
 		return op.toAutomaton(factory).star();
 	}
 
@@ -243,10 +242,20 @@ public final class Star extends RegularExpression {
 
 	@Override
 	public RegularExpression trim() {
-		RegularExpression trimOp = op.trim().simplify();
-		if (trimOp.isEmpty())
-			return trimOp;
-		else
-			return new Star(trimOp);
+		RegularExpression left = this.op.trimLeft().simplify();
+		if (left.isEmpty())
+			return Atom.EPSILON;
+		RegularExpression right = this.op.trimRight().simplify();
+		return new Star(new Comp(new Comp(left, this), right)).simplify();
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		return new Star(new Comp(this.op.trimLeft(), op));
+	}
+
+	@Override
+	public RegularExpression trimRight() {
+		return new Comp(this, op.trimRight());
 	}
 }
