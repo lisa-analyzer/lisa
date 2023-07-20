@@ -284,11 +284,6 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression trim() {
-		return new Or(first.trim(), second.trim());
-	}
-
-	@Override
 	public RegularExpression trimLeft() {
 		return new Or(first.trimLeft(), second.trimLeft());
 
@@ -297,5 +292,10 @@ public final class Or extends RegularExpression {
 	@Override
 	public RegularExpression trimRight() {
 		return new Or(first.trimRight(), second.trimRight());
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return first.readsWhiteSpaceString() || second.readsWhiteSpaceString();
 	}
 }

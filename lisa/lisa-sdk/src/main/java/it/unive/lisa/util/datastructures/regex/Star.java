@@ -241,21 +241,23 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression trim() {
-		RegularExpression left = this.op.trimLeft().simplify();
-		if (left.isEmpty())
-			return Atom.EPSILON;
-		RegularExpression right = this.op.trimRight().simplify();
-		return new Star(new Comp(new Comp(left, this), right)).simplify();
-	}
-
-	@Override
 	public RegularExpression trimLeft() {
-		return new Star(new Comp(this.op.trimLeft(), op));
+		RegularExpression trimLeft = op.trimLeft().simplify();
+		if (trimLeft.isEmpty())
+			return Atom.EPSILON;
+		return new Or(Atom.EPSILON, new Comp(trimLeft, this));
 	}
 
 	@Override
 	public RegularExpression trimRight() {
-		return new Comp(this, op.trimRight());
+		RegularExpression trimRight = op.trimRight();
+		if (trimRight.isEmpty())
+			return Atom.EPSILON;
+		return new Or(Atom.EPSILON, new Comp(this, trimRight));
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return op.readsWhiteSpaceString();
 	}
 }

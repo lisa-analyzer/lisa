@@ -312,8 +312,6 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 
 	public abstract RegularExpression repeat(long n);
 
-	public abstract RegularExpression trim();
-
 	public abstract RegularExpression trimLeft();
 
 	public abstract RegularExpression trimRight();
@@ -430,6 +428,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * @return the exploded regular expression
 	 */
 	public abstract RegularExpression[] explode();
+
+	protected abstract boolean readsWhiteSpaceString();
 
 	/**
 	 * Builds the Kleene closure of this regular expression ({@link Star}),

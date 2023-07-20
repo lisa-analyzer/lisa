@@ -196,17 +196,23 @@ public class Atom extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression trim() {
-		return new Atom(this.string.trim());
-	}
-
-	@Override
 	public RegularExpression trimLeft() {
-		return new Atom(StringUtils.stripStart(this.string, null));
+		String trimLeft = StringUtils.stripStart(this.string, null);
+		if (trimLeft.isEmpty())
+			return Atom.EPSILON;
+		return new Atom(trimLeft);
 	}
 
 	@Override
 	public RegularExpression trimRight() {
-		return new Atom(StringUtils.stripEnd(this.string, null));
+		String trimRight = StringUtils.stripEnd(this.string, null);
+		if (trimRight.isEmpty())
+			return Atom.EPSILON;
+		return new Atom(trimRight);
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return string.trim().isEmpty();
 	}
 }

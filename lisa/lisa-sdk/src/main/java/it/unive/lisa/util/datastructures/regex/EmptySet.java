@@ -138,11 +138,6 @@ public final class EmptySet extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression trim() {
-		return this;
-	}
-
-	@Override
 	public RegularExpression trimLeft() {
 		return this;
 	}
@@ -150,5 +145,10 @@ public final class EmptySet extends RegularExpression {
 	@Override
 	public RegularExpression trimRight() {
 		return this;
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return false;
 	}
 }

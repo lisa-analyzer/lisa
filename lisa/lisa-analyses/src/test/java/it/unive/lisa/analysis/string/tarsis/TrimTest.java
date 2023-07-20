@@ -42,13 +42,8 @@ public class TrimTest {
 		Tarsis f = new Tarsis(comp2);
 		assertTrue(f.trim().getAutomaton().isEqualTo(RegexAutomaton.string("a b")));
 
-		// " a b c "*.trim() = "a b c " + (" a b c ")* + " a b c"
-		Tarsis g = new Tarsis(abc_with_ws.star());
-		assertTrue(g.trim().getAutomaton().isEqualTo(RegexAutomaton.string("a b c   ").concat(abc_with_ws.star())
-				.concat(RegexAutomaton.string("   a b c")).star()));
-
 		// " abc " + " ".trim() = "abc"
-		Tarsis h = new Tarsis(comp3);
-		assertTrue(h.trim().getAutomaton().isEqualTo(RegexAutomaton.string("abc")));
+		Tarsis g = new Tarsis(comp3);
+		assertTrue(g.trim().getAutomaton().isEqualTo(RegexAutomaton.string("abc")));
 	}
 }

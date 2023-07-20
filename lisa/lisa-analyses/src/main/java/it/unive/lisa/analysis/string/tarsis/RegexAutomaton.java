@@ -471,7 +471,15 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return toRegex().simplify().repeat(n).toAutomaton(this).minimize();
 	}
 
+	public RegexAutomaton trimLeft() {
+		return this.toRegex().trimLeft().simplify().toAutomaton(this);
+	}
+
+	public RegexAutomaton trimRight() {
+		return this.toRegex().trimRight().simplify().toAutomaton(this);
+	}
+
 	public RegexAutomaton trim() {
-		return toRegex().simplify().trim().toAutomaton(this);
+		return this.toRegex().trimRight().simplify().trimLeft().simplify().toAutomaton(this);
 	}
 }

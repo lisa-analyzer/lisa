@@ -301,33 +301,37 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression trim() {
-		RegularExpression trimLeftFirst = first.trimLeft().simplify();
-		if (trimLeftFirst.isEmpty())
-			return second.trim();
-
-		RegularExpression trimRightSecond = second.trimRight().simplify();
-		if (trimRightSecond.isEmpty())
-			return first.trim();
-
-		return new Comp(trimLeftFirst, trimRightSecond).simplify();
-	}
-
-	@Override
 	public RegularExpression trimLeft() {
-		RegularExpression trimLeftFirst = this.first.trimLeft().simplify();
+		RegularExpression trimLeftFirst = first.trimLeft().simplify();
+		// it means that first reads just whitespaces strings (L(first)
+		// \subseteq { }*)
 		if (trimLeftFirst.isEmpty())
 			return this.second.trimLeft();
+		// first reads at least a whitespace string
+		else if (first.readsWhiteSpaceString())
+			return new Or(new Comp(trimLeftFirst, second), second.trimLeft());
+//			return new Comp(trimLeftFirst, new Or(second, second.trimLeft()));
 		else
 			return new Comp(trimLeftFirst, second);
 	}
 
 	@Override
 	public RegularExpression trimRight() {
-		RegularExpression trimRightSecond = this.second.trimRight().simplify();
+		RegularExpression trimRightSecond = second.trimRight().simplify();
+		// it means that second reads just whitespaces strings (L(second)
+		// \subseteq { }*)
 		if (trimRightSecond.isEmpty())
 			return this.first.trimRight();
+		// second reads at least a whitespace string
+		else if (second.readsWhiteSpaceString())
+			return new Or(new Comp(first, trimRightSecond), first.trimRight());
+//			return new Comp(new Or(first, first.trimRight()), trimRightSecond);
 		else
 			return new Comp(this.first, trimRightSecond);
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return first.readsWhiteSpaceString() && second.readsWhiteSpaceString();
 	}
 }
