@@ -310,10 +310,33 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 */
 	protected abstract Set<PartialSubstring> substringAux(int charsToSkip, int missingChars);
 
+	/**
+	 * Yields a new regular expression corresponding to the {@code n}-repetition
+	 * of {@code this}.
+	 * 
+	 * @param n number of repetitions
+	 * 
+	 * @return a new regular expression corresponding to the
+	 *             {@code n}-repetition of {@code this}
+	 */
 	public abstract RegularExpression repeat(long n);
 
+	/**
+	 * Yields a new regular expression where leading whitespaces have been
+	 * removed from {@code this}.
+	 * 
+	 * @return a new regular expression where leading whitespaces have been
+	 *             removed from {@code this}
+	 */
 	public abstract RegularExpression trimLeft();
 
+	/**
+	 * Yields a new regular expression where trailing whitespaces have been
+	 * removed from {@code this}.
+	 * 
+	 * @return a new regular expression where trailing whitespaces have been
+	 *             removed from {@code this}
+	 */
 	public abstract RegularExpression trimRight();
 
 	/**

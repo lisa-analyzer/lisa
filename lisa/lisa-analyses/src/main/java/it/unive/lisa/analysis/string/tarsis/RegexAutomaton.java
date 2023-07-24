@@ -471,14 +471,35 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return toRegex().simplify().repeat(n).toAutomaton(this).minimize();
 	}
 
+	/**
+	 * Yields a new automaton where leading whitespaces have been removed from
+	 * {@code this}.
+	 * 
+	 * @return a new automaton where leading whitespaces have been removed from
+	 *             {@code this}
+	 */
 	public RegexAutomaton trimLeft() {
 		return this.toRegex().trimLeft().simplify().toAutomaton(this);
 	}
 
+	/**
+	 * Yields a new automaton where trailing whitespaces have been removed from
+	 * {@code this}.
+	 * 
+	 * @return a new automaton where trailing whitespaces have been removed from
+	 *             {@code this}
+	 */
 	public RegexAutomaton trimRight() {
 		return this.toRegex().trimRight().simplify().toAutomaton(this);
 	}
 
+	/**
+	 * Yields a new automaton where trailing and leading whitespaces have been
+	 * removed from {@code this}.
+	 * 
+	 * @return a new automaton where trailing and leading whitespaces have been
+	 *             removed from {@code this}
+	 */
 	public RegexAutomaton trim() {
 		return this.toRegex().trimRight().simplify().trimLeft().simplify().toAutomaton(this);
 	}

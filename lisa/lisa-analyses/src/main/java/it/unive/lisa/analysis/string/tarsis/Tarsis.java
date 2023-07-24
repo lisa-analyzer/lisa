@@ -407,6 +407,18 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 				new Tarsis(RegexAutomaton.string(String.valueOf(c))), null);
 	}
 
+	/**
+	 * Yields a new Tarsis's instance recognizing each string of {@code this}
+	 * automaton repeated k-times, with k belonging to {@code intv}.
+	 * 
+	 * @param intv the interval
+	 * 
+	 * @return a new Tarsis's instance recognizing each string of {@code this}
+	 *             automaton repeated k-times, with k belonging to {@code intv}
+	 * 
+	 * @throws MathNumberConversionException if {@code intv} is iterated but is
+	 *                                           not finite
+	 */
 	public Tarsis repeat(Interval intv) throws MathNumberConversionException {
 		if (intv.isTop() || a.hasCycle())
 			return new Tarsis(a.star());
@@ -424,6 +436,13 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 			return new Tarsis(a.repeat(intv.interval.getLow().toLong()).concat(a.star()));
 	}
 
+	/**
+	 * Yields a new Tarsis's instance where trailing and leading whitespaces
+	 * have been removed from {@code this}.
+	 * 
+	 * @return a new Tarsis's instance where trailing and leading whitespaces
+	 *             have been removed from {@code this}
+	 */
 	public Tarsis trim() {
 		return new Tarsis(this.a.trim());
 	}
