@@ -1,17 +1,19 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /**
  * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using a
@@ -179,5 +181,79 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 					if (a.contains(b))
 						result = result.union(new SimpleAutomaton(a.replace(b, c)));
 		return result;
+	}
+
+	public SimpleAutomaton trimLeft() {
+		SimpleAutomaton result = copy();
+
+		Set<Transition<StringSymbol>> toAdd = new HashSet<>();
+		Set<Transition<StringSymbol>> toRemove = new HashSet<>();
+
+		while (true) {
+			for (Transition<StringSymbol> t : result.getOutgoingTransitionsFrom(result.getInitialState()))
+				if (t.getSymbol().getSymbol().equals(" ")) {
+					toRemove.add(t);
+					toAdd.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(), StringSymbol.EPSILON));
+				}
+
+			result.removeTransitions(toRemove);
+			result.getTransitions().addAll(toAdd);
+
+			result.minimize();
+
+			boolean b = false;
+			for (Transition<StringSymbol> t : result.getOutgoingTransitionsFrom(result.getInitialState())){
+				if (t.getSymbol().getSymbol().equals(" "))
+					b = true;
+			}
+
+			if (!b)
+				break;
+		}
+
+		return result;
+	}
+
+	public SimpleAutomaton trimRight() {
+
+		SimpleAutomaton result = copy();
+
+
+		Set<Transition<StringSymbol>> toAdd = new HashSet<>();
+		Set<Transition<StringSymbol>> toRemove = new HashSet<>();
+
+		while (true) {
+
+			for (State qf : result.getFinalStates()) {
+				for (Transition<StringSymbol> t : result.getIngoingTransitionsFrom(qf))
+					if (t.getSymbol().getSymbol().equals(" ")) {
+						toRemove.add(t);
+						toAdd.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(), StringSymbol.EPSILON));
+					}
+			}
+
+			result.removeTransitions(toRemove);
+			result.getTransitions().addAll(toAdd);
+			
+			result.minimize();
+
+			boolean b = false;
+			for (State qf : result.getFinalStates()) {
+
+				for (Transition<StringSymbol> t : result.getIngoingTransitionsFrom(qf)){
+					if (t.getSymbol().equals(new StringSymbol(" ")))
+						b = true;
+				}
+			}
+
+			if (!b)
+				break;
+		}
+
+		return result;
+	}
+	
+	public SimpleAutomaton trim() {
+		return trimLeft().trimRight();
 	}
 }
