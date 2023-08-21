@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string.fsa;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -8,12 +9,16 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 
 /**
  * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using a
@@ -234,7 +239,7 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 
 			result.removeTransitions(toRemove);
 			result.getTransitions().addAll(toAdd);
-			
+
 			result.minimize();
 
 			boolean b = false;
@@ -252,8 +257,186 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 
 		return result;
 	}
-	
+
 	public SimpleAutomaton trim() {
 		return trimLeft().trimRight();
+	}
+
+	public SimpleAutomaton repeat(Interval i) throws MathNumberConversionException{
+		if (equals(emptyString()))
+			return this;
+		else if (hasCycle())
+			return star();
+
+
+		MathNumber high = i.interval.getHigh();
+		MathNumber low = i.interval.getLow();
+		SimpleAutomaton epsilon = emptyString();
+
+		if(low.isMinusInfinity()) {
+			if(high.isPlusInfinity()) 
+				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));
+
+			if(high.isZero())
+				return emptyString();
+			else
+				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));			
+		}
+
+
+		long lowInt = low.toLong();
+
+		if(high.isPlusInfinity()){
+			//need exception
+			if(lowInt < 0)
+				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));							
+			if(low.isZero())
+				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));			
+			if(lowInt > 0)
+				return epsilon.union(auxRepeat(i.interval, getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));			
+		}
+
+		long highInt = high.toLong();
+
+		if(lowInt < 0){
+			if(highInt < 0)
+				return emptyLanguage();
+
+			if(high.isZero())
+				return emptyString();
+			else
+				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));			
+		}
+
+		if(low.isZero()) {
+			if(high.isZero())
+				return emptyString();
+
+			if(highInt > 0)		
+				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));			
+		}
+
+		if(lowInt > 0 && highInt > 0)
+			return auxRepeat(i.interval, getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage());			
+
+		return emptyLanguage();
+	}
+
+	public SimpleAutomaton auxRepeat(IntInterval i, State currentState, SortedSet<Transition<StringSymbol>> delta, SimpleAutomaton result) throws MathNumberConversionException{
+
+		if(currentState.isFinal()){
+
+			SortedSet<State> states = new TreeSet<>();
+
+			for(State s: getStates()) {
+				if (!s.equals(currentState))
+					states.add(new State(s.getId(), s.isInitial(), false));
+				else
+					states.add(new State(s.getId(), s.isInitial(), s.isFinal()));
+			}
+
+			SimpleAutomaton temp = new SimpleAutomaton(states, delta);
+			SimpleAutomaton tempResult = temp.copy();
+
+			for(long k = 1; k < i.getLow().toLong(); k++)
+				tempResult = tempResult.connectAutomaton(temp, tempResult.getFinalStates(), false);
+
+			if(i.getHigh().isPlusInfinity()){
+				tempResult = tempResult.connectAutomaton(temp.copy().star(), tempResult.getFinalStates(), true);
+			} else {
+				for (long k = i.getLow().toLong(); k < i.getHigh().toLong(); k++) 
+					tempResult = tempResult.connectAutomaton(temp, tempResult.getFinalStates(), true);
+			}
+
+			tempResult = tempResult.minimize();
+			result = result.union(tempResult);
+
+		}
+
+		for(Transition<StringSymbol> t: getOutgoingTransitionsFrom(currentState)){
+			SortedSet<Transition<StringSymbol>> clone = new TreeSet<Transition<StringSymbol>>(delta);
+			clone.add(t);
+			result = auxRepeat(i, t.getDestination(), clone, result).union(result);
+		}
+
+		return result;
+	}
+
+	public SimpleAutomaton connectAutomaton(SimpleAutomaton second, SortedSet<State> connectOn, boolean b){
+		SortedSet<Transition<StringSymbol>> delta = new TreeSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		HashMap<State, State> firstMapping = new HashMap<>();
+		HashMap<State, State> secondMapping = new HashMap<>();
+		int c = 0;
+
+		if(equals(emptyString())){
+			return second;
+		}
+
+		if(second.equals(emptyString())){
+			return this;
+		}
+
+		for(State s : getStates()) {
+			State newState = null;
+			if (b) {
+				newState = new State(c++, s.isInitial(), s.isFinal());
+			}else{
+				if (connectOn.contains(s)) {
+					newState = new State(c++, s.isInitial(), false);
+				} else {
+					newState = new State(c++, s.isInitial(), s.isFinal());
+				}
+			}
+			states.add(newState);
+			firstMapping.put(s, newState);
+		}
+
+		for(Transition<StringSymbol> t: getTransitions()){
+			delta.add(new Transition<>(firstMapping.get(t.getSource()), firstMapping.get(t.getDestination()), t.getSymbol()));
+		}
+
+
+		if(second.getStates().size() == 1 && second.getInitialState().isFinal()) {
+			for (Transition<StringSymbol> t : second.getOutgoingTransitionsFrom(second.getInitialState())) {
+				for (State s : connectOn) {
+					State newState = new State(firstMapping.get(s).getId(), s.isInitial(), true);
+					states.remove(firstMapping.get(s));
+					states.add(newState);
+					delta.add(new Transition<>(newState, newState, t.getSymbol()));
+				}
+				second.minimize();
+			}
+		}else{
+			for (State s : second.getStates()) {
+				State newState = new State(c++, s.isInitial(), s.isFinal());
+				states.add(newState);
+				secondMapping.put(s, newState);
+			}
+
+			states.remove(secondMapping.get(second.getInitialState()));
+
+			for (Transition<StringSymbol> t : second.getTransitions()) {
+				if (!t.getSource().isInitial() && !t.getDestination().isInitial()) {
+					delta.add(new Transition<>(secondMapping.get(t.getSource()), secondMapping.get(t.getDestination()), t.getSymbol()));
+				}
+				if (t.getSource().isInitial()) {
+					//TODO better recheck this function
+					for (State s : connectOn) {
+						if (states.contains(secondMapping.get(t.getSource())))
+							delta.add(new Transition<>(secondMapping.get(t.getSource()), firstMapping.get(s), t.getSymbol()));
+					}
+				}
+			}
+
+			for (Transition<StringSymbol> t : second.getOutgoingTransitionsFrom(second.getInitialState())) {
+				for (State s : connectOn) {
+					delta.add(new Transition<>(firstMapping.get(s), secondMapping.get(t.getDestination()), t.getSymbol()));
+				}
+			}
+
+		}
+
+		return new SimpleAutomaton(states, delta);
 	}
 }
