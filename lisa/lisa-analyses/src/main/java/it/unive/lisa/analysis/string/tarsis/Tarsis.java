@@ -387,8 +387,8 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 						new StringSymbol(t.getSymbol().toString())));
 			else {
 				for (char c = 32; c <= 123; c++)
-					fsaDelta.add(new Transition<>(t.getSource(), t.getSource(), new StringSymbol(c)));
-				fsaDelta.add(new Transition<>(t.getSource(), t.getSource(), StringSymbol.EPSILON));
+					fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(), new StringSymbol(c)));
+				fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(), StringSymbol.EPSILON));
 			}
 		}
 

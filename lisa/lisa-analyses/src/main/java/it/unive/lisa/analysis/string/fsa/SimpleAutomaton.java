@@ -420,8 +420,12 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 			}
 
 			states.remove(secondMapping.get(second.getInitialState()));
+			secondMapping.remove(second.getInitialState());
 
 			for (Transition<StringSymbol> t : second.getTransitions()) {
+				if (t.getSource().equals(second.getInitialState()) || t.getDestination().equals(second.getInitialState()) || !secondMapping.containsKey(t.getSource()) || !secondMapping.containsKey(t.getDestination()))
+					continue;
+				
 				if (!t.getSource().isInitial() && !t.getDestination().isInitial()) {
 					delta.add(new Transition<>(secondMapping.get(t.getSource()), secondMapping.get(t.getDestination()),
 							t.getSymbol()));
@@ -441,10 +445,9 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 					delta.add(new Transition<>(firstMapping.get(s), secondMapping.get(t.getDestination()),
 							t.getSymbol()));
 				}
-			}
-
+			}	
 		}
-
+		
 		return new SimpleAutomaton(states, delta);
 	}
 }
