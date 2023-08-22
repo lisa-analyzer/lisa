@@ -354,6 +354,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * @return the domain instance containing the replaced automaton
 	 */
 	public Tarsis replace(Tarsis search, Tarsis repl) {
+		if (isBottom() || search.isBottom() || repl.isBottom())
+			return bottom();
+		
 		try {
 			return new Tarsis(this.a.replace(search.a, repl.a));
 		} catch (CyclicAutomatonException e) {
