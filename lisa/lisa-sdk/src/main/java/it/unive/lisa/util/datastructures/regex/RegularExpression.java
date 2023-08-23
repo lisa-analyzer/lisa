@@ -456,7 +456,7 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * Checks whether this regular expression recognize a string made just of
 	 * whitespaces.
 	 * 
-	 * @return {@true} if this regular expression recognize a string made just
+	 * @return {@code true} if this regular expression recognize a string made just
 	 *             of whitespaces, {@code false} otherwise.
 	 */
 	protected abstract boolean readsWhiteSpaceString();
