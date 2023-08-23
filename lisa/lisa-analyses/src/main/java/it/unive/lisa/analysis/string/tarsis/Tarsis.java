@@ -356,7 +356,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	public Tarsis replace(Tarsis search, Tarsis repl) {
 		if (isBottom() || search.isBottom() || repl.isBottom())
 			return bottom();
-		
+
 		try {
 			return new Tarsis(this.a.replace(search.a, repl.a));
 		} catch (CyclicAutomatonException e) {
@@ -423,7 +423,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 *                                           not finite
 	 */
 	public Tarsis repeat(Interval intv) throws MathNumberConversionException {
-		if (intv.isTop() || a.hasCycle())
+		if (isBottom())
+			return this;
+		else if (intv.isTop() || a.hasCycle())
 			return new Tarsis(a.star());
 		else if (intv.interval.isFinite()) {
 			if (intv.interval.isSingleton())
@@ -447,6 +449,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 *             have been removed from {@code this}
 	 */
 	public Tarsis trim() {
+		if (isBottom() || isTop())
+			return this;
+
 		return new Tarsis(this.a.trim());
 	}
 }

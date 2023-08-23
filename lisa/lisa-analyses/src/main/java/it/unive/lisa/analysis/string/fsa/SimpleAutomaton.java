@@ -187,6 +187,13 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		return result;
 	}
 
+	/**
+	 * Yields a new automaton where leading whitespaces have been removed from
+	 * {@code this}.
+	 * 
+	 * @return a new automaton where leading whitespaces have been removed from
+	 *             {@code this}
+	 */
 	public SimpleAutomaton trimLeft() {
 		SimpleAutomaton result = copy();
 
@@ -218,6 +225,13 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		return result;
 	}
 
+	/**
+	 * Yields a new automaton where trailing whitespaces have been removed from
+	 * {@code this}.
+	 * 
+	 * @return a new automaton where trailing whitespaces have been removed from
+	 *             {@code this}
+	 */
 	public SimpleAutomaton trimRight() {
 
 		SimpleAutomaton result = copy();
@@ -257,10 +271,29 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		return result;
 	}
 
+	/**
+	 * Yields a new automaton where leading and trailing whitespaces have been
+	 * removed from {@code this}.
+	 * 
+	 * @return a new automaton where leading trailing whitespaces have been
+	 *             removed from {@code this}
+	 */
 	public SimpleAutomaton trim() {
-		return trimLeft().trimRight();
+		return this.toRegex().trimRight().simplify().trimLeft().simplify().toAutomaton(this);
 	}
 
+	/**
+	 * Yields a new automaton instance recognizing each string of {@code this}
+	 * automaton repeated k-times, with k belonging to {@code intv}.
+	 * 
+	 * @param i the interval
+	 * 
+	 * @return a new automaton instance recognizing each string of {@code this}
+	 *             automaton repeated k-times, with k belonging to {@code intv}
+	 * 
+	 * @throws MathNumberConversionException if {@code intv} is iterated but is
+	 *                                           not finite
+	 */
 	public SimpleAutomaton repeat(Interval i) throws MathNumberConversionException {
 		if (equals(emptyString()))
 			return this;
@@ -326,7 +359,7 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		return emptyLanguage();
 	}
 
-	public SimpleAutomaton auxRepeat(IntInterval i, State currentState, SortedSet<Transition<StringSymbol>> delta,
+	private SimpleAutomaton auxRepeat(IntInterval i, State currentState, SortedSet<Transition<StringSymbol>> delta,
 			SimpleAutomaton result) throws MathNumberConversionException {
 
 		if (currentState.isFinal()) {
@@ -367,7 +400,7 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		return result;
 	}
 
-	public SimpleAutomaton connectAutomaton(SimpleAutomaton second, SortedSet<State> connectOn, boolean b) {
+	private SimpleAutomaton connectAutomaton(SimpleAutomaton second, SortedSet<State> connectOn, boolean b) {
 		SortedSet<Transition<StringSymbol>> delta = new TreeSet<>();
 		SortedSet<State> states = new TreeSet<>();
 		HashMap<State, State> firstMapping = new HashMap<>();
@@ -423,9 +456,11 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 			secondMapping.remove(second.getInitialState());
 
 			for (Transition<StringSymbol> t : second.getTransitions()) {
-				if (t.getSource().equals(second.getInitialState()) || t.getDestination().equals(second.getInitialState()) || !secondMapping.containsKey(t.getSource()) || !secondMapping.containsKey(t.getDestination()))
+				if (t.getSource().equals(second.getInitialState())
+						|| t.getDestination().equals(second.getInitialState())
+						|| !secondMapping.containsKey(t.getSource()) || !secondMapping.containsKey(t.getDestination()))
 					continue;
-				
+
 				if (!t.getSource().isInitial() && !t.getDestination().isInitial()) {
 					delta.add(new Transition<>(secondMapping.get(t.getSource()), secondMapping.get(t.getDestination()),
 							t.getSymbol()));
@@ -445,9 +480,9 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 					delta.add(new Transition<>(firstMapping.get(s), secondMapping.get(t.getDestination()),
 							t.getSymbol()));
 				}
-			}	
+			}
 		}
-		
+
 		return new SimpleAutomaton(states, delta);
 	}
 }

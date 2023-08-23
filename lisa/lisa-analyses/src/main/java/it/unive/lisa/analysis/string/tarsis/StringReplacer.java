@@ -133,7 +133,6 @@ public class StringReplacer {
 		Map<State, State> mapper = new HashMap<>();
 		origin.getStates().forEach(s -> mapper.put(s, new State(s.getId(), s.isInitial(), false)));
 		states.addAll(mapper.values());
-		
 
 		Function<State, State> maker = s -> new State(counter.getAndIncrement(), false, false);
 
