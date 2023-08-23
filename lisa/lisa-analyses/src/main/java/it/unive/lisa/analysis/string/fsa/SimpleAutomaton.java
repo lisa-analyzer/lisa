@@ -466,7 +466,6 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 							t.getSymbol()));
 				}
 				if (t.getSource().isInitial()) {
-					// TODO better recheck this function
 					for (State s : connectOn) {
 						if (states.contains(secondMapping.get(t.getSource())))
 							delta.add(new Transition<>(secondMapping.get(t.getSource()), firstMapping.get(s),

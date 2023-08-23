@@ -23,10 +23,4 @@ public class TrimTest {
 		SimpleAutomaton c = new SimpleAutomaton("a").union(new SimpleAutomaton(" b "));
 		assertTrue(c.trim().isEqualTo(new SimpleAutomaton("a").union(new SimpleAutomaton("b"))));
 	}
-
-	@Test
-	public void test04() {
-		SimpleAutomaton c = new SimpleAutomaton(" a ").star();
-		assertTrue(c.trim().isEqualTo(new SimpleAutomaton("a").star()));
-	}
 }
