@@ -183,7 +183,7 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 
 	@Override
 	public RegexAutomaton emptyLanguage() {
-		return emptyLanguage();
+		return emptyLang();
 	}
 
 	@Override
@@ -454,5 +454,53 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 			result = a.union(result);
 
 		return result;
+	}
+
+	/**
+	 * Yields an automaton that corresponds to the {@code n}-time concatenation
+	 * of {@code this}.
+	 * 
+	 * @param n the number of repetitions
+	 * 
+	 * @return an automaton that corresponds to the {@code n}-time concatenation
+	 *             of {@code this}
+	 */
+	public RegexAutomaton repeat(long n) {
+		if (n == 0)
+			return emptyString();
+		return toRegex().simplify().repeat(n).toAutomaton(this).minimize();
+	}
+
+	/**
+	 * Yields a new automaton where leading whitespaces have been removed from
+	 * {@code this}.
+	 * 
+	 * @return a new automaton where leading whitespaces have been removed from
+	 *             {@code this}
+	 */
+	public RegexAutomaton trimLeft() {
+		return this.toRegex().trimLeft().simplify().toAutomaton(this);
+	}
+
+	/**
+	 * Yields a new automaton where trailing whitespaces have been removed from
+	 * {@code this}.
+	 * 
+	 * @return a new automaton where trailing whitespaces have been removed from
+	 *             {@code this}
+	 */
+	public RegexAutomaton trimRight() {
+		return this.toRegex().trimRight().simplify().toAutomaton(this);
+	}
+
+	/**
+	 * Yields a new automaton where trailing and leading whitespaces have been
+	 * removed from {@code this}.
+	 * 
+	 * @return a new automaton where trailing and leading whitespaces have been
+	 *             removed from {@code this}
+	 */
+	public RegexAutomaton trim() {
+		return this.toRegex().trimRight().simplify().trimLeft().simplify().toAutomaton(this);
 	}
 }

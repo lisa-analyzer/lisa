@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.ContainsCharProvider;
@@ -25,6 +26,7 @@ import it.unive.lisa.util.datastructures.regex.RegularExpression;
 import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -352,6 +354,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * @return the domain instance containing the replaced automaton
 	 */
 	public Tarsis replace(Tarsis search, Tarsis repl) {
+		if (isBottom() || search.isBottom() || repl.isBottom())
+			return bottom();
+
 		try {
 			return new Tarsis(this.a.replace(search.a, repl.a));
 		} catch (CyclicAutomatonException e) {
@@ -385,8 +390,8 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 						new StringSymbol(t.getSymbol().toString())));
 			else {
 				for (char c = 32; c <= 123; c++)
-					fsaDelta.add(new Transition<>(t.getSource(), t.getSource(), new StringSymbol(c)));
-				fsaDelta.add(new Transition<>(t.getSource(), t.getSource(), StringSymbol.EPSILON));
+					fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(), new StringSymbol(c)));
+				fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(), StringSymbol.EPSILON));
 			}
 		}
 
@@ -403,5 +408,50 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 
 		return satisfiesBinaryExpression(StringContains.INSTANCE, this,
 				new Tarsis(RegexAutomaton.string(String.valueOf(c))), null);
+	}
+
+	/**
+	 * Yields a new Tarsis's instance recognizing each string of {@code this}
+	 * automaton repeated k-times, with k belonging to {@code intv}.
+	 * 
+	 * @param intv the interval
+	 * 
+	 * @return a new Tarsis's instance recognizing each string of {@code this}
+	 *             automaton repeated k-times, with k belonging to {@code intv}
+	 * 
+	 * @throws MathNumberConversionException if {@code intv} is iterated but is
+	 *                                           not finite
+	 */
+	public Tarsis repeat(Interval intv) throws MathNumberConversionException {
+		if (isBottom())
+			return this;
+		else if (intv.isTop() || a.hasCycle())
+			return new Tarsis(a.star());
+		else if (intv.interval.isFinite()) {
+			if (intv.interval.isSingleton())
+				return new Tarsis(a.repeat(intv.interval.getHigh().toLong()));
+			else {
+				RegexAutomaton result = a.emptyLanguage();
+
+				for (Long i : intv.interval)
+					result = result.union(a.repeat(i));
+				return new Tarsis(result);
+			}
+		} else
+			return new Tarsis(a.repeat(intv.interval.getLow().toLong()).concat(a.star()));
+	}
+
+	/**
+	 * Yields a new Tarsis's instance where trailing and leading whitespaces
+	 * have been removed from {@code this}.
+	 * 
+	 * @return a new Tarsis's instance where trailing and leading whitespaces
+	 *             have been removed from {@code this}
+	 */
+	public Tarsis trim() {
+		if (isBottom() || isTop())
+			return this;
+
+		return new Tarsis(this.a.trim());
 	}
 }

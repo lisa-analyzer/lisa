@@ -28,6 +28,8 @@ public final class Transition<T extends TransitionSymbol<T>> implements Comparab
 	 *                        transition.
 	 */
 	public Transition(State source, State destination, T symbol) {
+		Objects.requireNonNull(source);
+		Objects.requireNonNull(destination);
 		this.source = source;
 		this.destination = destination;
 		this.symbol = symbol;

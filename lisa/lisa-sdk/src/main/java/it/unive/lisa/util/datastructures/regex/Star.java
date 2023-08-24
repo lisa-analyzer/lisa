@@ -22,7 +22,7 @@ public final class Star extends RegularExpression {
 	 * 
 	 * @param op the inner regular expression
 	 */
-	Star(RegularExpression op) {
+	public Star(RegularExpression op) {
 		this.op = op;
 	}
 
@@ -233,5 +233,31 @@ public final class Star extends RegularExpression {
 	@Override
 	protected int compareToAux(RegularExpression other) {
 		return op.compareTo(other.asStar().op);
+	}
+
+	@Override
+	public RegularExpression repeat(long n) {
+		return this;
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		RegularExpression trimLeft = op.trimLeft().simplify();
+		if (trimLeft.isEmpty())
+			return Atom.EPSILON;
+		return new Or(Atom.EPSILON, new Comp(trimLeft, this));
+	}
+
+	@Override
+	public RegularExpression trimRight() {
+		RegularExpression trimRight = op.trimRight();
+		if (trimRight.isEmpty())
+			return Atom.EPSILON;
+		return new Or(Atom.EPSILON, new Comp(this, trimRight));
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return op.readsWhiteSpaceString();
 	}
 }

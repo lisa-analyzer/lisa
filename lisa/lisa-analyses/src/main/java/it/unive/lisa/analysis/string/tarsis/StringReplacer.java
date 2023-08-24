@@ -122,7 +122,8 @@ public class StringReplacer {
 	}
 
 	private RegexAutomaton emptyStringReplace(RegexAutomaton str) {
-		AtomicInteger counter = new AtomicInteger();
+		int maxId = origin.getStates().stream().mapToInt(s -> s.getId()).max().getAsInt();
+		AtomicInteger counter = new AtomicInteger(maxId + 1);
 		SortedSet<State> states = new TreeSet<>();
 		SortedSet<Transition<RegularExpression>> delta = new TreeSet<>();
 

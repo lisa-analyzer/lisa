@@ -30,7 +30,7 @@ public final class Or extends RegularExpression {
 	 * @param first  the first regular expression
 	 * @param second the second regular expression
 	 */
-	Or(RegularExpression first, RegularExpression second) {
+	public Or(RegularExpression first, RegularExpression second) {
 		// make things deterministic: order the branches
 		if (first.compareTo(second) <= 0) {
 			this.first = first;
@@ -276,5 +276,26 @@ public final class Or extends RegularExpression {
 		if ((cmp = first.compareTo(other.asOr().first)) != 0)
 			return cmp;
 		return second.compareTo(other.asOr().second);
+	}
+
+	@Override
+	public RegularExpression repeat(long n) {
+		return new Or(first.repeat(n), second.repeat(n)).simplify();
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		return new Or(first.trimLeft(), second.trimLeft());
+
+	}
+
+	@Override
+	public RegularExpression trimRight() {
+		return new Or(first.trimRight(), second.trimRight());
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return first.readsWhiteSpaceString() || second.readsWhiteSpaceString();
 	}
 }
