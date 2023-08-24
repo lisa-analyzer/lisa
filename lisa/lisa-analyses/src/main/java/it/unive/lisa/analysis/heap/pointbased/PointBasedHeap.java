@@ -404,7 +404,8 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 				Object... params)
 				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
-
+			SymbolicExpression referred = expression.getExpression();
+			
 			for (ValueExpression loc : arg)
 				if (loc instanceof AllocationSite) {
 					MemoryPointer e = new MemoryPointer(
@@ -414,6 +415,20 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					if (expression.hasRuntimeTypes())
 						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
+				} else if (referred.hasRuntimeTypes() && referred.getRuntimeTypes(null).stream().anyMatch(t -> !t.isInMemoryType())) {
+//					if (loc.hasRuntimeTypes() && loc.getRuntimeTypes(null).stream().anyMatch(t -> !t.isInMemoryType())) {						
+						for (Type type : referred.getRuntimeTypes(null)) {
+							VariableAllocationSite site = new VariableAllocationSite(type, (Identifier) referred,
+									loc.getCodeLocation());
+							MemoryPointer e = new MemoryPointer(
+									new ReferenceType(type),
+									site,
+									site.getCodeLocation());
+							e.setRuntimeTypes(Collections.singleton(new ReferenceType(type)));
+							result.add(e);
+						}
+//					} else
+//						result.add(loc);
 				} else
 					result.add(loc);
 			return new ExpressionSet<>(result);
@@ -426,9 +441,15 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression ref : arg)
-				if (ref instanceof MemoryPointer)
-					result.add(((MemoryPointer) ref).getReferencedLocation());
-				else if (ref instanceof Identifier) {
+				if (ref instanceof MemoryPointer) {
+					HeapLocation location = ((MemoryPointer) ref).getReferencedLocation();
+					if (location instanceof VariableAllocationSite)
+						// if location is a variable allocation site, it
+						// rewrites to the pointed variable
+						result.add(((VariableAllocationSite) location).getIdentifier());
+					else
+						result.add(location);
+				} else if (ref instanceof Identifier) {
 					// this could be aliasing!
 					Identifier id = (Identifier) ref;
 					if (heapEnv.getKeys().contains(id))
@@ -456,8 +477,10 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
-			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
-				return new ExpressionSet<>(resolveIdentifier(expression));
+			if (!(expression instanceof MemoryPointer)) {
+				if (heapEnv.getKeys().contains(expression))
+					return new ExpressionSet<>(resolveIdentifier(expression));
+			}
 
 			return new ExpressionSet<>(expression);
 		}
