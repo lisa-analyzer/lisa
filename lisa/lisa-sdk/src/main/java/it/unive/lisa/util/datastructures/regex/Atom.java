@@ -6,6 +6,7 @@ import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A {@link RegularExpression} representing a single string.
@@ -180,5 +181,38 @@ public class Atom extends RegularExpression {
 	@Override
 	protected int compareToAux(RegularExpression other) {
 		return string.compareTo(other.asAtom().string);
+	}
+
+	@Override
+	public RegularExpression repeat(long n) {
+		if (n == 0)
+			return Atom.EPSILON;
+
+		RegularExpression r = Atom.EPSILON;
+		for (long i = 0; i < n; i++)
+			r = new Comp(r, this);
+		r.simplify();
+		return r;
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		String trimLeft = StringUtils.stripStart(this.string, null);
+		if (trimLeft.isEmpty())
+			return Atom.EPSILON;
+		return new Atom(trimLeft);
+	}
+
+	@Override
+	public RegularExpression trimRight() {
+		String trimRight = StringUtils.stripEnd(this.string, null);
+		if (trimRight.isEmpty())
+			return Atom.EPSILON;
+		return new Atom(trimRight);
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return string.trim().isEmpty();
 	}
 }

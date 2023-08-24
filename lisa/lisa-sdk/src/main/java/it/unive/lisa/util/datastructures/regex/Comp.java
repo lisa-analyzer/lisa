@@ -31,7 +31,7 @@ public final class Comp extends RegularExpression {
 	 * @param first  the first regular expression
 	 * @param second the second regular expression
 	 */
-	Comp(RegularExpression first, RegularExpression second) {
+	public Comp(RegularExpression first, RegularExpression second) {
 		this.first = first;
 		this.second = second;
 	}
@@ -287,5 +287,51 @@ public final class Comp extends RegularExpression {
 		if ((cmp = first.compareTo(other.asComp().first)) != 0)
 			return cmp;
 		return second.compareTo(other.asComp().second);
+	}
+
+	@Override
+	public RegularExpression repeat(long n) {
+		if (n == 0)
+			return Atom.EPSILON;
+
+		RegularExpression r = Atom.EPSILON;
+		for (long i = 0; i < n; i++)
+			r = new Comp(r, this);
+		return r.simplify();
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		RegularExpression trimLeftFirst = first.trimLeft().simplify();
+		// it means that first reads just whitespaces strings (L(first)
+		// \subseteq { }*)
+		if (trimLeftFirst.isEmpty())
+			return this.second.trimLeft();
+		// first reads at least a whitespace string
+		else if (first.readsWhiteSpaceString())
+			return new Or(new Comp(trimLeftFirst, second), second.trimLeft());
+//			return new Comp(trimLeftFirst, new Or(second, second.trimLeft()));
+		else
+			return new Comp(trimLeftFirst, second);
+	}
+
+	@Override
+	public RegularExpression trimRight() {
+		RegularExpression trimRightSecond = second.trimRight().simplify();
+		// it means that second reads just whitespaces strings (L(second)
+		// \subseteq { }*)
+		if (trimRightSecond.isEmpty())
+			return this.first.trimRight();
+		// second reads at least a whitespace string
+		else if (second.readsWhiteSpaceString())
+			return new Or(new Comp(first, trimRightSecond), first.trimRight());
+//			return new Comp(new Or(first, first.trimRight()), trimRightSecond);
+		else
+			return new Comp(this.first, trimRightSecond);
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return first.readsWhiteSpaceString() && second.readsWhiteSpaceString();
 	}
 }

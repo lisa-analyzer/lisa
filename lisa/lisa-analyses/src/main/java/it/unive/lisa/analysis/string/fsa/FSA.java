@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.ContainsCharProvider;
@@ -21,6 +22,7 @@ import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -416,5 +418,36 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 		}
 
 		return Satisfiability.NOT_SATISFIED;
+	}
+
+	/**
+	 * Yields a new FSA where trailing and leading whitespaces have been removed
+	 * from {@code this}.
+	 * 
+	 * @return a new FSA where trailing and leading whitespaces have been
+	 *             removed from {@code this}
+	 */
+	public FSA trim() {
+		if (isBottom() || isTop())
+			return this;
+		return new FSA(this.a.trim());
+	}
+
+	/**
+	 * Yields a new FSA instance recognizing each string of {@code this}
+	 * automaton repeated k-times, with k belonging to {@code intv}.
+	 * 
+	 * @param i the interval
+	 * 
+	 * @return a new FSA instance recognizing each string of {@code this}
+	 *             automaton repeated k-times, with k belonging to {@code intv}
+	 * 
+	 * @throws MathNumberConversionException if {@code intv} is iterated but is
+	 *                                           not finite
+	 */
+	public FSA repeat(Interval i) throws MathNumberConversionException {
+		if (isBottom() || isTop())
+			return this;
+		return new FSA(this.a.repeat(i));
 	}
 }

@@ -131,4 +131,24 @@ public final class EmptySet extends RegularExpression {
 	protected int compareToAux(RegularExpression other) {
 		return 0;
 	}
+
+	@Override
+	public RegularExpression repeat(long n) {
+		return this;
+	}
+
+	@Override
+	public RegularExpression trimLeft() {
+		return this;
+	}
+
+	@Override
+	public RegularExpression trimRight() {
+		return this;
+	}
+
+	@Override
+	protected boolean readsWhiteSpaceString() {
+		return false;
+	}
 }
