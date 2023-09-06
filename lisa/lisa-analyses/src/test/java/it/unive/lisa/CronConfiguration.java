@@ -40,8 +40,4 @@ public class CronConfiguration extends LiSAConfiguration {
 	 * and the results will be checked to be equal to the non-optimized version.
 	 */
 	public boolean compareWithOptimization = true;
-
-	public CronConfiguration() {
-		optimize = false;
-	}
 }
