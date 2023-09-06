@@ -165,18 +165,20 @@ public class OptimizedAnalyzedCFG<
 	 * fixpoint's results have not been unwinded yet, a fixpoint iteration is
 	 * executed in-place through {@link #unwind()}.
 	 *
-	 * @param st the statement
+	 * @param st   the statement
+	 * @param conf the {@link FixpointConfiguration} to use for running the fast
+	 *                 fixpoint computation
 	 *
 	 * @return the result computed at the given statement
 	 */
-	public AnalysisState<A, H, V, T> getUnwindedAnalysisStateAfter(Statement st) {
+	public AnalysisState<A, H, V, T> getUnwindedAnalysisStateAfter(Statement st, FixpointConfiguration conf) {
 		if (results.getKeys().contains(st))
 			return results.getState(st);
 
 		if (expanded != null)
 			return expanded.getState(st);
 
-		unwind();
+		unwind(conf);
 
 		return expanded.getState(st);
 	}
@@ -185,8 +187,11 @@ public class OptimizedAnalyzedCFG<
 	 * Runs an ascending fixpoint computation starting with the results
 	 * available in this graph, with the purpose of propagating the
 	 * approximations held in this result to all the missing nodes.
+	 * 
+	 * @param conf the {@link FixpointConfiguration} to use for running the fast
+	 *                 fixpoint computation
 	 */
-	public void unwind() {
+	public void unwind(FixpointConfiguration conf) {
 		AnalysisState<A, H, V, T> bottom = results.lattice.bottom();
 		StatementStore<A, H, V, T> bot = new StatementStore<>(bottom);
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
@@ -210,7 +215,7 @@ public class OptimizedAnalyzedCFG<
 			}
 		}
 
-		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, 0, new PrecomputedAnalysis());
+		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
 		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = new Fixpoint<>(this, true);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {

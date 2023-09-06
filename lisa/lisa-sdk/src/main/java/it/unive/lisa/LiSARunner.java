@@ -173,13 +173,14 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 	private void analyze(Collection<CFG> allCFGs, FileManager fileManager, AtomicBoolean htmlViewer,
 			AtomicBoolean subnodes) {
 		A state = this.state.top();
+		FixpointConfiguration fixconf = new FixpointConfiguration(conf);
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> {
 					try {
 						interproc.fixpoint(
 								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
 								(Class<? extends WorkingSet<Statement>>) conf.fixpointWorkingSet,
-								new FixpointConfiguration(conf));
+								fixconf);
 					} catch (FixpointException e) {
 						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
 						throw new AnalysisExecutionException(FIXPOINT_EXCEPTION_MESSAGE, e);
@@ -194,7 +195,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					Statement,
 					SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding
 							? (cfg, st) -> ((OptimizedAnalyzedCFG<A, H, V, T>) cfg)
-									.getUnwindedAnalysisStateAfter(st)
+									.getUnwindedAnalysisStateAfter(st, fixconf)
 									.representation()
 									.toSerializableValue()
 							: (cfg, st) -> ((AnalyzedCFG<A, H, V, T>) cfg)

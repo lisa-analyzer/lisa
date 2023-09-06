@@ -1,5 +1,19 @@
 package it.unive.lisa.interprocedural.context;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.DefaultParameters;
@@ -26,7 +40,6 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.context.recursion.RecursionSolver;
 import it.unive.lisa.logging.IterationLogger;
-import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
@@ -41,18 +54,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -169,10 +170,6 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		if (app.getEntryPoints().isEmpty())
 			throw new NoEntryPointException();
 
-		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> this.fixpointAux(entryState));
-	}
-
-	private void fixpointAux(AnalysisState<A, H, V, T> entryState) throws AnalysisExecutionException {
 		int iter = 0;
 		ContextSensitivityToken empty = (ContextSensitivityToken) token.startingId();
 
@@ -185,96 +182,15 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			triggers.clear();
 			pendingRecursions = false;
 
-			for (CFG cfg : IterationLogger.iterate(LOG, entryPoints, "Processing entrypoints", "entries"))
-				try {
-					if (results == null) {
-						AnalyzedCFG<A, H, V, T> graph = conf.optimize
-								? new OptimizedAnalyzedCFG<>(cfg, empty, entryState.bottom(), this)
-								: new AnalyzedCFG<>(cfg, empty, entryState);
-						CFGResults<A, H, V, T> value = new CFGResults<>(graph);
-						this.results = new FixpointResults<>(value.top());
-					}
-
-					token = empty;
-					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
-					results.putResult(cfg, empty,
-							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
-				} catch (SemanticException | AnalysisSetupException e) {
-					throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
-				} catch (FixpointException e) {
-					throw new AnalysisExecutionException("Error while computing fixpoint for entrypoint " + cfg, e);
-				}
+			processEntrypoints(entryState, empty, entryPoints);
 
 			if (pendingRecursions) {
 				Set<Recursion<A, H, V, T>> recursions = new HashSet<>();
 
-				for (Collection<CodeMember> rec : callgraph.getRecursions()) {
-					// these are the calls that start the recursion by invoking
-					// one of its members
-					Collection<Call> starters = callgraph.getCallSites(rec).stream()
-							.filter(site -> !rec.contains(site.getCFG()))
-							.collect(Collectors.toSet());
+				for (Collection<CodeMember> rec : callgraph.getRecursions()) 
+					buildRecursion(entryState, recursions, rec);
 
-					for (Call starter : starters) {
-						// these are the head of the recursion: members invoked
-						// from outside of it
-						Set<CFG> heads = callgraph.getCallees(starter.getCFG()).stream()
-								.filter(callee -> rec.contains(callee))
-								.filter(CFG.class::isInstance)
-								.map(CFG.class::cast)
-								.collect(Collectors.toSet());
-						Set<Pair<ContextSensitivityToken, CompoundState<A, H, V, T>>> entries = new HashSet<>();
-						for (Entry<ScopeId, AnalyzedCFG<A, H, V, T>> res : results.get(starter.getCFG())) {
-							StatementStore<A, H, V, T> params = new StatementStore<>(entryState.bottom());
-							Expression[] parameters = starter.getParameters();
-							if (conf.optimize)
-								for (Expression actual : parameters)
-									params.put(actual, ((OptimizedAnalyzedCFG<A, H, V, T>) res.getValue())
-											.getUnwindedAnalysisStateAfter(actual));
-							else
-								for (Expression actual : parameters)
-									params.put(actual, res.getValue().getAnalysisStateAfter(actual));
-
-							entries.add(Pair.of((ContextSensitivityToken) res.getKey(),
-									CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
-						}
-
-						for (CFG head : heads)
-							for (Pair<ContextSensitivityToken, CompoundState<A, H, V, T>> entry : entries) {
-								Recursion<A, H, V, T> recursion = new Recursion<>(
-										starter,
-										entry.getLeft(),
-										entry.getRight(),
-										head,
-										rec);
-								recursions.add(recursion);
-							}
-					}
-				}
-
-				List<Recursion<A, H, V, T>> orderedRecursions = new ArrayList<>(recursions.size());
-				for (Recursion<A, H, V, T> rec : recursions) {
-					int pos = 0;
-					for (; pos < orderedRecursions.size(); pos++)
-						if (orderedRecursions.get(pos).getMembers().contains(rec.getInvocation().getCFG()))
-							// as the recursion at pos contains the member
-							// invoking rec, rec must be solved before the
-							// recursion at pos
-							break;
-					// if no match is found, add() will place the element at the
-					// end (pos == size())
-					// otherwise, elements will be shifted
-					orderedRecursions.add(pos, rec);
-				}
-
-				try {
-					for (Recursion<A, H, V, T> rec : orderedRecursions) {
-						new RecursionSolver<>(this, rec).solve();
-						triggers.addAll(rec.getMembers());
-					}
-				} catch (SemanticException e) {
-					throw new AnalysisExecutionException("Unable to solve one or more recursions", e);
-				}
+				solveRecursions(recursions);
 			}
 
 			// starting from the callers of the cfgs that needed a lub,
@@ -286,6 +202,100 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 			iter++;
 		} while (!triggers.isEmpty());
+	}
+
+	private void solveRecursions(Set<Recursion<A, H, V, T>> recursions) {
+		List<Recursion<A, H, V, T>> orderedRecursions = new ArrayList<>(recursions.size());
+		for (Recursion<A, H, V, T> rec : recursions) {
+			int pos = 0;
+			for (; pos < orderedRecursions.size(); pos++)
+				if (orderedRecursions.get(pos).getMembers().contains(rec.getInvocation().getCFG()))
+					// as the recursion at pos contains the member
+					// invoking rec, rec must be solved before the
+					// recursion at pos
+					break;
+			// if no match is found, add() will place the element at the
+			// end (pos == size())
+			// otherwise, elements will be shifted
+			orderedRecursions.add(pos, rec);
+		}
+
+		try {
+			for (Recursion<A, H, V, T> rec : orderedRecursions) {
+				new RecursionSolver<>(this, rec).solve();
+				triggers.addAll(rec.getMembers());
+			}
+		} catch (SemanticException e) {
+			throw new AnalysisExecutionException("Unable to solve one or more recursions", e);
+		}
+	}
+
+	private void buildRecursion(AnalysisState<A, H, V, T> entryState, Set<Recursion<A, H, V, T>> recursions,
+			Collection<CodeMember> rec) {
+		// these are the calls that start the recursion by invoking
+		// one of its members
+		Collection<Call> starters = callgraph.getCallSites(rec).stream()
+				.filter(site -> !rec.contains(site.getCFG()))
+				.collect(Collectors.toSet());
+
+		for (Call starter : starters) {
+			// these are the head of the recursion: members invoked
+			// from outside of it
+			Set<CFG> heads = callgraph.getCallees(starter.getCFG()).stream()
+					.filter(callee -> rec.contains(callee))
+					.filter(CFG.class::isInstance)
+					.map(CFG.class::cast)
+					.collect(Collectors.toSet());
+			Set<Pair<ContextSensitivityToken, CompoundState<A, H, V, T>>> entries = new HashSet<>();
+			for (Entry<ScopeId, AnalyzedCFG<A, H, V, T>> res : results.get(starter.getCFG())) {
+				StatementStore<A, H, V, T> params = new StatementStore<>(entryState.bottom());
+				Expression[] parameters = starter.getParameters();
+				if (conf.optimize)
+					for (Expression actual : parameters)
+						params.put(actual, ((OptimizedAnalyzedCFG<A, H, V, T>) res.getValue())
+								.getUnwindedAnalysisStateAfter(actual, conf));
+				else
+					for (Expression actual : parameters)
+						params.put(actual, res.getValue().getAnalysisStateAfter(actual));
+
+				entries.add(Pair.of((ContextSensitivityToken) res.getKey(),
+						CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
+			}
+
+			for (CFG head : heads)
+				for (Pair<ContextSensitivityToken, CompoundState<A, H, V, T>> entry : entries) {
+					Recursion<A, H, V, T> recursion = new Recursion<>(
+							starter,
+							entry.getLeft(),
+							entry.getRight(),
+							head,
+							rec);
+					recursions.add(recursion);
+				}
+		}
+	}
+
+	private void processEntrypoints(AnalysisState<A, H, V, T> entryState, ContextSensitivityToken empty,
+			Collection<CFG> entryPoints) {
+		for (CFG cfg : IterationLogger.iterate(LOG, entryPoints, "Processing entrypoints", "entries"))
+			try {
+				if (results == null) {
+					AnalyzedCFG<A, H, V, T> graph = conf.optimize
+							? new OptimizedAnalyzedCFG<>(cfg, empty, entryState.bottom(), this)
+							: new AnalyzedCFG<>(cfg, empty, entryState);
+					CFGResults<A, H, V, T> value = new CFGResults<>(graph);
+					this.results = new FixpointResults<>(value.top());
+				}
+
+				token = empty;
+				AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
+				results.putResult(cfg, empty,
+						cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
+			} catch (SemanticException | AnalysisSetupException e) {
+				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
+			} catch (FixpointException e) {
+				throw new AnalysisExecutionException("Error while computing fixpoint for entrypoint " + cfg, e);
+			}
 	}
 
 	@Override

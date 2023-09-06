@@ -215,8 +215,8 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 
 				// we get the actual call that is part of the cfg
 				Call source = call;
-				if (call.getSource() != null)
-					source = call.getSource();
+				while (source.getSource() != null)
+					source = source.getSource();
 
 				// it might happen that the call is a hotspot and we don't need
 				// any additional work

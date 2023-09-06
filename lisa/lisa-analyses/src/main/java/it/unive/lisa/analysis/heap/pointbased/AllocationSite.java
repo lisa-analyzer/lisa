@@ -12,7 +12,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class AllocationSite extends HeapLocation {
+public abstract class AllocationSite extends HeapLocation {
 
 	private final String locationName;
 

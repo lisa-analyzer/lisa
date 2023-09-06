@@ -1,5 +1,10 @@
 package it.unive.lisa.imp.expressions;
 
+import java.util.Collections;
+import java.util.Objects;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,9 +28,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
-import java.util.Collections;
-import java.util.Objects;
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
@@ -82,13 +84,14 @@ public class IMPNewObj extends NaryExpression {
 		// we need to add the receiver to the parameters
 		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$lisareceiver", type);
 		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
-		ExpressionSet<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, new ExpressionSet<>(created));
 
 		// we also have to add the receiver inside the state
 		AnalysisState<A, H, V, T> callstate = paramThis.semantics(state, interprocedural, expressions);
 		AnalysisState<A, H, V, T> tmp = state.bottom();
-		for (SymbolicExpression v : callstate.getComputedExpressions())
+		for (SymbolicExpression v : callstate.getComputedExpressions()) 
 			tmp = tmp.lub(callstate.assign(v, ref, paramThis));
+		ExpressionSet<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params,
+				callstate.getComputedExpressions());
 		expressions.put(paramThis, tmp);
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(), CallType.INSTANCE, type.toString(),
