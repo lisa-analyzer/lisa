@@ -1,10 +1,13 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
 import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -30,6 +33,7 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A, H, V, T>,
 		T extends TypeDomain<T>>
 		extends CFGFixpoint<A, H, V, T> {
 
+	private final FixpointConfiguration config;
 	private final Collection<Statement> wideningPoints;
 
 	/**
@@ -38,28 +42,35 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A, H, V, T>,
 	 * @param target          the target of the implementation
 	 * @param interprocedural the {@link InterproceduralAnalysis} to use for
 	 *                            semantics computations
+	 * @param config          the {@link FixpointConfiguration} to use
 	 */
 	public DescendingNarrowingFixpoint(CFG target,
-			InterproceduralAnalysis<A, H, V, T> interprocedural) {
+			InterproceduralAnalysis<A, H, V, T> interprocedural,
+			FixpointConfiguration config) {
 		super(target, interprocedural);
-		this.wideningPoints = target.getCycleEntries();
+		this.config = config;
+		this.wideningPoints = config.useWideningPoints ? target.getCycleEntries() : null;
 	}
 
 	@Override
 	public CompoundState<A, H, V, T> operation(Statement node,
 			CompoundState<A, H, V, T> approx,
 			CompoundState<A, H, V, T> old) throws SemanticException {
-		// optimization: never apply narrowing on normal instructions,
-		// save time and precision and only apply to widening points
-		if (!wideningPoints.contains(node))
+		if (wideningPoints == null || !wideningPoints.contains(node))
+			// optimization: never apply narrowing on normal instructions,
+			// save time and precision and only apply to widening points
 			return old.glb(approx);
 
-		return CompoundState.of(
-				old.postState.narrowing(approx.postState),
-				// no need to narrow the intermediate expressions as
-				// well: we force convergence on the final post state
-				// only, to recover as much precision as possible
-				old.intermediateStates.glb(approx.intermediateStates));
+		AnalysisState<A, H, V, T> post = old.postState.narrowing(approx.postState);
+		StatementStore<A, H, V, T> intermediate;
+		if (config.useWideningPoints)
+			// no need to narrow the intermediate expressions as
+			// well: we force convergence on the final post state
+			// only, to recover as much precision as possible
+			intermediate = old.intermediateStates.glb(approx.intermediateStates);
+		else
+			intermediate = old.intermediateStates.narrowing(approx.intermediateStates);
+		return CompoundState.of(post, intermediate);
 	}
 
 	@Override

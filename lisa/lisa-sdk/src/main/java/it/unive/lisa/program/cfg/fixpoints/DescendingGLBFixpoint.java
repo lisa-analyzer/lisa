@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -39,14 +40,15 @@ public class DescendingGLBFixpoint<A extends AbstractState<A, H, V, T>,
 	 * Builds the fixpoint implementation.
 	 * 
 	 * @param target          the target of the implementation
-	 * @param maxGLBs         the maximum number of glbs
 	 * @param interprocedural the {@link InterproceduralAnalysis} to use for
 	 *                            semantics computations
+	 * @param config          the {@link FixpointConfiguration} to use
 	 */
-	public DescendingGLBFixpoint(CFG target, int maxGLBs,
-			InterproceduralAnalysis<A, H, V, T> interprocedural) {
+	public DescendingGLBFixpoint(CFG target,
+			InterproceduralAnalysis<A, H, V, T> interprocedural,
+			FixpointConfiguration config) {
 		super(target, interprocedural);
-		this.maxGLBs = maxGLBs;
+		this.maxGLBs = config.glbThreshold;
 		this.glbs = new HashMap<>(target.getNodesCount());
 	}
 

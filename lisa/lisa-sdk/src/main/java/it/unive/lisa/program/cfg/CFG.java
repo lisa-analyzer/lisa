@@ -411,7 +411,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = isOptimized
 				? new OptimizedFixpoint<>(this, false, conf.hotspots)
 				: new Fixpoint<>(this, false);
-		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, conf.wideningThreshold, interprocedural);
+		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, interprocedural, conf);
 
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
 		StatementStore<A, H, V, T> bot = new StatementStore<>(singleton.bottom());
@@ -425,14 +425,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		Map<Statement, CompoundState<A, H, V, T>> descending;
 		switch (conf.descendingPhaseType) {
 		case GLB:
-			DescendingGLBFixpoint<A, H, V, T> dg = new DescendingGLBFixpoint<>(
-					this,
-					conf.glbThreshold,
-					interprocedural);
+			DescendingGLBFixpoint<A, H, V, T> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
 			descending = fix.fixpoint(starting, ws, dg, ascending);
 			break;
 		case NARROWING:
-			DescendingNarrowingFixpoint<A, H, V, T> dn = new DescendingNarrowingFixpoint<>(this, interprocedural);
+			DescendingNarrowingFixpoint<A, H, V, T> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
 			descending = fix.fixpoint(starting, ws, dn, ascending);
 			break;
 		case NONE:

@@ -37,6 +37,11 @@ public class FixpointConfiguration extends BaseConfiguration {
 	public final boolean optimize;
 
 	/**
+	 * Holder of {@link LiSAConfiguration#useWideningPoints}.
+	 */
+	public final boolean useWideningPoints;
+
+	/**
 	 * Holder of {@link LiSAConfiguration#hotspots}.
 	 */
 	public final Predicate<Statement> hotspots;
@@ -53,5 +58,6 @@ public class FixpointConfiguration extends BaseConfiguration {
 		this.descendingPhaseType = parent.descendingPhaseType;
 		this.optimize = parent.optimize;
 		this.hotspots = parent.hotspots;
+		this.useWideningPoints = parent.useWideningPoints;
 	}
 }
