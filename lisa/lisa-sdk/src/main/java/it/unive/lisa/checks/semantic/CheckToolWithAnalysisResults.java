@@ -84,6 +84,10 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		return results.get(cfg);
 	}
 
+	public CallGraph getCallGraph() {
+		return callgraph;
+	}
+	
 	/**
 	 * Yields all the {@link CodeMember}s that call the given one, according to
 	 * the {@link CallGraph} that has been built during the analysis.
