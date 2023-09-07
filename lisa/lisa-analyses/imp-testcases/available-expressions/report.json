@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_ae.f0(ae__this).json", "untyped_ae.f1(ae__this).json", "untyped_ae.f2(ae__this).json", "untyped_ae.f3(ae__this).json", "untyped_ae.f4(ae__this).json" ],
   "info" : {
     "cfgs" : "5",
-    "duration" : "1s 596ms",
-    "end" : "2023-04-20T12:45:16.971+02:00",
+    "duration" : "1s 708ms",
+    "end" : "2023-09-07T11:45:37.118+02:00",
     "expressions" : "151",
     "files" : "5",
     "globals" : "0",
     "members" : "5",
     "programs" : "1",
-    "start" : "2023-04-20T12:45:15.375+02:00",
+    "start" : "2023-09-07T11:45:35.410+02:00",
     "statements" : "54",
     "units" : "1",
-    "version" : "0.1b7",
+    "version" : "0.1b8",
     "warnings" : "0"
   },
   "configuration" : {
@@ -31,6 +31,7 @@
     "serializeInputs" : "false",
     "serializeResults" : "true",
     "syntacticChecks" : "",
+    "useWideningPoints" : "true",
     "wideningThreshold" : "5",
     "workdir" : "test-outputs/available-expressions"
   }

@@ -82,7 +82,7 @@ public class IMPNewObj extends NaryExpression {
 		ref.setRuntimeTypes(Collections.singleton(reftype));
 
 		// we need to add the receiver to the parameters
-		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$lisareceiver", type);
+		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$lisareceiver", reftype);
 		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
 
 		// we also have to add the receiver inside the state
