@@ -4,11 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.TestAbstractState;
-import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestLanguageFeatures;
-import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestTypeSystem;
-import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -138,9 +135,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testCopy() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"), Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -169,9 +165,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testSimpleFill() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"), Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -187,9 +182,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDisjointWarnings() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"), Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -203,9 +197,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDuplicateWarnings() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"), Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -222,25 +215,19 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testResultRetrieval() {
-		AnalysisState<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> singleton = new AnalysisState<>(
-						new TestAbstractState(),
-						new ExpressionSet<>(), new SymbolAliasing());
+		AnalysisState<TestAbstractState> singleton = new AnalysisState<>(
+				new TestAbstractState(),
+				new ExpressionSet<>(), new SymbolAliasing());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
-		AnalyzedCFG<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res1 = new AnalyzedCFG<>(cfg, new UniqueScope(), singleton,
-						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
+		AnalyzedCFG<TestAbstractState> res1 = new AnalyzedCFG<>(cfg, new UniqueScope(), singleton,
+				Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
-		AnalyzedCFG<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res2 = new AnalyzedCFG<>(cfg2, new UniqueScope(), singleton,
-						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
+		AnalyzedCFG<TestAbstractState> res2 = new AnalyzedCFG<>(cfg2, new UniqueScope(), singleton,
+				Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain,
-				TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"),
 						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)), fakeCallGraph);
 

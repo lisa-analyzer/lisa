@@ -1,9 +1,6 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Map;
 
@@ -15,26 +12,20 @@ import java.util.Map;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the type of {@link AbstractState}
- * @param <H> the type of the {@link HeapDomain}
- * @param <V> the type of the {@link ValueDomain}
- * @param <T> the type of {@link TypeDomain}
  */
-public class StatementStore<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends FunctionalLattice<StatementStore<A, H, V, T>, Statement, AnalysisState<A, H, V, T>> {
+public class StatementStore<A extends AbstractState<A>>
+		extends FunctionalLattice<StatementStore<A>, Statement, AnalysisState<A>> {
 
 	/**
 	 * Builds the store.
 	 * 
 	 * @param state an instance of the underlying lattice
 	 */
-	public StatementStore(AnalysisState<A, H, V, T> state) {
+	public StatementStore(AnalysisState<A> state) {
 		super(state);
 	}
 
-	private StatementStore(AnalysisState<A, H, V, T> state, Map<Statement, AnalysisState<A, H, V, T>> function) {
+	private StatementStore(AnalysisState<A> state, Map<Statement, AnalysisState<A>> function) {
 		super(state, function);
 	}
 
@@ -48,7 +39,7 @@ public class StatementStore<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @return the previous state mapped to {@code expression}, or {@code null}
 	 */
-	public AnalysisState<A, H, V, T> put(Statement st, AnalysisState<A, H, V, T> state) {
+	public AnalysisState<A> put(Statement st, AnalysisState<A> state) {
 		if (function == null)
 			function = mkNewFunction(null, false);
 		return function.put(st, state);
@@ -68,18 +59,18 @@ public class StatementStore<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public StatementStore<A, H, V, T> top() {
+	public StatementStore<A> top() {
 		return new StatementStore<>(lattice.top());
 	}
 
 	@Override
-	public StatementStore<A, H, V, T> bottom() {
+	public StatementStore<A> bottom() {
 		return new StatementStore<>(lattice.bottom());
 	}
 
 	@Override
-	public StatementStore<A, H, V, T> mk(AnalysisState<A, H, V, T> lattice,
-			Map<Statement, AnalysisState<A, H, V, T>> function) {
+	public StatementStore<A> mk(AnalysisState<A> lattice,
+			Map<Statement, AnalysisState<A>> function) {
 		return new StatementStore<>(lattice, function);
 	}
 }

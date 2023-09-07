@@ -1,10 +1,7 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.FixpointResults;
@@ -56,25 +53,14 @@ import org.apache.logging.log4j.Logger;
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state
- * @param <T> the type of {@link TypeDomain} embedded into the computed abstract
- *                state
  */
-public class OptimizedAnalyzedCFG<
-		A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends AnalyzedCFG<A, H, V, T> {
+public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCFG<A> {
 
 	private static final Logger LOG = LogManager.getLogger(OptimizedAnalyzedCFG.class);
 
-	private final InterproceduralAnalysis<A, H, V, T> interprocedural;
+	private final InterproceduralAnalysis<A> interprocedural;
 
-	private StatementStore<A, H, V, T> expanded;
+	private StatementStore<A> expanded;
 
 	/**
 	 * Builds the control flow graph, storing the given mapping between nodes
@@ -93,8 +79,8 @@ public class OptimizedAnalyzedCFG<
 	 */
 	public OptimizedAnalyzedCFG(CFG cfg,
 			ScopeId id,
-			AnalysisState<A, H, V, T> singleton,
-			InterproceduralAnalysis<A, H, V, T> interprocedural) {
+			AnalysisState<A> singleton,
+			InterproceduralAnalysis<A> interprocedural) {
 		super(cfg, id, singleton);
 		this.interprocedural = interprocedural;
 	}
@@ -118,10 +104,10 @@ public class OptimizedAnalyzedCFG<
 	 */
 	public OptimizedAnalyzedCFG(CFG cfg,
 			ScopeId id,
-			AnalysisState<A, H, V, T> singleton,
-			Map<Statement, AnalysisState<A, H, V, T>> entryStates,
-			Map<Statement, AnalysisState<A, H, V, T>> results,
-			InterproceduralAnalysis<A, H, V, T> interprocedural) {
+			AnalysisState<A> singleton,
+			Map<Statement, AnalysisState<A>> entryStates,
+			Map<Statement, AnalysisState<A>> results,
+			InterproceduralAnalysis<A> interprocedural) {
 		super(cfg, id, singleton, entryStates, results);
 		this.interprocedural = interprocedural;
 	}
@@ -141,19 +127,19 @@ public class OptimizedAnalyzedCFG<
 	 */
 	public OptimizedAnalyzedCFG(CFG cfg,
 			ScopeId id,
-			StatementStore<A, H, V, T> entryStates,
-			StatementStore<A, H, V, T> results,
-			InterproceduralAnalysis<A, H, V, T> interprocedural) {
+			StatementStore<A> entryStates,
+			StatementStore<A> results,
+			InterproceduralAnalysis<A> interprocedural) {
 		super(cfg, id, entryStates, results);
 		this.interprocedural = interprocedural;
 	}
 
 	private OptimizedAnalyzedCFG(CFG cfg,
 			ScopeId id,
-			StatementStore<A, H, V, T> entryStates,
-			StatementStore<A, H, V, T> results,
-			StatementStore<A, H, V, T> expanded,
-			InterproceduralAnalysis<A, H, V, T> interprocedural) {
+			StatementStore<A> entryStates,
+			StatementStore<A> results,
+			StatementStore<A> expanded,
+			InterproceduralAnalysis<A> interprocedural) {
 		super(cfg, id, entryStates, results);
 		this.interprocedural = interprocedural;
 		this.expanded = expanded;
@@ -171,7 +157,7 @@ public class OptimizedAnalyzedCFG<
 	 *
 	 * @return the result computed at the given statement
 	 */
-	public AnalysisState<A, H, V, T> getUnwindedAnalysisStateAfter(Statement st, FixpointConfiguration conf) {
+	public AnalysisState<A> getUnwindedAnalysisStateAfter(Statement st, FixpointConfiguration conf) {
 		if (results.getKeys().contains(st))
 			return results.getState(st);
 
@@ -192,42 +178,42 @@ public class OptimizedAnalyzedCFG<
 	 *                 fixpoint computation
 	 */
 	public void unwind(FixpointConfiguration conf) {
-		AnalysisState<A, H, V, T> bottom = results.lattice.bottom();
-		StatementStore<A, H, V, T> bot = new StatementStore<>(bottom);
-		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
-		for (Entry<Statement, AnalysisState<A, H, V, T>> entry : entryStates)
+		AnalysisState<A> bottom = results.lattice.bottom();
+		StatementStore<A> bot = new StatementStore<>(bottom);
+		Map<Statement, CompoundState<A>> starting = new HashMap<>();
+		for (Entry<Statement, AnalysisState<A>> entry : entryStates)
 			starting.put(entry.getKey(), CompoundState.of(entry.getValue(), bot));
 
-		Map<Statement, CompoundState<A, H, V, T>> existing = new HashMap<>();
-		CompoundState<A, H, V, T> fallback = CompoundState.of(bottom, bot);
-		for (Entry<Statement, AnalysisState<A, H, V, T>> entry : results) {
+		Map<Statement, CompoundState<A>> existing = new HashMap<>();
+		CompoundState<A> fallback = CompoundState.of(bottom, bot);
+		for (Entry<Statement, AnalysisState<A>> entry : results) {
 			Statement stmt = entry.getKey();
-			AnalysisState<A, H, V, T> approx = entry.getValue();
-			CompoundState<A, H, V, T> def = existing.getOrDefault(stmt, fallback);
+			AnalysisState<A> approx = entry.getValue();
+			CompoundState<A> def = existing.getOrDefault(stmt, fallback);
 
 			if (!(stmt instanceof Expression) || ((Expression) stmt).getRootStatement() == stmt)
 				existing.put(stmt, CompoundState.of(approx, def.intermediateStates));
 			else {
 				Expression e = (Expression) stmt;
-				CompoundState<A, H, V, T> val = existing.computeIfAbsent(e.getRootStatement(),
+				CompoundState<A> val = existing.computeIfAbsent(e.getRootStatement(),
 						ex -> CompoundState.of(bottom, bot.bottom()));
 				val.intermediateStates.put(e, approx);
 			}
 		}
 
-		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
-		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = new Fixpoint<>(this, true);
+		AscendingFixpoint<A> asc = new AscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
+		Fixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new Fixpoint<>(this, true);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
-				Map<Statement, CompoundState<A, H, V, T>> res = fix.fixpoint(
+				Map<Statement, CompoundState<A>> res = fix.fixpoint(
 						starting,
 						FIFOWorkingSet.mk(),
 						asc,
 						existing);
 				expanded = new StatementStore<>(bottom);
-				for (Entry<Statement, CompoundState<A, H, V, T>> e : res.entrySet()) {
+				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
 					expanded.put(e.getKey(), e.getValue().postState);
-					for (Entry<Statement, AnalysisState<A, H, V, T>> ee : e.getValue().intermediateStates)
+					for (Entry<Statement, AnalysisState<A>> ee : e.getValue().intermediateStates)
 						expanded.put(ee.getKey(), ee.getValue());
 				}
 			} catch (FixpointException e) {
@@ -255,11 +241,11 @@ public class OptimizedAnalyzedCFG<
 	 * @param st        the statement
 	 * @param postState the poststate
 	 */
-	public void storePostStateOf(Statement st, AnalysisState<A, H, V, T> postState) {
+	public void storePostStateOf(Statement st, AnalysisState<A> postState) {
 		results.put(st, postState);
 	}
 
-	private class PrecomputedAnalysis implements InterproceduralAnalysis<A, H, V, T> {
+	private class PrecomputedAnalysis implements InterproceduralAnalysis<A> {
 
 		@Override
 		public void init(Application app,
@@ -270,7 +256,7 @@ public class OptimizedAnalyzedCFG<
 		}
 
 		@Override
-		public void fixpoint(AnalysisState<A, H, V, T> entryState,
+		public void fixpoint(AnalysisState<A> entryState,
 				Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 				FixpointConfiguration conf)
 				throws FixpointException {
@@ -278,35 +264,35 @@ public class OptimizedAnalyzedCFG<
 		}
 
 		@Override
-		public Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
+		public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(CFG cfg) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public AnalysisState<A, H, V, T> getAbstractResultOf(
+		public AnalysisState<A> getAbstractResultOf(
 				CFGCall call,
-				AnalysisState<A, H, V, T> entryState,
+				AnalysisState<A> entryState,
 				ExpressionSet<SymbolicExpression>[] parameters,
-				StatementStore<A, H, V, T> expressions)
+				StatementStore<A> expressions)
 				throws SemanticException {
 			Call source = call.getSource() == null ? call : call.getSource();
 			if (results.getKeys().contains(source))
 				return results.getState(source);
 
-			FixpointResults<A, H, V, T> precomputed = interprocedural.getFixpointResults();
+			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
 			ScopeId id = getId().push(call);
-			AnalysisState<A, H, V, T> state = entryState.bottom();
+			AnalysisState<A> state = entryState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
-				AnalysisState<A, H, V, T> res = precomputed.getState(target).getState(id).getExitState();
+				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();
 				state = state.lub(unscope(call, scope, res));
 			}
 			return state;
 		}
 
 		@Override
-		public AnalysisState<A, H, V, T> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V, T> entryState,
-				ExpressionSet<SymbolicExpression>[] parameters, StatementStore<A, H, V, T> expressions)
+		public AnalysisState<A> getAbstractResultOf(OpenCall call, AnalysisState<A> entryState,
+				ExpressionSet<SymbolicExpression>[] parameters, StatementStore<A> expressions)
 				throws SemanticException {
 			return interprocedural.getAbstractResultOf(call, entryState, parameters, expressions);
 		}
@@ -318,19 +304,19 @@ public class OptimizedAnalyzedCFG<
 		}
 
 		@Override
-		public FixpointResults<A, H, V, T> getFixpointResults() {
+		public FixpointResults<A> getFixpointResults() {
 			return interprocedural.getFixpointResults();
 		}
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A, H, V, T> lubAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+	public OptimizedAnalyzedCFG<A> lubAux(AnalyzedCFG<A> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
-				|| !(other instanceof OptimizedAnalyzedCFG<?, ?, ?, ?>))
+				|| !(other instanceof OptimizedAnalyzedCFG<?>))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
-		OptimizedAnalyzedCFG<A, H, V, T> o = (OptimizedAnalyzedCFG<A, H, V, T>) other;
-		return new OptimizedAnalyzedCFG<A, H, V, T>(
+		OptimizedAnalyzedCFG<A> o = (OptimizedAnalyzedCFG<A>) other;
+		return new OptimizedAnalyzedCFG<A>(
 				this,
 				id,
 				entryStates.lub(other.entryStates),
@@ -340,13 +326,13 @@ public class OptimizedAnalyzedCFG<
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A, H, V, T> glbAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+	public OptimizedAnalyzedCFG<A> glbAux(AnalyzedCFG<A> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
-				|| !(other instanceof OptimizedAnalyzedCFG<?, ?, ?, ?>))
+				|| !(other instanceof OptimizedAnalyzedCFG<?>))
 			throw new SemanticException(CANNOT_GLB_ERROR);
 
-		OptimizedAnalyzedCFG<A, H, V, T> o = (OptimizedAnalyzedCFG<A, H, V, T>) other;
-		return new OptimizedAnalyzedCFG<A, H, V, T>(
+		OptimizedAnalyzedCFG<A> o = (OptimizedAnalyzedCFG<A>) other;
+		return new OptimizedAnalyzedCFG<A>(
 				this,
 				id,
 				entryStates.glb(other.entryStates),
@@ -356,13 +342,13 @@ public class OptimizedAnalyzedCFG<
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A, H, V, T> wideningAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+	public OptimizedAnalyzedCFG<A> wideningAux(AnalyzedCFG<A> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
-				|| !(other instanceof OptimizedAnalyzedCFG<?, ?, ?, ?>))
+				|| !(other instanceof OptimizedAnalyzedCFG<?>))
 			throw new SemanticException(CANNOT_WIDEN_ERROR);
 
-		OptimizedAnalyzedCFG<A, H, V, T> o = (OptimizedAnalyzedCFG<A, H, V, T>) other;
-		return new OptimizedAnalyzedCFG<A, H, V, T>(
+		OptimizedAnalyzedCFG<A> o = (OptimizedAnalyzedCFG<A>) other;
+		return new OptimizedAnalyzedCFG<A>(
 				this,
 				id,
 				entryStates.widening(other.entryStates),
@@ -372,13 +358,13 @@ public class OptimizedAnalyzedCFG<
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A, H, V, T> narrowingAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+	public OptimizedAnalyzedCFG<A> narrowingAux(AnalyzedCFG<A> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
-				|| !(other instanceof OptimizedAnalyzedCFG<?, ?, ?, ?>))
+				|| !(other instanceof OptimizedAnalyzedCFG<?>))
 			throw new SemanticException(CANNOT_NARROW_ERROR);
 
-		OptimizedAnalyzedCFG<A, H, V, T> o = (OptimizedAnalyzedCFG<A, H, V, T>) other;
-		return new OptimizedAnalyzedCFG<A, H, V, T>(
+		OptimizedAnalyzedCFG<A> o = (OptimizedAnalyzedCFG<A>) other;
+		return new OptimizedAnalyzedCFG<A>(
 				this,
 				id,
 				entryStates.narrowing(other.entryStates),
@@ -388,12 +374,12 @@ public class OptimizedAnalyzedCFG<
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A, H, V, T> top() {
+	public OptimizedAnalyzedCFG<A> top() {
 		return new OptimizedAnalyzedCFG<>(this, id.startingId(), entryStates.top(), results.top(), null, null);
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A, H, V, T> bottom() {
+	public OptimizedAnalyzedCFG<A> bottom() {
 		return new OptimizedAnalyzedCFG<>(this, id.startingId(), entryStates.bottom(), results.bottom(), null, null);
 	}
 }

@@ -1,25 +1,15 @@
 package it.unive.lisa.analysis.traces;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.MapRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -28,6 +18,12 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to
@@ -56,19 +52,13 @@ import it.unive.lisa.type.Untyped;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the type of {@link AbstractState} that this is being partitioned
- * @param <H> the type of {@link HeapDomain} embedded in the abstract states
- * @param <V> the type of {@link ValueDomain} embedded in the abstract states
- * @param <T> the type of {@link TypeDomain} embedded in the abstract states
  * 
  * @see <a href=
  *          "https://doi.org/10.1145/1275497.1275501">https://doi.org/10.1145/1275497.1275501</a>
  */
-public class TracePartitioning<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends FunctionalLattice<TracePartitioning<A, H, V, T>, ExecutionTrace, A>
-		implements AbstractState<TracePartitioning<A, H, V, T>, H, V, T> {
+public class TracePartitioning<A extends AbstractState<A>>
+		extends FunctionalLattice<TracePartitioning<A>, ExecutionTrace, A>
+		implements AbstractState<TracePartitioning<A>> {
 
 	/**
 	 * The maximum number of {@link LoopIteration} tokens that a trace can
@@ -109,17 +99,17 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> top() {
+	public TracePartitioning<A> top() {
 		return new TracePartitioning<>(lattice.top(), null);
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> bottom() {
+	public TracePartitioning<A> bottom() {
 		return new TracePartitioning<>(lattice.bottom(), null);
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public TracePartitioning<A> assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		if (isBottom())
 			return this;
@@ -134,7 +124,7 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+	public TracePartitioning<A> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		if (isBottom())
 			return this;
@@ -149,7 +139,7 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public TracePartitioning<A> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
 			throws SemanticException {
 		if (isBottom())
 			return this;
@@ -211,7 +201,7 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> forgetIdentifier(Identifier id) throws SemanticException {
+	public TracePartitioning<A> forgetIdentifier(Identifier id) throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
@@ -222,7 +212,7 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public TracePartitioning<A> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
@@ -251,7 +241,7 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> pushScope(ScopeToken token) throws SemanticException {
+	public TracePartitioning<A> pushScope(ScopeToken token) throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
@@ -262,7 +252,7 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> popScope(ScopeToken token) throws SemanticException {
+	public TracePartitioning<A> popScope(ScopeToken token) throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
@@ -287,7 +277,7 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public TracePartitioning<A, H, V, T> mk(A lattice, Map<ExecutionTrace, A> function) {
+	public TracePartitioning<A> mk(A lattice, Map<ExecutionTrace, A> function) {
 		return new TracePartitioning<>(lattice, function);
 	}
 

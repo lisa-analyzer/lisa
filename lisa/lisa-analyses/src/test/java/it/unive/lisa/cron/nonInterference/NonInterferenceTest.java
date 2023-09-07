@@ -81,20 +81,14 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	private static class NICheck
 			implements SemanticCheck<
 					SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-							TypeEnvironment<InferredTypes>>,
-					MonolithicHeap,
-					InferenceSystem<NonInterference>,
-					TypeEnvironment<InferredTypes>> {
+							TypeEnvironment<InferredTypes>>> {
 
 		@Override
 		@SuppressWarnings({ "unchecked" })
 		public boolean visit(
 				CheckToolWithAnalysisResults<
 						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						InferenceSystem<NonInterference>,
-						TypeEnvironment<InferredTypes>> tool,
+								TypeEnvironment<InferredTypes>>> tool,
 				CFG graph, Statement node) {
 			if (!(node instanceof Assignment))
 				return true;
@@ -104,12 +98,12 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 
 			for (Object res : results)
 				try {
-					AnalyzedCFG<?, ?, ?, ?> result = (AnalyzedCFG<?, ?, ?, ?>) res;
-					AnalysisState<?, ?, ?, ?> post = result.getAnalysisStateAfter(assign);
+					AnalyzedCFG<?> result = (AnalyzedCFG<?>) res;
+					AnalysisState<?> post = result.getAnalysisStateAfter(assign);
 					InferenceSystem<NonInterference> state = post.getDomainInstance(InferenceSystem.class);
-					AnalysisState<?, ?, ?, ?> postL = result.getAnalysisStateAfter(assign.getLeft());
+					AnalysisState<?> postL = result.getAnalysisStateAfter(assign.getLeft());
 					InferenceSystem<NonInterference> left = postL.getDomainInstance(InferenceSystem.class);
-					AnalysisState<?, ?, ?, ?> postR = result.getAnalysisStateAfter(assign.getRight());
+					AnalysisState<?> postR = result.getAnalysisStateAfter(assign.getRight());
 					InferenceSystem<NonInterference> right = postR.getDomainInstance(InferenceSystem.class);
 
 					for (SymbolicExpression l : postL.getState().rewrite(postL.getComputedExpressions(), assign))

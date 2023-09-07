@@ -8,11 +8,8 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -40,16 +37,10 @@ import org.apache.logging.log4j.Logger;
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
  * 
- * @param <A> the abstract state of the analysis
- * @param <H> the heap domain
- * @param <V> the value domain
- * @param <T> the type domain
+ * @param <A> the {@link AbstractState} of the analysis
  */
 @FallbackImplementation
-public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
+public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements InterproceduralAnalysis<A> {
 
 	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
@@ -68,7 +59,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	/**
 	 * The cash of the fixpoints' results.
 	 */
-	private FixpointResults<A, H, V, T> results;
+	private FixpointResults<A> results;
 
 	/**
 	 * Builds the interprocedural analysis.
@@ -77,7 +68,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public void fixpoint(AnalysisState<A, H, V, T> entryState,
+	public void fixpoint(AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
@@ -92,14 +83,14 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 				"cfgs"))
 			try {
 				if (results == null) {
-					AnalyzedCFG<A, H, V, T> graph = conf.optimize
+					AnalyzedCFG<A> graph = conf.optimize
 							? new OptimizedAnalyzedCFG<>(cfg, ID, entryState.bottom(), this)
 							: new AnalyzedCFG<>(cfg, ID, entryState);
-					CFGResults<A, H, V, T> value = new CFGResults<>(graph);
+					CFGResults<A> value = new CFGResults<>(graph);
 					this.results = new FixpointResults<>(value.top());
 				}
 
-				AnalysisState<A, H, V, T> prepared = entryState;
+				AnalysisState<A> prepared = entryState;
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
 					Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(),
 							arg.getLocation());
@@ -114,16 +105,16 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(CFG cfg) {
 		return results.getState(cfg).getAll();
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			StatementStore<A> expressions)
 			throws SemanticException {
 		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(),
 				call.getTargetName(), call.getStaticType(), call.getParameters());
@@ -131,11 +122,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			OpenCall call,
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			StatementStore<A> expressions)
 			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}
@@ -155,7 +146,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public FixpointResults<A, H, V, T> getFixpointResults() {
+	public FixpointResults<A> getFixpointResults() {
 		return results;
 	}
 }

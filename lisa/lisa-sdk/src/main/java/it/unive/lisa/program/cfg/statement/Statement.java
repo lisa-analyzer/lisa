@@ -4,9 +4,6 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -122,9 +119,6 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * {@code expressions}.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
-	 * @param <H>             the type of the {@link HeapDomain}
-	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param <T>             the type of {@link TypeDomain}
 	 * @param entryState      the entry state that represents the abstract
 	 *                            values of each program variable and memory
 	 *                            location when the execution reaches this
@@ -139,14 +133,11 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-					AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException;
+	public abstract <A extends AbstractState<A>> AnalysisState<A> semantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException;
 
 	@Override
 	public CodeLocation getLocation() {

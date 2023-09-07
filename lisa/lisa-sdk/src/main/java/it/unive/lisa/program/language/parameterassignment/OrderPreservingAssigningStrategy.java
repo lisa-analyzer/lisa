@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -31,21 +28,18 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepare(
-					Call call,
-					AnalysisState<A, H, V, T> callState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					StatementStore<A, H, V, T> expressions,
-					Parameter[] formals,
-					ExpressionSet<SymbolicExpression>[] parameters)
-					throws SemanticException {
+	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepare(
+			Call call,
+			AnalysisState<A> callState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions,
+			Parameter[] formals,
+			ExpressionSet<SymbolicExpression>[] parameters)
+			throws SemanticException {
 		// prepare the state for the call: assign the value to each parameter
-		AnalysisState<A, H, V, T> prepared = callState;
+		AnalysisState<A> prepared = callState;
 		for (int i = 0; i < formals.length; i++) {
-			AnalysisState<A, H, V, T> temp = prepared.bottom();
+			AnalysisState<A> temp = prepared.bottom();
 			for (SymbolicExpression exp : parameters[i])
 				temp = temp.lub(prepared.assign(formals[i].toSymbolicVariable(), exp, call));
 			prepared = temp;

@@ -3,11 +3,8 @@ package it.unive.lisa.analysis;
 import static org.junit.Assert.assertEquals;
 
 import it.unive.lisa.TestAbstractState;
-import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestLanguageFeatures;
-import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestTypeSystem;
-import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.interprocedural.UniqueScope;
@@ -36,20 +33,14 @@ public class AnalyzedCFGTest {
 		OpenCall y = new OpenCall(cfg, unknown, CallType.STATIC, "bar", "foo", x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState, TestHeapDomain,
-				TestValueDomain,
-				TestTypeDomain> state = new AnalysisState<>(
-						new TestAbstractState(),
-						new ExpressionSet<>(), new SymbolAliasing());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new TestAbstractState(),
+				new ExpressionSet<>(), new SymbolAliasing());
 
-		Map<Statement, AnalysisState<TestAbstractState,
-				TestHeapDomain, TestValueDomain, TestTypeDomain>> entries = Map.of(y, state);
-		Map<Statement, AnalysisState<TestAbstractState,
-				TestHeapDomain, TestValueDomain, TestTypeDomain>> results = Map.of(y, state, x, state);
+		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
+		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
-		AnalyzedCFG<TestAbstractState, TestHeapDomain,
-				TestValueDomain,
-				TestTypeDomain> res = new AnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
+		AnalyzedCFG<TestAbstractState> res = new AnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));

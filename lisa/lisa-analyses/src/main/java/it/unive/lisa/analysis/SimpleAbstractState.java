@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -25,11 +19,22 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
- * memory layout and a value state modeling values of program variables and
- * memory locations.
+ * memory layout, a value state modeling values of program variables and memory
+ * locations, and a type state that can give types to expressions knowing the
+ * ones of variables.<br>
+ * <br>
+ * The interaction between heap and value/type domains follows the one defined
+ * <a href=
+ * "https://www.sciencedirect.com/science/article/pii/S0304397516300299">in this
+ * paper</a>.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -42,7 +47,8 @@ import it.unive.lisa.type.Untyped;
 public class SimpleAbstractState<H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
+		implements BaseLattice<SimpleAbstractState<H, V, T>>,
+		AbstractState<SimpleAbstractState<H, V, T>> {
 
 	/**
 	 * The key that should be used to store the instance of {@link HeapDomain}
@@ -99,14 +105,29 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		this.typeState = typeState;
 	}
 
+	/**
+	 * Yields the {@link HeapDomain} contained in this state.
+	 * 
+	 * @return the heap domain
+	 */
 	public H getHeapState() {
 		return heapState;
 	}
 
+	/**
+	 * Yields the {@link ValueDomain} contained in this state.
+	 * 
+	 * @return the value domain
+	 */
 	public V getValueState() {
 		return valueState;
 	}
 
+	/**
+	 * Yields the {@link TypeDomain} contained in this state.
+	 * 
+	 * @return the type domain
+	 */
 	public T getTypeState() {
 		return typeState;
 	}

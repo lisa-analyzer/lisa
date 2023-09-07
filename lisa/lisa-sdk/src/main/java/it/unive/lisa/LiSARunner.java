@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.ChecksExecutor;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -53,17 +50,8 @@ import org.apache.logging.log4j.Logger;
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state that will be used in the analysis fixpoint
- * @param <H> the type of {@link HeapDomain} contained into the abstract state
- *                that will be used in the analysis fixpoint
- * @param <V> the type of {@link ValueDomain} contained into the abstract state
- *                that will be used in the analysis fixpoint
- * @param <T> the type of {@link TypeDomain} contained into the abstract state
- *                that will be used in the analysis fixpoint
  */
-public class LiSARunner<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>> {
+public class LiSARunner<A extends AbstractState<A>> {
 
 	private static final String FIXPOINT_EXCEPTION_MESSAGE = "Exception during fixpoint computation";
 
@@ -71,7 +59,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 	private final LiSAConfiguration conf;
 
-	private final InterproceduralAnalysis<A, H, V, T> interproc;
+	private final InterproceduralAnalysis<A> interproc;
 
 	private final CallGraph callGraph;
 
@@ -85,7 +73,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 	 * @param callGraph the call graph to use
 	 * @param state     the abstract state to use for the analysis
 	 */
-	LiSARunner(LiSAConfiguration conf, InterproceduralAnalysis<A, H, V, T> interproc, CallGraph callGraph, A state) {
+	LiSARunner(LiSAConfiguration conf, InterproceduralAnalysis<A> interproc, CallGraph callGraph, A state) {
 		this.conf = conf;
 		this.interproc = interproc;
 		this.callGraph = callGraph;
@@ -148,14 +136,14 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		if (state != null) {
 			analyze(allCFGs, fileManager, htmlViewer, subnodes);
-			Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
+			Map<CFG, Collection<AnalyzedCFG<A>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			Collection<SemanticCheck<A, H, V, T>> semanticChecks = (Collection) conf.semanticChecks;
+			Collection<SemanticCheck<A>> semanticChecks = (Collection) conf.semanticChecks;
 			if (!semanticChecks.isEmpty()) {
-				CheckToolWithAnalysisResults<A, H, V, T> tool2 = new CheckToolWithAnalysisResults<>(
+				CheckToolWithAnalysisResults<A> tool2 = new CheckToolWithAnalysisResults<>(
 						tool,
 						results,
 						callGraph);
@@ -194,17 +182,17 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 			BiFunction<CFG,
 					Statement,
 					SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding
-							? (cfg, st) -> ((OptimizedAnalyzedCFG<A, H, V, T>) cfg)
+							? (cfg, st) -> ((OptimizedAnalyzedCFG<A>) cfg)
 									.getUnwindedAnalysisStateAfter(st, fixconf)
 									.representation()
 									.toSerializableValue()
-							: (cfg, st) -> ((AnalyzedCFG<A, H, V, T>) cfg)
+							: (cfg, st) -> ((AnalyzedCFG<A>) cfg)
 									.getAnalysisStateAfter(st)
 									.representation()
 									.toSerializableValue();
 
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
-				for (AnalyzedCFG<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
+				for (AnalyzedCFG<A> result : interproc.getAnalysisResultsOf(cfg)) {
 					SerializableGraph graph = result.toSerializableGraph(labeler);
 					String filename = cfg.getDescriptor().getFullSignatureWithParNames();
 					if (!result.getId().isStartingId())

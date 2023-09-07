@@ -1,22 +1,18 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -28,16 +24,10 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the type of {@link AbstractState} embedded in this state
- * @param <H> the type of {@link HeapDomain} embedded in the abstract state
- * @param <V> the type of {@link ValueDomain} embedded in the abstract state
- * @param <T> the type of {@link TypeDomain} embedded in the abstract state
  */
-public class AnalysisState<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		implements BaseLattice<AnalysisState<A, H, V, T>>,
-		SemanticDomain<AnalysisState<A, H, V, T>, SymbolicExpression, Identifier> {
+public class AnalysisState<A extends AbstractState<A>>
+		implements BaseLattice<AnalysisState<A>>,
+		SemanticDomain<AnalysisState<A>, SymbolicExpression, Identifier> {
 
 	/**
 	 * The abstract state of program variables and memory locations
@@ -127,13 +117,13 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @return a copy of this analysis state, with the new alias
 	 */
-	public AnalysisState<A, H, V, T> alias(Symbol toAlias, Symbol alias) {
+	public AnalysisState<A> alias(Symbol toAlias, Symbol alias) {
 		SymbolAliasing aliasing = this.aliasing.putState(toAlias, alias);
 		return new AnalysisState<>(state, computedExpressions, aliasing);
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
+	public AnalysisState<A> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.assign(id, value, pp);
 		return new AnalysisState<>(s, new ExpressionSet<>(id), aliasing);
@@ -154,7 +144,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public AnalysisState<A, H, V, T> assign(SymbolicExpression id, SymbolicExpression expression, ProgramPoint pp)
+	public AnalysisState<A> assign(SymbolicExpression id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 
 		if (id instanceof Identifier)
@@ -171,14 +161,14 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+	public AnalysisState<A> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.smallStepSemantics(expression, pp);
 		return new AnalysisState<>(s, new ExpressionSet<>(expression), aliasing);
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public AnalysisState<A> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
 			throws SemanticException {
 		A assume = state.assume(expression, src, dest);
 		if (assume.isBottom())
@@ -192,7 +182,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> pushScope(ScopeToken scope) throws SemanticException {
+	public AnalysisState<A> pushScope(ScopeToken scope) throws SemanticException {
 		return new AnalysisState<>(
 				state.pushScope(scope),
 				onAllExpressions(this.computedExpressions, scope, true),
@@ -209,7 +199,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> popScope(ScopeToken scope) throws SemanticException {
+	public AnalysisState<A> popScope(ScopeToken scope) throws SemanticException {
 		return new AnalysisState<>(
 				state.popScope(scope),
 				onAllExpressions(this.computedExpressions, scope, false),
@@ -217,7 +207,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> lubAux(AnalysisState<A, H, V, T> other) throws SemanticException {
+	public AnalysisState<A> lubAux(AnalysisState<A> other) throws SemanticException {
 		return new AnalysisState<>(
 				state.lub(other.state),
 				computedExpressions.lub(other.computedExpressions),
@@ -225,7 +215,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> glbAux(AnalysisState<A, H, V, T> other) throws SemanticException {
+	public AnalysisState<A> glbAux(AnalysisState<A> other) throws SemanticException {
 		return new AnalysisState<>(
 				state.glb(other.state),
 				computedExpressions.glb(other.computedExpressions),
@@ -233,7 +223,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> wideningAux(AnalysisState<A, H, V, T> other) throws SemanticException {
+	public AnalysisState<A> wideningAux(AnalysisState<A> other) throws SemanticException {
 		return new AnalysisState<>(
 				state.widening(other.state),
 				computedExpressions.lub(other.computedExpressions),
@@ -241,7 +231,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> narrowingAux(AnalysisState<A, H, V, T> other) throws SemanticException {
+	public AnalysisState<A> narrowingAux(AnalysisState<A> other) throws SemanticException {
 		return new AnalysisState<>(
 				state.narrowing(other.state),
 				computedExpressions.glb(other.computedExpressions),
@@ -249,19 +239,19 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public boolean lessOrEqualAux(AnalysisState<A, H, V, T> other) throws SemanticException {
+	public boolean lessOrEqualAux(AnalysisState<A> other) throws SemanticException {
 		return state.lessOrEqual(other.state)
 				&& computedExpressions.lessOrEqual(other.computedExpressions)
 				&& aliasing.lessOrEqual(other.aliasing);
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> top() {
+	public AnalysisState<A> top() {
 		return new AnalysisState<>(state.top(), computedExpressions.top(), aliasing.top());
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> bottom() {
+	public AnalysisState<A> bottom() {
 		return new AnalysisState<>(state.bottom(), computedExpressions.bottom(), aliasing.bottom());
 	}
 
@@ -276,12 +266,12 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> forgetIdentifier(Identifier id) throws SemanticException {
+	public AnalysisState<A> forgetIdentifier(Identifier id) throws SemanticException {
 		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions, aliasing);
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public AnalysisState<A> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
 		return new AnalysisState<>(state.forgetIdentifiersIf(test), computedExpressions, aliasing);
 	}
 
@@ -303,7 +293,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AnalysisState<?, ?, ?, ?> other = (AnalysisState<?, ?, ?, ?>) obj;
+		AnalysisState<?> other = (AnalysisState<?>) obj;
 		if (aliasing == null) {
 			if (other.aliasing != null)
 				return false;

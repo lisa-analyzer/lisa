@@ -51,16 +51,12 @@ public class CFGFixpointTest {
 	}
 
 	private ModularWorstCaseAnalysis<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> mkAnalysis(Program p)
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> mkAnalysis(
+					Program p)
 					throws InterproceduralAnalysisException, CallGraphConstructionException {
 		ModularWorstCaseAnalysis<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap,
-				ValueEnvironment<Sign>,
-				TypeEnvironment<InferredTypes>> analysis = new ModularWorstCaseAnalysis<>();
+				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
+						TypeEnvironment<InferredTypes>>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
 		Application app = new Application(p);
 		callgraph.init(app);
@@ -69,10 +65,7 @@ public class CFGFixpointTest {
 	}
 
 	private AnalysisState<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> mkState() {
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> mkState() {
 		return new AnalysisState<>(
 				new SimpleAbstractState<>(
 						new MonolithicHeap(),
@@ -129,16 +122,12 @@ public class CFGFixpointTest {
 		cfg.addNode(call, true);
 
 		AnalysisState<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap,
-				ValueEnvironment<Sign>,
-				TypeEnvironment<InferredTypes>> domain = mkState();
+				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
+						TypeEnvironment<InferredTypes>>> domain = mkState();
 		AnalyzedCFG<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap,
-				ValueEnvironment<Sign>,
-				TypeEnvironment<InferredTypes>> result = cfg.fixpoint(domain,
-						mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
+				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
+						TypeEnvironment<InferredTypes>>> result = cfg.fixpoint(domain,
+								mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
 
 		assertTrue(result.getAnalysisStateAfter(call).getState().getValueState().getKeys().isEmpty());
 	}

@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -22,18 +19,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state
- * @param <T> the type of {@link TypeDomain} contained into the computed
- *                abstract state
  */
-public class CFGResults<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends FunctionalLattice<CFGResults<A, H, V, T>, ScopeId, AnalyzedCFG<A, H, V, T>> {
+public class CFGResults<A extends AbstractState<A>>
+		extends FunctionalLattice<CFGResults<A>, ScopeId, AnalyzedCFG<A>> {
 
 	/**
 	 * Builds a new result.
@@ -41,12 +29,12 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 * @param lattice a singleton instance used for retrieving top and bottom
 	 *                    values
 	 */
-	public CFGResults(AnalyzedCFG<A, H, V, T> lattice) {
+	public CFGResults(AnalyzedCFG<A> lattice) {
 		super(lattice);
 	}
 
-	private CFGResults(AnalyzedCFG<A, H, V, T> lattice,
-			Map<ScopeId, AnalyzedCFG<A, H, V, T>> function) {
+	private CFGResults(AnalyzedCFG<A> lattice,
+			Map<ScopeId, AnalyzedCFG<A>> function) {
 		super(lattice, function);
 	}
 
@@ -76,8 +64,8 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, AnalyzedCFG<A, H, V, T>> putResult(ScopeId token,
-			AnalyzedCFG<A, H, V, T> result)
+	public Pair<Boolean, AnalyzedCFG<A>> putResult(ScopeId token,
+			AnalyzedCFG<A> result)
 			throws SemanticException {
 		if (function == null) {
 			// no previous result
@@ -86,7 +74,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 			return Pair.of(false, result);
 		}
 
-		AnalyzedCFG<A, H, V, T> previousResult = function.get(token);
+		AnalyzedCFG<A> previousResult = function.get(token);
 		if (previousResult == null) {
 			// no previous result
 			function.put(token, result);
@@ -106,7 +94,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 			return Pair.of(false, previousResult);
 		} else {
 			// result and previous are not comparable
-			AnalyzedCFG<A, H, V, T> lub = previousResult.lub(result);
+			AnalyzedCFG<A> lub = previousResult.lub(result);
 			function.put(token, lub);
 			return Pair.of(true, lub);
 		}
@@ -133,7 +121,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @return the result, or {@code null}
 	 */
-	public AnalyzedCFG<A, H, V, T> get(ScopeId token) {
+	public AnalyzedCFG<A> get(ScopeId token) {
 		return function == null ? null : function.get(token);
 	}
 
@@ -143,23 +131,23 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @return the results
 	 */
-	public Collection<AnalyzedCFG<A, H, V, T>> getAll() {
+	public Collection<AnalyzedCFG<A>> getAll() {
 		return function == null ? Collections.emptySet() : function.values();
 	}
 
 	@Override
-	public CFGResults<A, H, V, T> top() {
+	public CFGResults<A> top() {
 		return new CFGResults<>(lattice.top());
 	}
 
 	@Override
-	public CFGResults<A, H, V, T> bottom() {
+	public CFGResults<A> bottom() {
 		return new CFGResults<>(lattice.bottom());
 	}
 
 	@Override
-	public CFGResults<A, H, V, T> mk(AnalyzedCFG<A, H, V, T> lattice,
-			Map<ScopeId, AnalyzedCFG<A, H, V, T>> function) {
+	public CFGResults<A> mk(AnalyzedCFG<A> lattice,
+			Map<ScopeId, AnalyzedCFG<A>> function) {
 		return new CFGResults<>(lattice, function);
 	}
 }

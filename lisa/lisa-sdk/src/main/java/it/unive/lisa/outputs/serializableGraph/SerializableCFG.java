@@ -55,8 +55,8 @@ public class SerializableCFG {
 			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
 		String name = source.getDescriptor().getFullSignatureWithParNames();
 		String desc;
-		if (source instanceof AnalyzedCFG<?, ?, ?, ?> && !((AnalyzedCFG<?, ?, ?, ?>) source).getId().isStartingId())
-			desc = ((AnalyzedCFG<?, ?, ?, ?>) source).getId().toString();
+		if (source instanceof AnalyzedCFG<?> && !((AnalyzedCFG<?>) source).getId().isStartingId())
+			desc = ((AnalyzedCFG<?>) source).getId().toString();
 		else
 			desc = null;
 

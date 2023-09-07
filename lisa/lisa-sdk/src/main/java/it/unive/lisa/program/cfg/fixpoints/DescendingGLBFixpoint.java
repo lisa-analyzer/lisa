@@ -2,9 +2,6 @@ package it.unive.lisa.program.cfg.fixpoints;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
@@ -20,18 +17,8 @@ import java.util.Map;
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state
- * @param <T> the type of {@link TypeDomain} contained into the computed
- *                abstract state
  */
-public class DescendingGLBFixpoint<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends CFGFixpoint<A, H, V, T> {
+public class DescendingGLBFixpoint<A extends AbstractState<A>> extends CFGFixpoint<A> {
 
 	private final int maxGLBs;
 	private final Map<Statement, Integer> glbs;
@@ -45,7 +32,7 @@ public class DescendingGLBFixpoint<A extends AbstractState<A, H, V, T>,
 	 * @param config          the {@link FixpointConfiguration} to use
 	 */
 	public DescendingGLBFixpoint(CFG target,
-			InterproceduralAnalysis<A, H, V, T> interprocedural,
+			InterproceduralAnalysis<A> interprocedural,
 			FixpointConfiguration config) {
 		super(target, interprocedural);
 		this.maxGLBs = config.glbThreshold;
@@ -53,9 +40,9 @@ public class DescendingGLBFixpoint<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public CompoundState<A, H, V, T> operation(Statement node,
-			CompoundState<A, H, V, T> approx,
-			CompoundState<A, H, V, T> old) throws SemanticException {
+	public CompoundState<A> operation(Statement node,
+			CompoundState<A> approx,
+			CompoundState<A> old) throws SemanticException {
 		if (maxGLBs < 0)
 			return old;
 
@@ -68,8 +55,8 @@ public class DescendingGLBFixpoint<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public boolean equality(Statement node, CompoundState<A, H, V, T> approx,
-			CompoundState<A, H, V, T> old) throws SemanticException {
+	public boolean equality(Statement node, CompoundState<A> approx,
+			CompoundState<A> old) throws SemanticException {
 		return old.lessOrEqual(approx);
 	}
 }

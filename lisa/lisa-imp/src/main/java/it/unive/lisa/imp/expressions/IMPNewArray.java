@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -54,23 +51,20 @@ public class IMPNewArray extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet<SymbolicExpression>[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		MemoryAllocation alloc = new MemoryAllocation(getStaticType(), getLocation(), staticallyAllocated);
-		AnalysisState<A, H, V, T> sem = state.smallStepSemantics(alloc, this);
+		AnalysisState<A> sem = state.smallStepSemantics(alloc, this);
 
-		AnalysisState<A, H, V, T> result = state.bottom();
+		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions()) {
 			ReferenceType staticType = new ReferenceType(loc.getStaticType());
 			HeapReference ref = new HeapReference(staticType, loc, getLocation());
-			AnalysisState<A, H, V, T> refSem = sem.smallStepSemantics(ref, this);
+			AnalysisState<A> refSem = sem.smallStepSemantics(ref, this);
 			result = result.lub(refSem);
 		}
 

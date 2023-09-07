@@ -100,21 +100,12 @@ public class SemanticsSanityTest {
 	private ClassUnit unit;
 	private CFG cfg;
 	private CallGraph cg;
-	private InterproceduralAnalysis<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> interprocedural;
+	private InterproceduralAnalysis<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
+			TypeEnvironment<InferredTypes>>> interprocedural;
 	private AnalysisState<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> as;
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> as;
 	private StatementStore<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> store;
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> store;
 	private Expression fake;
 
 	@Before
@@ -153,13 +144,10 @@ public class SemanticsSanityTest {
 			}
 
 			@Override
-			public <A extends AbstractState<A, H, V, T>,
-					H extends HeapDomain<H>,
-					V extends ValueDomain<V>,
-					T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-							AnalysisState<A, H, V, T> entryState,
-							InterproceduralAnalysis<A, H, V, T> interprocedural, StatementStore<A, H, V, T> expressions)
-							throws SemanticException {
+			public <A extends AbstractState<A>> AnalysisState<A> semantics(
+					AnalysisState<A> entryState,
+					InterproceduralAnalysis<A> interprocedural, StatementStore<A> expressions)
+					throws SemanticException {
 				return entryState
 						.smallStepSemantics(
 								new Variable(Untyped.INSTANCE, "fake",

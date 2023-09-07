@@ -5,11 +5,8 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.GenericMapLattice;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
@@ -45,34 +42,24 @@ import org.apache.logging.log4j.Logger;
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state
- * @param <T> the type of {@link TypeDomain} contained into the computed
- *                abstract state
  */
-public class RecursionSolver<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends ContextBasedAnalysis<A, H, V, T> {
+public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAnalysis<A> {
 
 	private static final Logger LOG = LogManager.getLogger(RecursionSolver.class);
 
-	private final Recursion<A, H, V, T> recursion;
+	private final Recursion<A> recursion;
 
 	private final boolean returnsVoid;
 
-	private final Map<CFGCall, Pair<AnalysisState<A, H, V, T>, ContextSensitivityToken>> finalEntryStates;
+	private final Map<CFGCall, Pair<AnalysisState<A>, ContextSensitivityToken>> finalEntryStates;
 
-	private final BaseCasesFinder<A, H, V, T> baseCases;
+	private final BaseCasesFinder<A> baseCases;
 
-	private GenericMapLattice<CFGCall, AnalysisState<A, H, V, T>> previousApprox;
+	private GenericMapLattice<CFGCall, AnalysisState<A>> previousApprox;
 
-	private GenericMapLattice<CFGCall, AnalysisState<A, H, V, T>> recursiveApprox;
+	private GenericMapLattice<CFGCall, AnalysisState<A>> recursiveApprox;
 
-	private AnalysisState<A, H, V, T> base;
+	private AnalysisState<A> base;
 
 	/**
 	 * Builds the solver.
@@ -81,7 +68,7 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 	 *                      used to query call results
 	 * @param recursion the recursion to solve
 	 */
-	public RecursionSolver(ContextBasedAnalysis<A, H, V, T> backing, Recursion<A, H, V, T> recursion) {
+	public RecursionSolver(ContextBasedAnalysis<A> backing, Recursion<A> recursion) {
 		super(backing);
 		this.recursion = recursion;
 		finalEntryStates = new HashMap<>();
@@ -104,7 +91,7 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public void fixpoint(
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
@@ -114,18 +101,18 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			StatementStore<A> expressions)
 			throws SemanticException {
 		boolean inRecursion = recursion.getMembers().contains(call.getCFG());
 		if (inRecursion && call.getTargetedCFGs().contains(recursion.getRecursionHead())) {
 			// this is a back call
 			finalEntryStates.put(call, Pair.of(entryState, token));
 
-			AnalysisState<A, H, V, T> approx = null;
+			AnalysisState<A> approx = null;
 			if (recursiveApprox.getMap() != null)
 				approx = recursiveApprox.getMap().get(call);
 			if (approx == null)
@@ -157,7 +144,7 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 		int recursionCount = 0;
 		Call start = recursion.getInvocation();
 		Collection<CFGCall> ends = finalEntryStates.keySet();
-		CompoundState<A, H, V, T> entryState = recursion.getEntryState();
+		CompoundState<A> entryState = recursion.getEntryState();
 
 		LOG.info("Solving recursion at " + start.getLocation() + " for context " + recursion.getInvocationToken());
 
@@ -181,7 +168,7 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 			// we reset the analysis at the point where the starting call can be
 			// evaluated
 			token = recursion.getInvocationToken();
-			AnalysisState<A, H, V, T> post = start.expressionSemantics(
+			AnalysisState<A> post = start.expressionSemantics(
 					this,
 					entryState.postState,
 					params,
@@ -205,12 +192,12 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 			// recursive call, we need to store the approximation for the
 			// recursive call manually or the unwinding won't manage to solve it
 			for (CFGCall call : ends) {
-				Pair<AnalysisState<A, H, V, T>, ContextSensitivityToken> pair = finalEntryStates.get(call);
-				AnalysisState<A, H, V, T> callEntry = pair.getLeft();
+				Pair<AnalysisState<A>, ContextSensitivityToken> pair = finalEntryStates.get(call);
+				AnalysisState<A> callEntry = pair.getLeft();
 				ContextSensitivityToken callingToken = pair.getRight();
 
 				// we get the cfg containing the call
-				OptimizedAnalyzedCFG<A, H, V, T> caller = (OptimizedAnalyzedCFG<A, H, V, T>) results.get(call.getCFG())
+				OptimizedAnalyzedCFG<A> caller = (OptimizedAnalyzedCFG<A>) results.get(call.getCFG())
 						.get(callingToken);
 
 				// we get the actual call that is part of the cfg
@@ -223,8 +210,8 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 				if (!caller.hasPostStateOf(source)) {
 					// we add the value to the entry state, bringing in also the
 					// base case
-					AnalysisState<A, H, V, T> local = transferToCallsite(start, call, base);
-					AnalysisState<A, H, V, T> returned = callEntry.lub(recursiveApprox.getState(call).lub(local));
+					AnalysisState<A> local = transferToCallsite(start, call, base);
+					AnalysisState<A> returned = callEntry.lub(recursiveApprox.getState(call).lub(local));
 
 					// finally, we store it in the result
 					caller.storePostStateOf(source, returned);
@@ -232,12 +219,12 @@ public class RecursionSolver<A extends AbstractState<A, H, V, T>,
 			}
 	}
 
-	private AnalysisState<A, H, V, T> transferToCallsite(
+	private AnalysisState<A> transferToCallsite(
 			Call original,
 			CFGCall destination,
-			AnalysisState<A, H, V, T> state)
+			AnalysisState<A> state)
 			throws SemanticException {
-		AnalysisState<A, H, V, T> res = state.bottom();
+		AnalysisState<A> res = state.bottom();
 		Identifier meta = destination.getMetaVariable();
 		if (returnsVoid)
 			res = state;

@@ -1,8 +1,5 @@
 package it.unive.lisa;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -12,9 +9,11 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collections;
+import java.util.Set;
 
 public class TestAbstractState extends TestDomain<TestAbstractState, SymbolicExpression>
-		implements AbstractState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> {
+		implements AbstractState<TestAbstractState> {
 
 	@Override
 	public DomainRepresentation representation() {

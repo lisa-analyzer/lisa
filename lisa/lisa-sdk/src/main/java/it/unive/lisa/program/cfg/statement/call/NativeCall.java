@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
@@ -171,22 +168,19 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
-		AnalysisState<A, H, V, T> result = state.bottom();
+	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet<SymbolicExpression>[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		AnalysisState<A> result = state.bottom();
 
 		Expression[] parameters = getSubExpressions();
 		ParameterAssigningStrategy strategy = getProgram().getFeatures().getAssigningStrategy();
 		for (NativeCFG nat : targets)
 			try {
-				Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(this,
+				Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(this,
 						state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
 
 				NaryExpression rewritten = nat.rewrite(this, parameters);

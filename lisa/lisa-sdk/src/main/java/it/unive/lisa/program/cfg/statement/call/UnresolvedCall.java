@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -114,22 +111,19 @@ public class UnresolvedCall extends Call {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet<SymbolicExpression>[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Call resolved;
 		try {
 			resolved = interprocedural.resolve(this, parameterTypes(expressions), state.getAliasing());
 		} catch (CallResolutionException e) {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}
-		AnalysisState<A, H, V, T> result = resolved.expressionSemantics(interprocedural, state, params, expressions);
+		AnalysisState<A> result = resolved.expressionSemantics(interprocedural, state, params, expressions);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
 	}

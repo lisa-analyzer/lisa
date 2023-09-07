@@ -1,18 +1,10 @@
 package it.unive.lisa.program.language.parameterassignment;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -21,6 +13,9 @@ import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
 import it.unive.lisa.program.language.resolution.PythonLikeMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A Python-like assigning strategy. Specifically:<br>
@@ -66,17 +61,14 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepare(
-					Call call,
-					AnalysisState<A, H, V, T> callState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					StatementStore<A, H, V, T> expressions,
-					Parameter[] formals,
-					ExpressionSet<SymbolicExpression>[] parameters)
-					throws SemanticException {
+	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepare(
+			Call call,
+			AnalysisState<A> callState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions,
+			Parameter[] formals,
+			ExpressionSet<SymbolicExpression>[] parameters)
+			throws SemanticException {
 
 		ExpressionSet<SymbolicExpression>[] slots = new ExpressionSet[formals.length];
 		Set<Type>[] slotsTypes = new Set[formals.length];
@@ -97,7 +89,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 			}
 		}
 
-		AnalysisState<A, H, V, T> logic = PythonLikeMatchingStrategy.pythonLogic(
+		AnalysisState<A> logic = PythonLikeMatchingStrategy.pythonLogic(
 				formals,
 				actuals,
 				parameters,
@@ -111,9 +103,9 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 			return Pair.of(logic, parameters);
 
 		// prepare the state for the call: assign the value to each parameter
-		AnalysisState<A, H, V, T> prepared = callState;
+		AnalysisState<A> prepared = callState;
 		for (int i = 0; i < formals.length; i++) {
-			AnalysisState<A, H, V, T> temp = prepared.bottom();
+			AnalysisState<A> temp = prepared.bottom();
 			for (SymbolicExpression exp : slots[i])
 				temp = temp.lub(prepared.assign(formals[i].toSymbolicVariable(), exp, call));
 			prepared = temp;

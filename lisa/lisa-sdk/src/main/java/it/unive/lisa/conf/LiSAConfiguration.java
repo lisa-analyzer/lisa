@@ -138,7 +138,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * through {@link #callGraph}) that has been built. Defaults to an empty
 	 * set.
 	 */
-	public final Collection<SemanticCheck<?, ?, ?, ?>> semanticChecks = new HashSet<>();
+	public final Collection<SemanticCheck<?>> semanticChecks = new HashSet<>();
 
 	/**
 	 * The {@link CallGraph} instance to use during the analysis. Defaults to
@@ -158,7 +158,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * {@link LiSAFactory#getDefaultFor(Class, Object...)} in order to perform
 	 * the analysis.
 	 */
-	public InterproceduralAnalysis<?, ?, ?, ?> interproceduralAnalysis;
+	public InterproceduralAnalysis<?> interproceduralAnalysis;
 
 	/**
 	 * The {@link AbstractState} instance to run during the analysis. This will
@@ -166,7 +166,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * analysis, and can thus be any lattice element. If no value is set for
 	 * this field, no analysis will be executed. Defaults to {@code null}.
 	 */
-	public AbstractState<?, ?, ?, ?> abstractState;
+	public AbstractState<?> abstractState;
 
 	/**
 	 * Sets the format to use for dumping graph files, named

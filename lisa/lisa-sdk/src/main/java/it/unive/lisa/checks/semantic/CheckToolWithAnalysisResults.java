@@ -4,9 +4,6 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -27,16 +24,10 @@ import java.util.Map;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the type of {@link AbstractState} contained in the results
- * @param <H> the type of {@link HeapDomain} contained in the results
- * @param <V> the type of {@link ValueDomain} contained in the results
- * @param <T> the type of {@link TypeDomain} contained in the results
  */
-public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>> extends CheckTool {
+public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends CheckTool {
 
-	private final Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results;
+	private final Map<CFG, Collection<AnalyzedCFG<A>>> results;
 
 	private final CallGraph callgraph;
 
@@ -50,7 +41,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 *                          analysis
 	 */
 	public CheckToolWithAnalysisResults(LiSAConfiguration configuration, FileManager fileManager,
-			Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results,
+			Map<CFG, Collection<AnalyzedCFG<A>>> results,
 			CallGraph callgraph) {
 		super(configuration, fileManager);
 		this.results = results;
@@ -65,7 +56,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * @param callgraph the callgraph that has been built during the analysis
 	 */
 	public CheckToolWithAnalysisResults(CheckTool other,
-			Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results,
+			Map<CFG, Collection<AnalyzedCFG<A>>> results,
 			CallGraph callgraph) {
 		super(other);
 		this.results = results;
@@ -80,14 +71,19 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @return the results on the given cfg
 	 */
-	public Collection<AnalyzedCFG<A, H, V, T>> getResultOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A>> getResultOf(CFG cfg) {
 		return results.get(cfg);
 	}
 
+	/**
+	 * Yields the {@link CallGraph} constructed during the analysis.
+	 * 
+	 * @return the callgraph
+	 */
 	public CallGraph getCallGraph() {
 		return callgraph;
 	}
-	
+
 	/**
 	 * Yields all the {@link CodeMember}s that call the given one, according to
 	 * the {@link CallGraph} that has been built during the analysis.
@@ -138,8 +134,8 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public Call getResolvedVersion(UnresolvedCall call, AnalyzedCFG<A, H, V, T> result) throws SemanticException {
-		StatementStore<A, H, V, T> store = new StatementStore<>(result.getEntryState().bottom());
+	public Call getResolvedVersion(UnresolvedCall call, AnalyzedCFG<A> result) throws SemanticException {
+		StatementStore<A> store = new StatementStore<>(result.getEntryState().bottom());
 		for (Expression e : call.getParameters())
 			store.put(e, result.getAnalysisStateAfter(e));
 

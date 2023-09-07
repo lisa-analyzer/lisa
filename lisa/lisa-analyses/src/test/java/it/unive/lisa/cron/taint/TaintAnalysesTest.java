@@ -77,18 +77,12 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 
 	private static class TaintCheck<T extends BaseTaint<T>>
 			implements SemanticCheck<
-					SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-					MonolithicHeap,
-					ValueEnvironment<T>,
-					TypeEnvironment<InferredTypes>> {
+					SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>> {
 
 		@Override
 		public boolean visit(
 				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						ValueEnvironment<T>,
-						TypeEnvironment<InferredTypes>> tool,
+						SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>> tool,
 				CFG graph, Statement node) {
 			if (!(node instanceof UnresolvedCall))
 				return true;
@@ -100,10 +94,7 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 						SimpleAbstractState<
 								MonolithicHeap,
 								ValueEnvironment<T>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						ValueEnvironment<T>,
-						TypeEnvironment<InferredTypes>> result : tool.getResultOf(call.getCFG())) {
+								TypeEnvironment<InferredTypes>>> result : tool.getResultOf(call.getCFG())) {
 
 					Call resolved = (Call) tool.getResolvedVersion(call, result);
 					if (resolved instanceof CFGCall) {
@@ -113,9 +104,7 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 							for (int i = 0; i < parameters.length; i++)
 								if (parameters[i].getAnnotations().contains(BaseTaint.CLEAN_MATCHER)) {
 									AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>,
-											TypeEnvironment<InferredTypes>>,
-											MonolithicHeap, ValueEnvironment<T>,
-											TypeEnvironment<InferredTypes>> post = result
+											TypeEnvironment<InferredTypes>>> post = result
 													.getAnalysisStateAfter(call.getParameters()[i]);
 									for (SymbolicExpression e : post.getState().rewrite(post.getComputedExpressions(),
 											node)) {

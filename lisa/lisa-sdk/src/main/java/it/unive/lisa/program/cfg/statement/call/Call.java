@@ -1,18 +1,9 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -21,6 +12,10 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to another cfg.
@@ -241,9 +236,6 @@ public abstract class Call extends NaryExpression {
 	 * call, retrieved by accessing the given {@link StatementStore}.
 	 * 
 	 * @param <A>         the type of {@link AbstractState}
-	 * @param <H>         the type of the {@link HeapDomain}
-	 * @param <V>         the type of the {@link ValueDomain}
-	 * @param <T>         the type of {@link TypeDomain}
 	 * @param expressions the store containing the computed states for the
 	 *                        parameters
 	 * 
@@ -253,15 +245,12 @@ public abstract class Call extends NaryExpression {
 	 *                               types
 	 */
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> Set<Type>[] parameterTypes(StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> Set<Type>[] parameterTypes(StatementStore<A> expressions)
+			throws SemanticException {
 		Expression[] actuals = getParameters();
 		Set<Type>[] types = new Set[actuals.length];
 		for (int i = 0; i < actuals.length; i++) {
-			AnalysisState<A, H, V, T> state = expressions.getState(actuals[i]);
+			AnalysisState<A> state = expressions.getState(actuals[i]);
 			Set<Type> t = new HashSet<>();
 			for (SymbolicExpression e : state.getComputedExpressions())
 				t.addAll(state.getState().getRuntimeTypesOf(e, this));

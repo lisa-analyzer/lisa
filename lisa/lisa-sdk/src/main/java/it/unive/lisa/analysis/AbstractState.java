@@ -1,17 +1,13 @@
 package it.unive.lisa.analysis;
 
-import java.util.Set;
-
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
+import java.util.Set;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -22,15 +18,8 @@ import it.unive.lisa.type.Type;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the concrete type of the {@link AbstractState}
- * @param <H> the type of {@link HeapDomain} embedded in this state
- * @param <V> the type of {@link ValueDomain} embedded in this state
- * @param <T> the type of {@link ValueDomain} and {@link TypeDomain} embedded in
- *                this state
  */
-public interface AbstractState<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
+public interface AbstractState<A extends AbstractState<A>>
 		extends Lattice<A>, SemanticDomain<A, SymbolicExpression, Identifier> {
 
 	/**
@@ -78,7 +67,7 @@ public interface AbstractState<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @return the runtime types
 	 * 
-	 * @throws SemanticException
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException;
 
@@ -91,6 +80,8 @@ public interface AbstractState<A extends AbstractState<A, H, V, T>,
 	 * @param pp the program point where the types are required
 	 * 
 	 * @return the dynamic type
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException;
 }

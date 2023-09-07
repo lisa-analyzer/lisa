@@ -3,10 +3,7 @@ package it.unive.lisa.interprocedural;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -32,14 +29,11 @@ public class ReturnTopPolicy implements OpenCallPolicy {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> apply(
-					OpenCall call,
-					AnalysisState<A, H, V, T> entryState,
-					ExpressionSet<SymbolicExpression>[] params)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> apply(
+			OpenCall call,
+			AnalysisState<A> entryState,
+			ExpressionSet<SymbolicExpression>[] params)
+			throws SemanticException {
 
 		if (call.getStaticType().isVoidType())
 			return entryState.smallStepSemantics(new Skip(call.getLocation()), call);

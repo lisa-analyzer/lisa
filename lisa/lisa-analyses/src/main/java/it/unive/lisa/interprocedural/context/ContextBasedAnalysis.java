@@ -1,19 +1,5 @@
 package it.unive.lisa.interprocedural.context;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.DefaultParameters;
@@ -24,10 +10,7 @@ import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.CallGraphBasedAnalysis;
@@ -54,6 +37,18 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -61,17 +56,10 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
  * approximated applying the iterates of the recursion starting from bottom and
  * using the same widening threshold of cfg fixpoints.
  * 
- * @param <A> the abstract state of the analysis
- * @param <H> the heap domain
- * @param <V> the value domain
- * @param <T> the type domain
+ * @param <A> the {@link AbstractState} of the analysis
  */
 @DefaultParameters({ FullStackToken.class })
-public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends CallGraphBasedAnalysis<A, H, V, T> {
+public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphBasedAnalysis<A> {
 
 	private static final Logger LOG = LogManager.getLogger(ContextBasedAnalysis.class);
 
@@ -91,7 +79,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	/**
 	 * The results computed by this analysis.
 	 */
-	protected FixpointResults<A, H, V, T> results;
+	protected FixpointResults<A> results;
 
 	/**
 	 * The kind of {@link WorkingSet} to use during this analysis.
@@ -131,7 +119,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @param other the original analysis to copy
 	 */
-	protected ContextBasedAnalysis(ContextBasedAnalysis<A, H, V, T> other) {
+	protected ContextBasedAnalysis(ContextBasedAnalysis<A> other) {
 		super(other);
 		this.conf = other.conf;
 		this.results = other.results;
@@ -158,7 +146,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public void fixpoint(
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
@@ -185,9 +173,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			processEntrypoints(entryState, empty, entryPoints);
 
 			if (pendingRecursions) {
-				Set<Recursion<A, H, V, T>> recursions = new HashSet<>();
+				Set<Recursion<A>> recursions = new HashSet<>();
 
-				for (Collection<CodeMember> rec : callgraph.getRecursions()) 
+				for (Collection<CodeMember> rec : callgraph.getRecursions())
 					buildRecursion(entryState, recursions, rec);
 
 				solveRecursions(recursions);
@@ -204,9 +192,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		} while (!triggers.isEmpty());
 	}
 
-	private void solveRecursions(Set<Recursion<A, H, V, T>> recursions) {
-		List<Recursion<A, H, V, T>> orderedRecursions = new ArrayList<>(recursions.size());
-		for (Recursion<A, H, V, T> rec : recursions) {
+	private void solveRecursions(Set<Recursion<A>> recursions) {
+		List<Recursion<A>> orderedRecursions = new ArrayList<>(recursions.size());
+		for (Recursion<A> rec : recursions) {
 			int pos = 0;
 			for (; pos < orderedRecursions.size(); pos++)
 				if (orderedRecursions.get(pos).getMembers().contains(rec.getInvocation().getCFG()))
@@ -221,7 +209,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		}
 
 		try {
-			for (Recursion<A, H, V, T> rec : orderedRecursions) {
+			for (Recursion<A> rec : orderedRecursions) {
 				new RecursionSolver<>(this, rec).solve();
 				triggers.addAll(rec.getMembers());
 			}
@@ -230,7 +218,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		}
 	}
 
-	private void buildRecursion(AnalysisState<A, H, V, T> entryState, Set<Recursion<A, H, V, T>> recursions,
+	private void buildRecursion(AnalysisState<A> entryState, Set<Recursion<A>> recursions,
 			Collection<CodeMember> rec) {
 		// these are the calls that start the recursion by invoking
 		// one of its members
@@ -246,13 +234,13 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 					.filter(CFG.class::isInstance)
 					.map(CFG.class::cast)
 					.collect(Collectors.toSet());
-			Set<Pair<ContextSensitivityToken, CompoundState<A, H, V, T>>> entries = new HashSet<>();
-			for (Entry<ScopeId, AnalyzedCFG<A, H, V, T>> res : results.get(starter.getCFG())) {
-				StatementStore<A, H, V, T> params = new StatementStore<>(entryState.bottom());
+			Set<Pair<ContextSensitivityToken, CompoundState<A>>> entries = new HashSet<>();
+			for (Entry<ScopeId, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
+				StatementStore<A> params = new StatementStore<>(entryState.bottom());
 				Expression[] parameters = starter.getParameters();
 				if (conf.optimize)
 					for (Expression actual : parameters)
-						params.put(actual, ((OptimizedAnalyzedCFG<A, H, V, T>) res.getValue())
+						params.put(actual, ((OptimizedAnalyzedCFG<A>) res.getValue())
 								.getUnwindedAnalysisStateAfter(actual, conf));
 				else
 					for (Expression actual : parameters)
@@ -263,8 +251,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			}
 
 			for (CFG head : heads)
-				for (Pair<ContextSensitivityToken, CompoundState<A, H, V, T>> entry : entries) {
-					Recursion<A, H, V, T> recursion = new Recursion<>(
+				for (Pair<ContextSensitivityToken, CompoundState<A>> entry : entries) {
+					Recursion<A> recursion = new Recursion<>(
 							starter,
 							entry.getLeft(),
 							entry.getRight(),
@@ -275,20 +263,20 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		}
 	}
 
-	private void processEntrypoints(AnalysisState<A, H, V, T> entryState, ContextSensitivityToken empty,
+	private void processEntrypoints(AnalysisState<A> entryState, ContextSensitivityToken empty,
 			Collection<CFG> entryPoints) {
 		for (CFG cfg : IterationLogger.iterate(LOG, entryPoints, "Processing entrypoints", "entries"))
 			try {
 				if (results == null) {
-					AnalyzedCFG<A, H, V, T> graph = conf.optimize
+					AnalyzedCFG<A> graph = conf.optimize
 							? new OptimizedAnalyzedCFG<>(cfg, empty, entryState.bottom(), this)
 							: new AnalyzedCFG<>(cfg, empty, entryState);
-					CFGResults<A, H, V, T> value = new CFGResults<>(graph);
+					CFGResults<A> value = new CFGResults<>(graph);
 					this.results = new FixpointResults<>(value.top());
 				}
 
 				token = empty;
-				AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
+				AnalysisState<A> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 				results.putResult(cfg, empty,
 						cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
 			} catch (SemanticException | AnalysisSetupException e) {
@@ -299,7 +287,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(CFG cfg) {
 		if (results.contains(cfg))
 			return results.getState(cfg).getAll();
 		else
@@ -321,19 +309,19 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	 * @throws AnalysisSetupException if the {@link WorkingSet} for the fixpoint
 	 *                                    cannot be created
 	 */
-	private AnalyzedCFG<A, H, V, T> computeFixpoint(
+	private AnalyzedCFG<A> computeFixpoint(
 			CFG cfg,
 			ContextSensitivityToken token,
-			AnalysisState<A, H, V, T> entryState)
+			AnalysisState<A> entryState)
 			throws FixpointException, SemanticException, AnalysisSetupException {
-		AnalyzedCFG<A, H, V, T> fixpointResult = cfg.fixpoint(
+		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(
 				entryState,
 				this,
 				WorkingSet.of(workingSet),
 				conf,
 				token);
 		if (shouldStoreFixpointResults()) {
-			Pair<Boolean, AnalyzedCFG<A, H, V, T>> res = results.putResult(cfg, token, fixpointResult);
+			Pair<Boolean, AnalyzedCFG<A>> res = results.putResult(cfg, token, fixpointResult);
 			if (shouldStoreFixpointResults() && Boolean.TRUE.equals(res.getLeft()))
 				triggers.add(cfg);
 			fixpointResult = res.getRight();
@@ -376,31 +364,31 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public FixpointResults<A, H, V, T> getFixpointResults() {
+	public FixpointResults<A> getFixpointResults() {
 		return results;
 	}
 
-	private Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepareEntryState(
+	private Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepareEntryState(
 			CFGCall call,
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions,
+			StatementStore<A> expressions,
 			ScopeToken scope,
 			CFG cfg)
 			throws SemanticException {
 		Parameter[] formals = cfg.getDescriptor().getFormals();
 
 		// prepare the state for the call: hide the visible variables
-		Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> scoped = scope(
+		Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> scoped = scope(
 				entryState,
 				scope,
 				parameters);
-		AnalysisState<A, H, V, T> callState = scoped.getLeft();
+		AnalysisState<A> callState = scoped.getLeft();
 		ExpressionSet<SymbolicExpression>[] locals = scoped.getRight();
 
 		// assign parameters between the caller and the callee contexts
 		ParameterAssigningStrategy strategy = call.getProgram().getFeatures().getAssigningStrategy();
-		Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(
+		Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(
 				call,
 				callState,
 				this,
@@ -411,11 +399,11 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			StatementStore<A> expressions)
 			throws SemanticException {
 		callgraph.registerCall(call);
 
@@ -440,14 +428,14 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		ContextSensitivityToken callerToken = token;
 		token = token.push(call);
 		ScopeToken scope = new ScopeToken(call);
-		AnalysisState<A, H, V, T> result = entryState.bottom();
+		AnalysisState<A> result = entryState.bottom();
 
 		// compute the result over all possible targets, and take the lub of
 		// the results
 		for (CFG cfg : call.getTargetedCFGs()) {
-			CFGResults<A, H, V, T> localResults = results.get(cfg);
-			AnalyzedCFG<A, H, V, T> states = localResults == null ? null : localResults.get(token);
-			Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepared = prepareEntryState(
+			CFGResults<A> localResults = results.get(cfg);
+			AnalyzedCFG<A> states = localResults == null ? null : localResults.get(token);
+			Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepared = prepareEntryState(
 					call,
 					entryState,
 					parameters,
@@ -455,7 +443,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 					scope,
 					cfg);
 
-			AnalysisState<A, H, V, T> exitState;
+			AnalysisState<A> exitState;
 			if (canShortcut(cfg) && states != null && prepared.getLeft().lessOrEqual(states.getEntryState()))
 				// no need to compute the fixpoint: we already have an
 				// (over-)approximation of the result computed starting from
@@ -463,7 +451,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 				exitState = states.getExitState();
 			else {
 				// compute the result with a fixpoint iteration
-				AnalyzedCFG<A, H, V, T> fixpointResult = null;
+				AnalyzedCFG<A> fixpointResult = null;
 				try {
 					fixpointResult = computeFixpoint(cfg, token, prepared.getLeft());
 				} catch (FixpointException | AnalysisSetupException e) {

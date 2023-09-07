@@ -4,11 +4,8 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Application;
@@ -26,16 +23,10 @@ import java.util.Set;
 /**
  * An interprocedural analysis based on a call graph.
  * 
- * @param <A> The abstract state of the analysis
- * @param <H> The heap domain
- * @param <V> The value domain
- * @param <T> The type domain
+ * @param <A> The {@link AbstractState} of the analysis
  */
-public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		implements InterproceduralAnalysis<A, H, V, T> {
+public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
+		implements InterproceduralAnalysis<A> {
 
 	/**
 	 * The call graph used to resolve method calls.
@@ -63,7 +54,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	 * 
 	 * @param other the original analysis to copy
 	 */
-	protected CallGraphBasedAnalysis(CallGraphBasedAnalysis<A, H, V, T> other) {
+	protected CallGraphBasedAnalysis(CallGraphBasedAnalysis<A> other) {
 		this.callgraph = other.callgraph;
 		this.app = other.app;
 		this.policy = other.policy;
@@ -94,9 +85,9 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	 * 
 	 * @throws SemanticException if the analysis fails
 	 */
-	public AnalysisState<A, H, V, T> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V, T> entryState, CFG cfg)
+	public AnalysisState<A> prepareEntryStateOfEntryPoint(AnalysisState<A> entryState, CFG cfg)
 			throws SemanticException {
-		AnalysisState<A, H, V, T> prepared = entryState;
+		AnalysisState<A> prepared = entryState;
 
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
 			Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(), arg.getLocation());
@@ -109,11 +100,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			OpenCall call,
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			StatementStore<A> expressions)
 			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}

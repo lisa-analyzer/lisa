@@ -5,11 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import it.unive.lisa.TestAbstractState;
-import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestLanguageFeatures;
-import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestTypeSystem;
-import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -40,44 +37,44 @@ import org.junit.Test;
 public class OptimizedFixpointTest {
 
 	private static class FixpointTester2 implements FixpointImplementation<Statement, Edge,
-			CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain>> {
+			CompoundState<TestAbstractState>> {
 
 		@Override
-		public CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> semantics(
+		public CompoundState<TestAbstractState> semantics(
 				Statement node,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> entrystate)
+				CompoundState<TestAbstractState> entrystate)
 				throws Exception {
 			return entrystate;
 		}
 
 		@Override
-		public CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> traverse(Edge edge,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> entrystate)
+		public CompoundState<TestAbstractState> traverse(Edge edge,
+				CompoundState<TestAbstractState> entrystate)
 				throws Exception {
 			return entrystate;
 		}
 
 		@Override
-		public CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> union(Statement node,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> left,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> right)
+		public CompoundState<TestAbstractState> union(Statement node,
+				CompoundState<TestAbstractState> left,
+				CompoundState<TestAbstractState> right)
 				throws Exception {
 			return left.lub(right);
 		}
 
 		@Override
-		public CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> operation(
+		public CompoundState<TestAbstractState> operation(
 				Statement node,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> approx,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> old)
+				CompoundState<TestAbstractState> approx,
+				CompoundState<TestAbstractState> old)
 				throws Exception {
 			return old.lub(approx);
 		}
 
 		@Override
 		public boolean equality(Statement node,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> approx,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> old)
+				CompoundState<TestAbstractState> approx,
+				CompoundState<TestAbstractState> old)
 				throws Exception {
 			return approx.lessOrEqual(old);
 		}
@@ -101,16 +98,14 @@ public class OptimizedFixpointTest {
 		graph.computeBasicBlocks();
 
 		Map<Statement,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain>> res = null;
-		AnalysisState<TestAbstractState, TestHeapDomain, TestValueDomain,
-				TestTypeDomain> state = new AnalysisState<>(
-						new TestAbstractState(),
-						new ExpressionSet<>(),
-						new SymbolAliasing());
-		CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain,
-				TestTypeDomain> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
+				CompoundState<TestAbstractState>> res = null;
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new TestAbstractState(),
+				new ExpressionSet<>(),
+				new SymbolAliasing());
+		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain>(graph,
+			res = new OptimizedFixpoint<TestAbstractState>(graph,
 					false, st -> st instanceof Call).fixpoint(
 							Map.of(source, comp),
 							FIFOWorkingSet.mk(),
@@ -152,16 +147,14 @@ public class OptimizedFixpointTest {
 		graph.computeBasicBlocks();
 
 		Map<Statement,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain>> res = null;
-		AnalysisState<TestAbstractState, TestHeapDomain, TestValueDomain,
-				TestTypeDomain> state = new AnalysisState<>(
-						new TestAbstractState(),
-						new ExpressionSet<>(),
-						new SymbolAliasing());
-		CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain,
-				TestTypeDomain> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
+				CompoundState<TestAbstractState>> res = null;
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new TestAbstractState(),
+				new ExpressionSet<>(),
+				new SymbolAliasing());
+		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain>(graph,
+			res = new OptimizedFixpoint<TestAbstractState>(graph,
 					false, st -> st instanceof Call).fixpoint(
 							Map.of(source, comp),
 							FIFOWorkingSet.mk(),
@@ -203,16 +196,14 @@ public class OptimizedFixpointTest {
 		graph.computeBasicBlocks();
 
 		Map<Statement,
-				CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain>> res = null;
-		AnalysisState<TestAbstractState, TestHeapDomain, TestValueDomain,
-				TestTypeDomain> state = new AnalysisState<>(
-						new TestAbstractState(),
-						new ExpressionSet<>(),
-						new SymbolAliasing());
-		CompoundState<TestAbstractState, TestHeapDomain, TestValueDomain,
-				TestTypeDomain> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
+				CompoundState<TestAbstractState>> res = null;
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new TestAbstractState(),
+				new ExpressionSet<>(),
+				new SymbolAliasing());
+		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain>(graph,
+			res = new OptimizedFixpoint<TestAbstractState>(graph,
 					false, st -> st instanceof Call).fixpoint(
 							Map.of(source, comp),
 							FIFOWorkingSet.mk(),
