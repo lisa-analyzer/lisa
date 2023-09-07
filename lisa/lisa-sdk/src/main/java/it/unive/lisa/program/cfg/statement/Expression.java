@@ -1,5 +1,12 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -7,9 +14,6 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
 
 /**
  * An expression that is part of a statement of the program.
@@ -17,6 +21,8 @@ import java.util.Objects;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class Expression extends Statement {
+
+	private static final Logger LOG = LogManager.getLogger(Expression.class);
 
 	/**
 	 * The static type of this expression.
@@ -123,7 +129,14 @@ public abstract class Expression extends Statement {
 	 * @param st the containing statement
 	 */
 	public final void setParentStatement(Statement st) {
-		this.parent = st;
+		if (this.parent == null)
+			this.parent = st;
+		else
+			// this usually happens either with a bad code parsing process
+			// or when constructing resolved calls or similar constructs
+			// inside semantic functions. Either way, the syntactic structure
+			// of the code should not change once set
+			LOG.debug("Attempt to change the parent of " + this + " ignored");
 	}
 
 	/**
