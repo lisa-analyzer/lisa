@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -11,12 +17,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -161,9 +161,12 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 			return assign((Identifier) id, expression, pp);
 
 		A s = state.bottom();
-		ExpressionSet<SymbolicExpression> rewritten = rewrite(id, pp);
+		ExpressionSet<SymbolicExpression> rewritten = state.rewrite(id, pp);
 		for (SymbolicExpression i : rewritten)
-			s = s.lub(state.assign((Identifier) i, expression, pp));
+			if (!(i instanceof Identifier))
+				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
+			else
+				s = s.lub(state.assign((Identifier) i, expression, pp));
 		return new AnalysisState<>(s, rewritten, aliasing);
 	}
 
@@ -172,49 +175,6 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 			throws SemanticException {
 		A s = state.smallStepSemantics(expression, pp);
 		return new AnalysisState<>(s, new ExpressionSet<>(expression), aliasing);
-	}
-
-	/**
-	 * Uses the {@link HeapDomain} contained in this state to rewrite the given
-	 * expression. Every expression contained in the result can be safely cast
-	 * to {@link ValueExpression}.
-	 * 
-	 * @param expression the expression to rewrite
-	 * @param pp         the program point where the rewrite happens
-	 * 
-	 * @return the rewritten expressions
-	 * 
-	 * @throws SemanticException if something goes wrong while rewriting
-	 */
-	public ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
-			throws SemanticException {
-		Set<SymbolicExpression> rewritten = new HashSet<>();
-		@SuppressWarnings("unchecked")
-		H heap = (H) getState().getDomainInstance(HeapDomain.class);
-		rewritten.addAll(heap.rewrite(expression, pp).elements());
-		return new ExpressionSet<>(rewritten);
-	}
-
-	/**
-	 * Uses the {@link HeapDomain} contained in this state to rewrite the given
-	 * expressions. Every expression contained in the result can be safely cast
-	 * to {@link ValueExpression}.
-	 * 
-	 * @param expressions the expressions to rewrite
-	 * @param pp          the program point where the rewrite happens
-	 * 
-	 * @return the rewritten expressions
-	 * 
-	 * @throws SemanticException if something goes wrong while rewriting
-	 */
-	public ExpressionSet<SymbolicExpression> rewrite(ExpressionSet<SymbolicExpression> expressions, ProgramPoint pp)
-			throws SemanticException {
-		Set<SymbolicExpression> rewritten = new HashSet<>();
-		@SuppressWarnings("unchecked")
-		H heap = (H) getState().getDomainInstance(HeapDomain.class);
-		for (SymbolicExpression expression : expressions)
-			rewritten.addAll(heap.rewrite(expression, pp).elements());
-		return new ExpressionSet<>(rewritten);
 	}
 
 	@Override
@@ -384,35 +344,5 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 		Collection<D> result = SemanticDomain.super.getAllDomainInstances(domain);
 		result.addAll(state.getAllDomainInstances(domain));
 		return result;
-	}
-
-	/**
-	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
-	 * {@link HeapDomain} set to top.
-	 * 
-	 * @return the copy with top heap
-	 */
-	public AnalysisState<A, H, V, T> withTopHeap() {
-		return new AnalysisState<>(state.withTopHeap(), computedExpressions, aliasing);
-	}
-
-	/**
-	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
-	 * {@link ValueDomain} set to top.
-	 * 
-	 * @return the copy with top value
-	 */
-	public AnalysisState<A, H, V, T> withTopValue() {
-		return new AnalysisState<>(state.withTopValue(), computedExpressions, aliasing);
-	}
-
-	/**
-	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
-	 * {@link TypeDomain} set to top.
-	 * 
-	 * @return the copy with top type
-	 */
-	public AnalysisState<A, H, V, T> withTopType() {
-		return new AnalysisState<>(state.withTopType(), computedExpressions, aliasing);
 	}
 }

@@ -1,5 +1,11 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,12 +20,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to another cfg.
@@ -261,10 +262,9 @@ public abstract class Call extends NaryExpression {
 		Set<Type>[] types = new Set[actuals.length];
 		for (int i = 0; i < actuals.length; i++) {
 			AnalysisState<A, H, V, T> state = expressions.getState(actuals[i]);
-			T typedom = (T) state.getDomainInstance(TypeDomain.class);
 			Set<Type> t = new HashSet<>();
-			for (SymbolicExpression e : state.rewrite(state.getComputedExpressions(), this))
-				t.addAll(typedom.getRuntimeTypesOf((ValueExpression) e, this));
+			for (SymbolicExpression e : state.getComputedExpressions())
+				t.addAll(state.getState().getRuntimeTypesOf(e, this));
 			types[i] = t;
 		}
 		return types;

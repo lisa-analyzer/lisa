@@ -1,11 +1,19 @@
 package it.unive.lisa.analysis.traces;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.MapRepresentation;
@@ -18,10 +26,8 @@ import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to
@@ -281,93 +287,6 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public H getHeapState() {
-		if (isTop())
-			return lattice.getHeapState().top();
-
-		H result = lattice.getHeapState().bottom();
-		if (isBottom() || function == null)
-			return result;
-
-		try {
-			for (Entry<ExecutionTrace, A> trace : this)
-				result = result.lub(trace.getValue().getHeapState());
-		} catch (SemanticException e) {
-			return result.bottom();
-		}
-		return result;
-	}
-
-	@Override
-	public V getValueState() {
-		if (isTop())
-			return lattice.getValueState().top();
-
-		V result = lattice.getValueState().bottom();
-		if (isBottom() || function == null)
-			return result;
-
-		try {
-			for (Entry<ExecutionTrace, A> trace : this)
-				result = result.lub(trace.getValue().getValueState());
-		} catch (SemanticException e) {
-			return result.bottom();
-		}
-		return result;
-	}
-
-	@Override
-	public T getTypeState() {
-		if (isTop())
-			return lattice.getTypeState().top();
-
-		T result = lattice.getTypeState().bottom();
-		if (isBottom() || function == null)
-			return result;
-
-		try {
-			for (Entry<ExecutionTrace, A> trace : this)
-				result = result.lub(trace.getValue().getTypeState());
-		} catch (SemanticException e) {
-			return result.bottom();
-		}
-		return result;
-	}
-
-	@Override
-	public TracePartitioning<A, H, V, T> withTopHeap() {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopHeap());
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
-	public TracePartitioning<A, H, V, T> withTopValue() {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopValue());
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
-	public TracePartitioning<A, H, V, T> withTopType() {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopType());
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
 	public TracePartitioning<A, H, V, T> mk(A lattice, Map<ExecutionTrace, A> function) {
 		return new TracePartitioning<>(lattice, function);
 	}
@@ -398,5 +317,59 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	@Override
 	public String toString() {
 		return representation().toString();
+	}
+
+	@Override
+	public ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		if (isTop())
+			return lattice.top().rewrite(expression, pp);
+		else if (isBottom() || function == null)
+			return lattice.bottom().rewrite(expression, pp);
+
+		Set<SymbolicExpression> result = new HashSet<>();
+		for (A dom : getValues())
+			result.addAll(dom.rewrite(expression, pp).elements());
+		return new ExpressionSet<>(result);
+	}
+
+	@Override
+	public ExpressionSet<SymbolicExpression> rewrite(ExpressionSet<SymbolicExpression> expressions, ProgramPoint pp)
+			throws SemanticException {
+		if (isTop())
+			return lattice.top().rewrite(expressions, pp);
+		else if (isBottom() || function == null)
+			return lattice.bottom().rewrite(expressions, pp);
+
+		Set<SymbolicExpression> result = new HashSet<>();
+		for (A dom : getValues())
+			result.addAll(dom.rewrite(expressions, pp).elements());
+		return new ExpressionSet<>(result);
+	}
+
+	@Override
+	public Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException {
+		if (isTop())
+			return lattice.top().getRuntimeTypesOf(e, pp);
+		else if (isBottom() || function == null)
+			return lattice.bottom().getRuntimeTypesOf(e, pp);
+
+		Set<Type> result = new HashSet<>();
+		for (A dom : getValues())
+			result.addAll(dom.getRuntimeTypesOf(e, pp));
+		return result;
+	}
+
+	@Override
+	public Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException {
+		if (isTop())
+			return lattice.top().getDynamicTypeOf(e, pp);
+		else if (isBottom() || function == null)
+			return lattice.bottom().getDynamicTypeOf(e, pp);
+
+		Set<Type> result = new HashSet<>();
+		for (A dom : getValues())
+			result.add(dom.getDynamicTypeOf(e, pp));
+		return Type.commonSupertype(result, Untyped.INSTANCE);
 	}
 }

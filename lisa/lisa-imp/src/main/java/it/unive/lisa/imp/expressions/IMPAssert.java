@@ -1,5 +1,7 @@
 package it.unive.lisa.imp.expressions;
 
+import java.util.Set;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,7 +16,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryStatement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 
 /**
@@ -38,7 +39,6 @@ public class IMPAssert extends UnaryStatement {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
@@ -48,16 +48,8 @@ public class IMPAssert extends UnaryStatement {
 					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		Type type = null;
-		T typedom = (T) state.getDomainInstance(TypeDomain.class);
-		for (SymbolicExpression e : state.rewrite(expr, this)) {
-			Type inferred = typedom.getDynamicTypeOf((ValueExpression) e, this);
-			if (type == null)
-				type = inferred;
-			else
-				type = type.commonSupertype(inferred);
-		}
-		if (!type.isBooleanType())
+		Set<Type> types = state.getState().getRuntimeTypesOf(expr, this);
+		if (types.stream().noneMatch(Type::isBooleanType))
 			return state.bottom();
 		return state.smallStepSemantics(new Skip(getLocation()), this);
 	}

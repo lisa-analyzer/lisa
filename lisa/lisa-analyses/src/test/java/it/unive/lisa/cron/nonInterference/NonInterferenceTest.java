@@ -112,8 +112,8 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 					AnalysisState<?, ?, ?, ?> postR = result.getAnalysisStateAfter(assign.getRight());
 					InferenceSystem<NonInterference> right = postR.getDomainInstance(InferenceSystem.class);
 
-					for (SymbolicExpression l : postL.rewrite(postL.getComputedExpressions(), assign))
-						for (SymbolicExpression r : postR.rewrite(postR.getComputedExpressions(), assign)) {
+					for (SymbolicExpression l : postL.getState().rewrite(postL.getComputedExpressions(), assign))
+						for (SymbolicExpression r : postR.getState().rewrite(postR.getComputedExpressions(), assign)) {
 							NonInterference ll = left.eval((ValueExpression) l, assign.getLeft());
 							NonInterference rr = right.eval((ValueExpression) r, assign.getRight());
 

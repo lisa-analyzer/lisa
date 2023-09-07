@@ -1,5 +1,10 @@
 package it.unive.lisa.program.language.parameterassignment;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -15,11 +20,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
 import it.unive.lisa.program.language.resolution.PythonLikeMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A Python-like assigning strategy. Specifically:<br>
@@ -89,10 +90,10 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 				callState = def.semantics(callState, interprocedural, expressions);
 				expressions.put(def, callState);
 				defaults[pos] = callState.getComputedExpressions();
-				T typedom = (T) callState.getDomainInstance(TypeDomain.class);
-				defaultTypes[pos] = new HashSet<>();
-				for (SymbolicExpression e : callState.rewrite(defaults[pos], call))
-					defaultTypes[pos].addAll(typedom.getRuntimeTypesOf((ValueExpression) e, call));
+				Set<Type> types = new HashSet<>();
+				for (SymbolicExpression e : defaults[pos])
+					defaultTypes[pos].addAll(callState.getState().getRuntimeTypesOf(e, call));
+				defaultTypes[pos] = types;
 			}
 		}
 

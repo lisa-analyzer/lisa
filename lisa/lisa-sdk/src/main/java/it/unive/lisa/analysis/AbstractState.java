@@ -1,11 +1,17 @@
 package it.unive.lisa.analysis;
 
+import java.util.Set;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.type.Type;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -28,69 +34,63 @@ public interface AbstractState<A extends AbstractState<A, H, V, T>,
 		extends Lattice<A>, SemanticDomain<A, SymbolicExpression, Identifier> {
 
 	/**
-	 * The key that should be used to store the instance of {@link HeapDomain}
-	 * inside the {@link DomainRepresentation} returned by
-	 * {@link #representation()}.
-	 */
-	public static final String HEAP_REPRESENTATION_KEY = "heap";
-
-	/**
-	 * The key that should be used to store the instance of {@link TypeDomain}
-	 * inside the {@link DomainRepresentation} returned by
-	 * {@link #representation()}.
-	 */
-	public static final String TYPE_REPRESENTATION_KEY = "type";
-
-	/**
-	 * The key that should be used to store the instance of {@link ValueDomain}
-	 * inside the {@link DomainRepresentation} returned by
-	 * {@link #representation()}.
-	 */
-	public static final String VALUE_REPRESENTATION_KEY = "value";
-
-	/**
-	 * Yields the instance of {@link HeapDomain} that contains the information
-	 * on heap structures contained in this abstract state.
+	 * Rewrites the given expression to a simpler form containing no sub
+	 * expressions regarding the heap (that is, {@link HeapExpression}s). Every
+	 * expression contained in the result can be safely cast to
+	 * {@link ValueExpression}.
 	 * 
-	 * @return the heap domain
+	 * @param expression the expression to rewrite
+	 * @param pp         the program point where the rewrite happens
+	 * 
+	 * @return the rewritten expressions
+	 * 
+	 * @throws SemanticException if something goes wrong while rewriting
 	 */
-	H getHeapState();
+	public ExpressionSet<SymbolicExpression> rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp)
+			throws SemanticException;
 
 	/**
-	 * Yields the instance of {@link ValueDomain} that contains the information
-	 * on values of program variables and concretized memory locations.
+	 * Rewrites the given expressions to a simpler form containing no sub
+	 * expressions regarding the heap (that is, {@link HeapExpression}s). Every
+	 * expression contained in the result can be safely cast to
+	 * {@link ValueExpression}.
 	 * 
-	 * @return the value domain
+	 * @param expressions the expressions to rewrite
+	 * @param pp          the program point where the rewrite happens
+	 * 
+	 * @return the rewritten expressions
+	 * 
+	 * @throws SemanticException if something goes wrong while rewriting
 	 */
-	V getValueState();
+	public ExpressionSet<SymbolicExpression> rewrite(
+			ExpressionSet<SymbolicExpression> expressions,
+			ProgramPoint pp)
+			throws SemanticException;
 
 	/**
-	 * Yields the instance of {@link ValueDomain} and {@link TypeDomain} that
-	 * contains the information on runtime types of program variables and
-	 * concretized memory locations.
+	 * Yields the runtime types that this analysis infers for the given
+	 * expression.
 	 * 
-	 * @return the type domain
+	 * @param e  the expression to type
+	 * @param pp the program point where the types are required
+	 * 
+	 * @return the runtime types
+	 * 
+	 * @throws SemanticException
 	 */
-	T getTypeState();
+	Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException;
 
 	/**
-	 * Yields a copy of this state, but with the {@link HeapDomain} set to top.
+	 * Yields the dynamic type that this analysis infers for the given
+	 * expression. The dynamic type is the least common supertype of all its
+	 * runtime types.
 	 * 
-	 * @return the copy with top heap
-	 */
-	A withTopHeap();
-
-	/**
-	 * Yields a copy of this state, but with the {@link ValueDomain} set to top.
+	 * @param e  the expression to type
+	 * @param pp the program point where the types are required
 	 * 
-	 * @return the copy with top value
+	 * @return the dynamic type
 	 */
-	A withTopValue();
-
-	/**
-	 * Yields a copy of this state, but with the {@link TypeDomain} set to top.
-	 * 
-	 * @return the copy with top type
-	 */
-	A withTopType();
+	Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException;
 }

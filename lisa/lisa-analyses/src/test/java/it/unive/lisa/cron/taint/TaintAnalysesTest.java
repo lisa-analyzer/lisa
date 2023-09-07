@@ -117,7 +117,7 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 											MonolithicHeap, ValueEnvironment<T>,
 											TypeEnvironment<InferredTypes>> post = result
 													.getAnalysisStateAfter(call.getParameters()[i]);
-									for (SymbolicExpression e : post.rewrite(post.getComputedExpressions(),
+									for (SymbolicExpression e : post.getState().rewrite(post.getComputedExpressions(),
 											node)) {
 										T stack = post
 												.getState()

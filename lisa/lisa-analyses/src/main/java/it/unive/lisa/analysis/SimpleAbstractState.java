@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -18,11 +24,7 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
+import it.unive.lisa.type.Untyped;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -41,6 +43,27 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
 		implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
+
+	/**
+	 * The key that should be used to store the instance of {@link HeapDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
+	public static final String HEAP_REPRESENTATION_KEY = "heap";
+
+	/**
+	 * The key that should be used to store the instance of {@link TypeDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
+	public static final String TYPE_REPRESENTATION_KEY = "type";
+
+	/**
+	 * The key that should be used to store the instance of {@link ValueDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
+	public static final String VALUE_REPRESENTATION_KEY = "value";
 
 	/**
 	 * The domain containing information regarding heap structures
@@ -76,17 +99,14 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		this.typeState = typeState;
 	}
 
-	@Override
 	public H getHeapState() {
 		return heapState;
 	}
 
-	@Override
 	public V getValueState() {
 		return valueState;
 	}
 
-	@Override
 	public T getTypeState() {
 		return typeState;
 	}
@@ -394,17 +414,41 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> withTopHeap() {
-		return new SimpleAbstractState<>(heapState.top(), valueState, typeState);
+	public ExpressionSet<SymbolicExpression> rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp)
+			throws SemanticException {
+		Set<SymbolicExpression> rewritten = new HashSet<>();
+		rewritten.addAll(heapState.rewrite(expression, pp).elements());
+		return new ExpressionSet<>(rewritten);
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> withTopValue() {
-		return new SimpleAbstractState<>(heapState, valueState.top(), typeState);
+	public ExpressionSet<SymbolicExpression> rewrite(
+			ExpressionSet<SymbolicExpression> expressions,
+			ProgramPoint pp)
+			throws SemanticException {
+		Set<SymbolicExpression> rewritten = new HashSet<>();
+		for (SymbolicExpression expression : expressions)
+			rewritten.addAll(heapState.rewrite(expression, pp).elements());
+		return new ExpressionSet<>(rewritten);
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> withTopType() {
-		return new SimpleAbstractState<>(heapState, valueState, typeState.top());
+	public Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException {
+		Set<Type> types = new HashSet<>();
+		for (SymbolicExpression ex : rewrite(e, pp))
+			types.addAll(typeState.getRuntimeTypesOf((ValueExpression) ex, pp));
+		return types;
+	}
+
+	@Override
+	public Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException {
+		Set<Type> types = new HashSet<>();
+		for (SymbolicExpression ex : rewrite(e, pp))
+			types.add(typeState.getDynamicTypeOf((ValueExpression) ex, pp));
+		if (types.isEmpty())
+			return Untyped.INSTANCE;
+		return Type.commonSupertype(types, Untyped.INSTANCE);
 	}
 }

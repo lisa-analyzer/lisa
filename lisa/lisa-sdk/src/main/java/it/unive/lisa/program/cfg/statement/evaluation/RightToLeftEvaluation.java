@@ -11,10 +11,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.type.Type;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A right-to-left {@link EvaluationOrder}, evaluating expressions in reversed
@@ -33,7 +29,6 @@ public class RightToLeftEvaluation implements EvaluationOrder {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
@@ -52,11 +47,8 @@ public class RightToLeftEvaluation implements EvaluationOrder {
 			AnalysisState<A, H, V, T> tmp = subExpressions[i].semantics(postState, interprocedural, expressions);
 			expressions.put(subExpressions[i], tmp);
 			computed[i] = tmp.getComputedExpressions();
-			T typedom = (T) tmp.getDomainInstance(TypeDomain.class);
-			Set<Type> types = new HashSet<>();
-			for (SymbolicExpression e : tmp.rewrite(computed[i], subExpressions[i]))
-				types.addAll(typedom.getRuntimeTypesOf((ValueExpression) e, subExpressions[i]));
-			computed[i].forEach(e -> e.setRuntimeTypes(types));
+			for (SymbolicExpression e : computed[i])
+				e.setRuntimeTypes(tmp.getState().getRuntimeTypesOf(e, subExpressions[i]));
 			postState = tmp;
 		}
 
