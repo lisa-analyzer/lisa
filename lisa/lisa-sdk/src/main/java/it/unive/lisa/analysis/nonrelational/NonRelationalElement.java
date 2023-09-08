@@ -89,7 +89,7 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T variable(Identifier id, ProgramPoint pp) throws SemanticException {
+	default T fixedVariable(Identifier id, ProgramPoint pp) throws SemanticException {
 		return bottom();
 	}
 

@@ -84,7 +84,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 		Map<Identifier, T> func = mkNewFunction(function, false);
 		InferredPair<T> eval = lattice.eval(expression, this, pp);
 		T value = eval.getInferred();
-		T v = lattice.variable(id, pp);
+		T v = lattice.fixedVariable(id, pp);
 		if (!v.isBottom())
 			// some domains might provide fixed representations
 			// for some variables

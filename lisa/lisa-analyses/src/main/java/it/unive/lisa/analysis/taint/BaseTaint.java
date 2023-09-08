@@ -107,13 +107,13 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	/**
 	 * Default approximation for {@link Identifier}s. This method returns the
 	 * same as
-	 * {@link BaseNonRelationalValueDomain#variable(Identifier, ProgramPoint)}
+	 * {@link BaseNonRelationalValueDomain#fixedVariable(Identifier, ProgramPoint)}
 	 * if the given identifier has no annotations. Otherwise, it relies on the
 	 * presence if {@link #TAINTED_ANNOTATION} and {@link #CLEAN_ANNOTATION} to
 	 * produce abstract values. defaulting to bottom. <br>
 	 * <br>
 	 * If this method does not return bottom, it is used as return value for
-	 * both {@link #variable(Identifier, ProgramPoint)} and
+	 * both {@link #fixedVariable(Identifier, ProgramPoint)} and
 	 * {@link #evalIdentifier(Identifier, ValueEnvironment, ProgramPoint)}.
 	 * 
 	 * @param id the identifier to evaluate
@@ -126,7 +126,7 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	protected T defaultApprox(Identifier id, ProgramPoint pp) throws SemanticException {
 		Annotations annots = id.getAnnotations();
 		if (annots.isEmpty())
-			return BaseNonRelationalValueDomain.super.variable(id, pp);
+			return BaseNonRelationalValueDomain.super.fixedVariable(id, pp);
 
 		if (annots.contains(BaseTaint.TAINTED_MATCHER))
 			return tainted();
@@ -138,11 +138,11 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public T variable(Identifier id, ProgramPoint pp) throws SemanticException {
+	public T fixedVariable(Identifier id, ProgramPoint pp) throws SemanticException {
 		T def = defaultApprox(id, pp);
 		if (!def.isBottom())
 			return def;
-		return BaseNonRelationalValueDomain.super.variable(id, pp);
+		return BaseNonRelationalValueDomain.super.fixedVariable(id, pp);
 	}
 
 	@Override

@@ -360,11 +360,11 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	@Override
 	public InferredPair<NonInterference> evalIdentifier(Identifier id,
 			InferenceSystem<NonInterference> environment, ProgramPoint pp) throws SemanticException {
-		return new InferredPair<>(this, variable(id, pp), state(environment.getExecutionState(), pp));
+		return new InferredPair<>(this, fixedVariable(id, pp), state(environment.getExecutionState(), pp));
 	}
 
 	@Override
-	public NonInterference variable(Identifier id, ProgramPoint pp) {
+	public NonInterference fixedVariable(Identifier id, ProgramPoint pp) {
 		Annotations annots = id.getAnnotations();
 		if (annots.isEmpty())
 			return mkHighLow();

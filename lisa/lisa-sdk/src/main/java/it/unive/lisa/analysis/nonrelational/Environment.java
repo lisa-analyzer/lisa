@@ -65,12 +65,12 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 		Map<Identifier, T> func = mkNewFunction(function, false);
 		T value = lattice.eval(expression, (M) this, pp);
-		T v = lattice.variable(id, pp);
+		T v = lattice.fixedVariable(id, pp);
 		if (!v.isBottom())
 			// some domains might provide fixed representations
 			// for some variables
 			value = v;
-		if (id.isWeak() && function != null && function.containsKey(id))
+		else if (id.isWeak() && function != null && function.containsKey(id))
 			// if we have a weak identifier for which we already have
 			// information, we we perform a weak assignment
 			value = value.lub(getState(id));

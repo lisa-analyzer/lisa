@@ -190,8 +190,8 @@ public abstract class NonRelationalValueCartesianProduct<C extends NonRelational
 	}
 
 	@Override
-	public C variable(Identifier id, ProgramPoint pp) throws SemanticException {
-		return mk(left.variable(id, pp), right.variable(id, pp));
+	public C fixedVariable(Identifier id, ProgramPoint pp) throws SemanticException {
+		return mk(left.fixedVariable(id, pp), right.fixedVariable(id, pp));
 	}
 
 	@Override
