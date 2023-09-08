@@ -28,7 +28,7 @@ public class ReferenceType implements PointerType {
 
 	@Override
 	public boolean canBeAssignedTo(Type other) {
-		return other instanceof PointerType;
+		return other instanceof PointerType || other.isUntyped();
 	}
 
 	@Override

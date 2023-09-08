@@ -45,7 +45,7 @@ public class NullType implements InMemoryType {
 
 	@Override
 	public boolean canBeAssignedTo(Type other) {
-		return other.isPointerType();
+		return other.isPointerType() || other.isUntyped();
 	}
 
 	@Override

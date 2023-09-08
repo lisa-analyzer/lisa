@@ -66,7 +66,7 @@ public class TypeTokenType implements Type {
 
 	@Override
 	public boolean canBeAssignedTo(Type other) {
-		return other instanceof TypeTokenType;
+		return other instanceof TypeTokenType || other.isUntyped();
 	}
 
 	@Override
