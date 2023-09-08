@@ -1,4 +1,4 @@
-package it.unive.lisa.cron.interprocedural;
+package it.unive.lisa.cron;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;

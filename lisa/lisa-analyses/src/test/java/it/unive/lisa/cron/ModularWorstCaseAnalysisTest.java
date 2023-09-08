@@ -1,4 +1,4 @@
-package it.unive.lisa.cron.interprocedural;
+package it.unive.lisa.cron;
 
 import org.junit.Test;
 

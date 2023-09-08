@@ -1,4 +1,4 @@
-package it.unive.lisa.cron.nonRedundantSet;
+package it.unive.lisa.cron;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package it.unive.lisa.cron.traces;
+package it.unive.lisa.cron;
 
 import org.junit.Test;
 

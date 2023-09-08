@@ -1,4 +1,4 @@
-package it.unive.lisa.cron.numeric;
+package it.unive.lisa.cron;
 
 import org.junit.Test;
 

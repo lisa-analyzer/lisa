@@ -1,4 +1,4 @@
-package it.unive.lisa.cron.visualization;
+package it.unive.lisa.cron;
 
 import static org.junit.Assert.assertTrue;
 

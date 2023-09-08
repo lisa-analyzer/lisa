@@ -1,4 +1,4 @@
-package it.unive.lisa.cron.interprocedural;
+package it.unive.lisa.cron;
 
 import org.junit.Test;
 
@@ -8,6 +8,7 @@ import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
@@ -85,7 +86,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
 				new PointBasedHeap(),
-				new ValueEnvironment<>(new Sign()),
+				new ValueEnvironment<>(new Interval()),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
@@ -101,7 +102,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
 				new PointBasedHeap(),
-				new ValueEnvironment<>(new Sign()),
+				new ValueEnvironment<>(new Interval()),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();

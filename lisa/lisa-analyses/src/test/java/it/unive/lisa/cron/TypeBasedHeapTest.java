@@ -1,4 +1,4 @@
-package it.unive.lisa.cron.typeInference;
+package it.unive.lisa.cron;
 
 import org.junit.Test;
 
@@ -6,19 +6,19 @@ import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
-import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
-import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.analysis.heap.TypeBasedHeap;
 
-public class TypesCollectionTest extends AnalysisTestExecutor {
+public class TypeBasedHeapTest extends AnalysisTestExecutor {
+
 	@Test
-	public void testTypesCollection() throws AnalysisSetupException {
+	public void testTypeBasedHeap() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
+				new TypeBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
-				new TypeEnvironment<>(new InferredTypes()));
-		conf.testDir = "type-inference";
+				DefaultConfiguration.defaultTypeDomain());
+		conf.testDir = "heap/type-based-heap";
 		conf.programFile = "program.imp";
 		perform(conf);
 	}
