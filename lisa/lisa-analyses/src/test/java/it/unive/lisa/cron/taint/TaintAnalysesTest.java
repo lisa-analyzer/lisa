@@ -1,15 +1,15 @@
 package it.unive.lisa.cron.taint;
 
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
-import it.unive.lisa.LiSAFactory;
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractState;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
@@ -17,7 +17,6 @@ import it.unive.lisa.analysis.taint.BaseTaint;
 import it.unive.lisa.analysis.taint.Taint;
 import it.unive.lisa.analysis.taint.ThreeLevelsTaint;
 import it.unive.lisa.analysis.types.InferredTypes;
-import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
@@ -33,17 +32,16 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import org.junit.Test;
 
 public class TaintAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testTaint() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
-		conf.abstractState = LiSAFactory.getDefaultFor(AbstractState.class,
-				LiSAFactory.getDefaultFor(HeapDomain.class),
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
 				new ValueEnvironment<>(new Taint()),
-				LiSAFactory.getDefaultFor(TypeDomain.class));
+				DefaultConfiguration.defaultTypeDomain());
 		conf.serializeResults = true;
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
@@ -59,10 +57,10 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 	@Test
 	public void testThreeLevelsTaint() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
-		conf.abstractState = LiSAFactory.getDefaultFor(AbstractState.class,
-				LiSAFactory.getDefaultFor(HeapDomain.class),
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
 				new ValueEnvironment<>(new ThreeLevelsTaint()),
-				LiSAFactory.getDefaultFor(TypeDomain.class));
+				DefaultConfiguration.defaultTypeDomain());
 		conf.serializeResults = true;
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();

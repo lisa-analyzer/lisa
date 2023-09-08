@@ -1,7 +1,13 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.AnalysisSetupException;
-import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -28,18 +34,12 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
  * 
  * @param <A> the {@link AbstractState} of the analysis
  */
-@FallbackImplementation
 public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements InterproceduralAnalysis<A> {
 
 	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);

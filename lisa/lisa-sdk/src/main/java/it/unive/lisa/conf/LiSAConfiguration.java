@@ -1,7 +1,6 @@
 package it.unive.lisa.conf;
 
 import it.unive.lisa.LiSA;
-import it.unive.lisa.LiSAFactory;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.checks.semantic.SemanticCheck;

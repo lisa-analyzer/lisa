@@ -2,7 +2,6 @@ package it.unive.lisa.interprocedural.context;
 
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
-import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -58,7 +57,6 @@ import org.apache.logging.log4j.Logger;
  * 
  * @param <A> the {@link AbstractState} of the analysis
  */
-@DefaultParameters({ FullStackToken.class })
 public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphBasedAnalysis<A> {
 
 	private static final Logger LOG = LogManager.getLogger(ContextBasedAnalysis.class);

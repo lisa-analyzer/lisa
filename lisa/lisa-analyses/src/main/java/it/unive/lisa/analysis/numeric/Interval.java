@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -44,7 +43,6 @@ import it.unive.lisa.util.numeric.MathNumber;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-@FallbackImplementation
 public class Interval implements BaseNonRelationalValueDomain<Interval>, Comparable<Interval> {
 
 	/**

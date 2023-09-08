@@ -2,7 +2,12 @@ package it.unive.lisa.analysis.types;
 
 import static org.apache.commons.collections4.CollectionUtils.intersection;
 
-import it.unive.lisa.FallbackImplementation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -31,11 +36,6 @@ import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -43,7 +43,6 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-@FallbackImplementation
 public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes> {
 
 	private static final InferredTypes BOTTOM = new InferredTypes(null, Collections.emptySet());

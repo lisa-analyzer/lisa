@@ -1,15 +1,13 @@
 package it.unive.lisa.cron.dataflow;
 
-import static it.unive.lisa.LiSAFactory.getDefaultFor;
+import org.junit.Test;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.DefaultConfiguration;
+import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
 import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import org.junit.Test;
 
 public class ReachingDefinitionsTest extends AnalysisTestExecutor {
 
@@ -17,10 +15,10 @@ public class ReachingDefinitionsTest extends AnalysisTestExecutor {
 	public void testReachingDefinitions() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new ReachingDefinitions(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new PossibleForwardDataflowDomain<>(new ReachingDefinitions()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "reaching-definitions";
 		conf.programFile = "reaching-definitions.imp";
 		perform(conf);

@@ -1,10 +1,10 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import it.unive.lisa.FallbackImplementation;
-import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.Set;
+
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.type.Type;
 
 /**
  * A call graph constructed following the Rapid Type Analysis as defined in:
@@ -16,7 +16,6 @@ import java.util.Set;
  *
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-@FallbackImplementation
 public class RTACallGraph extends BaseCallGraph {
 
 	@Override

@@ -1,15 +1,16 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.DefaultParameters;
-import it.unive.lisa.FallbackImplementation;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.ObjectRepresentation;
-import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -19,11 +20,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -42,8 +38,6 @@ import java.util.function.Predicate;
  * @param <V> the type of {@link ValueDomain} embedded in this state
  * @param <T> the type of {@link TypeDomain} embedded in this state
  */
-@FallbackImplementation
-@DefaultParameters({ MonolithicHeap.class, Interval.class, InferredTypes.class })
 public class SimpleAbstractState<H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>

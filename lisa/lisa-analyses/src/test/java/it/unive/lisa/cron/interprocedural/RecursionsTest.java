@@ -1,23 +1,21 @@
 package it.unive.lisa.cron.interprocedural;
 
-import static it.unive.lisa.LiSAFactory.getDefaultFor;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.DefaultConfiguration;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.context.FullStackToken;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.LastCallToken;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RecursionsTest extends AnalysisTestExecutor {
@@ -26,10 +24,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFibonacciFullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -47,10 +45,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFibonacciKDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -68,10 +66,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFibonacciLast() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -89,10 +87,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFibonacciInsensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -110,10 +108,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialLoopFullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -126,10 +124,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialLoopKDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -142,10 +140,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialLoopLast() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -158,10 +156,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialLoopInsensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -174,10 +172,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testInfiniteRecursion2FullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -191,10 +189,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testInfiniteRecursion2KDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -208,10 +206,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testInfiniteRecursion2Last() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -225,10 +223,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testInfiniteRecursion2Insensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -242,10 +240,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testInfiniteRecursion1FullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -259,10 +257,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testInfiniteRecursion1KDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -276,10 +274,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testInfiniteRecursion1Last() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -293,10 +291,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testInfiniteRecursion1Insensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -310,10 +308,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialFullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -326,10 +324,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialKDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -342,10 +340,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialLast() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -358,10 +356,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialInsensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -374,10 +372,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialInterleavedFullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -390,10 +388,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialInterleavedKDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -406,10 +404,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialInterleavedLast() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -422,10 +420,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testFactorialInterleavedInsensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -438,10 +436,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testTwoRecursionsFullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -454,10 +452,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testTwoRecursionsKDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -470,10 +468,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testTwoRecursionsLast() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -486,10 +484,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testTwoRecursionsInsensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -502,10 +500,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testNestedRecursionsFullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -518,10 +516,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testNestedRecursionsKDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -534,10 +532,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testNestedRecursionsLast() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -550,10 +548,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testNestedRecursionsInsensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -566,10 +564,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testUnreachableBaseCaseFullStack() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -582,10 +580,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testUnreachableBaseCaseKDepth() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -598,10 +596,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testUnreachableBaseCaseLast() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -614,10 +612,10 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	public void testUnreachableBaseCaseInsensitive() throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = getDefaultFor(AbstractState.class,
-				getDefaultFor(HeapDomain.class),
-				new Interval(),
-				getDefaultFor(TypeDomain.class));
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Interval()),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
