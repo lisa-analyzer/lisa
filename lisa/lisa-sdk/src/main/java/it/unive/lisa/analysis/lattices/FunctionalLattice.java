@@ -84,7 +84,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	/**
-	 * Yields the state associated to the given key.
+	 * Yields the state associated to the given key. This operation is defined
+	 * in term of lattices: it always returns bottom of {@link #isBottom()}
+	 * holds, top if {@link #isTop()} holds, the stored value when key is part
+	 * of the mapping, or {@link #stateOfUnknown(Object)} otherwise. This method
+	 * is the primary way in which information mapped to a key should be
+	 * extracted from this function.
 	 * 
 	 * @param key the key
 	 * 
@@ -97,8 +102,39 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 			return lattice.top();
 		if (function != null && function.containsKey(key))
 			return function.get(key);
-		return lattice.bottom();
+		return stateOfUnknown(key);
 	}
+
+	/**
+	 * Similar to {@link #getState(Object)}, but yields a custom default value
+	 * for keys that are not part of the mapping (instead of using
+	 * {@link #stateOfUnknown(Object)}). This is useful for implementing
+	 * specific operation that need to use an operation-neutral element as
+	 * fallback.
+	 * 
+	 * @param key the key
+	 * 
+	 * @return the state
+	 */
+	public V getOtDefault(K key, V def) {
+		if (isBottom())
+			return lattice.bottom();
+		if (isTop())
+			return lattice.top();
+		if (function != null && function.containsKey(key))
+			return function.get(key);
+		return def;
+	}
+
+	/**
+	 * Yields the value that should be returned by {@link #getState(Object)}
+	 * whenever the given key is not present in this map.
+	 * 
+	 * @param key the key that is missing
+	 * 
+	 * @return the lattice element for keys not in the mapping
+	 */
+	public abstract V stateOfUnknown(K key);
 
 	/**
 	 * Yields an instance of this class equal to the receiver of the call, but
@@ -131,22 +167,22 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 
 	@Override
 	public F lubAux(F other) throws SemanticException {
-		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
+		return functionalLift(other, lattice.bottom(), this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
 	public F glbAux(F other) throws SemanticException {
-		return functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return functionalLift(other, lattice.top(), this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
 	@Override
 	public F wideningAux(F other) throws SemanticException {
-		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+		return functionalLift(other, lattice.bottom(), this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
 	@Override
 	public F narrowingAux(F other) throws SemanticException {
-		return functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
+		return functionalLift(other, lattice.top(), this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
 	}
 
 	/**
@@ -201,6 +237,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * Yields the functional lift between {@code this} and {@code other}.
 	 * 
 	 * @param other       the other functional lattice
+	 * @param missing     the lattice element to use for the lift when a key has
+	 *                        no mapping in one of the two functions (e.g., for
+	 *                        lub, missing should be bottom, while for glb it
+	 *                        should be top)
 	 * @param keyLifter   the key lifter
 	 * @param valueLifter the value lifter
 	 * 
@@ -209,13 +249,19 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @throws SemanticException if something goes wrong while lifting the
 	 *                               lattice elements
 	 */
-	public F functionalLift(F other, KeyFunctionalLift<K> keyLifter, FunctionalLift<V> valueLifter)
+	public F functionalLift(
+			F other,
+			V missing,
+			KeyFunctionalLift<K> keyLifter,
+			FunctionalLift<V> valueLifter)
 			throws SemanticException {
 		Map<K, V> function = mkNewFunction(null, false);
 		Set<K> keys = keyLifter.keyLift(this.getKeys(), other.getKeys());
 		for (K key : keys)
 			try {
-				function.put(key, valueLifter.lift(getState(key), other.getState(key)));
+				V s1 = getOtDefault(key, missing);
+				V s2 = other.getOtDefault(key, missing);
+				function.put(key, valueLifter.lift(s1, s2));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
 			}

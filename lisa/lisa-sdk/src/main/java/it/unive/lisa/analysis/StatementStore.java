@@ -1,8 +1,9 @@
 package it.unive.lisa.analysis;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Map;
 
 /**
  * A functional lattice that stores instances of {@link AnalysisState} computed
@@ -72,5 +73,10 @@ public class StatementStore<A extends AbstractState<A>>
 	public StatementStore<A> mk(AnalysisState<A> lattice,
 			Map<Statement, AnalysisState<A>> function) {
 		return new StatementStore<>(lattice, function);
+	}
+
+	@Override
+	public AnalysisState<A> stateOfUnknown(Statement key) {
+		return lattice.bottom();
 	}
 }

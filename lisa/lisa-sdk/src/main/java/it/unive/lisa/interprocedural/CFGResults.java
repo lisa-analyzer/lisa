@@ -1,14 +1,16 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link FunctionalLattice} from {@link ScopeId}s to {@link AnalyzedCFG}s.
@@ -149,5 +151,10 @@ public class CFGResults<A extends AbstractState<A>>
 	public CFGResults<A> mk(AnalyzedCFG<A> lattice,
 			Map<ScopeId, AnalyzedCFG<A>> function) {
 		return new CFGResults<>(lattice, function);
+	}
+
+	@Override
+	public AnalyzedCFG<A> stateOfUnknown(ScopeId key) {
+		return lattice.bottom();
 	}
 }

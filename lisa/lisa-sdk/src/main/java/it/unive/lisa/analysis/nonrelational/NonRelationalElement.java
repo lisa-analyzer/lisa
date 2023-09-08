@@ -94,6 +94,22 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	}
 
 	/**
+	 * Yields the default abstraction returned whenever a functional lattice
+	 * using this element as values is queried for the state of a variable not
+	 * currently part of its mapping. Abstraction for such a variable might have
+	 * been lost, for instance, due to a call to {@link Lattice#top()} on the
+	 * function itself. The default implementation of this method returns
+	 * {@link Lattice#top()}.
+	 * 
+	 * @param id the variable that is missing from the mapping
+	 * 
+	 * @return a default abstraction for the variable
+	 */
+	default T unknownVariable(Identifier id) {
+		return top();
+	}
+
+	/**
 	 * Yields a {@link DomainRepresentation} of the information contained in
 	 * this domain's instance.
 	 * 

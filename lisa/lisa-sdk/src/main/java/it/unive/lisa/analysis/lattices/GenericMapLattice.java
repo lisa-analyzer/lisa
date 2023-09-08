@@ -1,7 +1,8 @@
 package it.unive.lisa.analysis.lattices;
 
-import it.unive.lisa.analysis.Lattice;
 import java.util.Map;
+
+import it.unive.lisa.analysis.Lattice;
 
 /**
  * A generic ready-to-use {@link FunctionalLattice} with no additional fields,
@@ -50,5 +51,10 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 	@Override
 	public GenericMapLattice<K, V> mk(V lattice, Map<K, V> function) {
 		return new GenericMapLattice<>(lattice, function);
+	}
+
+	@Override
+	public V stateOfUnknown(K key) {
+		return isBottom() ? lattice.bottom() : lattice.top();
 	}
 }

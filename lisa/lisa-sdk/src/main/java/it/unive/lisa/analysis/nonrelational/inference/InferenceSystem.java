@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.VariableLift;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
@@ -9,7 +11,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Map;
 
 /**
  * An inference system that model standard derivation systems. An inference
@@ -167,27 +168,25 @@ public class InferenceSystem<T extends InferredValue<T>>
 	@Override
 	public InferenceSystem<T> lubAux(InferenceSystem<T> other)
 			throws SemanticException {
-		InferenceSystem<T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
+		InferenceSystem<T> newEnv = super.lubAux(other);
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.lub(other.state));
 	}
 
 	@Override
 	public InferenceSystem<T> wideningAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<
-				T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+		InferenceSystem<T> newEnv = super.wideningAux(other);
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.widening(other.state));
 	}
 
 	@Override
 	public InferenceSystem<T> glbAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		InferenceSystem<T> newEnv = super.glbAux(other);
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.glb(other.state));
 	}
 
 	@Override
 	public InferenceSystem<T> narrowingAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<
-				T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
+		InferenceSystem<T> newEnv = super.narrowingAux(other);
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.narrowing(other.state));
 	}
 
