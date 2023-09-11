@@ -164,6 +164,10 @@ class example {
 		strindex("x", "y"); // yield the index of the first occourrence of the second string into the first one
 		strrep("x", "y", "z"); // replace all occurrences of the second string inside the first one with the third string
 		strsub("x", 0, 1); // yield the substring of the string, from the first integer (inclusive) to the second one (exclusive)
+		
+		
+		// array operations directly supported (i.e., not in the form of receiver.method(params))
+		arraylen(intArray); // yields the length of the array
 	}
 	
 	// methods can be final to avoid overriding by subclasses

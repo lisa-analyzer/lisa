@@ -316,7 +316,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	public boolean lessOrEqualAux(AnalysisState<A> other) throws SemanticException {
 		return state.lessOrEqual(other.state)
 				&& computedExpressions.lessOrEqual(other.computedExpressions)
-				&& info == null ? true : info.lessOrEqual(other.info);
+				&& (info == null ? true : info.lessOrEqual(other.info));
 	}
 
 	@Override

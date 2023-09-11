@@ -143,6 +143,11 @@ STRSTARTS
 STRSUB
    : 'strsub'
    ;
+   // =========================== ARRAY FUNCTIONS =========================== 
+   
+ARRAYLEN
+   : 'arraylen'
+   ;
    // =========================== LITERALS ===========================  
    
 LITERAL_DECIMAL

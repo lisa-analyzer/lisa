@@ -11,11 +11,15 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import java.util.Objects;
 
 /**
@@ -47,6 +51,8 @@ public class IMPNewArray extends NaryExpression {
 			Expression[] dimensions) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type + "[]",
 				ArrayType.lookup(type, dimensions.length), dimensions);
+		if (dimensions.length != 1)
+			throw new UnsupportedOperationException("Multidimensional arrays are not yet supported");
 		this.staticallyAllocated = staticallyAllocated;
 	}
 
@@ -57,18 +63,35 @@ public class IMPNewArray extends NaryExpression {
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		MemoryAllocation alloc = new MemoryAllocation(getStaticType(), getLocation(), staticallyAllocated);
-		AnalysisState<A> sem = state.smallStepSemantics(alloc, this);
+		Type type = getStaticType();
+		MemoryAllocation alloc = new MemoryAllocation(type, getLocation(), staticallyAllocated);
+		AnalysisState<A> allocSt = state.smallStepSemantics(alloc, this);
+		ExpressionSet allocExps = allocSt.getComputedExpressions();
 
-		AnalysisState<A> result = state.bottom();
-		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-			ReferenceType staticType = new ReferenceType(loc.getStaticType());
-			HeapReference ref = new HeapReference(staticType, loc, getLocation());
-			AnalysisState<A> refSem = sem.smallStepSemantics(ref, this);
-			result = result.lub(refSem);
+		AnalysisState<A> initSt = state.bottom();
+		for (SymbolicExpression allocExp : allocExps) {
+			AccessChild len = new AccessChild(
+					Int32Type.INSTANCE,
+					allocExp,
+					new Variable(Untyped.INSTANCE, "len", getLocation()),
+					getLocation());
+
+			AnalysisState<A> lenSt = state.bottom();
+			// TODO fix when we'll support multidimensional arrays
+			for (SymbolicExpression dim : params[0])
+				lenSt = lenSt.lub(allocSt.assign(len, dim, this));
+			initSt = initSt.lub(lenSt);
 		}
 
-		return result;
+		AnalysisState<A> refSt = state.bottom();
+		for (SymbolicExpression loc : allocSt.getComputedExpressions()) {
+			ReferenceType t = new ReferenceType(loc.getStaticType());
+			HeapReference ref = new HeapReference(t, loc, getLocation());
+			AnalysisState<A> refSem = initSt.smallStepSemantics(ref, this);
+			refSt = refSt.lub(refSem);
+		}
+
+		return refSt;
 	}
 
 	@Override

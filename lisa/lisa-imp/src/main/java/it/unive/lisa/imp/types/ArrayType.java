@@ -134,6 +134,11 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	}
 
 	@Override
+	public int getDimensions() {
+		return dimensions;
+	}
+
+	@Override
 	public Set<Type> allInstances(TypeSystem types) {
 		return Collections.singleton(this);
 	}

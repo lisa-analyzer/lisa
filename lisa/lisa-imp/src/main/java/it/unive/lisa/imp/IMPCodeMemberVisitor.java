@@ -7,6 +7,7 @@ import it.unive.lisa.imp.antlr.IMPParser.ArgContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArgumentsContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArrayAccessContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArrayCreatorRestContext;
+import it.unive.lisa.imp.antlr.IMPParser.ArrayExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.AssignmentContext;
 import it.unive.lisa.imp.antlr.IMPParser.BasicExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.BinaryStringExprContext;
@@ -31,6 +32,7 @@ import it.unive.lisa.imp.antlr.IMPParser.TernaryStringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnaryStringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.WhileLoopContext;
 import it.unive.lisa.imp.antlr.IMPParserBaseVisitor;
+import it.unive.lisa.imp.constructs.ArrayLength;
 import it.unive.lisa.imp.constructs.StringConcat;
 import it.unive.lisa.imp.constructs.StringContains;
 import it.unive.lisa.imp.constructs.StringEndsWith;
@@ -551,6 +553,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return visitMethodCall(ctx.methodCall());
 		else if (ctx.stringExpr() != null)
 			return visitStringExpr(ctx.stringExpr());
+		else if (ctx.arrayExpr() != null)
+			return visitArrayExpr(ctx.arrayExpr());
 
 		throw new UnsupportedOperationException("Type of expression not supported: " + ctx);
 	}
@@ -572,6 +576,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			((PluggableStatement) returned).setOriginatingStatement(returned);
 
 		return returned;
+	}
+
+	@Override
+	public Expression visitArrayExpr(ArrayExprContext ctx) {
+		return new ArrayLength.IMPArrayLength(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.op));
 	}
 
 	@Override

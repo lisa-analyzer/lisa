@@ -275,7 +275,7 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		FunctionalLattice<?, ?, ?> other = (FunctionalLattice<?, ?, ?>) obj;
+		FixpointInfo other = (FixpointInfo) obj;
 		if (function == null) {
 			if (other.function != null)
 				return false;

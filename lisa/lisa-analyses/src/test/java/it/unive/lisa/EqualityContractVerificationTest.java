@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
@@ -445,7 +446,8 @@ public class EqualityContractVerificationTest {
 			else if (FunctionalLattice.class.isAssignableFrom(subject)
 					|| SetLattice.class.isAssignableFrom(subject)
 					|| InverseSetLattice.class.isAssignableFrom(subject)
-					|| NonInterference.class == subject)
+					|| NonInterference.class == subject
+					|| FixpointInfo.class == subject)
 				// fields function and elements and guards can be null
 				verify(subject, Warning.NONFINAL_FIELDS);
 			else if (subject == StaticTypes.class)

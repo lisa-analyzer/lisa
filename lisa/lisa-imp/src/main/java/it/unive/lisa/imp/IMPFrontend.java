@@ -19,6 +19,7 @@ import it.unive.lisa.imp.antlr.IMPParser.SignatureDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnitContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnitNameContext;
 import it.unive.lisa.imp.antlr.IMPParserBaseVisitor;
+import it.unive.lisa.imp.constructs.ArrayLength;
 import it.unive.lisa.imp.constructs.StringContains;
 import it.unive.lisa.imp.constructs.StringEndsWith;
 import it.unive.lisa.imp.constructs.StringEquals;
@@ -215,6 +216,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			str.addInstanceCodeMember(new StringReplace(unknownLocation, str));
 			str.addInstanceCodeMember(new StringStartsWith(unknownLocation, str));
 			str.addInstanceCodeMember(new StringSubstring(unknownLocation, str));
+			str.addInstanceCodeMember(new ArrayLength(unknownLocation, program));
 
 			// register all possible types
 			p.getTypes().registerType(BoolType.INSTANCE);

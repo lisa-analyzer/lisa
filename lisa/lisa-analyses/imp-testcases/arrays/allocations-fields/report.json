@@ -1,17 +1,17 @@
 {
   "warnings" : [ ],
-  "files" : [ "report.json", "untyped_A.f1(A__this).json", "untyped_A.f10(A__this).json", "untyped_A.f2(A__this).json", "untyped_A.f3(A__this).json", "untyped_A.f4(A__this).json", "untyped_A.f5(A__this).json", "untyped_A.f6(A__this).json", "untyped_A.f7(A__this).json", "untyped_A.f8(A__this).json", "untyped_A.f9(A__this).json" ],
+  "files" : [ "report.json", "untyped_arrays.bitest(arrays__this).json", "untyped_arrays.test(arrays__this).json" ],
   "info" : {
-    "cfgs" : "10",
-    "duration" : "103ms",
-    "end" : "2023-09-11T18:04:51.287+02:00",
-    "expressions" : "144",
-    "files" : "10",
-    "globals" : "2",
-    "members" : "10",
+    "cfgs" : "2",
+    "duration" : "420ms",
+    "end" : "2023-09-11T19:18:34.470+02:00",
+    "expressions" : "64",
+    "files" : "2",
+    "globals" : "0",
+    "members" : "2",
     "programs" : "1",
-    "start" : "2023-09-11T18:04:51.184+02:00",
-    "statements" : "56",
+    "start" : "2023-09-11T19:18:34.050+02:00",
+    "statements" : "19",
     "units" : "1",
     "version" : "0.1b8",
     "warnings" : "0"
@@ -33,6 +33,6 @@
     "syntacticChecks" : "",
     "useWideningPoints" : "true",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs/heap/point-based-heap/field-insensitive"
+    "workdir" : "test-outputs/arrays/allocations-fields"
   }
 }

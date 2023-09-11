@@ -54,7 +54,7 @@ public class IMPArrayAccess extends BinaryExpression {
 		TypeSystem types = getProgram().getTypes();
 		for (Type t : left.getRuntimeTypes(types))
 			if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
-				arraytypes.add(t.asPointerType().getInnerType().asArrayType());
+				arraytypes.add(t.asPointerType().getInnerType());
 
 		if (arraytypes.isEmpty())
 			return state.bottom();
@@ -62,8 +62,12 @@ public class IMPArrayAccess extends BinaryExpression {
 		ArrayType arraytype = Type.commonSupertype(arraytypes, getStaticType()).asArrayType();
 		HeapDereference container = new HeapDereference(arraytype, left, getLocation());
 		container.setRuntimeTypes(arraytypes);
+		AccessChild elem = new AccessChild(
+				arraytype.getInnerType(),
+				container,
+				right,
+				getLocation());
 
-		return state.smallStepSemantics(new AccessChild(arraytype.getInnerType(), container, right, getLocation()),
-				this);
+		return state.smallStepSemantics(elem, this);
 	}
 }
