@@ -46,8 +46,7 @@ import java.util.function.Predicate;
  * and their approximations using {@link #getKeys()}, {@link #getValues()},
  * {@link #getMap()} or by iterating over the instance itself. Approximations of
  * different traces can instead be collapsed and accessed by querying
- * {@link #getHeapState()}, {@link #getValueState()}, and
- * {@link #getTypeState()}, or {@link #collapse()}.
+ * {@link #collapse()}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
