@@ -10,7 +10,6 @@ import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.CodeUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
@@ -101,8 +100,7 @@ public class OptimizedFixpointTest {
 				CompoundState<TestAbstractState>> res = null;
 		AnalysisState<TestAbstractState> state = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet(),
-				new SymbolAliasing());
+				new ExpressionSet());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph,
@@ -150,8 +148,7 @@ public class OptimizedFixpointTest {
 				CompoundState<TestAbstractState>> res = null;
 		AnalysisState<TestAbstractState> state = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet(),
-				new SymbolAliasing());
+				new ExpressionSet());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph,
@@ -199,8 +196,7 @@ public class OptimizedFixpointTest {
 				CompoundState<TestAbstractState>> res = null;
 		AnalysisState<TestAbstractState> state = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet(),
-				new SymbolAliasing());
+				new ExpressionSet());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph,

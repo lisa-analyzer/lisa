@@ -1,8 +1,6 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.symbols.Symbol;
-import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -35,9 +33,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	private final A state;
 
 	/**
-	 * The lattice that handles symbol aliasing
+	 * The additional information to be computed during fixpoint computations
 	 */
-	private final SymbolAliasing aliasing;
+	private final FixpointInfo info;
 
 	/**
 	 * The last expressions that have been computed, representing side-effect
@@ -51,10 +49,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @param state              the {@link AbstractState} to embed in this
 	 *                               analysis state
 	 * @param computedExpression the expression that has been computed
-	 * @param aliasing           the symbol aliasing information
 	 */
-	public AnalysisState(A state, SymbolicExpression computedExpression, SymbolAliasing aliasing) {
-		this(state, new ExpressionSet(computedExpression), aliasing);
+	public AnalysisState(A state, SymbolicExpression computedExpression) {
+		this(state, new ExpressionSet(computedExpression), null);
 	}
 
 	/**
@@ -63,12 +60,37 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @param state               the {@link AbstractState} to embed in this
 	 *                                analysis state
 	 * @param computedExpressions the expressions that have been computed
-	 * @param aliasing            the symbol aliasing information
 	 */
-	public AnalysisState(A state, ExpressionSet computedExpressions, SymbolAliasing aliasing) {
+	public AnalysisState(A state, ExpressionSet computedExpressions) {
+		this(state, computedExpressions, null);
+	}
+
+	/**
+	 * Builds a new state.
+	 * 
+	 * @param state              the {@link AbstractState} to embed in this
+	 *                               analysis state
+	 * @param computedExpression the expression that has been computed
+	 * @param info               the additional information to be computed
+	 *                               during fixpoint computations
+	 */
+	public AnalysisState(A state, SymbolicExpression computedExpression, FixpointInfo info) {
+		this(state, new ExpressionSet(computedExpression), info);
+	}
+
+	/**
+	 * Builds a new state.
+	 * 
+	 * @param state               the {@link AbstractState} to embed in this
+	 *                                analysis state
+	 * @param computedExpressions the expressions that have been computed
+	 * @param info                the additional information to be computed
+	 *                                during fixpoint computations
+	 */
+	public AnalysisState(A state, ExpressionSet computedExpressions, FixpointInfo info) {
 		this.state = state;
 		this.computedExpressions = computedExpressions;
-		this.aliasing = aliasing;
+		this.info = info;
 	}
 
 	/**
@@ -82,14 +104,80 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	/**
-	 * Yields the symbol aliasing information, that can be used to resolve
-	 * targets of calls when the names used in the call are different from the
-	 * ones in the target's signature.
+	 * Yields the additional information that must be computed during fixpoint
+	 * computations. This is a generic key-value mapping that users of the
+	 * library can use for ad-hoc purposes.
 	 * 
-	 * @return the aliasing information
+	 * @return the additional information (can be {@code null})
 	 */
-	public SymbolAliasing getAliasing() {
-		return aliasing;
+	public FixpointInfo getFixpointInformation() {
+		return info;
+	}
+
+	/**
+	 * Yields the Additional information associated to the given key, as defined
+	 * in this instance's {@link #getFixpointInformation()}.
+	 * 
+	 * @param key the key
+	 * 
+	 * @return the mapped information
+	 */
+	public Lattice<?> getInfo(String key) {
+		return info == null ? null : info.get(key);
+	}
+
+	/**
+	 * Yields the additional information associated to the given key, casted to
+	 * the given type, as defined in this instance's
+	 * {@link #getFixpointInformation()}.
+	 * 
+	 * @param <T>  the type to cast the return value of this method to
+	 * @param key  the key
+	 * @param type the type to cast the retrieved information to
+	 * 
+	 * @return the mapped information
+	 */
+	public <T> T getInfo(String key, Class<T> type) {
+		return info == null ? null : info.get(key, type);
+	}
+
+	/**
+	 * Yields a copy of this state where the additional fixpoint information
+	 * ({@link #getFixpointInformation()}) has been updated by mapping the given
+	 * key to {@code info}. This is a strong update, meaning that the
+	 * information previously mapped to the same key, if any, is lost. For a
+	 * weak update, use {@link #putWeak(String, Lattice)}.
+	 * 
+	 * @param key  the key
+	 * @param info the information to store
+	 * 
+	 * @return a new instance with the updated mapping
+	 */
+	public AnalysisState<A> storeInfo(String key, Lattice<?> info) {
+		FixpointInfo fixinfo = this.info == null ? new FixpointInfo() : this.info;
+		fixinfo = fixinfo.put(key, info);
+		return new AnalysisState<>(state, computedExpressions, fixinfo);
+	}
+
+	/**
+	 * Yields a copy of this state where the additional fixpoint information
+	 * ({@link #getFixpointInformation()}) has been updated by mapping the given
+	 * key to {@code info}. This is a weak update, meaning that the information
+	 * previously mapped to the same key, if any, is lubbed together with the
+	 * given one, and the result is stored inside the mapping instead. For a
+	 * strong update, use {@link #storeInfo(String, Lattice)}.
+	 * 
+	 * @param key  the key
+	 * @param info the information to store
+	 * 
+	 * @return a new instance with the updated mapping
+	 * 
+	 * @throws SemanticException if something goes wrong during the lub
+	 */
+	public AnalysisState<A> weakStoreInfo(String key, Lattice<?> info) throws SemanticException {
+		FixpointInfo fixinfo = this.info == null ? new FixpointInfo() : this.info;
+		fixinfo = fixinfo.putWeak(key, info);
+		return new AnalysisState<>(state, computedExpressions, fixinfo);
 	}
 
 	/**
@@ -108,25 +196,11 @@ public class AnalysisState<A extends AbstractState<A>>
 		return computedExpressions;
 	}
 
-	/**
-	 * Registers an alias for the given symbol. Any previous aliases will be
-	 * deleted.
-	 * 
-	 * @param toAlias the symbol being aliased
-	 * @param alias   the alias for {@code toAlias}
-	 * 
-	 * @return a copy of this analysis state, with the new alias
-	 */
-	public AnalysisState<A> alias(Symbol toAlias, Symbol alias) {
-		SymbolAliasing aliasing = this.aliasing.putState(toAlias, alias);
-		return new AnalysisState<>(state, computedExpressions, aliasing);
-	}
-
 	@Override
 	public AnalysisState<A> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.assign(id, value, pp);
-		return new AnalysisState<>(s, new ExpressionSet(id), aliasing);
+		return new AnalysisState<>(s, new ExpressionSet(id), info);
 	}
 
 	/**
@@ -157,14 +231,14 @@ public class AnalysisState<A extends AbstractState<A>>
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
 				s = s.lub(state.assign((Identifier) i, expression, pp));
-		return new AnalysisState<>(s, rewritten, aliasing);
+		return new AnalysisState<>(s, rewritten, info);
 	}
 
 	@Override
 	public AnalysisState<A> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.smallStepSemantics(expression, pp);
-		return new AnalysisState<>(s, new ExpressionSet(expression), aliasing);
+		return new AnalysisState<>(s, new ExpressionSet(expression), info);
 	}
 
 	@Override
@@ -173,7 +247,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		A assume = state.assume(expression, src, dest);
 		if (assume.isBottom())
 			return bottom();
-		return new AnalysisState<>(assume, computedExpressions, aliasing);
+		return new AnalysisState<>(assume, computedExpressions, info);
 	}
 
 	@Override
@@ -186,7 +260,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.pushScope(scope),
 				onAllExpressions(this.computedExpressions, scope, true),
-				aliasing);
+				info);
 	}
 
 	private static ExpressionSet onAllExpressions(
@@ -203,7 +277,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.popScope(scope),
 				onAllExpressions(this.computedExpressions, scope, false),
-				aliasing);
+				info);
 	}
 
 	@Override
@@ -211,7 +285,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.lub(other.state),
 				computedExpressions.lub(other.computedExpressions),
-				aliasing.lub(other.aliasing));
+				info == null ? other.info : info.lub(other.info));
 	}
 
 	@Override
@@ -219,7 +293,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.glb(other.state),
 				computedExpressions.glb(other.computedExpressions),
-				aliasing.glb(other.aliasing));
+				info == null ? null : info.glb(other.info));
 	}
 
 	@Override
@@ -227,7 +301,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.widening(other.state),
 				computedExpressions.lub(other.computedExpressions),
-				aliasing.widening(other.aliasing));
+				info == null ? other.info : info.widening(other.info));
 	}
 
 	@Override
@@ -235,51 +309,51 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.narrowing(other.state),
 				computedExpressions.glb(other.computedExpressions),
-				aliasing.narrowing(other.aliasing));
+				info == null ? null : info.narrowing(other.info));
 	}
 
 	@Override
 	public boolean lessOrEqualAux(AnalysisState<A> other) throws SemanticException {
 		return state.lessOrEqual(other.state)
 				&& computedExpressions.lessOrEqual(other.computedExpressions)
-				&& aliasing.lessOrEqual(other.aliasing);
+				&& info == null ? true : info.lessOrEqual(other.info);
 	}
 
 	@Override
 	public AnalysisState<A> top() {
-		return new AnalysisState<>(state.top(), computedExpressions.top(), aliasing.top());
+		return new AnalysisState<>(state.top(), computedExpressions.top(), null);
 	}
 
 	@Override
 	public AnalysisState<A> bottom() {
-		return new AnalysisState<>(state.bottom(), computedExpressions.bottom(), aliasing.bottom());
+		return new AnalysisState<>(state.bottom(), computedExpressions.bottom(), FixpointInfo.BOTTOM);
 	}
 
 	@Override
 	public boolean isTop() {
-		return state.isTop() && computedExpressions.isTop() && aliasing.isTop();
+		return state.isTop() && computedExpressions.isTop() && info == null;
 	}
 
 	@Override
 	public boolean isBottom() {
-		return state.isBottom() && computedExpressions.isBottom() && aliasing.isBottom();
+		return state.isBottom() && computedExpressions.isBottom() && (info != null && info.isBottom());
 	}
 
 	@Override
 	public AnalysisState<A> forgetIdentifier(Identifier id) throws SemanticException {
-		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions, aliasing);
+		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions, info);
 	}
 
 	@Override
 	public AnalysisState<A> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
-		return new AnalysisState<>(state.forgetIdentifiersIf(test), computedExpressions, aliasing);
+		return new AnalysisState<>(state.forgetIdentifiersIf(test), computedExpressions, info);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((aliasing == null) ? 0 : aliasing.hashCode());
+		result = prime * result + ((info == null) ? 0 : info.hashCode());
 		result = prime * result + ((computedExpressions == null) ? 0 : computedExpressions.hashCode());
 		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		return result;
@@ -294,10 +368,10 @@ public class AnalysisState<A extends AbstractState<A>>
 		if (getClass() != obj.getClass())
 			return false;
 		AnalysisState<?> other = (AnalysisState<?>) obj;
-		if (aliasing == null) {
-			if (other.aliasing != null)
+		if (info == null) {
+			if (other.info != null)
 				return false;
-		} else if (!aliasing.equals(other.aliasing))
+		} else if (!info.equals(other.info))
 			return false;
 		if (computedExpressions == null) {
 			if (other.computedExpressions != null)
@@ -322,6 +396,26 @@ public class AnalysisState<A extends AbstractState<A>>
 		StructuredRepresentation stateRepr = state.representation();
 		StructuredRepresentation exprRepr = computedExpressions.representation();
 		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr));
+	}
+
+	/**
+	 * Variant of {@link #representation()} that also includes
+	 * {@link #getFixpointInformation()}.
+	 * 
+	 * @return the enriched representation
+	 */
+	public StructuredRepresentation representationWithInfo() {
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+		if (isTop())
+			return Lattice.topRepresentation();
+		if (info == null || info.isBottom())
+			return representation();
+
+		StructuredRepresentation stateRepr = state.representation();
+		StructuredRepresentation exprRepr = computedExpressions.representation();
+		StructuredRepresentation infoRepr = info.representation();
+		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr, "info", infoRepr));
 	}
 
 	@Override

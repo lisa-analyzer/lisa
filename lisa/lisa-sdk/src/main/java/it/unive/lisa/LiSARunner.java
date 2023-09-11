@@ -4,7 +4,6 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
-import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.checks.ChecksExecutor;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -166,7 +165,7 @@ public class LiSARunner<A extends AbstractState<A>> {
 				() -> {
 					try {
 						interproc.fixpoint(
-								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
+								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE)),
 								(Class<? extends WorkingSet<Statement>>) conf.fixpointWorkingSet,
 								fixconf);
 					} catch (FixpointException e) {

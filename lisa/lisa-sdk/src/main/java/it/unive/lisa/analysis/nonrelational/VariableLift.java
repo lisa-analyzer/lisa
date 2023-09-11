@@ -160,6 +160,7 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 		Set<Identifier> keys = new HashSet<>();
 		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, k1,
 				k2);
+		// this is needed for a name-only comparison
 		builder.compute(Comparator.comparing(Identifier::getName));
 		keys.addAll(builder.getOnlyFirst());
 		keys.addAll(builder.getOnlySecond());

@@ -45,7 +45,7 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @param call     the call to resolve
 	 * @param types    the runtime types of the parameters of the call
-	 * @param aliasing the symbol aliasing information
+	 * @param aliasing the symbol aliasing information, might be {@code null}
 	 * 
 	 * @return a collection of all the possible runtime targets
 	 * 

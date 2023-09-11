@@ -5,6 +5,7 @@ import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -419,7 +420,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 				return new AnalysisState<>(
 						entryState.getState().bottom(),
 						call.getMetaVariable(),
-						entryState.getAliasing().bottom());
+						FixpointInfo.BOTTOM);
 		}
 
 		ContextSensitivityToken callerToken = token;

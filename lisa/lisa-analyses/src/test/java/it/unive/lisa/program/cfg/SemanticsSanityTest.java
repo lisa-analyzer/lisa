@@ -123,7 +123,7 @@ public class SemanticsSanityTest {
 		as = new AnalysisState<>(
 				new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
 						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet(), new SymbolAliasing());
+				new ExpressionSet());
 		store = new StatementStore<>(as);
 		fake = new Expression(cfg, unknownLocation) {
 
@@ -468,8 +468,10 @@ public class SemanticsSanityTest {
 				boolean isBottom = ((Lattice) instance).isBottom();
 				if (instance instanceof AnalysisState) {
 					AnalysisState state = (AnalysisState) instance;
-					isBottom = state.getState().isBottom() && state.getAliasing().isBottom()
-					// analysis state keeps the assigned id on the stack
+					isBottom = state.getState().isBottom()
+							&& state.getFixpointInformation() != null
+							&& state.getFixpointInformation().isBottom()
+							// analysis state keeps the assigned id on the stack
 							&& state.getComputedExpressions().size() == 1
 							&& state.getComputedExpressions().iterator().next().equals(v);
 				}

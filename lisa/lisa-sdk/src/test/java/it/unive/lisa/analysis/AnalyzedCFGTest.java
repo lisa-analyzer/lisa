@@ -6,7 +6,6 @@ import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Program;
@@ -35,7 +34,7 @@ public class AnalyzedCFGTest {
 
 		AnalysisState<TestAbstractState> state = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet(), new SymbolAliasing());
+				new ExpressionSet());
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);

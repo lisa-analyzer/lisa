@@ -95,7 +95,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 		}
 
 		// the stack has to be empty
-		return new AnalysisState<>(prepared.getState(), new ExpressionSet(), new SymbolAliasing());
+		return new AnalysisState<>(prepared.getState(), new ExpressionSet());
 	}
 
 	@Override

@@ -11,7 +11,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
-import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -71,7 +70,7 @@ public class CFGFixpointTest {
 						new MonolithicHeap(),
 						new ValueEnvironment<>(new Sign()),
 						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet(), new SymbolAliasing());
+				new ExpressionSet());
 	}
 
 	@Test

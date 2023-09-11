@@ -101,10 +101,6 @@ public abstract class BaseCallGraph extends CallGraph {
 		if (types == null)
 			// we allow types to be null only for calls that we already resolved
 			throw new CallResolutionException("Cannot resolve call without runtime types");
-		if (aliasing == null)
-			// we allow aliasing to be null only for calls that we already
-			// resolved
-			throw new CallResolutionException("Cannot resolve call without symbol aliasing");
 
 		Collection<CFG> targets = new HashSet<>();
 		Collection<NativeCFG> nativeTargets = new HashSet<>();
@@ -389,35 +385,37 @@ public abstract class BaseCallGraph extends CallGraph {
 		String qualifier = descr.getUnit().getName();
 		String name = descr.getName();
 
-		Aliases nAlias = aliasing.getState(new NameSymbol(name));
-		Aliases qAlias = aliasing.getState(new QualifierSymbol(qualifier));
-		Aliases qnAlias = aliasing.getState(new QualifiedNameSymbol(qualifier, name));
-
 		boolean add = false;
-		// we first check the qualified name, then the qualifier and the
-		// name individually
-		if (!qnAlias.isEmpty()) {
-			for (QualifiedNameSymbol alias : qnAlias.castElements(QualifiedNameSymbol.class))
-				if (matchCodeMemberName(call, alias.getQualifier(), alias.getName())) {
-					add = true;
-					break;
-				}
-		}
+		if (aliasing != null) {
+			Aliases nAlias = aliasing.getState(new NameSymbol(name));
+			Aliases qAlias = aliasing.getState(new QualifierSymbol(qualifier));
+			Aliases qnAlias = aliasing.getState(new QualifiedNameSymbol(qualifier, name));
 
-		if (!add && !qAlias.isEmpty()) {
-			for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class))
-				if (matchCodeMemberName(call, alias.getQualifier(), name)) {
-					add = true;
-					break;
-				}
-		}
+			// we first check the qualified name, then the qualifier and the
+			// name individually
+			if (!qnAlias.isEmpty()) {
+				for (QualifiedNameSymbol alias : qnAlias.castElements(QualifiedNameSymbol.class))
+					if (matchCodeMemberName(call, alias.getQualifier(), alias.getName())) {
+						add = true;
+						break;
+					}
+			}
 
-		if (!add && !nAlias.isEmpty()) {
-			for (NameSymbol alias : nAlias.castElements(NameSymbol.class))
-				if (matchCodeMemberName(call, qualifier, alias.getName())) {
-					add = true;
-					break;
-				}
+			if (!add && !qAlias.isEmpty()) {
+				for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class))
+					if (matchCodeMemberName(call, alias.getQualifier(), name)) {
+						add = true;
+						break;
+					}
+			}
+
+			if (!add && !nAlias.isEmpty()) {
+				for (NameSymbol alias : nAlias.castElements(NameSymbol.class))
+					if (matchCodeMemberName(call, qualifier, alias.getName())) {
+						add = true;
+						break;
+					}
+			}
 		}
 
 		if (!add)
