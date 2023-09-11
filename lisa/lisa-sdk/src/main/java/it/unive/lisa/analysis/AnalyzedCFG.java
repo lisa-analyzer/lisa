@@ -5,6 +5,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.representation.StructuredRepresentation;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -327,5 +329,10 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 		} else if (!results.equals(other.results))
 			return false;
 		return true;
+	}
+
+	@Override
+	public StructuredRepresentation representation() {
+		throw new UnsupportedOperationException();
 	}
 }

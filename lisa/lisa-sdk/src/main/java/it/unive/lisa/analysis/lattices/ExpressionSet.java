@@ -1,21 +1,18 @@
 package it.unive.lisa.analysis.lattices;
 
-import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SemanticExceptionWrapper;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.collections.CollectionUtilities;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-import it.unive.lisa.util.representation.SetRepresentation;
-import it.unive.lisa.util.representation.StringRepresentation;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticExceptionWrapper;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
  * A set lattice containing a set of symbolic expressions.
@@ -169,15 +166,5 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 		for (T exp : elements)
 			mapped.add(exp.popScope(token));
 		return new ExpressionSet<>(mapped);
-	}
-
-	/**
-	 * Yields a {@link StructuredRepresentation} of the information contained in
-	 * this set.
-	 * 
-	 * @return the representation
-	 */
-	public StructuredRepresentation representation() {
-		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 }

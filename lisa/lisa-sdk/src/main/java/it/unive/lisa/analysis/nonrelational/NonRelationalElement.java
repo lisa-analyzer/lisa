@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A non-relational domain, that is able to compute the value of a
@@ -108,12 +107,4 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	default T unknownVariable(Identifier id) {
 		return top();
 	}
-
-	/**
-	 * Yields a {@link StructuredRepresentation} of the information contained in
-	 * this domain's instance.
-	 * 
-	 * @return the representation
-	 */
-	StructuredRepresentation representation();
 }

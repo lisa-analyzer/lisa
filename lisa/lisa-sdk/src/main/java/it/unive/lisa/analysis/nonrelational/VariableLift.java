@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -20,9 +19,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-import it.unive.lisa.util.representation.MapRepresentation;
-import it.unive.lisa.util.representation.StringRepresentation;
 
 /**
  * A {@link SemanticDomain} implemented as a lift for a
@@ -159,20 +155,6 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 		keys.forEach(result::remove);
 
 		return mk(lattice, result);
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		if (isTop())
-			return Lattice.topRepresentation();
-
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-
-		if (function == null)
-			return new StringRepresentation("empty");
-
-		return new MapRepresentation(function, StringRepresentation::new, NonRelationalElement::representation);
 	}
 
 	@Override

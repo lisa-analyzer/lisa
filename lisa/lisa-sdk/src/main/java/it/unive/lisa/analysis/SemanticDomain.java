@@ -1,13 +1,15 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Predicate;
+
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredObject;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
@@ -21,7 +23,8 @@ import java.util.function.Predicate;
  * @param <I> the type of variable {@link Identifier} that this domain can
  *                handle
  */
-public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends SymbolicExpression, I extends Identifier> {
+public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends SymbolicExpression, I extends Identifier>
+		extends StructuredObject {
 
 	/**
 	 * Yields a copy of this domain, where {@code id} has been assigned to
@@ -405,15 +408,12 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		public boolean mightBeFalse() {
 			return this == NOT_SATISFIED || this == UNKNOWN;
 		}
-	}
 
-	/**
-	 * Yields a {@link StructuredRepresentation} of the information contained in
-	 * this domain's instance.
-	 * 
-	 * @return the representation
-	 */
-	StructuredRepresentation representation();
+		@Override
+		public StructuredRepresentation representation() {
+			return new StringRepresentation(name());
+		}
+	}
 
 	/**
 	 * Yields a unique instance of the specific domain, of class {@code domain},

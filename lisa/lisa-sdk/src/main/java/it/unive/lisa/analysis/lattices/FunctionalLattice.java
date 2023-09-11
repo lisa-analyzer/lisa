@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.lattices;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +8,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.representation.MapRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -400,5 +404,19 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	public Map<K, V> getMap() {
 		return function;
+	}
+
+	@Override
+	public StructuredRepresentation representation() {
+		if (isTop())
+			return Lattice.topRepresentation();
+
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+
+		if (function == null)
+			return new StringRepresentation("empty");
+
+		return new MapRepresentation(function, StringRepresentation::new, Lattice::representation);
 	}
 }

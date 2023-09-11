@@ -1,11 +1,15 @@
 package it.unive.lisa.analysis.lattices;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.representation.SetRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A generic inverse set lattice containing a set of elements. Lattice
@@ -175,5 +179,10 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> im
 	 */
 	public boolean isEmpty() {
 		return elements.isEmpty();
+	}
+
+	@Override
+	public StructuredRepresentation representation() {
+		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 }

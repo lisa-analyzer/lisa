@@ -1,5 +1,14 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -10,17 +19,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-import it.unive.lisa.util.representation.StringRepresentation;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.
@@ -81,11 +79,6 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	public Satisfiability satisfies(SymbolicExpression expression,
 			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		return new StringRepresentation(toString());
 	}
 
 	@Override

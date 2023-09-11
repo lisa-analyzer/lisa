@@ -2,6 +2,7 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredObject;
 
 /**
  * An interface for elements that follow a lattice structure. Implementers of
@@ -12,7 +13,7 @@ import it.unive.lisa.util.representation.StringRepresentation;
  * 
  * @param <L> the concrete {@link Lattice} instance
  */
-public interface Lattice<L extends Lattice<L>> {
+public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 
 	/**
 	 * A string constant that can be used to represent top values.
@@ -20,8 +21,8 @@ public interface Lattice<L extends Lattice<L>> {
 	String TOP_STRING = "#TOP#";
 
 	/**
-	 * Yields a fresh {@link StructuredRepresentation} that can be used to represent
-	 * top values.
+	 * Yields a fresh {@link StructuredRepresentation} that can be used to
+	 * represent top values through {@link #representation()}.
 	 * 
 	 * @return the representation
 	 */
@@ -35,8 +36,8 @@ public interface Lattice<L extends Lattice<L>> {
 	String BOTTOM_STRING = "_|_";
 
 	/**
-	 * Yields a fresh {@link StructuredRepresentation} that can be used to represent
-	 * bottom values.
+	 * Yields a fresh {@link StructuredRepresentation} that can be used to
+	 * represent bottom values through {@link #representation()}.
 	 * 
 	 * @return the representation
 	 */
