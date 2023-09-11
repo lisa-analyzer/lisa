@@ -1,12 +1,11 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.heap.TypeBasedHeap;
+import org.junit.Test;
 
 public class TypeBasedHeapTest extends AnalysisTestExecutor {
 

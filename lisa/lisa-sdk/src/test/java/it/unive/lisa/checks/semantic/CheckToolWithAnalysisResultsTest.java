@@ -217,7 +217,7 @@ public class CheckToolWithAnalysisResultsTest {
 	public void testResultRetrieval() {
 		AnalysisState<TestAbstractState> singleton = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet<>(), new SymbolAliasing());
+				new ExpressionSet(), new SymbolAliasing());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
 		AnalyzedCFG<TestAbstractState> res1 = new AnalyzedCFG<>(cfg, new UniqueScope(), singleton,
 				Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));

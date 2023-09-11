@@ -17,9 +17,8 @@ import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
-
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;

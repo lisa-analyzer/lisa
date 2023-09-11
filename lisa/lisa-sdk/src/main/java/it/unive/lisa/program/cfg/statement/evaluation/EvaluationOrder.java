@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
  * The order of evaluation of the sub-expressions of an {@link NaryExpression}.
@@ -93,6 +92,6 @@ public interface EvaluationOrder {
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,
-			ExpressionSet<SymbolicExpression>[] computed)
+			ExpressionSet[] computed)
 			throws SemanticException;
 }

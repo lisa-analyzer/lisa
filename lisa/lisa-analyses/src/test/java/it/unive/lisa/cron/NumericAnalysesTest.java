@@ -1,7 +1,5 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
@@ -11,6 +9,7 @@ import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Parity;
 import it.unive.lisa.analysis.numeric.Sign;
+import org.junit.Test;
 
 public class NumericAnalysesTest extends AnalysisTestExecutor {
 

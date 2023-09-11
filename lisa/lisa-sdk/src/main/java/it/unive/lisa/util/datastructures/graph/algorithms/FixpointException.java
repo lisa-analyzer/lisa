@@ -3,7 +3,7 @@ package it.unive.lisa.util.datastructures.graph.algorithms;
 /**
  * An exception raised during the fixpoint computation.
  * 
- * @author Luca Negrini
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class FixpointException extends Exception {
 

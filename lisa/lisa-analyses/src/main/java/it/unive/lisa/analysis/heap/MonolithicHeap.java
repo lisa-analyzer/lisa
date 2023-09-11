@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -19,12 +13,16 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -43,7 +41,7 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	private static final StructuredRepresentation REPR = new StringRepresentation("monolith");
 
 	@Override
-	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		return expression.accept(new Rewriter(), pp);
 	}
@@ -147,8 +145,8 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
-				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
+		public ExpressionSet visit(AccessChild expression, ExpressionSet receiver,
+				ExpressionSet child, Object... params) throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			Set<Type> acc = new HashSet<>();
@@ -159,11 +157,11 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 					expression.getCodeLocation());
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes(null));
-			return new ExpressionSet<>(e);
+			return new ExpressionSet(e);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
+		public ExpressionSet visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
@@ -171,11 +169,11 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 					expression.getCodeLocation());
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes(null));
-			return new ExpressionSet<>(e);
+			return new ExpressionSet(e);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref,
+		public ExpressionSet visit(HeapReference expression, ExpressionSet ref,
 				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
@@ -189,11 +187,11 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			MemoryPointer e = new MemoryPointer(new ReferenceType(refType), loc, expression.getCodeLocation());
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes(null));
-			return new ExpressionSet<>(e);
+			return new ExpressionSet(e);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref,
+		public ExpressionSet visit(HeapDereference expression, ExpressionSet deref,
 				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a

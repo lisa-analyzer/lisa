@@ -10,13 +10,13 @@ import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,16 +30,16 @@ public class SubstitutionTest {
 
 	private static class Collector implements ValueDomain<Collector> {
 
-		private final ExpressionSet<Identifier> assigned, removed;
+		private final ExpressionSet assigned, removed;
 
 		private Collector() {
-			this.assigned = new ExpressionSet<>(new HashSet<>());
-			this.removed = new ExpressionSet<>(new HashSet<>());
+			this.assigned = new ExpressionSet(new HashSet<>());
+			this.removed = new ExpressionSet(new HashSet<>());
 		}
 
 		private Collector(Collector other) {
-			this.assigned = new ExpressionSet<>(other.assigned.elements());
-			this.removed = new ExpressionSet<>(other.removed.elements());
+			this.assigned = new ExpressionSet(other.assigned.elements());
+			this.removed = new ExpressionSet(other.removed.elements());
 		}
 
 		@Override
@@ -134,11 +134,12 @@ public class SubstitutionTest {
 	private final Variable y = new Variable(Untyped.INSTANCE, "y", SyntheticLocation.INSTANCE);
 	private final Variable z = new Variable(Untyped.INSTANCE, "z", SyntheticLocation.INSTANCE);
 	private final Variable w = new Variable(Untyped.INSTANCE, "w", SyntheticLocation.INSTANCE);
-	private final Comparator<Identifier> comparer = (l, r) -> l.getName().compareTo(r.getName());
+	private final Comparator<
+			SymbolicExpression> comparer = (l, r) -> ((Identifier) l).getName().compareTo(((Identifier) r).getName());
 
 	private void check(List<HeapReplacement> sub,
-			Collection<Identifier> addexpected,
-			Collection<Identifier> remexpected)
+			Collection<SymbolicExpression> addexpected,
+			Collection<SymbolicExpression> remexpected)
 			throws SemanticException {
 		Collector c = new Collector();
 		if (sub != null)
@@ -146,9 +147,11 @@ public class SubstitutionTest {
 				c = c.lub(c.applyReplacement(repl, fake));
 
 		CollectionsDiffBuilder<
-				Identifier> add = new CollectionsDiffBuilder<>(Identifier.class, addexpected, c.assigned.elements());
+				SymbolicExpression> add = new CollectionsDiffBuilder<>(SymbolicExpression.class, addexpected,
+						c.assigned.elements());
 		CollectionsDiffBuilder<
-				Identifier> rem = new CollectionsDiffBuilder<>(Identifier.class, remexpected, c.removed.elements());
+				SymbolicExpression> rem = new CollectionsDiffBuilder<>(SymbolicExpression.class, remexpected,
+						c.removed.elements());
 		add.compute(comparer);
 		rem.compute(comparer);
 

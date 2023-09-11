@@ -18,9 +18,8 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
-
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;

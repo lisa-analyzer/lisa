@@ -8,9 +8,8 @@ import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.ListRepresentation;
-
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.function.Predicate;
 

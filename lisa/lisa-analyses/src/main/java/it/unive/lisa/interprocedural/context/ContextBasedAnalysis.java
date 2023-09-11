@@ -1,19 +1,5 @@
 package it.unive.lisa.interprocedural.context;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
@@ -46,10 +32,21 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -368,10 +365,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 		return results;
 	}
 
-	private Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepareEntryState(
+	private Pair<AnalysisState<A>, ExpressionSet[]> prepareEntryState(
 			CFGCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
+			ExpressionSet[] parameters,
 			StatementStore<A> expressions,
 			ScopeToken scope,
 			CFG cfg)
@@ -379,16 +376,16 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 		Parameter[] formals = cfg.getDescriptor().getFormals();
 
 		// prepare the state for the call: hide the visible variables
-		Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> scoped = scope(
+		Pair<AnalysisState<A>, ExpressionSet[]> scoped = scope(
 				entryState,
 				scope,
 				parameters);
 		AnalysisState<A> callState = scoped.getLeft();
-		ExpressionSet<SymbolicExpression>[] locals = scoped.getRight();
+		ExpressionSet[] locals = scoped.getRight();
 
 		// assign parameters between the caller and the callee contexts
 		ParameterAssigningStrategy strategy = call.getProgram().getFeatures().getAssigningStrategy();
-		Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(
+		Pair<AnalysisState<A>, ExpressionSet[]> prepared = strategy.prepare(
 				call,
 				callState,
 				this,
@@ -402,7 +399,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
+			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		callgraph.registerCall(call);
@@ -435,7 +432,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 		for (CFG cfg : call.getTargetedCFGs()) {
 			CFGResults<A> localResults = results.get(cfg);
 			AnalyzedCFG<A> states = localResults == null ? null : localResults.get(token);
-			Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepared = prepareEntryState(
+			Pair<AnalysisState<A>, ExpressionSet[]> prepared = prepareEntryState(
 					call,
 					entryState,
 					parameters,

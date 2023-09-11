@@ -31,7 +31,7 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,
-			ExpressionSet<SymbolicExpression>[] computed)
+			ExpressionSet[] computed)
 			throws SemanticException {
 		if (subExpressions.length == 0)
 			return entryState;

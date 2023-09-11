@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 /**
  * A first-in, first-out working set. This implementation is thread-safe.
  * 
- * @author Luca Negrini
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <E> the type of the elements that this working set contains
  */

@@ -7,9 +7,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
-
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.Set;
 
@@ -22,13 +21,13 @@ public class TestAbstractState extends TestDomain<TestAbstractState, SymbolicExp
 	}
 
 	@Override
-	public ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		return new ExpressionSet<>(expression);
+		return new ExpressionSet(expression);
 	}
 
 	@Override
-	public ExpressionSet<SymbolicExpression> rewrite(ExpressionSet<SymbolicExpression> expressions, ProgramPoint pp)
+	public ExpressionSet rewrite(ExpressionSet expressions, ProgramPoint pp)
 			throws SemanticException {
 		return expressions;
 	}

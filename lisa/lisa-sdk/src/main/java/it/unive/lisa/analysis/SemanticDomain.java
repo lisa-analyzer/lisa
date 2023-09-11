@@ -1,15 +1,14 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.function.Predicate;
-
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.function.Predicate;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
@@ -24,7 +23,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  *                handle
  */
 public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends SymbolicExpression, I extends Identifier>
-		extends StructuredObject {
+		extends StructuredObject, ScopedObject<D> {
 
 	/**
 	 * Yields a copy of this domain, where {@code id} has been assigned to
@@ -139,36 +138,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException;
-
-	/**
-	 * Pushes a new scope, identified by the give token, in the domain. This
-	 * causes information about all variables not associated with a scope (and
-	 * thus visible) to be mapped to the given scope and hidden away, until the
-	 * scope is popped with {@link #popScope(ScopeToken)}.
-	 *
-	 * @param token the token identifying the scope to push
-	 * 
-	 * @return a copy of this domain where the local variables have been hidden
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	D pushScope(ScopeToken token) throws SemanticException;
-
-	/**
-	 * Pops the scope identified by the given token from the domain. This causes
-	 * all the visible variables (i.e. that are not mapped to a scope) to be
-	 * removed from the domain, while the local variables that were associated
-	 * to the given scope token (and thus hidden) will become visible again.
-	 *
-	 * @param token the token of the scope to be restored
-	 * 
-	 * @return a copy of this domain where the local variables have been
-	 *             removed, while the variables mapped to the given scope are
-	 *             visible again
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	D popScope(ScopeToken token) throws SemanticException;
 
 	/**
 	 * The satisfiability of an expression.

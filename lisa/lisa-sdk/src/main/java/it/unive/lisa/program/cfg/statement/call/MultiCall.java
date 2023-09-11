@@ -12,7 +12,6 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collection;
@@ -170,7 +169,7 @@ public class MultiCall extends Call implements ResolvedCall {
 	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet<SymbolicExpression>[] params,
+			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		AnalysisState<A> result = state.bottom();

@@ -70,18 +70,18 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,
-			ExpressionSet<SymbolicExpression>[] parameters)
+			ExpressionSet[] parameters)
 			throws SemanticException;
 
 	@Override
 	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet<SymbolicExpression>[] params,
+			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		// the stack has to be empty
-		state = new AnalysisState<>(state.getState(), new ExpressionSet<>(), state.getAliasing());
+		state = new AnalysisState<>(state.getState(), new ExpressionSet(), state.getAliasing());
 
 		// this will contain only the information about the returned
 		// metavariable

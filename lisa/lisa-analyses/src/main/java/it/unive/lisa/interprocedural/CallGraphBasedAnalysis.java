@@ -14,7 +14,6 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -96,14 +95,14 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 		}
 
 		// the stack has to be empty
-		return new AnalysisState<>(prepared.getState(), new ExpressionSet<>(), new SymbolAliasing());
+		return new AnalysisState<>(prepared.getState(), new ExpressionSet(), new SymbolAliasing());
 	}
 
 	@Override
 	public AnalysisState<A> getAbstractResultOf(
 			OpenCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
+			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return policy.apply(call, entryState, parameters);

@@ -1,12 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -28,12 +21,16 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
@@ -113,7 +110,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
+			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(),
@@ -125,7 +122,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 	public AnalysisState<A> getAbstractResultOf(
 			OpenCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
+			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return policy.apply(call, entryState, parameters);

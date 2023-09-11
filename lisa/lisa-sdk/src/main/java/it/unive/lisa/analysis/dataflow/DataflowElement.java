@@ -1,15 +1,13 @@
 package it.unive.lisa.analysis.dataflow;
 
-import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-
+import it.unive.lisa.util.representation.StructuredObject;
 import java.util.Collection;
 
 /**
@@ -28,7 +26,7 @@ import java.util.Collection;
  * @param <E> the concrete type of {@link DataflowElement}
  */
 public interface DataflowElement<D extends DataflowDomain<D, E>, E extends DataflowElement<D, E>>
-		extends SemanticEvaluator {
+		extends SemanticEvaluator, StructuredObject, ScopedObject<E> {
 
 	/**
 	 * Yields all the {@link Identifier}s that are involved in the definition of
@@ -105,40 +103,6 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	Collection<E> kill(ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
-
-	/**
-	 * Yields a {@link StructuredRepresentation} of the information contained in
-	 * this domain's instance.
-	 * 
-	 * @return the representation
-	 */
-	StructuredRepresentation representation();
-
-	/**
-	 * Push a scope to the dataflow element.
-	 * 
-	 * @param token the scope to be pushed
-	 * 
-	 * @return the element with the pushed scope
-	 * 
-	 * @throws SemanticException if the scope cannot be pushed
-	 * 
-	 * @see SemanticDomain#pushScope(ScopeToken)
-	 */
-	E pushScope(ScopeToken token) throws SemanticException;
-
-	/**
-	 * Pop a scope to the dataflow element.
-	 * 
-	 * @param token the scope to be popped
-	 * 
-	 * @return the element with the popped scope
-	 * 
-	 * @throws SemanticException if the scope cannot be popped
-	 * 
-	 * @see SemanticDomain#popScope(ScopeToken)
-	 */
-	E popScope(ScopeToken token) throws SemanticException;
 
 	@Override
 	default boolean tracksIdentifiers(Identifier id) {

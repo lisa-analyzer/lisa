@@ -122,7 +122,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
+			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException;
 
@@ -150,7 +150,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	AnalysisState<A> getAbstractResultOf(
 			OpenCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
+			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException;
 
@@ -198,13 +198,12 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	@SuppressWarnings("unchecked")
-	default Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> scope(
+	default Pair<AnalysisState<A>, ExpressionSet[]> scope(
 			AnalysisState<A> state,
 			ScopeToken scope,
-			ExpressionSet<SymbolicExpression>[] actuals)
+			ExpressionSet[] actuals)
 			throws SemanticException {
-		ExpressionSet<SymbolicExpression>[] locals = new ExpressionSet[actuals.length];
+		ExpressionSet[] locals = new ExpressionSet[actuals.length];
 		AnalysisState<A> callState = state.pushScope(scope);
 		for (int i = 0; i < actuals.length; i++)
 			locals[i] = actuals[i].pushScope(scope);

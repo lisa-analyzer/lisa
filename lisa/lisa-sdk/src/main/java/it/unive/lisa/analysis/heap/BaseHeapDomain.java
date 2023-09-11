@@ -112,30 +112,30 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public abstract static class Rewriter implements ExpressionVisitor<ExpressionSet<ValueExpression>> {
+	public abstract static class Rewriter implements ExpressionVisitor<ExpressionSet> {
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(UnaryExpression expression,
-				ExpressionSet<ValueExpression> arg,
+		public ExpressionSet visit(UnaryExpression expression,
+				ExpressionSet arg,
 				Object... params) throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
-			for (ValueExpression expr : arg) {
+			Set<SymbolicExpression> result = new HashSet<>();
+			for (SymbolicExpression expr : arg) {
 				UnaryExpression e = new UnaryExpression(expression.getStaticType(), expr, expression.getOperator(),
 						expression.getCodeLocation());
 				if (expr.hasRuntimeTypes())
 					e.setRuntimeTypes(expr.getRuntimeTypes(null));
 				result.add(e);
 			}
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(BinaryExpression expression,
-				ExpressionSet<ValueExpression> left,
-				ExpressionSet<ValueExpression> right, Object... params) throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
-			for (ValueExpression l : left)
-				for (ValueExpression r : right) {
+		public ExpressionSet visit(BinaryExpression expression,
+				ExpressionSet left,
+				ExpressionSet right, Object... params) throws SemanticException {
+			Set<SymbolicExpression> result = new HashSet<>();
+			for (SymbolicExpression l : left)
+				for (SymbolicExpression r : right) {
 					BinaryExpression e = new BinaryExpression(expression.getStaticType(), l, r,
 							expression.getOperator(),
 							expression.getCodeLocation());
@@ -143,18 +143,18 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				}
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(TernaryExpression expression,
-				ExpressionSet<ValueExpression> left,
-				ExpressionSet<ValueExpression> middle, ExpressionSet<ValueExpression> right, Object... params)
+		public ExpressionSet visit(TernaryExpression expression,
+				ExpressionSet left,
+				ExpressionSet middle, ExpressionSet right, Object... params)
 				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
-			for (ValueExpression l : left)
-				for (ValueExpression m : middle)
-					for (ValueExpression r : right) {
+			Set<SymbolicExpression> result = new HashSet<>();
+			for (SymbolicExpression l : left)
+				for (SymbolicExpression m : middle)
+					for (SymbolicExpression r : right) {
 						TernaryExpression e = new TernaryExpression(expression.getStaticType(), l, m, r,
 								expression.getOperator(),
 								expression.getCodeLocation());
@@ -162,30 +162,30 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 							e.setRuntimeTypes(expression.getRuntimeTypes(null));
 						result.add(e);
 					}
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(Skip expression, Object... params) throws SemanticException {
-			return new ExpressionSet<>(expression);
+		public ExpressionSet visit(Skip expression, Object... params) throws SemanticException {
+			return new ExpressionSet(expression);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(PushAny expression, Object... params)
+		public ExpressionSet visit(PushAny expression, Object... params)
 				throws SemanticException {
-			return new ExpressionSet<>(expression);
+			return new ExpressionSet(expression);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(Constant expression, Object... params)
+		public ExpressionSet visit(Constant expression, Object... params)
 				throws SemanticException {
-			return new ExpressionSet<>(expression);
+			return new ExpressionSet(expression);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
+		public ExpressionSet visit(Identifier expression, Object... params)
 				throws SemanticException {
-			return new ExpressionSet<>(expression);
+			return new ExpressionSet(expression);
 		}
 	}
 }

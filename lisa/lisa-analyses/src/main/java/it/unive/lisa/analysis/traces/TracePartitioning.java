@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.traces;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -22,9 +15,15 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to
@@ -311,7 +310,7 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		if (isTop())
 			return lattice.top().rewrite(expression, pp);
@@ -321,11 +320,11 @@ public class TracePartitioning<A extends AbstractState<A>>
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (A dom : getValues())
 			result.addAll(dom.rewrite(expression, pp).elements());
-		return new ExpressionSet<>(result);
+		return new ExpressionSet(result);
 	}
 
 	@Override
-	public ExpressionSet<SymbolicExpression> rewrite(ExpressionSet<SymbolicExpression> expressions, ProgramPoint pp)
+	public ExpressionSet rewrite(ExpressionSet expressions, ProgramPoint pp)
 			throws SemanticException {
 		if (isTop())
 			return lattice.top().rewrite(expressions, pp);
@@ -335,7 +334,7 @@ public class TracePartitioning<A extends AbstractState<A>>
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (A dom : getValues())
 			result.addAll(dom.rewrite(expressions, pp).elements());
-		return new ExpressionSet<>(result);
+		return new ExpressionSet(result);
 	}
 
 	@Override

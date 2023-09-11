@@ -86,7 +86,7 @@ public abstract class TernaryStatement extends NaryStatement {
 	public <A extends AbstractState<A>> AnalysisState<A> statementSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet<SymbolicExpression>[] params,
+			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		AnalysisState<A> result = state.bottom();

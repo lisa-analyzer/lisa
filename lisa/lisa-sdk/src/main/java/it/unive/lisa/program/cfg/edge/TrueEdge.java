@@ -35,7 +35,7 @@ public class TrueEdge extends Edge {
 	public <A extends AbstractState<A>> AnalysisState<A> traverse(
 			AnalysisState<A> sourceState)
 			throws SemanticException {
-		ExpressionSet<SymbolicExpression> exprs = sourceState.getComputedExpressions();
+		ExpressionSet exprs = sourceState.getComputedExpressions();
 		AnalysisState<A> result = sourceState.bottom();
 		for (SymbolicExpression expr : exprs)
 			result = result.lub(sourceState.assume(expr, getSource(), getDestination()));

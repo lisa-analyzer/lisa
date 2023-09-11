@@ -38,7 +38,7 @@ public class FalseEdge extends Edge {
 	public <A extends AbstractState<A>> AnalysisState<A> traverse(
 			AnalysisState<A> sourceState)
 			throws SemanticException {
-		ExpressionSet<SymbolicExpression> exprs = sourceState.getComputedExpressions();
+		ExpressionSet exprs = sourceState.getComputedExpressions();
 		AnalysisState<A> result = sourceState.bottom();
 		for (SymbolicExpression expr : exprs) {
 			UnaryExpression negated = new UnaryExpression(

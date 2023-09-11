@@ -1,8 +1,8 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * An interface for elements that follow a lattice structure. Implementers of

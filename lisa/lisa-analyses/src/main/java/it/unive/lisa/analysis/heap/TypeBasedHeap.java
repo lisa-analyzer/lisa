@@ -12,16 +12,14 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
-
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -70,7 +68,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		return expression.accept(new Rewriter(), pp);
 	}
@@ -203,15 +201,15 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
-				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
+		public ExpressionSet visit(AccessChild expression, ExpressionSet receiver,
+				ExpressionSet child, Object... params) throws SemanticException {
 			// we use the container because we are not field-sensitive
-			Set<ValueExpression> result = new HashSet<>();
+			Set<SymbolicExpression> result = new HashSet<>();
 
 			ProgramPoint pp = (ProgramPoint) params[0];
 			TypeSystem types = pp.getProgram().getTypes();
 
-			for (ValueExpression rec : receiver)
+			for (SymbolicExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					for (Type t : pid.getRuntimeTypes(types))
@@ -223,13 +221,13 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 							result.add(e);
 						}
 				}
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
+		public ExpressionSet visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
+			Set<SymbolicExpression> result = new HashSet<>();
 			ProgramPoint pp = (ProgramPoint) params[0];
 			TypeSystem types = pp.getProgram().getTypes();
 
@@ -239,19 +237,19 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 					e.setRuntimeTypes(Collections.singleton(t));
 					result.add(e);
 				}
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref,
+		public ExpressionSet visit(HeapReference expression, ExpressionSet ref,
 				Object... params)
 				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
+			Set<SymbolicExpression> result = new HashSet<>();
 
 			ProgramPoint pp = (ProgramPoint) params[0];
 
 			TypeSystem types = pp.getProgram().getTypes();
-			for (ValueExpression refExp : ref)
+			for (SymbolicExpression refExp : ref)
 				if (refExp instanceof HeapLocation) {
 					Set<Type> rt = refExp.getRuntimeTypes(types);
 					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
@@ -264,18 +262,18 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 					result.add(e);
 				}
 
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref,
+		public ExpressionSet visit(HeapDereference expression, ExpressionSet deref,
 				Object... params)
 				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
+			Set<SymbolicExpression> result = new HashSet<>();
 			ProgramPoint pp = (ProgramPoint) params[0];
 			TypeSystem types = pp.getProgram().getTypes();
 
-			for (ValueExpression derefExp : deref) {
+			for (SymbolicExpression derefExp : deref) {
 				if (derefExp instanceof Variable) {
 					Variable var = (Variable) derefExp;
 					for (Type t : var.getRuntimeTypes(types))
@@ -291,7 +289,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 				}
 			}
 
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 	}
 }

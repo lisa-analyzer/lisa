@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 
@@ -30,7 +29,7 @@ public class WorstCasePolicy implements OpenCallPolicy {
 	public <A extends AbstractState<A>> AnalysisState<A> apply(
 			OpenCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] params)
+			ExpressionSet[] params)
 			throws SemanticException {
 		AnalysisState<A> poststate = entryState.top();
 

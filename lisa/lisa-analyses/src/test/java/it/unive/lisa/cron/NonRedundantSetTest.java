@@ -1,7 +1,5 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
@@ -9,6 +7,7 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.nonRedundantSet.NonRedundantPowersetOfInterval;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+import org.junit.Test;
 
 public class NonRedundantSetTest extends AnalysisTestExecutor {
 

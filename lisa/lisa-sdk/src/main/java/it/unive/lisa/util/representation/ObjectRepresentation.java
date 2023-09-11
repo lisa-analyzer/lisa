@@ -9,7 +9,8 @@ import java.util.TreeMap;
 import java.util.function.Function;
 
 /**
- * A {@link StructuredRepresentation} in the form of a complex object with fields.
+ * A {@link StructuredRepresentation} in the form of a complex object with
+ * fields.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

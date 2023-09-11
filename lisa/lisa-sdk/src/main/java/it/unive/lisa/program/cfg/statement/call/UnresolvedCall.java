@@ -13,7 +13,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 
@@ -114,7 +113,7 @@ public class UnresolvedCall extends Call {
 	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet<SymbolicExpression>[] params,
+			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Call resolved;

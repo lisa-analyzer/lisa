@@ -1,8 +1,7 @@
 package it.unive.lisa.analysis.lattices;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.Lattice;
+import java.util.Map;
 
 /**
  * A generic ready-to-use {@link FunctionalLattice} with no additional fields,

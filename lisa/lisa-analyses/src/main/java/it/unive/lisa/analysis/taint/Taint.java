@@ -2,8 +2,8 @@ package it.unive.lisa.analysis.taint;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A {@link BaseTaint} implementation with only two level of taintedness: clean

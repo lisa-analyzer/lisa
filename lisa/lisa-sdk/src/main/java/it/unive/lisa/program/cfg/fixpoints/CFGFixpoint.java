@@ -1,11 +1,5 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.Lattice;
@@ -22,6 +16,10 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.representation.ListRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A {@link FixpointImplementation} for {@link CFG}s.

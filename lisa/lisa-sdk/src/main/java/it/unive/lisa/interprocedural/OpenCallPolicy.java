@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
  * Policy that determines what happens to the {@link AnalysisState} when an
@@ -34,6 +33,6 @@ public interface OpenCallPolicy {
 	<A extends AbstractState<A>> AnalysisState<A> apply(
 			OpenCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] params)
+			ExpressionSet[] params)
 			throws SemanticException;
 }

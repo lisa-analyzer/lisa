@@ -69,14 +69,12 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
-
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -125,7 +123,7 @@ public class SemanticsSanityTest {
 		as = new AnalysisState<>(
 				new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
 						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet<>(), new SymbolAliasing());
+				new ExpressionSet(), new SymbolAliasing());
 		store = new StatementStore<>(as);
 		fake = new Expression(cfg, unknownLocation) {
 
@@ -313,9 +311,9 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression,
+		public ExpressionSet rewrite(SymbolicExpression expression,
 				HeapEnvironment<NRHeap> environment, ProgramPoint pp) throws SemanticException {
-			return new ExpressionSet<>();
+			return new ExpressionSet();
 		}
 
 	}
@@ -339,7 +337,7 @@ public class SemanticsSanityTest {
 		if (param == SymbolicExpression.class)
 			return new Skip(new SourceCodeLocation("unknown", 0, 0));
 		if (param == ExpressionSet.class)
-			return new ExpressionSet<>();
+			return new ExpressionSet();
 		if (param == SymbolAliasing.class)
 			return new SymbolAliasing();
 		if (param == HeapDomain.class)

@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -53,12 +52,12 @@ public interface ParameterAssigningStrategy {
 	 * @throws SemanticException if something goes wrong while preparing the
 	 *                               entry-state
 	 */
-	<A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepare(
+	<A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
 			Call call,
 			AnalysisState<A> callState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,
 			Parameter[] formals,
-			ExpressionSet<SymbolicExpression>[] actuals)
+			ExpressionSet[] actuals)
 			throws SemanticException;
 }

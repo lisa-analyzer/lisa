@@ -61,20 +61,20 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepare(
+	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
 			Call call,
 			AnalysisState<A> callState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,
 			Parameter[] formals,
-			ExpressionSet<SymbolicExpression>[] parameters)
+			ExpressionSet[] parameters)
 			throws SemanticException {
 
-		ExpressionSet<SymbolicExpression>[] slots = new ExpressionSet[formals.length];
+		ExpressionSet[] slots = new ExpressionSet[formals.length];
 		Set<Type>[] slotsTypes = new Set[formals.length];
 		Expression[] actuals = call.getParameters();
 
-		ExpressionSet<SymbolicExpression>[] defaults = new ExpressionSet[formals.length];
+		ExpressionSet[] defaults = new ExpressionSet[formals.length];
 		Set<Type>[] defaultTypes = new Set[formals.length];
 		for (int pos = 0; pos < slots.length; pos++) {
 			Expression def = formals[pos].getDefaultValue();
@@ -112,7 +112,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 		}
 
 		// we remove expressions from the stack
-		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet<>(), prepared.getAliasing());
+		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet(), prepared.getAliasing());
 		return Pair.of(prepared, slots);
 	}
 

@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import java.util.Collection;
 
 /**
@@ -78,7 +77,7 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet<SymbolicExpression>[] params,
+			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Expression[] actuals = getParameters();
@@ -86,8 +85,7 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 		if (params.length == actuals.length) {
 			post = call.expressionSemantics(interprocedural, state, params, expressions);
 		} else {
-			@SuppressWarnings("unchecked")
-			ExpressionSet<SymbolicExpression>[] truncatedParams = new ExpressionSet[actuals.length];
+			ExpressionSet[] truncatedParams = new ExpressionSet[actuals.length];
 			if (actuals.length > 0)
 				System.arraycopy(params, 1, truncatedParams, 0, params.length - 1);
 			post = call.expressionSemantics(interprocedural, state, truncatedParams, expressions);

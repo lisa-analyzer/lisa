@@ -12,7 +12,6 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -138,7 +137,7 @@ public class OpenCall extends CallWithResult {
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,
-			ExpressionSet<SymbolicExpression>[] parameters)
+			ExpressionSet[] parameters)
 			throws SemanticException {
 		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
 	}

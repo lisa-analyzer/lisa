@@ -6,7 +6,6 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;

@@ -63,7 +63,7 @@ public class IMPNewObj extends NaryExpression {
 	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet<SymbolicExpression>[] params,
+			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Type type = getStaticType();
@@ -82,7 +82,7 @@ public class IMPNewObj extends NaryExpression {
 		AnalysisState<A> tmp = state.bottom();
 		for (SymbolicExpression v : callstate.getComputedExpressions())
 			tmp = tmp.lub(callstate.assign(v, ref, paramThis));
-		ExpressionSet<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params,
+		ExpressionSet[] fullParams = ArrayUtils.insert(0, params,
 				callstate.getComputedExpressions());
 		expressions.put(paramThis, tmp);
 

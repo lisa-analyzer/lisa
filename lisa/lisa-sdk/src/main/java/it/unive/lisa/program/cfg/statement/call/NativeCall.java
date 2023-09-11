@@ -16,7 +16,6 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collection;
@@ -171,7 +170,7 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet<SymbolicExpression>[] params,
+			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		AnalysisState<A> result = state.bottom();
@@ -180,7 +179,7 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 		ParameterAssigningStrategy strategy = getProgram().getFeatures().getAssigningStrategy();
 		for (NativeCFG nat : targets)
 			try {
-				Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(this,
+				Pair<AnalysisState<A>, ExpressionSet[]> prepared = strategy.prepare(this,
 						state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
 
 				NaryExpression rewritten = nat.rewrite(this, parameters);

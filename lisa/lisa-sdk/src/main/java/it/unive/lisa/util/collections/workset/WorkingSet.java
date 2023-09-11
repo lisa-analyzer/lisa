@@ -7,7 +7,7 @@ import java.util.Collection;
 /**
  * A working set, containing items to be processed.
  * 
- * @author Luca Negrini
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <E> the type of the elements that this working set contains
  */

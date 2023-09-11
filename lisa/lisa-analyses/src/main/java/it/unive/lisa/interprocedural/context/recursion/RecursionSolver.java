@@ -20,7 +20,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -104,7 +103,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
 			AnalysisState<A> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
+			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		boolean inRecursion = recursion.getMembers().contains(call.getCFG());
@@ -153,8 +152,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 		base = baseCases.find();
 
 		Expression[] actuals = start.getParameters();
-		@SuppressWarnings("unchecked")
-		ExpressionSet<SymbolicExpression>[] params = new ExpressionSet[actuals.length];
+		ExpressionSet[] params = new ExpressionSet[actuals.length];
 		for (int i = 0; i < params.length; i++)
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
 

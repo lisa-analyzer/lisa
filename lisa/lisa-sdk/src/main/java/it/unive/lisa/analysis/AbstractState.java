@@ -35,7 +35,7 @@ public interface AbstractState<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if something goes wrong while rewriting
 	 */
-	public ExpressionSet<SymbolicExpression> rewrite(
+	public ExpressionSet rewrite(
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException;
@@ -53,10 +53,7 @@ public interface AbstractState<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if something goes wrong while rewriting
 	 */
-	public ExpressionSet<SymbolicExpression> rewrite(
-			ExpressionSet<SymbolicExpression> expressions,
-			ProgramPoint pp)
-			throws SemanticException;
+	public ExpressionSet rewrite(ExpressionSet expressions, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Yields the runtime types that this analysis infers for the given

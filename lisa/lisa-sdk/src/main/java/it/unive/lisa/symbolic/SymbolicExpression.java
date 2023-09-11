@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -17,7 +18,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class SymbolicExpression {
+public abstract class SymbolicExpression implements ScopedObject<SymbolicExpression> {
 
 	/**
 	 * The code location of the statement that has generated this symbolic
@@ -126,6 +127,7 @@ public abstract class SymbolicExpression {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
+	@Override
 	public abstract SymbolicExpression pushScope(ScopeToken token) throws SemanticException;
 
 	/**
@@ -144,6 +146,7 @@ public abstract class SymbolicExpression {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
+	@Override
 	public abstract SymbolicExpression popScope(ScopeToken token) throws SemanticException;
 
 	/**

@@ -71,7 +71,7 @@ public class CFGFixpointTest {
 						new MonolithicHeap(),
 						new ValueEnvironment<>(new Sign()),
 						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet<>(), new SymbolAliasing());
+				new ExpressionSet(), new SymbolAliasing());
 	}
 
 	@Test

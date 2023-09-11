@@ -9,7 +9,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,7 +48,7 @@ public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the rewriting
 	 */
-	ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, HeapEnvironment<T> environment,
+	ExpressionSet rewrite(SymbolicExpression expression, HeapEnvironment<T> environment,
 			ProgramPoint pp)
 			throws SemanticException;
 
@@ -82,12 +81,12 @@ public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the rewriting
 	 */
-	default ExpressionSet<ValueExpression> rewriteAll(ExpressionSet<SymbolicExpression> expressions,
+	default ExpressionSet rewriteAll(ExpressionSet expressions,
 			HeapEnvironment<T> environment, ProgramPoint pp) throws SemanticException {
-		Set<ValueExpression> result = new HashSet<>();
+		Set<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression expr : expressions)
 			result.addAll(rewrite(expr, environment, pp).elements());
-		return new ExpressionSet<>(result);
+		return new ExpressionSet(result);
 	}
 
 }

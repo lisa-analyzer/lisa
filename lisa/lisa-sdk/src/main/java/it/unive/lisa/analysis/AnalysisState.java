@@ -6,9 +6,8 @@ import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.ObjectRepresentation;
-
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,7 +43,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * The last expressions that have been computed, representing side-effect
 	 * free expressions that are pending evaluation
 	 */
-	private final ExpressionSet<SymbolicExpression> computedExpressions;
+	private final ExpressionSet computedExpressions;
 
 	/**
 	 * Builds a new state.
@@ -55,7 +54,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @param aliasing           the symbol aliasing information
 	 */
 	public AnalysisState(A state, SymbolicExpression computedExpression, SymbolAliasing aliasing) {
-		this(state, new ExpressionSet<>(computedExpression), aliasing);
+		this(state, new ExpressionSet(computedExpression), aliasing);
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @param computedExpressions the expressions that have been computed
 	 * @param aliasing            the symbol aliasing information
 	 */
-	public AnalysisState(A state, ExpressionSet<SymbolicExpression> computedExpressions, SymbolAliasing aliasing) {
+	public AnalysisState(A state, ExpressionSet computedExpressions, SymbolAliasing aliasing) {
 		this.state = state;
 		this.computedExpressions = computedExpressions;
 		this.aliasing = aliasing;
@@ -105,7 +104,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @return the last computed expression
 	 */
-	public ExpressionSet<SymbolicExpression> getComputedExpressions() {
+	public ExpressionSet getComputedExpressions() {
 		return computedExpressions;
 	}
 
@@ -127,7 +126,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	public AnalysisState<A> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.assign(id, value, pp);
-		return new AnalysisState<>(s, new ExpressionSet<>(id), aliasing);
+		return new AnalysisState<>(s, new ExpressionSet(id), aliasing);
 	}
 
 	/**
@@ -152,7 +151,7 @@ public class AnalysisState<A extends AbstractState<A>>
 			return assign((Identifier) id, expression, pp);
 
 		A s = state.bottom();
-		ExpressionSet<SymbolicExpression> rewritten = state.rewrite(id, pp);
+		ExpressionSet rewritten = state.rewrite(id, pp);
 		for (SymbolicExpression i : rewritten)
 			if (!(i instanceof Identifier))
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
@@ -165,7 +164,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	public AnalysisState<A> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.smallStepSemantics(expression, pp);
-		return new AnalysisState<>(s, new ExpressionSet<>(expression), aliasing);
+		return new AnalysisState<>(s, new ExpressionSet(expression), aliasing);
 	}
 
 	@Override
@@ -190,13 +189,13 @@ public class AnalysisState<A extends AbstractState<A>>
 				aliasing);
 	}
 
-	private static ExpressionSet<SymbolicExpression> onAllExpressions(
-			ExpressionSet<SymbolicExpression> computedExpressions,
+	private static ExpressionSet onAllExpressions(
+			ExpressionSet computedExpressions,
 			ScopeToken scope, boolean push) throws SemanticException {
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression exp : computedExpressions)
 			result.add(push ? exp.pushScope(scope) : exp.popScope(scope));
-		return new ExpressionSet<>(result);
+		return new ExpressionSet(result);
 	}
 
 	@Override

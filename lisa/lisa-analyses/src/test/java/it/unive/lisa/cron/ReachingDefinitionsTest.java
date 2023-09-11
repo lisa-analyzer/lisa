@@ -1,13 +1,12 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
 import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
+import org.junit.Test;
 
 public class ReachingDefinitionsTest extends AnalysisTestExecutor {
 

@@ -11,7 +11,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
 import java.util.Objects;
@@ -182,13 +181,12 @@ public abstract class NaryStatement extends Statement {
 	 * {@inheritDoc}
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public <A extends AbstractState<A>> AnalysisState<A> semantics(
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		ExpressionSet<SymbolicExpression>[] computed = new ExpressionSet[subExpressions.length];
+		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
 		AnalysisState<A> result = statementSemantics(interprocedural, eval, computed, expressions);
@@ -225,6 +223,6 @@ public abstract class NaryStatement extends Statement {
 	public abstract <A extends AbstractState<A>> AnalysisState<A> statementSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet<SymbolicExpression>[] params, StatementStore<A> expressions)
+			ExpressionSet[] params, StatementStore<A> expressions)
 			throws SemanticException;
 }

@@ -28,13 +28,13 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 	}
 
 	@Override
-	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet<SymbolicExpression>[]> prepare(
+	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
 			Call call,
 			AnalysisState<A> callState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,
 			Parameter[] formals,
-			ExpressionSet<SymbolicExpression>[] parameters)
+			ExpressionSet[] parameters)
 			throws SemanticException {
 		// prepare the state for the call: assign the value to each parameter
 		AnalysisState<A> prepared = callState;
@@ -46,7 +46,7 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 		}
 
 		// we remove expressions from the stack
-		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet<>(), prepared.getAliasing());
+		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet(), prepared.getAliasing());
 		return Pair.of(prepared, parameters);
 	}
 

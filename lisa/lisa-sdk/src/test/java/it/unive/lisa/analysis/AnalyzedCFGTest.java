@@ -35,7 +35,7 @@ public class AnalyzedCFGTest {
 
 		AnalysisState<TestAbstractState> state = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet<>(), new SymbolAliasing());
+				new ExpressionSet(), new SymbolAliasing());
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);

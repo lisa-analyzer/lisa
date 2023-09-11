@@ -24,7 +24,6 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -272,7 +271,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 		public AnalysisState<A> getAbstractResultOf(
 				CFGCall call,
 				AnalysisState<A> entryState,
-				ExpressionSet<SymbolicExpression>[] parameters,
+				ExpressionSet[] parameters,
 				StatementStore<A> expressions)
 				throws SemanticException {
 			Call source = call.getSource() == null ? call : call.getSource();
@@ -292,7 +291,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 
 		@Override
 		public AnalysisState<A> getAbstractResultOf(OpenCall call, AnalysisState<A> entryState,
-				ExpressionSet<SymbolicExpression>[] parameters, StatementStore<A> expressions)
+				ExpressionSet[] parameters, StatementStore<A> expressions)
 				throws SemanticException {
 			return interprocedural.getAbstractResultOf(call, entryState, parameters, expressions);
 		}

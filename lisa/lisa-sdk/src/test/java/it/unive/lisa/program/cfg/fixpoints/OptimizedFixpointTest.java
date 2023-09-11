@@ -101,7 +101,7 @@ public class OptimizedFixpointTest {
 				CompoundState<TestAbstractState>> res = null;
 		AnalysisState<TestAbstractState> state = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet<>(),
+				new ExpressionSet(),
 				new SymbolAliasing());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
@@ -150,7 +150,7 @@ public class OptimizedFixpointTest {
 				CompoundState<TestAbstractState>> res = null;
 		AnalysisState<TestAbstractState> state = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet<>(),
+				new ExpressionSet(),
 				new SymbolAliasing());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
@@ -199,7 +199,7 @@ public class OptimizedFixpointTest {
 				CompoundState<TestAbstractState>> res = null;
 		AnalysisState<TestAbstractState> state = new AnalysisState<>(
 				new TestAbstractState(),
-				new ExpressionSet<>(),
+				new ExpressionSet(),
 				new SymbolAliasing());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
