@@ -23,7 +23,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
 /**
@@ -40,7 +40,7 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 	private static final String MONOLITH_NAME = "heap";
 
-	private static final DomainRepresentation REPR = new StringRepresentation("monolith");
+	private static final StructuredRepresentation REPR = new StringRepresentation("monolith");
 
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
@@ -117,7 +117,7 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return isBottom() ? Lattice.bottomRepresentation() : REPR;
 	}
 

@@ -4,11 +4,11 @@ import it.unive.lisa.outputs.serializableGraph.SerializableString;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
- * A {@link DomainRepresentation} in the form of a single string element.
+ * A {@link StructuredRepresentation} in the form of a single string element.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringRepresentation extends DomainRepresentation {
+public class StringRepresentation extends StructuredRepresentation {
 
 	/**
 	 * The textual representation.

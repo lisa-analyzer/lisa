@@ -15,7 +15,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +88,7 @@ public class SubstitutionTest {
 		}
 
 		@Override
-		public DomainRepresentation representation() {
+		public StructuredRepresentation representation() {
 			return null; // not used
 		}
 

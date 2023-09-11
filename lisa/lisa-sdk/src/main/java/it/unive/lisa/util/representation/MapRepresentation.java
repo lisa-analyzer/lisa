@@ -9,16 +9,16 @@ import java.util.TreeMap;
 import java.util.function.Function;
 
 /**
- * A {@link DomainRepresentation} in the form of a key-value mapping.
+ * A {@link StructuredRepresentation} in the form of a key-value mapping.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MapRepresentation extends DomainRepresentation {
+public class MapRepresentation extends StructuredRepresentation {
 
 	/**
 	 * The mappings of contained in this map.
 	 */
-	protected final SortedMap<DomainRepresentation, DomainRepresentation> map;
+	protected final SortedMap<StructuredRepresentation, StructuredRepresentation> map;
 
 	/**
 	 * Builds a new representation starting from the given map.
@@ -33,8 +33,8 @@ public class MapRepresentation extends DomainRepresentation {
 	 * @param valueMapper the function that knows how to convert values to their
 	 *                        representation
 	 */
-	public <K, V> MapRepresentation(Map<K, V> map, Function<K, DomainRepresentation> keyMapper,
-			Function<V, DomainRepresentation> valueMapper) {
+	public <K, V> MapRepresentation(Map<K, V> map, Function<K, StructuredRepresentation> keyMapper,
+			Function<V, StructuredRepresentation> valueMapper) {
 		this.map = new TreeMap<>();
 		for (Entry<K, V> e : map.entrySet())
 			this.map.put(keyMapper.apply(e.getKey()), valueMapper.apply(e.getValue()));
@@ -45,9 +45,9 @@ public class MapRepresentation extends DomainRepresentation {
 	 * 
 	 * @param map the map
 	 */
-	public MapRepresentation(Map<DomainRepresentation, DomainRepresentation> map) {
+	public MapRepresentation(Map<StructuredRepresentation, StructuredRepresentation> map) {
 		if (map instanceof SortedMap)
-			this.map = (SortedMap<DomainRepresentation, DomainRepresentation>) map;
+			this.map = (SortedMap<StructuredRepresentation, StructuredRepresentation>) map;
 		else
 			this.map = new TreeMap<>(map);
 	}
@@ -55,7 +55,7 @@ public class MapRepresentation extends DomainRepresentation {
 	@Override
 	public SerializableValue toSerializableValue() {
 		SortedMap<String, SerializableValue> fields = new TreeMap<>();
-		for (Entry<DomainRepresentation, DomainRepresentation> e : this.map.entrySet())
+		for (Entry<StructuredRepresentation, StructuredRepresentation> e : this.map.entrySet())
 			fields.put(e.getKey().toString(), e.getValue().toSerializableValue());
 		return new SerializableObject(getProperties(), fields);
 	}
@@ -64,7 +64,7 @@ public class MapRepresentation extends DomainRepresentation {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 
-		for (Entry<DomainRepresentation, DomainRepresentation> e : map.entrySet())
+		for (Entry<StructuredRepresentation, StructuredRepresentation> e : map.entrySet())
 			builder.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
 
 		return builder.toString().trim();

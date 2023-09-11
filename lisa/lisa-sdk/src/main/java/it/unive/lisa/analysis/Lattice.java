@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
 /**
@@ -20,12 +20,12 @@ public interface Lattice<L extends Lattice<L>> {
 	String TOP_STRING = "#TOP#";
 
 	/**
-	 * Yields a fresh {@link DomainRepresentation} that can be used to represent
+	 * Yields a fresh {@link StructuredRepresentation} that can be used to represent
 	 * top values.
 	 * 
 	 * @return the representation
 	 */
-	public static DomainRepresentation topRepresentation() {
+	public static StructuredRepresentation topRepresentation() {
 		return new StringRepresentation(TOP_STRING);
 	}
 
@@ -35,12 +35,12 @@ public interface Lattice<L extends Lattice<L>> {
 	String BOTTOM_STRING = "_|_";
 
 	/**
-	 * Yields a fresh {@link DomainRepresentation} that can be used to represent
+	 * Yields a fresh {@link StructuredRepresentation} that can be used to represent
 	 * bottom values.
 	 * 
 	 * @return the representation
 	 */
-	public static DomainRepresentation bottomRepresentation() {
+	public static StructuredRepresentation bottomRepresentation() {
 		return new StringRepresentation(BOTTOM_STRING);
 	}
 

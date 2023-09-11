@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
 /**
@@ -56,7 +56,7 @@ public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return this == BOTTOM ? Lattice.bottomRepresentation()
 				: this == CLEAN ? new StringRepresentation("_")
 						: this == TAINTED ? new StringRepresentation("#") : Lattice.topRepresentation();

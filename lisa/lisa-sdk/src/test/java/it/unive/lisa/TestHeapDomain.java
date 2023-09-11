@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
 import java.util.Collections;
@@ -16,7 +16,7 @@ public class TestHeapDomain extends TestDomain<TestHeapDomain, SymbolicExpressio
 		implements HeapDomain<TestHeapDomain> {
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new StringRepresentation("heap");
 	}
 

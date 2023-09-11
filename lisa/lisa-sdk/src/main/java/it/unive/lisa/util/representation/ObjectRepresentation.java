@@ -9,16 +9,16 @@ import java.util.TreeMap;
 import java.util.function.Function;
 
 /**
- * A {@link DomainRepresentation} in the form of a complex object with fields.
+ * A {@link StructuredRepresentation} in the form of a complex object with fields.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ObjectRepresentation extends DomainRepresentation {
+public class ObjectRepresentation extends StructuredRepresentation {
 
 	/**
 	 * The fields of this object, with their values.
 	 */
-	protected final SortedMap<String, DomainRepresentation> fields;
+	protected final SortedMap<String, StructuredRepresentation> fields;
 
 	/**
 	 * Builds a new representation starting from the given map. {@code mapper}
@@ -30,7 +30,7 @@ public class ObjectRepresentation extends DomainRepresentation {
 	 * @param mapper the function that knows how to convert values to their
 	 *                   representation
 	 */
-	public <V> ObjectRepresentation(Map<String, V> fields, Function<V, DomainRepresentation> mapper) {
+	public <V> ObjectRepresentation(Map<String, V> fields, Function<V, StructuredRepresentation> mapper) {
 		this.fields = new TreeMap<>();
 		for (Entry<String, V> e : fields.entrySet())
 			this.fields.put(e.getKey(), mapper.apply(e.getValue()));
@@ -41,9 +41,9 @@ public class ObjectRepresentation extends DomainRepresentation {
 	 * 
 	 * @param map the map
 	 */
-	public ObjectRepresentation(Map<String, DomainRepresentation> map) {
+	public ObjectRepresentation(Map<String, StructuredRepresentation> map) {
 		if (map instanceof SortedMap)
-			this.fields = (SortedMap<String, DomainRepresentation>) map;
+			this.fields = (SortedMap<String, StructuredRepresentation>) map;
 		else
 			this.fields = new TreeMap<>(map);
 	}
@@ -51,7 +51,7 @@ public class ObjectRepresentation extends DomainRepresentation {
 	@Override
 	public SerializableValue toSerializableValue() {
 		SortedMap<String, SerializableValue> fields = new TreeMap<>();
-		for (Entry<String, DomainRepresentation> e : this.fields.entrySet())
+		for (Entry<String, StructuredRepresentation> e : this.fields.entrySet())
 			fields.put(e.getKey(), e.getValue().toSerializableValue());
 		return new SerializableObject(getProperties(), fields);
 	}
@@ -60,7 +60,7 @@ public class ObjectRepresentation extends DomainRepresentation {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 
-		for (Entry<String, DomainRepresentation> e : fields.entrySet())
+		for (Entry<String, StructuredRepresentation> e : fields.entrySet())
 			builder.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
 
 		return builder.toString().trim();

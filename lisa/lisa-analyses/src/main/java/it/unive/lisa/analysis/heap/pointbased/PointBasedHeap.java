@@ -22,7 +22,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -232,7 +232,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isTop())
 			return Lattice.topRepresentation();
 

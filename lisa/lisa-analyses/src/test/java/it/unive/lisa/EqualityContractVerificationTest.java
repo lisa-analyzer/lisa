@@ -132,7 +132,7 @@ import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -167,8 +167,8 @@ public class EqualityContractVerificationTest {
 	private static final Interval int1 = Interval.TOP;
 	private static final Interval int2 = Interval.BOTTOM;
 
-	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
-	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
+	private static final StructuredRepresentation dr1 = new StringRepresentation("foo");
+	private static final StructuredRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
@@ -255,7 +255,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(NodeList.class, adj1, adj2)
-				.withPrefabValues(DomainRepresentation.class, dr1, dr2)
+				.withPrefabValues(StructuredRepresentation.class, dr1, dr2)
 				.withPrefabValues(RegularExpression.class, re1, re2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
@@ -427,7 +427,7 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testRepresentations() {
 		Reflections scanner = mkReflections();
-		for (Class<? extends DomainRepresentation> repr : scanner.getSubTypesOf(DomainRepresentation.class))
+		for (Class<? extends StructuredRepresentation> repr : scanner.getSubTypesOf(StructuredRepresentation.class))
 			verify(repr);
 	}
 

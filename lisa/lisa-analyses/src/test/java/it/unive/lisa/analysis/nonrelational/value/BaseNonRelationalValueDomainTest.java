@@ -32,7 +32,7 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
 import java.lang.reflect.InvocationTargetException;
@@ -46,7 +46,7 @@ public class BaseNonRelationalValueDomainTest {
 	private static class Sample implements BaseNonRelationalValueDomain<Sample> {
 
 		@Override
-		public DomainRepresentation representation() {
+		public StructuredRepresentation representation() {
 			return new StringRepresentation("sample");
 		}
 

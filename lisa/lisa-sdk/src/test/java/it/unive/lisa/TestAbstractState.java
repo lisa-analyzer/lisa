@@ -7,7 +7,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
 import java.util.Collections;
@@ -17,7 +17,7 @@ public class TestAbstractState extends TestDomain<TestAbstractState, SymbolicExp
 		implements AbstractState<TestAbstractState> {
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new StringRepresentation("state");
 	}
 

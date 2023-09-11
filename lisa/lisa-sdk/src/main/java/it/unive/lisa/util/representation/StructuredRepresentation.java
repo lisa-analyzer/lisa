@@ -1,23 +1,19 @@
 package it.unive.lisa.util.representation;
 
-import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.analysis.dataflow.DataflowElement;
-import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.collections.CollectionUtilities;
+
 /**
- * A structured representation of the abstract information present in a single
- * instance of {@link SemanticDomain}, {@link NonRelationalDomain},
- * {@link DataflowElement} or other types of domains. Instances of this class
- * can be used to depict the content of an abstract element in a domain-agnostic
- * way, such as dumping the information to a file.
+ * A structured representation of the information present in a single instance
+ * of an object. Instances of this class can be used to depict the content of an
+ * element in a domain-agnostic way, such as dumping the information to a file.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class DomainRepresentation implements Comparable<DomainRepresentation> {
+public abstract class StructuredRepresentation implements Comparable<StructuredRepresentation> {
 
 	private final SortedMap<String, String> properties = new TreeMap<>();
 
@@ -51,7 +47,7 @@ public abstract class DomainRepresentation implements Comparable<DomainRepresent
 	public abstract SerializableValue toSerializableValue();
 
 	@Override
-	public final int compareTo(DomainRepresentation o) {
+	public final int compareTo(StructuredRepresentation o) {
 		if (o == null)
 			return 1;
 
@@ -77,7 +73,7 @@ public abstract class DomainRepresentation implements Comparable<DomainRepresent
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DomainRepresentation other = (DomainRepresentation) obj;
+		StructuredRepresentation other = (StructuredRepresentation) obj;
 		if (properties == null) {
 			if (other.properties != null)
 				return false;

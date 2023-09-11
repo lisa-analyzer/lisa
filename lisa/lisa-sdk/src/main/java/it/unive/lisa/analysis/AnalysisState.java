@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 
 import java.util.Collection;
@@ -314,14 +314,14 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		DomainRepresentation stateRepr = state.representation();
-		DomainRepresentation exprRepr = computedExpressions.representation();
+		StructuredRepresentation stateRepr = state.representation();
+		StructuredRepresentation exprRepr = computedExpressions.representation();
 		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr));
 	}
 

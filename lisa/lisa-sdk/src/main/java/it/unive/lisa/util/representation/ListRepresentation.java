@@ -10,16 +10,16 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A {@link DomainRepresentation} in the form of a list of values.
+ * A {@link StructuredRepresentation} in the form of a list of values.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ListRepresentation extends DomainRepresentation {
+public class ListRepresentation extends StructuredRepresentation {
 
 	/**
 	 * The elements of contained in this list.
 	 */
-	protected final List<DomainRepresentation> elements;
+	protected final List<StructuredRepresentation> elements;
 
 	/**
 	 * Builds a new representation starting from the given list. {@code mapper}
@@ -31,7 +31,7 @@ public class ListRepresentation extends DomainRepresentation {
 	 * @param mapper   the function that knows how to convert elements to their
 	 *                     representation
 	 */
-	public <E> ListRepresentation(List<E> elements, Function<E, DomainRepresentation> mapper) {
+	public <E> ListRepresentation(List<E> elements, Function<E, StructuredRepresentation> mapper) {
 		this(elements.stream().map(mapper).collect(Collectors.toList()));
 	}
 
@@ -40,7 +40,7 @@ public class ListRepresentation extends DomainRepresentation {
 	 * 
 	 * @param elements the list
 	 */
-	public ListRepresentation(List<DomainRepresentation> elements) {
+	public ListRepresentation(List<StructuredRepresentation> elements) {
 		this.elements = elements;
 	}
 
@@ -49,14 +49,14 @@ public class ListRepresentation extends DomainRepresentation {
 	 * 
 	 * @param elements the list
 	 */
-	public ListRepresentation(DomainRepresentation... elements) {
+	public ListRepresentation(StructuredRepresentation... elements) {
 		this.elements = Arrays.asList(elements);
 	}
 
 	@Override
 	public SerializableValue toSerializableValue() {
 		List<SerializableValue> values = new ArrayList<>(elements.size());
-		for (DomainRepresentation e : elements)
+		for (StructuredRepresentation e : elements)
 			values.add(e.toSerializableValue());
 		return new SerializableArray(getProperties(), values);
 	}

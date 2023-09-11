@@ -3,7 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -408,12 +408,12 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	}
 
 	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * Yields a {@link StructuredRepresentation} of the information contained in
 	 * this domain's instance.
 	 * 
 	 * @return the representation
 	 */
-	DomainRepresentation representation();
+	StructuredRepresentation representation();
 
 	/**
 	 * Yields a unique instance of the specific domain, of class {@code domain},

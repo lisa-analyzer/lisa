@@ -25,7 +25,7 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
 import java.util.Objects;
@@ -160,7 +160,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 		else if (isTop())

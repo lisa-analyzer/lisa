@@ -11,16 +11,16 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A {@link DomainRepresentation} in the form of a set of values.
+ * A {@link StructuredRepresentation} in the form of a set of values.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SetRepresentation extends DomainRepresentation {
+public class SetRepresentation extends StructuredRepresentation {
 
 	/**
 	 * The elements of contained in this set.
 	 */
-	protected final SortedSet<DomainRepresentation> elements;
+	protected final SortedSet<StructuredRepresentation> elements;
 
 	/**
 	 * Builds a new representation starting from the given set. {@code mapper}
@@ -32,7 +32,7 @@ public class SetRepresentation extends DomainRepresentation {
 	 * @param mapper   the function that knows how to convert elements to their
 	 *                     representation
 	 */
-	public <E> SetRepresentation(Set<E> elements, Function<E, DomainRepresentation> mapper) {
+	public <E> SetRepresentation(Set<E> elements, Function<E, StructuredRepresentation> mapper) {
 		this(mapAndSort(elements, mapper));
 	}
 
@@ -41,16 +41,16 @@ public class SetRepresentation extends DomainRepresentation {
 	 * 
 	 * @param elements the set
 	 */
-	public SetRepresentation(Set<DomainRepresentation> elements) {
+	public SetRepresentation(Set<StructuredRepresentation> elements) {
 		if (elements instanceof SortedSet)
-			this.elements = (SortedSet<DomainRepresentation>) elements;
+			this.elements = (SortedSet<StructuredRepresentation>) elements;
 		else
 			this.elements = new TreeSet<>(elements);
 	}
 
-	private static <E> SortedSet<DomainRepresentation> mapAndSort(Iterable<E> elements,
-			Function<E, DomainRepresentation> mapper) {
-		SortedSet<DomainRepresentation> result = new TreeSet<>();
+	private static <E> SortedSet<StructuredRepresentation> mapAndSort(Iterable<E> elements,
+			Function<E, StructuredRepresentation> mapper) {
+		SortedSet<StructuredRepresentation> result = new TreeSet<>();
 		for (E e : elements)
 			result.add(mapper.apply(e));
 		return result;
@@ -59,7 +59,7 @@ public class SetRepresentation extends DomainRepresentation {
 	@Override
 	public SerializableValue toSerializableValue() {
 		List<SerializableValue> values = new ArrayList<>(elements.size());
-		for (DomainRepresentation e : elements)
+		for (StructuredRepresentation e : elements)
 			values.add(e.toSerializableValue());
 		return new SerializableArray(getProperties(), values);
 	}

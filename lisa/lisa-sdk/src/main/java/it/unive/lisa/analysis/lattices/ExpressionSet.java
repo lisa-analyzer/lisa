@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.SemanticExceptionWrapper;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionUtilities;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
@@ -172,12 +172,12 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 	}
 
 	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * Yields a {@link StructuredRepresentation} of the information contained in
 	 * this set.
 	 * 
 	 * @return the representation
 	 */
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 }

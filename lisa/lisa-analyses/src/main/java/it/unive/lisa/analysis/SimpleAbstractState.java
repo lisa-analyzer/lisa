@@ -18,7 +18,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 
 /**
@@ -46,21 +46,21 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	/**
 	 * The key that should be used to store the instance of {@link HeapDomain}
-	 * inside the {@link DomainRepresentation} returned by
+	 * inside the {@link StructuredRepresentation} returned by
 	 * {@link #representation()}.
 	 */
 	public static final String HEAP_REPRESENTATION_KEY = "heap";
 
 	/**
 	 * The key that should be used to store the instance of {@link TypeDomain}
-	 * inside the {@link DomainRepresentation} returned by
+	 * inside the {@link StructuredRepresentation} returned by
 	 * {@link #representation()}.
 	 */
 	public static final String TYPE_REPRESENTATION_KEY = "type";
 
 	/**
 	 * The key that should be used to store the instance of {@link ValueDomain}
-	 * inside the {@link DomainRepresentation} returned by
+	 * inside the {@link StructuredRepresentation} returned by
 	 * {@link #representation()}.
 	 */
 	public static final String VALUE_REPRESENTATION_KEY = "value";
@@ -399,15 +399,15 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		DomainRepresentation h = heapState.representation();
-		DomainRepresentation t = typeState.representation();
-		DomainRepresentation v = valueState.representation();
+		StructuredRepresentation h = heapState.representation();
+		StructuredRepresentation t = typeState.representation();
+		StructuredRepresentation v = valueState.representation();
 		return new ObjectRepresentation(Map.of(
 				HEAP_REPRESENTATION_KEY, h,
 				TYPE_REPRESENTATION_KEY, t,

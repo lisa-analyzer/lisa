@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 
 import java.util.Map;
@@ -185,12 +185,12 @@ public interface InferredValue<T extends InferredValue<T>>
 		}
 
 		/**
-		 * Yields a {@link DomainRepresentation} of the information contained in
+		 * Yields a {@link StructuredRepresentation} of the information contained in
 		 * this pair.
 		 * 
 		 * @return the representation
 		 */
-		public DomainRepresentation representation() {
+		public StructuredRepresentation representation() {
 			return new ObjectRepresentation(
 					Map.of("value", inferred.representation(), "state", state.representation()));
 		}

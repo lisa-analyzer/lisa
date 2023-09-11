@@ -8,7 +8,7 @@ import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.ListRepresentation;
 
 import java.util.Collection;
@@ -132,7 +132,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	public abstract C mk(T1 left, T2 right);
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new ListRepresentation(left.representation(), right.representation());
 	}
 

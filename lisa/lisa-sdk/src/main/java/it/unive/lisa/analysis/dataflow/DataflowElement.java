@@ -8,7 +8,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 import java.util.Collection;
 
@@ -107,12 +107,12 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	Collection<E> kill(ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
 
 	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * Yields a {@link StructuredRepresentation} of the information contained in
 	 * this domain's instance.
 	 * 
 	 * @return the representation
 	 */
-	DomainRepresentation representation();
+	StructuredRepresentation representation();
 
 	/**
 	 * Push a scope to the dataflow element.

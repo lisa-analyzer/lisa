@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.taint;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 
 /**
@@ -54,7 +54,7 @@ public class Taint extends BaseTaint<Taint> {
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return this == BOTTOM ? Lattice.bottomRepresentation()
 				: this == CLEAN ? new StringRepresentation("_") : new StringRepresentation("#");
 	}
