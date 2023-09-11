@@ -1,13 +1,14 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.ObjectRepresentation;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;

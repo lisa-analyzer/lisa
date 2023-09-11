@@ -3,11 +3,12 @@ package it.unive.lisa.analysis.string.bricks;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
+import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;

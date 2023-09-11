@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
 
 /**
  * An interface for elements that follow a lattice structure. Implementers of

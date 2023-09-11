@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -16,6 +15,8 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import it.unive.lisa.util.representation.DomainRepresentation;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

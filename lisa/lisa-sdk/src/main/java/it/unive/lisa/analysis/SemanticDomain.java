@@ -1,9 +1,10 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.representation.DomainRepresentation;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Predicate;

@@ -3,12 +3,13 @@ package it.unive.lisa.analysis.dataflow;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.representation.DomainRepresentation;
+import it.unive.lisa.util.representation.SetRepresentation;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;

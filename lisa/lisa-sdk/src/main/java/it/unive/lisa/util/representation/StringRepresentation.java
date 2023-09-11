@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.representation;
+package it.unive.lisa.util.representation;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;

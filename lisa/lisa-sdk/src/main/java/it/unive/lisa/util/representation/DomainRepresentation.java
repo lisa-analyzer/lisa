@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.representation;
+package it.unive.lisa.util.representation;
 
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
