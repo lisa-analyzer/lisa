@@ -406,6 +406,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return the map associated with this functional lattice element.
 	 */
 	public Map<K, V> getMap() {
+		if (function == null)
+			return Map.of();
 		return function;
 	}
 

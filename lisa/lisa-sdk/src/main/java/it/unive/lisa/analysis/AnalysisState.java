@@ -225,12 +225,13 @@ public class AnalysisState<A extends AbstractState<A>>
 			return assign((Identifier) id, expression, pp);
 
 		A s = state.bottom();
-		ExpressionSet rewritten = state.rewrite(id, pp);
+		AnalysisState<A> sem = smallStepSemantics(id, pp);
+		ExpressionSet rewritten = sem.state.rewrite(id, pp);
 		for (SymbolicExpression i : rewritten)
 			if (!(i instanceof Identifier))
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
-				s = s.lub(state.assign((Identifier) i, expression, pp));
+				s = s.lub(sem.state.assign((Identifier) i, expression, pp));
 		return new AnalysisState<>(s, rewritten, info);
 	}
 

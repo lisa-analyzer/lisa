@@ -23,7 +23,7 @@ public class StackAllocationSite extends AllocationSite {
 	 *                         this expression
 	 */
 	public StackAllocationSite(Type staticType, String locationName, boolean isWeak, CodeLocation location) {
-		this(staticType, locationName, null, isWeak, location);
+		this(staticType, locationName, (String) null, isWeak, location);
 	}
 
 	/**
@@ -42,4 +42,26 @@ public class StackAllocationSite extends AllocationSite {
 		super(staticType, locationName, field, isWeak, location);
 	}
 
+	public StackAllocationSite(Type staticType, String locationName, String field, boolean isWeak,
+			CodeLocation location) {
+		super(staticType, locationName, field, isWeak, location);
+	}
+
+	@Override
+	public AllocationSite toWeak() {
+		return isWeak() ? this
+				: new StackAllocationSite(
+						getStaticType(),
+						getLocationName(),
+						getField(),
+						true,
+						getCodeLocation());
+	}
+
+	@Override
+	public AllocationSite withField(SymbolicExpression field) {
+		if (getField() != null)
+			throw new IllegalStateException("Cannot add a field to an allocation site that already has one");
+		return new StackAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());
+	}
 }

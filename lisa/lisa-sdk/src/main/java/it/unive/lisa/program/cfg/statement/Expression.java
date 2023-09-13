@@ -134,7 +134,7 @@ public abstract class Expression extends Statement {
 			// or when constructing resolved calls or similar constructs
 			// inside semantic functions. Either way, the syntactic structure
 			// of the code should not change once set
-			LOG.debug("Attempt to change the parent of " + this + " ignored");
+			LOG.trace("Attempt to change the parent of " + this + " ignored");
 	}
 
 	/**

@@ -1,5 +1,16 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -22,13 +33,6 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -98,29 +102,28 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 			throws SemanticException {
 
 		PointBasedHeap sss = smallStepSemantics(expression, pp);
-		ExpressionSet rewrittenExp = sss.rewrite(expression, pp);
+		ExpressionSet rhsExprs = sss.rewrite(expression, pp);
 
 		PointBasedHeap result = bottom();
 		List<HeapReplacement> replacements = new LinkedList<>();
-		for (SymbolicExpression exp : rewrittenExp)
-			if (exp instanceof MemoryPointer) {
-				MemoryPointer pid = (MemoryPointer) exp;
-				HeapLocation star_y = pid.getReferencedLocation();
+		for (SymbolicExpression rhs : rhsExprs)
+			if (rhs instanceof MemoryPointer) {
+				HeapLocation rhs_ref = ((MemoryPointer) rhs).getReferencedLocation();
 				if (id instanceof MemoryPointer) {
 					// we have x = y, where both are pointers
 					// we perform *x = *y so that x and y
 					// become aliases
-					Identifier star_x = ((MemoryPointer) id).getReferencedLocation();
-					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(star_x, star_y, pp);
+					Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
+					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(lhs_ref, rhs_ref, pp);
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
-					if (star_y instanceof StackAllocationSite
-							&& alreadyAllocated(((StackAllocationSite) star_y).getLocationName()) != null)
+					if (rhs_ref instanceof StackAllocationSite
+							&& !getAlreadyAllocated(((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
 						result = result
-								.lub(nonAliasedAssignment(id, (StackAllocationSite) star_y, sss, pp, replacements));
+								.lub(nonAliasedAssignment(id, (StackAllocationSite) rhs_ref, sss, pp, replacements));
 					else {
 						// aliasing: id and star_y points to the same object
-						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
+						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, rhs_ref, pp);
 						result = result.lub(from(new PointBasedHeap(heap)));
 					}
 				}
@@ -134,18 +137,19 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	 * Yields an allocation site name {@code id} if it is tracked by this
 	 * domain, {@code null} otherwise.
 	 * 
-	 * @param id allocation site's name to be searched
+	 * @param location allocation site's name to be searched
 	 * 
 	 * @return an allocation site name {@code id} if it is tracked by this
 	 *             domain, {@code null} otherwise
 	 */
-	protected AllocationSite alreadyAllocated(String id) {
-		for (AllocationSites set : heapEnv.getValues())
-			for (AllocationSite site : set)
-				if (site.getLocationName().equals(id))
-					return site;
+	protected Set<Pair<Identifier, AllocationSite>> getAlreadyAllocated(String location) {
+		Set<Pair<Identifier, AllocationSite>> sites = new HashSet<>();
+		for (Entry<Identifier, AllocationSites> set : heapEnv)
+			for (AllocationSite site : set.getValue())
+				if (site.getLocationName().equals(location))
+					sites.add(Pair.of(set.getKey(), site));
 
-		return null;
+		return sites;
 	}
 
 	/**
