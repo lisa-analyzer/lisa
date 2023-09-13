@@ -42,6 +42,17 @@ public class HeapAllocationSite extends AllocationSite {
 		super(staticType, locationName, field, isWeak, location);
 	}
 
+	/**
+	 * Builds a heap allocation site.
+	 * 
+	 * @param staticType   the static type of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param field        the name of the field of this allocation site
+	 * @param isWeak       if this allocation site is weak
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
+	 */
 	public HeapAllocationSite(Type staticType, String locationName, String field, boolean isWeak,
 			CodeLocation location) {
 		super(staticType, locationName, field, isWeak, location);

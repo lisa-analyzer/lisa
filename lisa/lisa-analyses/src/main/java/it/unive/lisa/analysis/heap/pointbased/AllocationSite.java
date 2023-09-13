@@ -140,7 +140,21 @@ public abstract class AllocationSite extends HeapLocation {
 		return field;
 	}
 
+	/**
+	 * Yields a weak copy of this allocation site, that is, a copy where
+	 * {@link #isWeak()} returns {@code true}.
+	 * 
+	 * @return the weak copy
+	 */
 	public abstract AllocationSite toWeak();
 
+	/**
+	 * Yields a modified version of this allocation site by accessing the given
+	 * field.
+	 * 
+	 * @param field the field to access
+	 * 
+	 * @return the modified allocation site
+	 */
 	public abstract AllocationSite withField(SymbolicExpression field);
 }

@@ -1,5 +1,15 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.SetLattice;
+import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,16 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.SetLattice;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.
@@ -129,6 +129,19 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 		return new ExpressionSet();
 	}
 
+	/**
+	 * Applies a substitution to the contents of this set of allocation sites,
+	 * similarly to
+	 * {@link ValueDomain#applyReplacement(HeapReplacement, ProgramPoint)}.
+	 * 
+	 * @param r  the substitution
+	 * @param pp the program point where the substitution is applied
+	 * 
+	 * @return a copy of this set of sites where the substitution has been
+	 *             applied
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
 	public AllocationSites applyReplacement(HeapReplacement r, ProgramPoint pp) throws SemanticException {
 		if (isTop() || isBottom() || r.getSources().isEmpty())
 			return this;
