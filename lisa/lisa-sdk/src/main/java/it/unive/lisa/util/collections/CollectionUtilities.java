@@ -141,6 +141,37 @@ public final class CollectionUtilities {
 	}
 
 	/**
+	 * Meets (intersection) two collections, using a custom equality test to
+	 * determine if two elements are to be considered equals and thus met
+	 * together through the given {@code meet}. All elements that, according to
+	 * the given {@code equalityTest} are contained only in one of the input
+	 * collections, will not be part of the result.
+	 * 
+	 * @param <T>          the type of elements in the collections
+	 * @param <C>          the type of the collections to meet
+	 * @param first        the first collection
+	 * @param second       the second collection
+	 * @param result       the collection to be used as result, where met
+	 *                         elements will be added
+	 * @param equalityTest the tester for equality of the objects within the
+	 *                         collections
+	 * @param meet         the function that computes the meet of two equal
+	 *                         elements
+	 */
+	public static <T, C extends Collection<T>> void meet(C first, C second, C result, BiPredicate<T, T> equalityTest,
+			BinaryOperator<T> meet) {
+		// the following keeps track of the unmatched nodes in second
+		Collection<T> copy = new HashSet<>(second);
+		for (T t1 : first)
+			for (T t2 : second)
+				if (copy.contains(t2) && equalityTest.test(t1, t2)) {
+					copy.remove(t2);
+					result.add(meet.apply(t1, t2));
+					break;
+				}
+	}
+
+	/**
 	 * Stores the given objects into a collection and returns it.
 	 * 
 	 * @param <T>  the type of objects
