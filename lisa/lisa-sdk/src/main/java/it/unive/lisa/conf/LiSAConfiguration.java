@@ -141,21 +141,13 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 	/**
 	 * The {@link CallGraph} instance to use during the analysis. Defaults to
-	 * {@code null}. Setting this field is optional: if an analysis is to be
-	 * executed (that is, if {@link #abstractState} has been set), a default
-	 * {@link CallGraph} instance will be created through
-	 * {@link LiSAFactory#getDefaultFor(Class, Object...)} in order to perform
-	 * the analysis.
+	 * {@code null}.
 	 */
 	public CallGraph callGraph;
 
 	/**
 	 * The {@link InterproceduralAnalysis} instance to use during the analysis.
-	 * Defaults to {@code null}. Setting this field is optional: if an analysis
-	 * is to be executed (that is, if {@link #abstractState} has been set), a
-	 * default {@link InterproceduralAnalysis} instance will be created through
-	 * {@link LiSAFactory#getDefaultFor(Class, Object...)} in order to perform
-	 * the analysis.
+	 * Defaults to {@code null}.
 	 */
 	public InterproceduralAnalysis<?> interproceduralAnalysis;
 

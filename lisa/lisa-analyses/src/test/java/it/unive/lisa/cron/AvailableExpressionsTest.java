@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -11,7 +10,7 @@ import org.junit.Test;
 public class AvailableExpressionsTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testAvailableExpressions() throws AnalysisSetupException {
+	public void testAvailableExpressions() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

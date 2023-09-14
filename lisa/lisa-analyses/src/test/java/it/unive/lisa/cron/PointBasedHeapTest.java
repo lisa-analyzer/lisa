@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -11,7 +10,7 @@ import org.junit.Test;
 public class PointBasedHeapTest extends AnalysisTestExecutor {
 
 	@Test
-	public void fieldInsensitivePointBasedHeapTest() throws AnalysisSetupException {
+	public void fieldInsensitivePointBasedHeapTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -24,7 +23,7 @@ public class PointBasedHeapTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void fieldSensitivePointBasedHeapTest() throws AnalysisSetupException {
+	public void fieldSensitivePointBasedHeapTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

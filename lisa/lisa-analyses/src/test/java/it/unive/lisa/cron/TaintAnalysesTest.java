@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -35,7 +34,7 @@ import org.junit.Test;
 public class TaintAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testTaint() throws AnalysisSetupException {
+	public void testTaint() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.abstractState = DefaultConfiguration.simpleState(
 				DefaultConfiguration.defaultHeapDomain(),
@@ -54,7 +53,7 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testThreeLevelsTaint() throws AnalysisSetupException {
+	public void testThreeLevelsTaint() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.abstractState = DefaultConfiguration.simpleState(
 				DefaultConfiguration.defaultHeapDomain(),

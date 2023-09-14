@@ -1,6 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -65,6 +64,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 	}
 
 	@Override
+	public boolean needsCallGraph() {
+		return false;
+	}
+
+	@Override
 	public void fixpoint(AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
@@ -96,7 +100,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 				}
 
 				results.putResult(cfg, ID, cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), conf, ID));
-			} catch (SemanticException | AnalysisSetupException e) {
+			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
 	}

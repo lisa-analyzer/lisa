@@ -2,7 +2,6 @@ package it.unive.lisa.cron;
 
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -17,7 +16,7 @@ import org.junit.Test;
 
 public class VisualizationTest extends AnalysisTestExecutor {
 
-	private static CronConfiguration config() throws AnalysisSetupException {
+	private static CronConfiguration config() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.abstractState = DefaultConfiguration.defaultAbstractState();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
@@ -43,7 +42,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInputSerialization() throws AnalysisSetupException {
+	public void testInputSerialization() {
 		CronConfiguration conf = config();
 		conf.serializeInputs = true;
 		conf.testDir = "visualization";
@@ -53,7 +52,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testDOT() throws AnalysisSetupException {
+	public void testDOT() {
 		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.DOT;
 		conf.testDir = "visualization";
@@ -63,7 +62,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testGRAPHML() throws AnalysisSetupException {
+	public void testGRAPHML() {
 		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.GRAPHML;
 		conf.testDir = "visualization";
@@ -73,7 +72,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testGRAPHML_WITH_SUBNODES() throws AnalysisSetupException {
+	public void testGRAPHML_WITH_SUBNODES() {
 		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.GRAPHML_WITH_SUBNODES;
 		conf.testDir = "visualization";
@@ -83,7 +82,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testHTML() throws AnalysisSetupException {
+	public void testHTML() {
 		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.HTML;
 		conf.testDir = "visualization";
@@ -93,7 +92,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testHTML_WITH_SUBNODES() throws AnalysisSetupException {
+	public void testHTML_WITH_SUBNODES() {
 		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		conf.testDir = "visualization";

@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -20,7 +19,7 @@ import org.junit.runners.MethodSorters;
 public class RecursionsTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testFibonacciFullStack() throws AnalysisSetupException {
+	public void testFibonacciFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -41,7 +40,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFibonacciKDepth() throws AnalysisSetupException {
+	public void testFibonacciKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -62,7 +61,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFibonacciLast() throws AnalysisSetupException {
+	public void testFibonacciLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -83,7 +82,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFibonacciInsensitive() throws AnalysisSetupException {
+	public void testFibonacciInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -104,7 +103,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialLoopFullStack() throws AnalysisSetupException {
+	public void testFactorialLoopFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -120,7 +119,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialLoopKDepth() throws AnalysisSetupException {
+	public void testFactorialLoopKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -136,7 +135,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialLoopLast() throws AnalysisSetupException {
+	public void testFactorialLoopLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -152,7 +151,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialLoopInsensitive() throws AnalysisSetupException {
+	public void testFactorialLoopInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -168,7 +167,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInfiniteRecursion2FullStack() throws AnalysisSetupException {
+	public void testInfiniteRecursion2FullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -185,7 +184,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInfiniteRecursion2KDepth() throws AnalysisSetupException {
+	public void testInfiniteRecursion2KDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -202,7 +201,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInfiniteRecursion2Last() throws AnalysisSetupException {
+	public void testInfiniteRecursion2Last() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -219,7 +218,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInfiniteRecursion2Insensitive() throws AnalysisSetupException {
+	public void testInfiniteRecursion2Insensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -236,7 +235,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInfiniteRecursion1FullStack() throws AnalysisSetupException {
+	public void testInfiniteRecursion1FullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -253,7 +252,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInfiniteRecursion1KDepth() throws AnalysisSetupException {
+	public void testInfiniteRecursion1KDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -270,7 +269,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInfiniteRecursion1Last() throws AnalysisSetupException {
+	public void testInfiniteRecursion1Last() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -287,7 +286,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInfiniteRecursion1Insensitive() throws AnalysisSetupException {
+	public void testInfiniteRecursion1Insensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -304,7 +303,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialFullStack() throws AnalysisSetupException {
+	public void testFactorialFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -320,7 +319,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialKDepth() throws AnalysisSetupException {
+	public void testFactorialKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -336,7 +335,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialLast() throws AnalysisSetupException {
+	public void testFactorialLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -352,7 +351,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialInsensitive() throws AnalysisSetupException {
+	public void testFactorialInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -368,7 +367,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialInterleavedFullStack() throws AnalysisSetupException {
+	public void testFactorialInterleavedFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -384,7 +383,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialInterleavedKDepth() throws AnalysisSetupException {
+	public void testFactorialInterleavedKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -400,7 +399,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialInterleavedLast() throws AnalysisSetupException {
+	public void testFactorialInterleavedLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -416,7 +415,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFactorialInterleavedInsensitive() throws AnalysisSetupException {
+	public void testFactorialInterleavedInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -432,7 +431,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testTwoRecursionsFullStack() throws AnalysisSetupException {
+	public void testTwoRecursionsFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -448,7 +447,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testTwoRecursionsKDepth() throws AnalysisSetupException {
+	public void testTwoRecursionsKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -464,7 +463,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testTwoRecursionsLast() throws AnalysisSetupException {
+	public void testTwoRecursionsLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -480,7 +479,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testTwoRecursionsInsensitive() throws AnalysisSetupException {
+	public void testTwoRecursionsInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -496,7 +495,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testNestedRecursionsFullStack() throws AnalysisSetupException {
+	public void testNestedRecursionsFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -512,7 +511,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testNestedRecursionsKDepth() throws AnalysisSetupException {
+	public void testNestedRecursionsKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -528,7 +527,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testNestedRecursionsLast() throws AnalysisSetupException {
+	public void testNestedRecursionsLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -544,7 +543,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testNestedRecursionsInsensitive() throws AnalysisSetupException {
+	public void testNestedRecursionsInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -560,7 +559,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testUnreachableBaseCaseFullStack() throws AnalysisSetupException {
+	public void testUnreachableBaseCaseFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -576,7 +575,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testUnreachableBaseCaseKDepth() throws AnalysisSetupException {
+	public void testUnreachableBaseCaseKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -592,7 +591,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testUnreachableBaseCaseLast() throws AnalysisSetupException {
+	public void testUnreachableBaseCaseLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -608,7 +607,7 @@ public class RecursionsTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testUnreachableBaseCaseInsensitive() throws AnalysisSetupException {
+	public void testUnreachableBaseCaseInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

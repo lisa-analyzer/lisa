@@ -146,7 +146,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * ({@link #getFixpointInformation()}) has been updated by mapping the given
 	 * key to {@code info}. This is a strong update, meaning that the
 	 * information previously mapped to the same key, if any, is lost. For a
-	 * weak update, use {@link #putWeak(String, Lattice)}.
+	 * weak update, use {@link #weakStoreInfo(String, Lattice)}.
 	 * 
 	 * @param key  the key
 	 * @param info the information to store

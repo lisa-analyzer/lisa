@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -10,7 +9,7 @@ import org.junit.Test;
 public class DescendingTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testIntervalDescendingWidening() throws AnalysisSetupException {
+	public void testIntervalDescendingWidening() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -24,7 +23,7 @@ public class DescendingTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testIntervalDescendingMaxGlb() throws AnalysisSetupException {
+	public void testIntervalDescendingMaxGlb() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

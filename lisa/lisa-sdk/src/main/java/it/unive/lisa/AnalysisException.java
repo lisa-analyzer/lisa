@@ -1,12 +1,12 @@
 package it.unive.lisa;
 
 /**
- * A generic {@link Exception} that indicates that something has gone wrong
- * during the analysis.
+ * A generic {@link RuntimeException} that indicates that something has gone
+ * wrong during the analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AnalysisException extends Exception {
+public class AnalysisException extends RuntimeException {
 
 	private static final long serialVersionUID = 2005239836054799858L;
 

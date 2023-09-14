@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -16,7 +15,7 @@ import org.junit.Test;
 public class StringAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testPrefix() throws AnalysisSetupException {
+	public void testPrefix() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -29,7 +28,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testSuffix() throws AnalysisSetupException {
+	public void testSuffix() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -42,7 +41,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testCharInclusion() throws AnalysisSetupException {
+	public void testCharInclusion() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -55,7 +54,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testBricks() throws AnalysisSetupException {
+	public void testBricks() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -77,7 +76,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testFSA() throws AnalysisSetupException {
+	public void testFSA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -90,7 +89,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testTarsis() throws AnalysisSetupException {
+	public void testTarsis() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

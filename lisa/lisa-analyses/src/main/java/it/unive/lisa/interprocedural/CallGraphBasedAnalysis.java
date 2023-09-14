@@ -60,6 +60,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 	}
 
 	@Override
+	public boolean needsCallGraph() {
+		return true;
+	}
+
+	@Override
 	public void init(Application app, CallGraph callgraph, OpenCallPolicy policy)
 			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;

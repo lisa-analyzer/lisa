@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -14,7 +13,7 @@ import org.junit.Test;
 public class ModularWorstCaseAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testCHACallGraph() throws AnalysisSetupException {
+	public void testCHACallGraph() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -30,7 +29,7 @@ public class ModularWorstCaseAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testRTACallGraph() throws AnalysisSetupException {
+	public void testRTACallGraph() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -16,7 +15,7 @@ import org.junit.Test;
 public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testRTAContextSensitive1() throws AnalysisSetupException {
+	public void testRTAContextSensitive1() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -32,7 +31,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testRTAContextSensitive2() throws AnalysisSetupException {
+	public void testRTAContextSensitive2() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -48,7 +47,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testRTAContextSensitive3() throws AnalysisSetupException {
+	public void testRTAContextSensitive3() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -64,7 +63,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testRTAContextSensitive4() throws AnalysisSetupException {
+	public void testRTAContextSensitive4() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -80,7 +79,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testRTAContextSensitive5() throws AnalysisSetupException {
+	public void testRTAContextSensitive5() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -96,7 +95,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testRTAContextSensitive6() throws AnalysisSetupException {
+	public void testRTAContextSensitive6() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

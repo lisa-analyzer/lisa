@@ -1,7 +1,6 @@
 package it.unive.lisa.interprocedural.context;
 
 import it.unive.lisa.AnalysisExecutionException;
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -277,7 +276,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 				AnalysisState<A> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 				results.putResult(cfg, empty,
 						cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
-			} catch (SemanticException | AnalysisSetupException e) {
+			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
 				throw new AnalysisExecutionException("Error while computing fixpoint for entrypoint " + cfg, e);
@@ -301,17 +300,15 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 	 * 
 	 * @return the result of the fixpoint computation
 	 * 
-	 * @throws FixpointException      if the fixpoint terminates abruptly
-	 * @throws SemanticException      if an exception happens while storing the
-	 *                                    result of the fixpoint
-	 * @throws AnalysisSetupException if the {@link WorkingSet} for the fixpoint
-	 *                                    cannot be created
+	 * @throws FixpointException if the fixpoint terminates abruptly
+	 * @throws SemanticException if an exception happens while storing the
+	 *                               result of the fixpoint
 	 */
 	private AnalyzedCFG<A> computeFixpoint(
 			CFG cfg,
 			ContextSensitivityToken token,
 			AnalysisState<A> entryState)
-			throws FixpointException, SemanticException, AnalysisSetupException {
+			throws FixpointException, SemanticException {
 		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(
 				entryState,
 				this,
@@ -452,7 +449,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 				AnalyzedCFG<A> fixpointResult = null;
 				try {
 					fixpointResult = computeFixpoint(cfg, token, prepared.getLeft());
-				} catch (FixpointException | AnalysisSetupException e) {
+				} catch (FixpointException e) {
 					throw new SemanticException("Exception during the interprocedural analysis", e);
 				}
 

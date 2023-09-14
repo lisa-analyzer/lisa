@@ -45,6 +45,16 @@ import org.apache.commons.lang3.tuple.Pair;
 public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 
 	/**
+	 * Yields {@code true} if this analysis needs a {@link CallGraph} instance
+	 * to function. If this method return {@code false} and a {@link CallGraph}
+	 * is passed to LiSA in its configuration, the latter will be ignored and
+	 * won't be initialized nor constructed.
+	 * 
+	 * @return whether or not this analysis needs a call graph
+	 */
+	boolean needsCallGraph();
+
+	/**
 	 * Initializes the interprocedural analysis of the given program. A call to
 	 * this method should effectively re-initialize the interprocedural analysis
 	 * as if it is yet to be used. This is useful when the same instance is used

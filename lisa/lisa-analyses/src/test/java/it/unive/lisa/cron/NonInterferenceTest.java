@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AnalysisState;
@@ -29,7 +28,7 @@ import org.junit.Test;
 public class NonInterferenceTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testConfidentialityNI() throws AnalysisSetupException {
+	public void testConfidentialityNI() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = new SimpleAbstractState<>(
@@ -45,7 +44,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testIntegrityNI() throws AnalysisSetupException {
+	public void testIntegrityNI() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = new SimpleAbstractState<>(
@@ -61,7 +60,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testDeclassification() throws AnalysisSetupException {
+	public void testDeclassification() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = new SimpleAbstractState<>(

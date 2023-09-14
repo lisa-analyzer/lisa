@@ -118,22 +118,31 @@ public class LiSARunner<A extends AbstractState<A>> {
 		else
 			LOG.warn("Skipping syntactic checks execution since none have been provided");
 
-		try {
-			callGraph.init(app);
-		} catch (CallGraphConstructionException e) {
-			LOG.fatal("Exception while building the call graph for the input program", e);
-			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
-		}
+		if (interproc == null)
+			LOG.warn("Skipping analysis execution since no interprocedural analysis has been provided");
+		else if (callGraph == null && interproc.needsCallGraph())
+			throw new AnalysisSetupException(
+					"The provided interprocedural analysis needs a call graph to function, but none has been provided");
+		else if (state == null)
+			LOG.warn("Skipping analysis execution since no abstract sate has been provided");
+		else {
+			try {
+				callGraph.init(app);
+			} catch (CallGraphConstructionException e) {
+				LOG.fatal("Exception while building the call graph for the input program", e);
+				throw new AnalysisSetupException(
+						"Exception while building the call graph for the input program",
+						e);
+			}
 
-		try {
-			interproc.init(app, callGraph, conf.openCallPolicy);
-		} catch (InterproceduralAnalysisException e) {
-			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
-			throw new AnalysisExecutionException(
-					"Exception while building the interprocedural analysis for the input program", e);
-		}
+			try {
+				interproc.init(app, callGraph, conf.openCallPolicy);
+			} catch (InterproceduralAnalysisException e) {
+				LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
+				throw new AnalysisSetupException(
+						"Exception while building the interprocedural analysis for the input program", e);
+			}
 
-		if (state != null) {
 			analyze(allCFGs, fileManager, htmlViewer, subnodes);
 			Map<CFG, Collection<AnalyzedCFG<A>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
@@ -150,8 +159,7 @@ public class LiSARunner<A extends AbstractState<A>> {
 				ChecksExecutor.executeAll(tool2, app, semanticChecks);
 			} else
 				LOG.warn("Skipping semantic checks execution since none have been provided");
-		} else
-			LOG.warn("Skipping analysis execution since no abstract sate has been provided");
+		}
 
 		return tool.getWarnings();
 	}

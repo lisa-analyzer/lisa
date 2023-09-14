@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -14,7 +13,7 @@ import org.junit.Test;
 public class NumericAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testSign() throws AnalysisSetupException {
+	public void testSign() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -27,7 +26,7 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testParity() throws AnalysisSetupException {
+	public void testParity() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -40,7 +39,7 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testInterval() throws AnalysisSetupException {
+	public void testInterval() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -53,7 +52,7 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testIntegerConstantPropagation() throws AnalysisSetupException {
+	public void testIntegerConstantPropagation() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

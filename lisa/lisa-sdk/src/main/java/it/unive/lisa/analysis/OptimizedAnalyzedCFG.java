@@ -45,8 +45,9 @@ import org.apache.logging.log4j.Logger;
  * such that {@link Statement#stopsExecution()} holds), and hotspots (that is,
  * {@link Statement}s such that {@link LiSAConfiguration#hotspots} holds).
  * Approximations for other statements can be retrieved through
- * {@link #getUnwindedAnalysisStateAfter(Statement)}, that will first expand the
- * results using {@link #unwind()}.
+ * {@link #getUnwindedAnalysisStateAfter(Statement, FixpointConfiguration)},
+ * that will first expand the results using
+ * {@link #unwind(FixpointConfiguration)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -148,7 +149,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	 * Yields the computed result at a given statement (exit state). If such a
 	 * state is not available as it was discarded due to optimization, and
 	 * fixpoint's results have not been unwinded yet, a fixpoint iteration is
-	 * executed in-place through {@link #unwind()}.
+	 * executed in-place through {@link #unwind(FixpointConfiguration)}.
 	 *
 	 * @param st   the statement
 	 * @param conf the {@link FixpointConfiguration} to use for running the fast
@@ -305,6 +306,12 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 		@Override
 		public FixpointResults<A> getFixpointResults() {
 			return interprocedural.getFixpointResults();
+		}
+
+		@Override
+		public boolean needsCallGraph() {
+			// not really needed
+			return false;
 		}
 	}
 

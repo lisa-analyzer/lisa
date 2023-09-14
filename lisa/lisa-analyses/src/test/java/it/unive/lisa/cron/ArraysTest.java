@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -12,7 +11,7 @@ import org.junit.Test;
 public class ArraysTest extends AnalysisTestExecutor {
 
 	@Test
-	public void monolithTest() throws AnalysisSetupException {
+	public void monolithTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -26,7 +25,7 @@ public class ArraysTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void fieldInsensitiveTest() throws AnalysisSetupException {
+	public void fieldInsensitiveTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -40,7 +39,7 @@ public class ArraysTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void fieldSensitiveTest() throws AnalysisSetupException {
+	public void fieldSensitiveTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(

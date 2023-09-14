@@ -1,6 +1,5 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -10,7 +9,7 @@ import org.junit.Test;
 public class TracePartitioningTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testTracePartitioning() throws AnalysisSetupException {
+	public void testTracePartitioning() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.abstractState = new TracePartitioning<>(DefaultConfiguration.defaultAbstractState());
 		conf.serializeResults = true;
