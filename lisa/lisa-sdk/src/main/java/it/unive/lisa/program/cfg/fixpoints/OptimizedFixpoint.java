@@ -23,10 +23,11 @@ import java.util.function.Predicate;
 
 /**
  * A fixpoint algorithm for a {@link Graph}, parametric to the
- * {@link FixpointImplementation} that one wants to use to compute the results.
- * This fixpoint algorithms is optimized: it works exploiting the basic blocks
- * of the target graph, and only yields approximations of widening points,
- * stopping statements and user-defined hotspots.
+ * {@link it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation}
+ * that one wants to use to compute the results. This fixpoint algorithms is
+ * optimized: it works exploiting the basic blocks of the target graph, and only
+ * yields approximations of widening points, stopping statements and
+ * user-defined hotspots.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 

@@ -209,9 +209,8 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * Given two subset S<sub>1</sub> and S<sub>2</sub> of the domain of a
 	 * lattice widening(S<sub>1</sub>, S<sub>2</sub>) =
 	 * h<sup>&nabla;</sup>(S<sub>1</sub>, T<sub>2</sub>), where
-	 * h<sup>&nabla;</sup> is a
-	 * {@link #extrapolationHeuristic(NonRedundantPowerset) widenining-connected
-	 * extrapolation heuristic} and T<sub>2</sub> is equal to:
+	 * h<sup>&nabla;</sup> is a widenining-connected extrapolation heuristic and
+	 * T<sub>2</sub> is equal to:
 	 * <ul>
 	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
@@ -219,8 +218,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation}
-	 * and +<sub>EM</sub> is an
-	 * {@link #EgliMilnerConnector(NonRedundantPowerset) Egli-Milner connector}.
+	 * and +<sub>EM</sub> is an Egli-Milner connector.
 	 */
 	@Override
 	public C wideningAux(C other) throws SemanticException {

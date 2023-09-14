@@ -1,18 +1,19 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.symbolic.value.operator.StringOperator;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * A common implementation for classes implementing {@link BinaryOperator} and
  * {@link StringOperator}, providing a
  * {@link #typeInference(TypeSystem, Set, Set)} implementation that returns an
  * empty set if no {@link StringType} can be found in one of the arguments, and
- * a singleton set containing {@link #resultType(TypeSystem)} otherwise.
+ * a singleton set containing their result type otherwise.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

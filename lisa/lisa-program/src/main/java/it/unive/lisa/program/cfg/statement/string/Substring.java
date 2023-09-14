@@ -27,13 +27,12 @@ import it.unive.lisa.type.TypeSystem;
  * {@link StringType}. <br>
  * <br>
  * Since in most languages string operations are provided through calls to
- * library functions, this class contains a field {@link #originating} whose
- * purpose is to optionally store a {@link Statement} that is rewritten to an
- * instance of this class (i.e., a call to a {@link NativeCFG} modeling the
- * library function). If present, such statement will be used as
- * {@link ProgramPoint} for semantics computations. This allows subclasses to
- * implement {@link PluggableStatement} easily without redefining the semantics
- * provided by this class.
+ * library functions, this class contains a field whose purpose is to optionally
+ * store a {@link Statement} that is rewritten to an instance of this class
+ * (i.e., a call to a {@link NativeCFG} modeling the library function). If
+ * present, such statement will be used as {@link ProgramPoint} for semantics
+ * computations. This allows subclasses to implement {@link PluggableStatement}
+ * easily without redefining the semantics provided by this class.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
