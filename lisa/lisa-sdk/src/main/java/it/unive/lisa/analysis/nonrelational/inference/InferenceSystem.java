@@ -73,12 +73,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	@Override
 	public InferenceSystem<T> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		if (isBottom())
-			return this;
-
-		// If id cannot be tracked by the underlying
-		// lattice, return this
-		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
+		if (isBottom() || !lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
 			return this;
 
 		Map<Identifier, T> func = mkNewFunction(function, false);

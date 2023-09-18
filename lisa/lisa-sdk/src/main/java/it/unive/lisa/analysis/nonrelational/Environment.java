@@ -58,8 +58,6 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		if (isBottom())
 			return (M) this;
 
-		// If id cannot be tracked by the underlying
-		// lattice, return this
 		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
 			return (M) this;
 

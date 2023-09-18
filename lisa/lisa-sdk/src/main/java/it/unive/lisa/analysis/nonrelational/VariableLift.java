@@ -175,6 +175,6 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 
 	@Override
 	public T stateOfUnknown(Identifier key) {
-		return lattice.bottom();
+		return lattice.unknownVariable(key);
 	}
 }

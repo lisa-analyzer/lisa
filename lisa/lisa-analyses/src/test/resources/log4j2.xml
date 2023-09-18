@@ -2,7 +2,7 @@
 <Configuration status="WARN" name="DefaultLoggingConf">
 	<Appenders>
 		<Console name="console">
-			<PatternLayout pattern="%d %5level %c - %m %ex%n"/>
+			<PatternLayout pattern="%d [%5level] %m %ex%n"/>
 		</Console>
 	</Appenders>
 
