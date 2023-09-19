@@ -430,4 +430,9 @@ public class AnalysisState<A extends AbstractState<A>>
 		result.addAll(state.getAllDomainInstances(domain));
 		return result;
 	}
+	
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		return state.knowsIdentifier(id);
+	}
 }

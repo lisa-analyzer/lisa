@@ -447,4 +447,10 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			return new ExpressionSet(expression);
 		}
 	}
+	
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		return heapEnv.knowsIdentifier(id) || (id instanceof AllocationSite
+				&& heapEnv.getValues().stream().anyMatch(as -> as.contains((AllocationSite) id)));
+	}
 }

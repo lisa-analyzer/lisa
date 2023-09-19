@@ -75,6 +75,16 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	D assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException;
 
 	/**
+	 * Yields {@code true} if this instance is currently tracking abstract
+	 * information for the given identifier.
+	 * 
+	 * @param id the identifier
+	 * 
+	 * @return whether or not this domain knows about {@code id}
+	 */
+	boolean knowsIdentifier(Identifier id);
+
+	/**
 	 * Forgets an {@link Identifier}. This means that all information regarding
 	 * the given {@code id} will be lost. This method should be invoked whenever
 	 * an identifier gets out of scope.

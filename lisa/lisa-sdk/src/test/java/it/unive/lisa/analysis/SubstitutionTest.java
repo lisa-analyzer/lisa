@@ -115,6 +115,10 @@ public class SubstitutionTest {
 			return new Collector();
 		}
 
+		@Override
+		public boolean knowsIdentifier(Identifier id) {
+			return false; // not used
+		}
 	}
 
 	private static final ProgramPoint fake = new ProgramPoint() {

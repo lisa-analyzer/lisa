@@ -477,4 +477,9 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			return Untyped.INSTANCE;
 		return Type.commonSupertype(types, Untyped.INSTANCE);
 	}
+	
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		return heapState.knowsIdentifier(id) || valueState.knowsIdentifier(id) || typeState.knowsIdentifier(id);
+	}
 }

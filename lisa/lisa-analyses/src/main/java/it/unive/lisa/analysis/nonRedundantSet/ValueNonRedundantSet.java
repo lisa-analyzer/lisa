@@ -1,10 +1,11 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
+import java.util.SortedSet;
+
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.SortedSet;
 
 /**
  * This class expands the {@link NonRedundantPowerset} class fixing the type of
@@ -44,4 +45,8 @@ public class ValueNonRedundantSet<T extends ValueDomain<T>>
 		return this.isTop && this.elements.isEmpty();
 	}
 
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		return elements.stream().anyMatch(e -> e.knowsIdentifier(id));
+	}
 }

@@ -270,4 +270,9 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	public final String toString() {
 		return representation().toString();
 	}
+	
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		return elements.stream().anyMatch(e -> e.getInvolvedIdentifiers().contains(id));
+	}
 }

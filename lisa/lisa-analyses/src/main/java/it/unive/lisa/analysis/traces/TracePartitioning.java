@@ -1,5 +1,12 @@
 package it.unive.lisa.analysis.traces;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -18,12 +25,6 @@ import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to
@@ -365,5 +366,16 @@ public class TracePartitioning<A extends AbstractState<A>>
 	@Override
 	public A stateOfUnknown(ExecutionTrace key) {
 		return lattice.bottom();
+	}
+
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		if (isTop() || isBottom() || function == null)
+			return false;
+
+		for (Entry<ExecutionTrace, A> trace : this)
+			if (trace.getValue().knowsIdentifier(id))
+				return true;
+		return false;
 	}
 }

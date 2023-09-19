@@ -39,4 +39,9 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	public boolean isBottom() {
 		return left.isBottom() && right.isBottom();
 	}
+	
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		return left.knowsIdentifier(id) || right.knowsIdentifier(id);
+	}
 }

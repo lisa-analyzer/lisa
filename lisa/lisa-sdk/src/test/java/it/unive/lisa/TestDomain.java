@@ -87,4 +87,9 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 	public String toString() {
 		return representation().toString();
 	}
+
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		return false;
+	}
 }

@@ -199,4 +199,9 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			return deref;
 		}
 	}
+	
+	@Override
+	public boolean knowsIdentifier(Identifier id) {
+		return false;
+	}
 }
