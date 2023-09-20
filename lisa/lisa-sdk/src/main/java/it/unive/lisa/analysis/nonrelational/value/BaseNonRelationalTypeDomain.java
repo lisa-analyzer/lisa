@@ -14,8 +14,10 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
@@ -135,6 +137,11 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 		}
 
 		@Override
+		public T visit(PushInv expression, Object... params) throws SemanticException {
+			return singleton.evalPushInv(expression, (ProgramPoint) params[1]);
+		}
+
+		@Override
 		public T visit(Constant expression, Object... params) throws SemanticException {
 			if (expression instanceof NullConstant)
 				return singleton.evalNullConstant((ProgramPoint) params[1]);
@@ -225,16 +232,13 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 
 	@Override
 	default boolean tracksIdentifiers(Identifier id) {
-		// As default, base non relational type domains
-		// tracks only non-pointer identifier
-		return canProcess(id);
+		return !(id instanceof MemoryPointer);
 	}
 
 	@Override
 	default boolean canProcess(SymbolicExpression expression) {
-		if (expression.hasRuntimeTypes())
-			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
-		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
+		// Type analysis can process any expression
+		return true;
 	}
 
 	/**
@@ -282,6 +286,21 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 	 */
 	default T evalPushAny(PushAny pushAny, ProgramPoint pp) throws SemanticException {
 		return top();
+	}
+
+	/**
+	 * Yields the evaluation of a push-inv expression.
+	 * 
+	 * @param pushInv the push-inv expression to be evaluated
+	 * @param pp      the program point that where this operation is being
+	 *                    evaluated
+	 * 
+	 * @return the evaluation of the push-inv expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default T evalPushInv(PushInv pushInv, ProgramPoint pp) throws SemanticException {
+		return bottom();
 	}
 
 	/**

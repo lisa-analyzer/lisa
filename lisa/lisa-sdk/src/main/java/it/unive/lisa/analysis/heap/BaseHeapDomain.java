@@ -12,6 +12,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
@@ -172,6 +173,12 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 
 		@Override
 		public ExpressionSet visit(PushAny expression, Object... params)
+				throws SemanticException {
+			return new ExpressionSet(expression);
+		}
+
+		@Override
+		public ExpressionSet visit(PushInv expression, Object... params)
 				throws SemanticException {
 			return new ExpressionSet(expression);
 		}

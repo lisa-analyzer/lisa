@@ -25,6 +25,7 @@ import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.VoidType;
@@ -246,8 +247,15 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 		if (returnsVoid(call, state))
 			return state.popScope(scope);
 
-		AnalysisState<A> tmp = state.bottom();
 		Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
+
+		if (state.getComputedExpressions().isEmpty()) {
+			// a return value is expected, but nothing is left on the stack
+			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
+			return state.popScope(scope).assign(meta, inv, call);
+		}
+
+		AnalysisState<A> tmp = state.bottom();
 		for (SymbolicExpression ret : state.getComputedExpressions())
 			tmp = tmp.lub(state.assign(meta, ret, call));
 

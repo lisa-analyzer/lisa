@@ -2,7 +2,6 @@ package it.unive.lisa.interprocedural.context.recursion;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -91,10 +90,7 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 			if (returnsVoid)
 				return entryState.bottom();
 			else
-				return new AnalysisState<>(
-						entryState.getState().bottom(),
-						call.getMetaVariable(),
-						FixpointInfo.BOTTOM);
+				return entryState.bottom().smallStepSemantics(call.getMetaVariable(), call);
 		}
 
 		return super.getAbstractResultOf(call, entryState, parameters, expressions);

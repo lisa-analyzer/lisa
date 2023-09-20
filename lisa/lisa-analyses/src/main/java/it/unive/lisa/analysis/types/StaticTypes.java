@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.types;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -8,12 +11,11 @@ import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
@@ -24,8 +26,6 @@ import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -115,6 +115,11 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
+	public StaticTypes evalPushInv(PushInv pushInv, ProgramPoint pp) throws SemanticException {
+		return new StaticTypes(pp.getProgram().getTypes(), pushInv.getStaticType());
+	}
+
+	@Override
 	public StaticTypes evalNullConstant(ProgramPoint pp) {
 		return new StaticTypes(pp.getProgram().getTypes(), NullType.INSTANCE);
 	}
@@ -192,17 +197,6 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 				return false;
 		} else if (!type.equals(other.type))
 			return false;
-		return true;
-	}
-
-	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !(id instanceof MemoryPointer);
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		// Type analysis can process any expression
 		return true;
 	}
 }

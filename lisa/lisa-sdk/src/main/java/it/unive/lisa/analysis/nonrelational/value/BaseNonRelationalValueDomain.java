@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
@@ -132,6 +133,11 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 		@Override
 		public T visit(PushAny expression, Object... params) throws SemanticException {
 			return singleton.evalPushAny(expression, (ProgramPoint) params[1]);
+		}
+
+		@Override
+		public T visit(PushInv expression, Object... params) throws SemanticException {
+			return singleton.evalPushInv(expression, (ProgramPoint) params[1]);
 		}
 
 		@Override
@@ -282,6 +288,21 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 */
 	default T evalPushAny(PushAny pushAny, ProgramPoint pp) throws SemanticException {
 		return top();
+	}
+
+	/**
+	 * Yields the evaluation of a push-inv expression.
+	 * 
+	 * @param pushInv the push-inv expression to be evaluated
+	 * @param pp      the program point that where this operation is being
+	 *                    evaluated
+	 * 
+	 * @return the evaluation of the push-inv expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default T evalPushInv(PushInv pushInv, ProgramPoint pp) throws SemanticException {
+		return bottom();
 	}
 
 	/**

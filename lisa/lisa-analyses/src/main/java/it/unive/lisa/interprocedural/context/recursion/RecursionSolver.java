@@ -1,5 +1,13 @@
 package it.unive.lisa.interprocedural.context.recursion;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
@@ -21,15 +29,10 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A recursion solver that applies the iterates of the recursion starting from
@@ -118,7 +121,17 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 				// no state: we must start with the base cases
 				approx = transferToCallsite(recursion.getInvocation(), call, base);
 			// we bring in the entry state to carry over the correct scope
-			return approx.lub(entryState);
+			AnalysisState<A> res = approx.lub(entryState);
+			Identifier meta = call.getMetaVariable();
+			if (!res.knowsIdentifier(meta)) {
+				// if we have no information for the return value, we want to
+				// force it to bottom as it means that this is either the first
+				// execution (that must start from bottom) or that the recursion
+				// diverges
+				PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
+				res = res.assign(meta, inv, call);
+			}
+			return res;
 		}
 		return super.getAbstractResultOf(call, entryState, parameters, expressions);
 	}
@@ -230,6 +243,15 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 			for (Identifier variable : original.getMetaVariables())
 				// we transfer the return value
 				res = res.lub(state.assign(meta, variable, original));
+
+		if (!res.knowsIdentifier(meta)) {
+			// if we have no information for the return value, we want to
+			// force it to bottom as it means that this is either the first
+			// execution (that must start from bottom) or that the recursion
+			// diverges
+			PushInv inv = new PushInv(meta.getStaticType(), destination.getLocation());
+			res = res.assign(meta, inv, destination);
+		}
 
 		// we only keep variables that can be affected by the recursive
 		// chain: the whole recursion return value, and all variables

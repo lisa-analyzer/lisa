@@ -2,6 +2,12 @@ package it.unive.lisa.analysis.types;
 
 import static org.apache.commons.collections4.CollectionUtils.intersection;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -10,12 +16,11 @@ import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
@@ -30,11 +35,6 @@ import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -157,6 +157,11 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		if (pushAny.getStaticType().isUntyped())
 			return new InferredTypes(true, types.getTypes());
 		return new InferredTypes(types, pushAny.getRuntimeTypes(types));
+	}
+	
+	@Override
+	public InferredTypes evalPushInv(PushInv pushInv, ProgramPoint pp) throws SemanticException {
+		return bottom();
 	}
 
 	@Override
@@ -352,16 +357,5 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		if (inferred.isEmpty())
 			return BOTTOM;
 		return new InferredTypes(types, inferred);
-	}
-
-	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !(id instanceof MemoryPointer);
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		// Type analysis can process any expression
-		return true;
 	}
 }

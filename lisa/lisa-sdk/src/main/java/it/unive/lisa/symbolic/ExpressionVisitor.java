@@ -9,6 +9,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
@@ -178,6 +179,20 @@ public interface ExpressionVisitor<T> {
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
 	T visit(PushAny expression, Object... params) throws SemanticException;
+
+	/**
+	 * Visits a {@link PushInv}.
+	 * 
+	 * @param expression the pushinv
+	 * @param params     the additional parameters provided to
+	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
+	 *                       if any
+	 * 
+	 * @return the value produced by visiting the pushinv
+	 * 
+	 * @throws SemanticException if an error occurs during the visit operation
+	 */
+	T visit(PushInv expression, Object... params) throws SemanticException;
 
 	/**
 	 * Visits a {@link Constant}.
