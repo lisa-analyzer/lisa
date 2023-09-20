@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.type.Type;
@@ -19,14 +20,19 @@ public class MemoryAllocation extends HeapExpression {
 	private final boolean isStackAllocation;
 
 	/**
+	 * Annotations of this memory allocation.
+	 */
+	private final Annotations anns;
+	
+	/**
 	 * Builds the heap allocation.
 	 * 
 	 * @param staticType the static type of this expression
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public MemoryAllocation(Type staticType, CodeLocation location) {
-		this(staticType, location, false);
+	public MemoryAllocation(Type staticType, CodeLocation location, Annotations anns) {
+		this(staticType, location, anns, false);
 	}
 
 	/**
@@ -37,16 +43,17 @@ public class MemoryAllocation extends HeapExpression {
 	 *                              generated this expression
 	 * @param isStackAllocation if this allocation is allocated in the stack
 	 */
-	public MemoryAllocation(Type staticType, CodeLocation location, boolean isStackAllocation) {
+	public MemoryAllocation(Type staticType, CodeLocation location, Annotations anns, boolean isStackAllocation) {
 		super(staticType, location);
 		this.isStackAllocation = isStackAllocation;
+		this.anns = anns;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(isStackAllocation);
+		result = prime * result + Objects.hash(anns, isStackAllocation);
 		return result;
 	}
 
@@ -58,6 +65,10 @@ public class MemoryAllocation extends HeapExpression {
 	public boolean isStackAllocation() {
 		return isStackAllocation;
 	}
+	
+	public Annotations getAnnotations() {
+		return anns;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -68,7 +79,7 @@ public class MemoryAllocation extends HeapExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		MemoryAllocation other = (MemoryAllocation) obj;
-		return isStackAllocation == other.isStackAllocation;
+		return Objects.equals(anns, other.anns) && isStackAllocation == other.isStackAllocation;
 	}
 
 	@Override

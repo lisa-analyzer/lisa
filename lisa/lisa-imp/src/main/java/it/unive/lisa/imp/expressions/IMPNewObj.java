@@ -10,6 +10,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
@@ -74,7 +75,7 @@ public class IMPNewObj extends NaryExpression {
 					throws SemanticException {
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
-		MemoryAllocation created = new MemoryAllocation(type, getLocation(), staticallyAllocated);
+		MemoryAllocation created = new MemoryAllocation(type, getLocation(), new Annotations(), staticallyAllocated);
 		HeapReference ref = new HeapReference(reftype, created, getLocation());
 		created.setRuntimeTypes(Collections.singleton(type));
 		ref.setRuntimeTypes(Collections.singleton(reftype));

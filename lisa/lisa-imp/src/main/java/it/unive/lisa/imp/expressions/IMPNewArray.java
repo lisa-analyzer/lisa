@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
@@ -63,7 +64,7 @@ public class IMPNewArray extends NaryExpression {
 					ExpressionSet<SymbolicExpression>[] params,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		MemoryAllocation alloc = new MemoryAllocation(getStaticType(), getLocation(), staticallyAllocated);
+		MemoryAllocation alloc = new MemoryAllocation(getStaticType(), getLocation(), new Annotations(), staticallyAllocated);
 		AnalysisState<A, H, V, T> sem = state.smallStepSemantics(alloc, this);
 
 		AnalysisState<A, H, V, T> result = state.bottom();

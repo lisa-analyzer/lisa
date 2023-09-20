@@ -1,5 +1,13 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -7,6 +15,7 @@ import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -23,13 +32,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -118,7 +120,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					if (star_y instanceof StackAllocationSite
 							&& alreadyAllocated(((StackAllocationSite) star_y).getLocationName()) != null)
 						result = result
-								.lub(nonAliasedAssignment(id, (StackAllocationSite) star_y, sss, pp, replacements));
+						.lub(nonAliasedAssignment(id, (StackAllocationSite) star_y, sss, pp, replacements));
 					else {
 						// aliasing: id and star_y points to the same object
 						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
@@ -187,7 +189,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	 */
 	public PointBasedHeap nonAliasedAssignment(Identifier id, StackAllocationSite site, PointBasedHeap pb,
 			ProgramPoint pp, List<HeapReplacement> replacements)
-			throws SemanticException {
+					throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
 		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
@@ -359,7 +361,13 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 								site.getLocationName(),
 								true,
 								expression.getCodeLocation());
-
+					
+					// propagates the annotations of the child value expression to the newly created allocation site
+					for (ValueExpression f : child)
+						if (f instanceof Identifier)
+							for (Annotation ann : e.getAnnotations())
+							e.addAnnotation(ann);
+					
 					Set<Type> types = new HashSet<>();
 					if (expression.hasRuntimeTypes())
 						types.addAll(expression.getRuntimeTypes(null));
@@ -371,8 +379,19 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 						e.setRuntimeTypes(types);
 
 					result.add(e);
-				} else if (rec instanceof AllocationSite)
+				} else if (rec instanceof AllocationSite) {
+					Set<Type> types = new HashSet<>();
+					if (expression.hasRuntimeTypes())
+						types.addAll(expression.getRuntimeTypes(null));
+
+					if (rec.hasRuntimeTypes())
+						types.addAll(rec.getRuntimeTypes(null));
+
+					if (!types.isEmpty()) 
+						rec.setRuntimeTypes(types);
+					
 					result.add(rec);
+				}
 
 			return new ExpressionSet<>(result);
 		}
@@ -381,18 +400,24 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
 			AllocationSite id;
-			if (expression.isStackAllocation())
+			if (expression.isStackAllocation()) {
 				id = new StackAllocationSite(
 						expression.getStaticType(),
 						expression.getCodeLocation().getCodeLocation(),
 						true,
 						expression.getCodeLocation());
-			else
+			} else {
 				id = new HeapAllocationSite(
 						expression.getStaticType(),
 						expression.getCodeLocation().getCodeLocation(),
 						true,
 						expression.getCodeLocation());
+			}
+
+			// propagates the annotations of expression
+			// to the newly created allocation site
+			for (Annotation ann : expression.getAnnotations())
+				id.getAnnotations().addAnnotation(ann);
 
 			if (expression.hasRuntimeTypes())
 				id.setRuntimeTypes(expression.getRuntimeTypes(null));
@@ -402,17 +427,24 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> arg,
 				Object... params)
-				throws SemanticException {
+						throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression loc : arg)
 				if (loc instanceof AllocationSite) {
+					AllocationSite allocSite = (AllocationSite) loc;
 					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(loc.getStaticType()),
-							(AllocationSite) loc,
-							loc.getCodeLocation());
+							new ReferenceType(allocSite.getStaticType()),
+							allocSite,
+							allocSite.getCodeLocation());
 					if (expression.hasRuntimeTypes())
 						e.setRuntimeTypes(expression.getRuntimeTypes(null));
+					
+					// propagates the annotations of the allocation site
+					// to the newly created memory pointer
+					for (Annotation ann : allocSite.getAnnotations())
+						e.addAnnotation(ann);
+					
 					result.add(e);
 				} else
 					result.add(loc);
@@ -422,7 +454,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> arg,
 				Object... params)
-				throws SemanticException {
+						throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression ref : arg)
@@ -444,7 +476,13 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 							site = new StackAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
 						else
 							throw new SemanticException("The type " + id.getStaticType()
-									+ " cannot be allocated by point-based heap domains");
+							+ " cannot be allocated by point-based heap domains");
+						
+						// propagates the annotations of the variable
+						// to the newly created allocation site
+						for (Annotation ann : id.getAnnotations())
+							site.addAnnotation(ann);
+						
 						result.add(site);
 					}
 				} else
