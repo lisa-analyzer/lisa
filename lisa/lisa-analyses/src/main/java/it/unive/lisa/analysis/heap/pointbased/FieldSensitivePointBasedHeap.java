@@ -101,7 +101,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	public FieldSensitivePointBasedHeap nonAliasedAssignment(Identifier id, StackAllocationSite site,
 			PointBasedHeap pb,
 			ProgramPoint pp, List<HeapReplacement> replacements)
-					throws SemanticException {
+			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
 		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
@@ -109,7 +109,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		HeapEnvironment<AllocationSites> heap = pb.heapEnv.assign(id, clone, pp);
 
 		Map<AllocationSite,
-		Set<SymbolicExpression>> newFields = new HashMap<>(((FieldSensitivePointBasedHeap) pb).fields);
+				Set<SymbolicExpression>> newFields = new HashMap<>(((FieldSensitivePointBasedHeap) pb).fields);
 
 		// all the allocation sites fields of star_y
 		if (((FieldSensitivePointBasedHeap) pb).fields.containsKey(site)) {
@@ -162,7 +162,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 			AccessChild accessChild = (AccessChild) expression;
 			Map<AllocationSite,
-			Set<SymbolicExpression>> mapping = new HashMap<AllocationSite, Set<SymbolicExpression>>(sss.fields);
+					Set<SymbolicExpression>> mapping = new HashMap<AllocationSite, Set<SymbolicExpression>>(sss.fields);
 
 			ExpressionSet<ValueExpression> exprs = rewrite(accessChild.getContainer(), pp);
 			for (ValueExpression rec : exprs)
@@ -234,7 +234,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 							site.isWeak(),
 							site.getCodeLocation());
 
-				// propagates the annotations of the child value expression to the newly created allocation site
+				// propagates the annotations of the child value expression to
+				// the newly created allocation site
 				for (ValueExpression f : child)
 					if (f instanceof Identifier)
 						for (Annotation ann : e.getAnnotations())

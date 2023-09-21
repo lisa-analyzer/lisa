@@ -64,7 +64,8 @@ public class IMPNewArray extends NaryExpression {
 					ExpressionSet<SymbolicExpression>[] params,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		MemoryAllocation alloc = new MemoryAllocation(getStaticType(), getLocation(), new Annotations(), staticallyAllocated);
+		MemoryAllocation alloc = new MemoryAllocation(getStaticType(), getLocation(), new Annotations(),
+				staticallyAllocated);
 		AnalysisState<A, H, V, T> sem = state.smallStepSemantics(alloc, this);
 
 		AnalysisState<A, H, V, T> result = state.bottom();

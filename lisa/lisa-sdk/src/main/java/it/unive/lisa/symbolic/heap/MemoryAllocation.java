@@ -23,13 +23,14 @@ public class MemoryAllocation extends HeapExpression {
 	 * Annotations of this memory allocation.
 	 */
 	private final Annotations anns;
-	
+
 	/**
 	 * Builds the heap allocation.
 	 * 
 	 * @param staticType the static type of this expression
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
+	 * @param anns       the annotations of this memory allocation
 	 */
 	public MemoryAllocation(Type staticType, CodeLocation location, Annotations anns) {
 		this(staticType, location, anns, false);
@@ -41,6 +42,7 @@ public class MemoryAllocation extends HeapExpression {
 	 * @param staticType        the static type of this expression
 	 * @param location          the code location of the statement that has
 	 *                              generated this expression
+	 * @param anns              the annotations of this memory allocation
 	 * @param isStackAllocation if this allocation is allocated in the stack
 	 */
 	public MemoryAllocation(Type staticType, CodeLocation location, Annotations anns, boolean isStackAllocation) {
@@ -65,7 +67,12 @@ public class MemoryAllocation extends HeapExpression {
 	public boolean isStackAllocation() {
 		return isStackAllocation;
 	}
-	
+
+	/**
+	 * Yields the annotations of this expression.
+	 * 
+	 * @return the annotations of this expression
+	 */
 	public Annotations getAnnotations() {
 		return anns;
 	}
