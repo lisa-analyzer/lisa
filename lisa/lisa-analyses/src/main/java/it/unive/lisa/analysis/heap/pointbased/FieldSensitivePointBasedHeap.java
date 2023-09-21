@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -100,7 +101,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	public FieldSensitivePointBasedHeap nonAliasedAssignment(Identifier id, StackAllocationSite site,
 			PointBasedHeap pb,
 			ProgramPoint pp, List<HeapReplacement> replacements)
-			throws SemanticException {
+					throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
 		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
@@ -108,7 +109,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		HeapEnvironment<AllocationSites> heap = pb.heapEnv.assign(id, clone, pp);
 
 		Map<AllocationSite,
-				Set<SymbolicExpression>> newFields = new HashMap<>(((FieldSensitivePointBasedHeap) pb).fields);
+		Set<SymbolicExpression>> newFields = new HashMap<>(((FieldSensitivePointBasedHeap) pb).fields);
 
 		// all the allocation sites fields of star_y
 		if (((FieldSensitivePointBasedHeap) pb).fields.containsKey(site)) {
@@ -161,7 +162,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 			AccessChild accessChild = (AccessChild) expression;
 			Map<AllocationSite,
-					Set<SymbolicExpression>> mapping = new HashMap<AllocationSite, Set<SymbolicExpression>>(sss.fields);
+			Set<SymbolicExpression>> mapping = new HashMap<AllocationSite, Set<SymbolicExpression>>(sss.fields);
 
 			ExpressionSet<ValueExpression> exprs = rewrite(accessChild.getContainer(), pp);
 			for (ValueExpression rec : exprs)
@@ -233,6 +234,12 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 							site.isWeak(),
 							site.getCodeLocation());
 
+				// propagates the annotations of the child value expression to the newly created allocation site
+				for (ValueExpression f : child)
+					if (f instanceof Identifier)
+						for (Annotation ann : e.getAnnotations())
+							e.addAnnotation(ann);
+
 				if (expression.hasRuntimeTypes())
 					e.setRuntimeTypes(expression.getRuntimeTypes(null));
 				result.add(e);
@@ -255,6 +262,11 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				e = new StackAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
 			else
 				e = new HeapAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+
+			// propagates the annotations of expression
+			// to the newly created allocation site
+			for (Annotation ann : expression.getAnnotations())
+				e.getAnnotations().addAnnotation(ann);
 
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes(null));
