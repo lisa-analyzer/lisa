@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.nonrelational;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -65,11 +66,11 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 
-		return lattice.satisfies(expression, (M) this, pp);
+		return lattice.satisfies(expression, (M) this, pp, oracle);
 	}
 
 	@Override

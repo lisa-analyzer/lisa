@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -84,7 +85,8 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	 * @param sign the sign (0 = top, 1 = bottom, 2 = zero, 3 = negative, 4 =
 	 *                 positive)
 	 */
-	public Sign(byte sign) {
+	public Sign(
+			byte sign) {
 		this.sign = sign;
 	}
 
@@ -117,12 +119,17 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	public Sign evalNullConstant(ProgramPoint pp) {
+	public Sign evalNullConstant(
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return top();
 	}
 
 	@Override
-	public Sign evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Sign evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return i == 0 ? ZERO : i > 0 ? POS : NEG;
@@ -171,7 +178,11 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	public Sign evalUnaryExpression(UnaryOperator operator, Sign arg, ProgramPoint pp) {
+	public Sign evalUnaryExpression(
+			UnaryOperator operator,
+			Sign arg,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (operator == NumericNegation.INSTANCE)
 			if (arg.isPositive())
 				return NEG;
@@ -185,7 +196,12 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	public Sign evalBinaryExpression(BinaryOperator operator, Sign left, Sign right, ProgramPoint pp) {
+	public Sign evalBinaryExpression(
+			BinaryOperator operator,
+			Sign left,
+			Sign right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (operator instanceof AdditionOperator)
 			if (left.isZero())
 				return right;
@@ -236,12 +252,16 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	public Sign lubAux(Sign other) throws SemanticException {
+	public Sign lubAux(
+			Sign other)
+			throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Sign other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Sign other)
+			throws SemanticException {
 		return false;
 	}
 
@@ -254,7 +274,8 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -268,8 +289,12 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Sign left, Sign right,
-			ProgramPoint pp) {
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			Sign left,
+			Sign right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -299,7 +324,8 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	 * 
 	 * @return the satisfiability of {@code this = other}
 	 */
-	public Satisfiability eq(Sign other) {
+	public Satisfiability eq(
+			Sign other) {
 		if (!this.equals(other))
 			return Satisfiability.NOT_SATISFIED;
 		else if (isZero())
@@ -316,7 +342,8 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	 * 
 	 * @return the satisfiability of {@code this > other}
 	 */
-	public Satisfiability gt(Sign other) {
+	public Satisfiability gt(
+			Sign other) {
 		if (this.equals(other))
 			return this.isZero() ? Satisfiability.NOT_SATISFIED : Satisfiability.UNKNOWN;
 		else if (this.isZero())
@@ -328,8 +355,13 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
-			ProgramPoint pp) {
+	public Satisfiability satisfiesTernaryExpression(
+			TernaryOperator operator,
+			Sign left,
+			Sign middle,
+			Sign right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -340,17 +372,18 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			ValueExpression left,
 			ValueExpression right,
 			ProgramPoint src,
-			ProgramPoint dest)
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		Identifier id;
 		Sign eval;
 		boolean rightIsExpr;
 		if (left instanceof Identifier) {
-			eval = eval(right, environment, src);
+			eval = eval(right, environment, src, oracle);
 			id = (Identifier) left;
 			rightIsExpr = true;
 		} else if (right instanceof Identifier) {
-			eval = eval(left, environment, src);
+			eval = eval(left, environment, src, oracle);
 			id = (Identifier) right;
 			rightIsExpr = false;
 		} else

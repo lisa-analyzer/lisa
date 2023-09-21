@@ -1,16 +1,18 @@
 package it.unive.lisa.analysis;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ObjectRepresentation;
+import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -25,7 +27,8 @@ import java.util.function.Predicate;
  */
 public class AnalysisState<A extends AbstractState<A>>
 		implements BaseLattice<AnalysisState<A>>,
-		SemanticDomain<AnalysisState<A>, SymbolicExpression, Identifier> {
+		StructuredObject,
+		ScopedObject<AnalysisState<A>> {
 
 	/**
 	 * The abstract state of program variables and memory locations
@@ -196,10 +199,25 @@ public class AnalysisState<A extends AbstractState<A>>
 		return computedExpressions;
 	}
 
-	@Override
-	public AnalysisState<A> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
+	/**
+	 * Yields a copy of this state, where {@code id} has been assigned to
+	 * {@code value}.
+	 * 
+	 * @param id    the identifier to assign the value to
+	 * @param value the expression to assign
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
+	 * 
+	 * @return a copy of this domain, modified by the assignment
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public AnalysisState<A> assign(
+			Identifier id,
+			SymbolicExpression value,
+			ProgramPoint pp)
 			throws SemanticException {
-		A s = state.assign(id, value, pp);
+		A s = state.assign(id, value, pp, state);
 		return new AnalysisState<>(s, new ExpressionSet(id), info);
 	}
 
@@ -218,7 +236,10 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public AnalysisState<A> assign(SymbolicExpression id, SymbolicExpression expression, ProgramPoint pp)
+	public AnalysisState<A> assign(
+			SymbolicExpression id,
+			SymbolicExpression expression,
+			ProgramPoint pp)
 			throws SemanticException {
 
 		if (id instanceof Identifier)
@@ -226,34 +247,87 @@ public class AnalysisState<A extends AbstractState<A>>
 
 		A s = state.bottom();
 		AnalysisState<A> sem = smallStepSemantics(id, pp);
-		ExpressionSet rewritten = sem.state.rewrite(id, pp);
+		ExpressionSet rewritten = sem.state.rewrite(id, pp, state);
 		for (SymbolicExpression i : rewritten)
 			if (!(i instanceof Identifier))
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
-				s = s.lub(sem.state.assign((Identifier) i, expression, pp));
+				s = s.lub(sem.state.assign((Identifier) i, expression, pp, state));
 		return new AnalysisState<>(s, rewritten, info);
 	}
 
-	@Override
-	public AnalysisState<A> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+	/**
+	 * Yields a copy of this state, that has been modified accordingly to the
+	 * semantics of the given {@code expression}.
+	 * 
+	 * @param expression the expression whose semantics need to be computed
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * 
+	 * @return a copy of this domain, modified accordingly to the semantics of
+	 *             {@code expression}
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public AnalysisState<A> smallStepSemantics(
+			SymbolicExpression expression,
+			ProgramPoint pp)
 			throws SemanticException {
-		A s = state.smallStepSemantics(expression, pp);
+		A s = state.smallStepSemantics(expression, pp, state);
 		return new AnalysisState<>(s, new ExpressionSet(expression), info);
 	}
 
-	@Override
-	public AnalysisState<A> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	/**
+	 * Yields a copy of this state, modified by assuming that the given
+	 * expression holds. It is required that the returned domain is in relation
+	 * with this one. A safe (but imprecise) implementation of this method can
+	 * always return {@code this}.
+	 * 
+	 * @param expression the expression to assume to hold.
+	 * @param src        the program point that where this operation is being
+	 *                       evaluated, corresponding to the one that generated
+	 *                       the given expression
+	 * @param dest       the program point where the execution will move after
+	 *                       the expression has been assumed
+	 * 
+	 * @return the (optionally) modified copy of this domain
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public AnalysisState<A> assume(
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest)
 			throws SemanticException {
-		A assume = state.assume(expression, src, dest);
+		A assume = state.assume(expression, src, dest, state);
 		if (assume.isBottom())
 			return bottom();
 		return new AnalysisState<>(assume, computedExpressions, info);
 	}
 
-	@Override
-	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		return state.satisfies(expression, pp);
+	/**
+	 * Checks if the given expression is satisfied by the abstract values of
+	 * this state, returning an instance of {@link Satisfiability}.
+	 * 
+	 * @param expression the expression whose satisfiability is to be evaluated
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * 
+	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied
+	 *             by the values of this domain,
+	 *             {@link Satisfiability#NOT_SATISFIED} if it is not satisfied,
+	 *             or {@link Satisfiability#UNKNOWN} if it is either impossible
+	 *             to determine if it satisfied, or if it is satisfied by some
+	 *             values and not by some others (this is equivalent to a TOP
+	 *             boolean value)
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public SemanticDomain.Satisfiability satisfies(
+			SymbolicExpression expression,
+			ProgramPoint pp)
+			throws SemanticException {
+		return state.satisfies(expression, pp, state);
 	}
 
 	@Override
@@ -340,14 +414,51 @@ public class AnalysisState<A extends AbstractState<A>>
 		return state.isBottom() && computedExpressions.isBottom() && (info != null && info.isBottom());
 	}
 
-	@Override
+	/**
+	 * Forgets an {@link Identifier}. This means that all information regarding
+	 * the given {@code id} will be lost. This method should be invoked whenever
+	 * an identifier gets out of scope.
+	 * 
+	 * @param id the identifier to forget
+	 * 
+	 * @return the analysis state without information about the given id
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	public AnalysisState<A> forgetIdentifier(Identifier id) throws SemanticException {
 		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions, info);
 	}
 
-	@Override
+	/**
+	 * Forgets all {@link Identifier}s that match the given predicate. This
+	 * means that all information regarding the those identifiers will be lost.
+	 * This method should be invoked whenever an identifier gets out of scope.
+	 * 
+	 * @param test the test to identify the targets of the removal
+	 * 
+	 * @return the analysis state in without information about the ids
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	public AnalysisState<A> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
 		return new AnalysisState<>(state.forgetIdentifiersIf(test), computedExpressions, info);
+	}
+
+	/**
+	 * Forgets all the given {@link Identifier}s by invoking
+	 * {@link #forgetIdentifier(Identifier)} on each given identifier.
+	 * 
+	 * @param ids the collection of identifiers to forget
+	 * 
+	 * @return the analysis state without information about the given ids
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public AnalysisState<A> forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		AnalysisState<A> result = this;
+		for (Identifier id : ids)
+			result = result.forgetIdentifier(id);
+		return result;
 	}
 
 	@Override
@@ -422,17 +533,5 @@ public class AnalysisState<A extends AbstractState<A>>
 	@Override
 	public String toString() {
 		return representation().toString();
-	}
-
-	@Override
-	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(Class<D> domain) {
-		Collection<D> result = SemanticDomain.super.getAllDomainInstances(domain);
-		result.addAll(state.getAllDomainInstances(domain));
-		return result;
-	}
-	
-	@Override
-	public boolean knowsIdentifier(Identifier id) {
-		return state.knowsIdentifier(id);
 	}
 }

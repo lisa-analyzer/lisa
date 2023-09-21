@@ -1,8 +1,12 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
@@ -17,12 +21,10 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
- * cases of {@link #smallStepSemantics(SymbolicExpression, ProgramPoint)}. All
+ * cases of {@link #smallStepSemantics(SymbolicExpression, ProgramPoint, SemanticOracle)}. All
  * implementers of {@link HeapDomain} should inherit from this class for
  * ensuring a consistent behavior on the base cases, unless explicitly needed.
  * 
@@ -34,32 +36,36 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 
 	@Override
 	@SuppressWarnings("unchecked")
-	default H smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	default H smallStepSemantics(
+			SymbolicExpression expression,
+			ProgramPoint pp, 
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (expression instanceof HeapExpression)
-			return semanticsOf((HeapExpression) expression, pp);
+			return semanticsOf((HeapExpression) expression, pp, oracle);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
-			return smallStepSemantics(unary.getExpression(), pp);
+			return smallStepSemantics(unary.getExpression(), pp, oracle);
 		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
-			H sem = smallStepSemantics(binary.getLeft(), pp);
+			H sem = smallStepSemantics(binary.getLeft(), pp, oracle);
 			if (sem.isBottom())
 				return sem;
-			return sem.smallStepSemantics(binary.getRight(), pp);
+			return sem.smallStepSemantics(binary.getRight(), pp, oracle);
 		}
 
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression ternary = (TernaryExpression) expression;
-			H sem1 = smallStepSemantics(ternary.getLeft(), pp);
+			H sem1 = smallStepSemantics(ternary.getLeft(), pp, oracle);
 			if (sem1.isBottom())
 				return sem1;
-			H sem2 = sem1.smallStepSemantics(ternary.getMiddle(), pp);
+			H sem2 = sem1.smallStepSemantics(ternary.getMiddle(), pp, oracle);
 			if (sem2.isBottom())
 				return sem2;
-			return sem2.smallStepSemantics(ternary.getRight(), pp);
+			return sem2.smallStepSemantics(ternary.getRight(), pp, oracle);
 		}
 
 		if (expression instanceof ValueExpression)
@@ -99,12 +105,17 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	 * @param expression the expression to evaluate
 	 * @param pp         the program point that where this expression is being
 	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return a new instance of this domain
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract H semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException;
+	public abstract H semanticsOf(
+			HeapExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
 
 	/**
 	 * An {@link ExpressionVisitor} that rewrites {@link SymbolicExpression}s to

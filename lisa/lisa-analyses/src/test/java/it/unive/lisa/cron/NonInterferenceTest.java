@@ -1,5 +1,9 @@
 package it.unive.lisa.cron;
 
+import java.util.Collection;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AnalysisState;
@@ -22,8 +26,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
-import org.junit.Test;
 
 public class NonInterferenceTest extends AnalysisTestExecutor {
 
@@ -78,7 +80,8 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	}
 
 	private static class NICheck
-			implements SemanticCheck<
+			implements
+			SemanticCheck<
 					SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
 							TypeEnvironment<InferredTypes>>> {
 
@@ -88,7 +91,8 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 				CheckToolWithAnalysisResults<
 						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
 								TypeEnvironment<InferredTypes>>> tool,
-				CFG graph, Statement node) {
+				CFG graph,
+				Statement node) {
 			if (!(node instanceof Assignment))
 				return true;
 
@@ -99,16 +103,18 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 				try {
 					AnalyzedCFG<?> result = (AnalyzedCFG<?>) res;
 					AnalysisState<?> post = result.getAnalysisStateAfter(assign);
-					InferenceSystem<NonInterference> state = post.getDomainInstance(InferenceSystem.class);
+					InferenceSystem<NonInterference> state = post.getState().getDomainInstance(InferenceSystem.class);
 					AnalysisState<?> postL = result.getAnalysisStateAfter(assign.getLeft());
-					InferenceSystem<NonInterference> left = postL.getDomainInstance(InferenceSystem.class);
+					InferenceSystem<NonInterference> left = postL.getState().getDomainInstance(InferenceSystem.class);
 					AnalysisState<?> postR = result.getAnalysisStateAfter(assign.getRight());
-					InferenceSystem<NonInterference> right = postR.getDomainInstance(InferenceSystem.class);
+					InferenceSystem<NonInterference> right = postR.getState().getDomainInstance(InferenceSystem.class);
 
-					for (SymbolicExpression l : postL.getState().rewrite(postL.getComputedExpressions(), assign))
-						for (SymbolicExpression r : postR.getState().rewrite(postR.getComputedExpressions(), assign)) {
-							NonInterference ll = left.eval((ValueExpression) l, assign.getLeft());
-							NonInterference rr = right.eval((ValueExpression) r, assign.getRight());
+					for (SymbolicExpression l : postL.getState().rewrite(postL.getComputedExpressions(), assign,
+							postL.getState()))
+						for (SymbolicExpression r : postR.getState().rewrite(postR.getComputedExpressions(), assign,
+								postR.getState())) {
+							NonInterference ll = left.eval((ValueExpression) l, assign.getLeft(), postL.getState());
+							NonInterference rr = right.eval((ValueExpression) r, assign.getRight(), postR.getState());
 
 							if (ll.isLowConfidentiality() && rr.isHighConfidentiality())
 								tool.warnOn(assign,

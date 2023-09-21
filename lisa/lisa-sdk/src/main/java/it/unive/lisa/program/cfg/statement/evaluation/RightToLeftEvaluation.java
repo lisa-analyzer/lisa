@@ -42,7 +42,7 @@ public class RightToLeftEvaluation implements EvaluationOrder {
 			expressions.put(subExpressions[i], tmp);
 			computed[i] = tmp.getComputedExpressions();
 			for (SymbolicExpression e : computed[i])
-				e.setRuntimeTypes(tmp.getState().getRuntimeTypesOf(e, subExpressions[i]));
+				e.setRuntimeTypes(tmp.getState().getRuntimeTypesOf(e, subExpressions[i], tmp.getState()));
 			postState = tmp;
 		}
 

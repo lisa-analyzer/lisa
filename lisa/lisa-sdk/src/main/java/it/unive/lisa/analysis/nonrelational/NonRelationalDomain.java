@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.nonrelational;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -35,11 +36,12 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 *                        variables for the evaluation
 	 * @param pp          the program point that where this operation is being
 	 *                        evaluated
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return an new instance of this domain, representing the abstract result
 	 *             of {@code expression} when evaluated on {@code environment}
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	T eval(E expression, F environment, ProgramPoint pp) throws SemanticException;
+	T eval(E expression, F environment, ProgramPoint pp, SemanticOracle oracle) throws SemanticException;
 }

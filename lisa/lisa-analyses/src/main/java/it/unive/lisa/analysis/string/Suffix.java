@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.string;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
@@ -50,12 +51,15 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 	 *
 	 * @param suffix the suffix
 	 */
-	public Suffix(String suffix) {
+	public Suffix(
+			String suffix) {
 		this.suffix = suffix;
 	}
 
 	@Override
-	public Suffix lubAux(Suffix other) throws SemanticException {
+	public Suffix lubAux(
+			Suffix other)
+			throws SemanticException {
 		String otherSuffix = other.suffix;
 		StringBuilder result = new StringBuilder();
 
@@ -76,7 +80,9 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Suffix other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Suffix other)
+			throws SemanticException {
 		if (other.suffix.length() <= this.suffix.length()) {
 			Suffix lub = this.lubAux(other);
 
@@ -87,7 +93,8 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(
+			Object o) {
 		if (this == o)
 			return true;
 		if (o == null || getClass() != o.getClass())
@@ -122,7 +129,10 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 	}
 
 	@Override
-	public Suffix evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Suffix evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (constant.getValue() instanceof String) {
 			String str = (String) constant.getValue();
 			if (!str.isEmpty())
@@ -133,7 +143,12 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 	}
 
 	@Override
-	public Suffix evalBinaryExpression(BinaryOperator operator, Suffix left, Suffix right, ProgramPoint pp) {
+	public Suffix evalBinaryExpression(
+			BinaryOperator operator,
+			Suffix left,
+			Suffix right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (operator == StringConcat.INSTANCE) {
 			return right;
 		} else if (operator == StringContains.INSTANCE ||
@@ -148,8 +163,14 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 	}
 
 	@Override
-	public Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right,
-			ProgramPoint pp) throws SemanticException {
+	public Suffix evalTernaryExpression(
+			TernaryOperator operator,
+			Suffix left,
+			Suffix middle,
+			Suffix right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 
 		if (operator == StringReplace.INSTANCE) {
 			String replace = right.getSuffix();
@@ -184,7 +205,9 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 	 * @return the suffix corresponding to the substring of this suffix between
 	 *             two indexes
 	 */
-	public Suffix substring(long begin, long end) {
+	public Suffix substring(
+			long begin,
+			long end) {
 		return new Suffix("");
 	}
 
@@ -206,12 +229,14 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 	 * 
 	 * @return the minimum and maximum index of {@code s} in {@code this}
 	 */
-	public IntInterval indexOf(Suffix s) {
+	public IntInterval indexOf(
+			Suffix s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
-	public Satisfiability containsChar(char c) {
+	public Satisfiability containsChar(
+			char c) {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 		if (isBottom())

@@ -42,7 +42,7 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 			expressions.put(subExpressions[i], tmp);
 			computed[i] = tmp.getComputedExpressions();
 			for (SymbolicExpression e : computed[i])
-				e.setRuntimeTypes(tmp.getState().getRuntimeTypesOf(e, subExpressions[i]));
+				e.setRuntimeTypes(tmp.getState().getRuntimeTypesOf(e, subExpressions[i], tmp.getState()));
 			postState = tmp;
 		}
 
@@ -50,22 +50,28 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 	}
 
 	@Override
-	public int previous(int pos, int len) {
+	public int previous(
+			int pos,
+			int len) {
 		return pos - 1;
 	}
 
 	@Override
-	public int next(int pos, int len) {
+	public int next(
+			int pos,
+			int len) {
 		return pos == len - 1 ? -1 : pos + 1;
 	}
 
 	@Override
-	public int first(int len) {
+	public int first(
+			int len) {
 		return 0;
 	}
 
 	@Override
-	public int last(int len) {
+	public int last(
+			int len) {
 		return len - 1;
 	}
 }

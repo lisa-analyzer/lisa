@@ -1,9 +1,10 @@
 package it.unive.lisa.program;
 
+import java.util.Objects;
+
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.Constant;
-import java.util.Objects;
 
 /**
  * A global variable, scoped by its container, that is fixed to a statically

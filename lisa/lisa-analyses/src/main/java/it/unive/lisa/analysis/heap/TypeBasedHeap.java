@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import org.apache.commons.collections4.SetUtils;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -56,7 +57,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	 * 
 	 * @param names the name of the known types
 	 */
-	public TypeBasedHeap(Set<String> names) {
+	public TypeBasedHeap(
+			Set<String> names) {
 		this.names = names;
 	}
 
@@ -70,35 +72,54 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(new Rewriter(), pp);
+		return expression.accept(new Rewriter(), pp, oracle);
 	}
 
 	@Override
-	public TypeBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public TypeBasedHeap assign(
+			Identifier id,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public TypeBasedHeap assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public TypeBasedHeap assume(
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public TypeBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
+	public TypeBasedHeap forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public TypeBasedHeap forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public TypeBasedHeap forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
 	}
@@ -124,16 +145,21 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public TypeBasedHeap mk(TypeBasedHeap reference) {
+	public TypeBasedHeap mk(
+			TypeBasedHeap reference) {
 		return this;
 	}
 
 	@Override
-	public TypeBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
+	public TypeBasedHeap semanticsOf(
+			HeapExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
-			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
-			return containerState.smallStepSemantics(access.getChild(), pp);
+			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp, oracle);
+			return containerState.smallStepSemantics(access.getChild(), pp, oracle);
 		}
 
 		if (expression instanceof MemoryAllocation) {
@@ -146,26 +172,32 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 		}
 
 		if (expression instanceof HeapReference)
-			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
+			return smallStepSemantics(((HeapReference) expression).getExpression(), pp, oracle);
 
 		if (expression instanceof HeapDereference)
-			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp);
+			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp, oracle);
 
 		return top();
 	}
 
 	@Override
-	public TypeBasedHeap lubAux(TypeBasedHeap other) throws SemanticException {
+	public TypeBasedHeap lubAux(
+			TypeBasedHeap other)
+			throws SemanticException {
 		return new TypeBasedHeap(SetUtils.union(names, other.names));
 	}
 
 	@Override
-	public TypeBasedHeap glbAux(TypeBasedHeap other) throws SemanticException {
+	public TypeBasedHeap glbAux(
+			TypeBasedHeap other)
+			throws SemanticException {
 		return new TypeBasedHeap(SetUtils.intersection(names, other.names));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(TypeBasedHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			TypeBasedHeap other)
+			throws SemanticException {
 		return other.names.containsAll(names);
 	}
 
@@ -178,7 +210,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -203,8 +236,12 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
-		public ExpressionSet visit(AccessChild expression, ExpressionSet receiver,
-				ExpressionSet child, Object... params) throws SemanticException {
+		public ExpressionSet visit(
+				AccessChild expression,
+				ExpressionSet receiver,
+				ExpressionSet child,
+				Object... params)
+				throws SemanticException {
 			// we use the container because we are not field-sensitive
 			Set<SymbolicExpression> result = new HashSet<>();
 
@@ -227,7 +264,9 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet visit(MemoryAllocation expression, Object... params)
+		public ExpressionSet visit(
+				MemoryAllocation expression,
+				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 			ProgramPoint pp = (ProgramPoint) params[0];
@@ -243,7 +282,9 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet visit(HeapReference expression, ExpressionSet ref,
+		public ExpressionSet visit(
+				HeapReference expression,
+				ExpressionSet ref,
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
@@ -268,7 +309,9 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet visit(HeapDereference expression, ExpressionSet deref,
+		public ExpressionSet visit(
+				HeapDereference expression,
+				ExpressionSet deref,
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
@@ -296,7 +339,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		return false;
 	}
 }

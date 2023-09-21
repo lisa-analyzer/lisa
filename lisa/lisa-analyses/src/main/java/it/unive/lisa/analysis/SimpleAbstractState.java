@@ -1,9 +1,15 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
+import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -11,14 +17,8 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -126,12 +126,16 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public SimpleAbstractState<H, V, T> assign(
+			Identifier id,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		H heap = heapState.assign(id, expression, pp);
-		ExpressionSet exprs = heap.rewrite(expression, pp);
+		H heap = heapState.assign(id, expression, pp, oracle);
+		ExpressionSet exprs = heap.rewrite(expression, pp, oracle);
 
-		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp, oracle);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -141,26 +145,29 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T tmp = type.assign(id, ve, pp);
+			T tmp = type.assign(id, ve, pp, oracle);
 
-			Set<Type> rt = tmp.getRuntimeTypesOf(ve, pp);
+			Set<Type> rt = tmp.getRuntimeTypesOf(ve, pp, oracle);
 			id.setRuntimeTypes(rt);
 			expr.setRuntimeTypes(rt);
 
 			typeRes = typeRes.lub(tmp);
-			valueRes = valueRes.lub(value.assign(id, ve, pp));
+			valueRes = valueRes.lub(value.assign(id, ve, pp, oracle));
 		}
 
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+	public SimpleAbstractState<H, V, T> smallStepSemantics(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		H heap = heapState.smallStepSemantics(expression, pp);
-		ExpressionSet exprs = heap.rewrite(expression, pp);
+		H heap = heapState.smallStepSemantics(expression, pp, oracle);
+		ExpressionSet exprs = heap.rewrite(expression, pp, oracle);
 
-		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp, oracle);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -170,31 +177,38 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T tmp = type.smallStepSemantics(ve, pp);
+			T tmp = type.smallStepSemantics(ve, pp, oracle);
 
-			Set<Type> rt = tmp.getRuntimeTypesOf(ve, pp);
+			Set<Type> rt = tmp.getRuntimeTypesOf(ve, pp, oracle);
 			expr.setRuntimeTypes(rt);
 
 			// if the expression is a memory allocation, its type is registered
 			// in the type domain
 			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
-				tmp = tmp.assign((Identifier) ve, ve, pp);
+				tmp = tmp.assign((Identifier) ve, ve, pp, oracle);
 
 			typeRes = typeRes.lub(tmp);
-			valueRes = valueRes.lub(value.smallStepSemantics(ve, pp));
+			valueRes = valueRes.lub(value.smallStepSemantics(ve, pp, oracle));
 		}
 
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
-	private SimpleAbstractState<H, V, T> applySubstitution(H heap, V value, T type, ProgramPoint pp)
-			throws SemanticException {
+	private static <H extends HeapDomain<H>,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> SimpleAbstractState<H, V, T> applySubstitution(
+					H heap,
+					V value,
+					T type,
+					ProgramPoint pp,
+					SemanticOracle oracle)
+					throws SemanticException {
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty()) {
 			for (HeapReplacement repl : heap.getSubstitution()) {
 				Set<Type> runtimeTypes;
 				Set<Type> allTypes = new HashSet<Type>();
 				for (Identifier source : repl.getSources()) {
-					runtimeTypes = type.smallStepSemantics(source, pp).getRuntimeTypesOf(source, pp);
+					runtimeTypes = type.smallStepSemantics(source, pp, oracle).getRuntimeTypesOf(source, pp, oracle);
 					source.setRuntimeTypes(runtimeTypes);
 					allTypes.addAll(runtimeTypes);
 				}
@@ -208,11 +222,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 				for (Identifier source : repl.getSources()) {
 					T partial = type;
 					for (Identifier target : repl.getTargets())
-						partial = partial.assign(target, source, pp);
+						partial = partial.assign(target, source, pp, oracle);
 					lub = lub.lub(partial);
 				}
 				type = lub.forgetIdentifiers(repl.getIdsToForget());
-				value = value.applyReplacement(repl, pp);
+				value = value.applyReplacement(repl, pp, oracle);
 			}
 		}
 
@@ -220,14 +234,18 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public SimpleAbstractState<H, V, T> assume(
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
-		H heap = heapState.assume(expression, src, dest);
+		H heap = heapState.assume(expression, src, dest, oracle);
 		if (heap.isBottom())
 			return bottom();
 
-		ExpressionSet exprs = heap.rewrite(expression, src);
-		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, src);
+		ExpressionSet exprs = heap.rewrite(expression, src, oracle);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, src, oracle);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -237,12 +255,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T tmp = type.smallStepSemantics(ve, src);
-			Set<Type> rt = tmp.getRuntimeTypesOf(ve, src);
+			T tmp = type.smallStepSemantics(ve, src, oracle);
+			Set<Type> rt = tmp.getRuntimeTypesOf(ve, src, oracle);
 			expr.setRuntimeTypes(rt);
 
-			typeRes = typeRes.lub(type.assume(ve, src, dest));
-			valueRes = valueRes.lub(value.assume(ve, src, dest));
+			typeRes = typeRes.lub(type.assume(ve, src, dest, oracle));
+			valueRes = valueRes.lub(value.assume(ve, src, dest, oracle));
 		}
 
 		if (typeRes.isBottom() || valueRes.isBottom())
@@ -252,28 +270,32 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		Satisfiability heapsat = heapState.satisfies(expression, pp);
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability heapsat = heapState.satisfies(expression, pp, oracle);
 		if (heapsat == Satisfiability.BOTTOM)
 			return Satisfiability.BOTTOM;
 
-		ExpressionSet rewritten = heapState.rewrite(expression, pp);
+		ExpressionSet rewritten = heapState.rewrite(expression, pp, oracle);
 		Satisfiability typesat = Satisfiability.BOTTOM;
 		Satisfiability valuesat = Satisfiability.BOTTOM;
 		for (SymbolicExpression expr : rewritten) {
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T tmp = typeState.smallStepSemantics(ve, pp);
-			Set<Type> rt = tmp.getRuntimeTypesOf(ve, pp);
+			T tmp = typeState.smallStepSemantics(ve, pp, oracle);
+			Set<Type> rt = tmp.getRuntimeTypesOf(ve, pp, oracle);
 			expr.setRuntimeTypes(rt);
 
-			Satisfiability sat = typeState.satisfies(ve, pp);
+			Satisfiability sat = typeState.satisfies(ve, pp, oracle);
 			if (sat == Satisfiability.BOTTOM)
 				return sat;
 			typesat = typesat.lub(sat);
 
-			sat = valueState.satisfies(ve, pp);
+			sat = valueState.satisfies(ve, pp, oracle);
 			if (sat == Satisfiability.BOTTOM)
 				return sat;
 			valuesat = valuesat.lub(sat);
@@ -442,42 +464,39 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	@Override
 	public ExpressionSet rewrite(
 			SymbolicExpression expression,
-			ProgramPoint pp)
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		Set<SymbolicExpression> rewritten = new HashSet<>();
-		rewritten.addAll(heapState.rewrite(expression, pp).elements());
-		return new ExpressionSet(rewritten);
+		return heapState.rewrite(expression, pp, oracle);
 	}
 
 	@Override
 	public ExpressionSet rewrite(
 			ExpressionSet expressions,
-			ProgramPoint pp)
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		Set<SymbolicExpression> rewritten = new HashSet<>();
-		for (SymbolicExpression expression : expressions)
-			rewritten.addAll(heapState.rewrite(expression, pp).elements());
-		return new ExpressionSet(rewritten);
+		return heapState.rewrite(expressions, pp, oracle);
 	}
 
 	@Override
-	public Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException {
-		Set<Type> types = new HashSet<>();
-		for (SymbolicExpression ex : rewrite(e, pp))
-			types.addAll(typeState.getRuntimeTypesOf((ValueExpression) ex, pp));
-		return types;
+	public Set<Type> getRuntimeTypesOf(
+			SymbolicExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return typeState.getRuntimeTypesOf(e, pp, oracle);
 	}
 
 	@Override
-	public Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException {
-		Set<Type> types = new HashSet<>();
-		for (SymbolicExpression ex : rewrite(e, pp))
-			types.add(typeState.getDynamicTypeOf((ValueExpression) ex, pp));
-		if (types.isEmpty())
-			return Untyped.INSTANCE;
-		return Type.commonSupertype(types, Untyped.INSTANCE);
+	public Type getDynamicTypeOf(
+			SymbolicExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return typeState.getDynamicTypeOf(e, pp, oracle);
 	}
-	
+
 	@Override
 	public boolean knowsIdentifier(Identifier id) {
 		return heapState.knowsIdentifier(id) || valueState.knowsIdentifier(id) || typeState.knowsIdentifier(id);

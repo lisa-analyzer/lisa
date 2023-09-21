@@ -41,7 +41,7 @@ public class IMPAssert extends UnaryStatement {
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		Set<Type> types = state.getState().getRuntimeTypesOf(expr, this);
+		Set<Type> types = state.getState().getRuntimeTypesOf(expr, this, state.getState());
 		if (types.stream().noneMatch(Type::isBooleanType))
 			return state.bottom();
 		return state.smallStepSemantics(new Skip(getLocation()), this);

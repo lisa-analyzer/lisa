@@ -1,13 +1,15 @@
 package it.unive.lisa;
 
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicExpression>
@@ -24,17 +26,17 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 	}
 
 	@Override
-	public T assign(Identifier id, E expression, ProgramPoint pp) throws SemanticException {
+	public T assign(Identifier id, E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public T smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException {
+	public T smallStepSemantics(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public T assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+	public T assume(E expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
 		return (T) this;
 	}
 
@@ -49,7 +51,7 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 	}
 
 	@Override
-	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 

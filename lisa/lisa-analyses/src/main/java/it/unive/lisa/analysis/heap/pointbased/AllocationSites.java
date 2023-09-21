@@ -1,15 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.SetLattice;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +8,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.SetLattice;
+import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.
@@ -69,14 +71,20 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public AllocationSites eval(SymbolicExpression expression,
-			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) {
+	public AllocationSites eval(
+			SymbolicExpression expression,
+			HeapEnvironment<AllocationSites> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return new AllocationSites(Collections.singleton((AllocationSite) expression), false);
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression,
-			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) {
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			HeapEnvironment<AllocationSites> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -118,21 +126,30 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public HeapEnvironment<AllocationSites> assume(HeapEnvironment<AllocationSites> environment,
-			SymbolicExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+	public HeapEnvironment<AllocationSites> assume(
+			HeapEnvironment<AllocationSites> environment,
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return environment;
 	}
 
 	@Override
-	public ExpressionSet rewrite(SymbolicExpression expression,
-			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) throws SemanticException {
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			HeapEnvironment<AllocationSites> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return new ExpressionSet();
 	}
 
 	/**
 	 * Applies a substitution to the contents of this set of allocation sites,
 	 * similarly to
-	 * {@link ValueDomain#applyReplacement(HeapReplacement, ProgramPoint)}.
+	 * {@link ValueDomain#applyReplacement(it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement, ProgramPoint, SemanticOracle)}.
 	 * 
 	 * @param r  the substitution
 	 * @param pp the program point where the substitution is applied

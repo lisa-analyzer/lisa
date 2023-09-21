@@ -1,14 +1,15 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.function.Predicate;
+
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.function.Predicate;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
@@ -33,12 +34,13 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @param expression the expression to assign
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return a copy of this domain, modified by the assignment
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D assign(I id, E expression, ProgramPoint pp) throws SemanticException;
+	D assign(I id, E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException;
 
 	/**
 	 * Yields a copy of this domain, that has been modified accordingly to the
@@ -47,13 +49,14 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @param expression the expression whose semantics need to be computed
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return a copy of this domain, modified accordingly to the semantics of
 	 *             {@code expression}
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException;
+	D smallStepSemantics(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException;
 
 	/**
 	 * Yields a copy of this domain, modified by assuming that the given
@@ -67,12 +70,13 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 *                       the given expression
 	 * @param dest       the program point where the execution will move after
 	 *                       the expression has been assumed
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return the (optionally) modified copy of this domain
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException;
+	D assume(E expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException;
 
 	/**
 	 * Yields {@code true} if this instance is currently tracking abstract
@@ -136,6 +140,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @param expression the expression whose satisfiability is to be evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied
 	 *             by the values of this domain,
@@ -147,7 +152,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException;
+	Satisfiability satisfies(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException;
 
 	/**
 	 * The satisfiability of an expression.

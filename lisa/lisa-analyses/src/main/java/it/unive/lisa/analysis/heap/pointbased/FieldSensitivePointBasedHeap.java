@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.heap.pointbased;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.GenericMapLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -97,13 +98,14 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 			Identifier id,
 			StackAllocationSite site,
 			List<HeapReplacement> replacements,
-			ProgramPoint pp)
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
 		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
 				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
-		HeapEnvironment<AllocationSites> heap = heapEnv.assign(id, clone, pp);
+		HeapEnvironment<AllocationSites> heap = heapEnv.assign(id, clone, pp, oracle);
 
 		Map<AllocationSite, ExpressionSet> newFields = new HashMap<>(fields.getMap());
 
@@ -140,26 +142,32 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	}
 
 	@Override
-	public FieldSensitivePointBasedHeap smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+	public FieldSensitivePointBasedHeap smallStepSemantics(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression instanceof AccessChild) {
-			FieldSensitivePointBasedHeap sss = (FieldSensitivePointBasedHeap) super.smallStepSemantics(expression, pp);
+			FieldSensitivePointBasedHeap sss = (FieldSensitivePointBasedHeap) super.smallStepSemantics(
+					expression,
+					pp,
+					oracle);
 
 			AccessChild accessChild = (AccessChild) expression;
 			Map<AllocationSite, ExpressionSet> mapping = new HashMap<>(sss.fields.getMap());
 
-			ExpressionSet exprs = rewrite(accessChild.getContainer(), pp);
+			ExpressionSet exprs = rewrite(accessChild.getContainer(), pp, oracle);
 			for (SymbolicExpression rec : exprs)
 				if (rec instanceof MemoryPointer) {
 					AllocationSite site = (AllocationSite) ((MemoryPointer) rec).getReferencedLocation();
-					ExpressionSet childs = rewrite(accessChild.getChild(), pp);
+					ExpressionSet childs = rewrite(accessChild.getChild(), pp, oracle);
 
 					for (SymbolicExpression child : childs)
 						addField(site, child, mapping);
 
 				} else if (rec instanceof AllocationSite) {
 					AllocationSite site = (AllocationSite) rec;
-					ExpressionSet childs = rewrite(accessChild.getChild(), pp);
+					ExpressionSet childs = rewrite(accessChild.getChild(), pp, oracle);
 
 					for (SymbolicExpression child : childs)
 						addField(site, child, mapping);
@@ -170,7 +178,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 		} else if (expression instanceof MemoryAllocation) {
 			String loc = expression.getCodeLocation().getCodeLocation();
 			Set<AllocationSite> alreadyAllocated = getAllocatedAt(loc);
-			FieldSensitivePointBasedHeap sss = super.smallStepSemantics(expression, pp);
+			FieldSensitivePointBasedHeap sss = super.smallStepSemantics(expression, pp, oracle);
 			HeapEnvironment<AllocationSites> env = sss.heapEnv;
 
 			if (!alreadyAllocated.isEmpty()) {
@@ -217,7 +225,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 			}
 		}
 
-		FieldSensitivePointBasedHeap sss = super.smallStepSemantics(expression, pp);
+		FieldSensitivePointBasedHeap sss = super.smallStepSemantics(expression, pp, oracle);
 		return new FieldSensitivePointBasedHeap(sss.heapEnv, fields);
 	}
 
@@ -229,9 +237,9 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	}
 
 	@Override
-	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp, SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(new Rewriter());
+		return expression.accept(new Rewriter(), pp, oracle);
 	}
 
 	/**

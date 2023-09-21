@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.taint;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
@@ -31,7 +32,8 @@ public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
 		this((byte) 3);
 	}
 
-	private ThreeLevelsTaint(byte v) {
+	private ThreeLevelsTaint(
+			byte v) {
 		this.taint = v;
 	}
 
@@ -73,8 +75,13 @@ public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
 	}
 
 	@Override
-	public ThreeLevelsTaint evalBinaryExpression(BinaryOperator operator, ThreeLevelsTaint left, ThreeLevelsTaint right,
-			ProgramPoint pp) throws SemanticException {
+	public ThreeLevelsTaint evalBinaryExpression(
+			BinaryOperator operator,
+			ThreeLevelsTaint left,
+			ThreeLevelsTaint right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (left == TAINTED || right == TAINTED)
 			return TAINTED;
 
@@ -85,8 +92,14 @@ public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
 	}
 
 	@Override
-	public ThreeLevelsTaint evalTernaryExpression(TernaryOperator operator, ThreeLevelsTaint left,
-			ThreeLevelsTaint middle, ThreeLevelsTaint right, ProgramPoint pp) throws SemanticException {
+	public ThreeLevelsTaint evalTernaryExpression(
+			TernaryOperator operator,
+			ThreeLevelsTaint left,
+			ThreeLevelsTaint middle,
+			ThreeLevelsTaint right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (left == TAINTED || right == TAINTED || middle == TAINTED)
 			return TAINTED;
 
@@ -97,19 +110,25 @@ public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
 	}
 
 	@Override
-	public ThreeLevelsTaint lubAux(ThreeLevelsTaint other) throws SemanticException {
+	public ThreeLevelsTaint lubAux(
+			ThreeLevelsTaint other)
+			throws SemanticException {
 		// only happens with clean and tainted, that are not comparable
 		return TOP;
 	}
 
 	@Override
-	public ThreeLevelsTaint wideningAux(ThreeLevelsTaint other) throws SemanticException {
+	public ThreeLevelsTaint wideningAux(
+			ThreeLevelsTaint other)
+			throws SemanticException {
 		// only happens with clean and tainted, that are not comparable
 		return TOP;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(ThreeLevelsTaint other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			ThreeLevelsTaint other)
+			throws SemanticException {
 		// only happens with clean and tainted, that are not comparable
 		return false;
 	}
@@ -123,7 +142,8 @@ public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

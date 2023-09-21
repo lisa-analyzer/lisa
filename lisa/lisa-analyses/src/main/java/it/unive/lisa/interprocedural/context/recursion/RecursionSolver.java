@@ -123,7 +123,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 			// we bring in the entry state to carry over the correct scope
 			AnalysisState<A> res = approx.lub(entryState);
 			Identifier meta = call.getMetaVariable();
-			if (!res.knowsIdentifier(meta)) {
+			if (!res.getState().knowsIdentifier(meta)) {
 				// if we have no information for the return value, we want to
 				// force it to bottom as it means that this is either the first
 				// execution (that must start from bottom) or that the recursion
@@ -244,7 +244,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 				// we transfer the return value
 				res = res.lub(state.assign(meta, variable, original));
 
-		if (!res.knowsIdentifier(meta)) {
+		if (!res.getState().knowsIdentifier(meta)) {
 			// if we have no information for the return value, we want to
 			// force it to bottom as it means that this is either the first
 			// execution (that must start from bottom) or that the recursion

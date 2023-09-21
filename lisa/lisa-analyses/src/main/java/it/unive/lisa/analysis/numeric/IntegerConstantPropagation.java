@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -57,7 +58,10 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 		this(null, true, false);
 	}
 
-	private IntegerConstantPropagation(Integer value, boolean isTop, boolean isBottom) {
+	private IntegerConstantPropagation(
+			Integer value,
+			boolean isTop,
+			boolean isBottom) {
 		this.value = value;
 		this.isTop = isTop;
 		this.isBottom = isBottom;
@@ -68,11 +72,14 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 	 * 
 	 * @param value the constant
 	 */
-	public IntegerConstantPropagation(Integer value) {
+	public IntegerConstantPropagation(
+			Integer value) {
 		this(value, false, false);
 	}
 
-	private IntegerConstantPropagation(boolean isTop, boolean isBottom) {
+	private IntegerConstantPropagation(
+			boolean isTop,
+			boolean isBottom) {
 		this(null, isTop, isBottom);
 	}
 
@@ -102,20 +109,28 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 	}
 
 	@Override
-	public IntegerConstantPropagation evalNullConstant(ProgramPoint pp) {
+	public IntegerConstantPropagation evalNullConstant(
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return top();
 	}
 
 	@Override
-	public IntegerConstantPropagation evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public IntegerConstantPropagation evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (constant.getValue() instanceof Integer)
 			return new IntegerConstantPropagation((Integer) constant.getValue());
 		return top();
 	}
 
 	@Override
-	public IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
-			ProgramPoint pp) {
+	public IntegerConstantPropagation evalUnaryExpression(
+			UnaryOperator operator,
+			IntegerConstantPropagation arg,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 
 		if (arg.isTop())
 			return top();
@@ -127,8 +142,12 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 	}
 
 	@Override
-	public IntegerConstantPropagation evalBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
-			IntegerConstantPropagation right, ProgramPoint pp) {
+	public IntegerConstantPropagation evalBinaryExpression(
+			BinaryOperator operator,
+			IntegerConstantPropagation left,
+			IntegerConstantPropagation right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 
 		if (operator instanceof AdditionOperator)
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value + right.value);
@@ -158,19 +177,27 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 	}
 
 	@Override
-	public IntegerConstantPropagation evalTernaryExpression(TernaryOperator operator,
+	public IntegerConstantPropagation evalTernaryExpression(
+			TernaryOperator operator,
 			IntegerConstantPropagation left,
-			IntegerConstantPropagation middle, IntegerConstantPropagation right, ProgramPoint pp) {
+			IntegerConstantPropagation middle,
+			IntegerConstantPropagation right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return top();
 	}
 
 	@Override
-	public IntegerConstantPropagation lubAux(IntegerConstantPropagation other) throws SemanticException {
+	public IntegerConstantPropagation lubAux(
+			IntegerConstantPropagation other)
+			throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(IntegerConstantPropagation other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			IntegerConstantPropagation other)
+			throws SemanticException {
 		return false;
 	}
 
@@ -185,7 +212,8 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -206,8 +234,12 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
-			IntegerConstantPropagation right, ProgramPoint pp) {
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			IntegerConstantPropagation left,
+			IntegerConstantPropagation right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
@@ -237,16 +269,17 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 			ValueExpression left,
 			ValueExpression right,
 			ProgramPoint src,
-			ProgramPoint dest)
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (operator == ComparisonEq.INSTANCE)
 			if (left instanceof Identifier) {
-				IntegerConstantPropagation eval = eval(right, environment, src);
+				IntegerConstantPropagation eval = eval(right, environment, src, oracle);
 				if (eval.isBottom())
 					return environment.bottom();
 				return environment.putState((Identifier) left, eval);
 			} else if (right instanceof Identifier) {
-				IntegerConstantPropagation eval = eval(left, environment, src);
+				IntegerConstantPropagation eval = eval(left, environment, src, oracle);
 				if (eval.isBottom())
 					return environment.bottom();
 				return environment.putState((Identifier) right, eval);

@@ -1,11 +1,13 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+
 import org.apache.commons.collections4.CollectionUtils;
+
+import it.unive.lisa.program.cfg.CodeLocation;
 
 /**
  * A {@link CompilationUnit} representing a concrete class that can be

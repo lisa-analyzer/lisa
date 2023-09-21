@@ -89,8 +89,15 @@ public abstract class Call extends NaryExpression {
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
-	protected Call(CFG cfg, CodeLocation location, CallType type,
-			String qualifier, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
+	protected Call(
+			CFG cfg,
+			CodeLocation location,
+			CallType type,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression... parameters) {
 		super(cfg, location, completeName(qualifier, targetName), order, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of a call cannot be null");
 		this.targetName = targetName;
@@ -98,7 +105,9 @@ public abstract class Call extends NaryExpression {
 		this.callType = type;
 	}
 
-	private static String completeName(String qualifier, String name) {
+	private static String completeName(
+			String qualifier,
+			String name) {
 		return StringUtils.isNotBlank(qualifier) ? qualifier + "::" + name : name;
 	}
 
@@ -188,7 +197,8 @@ public abstract class Call extends NaryExpression {
 	 * 
 	 * @param source the call that this one originated from
 	 */
-	public void setSource(UnresolvedCall source) {
+	public void setSource(
+			UnresolvedCall source) {
 		this.source = source;
 	}
 
@@ -208,7 +218,8 @@ public abstract class Call extends NaryExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -245,7 +256,8 @@ public abstract class Call extends NaryExpression {
 	 *                               types
 	 */
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A>> Set<Type>[] parameterTypes(StatementStore<A> expressions)
+	public <A extends AbstractState<A>> Set<Type>[] parameterTypes(
+			StatementStore<A> expressions)
 			throws SemanticException {
 		Expression[] actuals = getParameters();
 		Set<Type>[] types = new Set[actuals.length];
@@ -253,7 +265,7 @@ public abstract class Call extends NaryExpression {
 			AnalysisState<A> state = expressions.getState(actuals[i]);
 			Set<Type> t = new HashSet<>();
 			for (SymbolicExpression e : state.getComputedExpressions())
-				t.addAll(state.getState().getRuntimeTypesOf(e, this));
+				t.addAll(state.getState().getRuntimeTypesOf(e, this, state.getState()));
 			types[i] = t;
 		}
 		return types;

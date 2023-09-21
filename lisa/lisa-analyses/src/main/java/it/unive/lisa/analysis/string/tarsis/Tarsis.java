@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.string.ContainsCharProvider;
@@ -74,7 +75,8 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * 
 	 * @param a the {@link SimpleAutomaton} used for object construction.
 	 */
-	public Tarsis(RegexAutomaton a) {
+	public Tarsis(
+			RegexAutomaton a) {
 		this.a = a;
 	}
 
@@ -88,12 +90,16 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	}
 
 	@Override
-	public Tarsis lubAux(Tarsis other) throws SemanticException {
+	public Tarsis lubAux(
+			Tarsis other)
+			throws SemanticException {
 		return new Tarsis(this.a.union(other.a));
 	}
 
 	@Override
-	public Tarsis glbAux(Tarsis other) throws SemanticException {
+	public Tarsis glbAux(
+			Tarsis other)
+			throws SemanticException {
 		return new Tarsis(this.a.intersection(other.a));
 	}
 
@@ -107,7 +113,8 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 		return a.getStates().size();
 	}
 
-	private int getSizeDiffCapped(Tarsis other) {
+	private int getSizeDiffCapped(
+			Tarsis other) {
 		int size = size();
 		int otherSize = other.size();
 		if (size > otherSize)
@@ -119,17 +126,22 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	}
 
 	@Override
-	public Tarsis wideningAux(Tarsis other) throws SemanticException {
+	public Tarsis wideningAux(
+			Tarsis other)
+			throws SemanticException {
 		return new Tarsis(this.a.union(other.a).widening(getSizeDiffCapped(other)));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Tarsis other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Tarsis other)
+			throws SemanticException {
 		return this.a.isContained(other.a);
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(
+			Object o) {
 		if (this == o)
 			return true;
 		if (o == null || getClass() != o.getClass())
@@ -169,7 +181,11 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	}
 
 	@Override
-	public Tarsis evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+	public Tarsis evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (constant.getValue() instanceof String)
 			return new Tarsis(RegexAutomaton.string((String) constant.getValue()));
 		return top();
@@ -177,7 +193,12 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 
 	// TODO unary and ternary and all other binary
 	@Override
-	public Tarsis evalBinaryExpression(BinaryOperator operator, Tarsis left, Tarsis right, ProgramPoint pp)
+	public Tarsis evalBinaryExpression(
+			BinaryOperator operator,
+			Tarsis left,
+			Tarsis right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (operator == StringConcat.INSTANCE)
 			return new Tarsis(left.a.concat(right.a));
@@ -185,16 +206,27 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	}
 
 	@Override
-	public Tarsis evalTernaryExpression(TernaryOperator operator, Tarsis left, Tarsis middle, Tarsis right,
-			ProgramPoint pp) throws SemanticException {
+	public Tarsis evalTernaryExpression(
+			TernaryOperator operator,
+			Tarsis left,
+			Tarsis middle,
+			Tarsis right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (operator == StringReplace.INSTANCE)
 			return left.replace(middle, right);
 		return TOP;
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Tarsis left, Tarsis right,
-			ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			Tarsis left,
+			Tarsis right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (operator == StringContains.INSTANCE)
 			return left.contains(right);
 		return SemanticDomain.Satisfiability.UNKNOWN;
@@ -208,7 +240,8 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * 
 	 * @return the satisfiability result
 	 */
-	public Satisfiability contains(Tarsis other) {
+	public Satisfiability contains(
+			Tarsis other) {
 		try {
 			if (!a.hasCycle()
 					&& !other.a.hasCycle()
@@ -261,7 +294,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 		return Satisfiability.UNKNOWN;
 	}
 
-	private Satisfiability contains(String other, String that) {
+	private Satisfiability contains(
+			String other,
+			String that) {
 		if (!other.contains("Ͳ")) {
 			if (other.contains(that))
 				return Satisfiability.SATISFIED;
@@ -285,7 +320,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * @return the Tarsis automaton corresponding to the substring of this
 	 *             Tarsis automaton between two indexes
 	 */
-	public Tarsis substring(long begin, long end) {
+	public Tarsis substring(
+			long begin,
+			long end) {
 		if (isTop() || isBottom())
 			return this;
 
@@ -323,7 +360,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * @throws CyclicAutomatonException when the automaton is cyclic and its
 	 *                                      language is accessed
 	 */
-	public IntInterval indexOf(Tarsis s) throws CyclicAutomatonException {
+	public IntInterval indexOf(
+			Tarsis s)
+			throws CyclicAutomatonException {
 		if (contains(s) == Satisfiability.NOT_SATISFIED)
 			return new IntInterval(-1, -1);
 		else if (a.hasCycle() || s.a.hasCycle() || s.a.acceptsTopEventually())
@@ -339,7 +378,8 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * 
 	 * @return the concatenation between two automata
 	 */
-	public Tarsis concat(Tarsis other) {
+	public Tarsis concat(
+			Tarsis other) {
 		return new Tarsis(this.a.concat(other.a));
 	}
 
@@ -353,7 +393,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * 
 	 * @return the domain instance containing the replaced automaton
 	 */
-	public Tarsis replace(Tarsis search, Tarsis repl) {
+	public Tarsis replace(
+			Tarsis search,
+			Tarsis repl) {
 		if (isBottom() || search.isBottom() || repl.isBottom())
 			return bottom();
 
@@ -400,14 +442,16 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	}
 
 	@Override
-	public Satisfiability containsChar(char c) throws SemanticException {
+	public Satisfiability containsChar(
+			char c)
+			throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 
 		return satisfiesBinaryExpression(StringContains.INSTANCE, this,
-				new Tarsis(RegexAutomaton.string(String.valueOf(c))), null);
+				new Tarsis(RegexAutomaton.string(String.valueOf(c))), null, null);
 	}
 
 	/**
@@ -422,7 +466,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * @throws MathNumberConversionException if {@code intv} is iterated but is
 	 *                                           not finite
 	 */
-	public Tarsis repeat(Interval intv) throws MathNumberConversionException {
+	public Tarsis repeat(
+			Interval intv)
+			throws MathNumberConversionException {
 		if (isBottom())
 			return this;
 		else if (intv.isTop() || a.hasCycle())

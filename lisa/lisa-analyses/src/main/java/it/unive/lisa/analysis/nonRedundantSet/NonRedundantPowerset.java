@@ -1,20 +1,22 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.function.Predicate;
 
 /**
  * This abstract class generalize the abstract domain lattice whose domain is
@@ -289,28 +291,28 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C assign(I id, E expression, ProgramPoint pp) throws SemanticException {
+	public C assign(I id, E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
-			newElements.add(elem.assign(id, expression, pp));
+			newElements.add(elem.assign(id, expression, pp, oracle));
 		}
 		return mk(newElements).removeRedundancy();
 	}
 
 	@Override
-	public C smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException {
+	public C smallStepSemantics(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
-			newElements.add(elem.smallStepSemantics(expression, pp));
+			newElements.add(elem.smallStepSemantics(expression, pp, oracle));
 		}
 		return mk(newElements).removeRedundancy();
 	}
 
 	@Override
-	public C assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+	public C assume(E expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
-			newElements.add(elem.assume(expression, src, dest));
+			newElements.add(elem.assume(expression, src, dest, oracle));
 		}
 		return mk(newElements).removeRedundancy();
 	}
@@ -401,13 +403,11 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	public abstract C mk(SortedSet<T> set, boolean isTop, T valueDomain);
 
 	@Override
-	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
-
+	public Satisfiability satisfies(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 		Set<Satisfiability> setSatisf = new HashSet<Satisfiability>();
 
-		for (T element : this.elements) {
-			setSatisf.add(element.satisfies(expression, pp));
-		}
+		for (T element : this.elements) 
+			setSatisf.add(element.satisfies(expression, pp, oracle));
 
 		if ((setSatisf.contains(Satisfiability.SATISFIED) && setSatisf.contains(Satisfiability.NOT_SATISFIED)) ||
 				setSatisf.contains(Satisfiability.UNKNOWN))

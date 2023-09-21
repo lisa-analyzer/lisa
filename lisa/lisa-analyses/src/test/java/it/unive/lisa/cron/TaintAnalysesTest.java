@@ -103,11 +103,11 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 											TypeEnvironment<InferredTypes>>> post = result
 													.getAnalysisStateAfter(call.getParameters()[i]);
 									for (SymbolicExpression e : post.getState().rewrite(post.getComputedExpressions(),
-											node)) {
+											node, post.getState())) {
 										T stack = post
 												.getState()
 												.getValueState()
-												.eval((ValueExpression) e, node);
+												.eval((ValueExpression) e, node, post.getState());
 										if (stack.isAlwaysTainted())
 											tool.warnOn(call, "Parameter " + i + " is always tainted");
 										else if (stack.isPossiblyTainted())

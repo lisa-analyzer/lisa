@@ -12,6 +12,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -109,37 +110,48 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public TracePartitioning<A> assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public TracePartitioning<A> assign(
+			Identifier id,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (isBottom())
 			return this;
 
 		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
 		if (isTop() || function == null)
-			result.put(new ExecutionTrace(), lattice.assign(id, expression, pp));
+			result.put(new ExecutionTrace(), lattice.assign(id, expression, pp, oracle));
 		else
 			for (Entry<ExecutionTrace, A> trace : this)
-				result.put(trace.getKey(), trace.getValue().assign(id, expression, pp));
+				result.put(trace.getKey(), trace.getValue().assign(id, expression, pp, oracle));
 		return new TracePartitioning<>(lattice, result);
 	}
 
 	@Override
-	public TracePartitioning<A> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+	public TracePartitioning<A> smallStepSemantics(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (isBottom())
 			return this;
 
 		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
 		if (isTop() || function == null)
-			result.put(new ExecutionTrace(), lattice.smallStepSemantics(expression, pp));
+			result.put(new ExecutionTrace(), lattice.smallStepSemantics(expression, pp, oracle));
 		else
 			for (Entry<ExecutionTrace, A> trace : this)
-				result.put(trace.getKey(), trace.getValue().smallStepSemantics(expression, pp));
+				result.put(trace.getKey(), trace.getValue().smallStepSemantics(expression, pp, oracle));
 		return new TracePartitioning<>(lattice, result);
 	}
 
 	@Override
-	public TracePartitioning<A> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public TracePartitioning<A> assume(
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (isBottom())
 			return this;
@@ -155,7 +167,7 @@ public class TracePartitioning<A extends AbstractState<A>>
 			for (Entry<ExecutionTrace, A> trace : this) {
 				A state = trace.getValue();
 				ExecutionTrace tokens = trace.getKey();
-				A assume = state.assume(expression, src, dest);
+				A assume = state.assume(expression, src, dest, oracle);
 				if (assume.isBottom())
 					// we only keep traces that can escape the loop
 					continue;
@@ -223,7 +235,11 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -232,7 +248,7 @@ public class TracePartitioning<A extends AbstractState<A>>
 
 		Satisfiability result = Satisfiability.BOTTOM;
 		for (Entry<ExecutionTrace, A> trace : this) {
-			Satisfiability sat = trace.getValue().satisfies(expression, pp);
+			Satisfiability sat = trace.getValue().satisfies(expression, pp, oracle);
 			if (sat == Satisfiability.BOTTOM)
 				return sat;
 			result = result.lub(sat);
@@ -310,56 +326,70 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (isTop())
-			return lattice.top().rewrite(expression, pp);
+			return lattice.top().rewrite(expression, pp, oracle);
 		else if (isBottom() || function == null)
-			return lattice.bottom().rewrite(expression, pp);
+			return lattice.bottom().rewrite(expression, pp, oracle);
 
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (A dom : getValues())
-			result.addAll(dom.rewrite(expression, pp).elements());
+			result.addAll(dom.rewrite(expression, pp, oracle).elements());
 		return new ExpressionSet(result);
 	}
 
 	@Override
-	public ExpressionSet rewrite(ExpressionSet expressions, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			ExpressionSet expressions,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (isTop())
-			return lattice.top().rewrite(expressions, pp);
+			return lattice.top().rewrite(expressions, pp, oracle);
 		else if (isBottom() || function == null)
-			return lattice.bottom().rewrite(expressions, pp);
+			return lattice.bottom().rewrite(expressions, pp, oracle);
 
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (A dom : getValues())
-			result.addAll(dom.rewrite(expressions, pp).elements());
+			result.addAll(dom.rewrite(expressions, pp, oracle).elements());
 		return new ExpressionSet(result);
 	}
 
 	@Override
-	public Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException {
+	public Set<Type> getRuntimeTypesOf(
+			SymbolicExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (isTop())
-			return lattice.top().getRuntimeTypesOf(e, pp);
+			return lattice.top().getRuntimeTypesOf(e, pp, oracle);
 		else if (isBottom() || function == null)
-			return lattice.bottom().getRuntimeTypesOf(e, pp);
+			return lattice.bottom().getRuntimeTypesOf(e, pp, oracle);
 
 		Set<Type> result = new HashSet<>();
 		for (A dom : getValues())
-			result.addAll(dom.getRuntimeTypesOf(e, pp));
+			result.addAll(dom.getRuntimeTypesOf(e, pp, oracle));
 		return result;
 	}
 
 	@Override
-	public Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp) throws SemanticException {
+	public Type getDynamicTypeOf(
+			SymbolicExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (isTop())
-			return lattice.top().getDynamicTypeOf(e, pp);
+			return lattice.top().getDynamicTypeOf(e, pp, oracle);
 		else if (isBottom() || function == null)
-			return lattice.bottom().getDynamicTypeOf(e, pp);
+			return lattice.bottom().getDynamicTypeOf(e, pp, oracle);
 
 		Set<Type> result = new HashSet<>();
 		for (A dom : getValues())
-			result.add(dom.getDynamicTypeOf(e, pp));
+			result.add(dom.getDynamicTypeOf(e, pp, oracle));
 		return Type.commonSupertype(result, Untyped.INSTANCE);
 	}
 

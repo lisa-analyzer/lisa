@@ -1,6 +1,7 @@
 package it.unive.lisa;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -11,7 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class TestHeapDomain extends TestDomain<TestHeapDomain, SymbolicExpression>
-		implements HeapDomain<TestHeapDomain> {
+		implements
+		HeapDomain<TestHeapDomain> {
 
 	@Override
 	public StructuredRepresentation representation() {
@@ -24,7 +26,10 @@ public class TestHeapDomain extends TestDomain<TestHeapDomain, SymbolicExpressio
 	}
 
 	@Override
-	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return new ExpressionSet();
 	}

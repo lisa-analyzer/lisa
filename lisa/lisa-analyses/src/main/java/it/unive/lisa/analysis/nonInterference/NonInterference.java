@@ -1,7 +1,12 @@
 package it.unive.lisa.analysis.nonInterference;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.program.annotations.Annotation;
@@ -20,9 +25,6 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * The type-system based implementation of the non interference analysis.
@@ -91,7 +93,9 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	 * @param confidentiality the confidentiality value
 	 * @param integrity       the integrity value
 	 */
-	public NonInterference(byte confidentiality, byte integrity) {
+	public NonInterference(
+			byte confidentiality,
+			byte integrity) {
 		this.confidentiality = confidentiality;
 		this.integrity = integrity;
 		this.guards = null;
@@ -158,13 +162,16 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	public NonInterference lubAux(NonInterference other) throws SemanticException {
+	public NonInterference lubAux(
+			NonInterference other)
+			throws SemanticException {
 		NonInterference ni = combine(other);
 		addGuards(other, ni);
 		return ni;
 	}
 
-	private NonInterference combine(NonInterference other) {
+	private NonInterference combine(
+			NonInterference other) {
 		// HL
 		// | \
 		// HH LL
@@ -178,7 +185,10 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 		return ni;
 	}
 
-	private void addGuards(NonInterference other, NonInterference ni) throws SemanticException {
+	private void addGuards(
+			NonInterference other,
+			NonInterference ni)
+			throws SemanticException {
 		if (guards != null)
 			ni.guards = new IdentityHashMap<>(guards);
 		if (other.guards != null)
@@ -191,11 +201,14 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	public boolean lessOrEqualAux(NonInterference other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			NonInterference other)
+			throws SemanticException {
 		return compare(other) && compareGuards(other);
 	}
 
-	private boolean compare(NonInterference other) {
+	private boolean compare(
+			NonInterference other) {
 		// HL
 		// | \
 		// HH LL
@@ -208,7 +221,9 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 		return confidentiality && integrity;
 	}
 
-	private boolean compareGuards(NonInterference other) throws SemanticException {
+	private boolean compareGuards(
+			NonInterference other)
+			throws SemanticException {
 		if (guards == null)
 			return true;
 		if (other.guards == null)
@@ -232,7 +247,8 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -264,7 +280,10 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 		return new StringRepresentation((isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L"));
 	}
 
-	private NonInterference state(NonInterference state, ProgramPoint pp) throws SemanticException {
+	private NonInterference state(
+			NonInterference state,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (state.guards == null || state.guards.isEmpty())
 			// we return LH since that is the lowest non-error state
 			return mkLowHigh();
@@ -303,68 +322,119 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalSkip(Skip skip, NonInterference state, ProgramPoint pp)
+	public InferredPair<NonInterference> evalSkip(
+			Skip skip,
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return new InferredPair<>(this, bottom(), state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalPushAny(PushAny pushAny, NonInterference state, ProgramPoint pp)
+	public InferredPair<NonInterference> evalPushAny(
+			PushAny pushAny,
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return new InferredPair<>(this, top(), state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalTypeConv(BinaryExpression conv, NonInterference left,
-			NonInterference right, NonInterference state, ProgramPoint pp) throws SemanticException {
+	public InferredPair<NonInterference> evalTypeConv(
+			BinaryExpression conv,
+			NonInterference left,
+			NonInterference right,
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return new InferredPair<>(this, left, state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalTypeCast(BinaryExpression cast, NonInterference left,
-			NonInterference right, NonInterference state, ProgramPoint pp) throws SemanticException {
+	public InferredPair<NonInterference> evalTypeCast(
+			BinaryExpression cast,
+			NonInterference left,
+			NonInterference right,
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return new InferredPair<>(this, left, state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalNullConstant(NonInterference state, ProgramPoint pp)
+	public InferredPair<NonInterference> evalNullConstant(
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return new InferredPair<>(this, mkLowHigh(), state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalNonNullConstant(Constant constant, NonInterference state,
-			ProgramPoint pp) throws SemanticException {
+	public InferredPair<NonInterference> evalNonNullConstant(
+			Constant constant,
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return new InferredPair<>(this, mkLowHigh(), state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalUnaryExpression(UnaryOperator operator, NonInterference arg,
-			NonInterference state, ProgramPoint pp) throws SemanticException {
+	public InferredPair<NonInterference> evalUnaryExpression(
+			UnaryOperator operator,
+			NonInterference arg,
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return new InferredPair<>(this, arg, state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalBinaryExpression(BinaryOperator operator, NonInterference left,
-			NonInterference right, NonInterference state, ProgramPoint pp) throws SemanticException {
+	public InferredPair<NonInterference> evalBinaryExpression(
+			BinaryOperator operator,
+			NonInterference left,
+			NonInterference right,
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return new InferredPair<>(this, left.lub(right), state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalTernaryExpression(TernaryOperator operator, NonInterference left,
-			NonInterference middle, NonInterference right, NonInterference state, ProgramPoint pp)
+	public InferredPair<NonInterference> evalTernaryExpression(
+			TernaryOperator operator,
+			NonInterference left,
+			NonInterference middle,
+			NonInterference right,
+			NonInterference state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return new InferredPair<>(this, left.lub(middle).lub(right), state(state, pp));
 	}
 
 	@Override
-	public InferredPair<NonInterference> evalIdentifier(Identifier id,
-			InferenceSystem<NonInterference> environment, ProgramPoint pp) throws SemanticException {
-		return new InferredPair<>(this, fixedVariable(id, pp), state(environment.getExecutionState(), pp));
+	public InferredPair<NonInterference> evalIdentifier(
+			Identifier id,
+			InferenceSystem<NonInterference> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return new InferredPair<>(this, fixedVariable(id, pp, oracle), state(environment.getExecutionState(), pp));
 	}
 
 	@Override
-	public NonInterference fixedVariable(Identifier id, ProgramPoint pp) {
+	public NonInterference fixedVariable(
+			Identifier id,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		Annotations annots = id.getAnnotations();
 		if (annots.isEmpty())
 			return mkHighLow();
@@ -383,14 +453,20 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	public boolean tracksIdentifiers(Identifier id) {
+	public boolean tracksIdentifiers(
+			Identifier id) {
 		return true;
 	}
 
 	@Override
-	public InferenceSystem<NonInterference> assume(InferenceSystem<NonInterference> environment,
-			ValueExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
-		InferredPair<NonInterference> eval = eval(expression, environment, src);
+	public InferenceSystem<NonInterference> assume(
+			InferenceSystem<NonInterference> environment,
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		InferredPair<NonInterference> eval = eval(expression, environment, src, oracle);
 		NonInterference inf = eval.getInferred();
 		inf.guards = new IdentityHashMap<>();
 		if (eval.getState().guards != null)

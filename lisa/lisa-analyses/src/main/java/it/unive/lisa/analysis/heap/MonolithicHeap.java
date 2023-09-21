@@ -1,7 +1,14 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -18,11 +25,6 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -41,7 +43,10 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	private static final StructuredRepresentation REPR = new StringRepresentation("monolith");
 
 	@Override
-	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return expression.accept(new Rewriter(), pp);
 	}
@@ -52,55 +57,81 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public MonolithicHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public MonolithicHeap assign(
+			Identifier id,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap mk(MonolithicHeap reference) {
+	public MonolithicHeap mk(
+			MonolithicHeap reference) {
 		return TOP;
 	}
 
 	@Override
-	public MonolithicHeap semanticsOf(HeapExpression expression, ProgramPoint pp) {
+	public MonolithicHeap semanticsOf(
+			HeapExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public MonolithicHeap assume(
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public MonolithicHeap forgetIdentifier(Identifier id) throws SemanticException {
+	public MonolithicHeap forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public MonolithicHeap forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap lubAux(MonolithicHeap other) throws SemanticException {
+	public MonolithicHeap lubAux(
+			MonolithicHeap other)
+			throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	public MonolithicHeap glbAux(MonolithicHeap other) throws SemanticException {
+	public MonolithicHeap glbAux(
+			MonolithicHeap other)
+			throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(MonolithicHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			MonolithicHeap other)
+			throws SemanticException {
 		return true;
 	}
 
@@ -125,7 +156,8 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -145,8 +177,12 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
-		public ExpressionSet visit(AccessChild expression, ExpressionSet receiver,
-				ExpressionSet child, Object... params) throws SemanticException {
+		public ExpressionSet visit(
+				AccessChild expression,
+				ExpressionSet receiver,
+				ExpressionSet child,
+				Object... params)
+				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			Set<Type> acc = new HashSet<>();
@@ -161,7 +197,9 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 		}
 
 		@Override
-		public ExpressionSet visit(MemoryAllocation expression, Object... params)
+		public ExpressionSet visit(
+				MemoryAllocation expression,
+				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
@@ -173,7 +211,9 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 		}
 
 		@Override
-		public ExpressionSet visit(HeapReference expression, ExpressionSet ref,
+		public ExpressionSet visit(
+				HeapReference expression,
+				ExpressionSet ref,
 				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
@@ -191,7 +231,9 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 		}
 
 		@Override
-		public ExpressionSet visit(HeapDereference expression, ExpressionSet deref,
+		public ExpressionSet visit(
+				HeapDereference expression,
+				ExpressionSet deref,
 				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
@@ -199,9 +241,10 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			return deref;
 		}
 	}
-	
+
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		return false;
 	}
 }

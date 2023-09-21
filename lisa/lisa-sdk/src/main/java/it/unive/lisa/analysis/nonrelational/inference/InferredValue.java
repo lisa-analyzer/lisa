@@ -1,22 +1,24 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Map;
 
 /**
  * A {@link NonRelationalElement} that can be inferred by
  * {@link InferenceSystem}s. The main difference between a
  * {@link NonRelationalDomain} and an {@link InferredValue} is that
- * {@link #eval(ValueExpression, InferenceSystem, ProgramPoint)} returns
- * instances of {@link InferredPair}, to model the fact that every semantic
- * evaluation also modifies the execution state.
+ * {@link #eval(ValueExpression, InferenceSystem, ProgramPoint, SemanticOracle)}
+ * returns instances of {@link InferredPair}, to model the fact that every
+ * semantic evaluation also modifies the execution state.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -34,6 +36,7 @@ public interface InferredValue<T extends InferredValue<T>>
 	 *                        variables for the evaluation
 	 * @param pp          the program point that where this operation is being
 	 *                        evaluated
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return an new instance of this domain, representing the abstract result
 	 *             of {@code expression} when evaluated on {@code environment}.
@@ -42,7 +45,11 @@ public interface InferredValue<T extends InferredValue<T>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
+	InferredPair<T> eval(
+			ValueExpression expression,
+			InferenceSystem<T> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException;
 
 	/**

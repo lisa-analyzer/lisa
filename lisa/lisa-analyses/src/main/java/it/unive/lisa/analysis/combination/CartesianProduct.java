@@ -1,17 +1,19 @@
 package it.unive.lisa.analysis.combination;
 
+import java.util.Collection;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ListRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
-import java.util.function.Predicate;
 
 /**
  * A generic Cartesian product abstract domain between two non-communicating
@@ -136,23 +138,23 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public C assign(I id, E expression, ProgramPoint pp) throws SemanticException {
-		T1 newLeft = left.assign(id, expression, pp);
-		T2 newRight = right.assign(id, expression, pp);
+	public C assign(I id, E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+		T1 newLeft = left.assign(id, expression, pp, oracle);
+		T2 newRight = right.assign(id, expression, pp, oracle);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException {
-		T1 newLeft = left.smallStepSemantics(expression, pp);
-		T2 newRight = right.smallStepSemantics(expression, pp);
+	public C smallStepSemantics(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+		T1 newLeft = left.smallStepSemantics(expression, pp, oracle);
+		T2 newRight = right.smallStepSemantics(expression, pp, oracle);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
-		T1 newLeft = left.assume(expression, src, dest);
-		T2 newRight = right.assume(expression, src, dest);
+	public C assume(E expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
+		T1 newLeft = left.assume(expression, src, dest, oracle);
+		T2 newRight = right.assume(expression, src, dest, oracle);
 		return mk(newLeft, newRight);
 	}
 
@@ -186,8 +188,8 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
-		return left.satisfies(expression, pp).and(right.satisfies(expression, pp));
+	public Satisfiability satisfies(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+		return left.satisfies(expression, pp, oracle).and(right.satisfies(expression, pp, oracle));
 	}
 
 	@Override

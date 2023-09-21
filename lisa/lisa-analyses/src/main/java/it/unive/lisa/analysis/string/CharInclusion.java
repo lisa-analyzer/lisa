@@ -1,8 +1,16 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
@@ -19,11 +27,6 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The suffix string abstract domain.
@@ -58,14 +61,17 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	 * @param certainlyContained the set of certainly contained characters
 	 * @param maybeContained     the set of maybe contained characters
 	 */
-	public CharInclusion(Set<Character> certainlyContained,
+	public CharInclusion(
+			Set<Character> certainlyContained,
 			Set<Character> maybeContained) {
 		this.certainlyContained = certainlyContained;
 		this.maybeContained = maybeContained;
 	}
 
 	@Override
-	public CharInclusion lubAux(CharInclusion other) throws SemanticException {
+	public CharInclusion lubAux(
+			CharInclusion other)
+			throws SemanticException {
 		Set<Character> lubAuxCertainly = new TreeSet<>();
 
 		Set<Character> lubAuxMaybe;
@@ -85,7 +91,9 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	}
 
 	@Override
-	public boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			CharInclusion other)
+			throws SemanticException {
 		if (this.certainlyContained.size() > other.certainlyContained.size())
 			return false;
 		if (!other.certainlyContained.containsAll(certainlyContained))
@@ -100,7 +108,8 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(
+			Object o) {
 		if (this == o)
 			return true;
 		if (o == null || getClass() != o.getClass())
@@ -162,7 +171,10 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	}
 
 	@Override
-	public CharInclusion evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public CharInclusion evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (constant.getValue() instanceof String) {
 			Set<Character> charsSet = ((String) constant.getValue()).chars()
 					.mapToObj(e -> (char) e).collect(Collectors.toCollection(TreeSet::new));
@@ -174,8 +186,12 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	}
 
 	@Override
-	public CharInclusion evalBinaryExpression(BinaryOperator operator, CharInclusion left, CharInclusion right,
-			ProgramPoint pp) {
+	public CharInclusion evalBinaryExpression(
+			BinaryOperator operator,
+			CharInclusion left,
+			CharInclusion right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (operator == StringConcat.INSTANCE) {
 			Set<Character> resultCertainlyContained = new TreeSet<>();
 			resultCertainlyContained.addAll(left.certainlyContained);
@@ -205,8 +221,14 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	}
 
 	@Override
-	public CharInclusion evalTernaryExpression(TernaryOperator operator, CharInclusion left, CharInclusion middle,
-			CharInclusion right, ProgramPoint pp) throws SemanticException {
+	public CharInclusion evalTernaryExpression(
+			TernaryOperator operator,
+			CharInclusion left,
+			CharInclusion middle,
+			CharInclusion right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (operator == StringReplace.INSTANCE) {
 
 			if (!left.certainlyContained.containsAll(middle.certainlyContained))
@@ -238,8 +260,12 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, CharInclusion left, CharInclusion right,
-			ProgramPoint pp) {
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			CharInclusion left,
+			CharInclusion right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (left.isTop() || right.isBottom())
 			return Satisfiability.UNKNOWN;
 
@@ -272,7 +298,9 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	 * @return the char inclusion abstract value corresponding to the substring
 	 *             of this char inclusion abstract value between two indexes
 	 */
-	public CharInclusion substring(long begin, long end) {
+	public CharInclusion substring(
+			long begin,
+			long end) {
 		if (isTop() || isBottom())
 			return this;
 		return new CharInclusion(new TreeSet<>(), maybeContained);
@@ -296,12 +324,14 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	 * 
 	 * @return the minimum and maximum index of {@code s} in {@code this}
 	 */
-	public IntInterval indexOf(CharInclusion s) {
+	public IntInterval indexOf(
+			CharInclusion s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
-	public Satisfiability containsChar(char c) {
+	public Satisfiability containsChar(
+			char c) {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 		if (isBottom())

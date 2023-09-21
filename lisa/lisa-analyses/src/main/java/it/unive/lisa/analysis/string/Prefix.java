@@ -1,8 +1,11 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
@@ -19,7 +22,6 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
 
 /**
  * The prefix string abstract domain.
@@ -50,12 +52,15 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 	 * 
 	 * @param prefix the prefix
 	 */
-	public Prefix(String prefix) {
+	public Prefix(
+			String prefix) {
 		this.prefix = prefix;
 	}
 
 	@Override
-	public Prefix lubAux(Prefix other) throws SemanticException {
+	public Prefix lubAux(
+			Prefix other)
+			throws SemanticException {
 		String otherPrefixString = other.prefix;
 		StringBuilder result = new StringBuilder();
 
@@ -74,7 +79,9 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Prefix other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Prefix other)
+			throws SemanticException {
 		if (other.prefix.length() <= this.prefix.length()) {
 			Prefix lub = this.lubAux(other);
 
@@ -85,7 +92,8 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(
+			Object o) {
 		if (this == o)
 			return true;
 		if (o == null || getClass() != o.getClass())
@@ -120,7 +128,10 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 	}
 
 	@Override
-	public Prefix evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Prefix evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (constant.getValue() instanceof String) {
 			String str = (String) constant.getValue();
 			if (!str.isEmpty())
@@ -132,7 +143,12 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 	}
 
 	@Override
-	public Prefix evalBinaryExpression(BinaryOperator operator, Prefix left, Prefix right, ProgramPoint pp) {
+	public Prefix evalBinaryExpression(
+			BinaryOperator operator,
+			Prefix left,
+			Prefix right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (operator == StringConcat.INSTANCE) {
 			return left;
 		} else if (operator == StringContains.INSTANCE ||
@@ -147,8 +163,14 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 	}
 
 	@Override
-	public Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right,
-			ProgramPoint pp) throws SemanticException {
+	public Prefix evalTernaryExpression(
+			TernaryOperator operator,
+			Prefix left,
+			Prefix middle,
+			Prefix right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 
 		if (operator == StringReplace.INSTANCE) {
 			String replace = right.getPrefix();
@@ -183,7 +205,9 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 	 * @return the prefix corresponding to the substring of this prefix between
 	 *             two indexes
 	 */
-	public Prefix substring(long begin, long end) {
+	public Prefix substring(
+			long begin,
+			long end) {
 		if (isTop() || isBottom())
 			return this;
 
@@ -213,12 +237,14 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 	 * 
 	 * @return the minimum and maximum index of {@code s} in {@code this}
 	 */
-	public IntInterval indexOf(Prefix s) {
+	public IntInterval indexOf(
+			Prefix s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
-	public Satisfiability containsChar(char c) {
+	public Satisfiability containsChar(
+			char c) {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 		if (isBottom())

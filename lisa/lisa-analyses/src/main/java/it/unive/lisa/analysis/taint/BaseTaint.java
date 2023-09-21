@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.taint;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.annotations.Annotation;
@@ -123,10 +124,14 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	 * 
 	 * @throws SemanticException if an exception happens during the evaluation
 	 */
-	protected T defaultApprox(Identifier id, ProgramPoint pp) throws SemanticException {
+	protected T defaultApprox(
+			Identifier id,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		Annotations annots = id.getAnnotations();
 		if (annots.isEmpty())
-			return BaseNonRelationalValueDomain.super.fixedVariable(id, pp);
+			return BaseNonRelationalValueDomain.super.fixedVariable(id, pp, oracle);
 
 		if (annots.contains(BaseTaint.TAINTED_MATCHER))
 			return tainted();
@@ -138,83 +143,142 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public T fixedVariable(Identifier id, ProgramPoint pp) throws SemanticException {
-		T def = defaultApprox(id, pp);
-		if (!def.isBottom())
-			return def;
-		return BaseNonRelationalValueDomain.super.fixedVariable(id, pp);
-	}
-
-	@Override
-	public T evalIdentifier(Identifier id, ValueEnvironment<T> environment, ProgramPoint pp)
+	public T fixedVariable(
+			Identifier id,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		T def = defaultApprox(id, pp);
+		T def = defaultApprox(id, pp, oracle);
 		if (!def.isBottom())
 			return def;
-		return BaseNonRelationalValueDomain.super.evalIdentifier(id, environment, pp);
+		return BaseNonRelationalValueDomain.super.fixedVariable(id, pp, oracle);
 	}
 
 	@Override
-	public T evalPushAny(PushAny pushAny, ProgramPoint pp) throws SemanticException {
+	public T evalIdentifier(
+			Identifier id,
+			ValueEnvironment<T> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		T def = defaultApprox(id, pp, oracle);
+		if (!def.isBottom())
+			return def;
+		return BaseNonRelationalValueDomain.super.evalIdentifier(id, environment, pp, oracle);
+	}
+
+	@Override
+	public T evalPushAny(
+			PushAny pushAny,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return top();
 	}
 
 	@Override
-	public T evalNullConstant(ProgramPoint pp) throws SemanticException {
+	public T evalNullConstant(
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return clean();
 	}
 
 	@Override
-	public T evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+	public T evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return clean();
 	}
 
 	@Override
-	public T evalUnaryExpression(UnaryOperator operator, T arg, ProgramPoint pp) throws SemanticException {
+	public T evalUnaryExpression(
+			UnaryOperator operator,
+			T arg,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return arg;
 	}
 
 	@Override
-	public T evalBinaryExpression(BinaryOperator operator, T left, T right, ProgramPoint pp) throws SemanticException {
+	public T evalBinaryExpression(
+			BinaryOperator operator,
+			T left,
+			T right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return left.lub(right);
 	}
 
 	@Override
-	public T evalTernaryExpression(TernaryOperator operator, T left, T middle, T right, ProgramPoint pp)
+	public T evalTernaryExpression(
+			TernaryOperator operator,
+			T left,
+			T middle,
+			T right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return left.lub(middle).lub(right);
 	}
 
 	@Override
-	public T evalTypeCast(BinaryExpression cast, T left, T right, ProgramPoint pp) throws SemanticException {
+	public T evalTypeCast(
+			BinaryExpression cast,
+			T left,
+			T right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return left;
 	}
 
 	@Override
-	public T evalTypeConv(BinaryExpression conv, T left, T right, ProgramPoint pp) throws SemanticException {
+	public T evalTypeConv(
+			BinaryExpression conv,
+			T left,
+			T right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return left;
 	}
 
 	@Override
-	public boolean tracksIdentifiers(Identifier id) {
+	public boolean tracksIdentifiers(
+			Identifier id) {
 		return true;
 	}
 
 	@Override
-	public boolean canProcess(SymbolicExpression expression) {
+	public boolean canProcess(
+			SymbolicExpression expression) {
 		return !expression.getDynamicType().isPointerType() && !expression.getDynamicType().isInMemoryType();
 	}
 
 	@Override
-	public Satisfiability satisfies(ValueExpression expression, ValueEnvironment<T> environment, ProgramPoint pp)
+	public Satisfiability satisfies(
+			ValueExpression expression,
+			ValueEnvironment<T> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		// quick answer: we cannot do anything
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression, ProgramPoint src,
-			ProgramPoint dest) throws SemanticException {
+	public ValueEnvironment<T> assume(
+			ValueEnvironment<T> environment,
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		// quick answer: we cannot do anything
 		return environment;
 	}

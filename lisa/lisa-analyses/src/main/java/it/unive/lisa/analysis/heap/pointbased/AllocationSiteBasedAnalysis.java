@@ -1,7 +1,15 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -21,12 +29,6 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * A base class for heap analyses based on the allocation sites of the objects
@@ -110,12 +112,16 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	protected abstract A mk(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements);
 
 	@Override
-	public A assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public A assign(
+			Identifier id,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		A sss = smallStepSemantics(expression, pp);
+		A sss = smallStepSemantics(expression, pp, oracle);
 		A result = bottom();
 		List<HeapReplacement> replacements = new LinkedList<>();
-		ExpressionSet rhsExps = sss.rewrite(expression, pp);
+		ExpressionSet rhsExps = sss.rewrite(expression, pp, oracle);
 
 		for (SymbolicExpression rhs : rhsExps)
 			if (rhs instanceof MemoryPointer) {
@@ -124,16 +130,16 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 					// we have x = y, where both are pointers we perform *x = *y
 					// so that x and y become aliases
 					Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
-					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(lhs_ref, rhs_ref, pp);
+					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(lhs_ref, rhs_ref, pp, oracle);
 					result = result.lub(mk(heap));
 				} else if (rhs_ref instanceof StackAllocationSite
 						&& !getAllocatedAt(((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
 					// for stack elements, assignment works as a shallow copy
 					// since there are no pointers to alias
-					result = result.lub(sss.shallowCopy(id, (StackAllocationSite) rhs_ref, replacements, pp));
+					result = result.lub(sss.shallowCopy(id, (StackAllocationSite) rhs_ref, replacements, pp, oracle));
 				else {
 					// aliasing: id and star_y points to the same object
-					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, rhs_ref, pp);
+					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, rhs_ref, pp, oracle);
 					result = result.lub(mk(heap));
 				}
 			} else
@@ -180,7 +186,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			Identifier id,
 			StackAllocationSite site,
 			List<HeapReplacement> replacements,
-			ProgramPoint pp)
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
@@ -190,7 +197,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		if (site.hasRuntimeTypes())
 			clone.setRuntimeTypes(site.getRuntimeTypes(null));
 
-		HeapEnvironment<AllocationSites> tmp = heapEnv.assign(id, clone, pp);
+		HeapEnvironment<AllocationSites> tmp = heapEnv.assign(id, clone, pp, oracle);
 
 		HeapReplacement replacement = new HeapReplacement();
 		replacement.addSource(site);
@@ -202,14 +209,21 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	}
 
 	@Override
-	public A assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public A assume(
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		// we just rewrite the expression if needed
-		return smallStepSemantics(expression, src);
+		return smallStepSemantics(expression, src, oracle);
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
 	}
@@ -265,15 +279,17 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public A semanticsOf(HeapExpression expression, ProgramPoint pp)
-			throws SemanticException {
+	public A semanticsOf(HeapExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 		return (A) this;
 	}
 
 	@Override
-	public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(new Rewriter());
+		return expression.accept(new Rewriter(), pp, oracle);
 	}
 
 	/**
@@ -447,7 +463,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			return new ExpressionSet(expression);
 		}
 	}
-	
+
 	@Override
 	public boolean knowsIdentifier(Identifier id) {
 		return heapEnv.knowsIdentifier(id) || (id instanceof AllocationSite
