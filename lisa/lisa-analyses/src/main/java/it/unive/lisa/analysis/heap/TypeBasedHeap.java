@@ -24,7 +24,6 @@ import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
@@ -164,7 +163,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 
 		if (expression instanceof MemoryAllocation) {
 			Set<String> names = new HashSet<>(this.names);
-			for (Type type : expression.getRuntimeTypes(pp.getProgram().getTypes()))
+			for (Type type : oracle.getRuntimeTypesOf(expression, pp, oracle))
 				if (type.isInMemoryType())
 					names.add(type.toString());
 
@@ -246,17 +245,16 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			Set<SymbolicExpression> result = new HashSet<>();
 
 			ProgramPoint pp = (ProgramPoint) params[0];
-			TypeSystem types = pp.getProgram().getTypes();
+			SemanticOracle oracle = (SemanticOracle) params[1];
 
 			for (SymbolicExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
-					for (Type t : pid.getRuntimeTypes(types))
+					for (Type t : oracle.getRuntimeTypesOf(pid, pp, oracle))
 						if (t.isPointerType()) {
 							Type inner = t.asPointerType().getInnerType();
 							HeapLocation e = new HeapLocation(inner, inner.toString(), true,
 									expression.getCodeLocation());
-							e.setRuntimeTypes(Collections.singleton(inner));
 							result.add(e);
 						}
 				}
@@ -269,15 +267,11 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
-			ProgramPoint pp = (ProgramPoint) params[0];
-			TypeSystem types = pp.getProgram().getTypes();
-
-			for (Type t : expression.getRuntimeTypes(types))
-				if (t.isInMemoryType()) {
-					HeapLocation e = new HeapLocation(t, t.toString(), true, expression.getCodeLocation());
-					e.setRuntimeTypes(Collections.singleton(t));
-					result.add(e);
-				}
+			Type t = expression.getStaticType();
+			if (t.isInMemoryType()) {
+				HeapLocation e = new HeapLocation(t, t.toString(), true, expression.getCodeLocation());
+				result.add(e);
+			}
 			return new ExpressionSet(result);
 		}
 
@@ -290,18 +284,16 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			Set<SymbolicExpression> result = new HashSet<>();
 
 			ProgramPoint pp = (ProgramPoint) params[0];
+			SemanticOracle oracle = (SemanticOracle) params[1];
 
-			TypeSystem types = pp.getProgram().getTypes();
 			for (SymbolicExpression refExp : ref)
 				if (refExp instanceof HeapLocation) {
-					Set<Type> rt = refExp.getRuntimeTypes(types);
+					Set<Type> rt = oracle.getRuntimeTypesOf(refExp, pp, oracle);
 					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
 					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(refExp.hasRuntimeTypes() ? sup : Untyped.INSTANCE),
+							new ReferenceType(sup),
 							(HeapLocation) refExp,
 							refExp.getCodeLocation());
-					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				}
 
@@ -316,18 +308,16 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 			ProgramPoint pp = (ProgramPoint) params[0];
-			TypeSystem types = pp.getProgram().getTypes();
+			SemanticOracle oracle = (SemanticOracle) params[1];
 
 			for (SymbolicExpression derefExp : deref) {
 				if (derefExp instanceof Variable) {
 					Variable var = (Variable) derefExp;
-					for (Type t : var.getRuntimeTypes(types))
+					for (Type t : oracle.getRuntimeTypesOf(var, pp, oracle))
 						if (t.isPointerType()) {
 							Type inner = t.asPointerType().getInnerType();
 							HeapLocation loc = new HeapLocation(inner, inner.toString(), true,
 									var.getCodeLocation());
-							loc.setRuntimeTypes(Collections.singleton(inner));
-
 							MemoryPointer pointer = new MemoryPointer(t, loc, var.getCodeLocation());
 							result.add(pointer);
 						}

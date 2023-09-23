@@ -1,5 +1,8 @@
 package it.unive.lisa.imp.expressions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,9 +17,6 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An expression modeling the array element access operation
@@ -51,8 +51,7 @@ public class IMPArrayAccess extends BinaryExpression {
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Set<Type> arraytypes = new HashSet<>();
-		TypeSystem types = getProgram().getTypes();
-		for (Type t : left.getRuntimeTypes(types))
+		for (Type t : state.getState().getRuntimeTypesOf(left, this, state.getState()))
 			if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
 				arraytypes.add(t.asPointerType().getInnerType());
 
@@ -61,7 +60,6 @@ public class IMPArrayAccess extends BinaryExpression {
 
 		ArrayType arraytype = Type.commonSupertype(arraytypes, getStaticType()).asArrayType();
 		HeapDereference container = new HeapDereference(arraytype, left, getLocation());
-		container.setRuntimeTypes(arraytypes);
 		AccessChild elem = new AccessChild(
 				arraytype.getInnerType(),
 				container,

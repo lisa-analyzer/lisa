@@ -18,7 +18,6 @@ import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string length operation. The type of the operand
@@ -53,7 +52,10 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 	 * @param location  the code location where this operation is defined
 	 * @param parameter the operand of this operation
 	 */
-	public Length(CFG cfg, CodeLocation location, Expression parameter) {
+	public Length(
+			CFG cfg,
+			CodeLocation location,
+			Expression parameter) {
 		super(cfg, location, "len", cfg.getDescriptor().getUnit().getProgram().getTypes().getIntegerType(), parameter);
 	}
 
@@ -64,8 +66,7 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (expr.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(expr, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

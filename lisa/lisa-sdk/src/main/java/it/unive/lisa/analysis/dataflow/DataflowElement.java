@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.dataflow;
 import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -26,7 +27,10 @@ import java.util.Collection;
  * @param <E> the concrete type of {@link DataflowElement}
  */
 public interface DataflowElement<D extends DataflowDomain<D, E>, E extends DataflowElement<D, E>>
-		extends SemanticEvaluator, StructuredObject, ScopedObject<E> {
+		extends
+		SemanticEvaluator,
+		StructuredObject,
+		ScopedObject<E> {
 
 	/**
 	 * Yields all the {@link Identifier}s that are involved in the definition of
@@ -52,7 +56,12 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Collection<E> gen(Identifier id, ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
+	Collection<E> gen(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			D domain)
+			throws SemanticException;
 
 	/**
 	 * The dataflow <i>gen</i> operation, yielding the dataflow elements that
@@ -68,7 +77,11 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Collection<E> gen(ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
+	Collection<E> gen(
+			ValueExpression expression,
+			ProgramPoint pp,
+			D domain)
+			throws SemanticException;
 
 	/**
 	 * The dataflow <i>kill</i> operation, yielding the dataflow elements that
@@ -86,7 +99,12 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Collection<E> kill(Identifier id, ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
+	Collection<E> kill(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			D domain)
+			throws SemanticException;
 
 	/**
 	 * The dataflow <i>kill</i> operation, yielding the dataflow elements that
@@ -102,17 +120,28 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Collection<E> kill(ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
+	Collection<E> kill(
+			ValueExpression expression,
+			ProgramPoint pp,
+			D domain)
+			throws SemanticException;
 
 	@Override
-	default boolean tracksIdentifiers(Identifier id) {
-		return canProcess(id);
+	default boolean tracksIdentifiers(
+			Identifier id,
+			ProgramPoint pp, SemanticOracle oracle) {
+		return canProcess(id, pp, oracle);
 	}
 
 	@Override
-	default boolean canProcess(SymbolicExpression expression) {
-		if (expression.hasRuntimeTypes())
-			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
-		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
+	default boolean canProcess(
+			SymbolicExpression expression,
+			ProgramPoint pp, SemanticOracle oracle) {
+		try {
+			return oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
+					.anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		} catch (SemanticException e) {
+			return false;
+		}
 	}
 }

@@ -134,8 +134,6 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 			for (SymbolicExpression expr : arg) {
 				UnaryExpression e = new UnaryExpression(expression.getStaticType(), expr, expression.getOperator(),
 						expression.getCodeLocation());
-				if (expr.hasRuntimeTypes())
-					e.setRuntimeTypes(expr.getRuntimeTypes(null));
 				result.add(e);
 			}
 			return new ExpressionSet(result);
@@ -151,8 +149,6 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 					BinaryExpression e = new BinaryExpression(expression.getStaticType(), l, r,
 							expression.getOperator(),
 							expression.getCodeLocation());
-					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				}
 			return new ExpressionSet(result);
@@ -170,8 +166,6 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 						TernaryExpression e = new TernaryExpression(expression.getStaticType(), l, m, r,
 								expression.getOperator(),
 								expression.getCodeLocation());
-						if (expression.hasRuntimeTypes())
-							e.setRuntimeTypes(expression.getRuntimeTypes(null));
 						result.add(e);
 					}
 			return new ExpressionSet(result);

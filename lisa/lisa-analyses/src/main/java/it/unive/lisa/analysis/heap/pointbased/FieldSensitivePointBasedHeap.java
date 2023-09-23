@@ -286,9 +286,6 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 							target,
 							site.isWeak(),
 							site.getCodeLocation());
-
-				if (expression.hasRuntimeTypes())
-					e.setRuntimeTypes(expression.getRuntimeTypes(null));
 				result.add(e);
 			}
 		}
@@ -309,9 +306,6 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 				e = new StackAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
 			else
 				e = new HeapAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
-
-			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet(e);
 		}
 	}

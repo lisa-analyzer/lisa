@@ -17,7 +17,6 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string replace operation. The type of all three
@@ -54,7 +53,12 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 	 * @param middle   the middle operand of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Replace(CFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
+	public Replace(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression middle,
+			Expression right) {
 		super(cfg, location, "replace", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
 				middle, right);
 	}
@@ -68,12 +72,11 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (middle.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(middle, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

@@ -1,6 +1,8 @@
 
 package it.unive.lisa.imp.expressions;
 
+import java.util.Set;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,14 +25,13 @@ import it.unive.lisa.type.Untyped;
 /**
  * An expression modeling the plus operation ({@code +}) that, in some
  * languages, represents either the string concatenation or the numeric addition
- * depending on the types of its operands. If both operands' dynamic type
- * (according to {@link SymbolicExpression#getDynamicType()}) is a
- * {@link it.unive.lisa.type.StringType} (according to
- * {@link Type#isStringType()}), then this operation translates to a string
- * concatenation of its operands, and its type is {@link StringType}. Otherwise,
- * both operands' types must be instances of {@link NumericType}, and the type
- * of this expression (i.e., a numerical sum) is the common numerical type of
- * its operands, according to the type inference.
+ * depending on the types of its operands. The semantics checks for each
+ * combination of the operands' runtime types: if both types are
+ * {@link it.unive.lisa.type.StringType}s, then this operation translates to a
+ * string concatenation of its operands, and its type is {@link StringType}.
+ * Otherwise, both operands' types must be instances of {@link NumericType}, and
+ * the type of this expression (i.e., a numerical sum) is the common numerical
+ * type of its operands, according to the type inference.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -46,7 +47,13 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 	 * @param left       the left-hand side of this operation
 	 * @param right      the right-hand side of this operation
 	 */
-	public IMPAddOrConcat(CFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
+	public IMPAddOrConcat(
+			CFG cfg,
+			String sourceFile,
+			int line,
+			int col,
+			Expression left,
+			Expression right) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "+", left, right);
 	}
 
@@ -62,8 +69,11 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 		BinaryOperator op;
 		TypeSystem types = getProgram().getTypes();
 
-		for (Type tleft : left.getRuntimeTypes(types))
-			for (Type tright : right.getRuntimeTypes(types)) {
+		Set<Type> ltypes = state.getState().getRuntimeTypesOf(left, this, state.getState());
+		Set<Type> rtypes = state.getState().getRuntimeTypesOf(right, this, state.getState());
+
+		for (Type tleft : ltypes)
+			for (Type tright : rtypes) {
 				if (tleft.isStringType())
 					if (tright.isStringType() || tright.isUntyped())
 						op = StringConcat.INSTANCE;
@@ -89,9 +99,7 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 				if (op == null)
 					continue;
 
-				Type t = Type.commonSupertype(
-						op.typeInference(types, left.getRuntimeTypes(types), right.getRuntimeTypes(types)),
-						Untyped.INSTANCE);
+				Type t = Type.commonSupertype(op.typeInference(types, ltypes, rtypes), Untyped.INSTANCE);
 				result = result.lub(state.smallStepSemantics(
 						new BinaryExpression(
 								t,

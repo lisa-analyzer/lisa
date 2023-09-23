@@ -14,7 +14,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the greater or equal operation ({@code >=}). Both
@@ -45,10 +44,9 @@ public class GreaterOrEqual extends it.unive.lisa.program.cfg.statement.BinaryEx
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

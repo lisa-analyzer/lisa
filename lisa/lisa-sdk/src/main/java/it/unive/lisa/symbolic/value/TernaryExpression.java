@@ -98,8 +98,6 @@ public class TernaryExpression extends ValueExpression {
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
 		TernaryExpression expr = new TernaryExpression(getStaticType(), left.pushScope(token), middle.pushScope(token),
 				right.pushScope(token), operator, getCodeLocation());
-		if (hasRuntimeTypes())
-			expr.setRuntimeTypes(getRuntimeTypes(null));
 		return expr;
 	}
 
@@ -107,8 +105,6 @@ public class TernaryExpression extends ValueExpression {
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		TernaryExpression expr = new TernaryExpression(getStaticType(), left.popScope(token), middle.popScope(token),
 				right.popScope(token), operator, getCodeLocation());
-		if (hasRuntimeTypes())
-			expr.setRuntimeTypes(getRuntimeTypes(null));
 		return expr;
 	}
 

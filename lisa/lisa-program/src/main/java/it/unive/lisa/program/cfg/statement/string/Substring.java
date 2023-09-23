@@ -18,7 +18,6 @@ import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string substring operation. The type of the first
@@ -56,7 +55,12 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 	 * @param middle   the middle operand of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Substring(CFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
+	public Substring(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression middle,
+			Expression right) {
 		super(cfg, location, "substring", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
 				middle, right);
 	}
@@ -70,12 +74,11 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (middle.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(middle, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

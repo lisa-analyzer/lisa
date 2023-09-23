@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
  * A left-to-right {@link EvaluationOrder}, evaluating expressions in the given
@@ -41,8 +40,6 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 			AnalysisState<A> tmp = subExpressions[i].semantics(postState, interprocedural, expressions);
 			expressions.put(subExpressions[i], tmp);
 			computed[i] = tmp.getComputedExpressions();
-			for (SymbolicExpression e : computed[i])
-				e.setRuntimeTypes(tmp.getState().getRuntimeTypesOf(e, subExpressions[i], tmp.getState()));
 			postState = tmp;
 		}
 

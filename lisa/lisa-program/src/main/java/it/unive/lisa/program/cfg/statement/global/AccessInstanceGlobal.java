@@ -1,5 +1,8 @@
 package it.unive.lisa.program.cfg.statement.global;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -19,11 +22,7 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An access to an instance {@link Global} of a {@link ClassUnit}.
@@ -47,7 +46,11 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */
-	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, String target) {
+	public AccessInstanceGlobal(
+			CFG cfg,
+			CodeLocation location,
+			Expression receiver,
+			String target) {
 		super(cfg, location, "::", Untyped.INSTANCE, receiver);
 		this.target = target;
 		receiver.setParentStatement(this);
@@ -81,7 +84,8 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -113,15 +117,15 @@ public class AccessInstanceGlobal extends UnaryExpression {
 
 		AnalysisState<A> result = state.bottom();
 		boolean atLeastOne = false;
-		TypeSystem types = getProgram().getTypes();
-		for (Type recType : expr.getRuntimeTypes(types))
+		Set<Type> types = state.getState().getRuntimeTypesOf(expr, this, state.getState());
+
+		for (Type recType : types)
 			if (recType.isPointerType()) {
 				Type inner = recType.asPointerType().getInnerType();
 				if (!inner.isUnitType())
 					continue;
 
 				HeapDereference container = new HeapDereference(inner, expr, loc);
-				container.setRuntimeTypes(Collections.singleton(inner));
 				CompilationUnit unit = inner.asUnitType().getUnit();
 
 				Set<CompilationUnit> seen = new HashSet<>();
@@ -143,7 +147,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 
 		// worst case: we are accessing a global that we know nothing about
 		Set<Type> rectypes = new HashSet<>();
-		for (Type t : expr.getRuntimeTypes(types))
+		for (Type t : types)
 			if (t.isPointerType())
 				rectypes.add(t.asPointerType().getInnerType());
 
@@ -153,7 +157,6 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
 		Variable var = new Variable(Untyped.INSTANCE, target, new Annotations(), getLocation());
 		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
-		container.setRuntimeTypes(rectypes);
 		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
 		return state.smallStepSemantics(access, this);
 	}

@@ -18,7 +18,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string startsWith operation. The type of both
@@ -54,7 +53,11 @@ public class StartsWith extends it.unive.lisa.program.cfg.statement.BinaryExpres
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public StartsWith(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public StartsWith(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "startsWith", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left,
 				right);
 	}
@@ -67,10 +70,9 @@ public class StartsWith extends it.unive.lisa.program.cfg.statement.BinaryExpres
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

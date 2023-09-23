@@ -519,7 +519,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 			SemanticOracle oracle)
 			throws SemanticException {
 		T bot = bottom();
-		return conv.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? new InferredPair<>(bot, bot, bot)
+		return oracle.getRuntimeTypesOf(conv, pp, oracle).isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
 	}
 
@@ -548,7 +548,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 			SemanticOracle oracle)
 			throws SemanticException {
 		T bot = bottom();
-		return cast.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? new InferredPair<>(bot, bot, bot)
+		return oracle.getRuntimeTypesOf(cast, pp, oracle).isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
 	}
 
@@ -803,17 +803,22 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 
 	@Override
 	default boolean tracksIdentifiers(
-			Identifier id) {
+			Identifier id,
+			ProgramPoint pp, SemanticOracle oracle) {
 		// As default, base inferred values tracks only non-pointer identifier
-		return canProcess(id);
+		return canProcess(id, pp, oracle);
 	}
 
 	@Override
 	default boolean canProcess(
-			SymbolicExpression expression) {
-		if (expression.hasRuntimeTypes())
-			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
-		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
+			SymbolicExpression expression,
+			ProgramPoint pp, SemanticOracle oracle) {
+		try {
+			return oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
+					.anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		} catch (SemanticException e) {
+			return false;
+		}
 	}
 
 	@Override

@@ -191,8 +191,6 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 			HeapLocation e = new HeapLocation(refType, MONOLITH_NAME, true,
 					expression.getCodeLocation());
-			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet(e);
 		}
 
@@ -205,8 +203,6 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			// new one is modeled through the monolith
 			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
 					expression.getCodeLocation());
-			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet(e);
 		}
 
@@ -225,8 +221,6 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			HeapLocation loc = new HeapLocation(refType, MONOLITH_NAME, true,
 					expression.getCodeLocation());
 			MemoryPointer e = new MemoryPointer(new ReferenceType(refType), loc, expression.getCodeLocation());
-			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet(e);
 		}
 

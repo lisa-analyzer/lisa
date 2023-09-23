@@ -20,6 +20,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.type.Type;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.
@@ -27,7 +28,8 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
-		implements NonRelationalHeapDomain<AllocationSites> {
+		implements
+		NonRelationalHeapDomain<AllocationSites> {
 
 	private static final AllocationSites TOP = new AllocationSites(new HashSet<>(), true);
 	private static final AllocationSites BOTTOM = new AllocationSites(new HashSet<>(), false);
@@ -46,7 +48,9 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	 * @param set   the set of {@link AllocationSite}s
 	 * @param isTop whether this instance is the top of the lattice
 	 */
-	AllocationSites(Set<AllocationSite> set, boolean isTop) {
+	AllocationSites(
+			Set<AllocationSite> set,
+			boolean isTop) {
 		super(set, isTop);
 	}
 
@@ -61,7 +65,8 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public AllocationSites mk(Set<AllocationSite> set) {
+	public AllocationSites mk(
+			Set<AllocationSite> set) {
 		return new AllocationSites(set, false);
 	}
 
@@ -94,7 +99,9 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public AllocationSites lubAux(AllocationSites other) throws SemanticException {
+	public AllocationSites lubAux(
+			AllocationSites other)
+			throws SemanticException {
 		Map<String, AllocationSite> lub = new HashMap<>();
 
 		// all weak identifiers are part of the lub
@@ -116,12 +123,23 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return id.getDynamicType().isPointerType() || id.getDynamicType().isUntyped();
+	public boolean tracksIdentifiers(
+			Identifier id,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		try {
+			Type dyn = oracle.getDynamicTypeOf(id, pp, oracle);
+			return dyn.isPointerType() || dyn.isUntyped();
+		} catch (SemanticException e) {
+			return false;
+		}
 	}
 
 	@Override
-	public boolean canProcess(SymbolicExpression expression) {
+	public boolean canProcess(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return expression instanceof AllocationSite;
 	}
 
@@ -159,7 +177,10 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public AllocationSites applyReplacement(HeapReplacement r, ProgramPoint pp) throws SemanticException {
+	public AllocationSites applyReplacement(
+			HeapReplacement r,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isTop() || isBottom() || r.getSources().isEmpty())
 			return this;
 
@@ -172,5 +193,14 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 			return new AllocationSites(copy, false);
 		} else
 			return this;
+	}
+
+	@Override
+	public AllocationSites unknownVariable(
+			Identifier id) {
+		// we use bottom since heap environments track all possible keys: the
+		// absence of a key means no information (bottom) instead of any
+		// possible information (top)
+		return bottom();
 	}
 }

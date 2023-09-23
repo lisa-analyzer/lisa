@@ -13,7 +13,6 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the logical negation ({@code !} or {@code not}). The
@@ -31,7 +30,10 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 	 * @param location   the location where this literal is defined
 	 * @param expression the operand of this operation
 	 */
-	public Not(CFG cfg, CodeLocation location, Expression expression) {
+	public Not(
+			CFG cfg,
+			CodeLocation location,
+			Expression expression) {
 		super(cfg, location, "!", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), expression);
 	}
 
@@ -42,8 +44,7 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (expr.getRuntimeTypes(types).stream().noneMatch(Type::isBooleanType))
+		if (state.getState().getRuntimeTypesOf(expr, this, state.getState()).stream().noneMatch(Type::isBooleanType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

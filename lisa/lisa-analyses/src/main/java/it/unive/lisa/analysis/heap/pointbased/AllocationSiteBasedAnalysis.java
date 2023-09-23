@@ -193,10 +193,6 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		// be assigned to id
 		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
 				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
-		// also runtime types are inherited, if already inferred
-		if (site.hasRuntimeTypes())
-			clone.setRuntimeTypes(site.getRuntimeTypes(null));
-
 		HeapEnvironment<AllocationSites> tmp = heapEnv.assign(id, clone, pp, oracle);
 
 		HeapReplacement replacement = new HeapReplacement();
@@ -327,17 +323,6 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 								site.getLocationName(),
 								true,
 								expression.getCodeLocation());
-
-					Set<Type> types = new HashSet<>();
-					if (expression.hasRuntimeTypes())
-						types.addAll(expression.getRuntimeTypes(null));
-
-					if (rec.hasRuntimeTypes())
-						types.addAll(rec.getRuntimeTypes(null));
-
-					if (!types.isEmpty())
-						e.setRuntimeTypes(types);
-
 					result.add(e);
 				} else if (rec instanceof AllocationSite)
 					result.add(rec);
@@ -361,9 +346,6 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 						expression.getCodeLocation().getCodeLocation(),
 						true,
 						expression.getCodeLocation());
-
-			if (expression.hasRuntimeTypes())
-				id.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet(id);
 		}
 
@@ -379,8 +361,6 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 							new ReferenceType(loc.getStaticType()),
 							(AllocationSite) loc,
 							loc.getCodeLocation());
-					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				} else
 					result.add(loc);
@@ -437,8 +417,6 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 						new ReferenceType(site.getStaticType()),
 						site,
 						site.getCodeLocation());
-				if (v.hasRuntimeTypes())
-					e.setRuntimeTypes(v.getRuntimeTypes(null));
 				result.add(e);
 			}
 

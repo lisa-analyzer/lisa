@@ -293,18 +293,23 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 
 	@Override
 	default boolean tracksIdentifiers(
-			Identifier id) {
+			Identifier id,
+			ProgramPoint pp, SemanticOracle oracle) {
 		// As default, base non relational values domains
 		// tracks only non-pointer identifier
-		return canProcess(id);
+		return canProcess(id, pp, oracle);
 	}
 
 	@Override
 	default boolean canProcess(
-			SymbolicExpression expression) {
-		if (expression.hasRuntimeTypes())
-			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
-		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
+			SymbolicExpression expression,
+			ProgramPoint pp, SemanticOracle oracle) {
+		try {
+			return oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
+					.anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		} catch (SemanticException e) {
+			return false;
+		}
 	}
 
 	/**
@@ -406,7 +411,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return conv.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? bottom() : left;
+		return oracle.getRuntimeTypesOf(conv, pp, oracle).isEmpty() ? bottom() : left;
 	}
 
 	/**
@@ -430,7 +435,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return cast.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? bottom() : left;
+		return oracle.getRuntimeTypesOf(cast, pp, oracle).isEmpty() ? bottom() : left;
 	}
 
 	/**

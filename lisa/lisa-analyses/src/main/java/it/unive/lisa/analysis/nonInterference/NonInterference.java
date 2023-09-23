@@ -454,7 +454,7 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 
 	@Override
 	public boolean tracksIdentifiers(
-			Identifier id) {
+			Identifier id, ProgramPoint pp, SemanticOracle oracle) {
 		return true;
 	}
 

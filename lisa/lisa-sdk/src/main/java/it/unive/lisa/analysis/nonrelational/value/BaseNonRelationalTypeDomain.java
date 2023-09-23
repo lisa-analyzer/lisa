@@ -294,13 +294,13 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 
 	@Override
 	default boolean tracksIdentifiers(
-			Identifier id) {
+			Identifier id, ProgramPoint pp, SemanticOracle oracle) {
 		return !(id instanceof MemoryPointer);
 	}
 
 	@Override
 	default boolean canProcess(
-			SymbolicExpression expression) {
+			SymbolicExpression expression, ProgramPoint pp, SemanticOracle oracle) {
 		// Type analysis can process any expression
 		return true;
 	}
@@ -404,7 +404,7 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return conv.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? bottom() : left;
+		return oracle.getRuntimeTypesOf(conv, pp, oracle).isEmpty() ? bottom() : left;
 	}
 
 	/**
@@ -428,7 +428,7 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return cast.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? bottom() : left;
+		return oracle.getRuntimeTypesOf(cast, pp, oracle).isEmpty() ? bottom() : left;
 	}
 
 	/**

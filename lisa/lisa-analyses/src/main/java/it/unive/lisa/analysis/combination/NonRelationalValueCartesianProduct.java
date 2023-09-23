@@ -229,13 +229,13 @@ public abstract class NonRelationalValueCartesianProduct<C extends NonRelational
 
 	@Override
 	public boolean canProcess(
-			SymbolicExpression expression) {
-		return left.canProcess(expression) || right.canProcess(expression);
+			SymbolicExpression expression, ProgramPoint pp, SemanticOracle oracle) {
+		return left.canProcess(expression, pp, oracle) || right.canProcess(expression, pp, oracle);
 	}
 
 	@Override
 	public boolean tracksIdentifiers(
-			Identifier id) {
-		return left.tracksIdentifiers(id) || right.tracksIdentifiers(id);
+			Identifier id, ProgramPoint pp, SemanticOracle oracle) {
+		return left.tracksIdentifiers(id, pp, oracle) || right.tracksIdentifiers(id, pp, oracle);
 	}
 }

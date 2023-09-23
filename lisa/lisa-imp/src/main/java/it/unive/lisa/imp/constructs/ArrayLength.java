@@ -1,5 +1,8 @@
 package it.unive.lisa.imp.constructs;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,10 +26,7 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The native construct representing the array length operation. This construct
@@ -112,8 +112,8 @@ public class ArrayLength extends NativeCFG {
 				AnalysisState<A> state, SymbolicExpression expr, StatementStore<A> expressions)
 				throws SemanticException {
 			Set<Type> arraytypes = new HashSet<>();
-			TypeSystem types = getProgram().getTypes();
-			for (Type t : expr.getRuntimeTypes(types))
+			Set<Type> types = state.getState().getRuntimeTypesOf(expr, this, state.getState());
+			for (Type t : types)
 				if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
 					arraytypes.add(t.asPointerType().getInnerType());
 
@@ -122,7 +122,6 @@ public class ArrayLength extends NativeCFG {
 
 			ArrayType arraytype = Type.commonSupertype(arraytypes, getStaticType()).asArrayType();
 			HeapDereference container = new HeapDereference(arraytype, expr, getLocation());
-			container.setRuntimeTypes(arraytypes);
 			AccessChild len = new AccessChild(
 					Int32Type.INSTANCE,
 					container,

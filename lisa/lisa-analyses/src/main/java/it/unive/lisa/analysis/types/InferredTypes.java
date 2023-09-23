@@ -159,18 +159,19 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		if (!eval.isTop() && !eval.isBottom())
 			return eval;
 		TypeSystem types = pp.getProgram().getTypes();
-		return new InferredTypes(types, id.getRuntimeTypes(types));
+		return new InferredTypes(types, id.getStaticType().allInstances(types));
 	}
 
 	@Override
 	public InferredTypes evalPushAny(
 			PushAny pushAny,
 			ProgramPoint pp,
-			SemanticOracle oracle) {
+			SemanticOracle oracle)
+			throws SemanticException {
 		TypeSystem types = pp.getProgram().getTypes();
 		if (pushAny.getStaticType().isUntyped())
 			return new InferredTypes(true, types.getTypes());
-		return new InferredTypes(types, pushAny.getRuntimeTypes(types));
+		return new InferredTypes(types, pushAny.getStaticType().allInstances(types));
 	}
 
 	@Override

@@ -18,7 +18,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string indexOf operation. The type of both
@@ -67,10 +66,9 @@ public class IndexOf extends it.unive.lisa.program.cfg.statement.BinaryExpressio
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

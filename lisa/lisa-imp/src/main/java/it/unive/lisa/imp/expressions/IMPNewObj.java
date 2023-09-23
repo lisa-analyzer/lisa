@@ -1,5 +1,9 @@
 package it.unive.lisa.imp.expressions;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -20,9 +24,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
-import java.util.Collections;
-import java.util.Objects;
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
@@ -52,7 +53,13 @@ public class IMPNewObj extends NaryExpression {
 	 * @param staticallyAllocated if this allocation is static or not
 	 * @param parameters          the parameters of the constructor call
 	 */
-	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated,
+	public IMPNewObj(
+			CFG cfg,
+			String sourceFile,
+			int line,
+			int col,
+			Type type,
+			boolean staticallyAllocated,
 			Expression... parameters) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type, type,
 				parameters);
@@ -70,8 +77,6 @@ public class IMPNewObj extends NaryExpression {
 		ReferenceType reftype = new ReferenceType(type);
 		MemoryAllocation created = new MemoryAllocation(type, getLocation(), staticallyAllocated);
 		HeapReference ref = new HeapReference(reftype, created, getLocation());
-		created.setRuntimeTypes(Collections.singleton(type));
-		ref.setRuntimeTypes(Collections.singleton(reftype));
 
 		// we need to add the receiver to the parameters
 		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$lisareceiver", reftype);
@@ -117,7 +122,8 @@ public class IMPNewObj extends NaryExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

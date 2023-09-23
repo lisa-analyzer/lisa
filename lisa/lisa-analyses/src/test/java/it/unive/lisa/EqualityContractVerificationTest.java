@@ -363,7 +363,7 @@ public class EqualityContractVerificationTest {
 			else
 				// location is excluded on purpose: it only brings syntactic
 				// information
-				verify(expr, verifier -> verifier.withIgnoredFields("location", "types"));
+				verify(expr, verifier -> verifier.withIgnoredFields("location"));
 	}
 
 	@Test

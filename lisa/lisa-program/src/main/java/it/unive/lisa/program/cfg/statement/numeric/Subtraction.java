@@ -13,7 +13,6 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingSub;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the subtraction operation ({@code -}). Both operands'
@@ -33,7 +32,11 @@ public class Subtraction extends it.unive.lisa.program.cfg.statement.BinaryExpre
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Subtraction(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public Subtraction(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "-", left, right);
 	}
 
@@ -45,10 +48,9 @@ public class Subtraction extends it.unive.lisa.program.cfg.statement.BinaryExpre
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.type.Type;
 
 /**
  * A taint analysis, that is, an information-flow analysis tracking only
@@ -250,14 +251,21 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 
 	@Override
 	public boolean tracksIdentifiers(
-			Identifier id) {
+			Identifier id,
+			ProgramPoint pp, SemanticOracle oracle) {
 		return true;
 	}
 
 	@Override
 	public boolean canProcess(
-			SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType() && !expression.getDynamicType().isInMemoryType();
+			SymbolicExpression expression,
+			ProgramPoint pp, SemanticOracle oracle) {
+		try {
+			Type dyn = oracle.getDynamicTypeOf(expression, pp, oracle);
+			return !dyn.isPointerType() && !dyn.isInMemoryType();
+		} catch (SemanticException e) {
+			return false;
+		}
 	}
 
 	@Override

@@ -69,7 +69,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		if (isBottom())
 			return (M) this;
 
-		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
+		if (!lattice.canProcess(expression, pp, oracle) || !lattice.tracksIdentifiers(id, pp, oracle))
 			return (M) this;
 
 		Map<Identifier, T> func = mkNewFunction(function, false);

@@ -13,7 +13,6 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the logical conjunction ({@code &&} or {@code and}).
@@ -44,10 +43,9 @@ public class And extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isBooleanType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isBooleanType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isBooleanType))
+		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isBooleanType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

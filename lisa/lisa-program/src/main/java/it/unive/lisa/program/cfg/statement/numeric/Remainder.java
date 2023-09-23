@@ -13,7 +13,6 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingRem;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the remainder operation ({@code %}, returning the
@@ -34,7 +33,11 @@ public class Remainder extends it.unive.lisa.program.cfg.statement.BinaryExpress
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Remainder(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public Remainder(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "%", left, right);
 	}
 
@@ -46,10 +49,9 @@ public class Remainder extends it.unive.lisa.program.cfg.statement.BinaryExpress
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
