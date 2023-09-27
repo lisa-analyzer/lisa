@@ -38,4 +38,9 @@ public abstract class ValueExpression extends SymbolicExpression {
 	public ValueExpression removeNegations() {
 		return this;
 	}
+	
+	@Override
+	public boolean dealsWithMemory() {
+		return false;
+	}
 }

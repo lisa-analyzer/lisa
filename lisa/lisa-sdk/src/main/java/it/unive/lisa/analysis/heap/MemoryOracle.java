@@ -60,7 +60,10 @@ public interface MemoryOracle {
 			throws SemanticException {
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression expr : expressions)
-			result.addAll(rewrite(expr, pp, oracle).elements());
+			if (!expr.dealsWithMemory())
+				result.add(expr);
+			else
+				result.addAll(rewrite(expr, pp, oracle).elements());
 		return new ExpressionSet(result);
 	}
 

@@ -120,8 +120,12 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			throws SemanticException {
 		A sss = smallStepSemantics(expression, pp, oracle);
 		A result = bottom();
-		List<HeapReplacement> replacements = new LinkedList<>();
-		ExpressionSet rhsExps = sss.rewrite(expression, pp, oracle);
+		List<HeapReplacement> replacements = new LinkedList<>();		
+		ExpressionSet rhsExps;
+		if (expression.dealsWithMemory())
+			rhsExps = rewrite(expression, pp, oracle);
+		else
+			rhsExps = new ExpressionSet(expression);
 
 		for (SymbolicExpression rhs : rhsExps)
 			if (rhs instanceof MemoryPointer) {

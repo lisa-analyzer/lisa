@@ -135,4 +135,9 @@ public class UnaryExpression extends ValueExpression {
 		T arg = expression.accept(visitor, params);
 		return visitor.visit(this, arg, params);
 	}
+	
+	@Override
+	public boolean dealsWithMemory() {
+		return expression.dealsWithMemory();
+	}
 }

@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -135,43 +136,45 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>();
-		mo.heap = heapState;
-		mo.value = valueState;
-		mo.type = typeState;
+		if (!expression.dealsWithMemory()) {
+			ValueExpression ve = (ValueExpression) expression;
+			return new SimpleAbstractState<>(
+					heapState.assign(id, expression, pp, this),
+					valueState.assign(id, ve, pp, this),
+					typeState.assign(id, ve, pp, this));
+		}
 
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.assign(id, expression, pp, mo);
 		ExpressionSet exprs = mo.heap.rewrite(expression, pp, mo);
-		applySubstitution(mo, pp);
-
 		if (exprs.isEmpty())
 			return bottom();
-		else if (exprs.elements.size() == 1) {
+
+		applySubstitution(mo, pp);
+
+		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (!(expr instanceof ValueExpression))
+			if (expr.dealsWithMemory())
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			mo.type = mo.type.assign(id, ve, pp, mo);
-			mo.value = mo.value.assign(id, ve, pp, mo);
-			return new SimpleAbstractState<>(mo.heap, mo.value, mo.type);
-		} else {
-			T typeRes = mo.type.bottom();
-			V valueRes = mo.value.bottom();
-			T startTypes = mo.type;
-			for (SymbolicExpression expr : exprs) {
-				if (!(expr instanceof ValueExpression))
-					throw new SemanticException("Rewriting failed for expression " + expr);
-				ValueExpression ve = (ValueExpression) expr;
-				mo.type = startTypes;
-				mo.type = startTypes.assign(id, ve, pp, mo);
-				typeRes = typeRes.lub(mo.type);
-				// we never update mo.value, so we don't need to change the
-				// receiver here
-				valueRes = valueRes.lub(mo.value.assign(id, ve, pp, mo));
-			}
-
-			return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+			T t = mo.type.assign(id, ve, pp, mo);
+			V v = mo.value.assign(id, ve, pp, mo);
+			return new SimpleAbstractState<>(mo.heap, v, t);
 		}
+
+		T typeRes = mo.type.bottom();
+		V valueRes = mo.value.bottom();
+		for (SymbolicExpression expr : exprs) {
+			if (expr.dealsWithMemory())
+				throw new SemanticException("Rewriting failed for expression " + expr);
+			ValueExpression ve = (ValueExpression) expr;
+			T t = mo.type.assign(id, ve, pp, mo);
+			V v = mo.value.assign(id, ve, pp, mo);
+			typeRes = typeRes.lub(t);
+			valueRes = valueRes.lub(v);
+		}
+
+		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
 	}
 
 	@Override
@@ -180,55 +183,53 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>();
-		mo.heap = heapState;
-		mo.value = valueState;
-		mo.type = typeState;
+		if (!expression.dealsWithMemory()) {
+			ValueExpression ve = (ValueExpression) expression;
+			return new SimpleAbstractState<>(
+					heapState.smallStepSemantics(expression, pp, this),
+					valueState.smallStepSemantics(ve, pp, this),
+					typeState.smallStepSemantics(ve, pp, this));
+		}
 
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.smallStepSemantics(expression, pp, mo);
 		ExpressionSet exprs = mo.heap.rewrite(expression, pp, mo);
-		applySubstitution(mo, pp);
-
 		if (exprs.isEmpty())
 			return bottom();
-		else if (exprs.elements.size() == 1) {
+
+		applySubstitution(mo, pp);
+
+		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (!(expr instanceof ValueExpression))
+			if (expr.dealsWithMemory())
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			mo.type = mo.type.smallStepSemantics(ve, pp, mo);
-
-			// if the expression is a memory allocation, its type is
-			// registered in the type domain
+			T t = mo.type.smallStepSemantics(ve, pp, mo);
 			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
-				mo.type = mo.type.assign((Identifier) ve, ve, pp, mo);
-
-			mo.value = mo.value.smallStepSemantics(ve, pp, mo);
-			return new SimpleAbstractState<>(mo.heap, mo.value, mo.type);
-		} else {
-			T typeRes = mo.type.bottom();
-			V valueRes = mo.value.bottom();
-			T startTypes = mo.type;
-			for (SymbolicExpression expr : exprs) {
-				if (!(expr instanceof ValueExpression))
-					throw new SemanticException("Rewriting failed for expression " + expr);
-				ValueExpression ve = (ValueExpression) expr;
-				mo.type = startTypes;
-				mo.type = startTypes.smallStepSemantics(ve, pp, mo);
-
 				// if the expression is a memory allocation, its type is
 				// registered in the type domain
-				if (expression instanceof MemoryAllocation && expr instanceof Identifier)
-					mo.type = mo.type.assign((Identifier) ve, ve, pp, mo);
-
-				typeRes = typeRes.lub(mo.type);
-				// we never update mo.value, so we don't need to change the
-				// receiver here
-				valueRes = valueRes.lub(mo.value.smallStepSemantics(ve, pp, mo));
-			}
-
-			return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+				t = t.assign((Identifier) ve, ve, pp, mo);
+			V v = mo.value.smallStepSemantics(ve, pp, mo);
+			return new SimpleAbstractState<>(mo.heap, v, t);
 		}
+
+		T typeRes = mo.type.bottom();
+		V valueRes = mo.value.bottom();
+		for (SymbolicExpression expr : exprs) {
+			if (expr.dealsWithMemory())
+				throw new SemanticException("Rewriting failed for expression " + expr);
+			ValueExpression ve = (ValueExpression) expr;
+			T t = mo.type.smallStepSemantics(ve, pp, mo);
+			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
+				// if the expression is a memory allocation, its type is
+				// registered in the type domain
+				t = t.assign((Identifier) ve, ve, pp, mo);
+			V v = mo.value.smallStepSemantics(ve, pp, mo);
+			typeRes = typeRes.lub(t);
+			valueRes = valueRes.lub(v);
+		}
+
+		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
 	}
 
 	private static <H extends HeapDomain<H>,
@@ -237,10 +238,15 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 					MutableOracle<H, V, T> mo,
 					ProgramPoint pp)
 					throws SemanticException {
-		if (mo.heap.getSubstitution() != null && !mo.heap.getSubstitution().isEmpty())
-			for (HeapReplacement repl : mo.heap.getSubstitution()) {
-				mo.type = mo.type.applyReplacement(repl, pp, mo);
-				mo.value = mo.value.applyReplacement(repl, pp, mo);
+		List<HeapReplacement> subs = mo.heap.getSubstitution();
+		if (subs != null)
+			for (HeapReplacement repl : subs) {
+				T t = mo.type.applyReplacement(repl, pp, mo);
+				V v = mo.value.applyReplacement(repl, pp, mo);
+				// we update the oracle after both replacements have been
+				// applied to not lose info on the sources that will be removed
+				mo.type = t;
+				mo.value = v;
 			}
 	}
 
@@ -251,52 +257,60 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>();
-		mo.heap = heapState;
-		mo.value = valueState;
-		mo.type = typeState;
+		if (!expression.dealsWithMemory()) {
+			ValueExpression ve = (ValueExpression) expression;
+			H h = heapState.assume(expression, src, dest, this);
+			if (h.isBottom())
+				return bottom();
+			T t = typeState.assume(ve, src, dest, this);
+			if (t.isBottom())
+				return bottom();
+			V v = valueState.assume(ve, src, dest, this);
+			if (v.isBottom())
+				return bottom();
+			return new SimpleAbstractState<>(h, v, t);
+		}
 
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.assume(expression, src, dest, mo);
 		if (mo.heap.isBottom())
 			return bottom();
 		ExpressionSet exprs = mo.heap.rewrite(expression, src, mo);
-		applySubstitution(mo, src);
-
 		if (exprs.isEmpty())
 			return bottom();
-		else if (exprs.elements.size() == 1) {
+
+		applySubstitution(mo, src);
+
+		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (!(expr instanceof ValueExpression))
+			if (expr.dealsWithMemory())
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			mo.type = mo.type.assume(ve, src, dest, mo);
-			mo.value = mo.value.assume(ve, src, dest, mo);
-
-			if (mo.type.isBottom() || mo.value.isBottom())
+			T t = mo.type.assume(ve, src, dest, mo);
+			if (t.isBottom())
 				return bottom();
-
-			return new SimpleAbstractState<>(mo.heap, mo.value, mo.type);
-		} else {
-			T typeRes = mo.type.bottom();
-			V valueRes = mo.value.bottom();
-			T startTypes = mo.type;
-			for (SymbolicExpression expr : exprs) {
-				if (!(expr instanceof ValueExpression))
-					throw new SemanticException("Rewriting failed for expression " + expr);
-				ValueExpression ve = (ValueExpression) expr;
-				mo.type = startTypes;
-				mo.type = startTypes.assume(ve, src, dest, mo);
-				typeRes = typeRes.lub(mo.type);
-				// we never update mo.value, so we don't need to change the
-				// receiver here
-				valueRes = valueRes.lub(mo.value.assume(ve, src, dest, mo));
-			}
-
-			if (typeRes.isBottom() || valueRes.isBottom())
+			V v = mo.value.assume(ve, src, dest, mo);
+			if (v.isBottom())
 				return bottom();
-
-			return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+			return new SimpleAbstractState<>(mo.heap, v, t);
 		}
+
+		T typeRes = mo.type.bottom();
+		V valueRes = mo.value.bottom();
+		for (SymbolicExpression expr : exprs) {
+			if (expr.dealsWithMemory())
+				throw new SemanticException("Rewriting failed for expression " + expr);
+			ValueExpression ve = (ValueExpression) expr;
+			T t = mo.type.assume(ve, src, dest, mo);
+			V v = mo.value.assume(ve, src, dest, mo);
+			typeRes = typeRes.lub(t);
+			valueRes = valueRes.lub(v);
+		}
+
+		if (typeRes.isBottom() || valueRes.isBottom())
+			return bottom();
+
+		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
 	}
 
 	@Override
@@ -309,11 +323,39 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		if (heapsat == Satisfiability.BOTTOM)
 			return Satisfiability.BOTTOM;
 
-		ExpressionSet rewritten = heapState.rewrite(expression, pp, this);
+		if (!expression.dealsWithMemory()) {
+			ValueExpression ve = (ValueExpression) expression;
+			Satisfiability typesat = typeState.satisfies(ve, pp, this);
+			if (typesat == Satisfiability.BOTTOM)
+				return Satisfiability.BOTTOM;
+			Satisfiability valuesat = valueState.satisfies(ve, pp, this);
+			if (valuesat == Satisfiability.BOTTOM)
+				return Satisfiability.BOTTOM;
+			return heapsat.glb(typesat).glb(valuesat);
+		}
+
+		ExpressionSet exprs = heapState.rewrite(expression, pp, this);
+		if (exprs.isEmpty())
+			return Satisfiability.BOTTOM;
+
+		if (exprs.elements.size() == 1) {
+			SymbolicExpression expr = exprs.elements.iterator().next();
+			if (expr.dealsWithMemory())
+				throw new SemanticException("Rewriting failed for expression " + expr);
+			ValueExpression ve = (ValueExpression) expression;
+			Satisfiability typesat = typeState.satisfies(ve, pp, this);
+			if (typesat == Satisfiability.BOTTOM)
+				return Satisfiability.BOTTOM;
+			Satisfiability valuesat = valueState.satisfies(ve, pp, this);
+			if (valuesat == Satisfiability.BOTTOM)
+				return Satisfiability.BOTTOM;
+			return heapsat.glb(typesat).glb(valuesat);
+		}
+
 		Satisfiability typesat = Satisfiability.BOTTOM;
 		Satisfiability valuesat = Satisfiability.BOTTOM;
-		for (SymbolicExpression expr : rewritten) {
-			if (!(expr instanceof ValueExpression))
+		for (SymbolicExpression expr : exprs) {
+			if (expr.dealsWithMemory())
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			Satisfiability sat = typeState.satisfies(ve, pp, this);
@@ -513,6 +555,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		if (!expression.dealsWithMemory())
+			return new ExpressionSet(expression);
 		return heapState.rewrite(expression, pp, oracle);
 	}
 
@@ -557,12 +601,23 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		private V value;
 		private T type;
 
+		public MutableOracle(
+				H heap,
+				V value,
+				T type) {
+			this.heap = heap;
+			this.value = value;
+			this.type = type;
+		}
+
 		@Override
 		public ExpressionSet rewrite(
 				SymbolicExpression expression,
 				ProgramPoint pp,
 				SemanticOracle oracle)
 				throws SemanticException {
+			if (!expression.dealsWithMemory())
+				return new ExpressionSet(expression);
 			return heap.rewrite(expression, pp, this);
 		}
 

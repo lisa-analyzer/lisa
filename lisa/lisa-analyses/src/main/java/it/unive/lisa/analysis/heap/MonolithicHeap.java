@@ -48,7 +48,7 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(new Rewriter(), pp);
+		return expression.accept(Rewriter.SINGLETON, pp);
 	}
 
 	@Override
@@ -175,6 +175,8 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
+
+		public static final Rewriter SINGLETON = new Rewriter();
 
 		@Override
 		public ExpressionSet visit(

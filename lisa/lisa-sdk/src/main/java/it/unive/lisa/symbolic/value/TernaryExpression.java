@@ -160,4 +160,9 @@ public class TernaryExpression extends ValueExpression {
 		T right = this.right.accept(visitor, params);
 		return visitor.visit(this, left, middle, right, params);
 	}
+	
+	@Override
+	public boolean dealsWithMemory() {
+		return left.dealsWithMemory() || middle.dealsWithMemory() || right.dealsWithMemory();
+	}
 }

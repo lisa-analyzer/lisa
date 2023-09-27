@@ -241,7 +241,6 @@ public class AnalysisState<A extends AbstractState<A>>
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
-
 		if (id instanceof Identifier)
 			return assign((Identifier) id, expression, pp);
 

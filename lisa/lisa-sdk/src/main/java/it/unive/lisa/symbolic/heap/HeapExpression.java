@@ -29,15 +29,20 @@ public abstract class HeapExpression extends SymbolicExpression {
 		super(type, location);
 	}
 
-	// By default a heap expression does not change the scope.
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
+		// By default a heap expression does not change the scope.
 		return this;
 	}
 
-	// By default a heap expression does not change the scope.
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+		// By default a heap expression does not change the scope.
 		return this;
+	}
+	
+	@Override
+	public final boolean dealsWithMemory() {
+		return true;
 	}
 }

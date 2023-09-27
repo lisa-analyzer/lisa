@@ -76,7 +76,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(new Rewriter(), pp, oracle);
+		return expression.accept(Rewriter.SINGLETON, pp, oracle);
 	}
 
 	@Override
@@ -233,6 +233,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
+		
+		public static final Rewriter SINGLETON = new Rewriter();
 
 		@Override
 		public ExpressionSet visit(

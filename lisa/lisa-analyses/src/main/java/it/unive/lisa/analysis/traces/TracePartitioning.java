@@ -331,6 +331,9 @@ public class TracePartitioning<A extends AbstractState<A>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		if (!expression.dealsWithMemory())
+			return new ExpressionSet(expression);
+		
 		if (isTop())
 			return lattice.top().rewrite(expression, pp, oracle);
 		else if (isBottom() || function == null)

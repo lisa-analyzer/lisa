@@ -91,9 +91,8 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (e instanceof Identifier)
-			// we avoid rewriting as we have an immediate answer
-			return eval((Identifier) e, pp, oracle).getRuntimeTypes();
+		if (!e.dealsWithMemory())
+			return eval((ValueExpression) e, pp, oracle).getRuntimeTypes();
 		
 		ExpressionSet vexps = oracle.rewrite(e, pp, oracle);
 		Set<Type> result = new HashSet<>();

@@ -136,4 +136,9 @@ public class BinaryExpression extends ValueExpression {
 		T right = this.right.accept(visitor, params);
 		return visitor.visit(this, left, right, params);
 	}
+	
+	@Override
+	public boolean dealsWithMemory() {
+		return left.dealsWithMemory() || right.dealsWithMemory();
+	}
 }
