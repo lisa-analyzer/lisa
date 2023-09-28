@@ -1,8 +1,5 @@
 package it.unive.lisa;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -13,6 +10,8 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.Set;
 
 public class TestAbstractState extends TestDomain<TestAbstractState, SymbolicExpression>
 		implements

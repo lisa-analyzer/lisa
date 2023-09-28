@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymbol> {
 
 	@Override
-	public SimpleAutomaton singleString(String string) {
+	public SimpleAutomaton singleString(
+			String string) {
 		return new SimpleAutomaton(string);
 	}
 
@@ -63,7 +64,9 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	}
 
 	@Override
-	public SimpleAutomaton from(SortedSet<State> states, SortedSet<Transition<StringSymbol>> transitions) {
+	public SimpleAutomaton from(
+			SortedSet<State> states,
+			SortedSet<Transition<StringSymbol>> transitions) {
 		return new SimpleAutomaton(states, transitions);
 	}
 
@@ -73,12 +76,15 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	}
 
 	@Override
-	public StringSymbol concat(StringSymbol first, StringSymbol second) {
+	public StringSymbol concat(
+			StringSymbol first,
+			StringSymbol second) {
 		return first.concat(second);
 	}
 
 	@Override
-	public RegularExpression symbolToRegex(StringSymbol symbol) {
+	public RegularExpression symbolToRegex(
+			StringSymbol symbol) {
 		return new Atom(symbol.getSymbol());
 	}
 
@@ -88,7 +94,9 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	 * @param states      the set of states of the new automaton
 	 * @param transitions the set of the transitions of the new automaton
 	 */
-	public SimpleAutomaton(SortedSet<State> states, SortedSet<Transition<StringSymbol>> transitions) {
+	public SimpleAutomaton(
+			SortedSet<State> states,
+			SortedSet<Transition<StringSymbol>> transitions) {
 		super(states, transitions);
 	}
 
@@ -97,7 +105,8 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	 * 
 	 * @param s the only string accepted by the automaton.
 	 */
-	public SimpleAutomaton(String s) {
+	public SimpleAutomaton(
+			String s) {
 		super();
 
 		if (s.isEmpty())
@@ -131,7 +140,8 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	 * @return a boolean value that indicates either if {@code str} has been
 	 *             accepted or not.
 	 */
-	public boolean validateString(String str) {
+	public boolean validateString(
+			String str) {
 		// stores all the possible states reached by the automaton after each
 		// input char
 		Set<State> currentStates = epsilonClosure(getInitialStates());
@@ -174,7 +184,10 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	 * 
 	 * @throws CyclicAutomatonException if {@code toReplace} contains loops
 	 */
-	public SimpleAutomaton replace(SimpleAutomaton toReplace, SimpleAutomaton str) throws CyclicAutomatonException {
+	public SimpleAutomaton replace(
+			SimpleAutomaton toReplace,
+			SimpleAutomaton str)
+			throws CyclicAutomatonException {
 		if (this.hasCycle() || toReplace.hasCycle() || str.hasCycle())
 			return unknownString();
 
@@ -294,7 +307,9 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	 * @throws MathNumberConversionException if {@code intv} is iterated but is
 	 *                                           not finite
 	 */
-	public SimpleAutomaton repeat(Interval i) throws MathNumberConversionException {
+	public SimpleAutomaton repeat(
+			Interval i)
+			throws MathNumberConversionException {
 		if (equals(emptyString()))
 			return this;
 		else if (hasCycle())
@@ -359,8 +374,12 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		return emptyLanguage();
 	}
 
-	private SimpleAutomaton auxRepeat(IntInterval i, State currentState, SortedSet<Transition<StringSymbol>> delta,
-			SimpleAutomaton result) throws MathNumberConversionException {
+	private SimpleAutomaton auxRepeat(
+			IntInterval i,
+			State currentState,
+			SortedSet<Transition<StringSymbol>> delta,
+			SimpleAutomaton result)
+			throws MathNumberConversionException {
 
 		if (currentState.isFinal()) {
 
@@ -400,7 +419,10 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		return result;
 	}
 
-	private SimpleAutomaton connectAutomaton(SimpleAutomaton second, SortedSet<State> connectOn, boolean b) {
+	private SimpleAutomaton connectAutomaton(
+			SimpleAutomaton second,
+			SortedSet<State> connectOn,
+			boolean b) {
 		SortedSet<Transition<StringSymbol>> delta = new TreeSet<>();
 		SortedSet<State> states = new TreeSet<>();
 		HashMap<State, State> firstMapping = new HashMap<>();

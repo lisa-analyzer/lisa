@@ -18,7 +18,8 @@ public class NullConstant extends Constant {
 	 * @param location the location where the expression is defined within the
 	 *                     program
 	 */
-	public NullConstant(CodeLocation location) {
+	public NullConstant(
+			CodeLocation location) {
 		super(NullType.INSTANCE, NULL_CONST, location);
 	}
 
@@ -28,7 +29,8 @@ public class NullConstant extends Constant {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

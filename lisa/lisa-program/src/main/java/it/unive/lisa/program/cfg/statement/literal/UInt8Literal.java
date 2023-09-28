@@ -20,7 +20,10 @@ public class UInt8Literal extends Literal<Byte> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public UInt8Literal(CFG cfg, CodeLocation location, byte value) {
+	public UInt8Literal(
+			CFG cfg,
+			CodeLocation location,
+			byte value) {
 		super(cfg, location, value, UInt8Type.INSTANCE);
 	}
 }

@@ -33,7 +33,9 @@ public class MapRepresentation extends StructuredRepresentation {
 	 * @param valueMapper the function that knows how to convert values to their
 	 *                        representation
 	 */
-	public <K, V> MapRepresentation(Map<K, V> map, Function<K, StructuredRepresentation> keyMapper,
+	public <K, V> MapRepresentation(
+			Map<K, V> map,
+			Function<K, StructuredRepresentation> keyMapper,
 			Function<V, StructuredRepresentation> valueMapper) {
 		this.map = new TreeMap<>();
 		for (Entry<K, V> e : map.entrySet())
@@ -45,7 +47,8 @@ public class MapRepresentation extends StructuredRepresentation {
 	 * 
 	 * @param map the map
 	 */
-	public MapRepresentation(Map<StructuredRepresentation, StructuredRepresentation> map) {
+	public MapRepresentation(
+			Map<StructuredRepresentation, StructuredRepresentation> map) {
 		if (map instanceof SortedMap)
 			this.map = (SortedMap<StructuredRepresentation, StructuredRepresentation>) map;
 		else
@@ -79,7 +82,8 @@ public class MapRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

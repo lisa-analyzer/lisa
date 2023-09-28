@@ -29,7 +29,11 @@ public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public NotEqual(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public NotEqual(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "!=", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
 	}
 

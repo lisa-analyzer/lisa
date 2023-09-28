@@ -1,11 +1,10 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.cfg.CodeLocation;
 
 /**
  * A interface unit of the program to analyze. A interface unit is a
@@ -30,7 +29,11 @@ public class InterfaceUnit extends CompilationUnit {
 	 * @param name     the name of the unit
 	 * @param sealed   whether or not this unit can be inherited from
 	 */
-	public InterfaceUnit(CodeLocation location, Program program, String name, boolean sealed) {
+	public InterfaceUnit(
+			CodeLocation location,
+			Program program,
+			String name,
+			boolean sealed) {
 		super(location, program, name, sealed);
 		superinterfaces = new LinkedList<>();
 	}
@@ -48,7 +51,8 @@ public class InterfaceUnit extends CompilationUnit {
 	 * 
 	 * @return {@code true} only if the list has changed
 	 */
-	public boolean addSuperinterface(InterfaceUnit unit) {
+	public boolean addSuperinterface(
+			InterfaceUnit unit) {
 		return superinterfaces.add(unit);
 	}
 
@@ -58,7 +62,9 @@ public class InterfaceUnit extends CompilationUnit {
 	}
 
 	@Override
-	public void addInstance(Unit unit) throws ProgramValidationException {
+	public void addInstance(
+			Unit unit)
+			throws ProgramValidationException {
 		if (superinterfaces.contains(unit))
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
 					+ " is both a super unit and an instance of " + this);
@@ -69,13 +75,15 @@ public class InterfaceUnit extends CompilationUnit {
 	}
 
 	@Override
-	public boolean isInstanceOf(CompilationUnit unit) {
+	public boolean isInstanceOf(
+			CompilationUnit unit) {
 		return this == unit || unit.instances.contains(this)
 				|| superinterfaces.stream().anyMatch(u -> u.isInstanceOf(unit));
 	}
 
 	@Override
-	public boolean addAncestor(CompilationUnit unit) {
+	public boolean addAncestor(
+			CompilationUnit unit) {
 		if (unit instanceof InterfaceUnit)
 			return superinterfaces.add((InterfaceUnit) unit);
 		else

@@ -18,7 +18,9 @@ public class IntIntervalIterator implements Iterator<Long> {
 	 * @param init low bound
 	 * @param end  high bound
 	 */
-	public IntIntervalIterator(long init, long end) {
+	public IntIntervalIterator(
+			long init,
+			long end) {
 		this.init = init;
 		this.end = end;
 	}

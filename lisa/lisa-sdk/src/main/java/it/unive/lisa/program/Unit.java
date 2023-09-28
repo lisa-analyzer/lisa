@@ -1,15 +1,14 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
+import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.CodeMemberDescriptor;
-import it.unive.lisa.program.cfg.NativeCFG;
 
 /**
  * A unit of the program to analyze. A unit is a logical entity that groups a
@@ -45,7 +44,8 @@ public abstract class Unit {
 	 * 
 	 * @param name the name of the unit
 	 */
-	protected Unit(String name) {
+	protected Unit(
+			String name) {
 		this.name = name;
 		this.globals = new TreeMap<>();
 		this.codeMembers = new TreeMap<>();
@@ -91,7 +91,8 @@ public abstract class Unit {
 	 * 
 	 * @return the global with the given name, or {@code null}
 	 */
-	public final Global getGlobal(String name) {
+	public final Global getGlobal(
+			String name) {
 		return globals.get(name);
 	}
 
@@ -103,7 +104,8 @@ public abstract class Unit {
 	 * 
 	 * @return the code member with the given signature, or {@code null}
 	 */
-	public final CodeMember getCodeMember(String signature) {
+	public final CodeMember getCodeMember(
+			String signature) {
 		return codeMembers.get(signature);
 	}
 
@@ -115,7 +117,8 @@ public abstract class Unit {
 	 * 
 	 * @return the collection of code members with the given name
 	 */
-	public final Collection<CodeMember> getCodeMembersByName(String name) {
+	public final Collection<CodeMember> getCodeMembersByName(
+			String name) {
 		return codeMembers.values().stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.collect(Collectors.toList());
 	}
@@ -152,7 +155,8 @@ public abstract class Unit {
 	 *             the same name, {@code false} otherwise. If this method
 	 *             returns {@code false}, the given global is discarded.
 	 */
-	public final boolean addGlobal(Global global) {
+	public final boolean addGlobal(
+			Global global) {
 		return globals.putIfAbsent(global.getName(), global) == null;
 	}
 
@@ -166,7 +170,8 @@ public abstract class Unit {
 	 *             the same signature, {@code false} otherwise. If this method
 	 *             returns {@code false}, the given member is discarded.
 	 */
-	public final boolean addCodeMember(CodeMember member) {
+	public final boolean addCodeMember(
+			CodeMember member) {
 		return codeMembers.putIfAbsent(member.getDescriptor().getSignature(), member) == null;
 	}
 
@@ -184,7 +189,8 @@ public abstract class Unit {
 	 * 
 	 * @return the collection of code members that match the given signature
 	 */
-	public final Collection<CodeMember> getMatchingCodeMember(CodeMemberDescriptor signature) {
+	public final Collection<CodeMember> getMatchingCodeMember(
+			CodeMemberDescriptor signature) {
 		Collection<CodeMember> result = new HashSet<>();
 
 		for (CodeMember member : codeMembers.values())

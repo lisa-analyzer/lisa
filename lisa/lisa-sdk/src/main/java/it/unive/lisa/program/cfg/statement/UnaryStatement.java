@@ -30,7 +30,11 @@ public abstract class UnaryStatement extends NaryStatement {
 	 *                          statement
 	 * @param subExpression the sub-expression of this statement
 	 */
-	protected UnaryStatement(CFG cfg, CodeLocation location, String constructName, Expression subExpression) {
+	protected UnaryStatement(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression subExpression) {
 		super(cfg, location, constructName, subExpression);
 	}
 
@@ -45,7 +49,11 @@ public abstract class UnaryStatement extends NaryStatement {
 	 * @param order         the evaluation order of the sub-expressions
 	 * @param subExpression the sub-expression of this statement
 	 */
-	protected UnaryStatement(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected UnaryStatement(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
 			Expression subExpression) {
 		super(cfg, location, constructName, order, subExpression);
 	}

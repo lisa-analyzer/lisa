@@ -25,7 +25,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 		E extends SymbolicExpression,
 		F extends Environment<F, E, T>>
-		extends NonRelationalElement<T, E, F> {
+		extends
+		NonRelationalElement<T, E, F> {
 
 	/**
 	 * Evaluates a {@link SymbolicExpression}, assuming that the values of
@@ -43,5 +44,10 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	T eval(E expression, F environment, ProgramPoint pp, SemanticOracle oracle) throws SemanticException;
+	T eval(
+			E expression,
+			F environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
 }

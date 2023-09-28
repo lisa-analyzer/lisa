@@ -14,7 +14,8 @@ public enum TimeFormat {
 	 */
 	NANOS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			return String.valueOf(nanos) + UNIT_NANOS;
 		}
 	},
@@ -24,7 +25,8 @@ public enum TimeFormat {
 	 */
 	MILLIS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			return String.valueOf(TimeUnit.NANOSECONDS.toMillis(nanos)) + UNIT_MILLIS;
 		}
 	},
@@ -34,7 +36,8 @@ public enum TimeFormat {
 	 */
 	SECONDS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			return String.valueOf(TimeUnit.NANOSECONDS.toSeconds(nanos)) + UNIT_SECONDS;
 		}
 	},
@@ -44,7 +47,8 @@ public enum TimeFormat {
 	 */
 	MINUTES {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			return String.valueOf(TimeUnit.NANOSECONDS.toMinutes(nanos)) + UNIT_MINUTES;
 		}
 	},
@@ -54,7 +58,8 @@ public enum TimeFormat {
 	 */
 	HOURS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			return String.valueOf(TimeUnit.NANOSECONDS.toHours(nanos)) + UNIT_HOURS;
 		}
 	},
@@ -64,7 +69,8 @@ public enum TimeFormat {
 	 */
 	SECONDS_AND_MILLIS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			long seconds = TimeUnit.NANOSECONDS.toSeconds(nanos);
 			if (seconds == 0)
 				return MILLIS.format(nanos);
@@ -78,7 +84,8 @@ public enum TimeFormat {
 	 */
 	MINUTES_AND_SECONDS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			long minutes = TimeUnit.NANOSECONDS.toMinutes(nanos);
 			if (minutes == 0)
 				return SECONDS.format(nanos);
@@ -92,7 +99,8 @@ public enum TimeFormat {
 	 */
 	UP_TO_MILLIS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			long millis = TimeUnit.NANOSECONDS.toMillis(nanos);
 			if (millis == 0)
 				return NANOS.format(nanos);
@@ -106,7 +114,8 @@ public enum TimeFormat {
 	 */
 	UP_TO_SECONDS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			long seconds = TimeUnit.NANOSECONDS.toSeconds(nanos);
 			long diff = nanos - TimeUnit.SECONDS.toNanos(seconds);
 			long millis = TimeUnit.NANOSECONDS.toMillis(diff);
@@ -126,7 +135,8 @@ public enum TimeFormat {
 	 */
 	UP_TO_MINUTES {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			long minutes = TimeUnit.NANOSECONDS.toMinutes(nanos);
 			long diff = nanos - TimeUnit.MINUTES.toNanos(minutes);
 			long seconds = TimeUnit.NANOSECONDS.toSeconds(diff);
@@ -150,7 +160,8 @@ public enum TimeFormat {
 	 */
 	UP_TO_HOURS {
 		@Override
-		public String format(long nanos) {
+		public String format(
+				long nanos) {
 			long hours = TimeUnit.NANOSECONDS.toHours(nanos);
 			long diff = nanos - TimeUnit.HOURS.toNanos(hours);
 			long minutes = TimeUnit.NANOSECONDS.toMinutes(diff);
@@ -186,7 +197,8 @@ public enum TimeFormat {
 	 * 
 	 * @return the formatted string
 	 */
-	public String format(long nanos) {
+	public String format(
+			long nanos) {
 		return String.valueOf(nanos);
 	}
 }

@@ -31,7 +31,9 @@ public class ListRepresentation extends StructuredRepresentation {
 	 * @param mapper   the function that knows how to convert elements to their
 	 *                     representation
 	 */
-	public <E> ListRepresentation(List<E> elements, Function<E, StructuredRepresentation> mapper) {
+	public <E> ListRepresentation(
+			List<E> elements,
+			Function<E, StructuredRepresentation> mapper) {
 		this(elements.stream().map(mapper).collect(Collectors.toList()));
 	}
 
@@ -40,7 +42,8 @@ public class ListRepresentation extends StructuredRepresentation {
 	 * 
 	 * @param elements the list
 	 */
-	public ListRepresentation(List<StructuredRepresentation> elements) {
+	public ListRepresentation(
+			List<StructuredRepresentation> elements) {
 		this.elements = elements;
 	}
 
@@ -49,7 +52,8 @@ public class ListRepresentation extends StructuredRepresentation {
 	 * 
 	 * @param elements the list
 	 */
-	public ListRepresentation(StructuredRepresentation... elements) {
+	public ListRepresentation(
+			StructuredRepresentation... elements) {
 		this.elements = Arrays.asList(elements);
 	}
 
@@ -75,7 +79,8 @@ public class ListRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

@@ -1,12 +1,11 @@
 package it.unive.lisa.analysis.type;
 
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
+import java.util.Set;
 
 /**
  * An oracle that can be queried for runtime type information.
@@ -27,7 +26,11 @@ public interface TypeOracle {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp, SemanticOracle oracle) throws SemanticException;
+	Set<Type> getRuntimeTypesOf(
+			SymbolicExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
 
 	/**
 	 * Yields the dynamic type that this analysis infers for the given
@@ -42,5 +45,9 @@ public interface TypeOracle {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp, SemanticOracle oracle) throws SemanticException;
+	Type getDynamicTypeOf(
+			SymbolicExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
 }

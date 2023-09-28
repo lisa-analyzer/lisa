@@ -54,7 +54,11 @@ public abstract class NaryExpression extends Expression {
 	 *                           expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, Expression... subExpressions) {
+	protected NaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression... subExpressions) {
 		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE, subExpressions);
 	}
 
@@ -70,7 +74,11 @@ public abstract class NaryExpression extends Expression {
 	 * @param order          the evaluation order of the sub-expressions
 	 * @param subExpressions the sub-expressions
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected NaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
 			Expression... subExpressions) {
 		this(cfg, location, constructName, order, Untyped.INSTANCE, subExpressions);
 	}
@@ -87,7 +95,11 @@ public abstract class NaryExpression extends Expression {
 	 * @param staticType     the static type of this expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
+	protected NaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Type staticType,
 			Expression... subExpressions) {
 		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, staticType, subExpressions);
 	}
@@ -104,8 +116,13 @@ public abstract class NaryExpression extends Expression {
 	 * @param staticType     the static type of this expression
 	 * @param subExpressions the sub-expressions
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Type staticType, Expression... subExpressions) {
+	protected NaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression... subExpressions) {
 		super(cfg, location, staticType);
 		Objects.requireNonNull(subExpressions, "The array of sub-expressions of an expression cannot be null");
 		for (int i = 0; i < subExpressions.length; i++)
@@ -148,7 +165,8 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		this.offset = offset;
 		int off = offset;
 		for (Expression sub : subExpressions)
@@ -157,7 +175,8 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(
+			Statement other) {
 		int len = subExpressions.length;
 		if (other == this)
 			return len == 0 ? null : subExpressions[order.last(len)];
@@ -172,7 +191,9 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public final <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public final <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		for (Expression sub : subExpressions)
 			if (!sub.accept(visitor, tool))
 				return false;
@@ -194,7 +215,8 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -266,6 +288,7 @@ public abstract class NaryExpression extends Expression {
 	public abstract <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet[] params, StatementStore<A> expressions)
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
 			throws SemanticException;
 }

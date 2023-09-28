@@ -25,7 +25,9 @@ public class SequentialEdge extends Edge {
 	 * @param source      the source statement
 	 * @param destination the destination statement
 	 */
-	public SequentialEdge(Statement source, Statement destination) {
+	public SequentialEdge(
+			Statement source,
+			Statement destination) {
 		super(source, destination);
 	}
 
@@ -35,7 +37,8 @@ public class SequentialEdge extends Edge {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> traverse(AnalysisState<A> sourceState) {
+	public <A extends AbstractState<A>> AnalysisState<A> traverse(
+			AnalysisState<A> sourceState) {
 		return sourceState;
 	}
 
@@ -45,7 +48,9 @@ public class SequentialEdge extends Edge {
 	}
 
 	@Override
-	public SequentialEdge newInstance(Statement source, Statement destination) {
+	public SequentialEdge newInstance(
+			Statement source,
+			Statement destination) {
 		return new SequentialEdge(source, destination);
 	}
 }

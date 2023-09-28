@@ -35,8 +35,13 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
 	 */
-	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName,
-			Expression left, Expression middle, Expression right) {
+	protected TernaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression left,
+			Expression middle,
+			Expression right) {
 		super(cfg, location, constructName, left, middle, right);
 	}
 
@@ -54,8 +59,14 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
 	 */
-	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
-			Expression left, Expression middle, Expression right) {
+	protected TernaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Type staticType,
+			Expression left,
+			Expression middle,
+			Expression right) {
 		super(cfg, location, constructName, staticType, left, middle, right);
 	}
 
@@ -73,8 +84,14 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
 	 */
-	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Expression left, Expression middle, Expression right) {
+	protected TernaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Expression left,
+			Expression middle,
+			Expression right) {
 		super(cfg, location, constructName, order, left, middle, right);
 	}
 
@@ -92,8 +109,15 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
 	 */
-	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Type staticType, Expression left, Expression middle, Expression right) {
+	protected TernaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression left,
+			Expression middle,
+			Expression right) {
 		super(cfg, location, constructName, order, staticType, left, middle, right);
 	}
 

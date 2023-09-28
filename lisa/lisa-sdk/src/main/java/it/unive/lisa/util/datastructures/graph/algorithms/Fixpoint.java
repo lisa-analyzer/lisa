@@ -50,7 +50,9 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	 *                                all nodes independently of the fixpoint
 	 *                                implementation
 	 */
-	public Fixpoint(G graph, boolean forceFullEvaluation) {
+	public Fixpoint(
+			G graph,
+			boolean forceFullEvaluation) {
 		this.graph = graph;
 		this.forceFullEvaluation = forceFullEvaluation;
 	}
@@ -82,7 +84,10 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T semantics(N node, T entrystate) throws Exception;
+		T semantics(
+				N node,
+				T entrystate)
+				throws Exception;
 
 		/**
 		 * Given an edge and a state, computes a new state by modifying the
@@ -99,7 +104,10 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T traverse(E edge, T entrystate) throws Exception;
+		T traverse(
+				E edge,
+				T entrystate)
+				throws Exception;
 
 		/**
 		 * Given a node and two states, computes their union (i.e. least upper
@@ -118,7 +126,11 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T union(N node, T left, T right) throws Exception;
+		T union(
+				N node,
+				T left,
+				T right)
+				throws Exception;
 
 		/**
 		 * Given a node and two states, joins the states (i.e. least upper bound
@@ -136,7 +148,11 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T operation(N node, T approx, T old) throws Exception;
+		T operation(
+				N node,
+				T approx,
+				T old)
+				throws Exception;
 
 		/**
 		 * Given a node and two states, yields whether or not the most recent
@@ -159,7 +175,11 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		boolean equality(N node, T approx, T old) throws Exception;
+		boolean equality(
+				N node,
+				T approx,
+				T old)
+				throws Exception;
 	}
 
 	/**
@@ -180,7 +200,9 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	 * @throws FixpointException if something goes wrong during the fixpoint
 	 *                               execution
 	 */
-	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
+	public Map<N, T> fixpoint(
+			Map<N, T> startingPoints,
+			WorkingSet<N> ws,
 			FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
 		return fixpoint(startingPoints, ws, implementation, null);
@@ -205,7 +227,8 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	 * @throws FixpointException if something goes wrong during the fixpoint
 	 *                               execution
 	 */
-	public Map<N, T> fixpoint(Map<N, T> startingPoints,
+	public Map<N, T> fixpoint(
+			Map<N, T> startingPoints,
 			WorkingSet<N> ws,
 			FixpointImplementation<N, E, T> implementation,
 			Map<N, T> initialResult)
@@ -277,7 +300,11 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	 * 
 	 * @throws FixpointException if something goes wrong during the computation
 	 */
-	protected T getEntryState(N node, T startstate, FixpointImplementation<N, E, T> implementation, Map<N, T> result)
+	protected T getEntryState(
+			N node,
+			T startstate,
+			FixpointImplementation<N, E, T> implementation,
+			Map<N, T> result)
 			throws FixpointException {
 		Collection<N> preds = graph.predecessorsOf(node);
 		List<T> states = new ArrayList<>(preds.size());

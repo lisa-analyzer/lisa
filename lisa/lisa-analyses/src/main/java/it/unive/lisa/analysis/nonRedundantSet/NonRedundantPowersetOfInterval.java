@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
@@ -17,6 +14,8 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.util.numeric.MathNumber;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * The finite non redundant powerset of {@link Interval} abstract domain

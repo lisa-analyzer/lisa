@@ -33,14 +33,18 @@ import org.joda.time.format.PeriodFormatterBuilder;
 public class LiSARunInfo {
 
 	private static class StatementCounter
-			implements GraphVisitor<CFG, Statement, Edge, Void> {
+			implements
+			GraphVisitor<CFG, Statement, Edge, Void> {
 
 		private int statements = 0;
 
 		private int expressions = 0;
 
 		@Override
-		public boolean visit(Void tool, CFG graph, Statement node) {
+		public boolean visit(
+				Void tool,
+				CFG graph,
+				Statement node) {
 			if (node instanceof Expression) {
 				if (((Expression) node).getRootStatement() == node)
 					statements++;
@@ -149,7 +153,11 @@ public class LiSARunInfo {
 	 * @param start    the start time
 	 * @param end      the end time
 	 */
-	public LiSARunInfo(Collection<Warning> warnings, Collection<String> files, Application app, DateTime start,
+	public LiSARunInfo(
+			Collection<Warning> warnings,
+			Collection<String> files,
+			Application app,
+			DateTime start,
 			DateTime end) {
 		this.version = VersionInfo.VERSION;
 		this.warnings = warnings.size();
@@ -189,7 +197,8 @@ public class LiSARunInfo {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -222,7 +231,8 @@ public class LiSARunInfo {
 	 * @return whether or not the two info contain the same code metrics and
 	 *             results
 	 */
-	public boolean sameCodeAndResults(LiSARunInfo other) {
+	public boolean sameCodeAndResults(
+			LiSARunInfo other) {
 		if (this == other)
 			return true;
 		if (other == null)

@@ -20,7 +20,9 @@ public class CallGraphNode implements Node<CallGraph, CallGraphNode, CallGraphEd
 	 * @param graph the parent graph
 	 * @param cm    the code member represented by this node
 	 */
-	public CallGraphNode(CallGraph graph, CodeMember cm) {
+	public CallGraphNode(
+			CallGraph graph,
+			CodeMember cm) {
 		this.graph = graph;
 		this.cm = cm;
 	}
@@ -44,7 +46,9 @@ public class CallGraphNode implements Node<CallGraph, CallGraphNode, CallGraphEd
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CallGraph, CallGraphNode, CallGraphEdge, V> visitor, V tool) {
+	public <V> boolean accept(
+			GraphVisitor<CallGraph, CallGraphNode, CallGraphEdge, V> visitor,
+			V tool) {
 		return visitor.visit(tool, graph, this);
 	}
 
@@ -57,7 +61,8 @@ public class CallGraphNode implements Node<CallGraph, CallGraphNode, CallGraphEd
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

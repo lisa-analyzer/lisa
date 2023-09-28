@@ -29,7 +29,10 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	 *                       program
 	 * @param expression the expression to return
 	 */
-	public Return(CFG cfg, CodeLocation location, Expression expression) {
+	public Return(
+			CFG cfg,
+			CodeLocation location,
+			Expression expression) {
 		super(cfg, location, "return", expression);
 	}
 

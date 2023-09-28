@@ -22,7 +22,9 @@ public class TrueEdge extends Edge {
 	 * @param source      the source statement
 	 * @param destination the destination statement
 	 */
-	public TrueEdge(Statement source, Statement destination) {
+	public TrueEdge(
+			Statement source,
+			Statement destination) {
 		super(source, destination);
 	}
 
@@ -48,7 +50,9 @@ public class TrueEdge extends Edge {
 	}
 
 	@Override
-	public TrueEdge newInstance(Statement source, Statement destination) {
+	public TrueEdge newInstance(
+			Statement source,
+			Statement destination) {
 		return new TrueEdge(source, destination);
 	}
 }

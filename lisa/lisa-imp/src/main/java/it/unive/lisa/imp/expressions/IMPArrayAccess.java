@@ -1,8 +1,5 @@
 package it.unive.lisa.imp.expressions;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -17,6 +14,8 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An expression modeling the array element access operation
@@ -38,7 +37,13 @@ public class IMPArrayAccess extends BinaryExpression {
 	 *                       will receive the access
 	 * @param location   the expression representing the accessed element
 	 */
-	public IMPArrayAccess(CFG cfg, String sourceFile, int line, int col, Expression container, Expression location) {
+	public IMPArrayAccess(
+			CFG cfg,
+			String sourceFile,
+			int line,
+			int col,
+			Expression container,
+			Expression location) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "[]", container, location);
 	}
 

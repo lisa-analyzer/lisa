@@ -35,8 +35,10 @@ import org.junit.Test;
 
 public class OptimizedFixpointTest {
 
-	private static class FixpointTester2 implements FixpointImplementation<Statement, Edge,
-			CompoundState<TestAbstractState>> {
+	private static class FixpointTester2
+			implements
+			FixpointImplementation<Statement, Edge,
+					CompoundState<TestAbstractState>> {
 
 		@Override
 		public CompoundState<TestAbstractState> semantics(
@@ -47,14 +49,16 @@ public class OptimizedFixpointTest {
 		}
 
 		@Override
-		public CompoundState<TestAbstractState> traverse(Edge edge,
+		public CompoundState<TestAbstractState> traverse(
+				Edge edge,
 				CompoundState<TestAbstractState> entrystate)
 				throws Exception {
 			return entrystate;
 		}
 
 		@Override
-		public CompoundState<TestAbstractState> union(Statement node,
+		public CompoundState<TestAbstractState> union(
+				Statement node,
 				CompoundState<TestAbstractState> left,
 				CompoundState<TestAbstractState> right)
 				throws Exception {
@@ -71,7 +75,8 @@ public class OptimizedFixpointTest {
 		}
 
 		@Override
-		public boolean equality(Statement node,
+		public boolean equality(
+				Statement node,
 				CompoundState<TestAbstractState> approx,
 				CompoundState<TestAbstractState> old)
 				throws Exception {

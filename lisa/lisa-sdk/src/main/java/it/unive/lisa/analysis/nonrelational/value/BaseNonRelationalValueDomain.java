@@ -311,6 +311,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @param environment the environment where the identifier must be evaluated
 	 * @param pp          the program point that where this operation is being
 	 *                        evaluated
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the identifier
 	 * 
@@ -328,9 +329,10 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	/**
 	 * Yields the evaluation of a skip expression.
 	 * 
-	 * @param skip the skip expression to be evaluated
-	 * @param pp   the program point that where this operation is being
-	 *                 evaluated
+	 * @param skip   the skip expression to be evaluated
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the skip expression
 	 * 
@@ -350,6 +352,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @param pushAny the push-any expression to be evaluated
 	 * @param pp      the program point that where this operation is being
 	 *                    evaluated
+	 * @param oracle  the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the push-any expression
 	 * 
@@ -369,6 +372,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @param pushInv the push-inv expression to be evaluated
 	 * @param pp      the program point that where this operation is being
 	 *                    evaluated
+	 * @param oracle  the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the push-inv expression
 	 * 
@@ -385,12 +389,13 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	/**
 	 * Yields the evaluation of a type conversion expression.
 	 * 
-	 * @param conv  the type conversion expression
-	 * @param left  the left expression, namely the expression to be converted
-	 * @param right the right expression, namely the types to which left should
-	 *                  be converted
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param conv   the type conversion expression
+	 * @param left   the left expression, namely the expression to be converted
+	 * @param right  the right expression, namely the types to which left should
+	 *                   be converted
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the type conversion expression
 	 * 
@@ -409,12 +414,13 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	/**
 	 * Yields the evaluation of a type cast expression.
 	 * 
-	 * @param cast  the type casted expression
-	 * @param left  the left expression, namely the expression to be casted
-	 * @param right the right expression, namely the types to which left should
-	 *                  be casted
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param cast   the type casted expression
+	 * @param left   the left expression, namely the expression to be casted
+	 * @param right  the right expression, namely the types to which left should
+	 *                   be casted
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the type cast expression
 	 * 
@@ -433,7 +439,9 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	/**
 	 * Yields the evaluation of the null constant {@link NullConstant}.
 	 * 
-	 * @param pp the program point that where this operation is being evaluated
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the constant
 	 * 
@@ -452,6 +460,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @param constant the constant to evaluate
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the constant
 	 * 
@@ -475,6 +484,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                     value of the expresion's argument
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -503,6 +513,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                     value of the right-hand side argument
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -534,6 +545,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                     value of the right-hand side argument
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -553,9 +565,10 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	/**
 	 * Yields the satisfiability of an abstract value of type {@code <T>}.
 	 * 
-	 * @param value the abstract value whose satisfiability is to be evaluated
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param value  the abstract value whose satisfiability is to be evaluated
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -578,7 +591,9 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * Yields the satisfiability of the null constant {@link NullConstant} on
 	 * this abstract domain.
 	 * 
-	 * @param pp the program point that where this operation is being evaluated
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -603,6 +618,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @param constant the constant to satisfied
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} is the constant is satisfied by
 	 *             this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -633,6 +649,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                     argument of the unary expression
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -669,6 +686,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                     expression
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -707,6 +725,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                     expression
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -803,6 +822,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                        the given expression
 	 * @param dest        the program point where the execution will move after
 	 *                        the expression has been assumed
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return the environment {@code environment} assuming that a ternary
 	 *             expression with operator {@code operator}, left argument
@@ -841,6 +861,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                        the given expression
 	 * @param dest        the program point where the execution will move after
 	 *                        the expression has been assumed
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return the environment {@code environment} assuming that a binary
 	 *             expression with operator {@code operator}, left argument
@@ -874,6 +895,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                        the given expression
 	 * @param dest        the program point where the execution will move after
 	 *                        the expression has been assumed
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return the environment {@code environment} assuming that an unary
 	 *             expression with operator {@code operator} and argument

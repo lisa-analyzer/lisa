@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -17,6 +11,11 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.Predicate;
 
 /**
  * This abstract class generalize the abstract domain lattice whose domain is
@@ -54,7 +53,10 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 *                        or not
 	 * @param valueDomain an instance of the underlying lattice
 	 */
-	public NonRedundantPowerset(SortedSet<T> elements, boolean isTop, T valueDomain) {
+	public NonRedundantPowerset(
+			SortedSet<T> elements,
+			boolean isTop,
+			T valueDomain) {
 		super(elements, isTop);
 		this.valueDomain = valueDomain;
 	}
@@ -114,7 +116,8 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * removed of redundancy.
 	 */
 	@Override
-	public C lubAux(C other)
+	public C lubAux(
+			C other)
 			throws SemanticException {
 		Set<T> lubSet = new HashSet<T>(this.elements);
 		lubSet.addAll(other.elements);
@@ -122,7 +125,8 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C glbAux(C other)
+	public C glbAux(
+			C other)
 			throws SemanticException {
 		Set<T> glbSet = new TreeSet<>();
 		for (T s1 : this.elements)
@@ -147,7 +151,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected C EgliMilnerConnector(C other) throws SemanticException {
+	protected C EgliMilnerConnector(
+			C other)
+			throws SemanticException {
 		Set<T> unionSet = new HashSet<T>(this.elements);
 		unionSet.addAll(other.elements);
 		T completeLub = valueDomain.bottom();
@@ -192,7 +198,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected C extrapolationHeuristic(C other) throws SemanticException {
+	protected C extrapolationHeuristic(
+			C other)
+			throws SemanticException {
 		Set<T> extrapolatedSet = new TreeSet<>();
 		for (T s1 : this.elements) {
 			for (T s2 : other.elements) {
@@ -223,7 +231,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * and +<sub>EM</sub> is an Egli-Milner connector.
 	 */
 	@Override
-	public C wideningAux(C other) throws SemanticException {
+	public C wideningAux(
+			C other)
+			throws SemanticException {
 		if (lessOrEqualEgliMilner(other)) {
 			return extrapolationHeuristic(other).removeRedundancy();
 		} else {
@@ -238,7 +248,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * s<sub>1</sub> &le; s<sub>2</sub>.
 	 */
 	@Override
-	public boolean lessOrEqualAux(C other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			C other)
+			throws SemanticException {
 		for (T s1 : this.elements) {
 			boolean existsGreaterElement = false;
 			for (T s2 : other.elements) {
@@ -270,7 +282,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public boolean lessOrEqualEgliMilner(C other) throws SemanticException {
+	public boolean lessOrEqualEgliMilner(
+			C other)
+			throws SemanticException {
 		if (lessOrEqual(other)) {
 			if (!isBottom()) {
 				for (T s2 : other.elements) {
@@ -291,7 +305,12 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C assign(I id, E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+	public C assign(
+			I id,
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.assign(id, expression, pp, oracle));
@@ -300,7 +319,11 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C smallStepSemantics(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+	public C smallStepSemantics(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.smallStepSemantics(expression, pp, oracle));
@@ -309,7 +332,12 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C assume(E expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
+	public C assume(
+			E expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.assume(expression, src, dest, oracle));
@@ -318,7 +346,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C forgetIdentifier(Identifier id) throws SemanticException {
+	public C forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.forgetIdentifier(id));
@@ -327,7 +357,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public C forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.forgetIdentifiersIf(test));
@@ -336,7 +368,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C pushScope(ScopeToken token) throws SemanticException {
+	public C pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.pushScope(token));
@@ -345,7 +379,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C popScope(ScopeToken token) throws SemanticException {
+	public C popScope(
+			ScopeToken token)
+			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
 			newElements.add(elem.popScope(token));
@@ -376,7 +412,8 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C mk(Set<T> set) {
+	public C mk(
+			Set<T> set) {
 		SortedSet<T> sorted = set instanceof SortedSet ? (SortedSet<T>) set : new TreeSet<>(set);
 		if (set.isEmpty())
 			return mk(sorted, false, this.valueDomain);
@@ -400,13 +437,20 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * @return a new concrete instance of {@link NonRedundantPowerset} with the
 	 *             given configuration passed
 	 */
-	public abstract C mk(SortedSet<T> set, boolean isTop, T valueDomain);
+	public abstract C mk(
+			SortedSet<T> set,
+			boolean isTop,
+			T valueDomain);
 
 	@Override
-	public Satisfiability satisfies(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+	public Satisfiability satisfies(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		Set<Satisfiability> setSatisf = new HashSet<Satisfiability>();
 
-		for (T element : this.elements) 
+		for (T element : this.elements)
 			setSatisf.add(element.satisfies(expression, pp, oracle));
 
 		if ((setSatisf.contains(Satisfiability.SATISFIED) && setSatisf.contains(Satisfiability.NOT_SATISFIED)) ||
@@ -431,7 +475,8 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

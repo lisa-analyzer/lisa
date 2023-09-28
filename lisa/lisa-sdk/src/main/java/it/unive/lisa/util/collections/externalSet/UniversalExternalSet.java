@@ -25,7 +25,8 @@ public final class UniversalExternalSet<T> implements ExternalSet<T> {
 	 * 
 	 * @param cache the cache
 	 */
-	UniversalExternalSet(ExternalSetCache<T> cache) {
+	UniversalExternalSet(
+			ExternalSetCache<T> cache) {
 		this.cache = cache;
 	}
 
@@ -41,7 +42,8 @@ public final class UniversalExternalSet<T> implements ExternalSet<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean contains(Object o) {
+	public boolean contains(
+			Object o) {
 		try {
 			return cache.indexOf((T) o) != -1;
 		} catch (ClassCastException e) {
@@ -61,37 +63,44 @@ public final class UniversalExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public <E> E[] toArray(E[] a) {
+	public <E> E[] toArray(
+			E[] a) {
 		return cache.getAllElements().toArray(a);
 	}
 
 	@Override
-	public boolean add(T e) {
+	public boolean add(
+			T e) {
 		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "add"));
 	}
 
 	@Override
-	public boolean remove(Object o) {
+	public boolean remove(
+			Object o) {
 		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "remove"));
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+	public boolean containsAll(
+			Collection<?> c) {
 		return cache.getAllElements().containsAll(c);
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends T> c) {
+	public boolean addAll(
+			Collection<? extends T> c) {
 		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "add"));
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(
+			Collection<?> c) {
 		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "remove"));
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(
+			Collection<?> c) {
 		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "remove"));
 	}
 
@@ -126,7 +135,8 @@ public final class UniversalExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

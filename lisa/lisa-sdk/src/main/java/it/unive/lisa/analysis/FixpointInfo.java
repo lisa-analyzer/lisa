@@ -55,11 +55,14 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 	 * 
 	 * @param mapping the mapping to use
 	 */
-	public FixpointInfo(Map<String, Lattice<?>> mapping) {
+	public FixpointInfo(
+			Map<String, Lattice<?>> mapping) {
 		this.function = mapping != null && mapping.isEmpty() ? null : mapping;
 	}
 
-	private Map<String, Lattice<?>> mkNewFunction(Map<String, Lattice<?>> other, boolean preserveNull) {
+	private Map<String, Lattice<?>> mkNewFunction(
+			Map<String, Lattice<?>> other,
+			boolean preserveNull) {
 		if (other == null)
 			return preserveNull ? null : new HashMap<>();
 		return new HashMap<>(other);
@@ -72,7 +75,8 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 	 * 
 	 * @return the mapped information
 	 */
-	public Lattice<?> get(String key) {
+	public Lattice<?> get(
+			String key) {
 		if (isBottom() || isTop() || function == null)
 			return null;
 		return function.get(key);
@@ -89,7 +93,9 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 	 * @return the mapped information
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T get(String key, Class<T> type) {
+	public <T> T get(
+			String key,
+			Class<T> type) {
 		return (T) get(key);
 	}
 
@@ -104,7 +110,9 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 	 * 
 	 * @return a new instance with the updated mapping
 	 */
-	public FixpointInfo put(String key, Lattice<?> info) {
+	public FixpointInfo put(
+			String key,
+			Lattice<?> info) {
 		// we are only adding elements here, so it is fine to not preserve null
 		Map<String, Lattice<?>> result = mkNewFunction(function, false);
 		result.put(key, info);
@@ -126,7 +134,10 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 	 * @throws SemanticException if something goes wrong during the lub
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public FixpointInfo putWeak(String key, Lattice<?> info) throws SemanticException {
+	public FixpointInfo putWeak(
+			String key,
+			Lattice<?> info)
+			throws SemanticException {
 		Map<String, Lattice<?>> result = mkNewFunction(function, false);
 		// need to leave this raw to not have the compiler complaining about the
 		// lub invocation
@@ -141,7 +152,9 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FixpointInfo lubAux(FixpointInfo other) throws SemanticException {
+	public FixpointInfo lubAux(
+			FixpointInfo other)
+			throws SemanticException {
 		Map<String, Lattice<?>> function = mkNewFunction(null, false);
 		Set<String> keys = SetUtils.union(this.getKeys(), other.getKeys());
 		for (String key : keys)
@@ -164,7 +177,9 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FixpointInfo glbAux(FixpointInfo other) throws SemanticException {
+	public FixpointInfo glbAux(
+			FixpointInfo other)
+			throws SemanticException {
 		Map<String, Lattice<?>> function = mkNewFunction(null, false);
 		Set<String> keys = SetUtils.intersection(this.getKeys(), other.getKeys());
 		for (String key : keys)
@@ -183,7 +198,9 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FixpointInfo wideningAux(FixpointInfo other) throws SemanticException {
+	public FixpointInfo wideningAux(
+			FixpointInfo other)
+			throws SemanticException {
 		Map<String, Lattice<?>> function = mkNewFunction(null, false);
 		Set<String> keys = SetUtils.union(this.getKeys(), other.getKeys());
 		for (String key : keys)
@@ -206,7 +223,9 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FixpointInfo narrowingAux(FixpointInfo other) throws SemanticException {
+	public FixpointInfo narrowingAux(
+			FixpointInfo other)
+			throws SemanticException {
 		Map<String, Lattice<?>> function = mkNewFunction(null, false);
 		Set<String> keys = SetUtils.intersection(this.getKeys(), other.getKeys());
 		for (String key : keys)
@@ -225,7 +244,9 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public boolean lessOrEqualAux(FixpointInfo other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			FixpointInfo other)
+			throws SemanticException {
 		if (function != null)
 			for (String key : function.keySet()) {
 				// need to leave this raw to not have the compiler complaining
@@ -268,7 +289,8 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

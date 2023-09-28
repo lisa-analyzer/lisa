@@ -37,7 +37,11 @@ public class NamedParameterExpression extends UnaryExpression {
 	 * @param subExpression the expression being assigned to the target
 	 *                          parameter
 	 */
-	public NamedParameterExpression(CFG cfg, CodeLocation location, String parameterName, Expression subExpression) {
+	public NamedParameterExpression(
+			CFG cfg,
+			CodeLocation location,
+			String parameterName,
+			Expression subExpression) {
 		super(cfg, location, parameterName + "=", subExpression.getStaticType(), subExpression);
 		this.parameterName = parameterName;
 	}
@@ -60,7 +64,8 @@ public class NamedParameterExpression extends UnaryExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

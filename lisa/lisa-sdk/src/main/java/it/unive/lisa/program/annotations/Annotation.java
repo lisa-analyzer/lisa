@@ -22,7 +22,8 @@ public class Annotation implements Comparable<Annotation> {
 	 * 
 	 * @param annotationName the name of the annotation
 	 */
-	public Annotation(String annotationName) {
+	public Annotation(
+			String annotationName) {
 		this(annotationName, Collections.emptyList(), false);
 	}
 
@@ -32,7 +33,9 @@ public class Annotation implements Comparable<Annotation> {
 	 * @param annotationName the name of the annotation
 	 * @param inherited      denotes whether the annotation can be inherited
 	 */
-	public Annotation(String annotationName, boolean inherited) {
+	public Annotation(
+			String annotationName,
+			boolean inherited) {
 		this(annotationName, Collections.emptyList(), inherited);
 	}
 
@@ -43,7 +46,9 @@ public class Annotation implements Comparable<Annotation> {
 	 * @param annotationName    the name of the annotation
 	 * @param annotationMembers the annotation members
 	 */
-	public Annotation(String annotationName, List<AnnotationMember> annotationMembers) {
+	public Annotation(
+			String annotationName,
+			List<AnnotationMember> annotationMembers) {
 		this(annotationName, annotationMembers, false);
 	}
 
@@ -54,7 +59,10 @@ public class Annotation implements Comparable<Annotation> {
 	 * @param annotationMembers the annotation members
 	 * @param inherited         denotes whether the annotation can be inherited
 	 */
-	public Annotation(String annotationName, List<AnnotationMember> annotationMembers, boolean inherited) {
+	public Annotation(
+			String annotationName,
+			List<AnnotationMember> annotationMembers,
+			boolean inherited) {
 		this.annotationMembers = annotationMembers;
 		this.annotationName = annotationName;
 		this.inherited = inherited;
@@ -89,7 +97,8 @@ public class Annotation implements Comparable<Annotation> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -132,7 +141,8 @@ public class Annotation implements Comparable<Annotation> {
 	}
 
 	@Override
-	public int compareTo(Annotation o) {
+	public int compareTo(
+			Annotation o) {
 		int cmp = 0;
 		if ((cmp = annotationName.compareTo(o.annotationName)) != 0)
 			return cmp;

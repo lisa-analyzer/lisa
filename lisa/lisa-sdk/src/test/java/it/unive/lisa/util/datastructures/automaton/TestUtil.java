@@ -8,7 +8,8 @@ import java.util.TreeSet;
 public class TestUtil {
 	private static final Random random = new Random();
 
-	public static TestAutomaton build(State... states) {
+	public static TestAutomaton build(
+			State... states) {
 		SortedSet<State> ss = new TreeSet<>();
 		for (State q : states)
 			ss.add(q);
@@ -17,21 +18,27 @@ public class TestUtil {
 	}
 
 	@SafeVarargs
-	public static TestAutomaton addEdges(TestAutomaton a, Transition<TestSymbol>... transitions) {
+	public static TestAutomaton addEdges(
+			TestAutomaton a,
+			Transition<TestSymbol>... transitions) {
 		for (Transition<TestSymbol> t : transitions)
 			a.addTransition(t);
 
 		return a;
 	}
 
-	public static TestSymbol randomChar(int count) {
+	public static TestSymbol randomChar(
+			int count) {
 		String ALPHA_NUMERIC_STRING = "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
 		int character = (int) (Math.random() * ALPHA_NUMERIC_STRING.length());
 		return new TestSymbol(String.valueOf(ALPHA_NUMERIC_STRING.charAt(character)));
 	}
 
-	public static TestAutomaton generateAutomaton(SortedSet<State> states, Map<Integer, State> mapping,
-			int numberOfTransitionsForEachState, int charLen) {
+	public static TestAutomaton generateAutomaton(
+			SortedSet<State> states,
+			Map<Integer, State> mapping,
+			int numberOfTransitionsForEachState,
+			int charLen) {
 		TestAutomaton a = null;
 
 		do {

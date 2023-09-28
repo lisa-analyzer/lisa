@@ -50,8 +50,14 @@ public class MultiCall extends Call implements ResolvedCall {
 	 * @param calls      the Calls underlying this one
 	 * @param parameters the parameters of this call
 	 */
-	public MultiCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			Collection<Call> calls, Expression... parameters) {
+	public MultiCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			Collection<Call> calls,
+			Expression... parameters) {
 		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, calls, parameters);
 	}
 
@@ -72,8 +78,15 @@ public class MultiCall extends Call implements ResolvedCall {
 	 * @param calls      the Calls underlying this one
 	 * @param parameters the parameters of this call
 	 */
-	public MultiCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Collection<Call> calls, Expression... parameters) {
+	public MultiCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Collection<Call> calls,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, getCommonReturnType(calls), parameters);
 		Objects.requireNonNull(calls, "The calls underlying a multi call cannot be null");
 		for (Call target : calls) {
@@ -84,7 +97,8 @@ public class MultiCall extends Call implements ResolvedCall {
 		this.calls = calls;
 	}
 
-	private static Type getCommonReturnType(Collection<Call> targets) {
+	private static Type getCommonReturnType(
+			Collection<Call> targets) {
 		Iterator<Call> it = targets.iterator();
 		Type result = null;
 		while (it.hasNext()) {
@@ -112,7 +126,9 @@ public class MultiCall extends Call implements ResolvedCall {
 	 * @param source the unresolved call to copy
 	 * @param calls  the calls underlying this one
 	 */
-	public MultiCall(UnresolvedCall source, Call... calls) {
+	public MultiCall(
+			UnresolvedCall source,
+			Call... calls) {
 		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
 				List.of(calls), source.getParameters());
 		for (Expression param : source.getParameters())
@@ -138,7 +154,8 @@ public class MultiCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -160,7 +177,8 @@ public class MultiCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public void setSource(UnresolvedCall source) {
+	public void setSource(
+			UnresolvedCall source) {
 		super.setSource(source);
 		calls.forEach(c -> c.setSource(source));
 	}

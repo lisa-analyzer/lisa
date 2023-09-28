@@ -6,7 +6,8 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 public class TestValueDomain extends TestDomain<TestValueDomain, ValueExpression>
-		implements ValueDomain<TestValueDomain> {
+		implements
+		ValueDomain<TestValueDomain> {
 
 	@Override
 	public StructuredRepresentation representation() {

@@ -27,7 +27,10 @@ public class Throw extends UnaryStatement {
 	 *                       program
 	 * @param expression the expression to raise as error
 	 */
-	public Throw(CFG cfg, CodeLocation location, Expression expression) {
+	public Throw(
+			CFG cfg,
+			CodeLocation location,
+			Expression expression) {
 		super(cfg, location, "throw", expression);
 	}
 

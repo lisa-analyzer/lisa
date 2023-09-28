@@ -1,8 +1,5 @@
 package it.unive.lisa.imp.constructs;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -27,6 +24,8 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The native construct representing the array length operation. This construct
@@ -42,7 +41,9 @@ public class ArrayLength extends NativeCFG {
 	 * @param location the location where this construct is defined
 	 * @param program  the program of the analysis
 	 */
-	public ArrayLength(CodeLocation location, Program program) {
+	public ArrayLength(
+			CodeLocation location,
+			Program program) {
 		super(new CodeMemberDescriptor(location, program, false, "arraylen", Int32Type.INSTANCE,
 				new Parameter(location, "a", Untyped.INSTANCE)),
 				IMPArrayLength.class);
@@ -72,12 +73,16 @@ public class ArrayLength extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPArrayLength build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPArrayLength build(
+				CFG cfg,
+				CodeLocation location,
+				Expression... params) {
 			return new IMPArrayLength(cfg, location, params[0]);
 		}
 
 		@Override
-		public void setOriginatingStatement(Statement st) {
+		public void setOriginatingStatement(
+				Statement st) {
 			originating = st;
 		}
 
@@ -91,7 +96,11 @@ public class ArrayLength extends NativeCFG {
 		 * @param col        the column where this operation is defined
 		 * @param parameter  the operand of this operation
 		 */
-		public IMPArrayLength(CFG cfg, String sourceFile, int line, int col,
+		public IMPArrayLength(
+				CFG cfg,
+				String sourceFile,
+				int line,
+				int col,
 				Expression parameter) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), parameter);
 		}
@@ -103,13 +112,19 @@ public class ArrayLength extends NativeCFG {
 		 * @param location  the code location where this operation is defined
 		 * @param parameter the operand of this operation
 		 */
-		public IMPArrayLength(CFG cfg, CodeLocation location, Expression parameter) {
+		public IMPArrayLength(
+				CFG cfg,
+				CodeLocation location,
+				Expression parameter) {
 			super(cfg, location, "arraylen", parameter);
 		}
 
 		@Override
-		public <A extends AbstractState<A>> AnalysisState<A> unarySemantics(InterproceduralAnalysis<A> interprocedural,
-				AnalysisState<A> state, SymbolicExpression expr, StatementStore<A> expressions)
+		public <A extends AbstractState<A>> AnalysisState<A> unarySemantics(
+				InterproceduralAnalysis<A> interprocedural,
+				AnalysisState<A> state,
+				SymbolicExpression expr,
+				StatementStore<A> expressions)
 				throws SemanticException {
 			Set<Type> arraytypes = new HashSet<>();
 			Set<Type> types = state.getState().getRuntimeTypesOf(expr, this, state.getState());

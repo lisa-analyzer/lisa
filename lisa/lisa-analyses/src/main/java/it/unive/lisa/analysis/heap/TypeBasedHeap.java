@@ -1,13 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import org.apache.commons.collections4.SetUtils;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -28,6 +20,12 @@ import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import org.apache.commons.collections4.SetUtils;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
@@ -233,7 +231,10 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
-		
+
+		/**
+		 * The singleton instance of this rewriter.
+		 */
 		public static final Rewriter SINGLETON = new Rewriter();
 
 		@Override

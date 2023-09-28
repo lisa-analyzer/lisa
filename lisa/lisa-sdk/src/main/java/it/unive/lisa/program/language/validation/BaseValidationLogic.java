@@ -147,7 +147,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * all entrypoints ({@link Program#getEntryPoints()}) are defined.
 	 */
 	@Override
-	public void validateAndFinalize(Program program) throws ProgramValidationException {
+	public void validateAndFinalize(
+			Program program)
+			throws ProgramValidationException {
 		validateAndFinalize((Unit) program);
 
 		// all entrypoints should be within the set of cfgs
@@ -174,7 +176,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * 
 	 * @throws ProgramValidationException if the unit has an invalid structure
 	 */
-	public void validateAndFinalize(Unit unit) throws ProgramValidationException {
+	public void validateAndFinalize(
+			Unit unit)
+			throws ProgramValidationException {
 		for (CodeMember member : unit.getCodeMembers())
 			validate(member, false);
 
@@ -203,7 +207,10 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * 
 	 * @throws ProgramValidationException if the global has an invalid structure
 	 */
-	public void validate(Global global, boolean isInstance) throws ProgramValidationException {
+	public void validate(
+			Global global,
+			boolean isInstance)
+			throws ProgramValidationException {
 		if (isInstance != global.isInstance())
 			throw new ProgramValidationException(format(GLOBAL_INSTANCE_MISMATCH, global, global.isInstance(),
 					isInstance ? "instance" : "non-instance"));
@@ -221,7 +228,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * 
 	 * @throws ProgramValidationException if the unit has an invalid structure
 	 */
-	public void validateAndFinalize(CodeUnit unit) throws ProgramValidationException {
+	public void validateAndFinalize(
+			CodeUnit unit)
+			throws ProgramValidationException {
 		// nothing to do
 	}
 
@@ -234,7 +243,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * 
 	 * @throws ProgramValidationException if the unit has an invalid structure
 	 */
-	public void validateAndFinalize(ClassUnit unit) throws ProgramValidationException {
+	public void validateAndFinalize(
+			ClassUnit unit)
+			throws ProgramValidationException {
 		if (processedUnits.contains(unit.getName()))
 			return;
 
@@ -254,7 +265,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * 
 	 * @throws ProgramValidationException if the unit has an invalid structure
 	 */
-	public void validateAndFinalize(AbstractClassUnit unit) throws ProgramValidationException {
+	public void validateAndFinalize(
+			AbstractClassUnit unit)
+			throws ProgramValidationException {
 		if (processedUnits.contains(unit.getName()))
 			return;
 
@@ -273,7 +286,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * 
 	 * @throws ProgramValidationException if the unit has an invalid structure
 	 */
-	public void validateAndFinalize(InterfaceUnit unit) throws ProgramValidationException {
+	public void validateAndFinalize(
+			InterfaceUnit unit)
+			throws ProgramValidationException {
 		if (processedUnits.contains(unit.getName()))
 			return;
 
@@ -300,7 +315,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * 
 	 * @throws ProgramValidationException if the unit has an invalid structure
 	 */
-	public void validateAndFinalize(CompilationUnit unit) throws ProgramValidationException {
+	public void validateAndFinalize(
+			CompilationUnit unit)
+			throws ProgramValidationException {
 		if (processedUnits.contains(unit.getName()))
 			return;
 
@@ -389,7 +406,10 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * 
 	 * @throws ProgramValidationException if the member has an invalid structure
 	 */
-	public void validate(CodeMember member, boolean instance) throws ProgramValidationException {
+	public void validate(
+			CodeMember member,
+			boolean instance)
+			throws ProgramValidationException {
 		if (!instance && member instanceof AbstractCodeMember)
 			throw new ProgramValidationException(format(ABSTRACT_NON_INSTANCE, member));
 		Unit container = member.getDescriptor().getUnit();

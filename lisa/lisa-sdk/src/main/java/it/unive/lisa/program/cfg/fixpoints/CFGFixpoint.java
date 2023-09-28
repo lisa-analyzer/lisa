@@ -30,7 +30,8 @@ import org.apache.commons.lang3.StringUtils;
  *                state computed by the fixpoint
  */
 public abstract class CFGFixpoint<A extends AbstractState<A>>
-		implements FixpointImplementation<Statement, Edge, CFGFixpoint.CompoundState<A>> {
+		implements
+		FixpointImplementation<Statement, Edge, CFGFixpoint.CompoundState<A>> {
 
 	/**
 	 * The graph targeted by this implementation.
@@ -49,14 +50,18 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 	 * @param interprocedural the {@link InterproceduralAnalysis} to use for
 	 *                            semantics invocation
 	 */
-	public CFGFixpoint(CFG graph, InterproceduralAnalysis<A> interprocedural) {
+	public CFGFixpoint(
+			CFG graph,
+			InterproceduralAnalysis<A> interprocedural) {
 		this.graph = graph;
 		this.interprocedural = interprocedural;
 	}
 
 	@Override
-	public CompoundState<A> semantics(Statement node,
-			CompoundState<A> entrystate) throws SemanticException {
+	public CompoundState<A> semantics(
+			Statement node,
+			CompoundState<A> entrystate)
+			throws SemanticException {
 		StatementStore<A> expressions = new StatementStore<>(entrystate.postState.bottom());
 		AnalysisState<A> approx = node.semantics(entrystate.postState, interprocedural, expressions);
 		if (node instanceof Expression)
@@ -67,8 +72,10 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 	}
 
 	@Override
-	public CompoundState<A> traverse(Edge edge,
-			CompoundState<A> entrystate) throws SemanticException {
+	public CompoundState<A> traverse(
+			Edge edge,
+			CompoundState<A> entrystate)
+			throws SemanticException {
 		AnalysisState<A> approx = edge.traverse(entrystate.postState);
 
 		// we remove out of scope variables here
@@ -91,9 +98,11 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 	}
 
 	@Override
-	public CompoundState<A> union(Statement node,
+	public CompoundState<A> union(
+			Statement node,
 			CompoundState<A> left,
-			CompoundState<A> right) throws SemanticException {
+			CompoundState<A> right)
+			throws SemanticException {
 		return left.lub(right);
 	}
 
@@ -134,7 +143,9 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 		 */
 		public final StatementStore<A> intermediateStates;
 
-		private CompoundState(AnalysisState<A> postState, StatementStore<A> intermediateStates) {
+		private CompoundState(
+				AnalysisState<A> postState,
+				StatementStore<A> intermediateStates) {
 			this.postState = postState;
 			this.intermediateStates = intermediateStates;
 		}
@@ -149,7 +160,8 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)
@@ -176,12 +188,16 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 		}
 
 		@Override
-		public boolean lessOrEqual(CompoundState<A> other) throws SemanticException {
+		public boolean lessOrEqual(
+				CompoundState<A> other)
+				throws SemanticException {
 			return postState.lessOrEqual(other.postState) && intermediateStates.lessOrEqual(other.intermediateStates);
 		}
 
 		@Override
-		public CompoundState<A> lub(CompoundState<A> other) throws SemanticException {
+		public CompoundState<A> lub(
+				CompoundState<A> other)
+				throws SemanticException {
 			return CompoundState.of(postState.lub(other.postState), intermediateStates.lub(other.intermediateStates));
 		}
 
@@ -206,18 +222,24 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 		}
 
 		@Override
-		public CompoundState<A> glb(CompoundState<A> other) throws SemanticException {
+		public CompoundState<A> glb(
+				CompoundState<A> other)
+				throws SemanticException {
 			return CompoundState.of(postState.glb(other.postState), intermediateStates.glb(other.intermediateStates));
 		}
 
 		@Override
-		public CompoundState<A> narrowing(CompoundState<A> other) throws SemanticException {
+		public CompoundState<A> narrowing(
+				CompoundState<A> other)
+				throws SemanticException {
 			return CompoundState.of(postState.narrowing(other.postState),
 					intermediateStates.narrowing(other.intermediateStates));
 		}
 
 		@Override
-		public CompoundState<A> widening(CompoundState<A> other) throws SemanticException {
+		public CompoundState<A> widening(
+				CompoundState<A> other)
+				throws SemanticException {
 			return CompoundState.of(postState.widening(other.postState),
 					intermediateStates.widening(other.intermediateStates));
 		}

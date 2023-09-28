@@ -52,7 +52,8 @@ public class CFGFixpointTest {
 	private ModularWorstCaseAnalysis<
 			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> mkAnalysis(
 					Program p)
-					throws InterproceduralAnalysisException, CallGraphConstructionException {
+					throws InterproceduralAnalysisException,
+					CallGraphConstructionException {
 		ModularWorstCaseAnalysis<
 				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
 						TypeEnvironment<InferredTypes>>> analysis = new ModularWorstCaseAnalysis<>();
@@ -75,7 +76,9 @@ public class CFGFixpointTest {
 
 	@Test
 	public void testEmptyCFG()
-			throws InterproceduralAnalysisException, CallGraphConstructionException, ParsingException {
+			throws InterproceduralAnalysisException,
+			CallGraphConstructionException,
+			ParsingException {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
@@ -88,7 +91,9 @@ public class CFGFixpointTest {
 
 	@Test
 	public void testEmptyIMPMethod()
-			throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
+			throws ParsingException,
+			InterproceduralAnalysisException,
+			CallGraphConstructionException {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
@@ -101,7 +106,9 @@ public class CFGFixpointTest {
 
 	@Test
 	public void testIMPMethodWithEmptyIfBranch()
-			throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
+			throws ParsingException,
+			InterproceduralAnalysisException,
+			CallGraphConstructionException {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
@@ -114,7 +121,9 @@ public class CFGFixpointTest {
 
 	@Test
 	public void testMetaVariablesOfRootExpressions()
-			throws FixpointException, InterproceduralAnalysisException, CallGraphConstructionException {
+			throws FixpointException,
+			InterproceduralAnalysisException,
+			CallGraphConstructionException {
 		Program program = new Program(new IMPFeatures(), new IMPTypeSystem());
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, program, false, "cfg"));
 		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");

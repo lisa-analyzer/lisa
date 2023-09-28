@@ -312,6 +312,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param environment the environment where the identifier must be evaluated
 	 * @param pp          the program point that where this operation is being
 	 *                        evaluated
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the identifier
 	 * 
@@ -330,10 +331,11 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	/**
 	 * Yields the evaluation of a skip expression.
 	 * 
-	 * @param skip  the skip expression to be evaluated
-	 * @param state the current execution state
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param skip   the skip expression to be evaluated
+	 * @param state  the current execution state
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the skip expression
 	 * 
@@ -356,6 +358,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state   the current execution state
 	 * @param pp      the program point that where this operation is being
 	 *                    evaluated
+	 * @param oracle  the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the push-any expression
 	 * 
@@ -378,6 +381,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state   the current execution state
 	 * @param pp      the program point that where this operation is being
 	 *                    evaluated
+	 * @param oracle  the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the push-inv expression
 	 * 
@@ -396,9 +400,10 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	/**
 	 * Yields the evaluation of the null constant {@link NullConstant}.
 	 * 
-	 * @param state the current execution state
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param state  the current execution state
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the constant
 	 * 
@@ -420,6 +425,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the constant
 	 * 
@@ -446,6 +452,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -477,6 +484,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -497,13 +505,14 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	/**
 	 * Yields the evaluation of a type conversion expression.
 	 * 
-	 * @param conv  the type conversion expression
-	 * @param left  the left expression, namely the expression to be converted
-	 * @param right the right expression, namely the types to which left should
-	 *                  be converted
-	 * @param state the current execution state
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param conv   the type conversion expression
+	 * @param left   the left expression, namely the expression to be converted
+	 * @param right  the right expression, namely the types to which left should
+	 *                   be converted
+	 * @param state  the current execution state
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the type conversion expression
 	 * 
@@ -526,13 +535,14 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	/**
 	 * Yields the evaluation of a type cast expression.
 	 * 
-	 * @param cast  the type casted expression
-	 * @param left  the left expression, namely the expression to be casted
-	 * @param right the right expression, namely the types to which left should
-	 *                  be casted
-	 * @param state the current execution state
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param cast   the type casted expression
+	 * @param left   the left expression, namely the expression to be casted
+	 * @param right  the right expression, namely the types to which left should
+	 *                   be casted
+	 * @param state  the current execution state
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the type cast expression
 	 * 
@@ -569,6 +579,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -590,10 +601,11 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	/**
 	 * Yields the satisfiability of an abstract value of type {@code <T>}.
 	 * 
-	 * @param value the abstract value whose satisfiability is to be evaluated
-	 * @param state the current execution state
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param value  the abstract value whose satisfiability is to be evaluated
+	 * @param state  the current execution state
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -618,6 +630,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * 
 	 * @param pushAny the push any expression to satisfy
 	 * @param state   the current execution state
+	 * @param oracle  the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -640,9 +653,10 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * Yields the satisfiability of the null constant {@link NullConstant} on
 	 * this abstract domain.
 	 * 
-	 * @param state the current execution state
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
+	 * @param state  the current execution state
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -669,6 +683,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} is the constant is satisfied by
 	 *             this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -701,6 +716,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -739,6 +755,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -779,6 +796,7 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
+	 * @param oracle   the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is

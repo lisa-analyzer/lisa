@@ -47,7 +47,9 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> im
 	 * @param isTop    whether or not this is the top or bottom element of the
 	 *                     lattice, valid only if the set of elements is empty
 	 */
-	public InverseSetLattice(Set<E> elements, boolean isTop) {
+	public InverseSetLattice(
+			Set<E> elements,
+			boolean isTop) {
 		this.elements = elements;
 		this.isTop = isTop;
 	}
@@ -64,17 +66,22 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> im
 	 * @return a new concrete instance of {@link InverseSetLattice} containing
 	 *             the elements of the given set
 	 */
-	public abstract S mk(Set<E> set);
+	public abstract S mk(
+			Set<E> set);
 
 	@Override
-	public S lubAux(S other) throws SemanticException {
+	public S lubAux(
+			S other)
+			throws SemanticException {
 		Set<E> lub = new HashSet<>(elements);
 		lub.retainAll(other.elements);
 		return mk(lub);
 	}
 
 	@Override
-	public S glbAux(S other) throws SemanticException {
+	public S glbAux(
+			S other)
+			throws SemanticException {
 		Set<E> glb = new HashSet<>(elements);
 		glb.addAll(other.elements);
 		return mk(glb);
@@ -86,7 +93,9 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> im
 	}
 
 	@Override
-	public boolean lessOrEqualAux(S other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			S other)
+			throws SemanticException {
 		return elements.containsAll(other.elements);
 	}
 
@@ -98,7 +107,8 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> im
 	 * @return {@code true} if the element is contained in this set,
 	 *             {@code false} otherwise.
 	 */
-	public boolean contains(E elem) {
+	public boolean contains(
+			E elem) {
 		return elements.contains(elem);
 	}
 
@@ -131,7 +141,8 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> im
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

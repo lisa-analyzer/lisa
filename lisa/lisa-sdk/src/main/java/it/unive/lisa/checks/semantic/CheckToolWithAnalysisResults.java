@@ -40,7 +40,9 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * @param callgraph     the callgraph that has been built during the
 	 *                          analysis
 	 */
-	public CheckToolWithAnalysisResults(LiSAConfiguration configuration, FileManager fileManager,
+	public CheckToolWithAnalysisResults(
+			LiSAConfiguration configuration,
+			FileManager fileManager,
 			Map<CFG, Collection<AnalyzedCFG<A>>> results,
 			CallGraph callgraph) {
 		super(configuration, fileManager);
@@ -55,7 +57,8 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * @param results   the results to store
 	 * @param callgraph the callgraph that has been built during the analysis
 	 */
-	public CheckToolWithAnalysisResults(CheckTool other,
+	public CheckToolWithAnalysisResults(
+			CheckTool other,
 			Map<CFG, Collection<AnalyzedCFG<A>>> results,
 			CallGraph callgraph) {
 		super(other);
@@ -71,7 +74,8 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * 
 	 * @return the results on the given cfg
 	 */
-	public Collection<AnalyzedCFG<A>> getResultOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A>> getResultOf(
+			CFG cfg) {
 		return results.get(cfg);
 	}
 
@@ -92,7 +96,8 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * 
 	 * @return the collection of callers code members
 	 */
-	public Collection<CodeMember> getCallers(CodeMember cm) {
+	public Collection<CodeMember> getCallers(
+			CodeMember cm) {
 		return callgraph.getCallers(cm);
 	}
 
@@ -105,7 +110,8 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * 
 	 * @return the collection of called code members
 	 */
-	public Collection<CodeMember> getCallees(CodeMember cm) {
+	public Collection<CodeMember> getCallees(
+			CodeMember cm) {
 		return callgraph.getCallees(cm);
 	}
 
@@ -118,7 +124,8 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * 
 	 * @return the collection of calls that target the code member
 	 */
-	public Collection<Call> getCallSites(CodeMember cm) {
+	public Collection<Call> getCallSites(
+			CodeMember cm) {
 		return callgraph.getCallSites(cm);
 	}
 
@@ -134,7 +141,10 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public Call getResolvedVersion(UnresolvedCall call, AnalyzedCFG<A> result) throws SemanticException {
+	public Call getResolvedVersion(
+			UnresolvedCall call,
+			AnalyzedCFG<A> result)
+			throws SemanticException {
 		StatementStore<A> store = new StatementStore<>(result.getEntryState().bottom());
 		for (Expression e : call.getParameters())
 			store.put(e, result.getAnalysisStateAfter(e));

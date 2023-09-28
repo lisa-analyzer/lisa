@@ -99,7 +99,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @throws ParsingException if this frontend is unable to parse the file
 	 */
-	public static Program processFile(String file) throws ParsingException {
+	public static Program processFile(
+			String file)
+			throws ParsingException {
 		return new IMPFrontend(file, false).work(null);
 	}
 
@@ -116,7 +118,10 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @throws ParsingException if this frontend is unable to parse the file
 	 */
-	public static Program processFile(String file, boolean onlyMain) throws ParsingException {
+	public static Program processFile(
+			String file,
+			boolean onlyMain)
+			throws ParsingException {
 		return new IMPFrontend(file, onlyMain).work(null);
 	}
 
@@ -134,7 +139,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @throws ParsingException if this frontend is unable to parse the text
 	 */
-	public static Program processText(String text) throws ParsingException {
+	public static Program processText(
+			String text)
+			throws ParsingException {
 		return processText(text, false);
 	}
 
@@ -151,7 +158,10 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @throws ParsingException if this frontend is unable to parse the text
 	 */
-	public static Program processText(String text, boolean onlyMain) throws ParsingException {
+	public static Program processText(
+			String text,
+			boolean onlyMain)
+			throws ParsingException {
 		try (InputStream is = new ByteArrayInputStream(text.getBytes())) {
 			return new IMPFrontend("in-memory.imp", onlyMain).work(is);
 		} catch (IOException e) {
@@ -171,7 +181,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private final boolean onlyMain;
 
-	private IMPFrontend(String file, boolean onlyMain) {
+	private IMPFrontend(
+			String file,
+			boolean onlyMain) {
 		this.file = file;
 		inheritanceMap = new HashMap<>();
 		implementedInterfaces = new HashMap<>();
@@ -179,7 +191,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		this.onlyMain = onlyMain;
 	}
 
-	private Program work(InputStream inputStream) throws ParsingException {
+	private Program work(
+			InputStream inputStream)
+			throws ParsingException {
 		// first remove all cached types from previous executions
 		ClassType.clearAll();
 		ArrayType.clearAll();
@@ -250,7 +264,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Program visitFile(FileContext ctx) {
+	public Program visitFile(
+			FileContext ctx) {
 		for (UnitContext unit : ctx.unit()) {
 			// we add all the units first, so that type resolution an work
 			SourceCodeLocation loc = new SourceCodeLocation(file, getLine(ctx), getCol(ctx));
@@ -297,7 +312,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Unit visitUnit(UnitContext ctx) {
+	public Unit visitUnit(
+			UnitContext ctx) {
 		if (ctx.classUnit() != null)
 			return visitClassUnit(ctx.classUnit());
 		else if (ctx.interfaceUnit() != null)
@@ -306,7 +322,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public InterfaceUnit visitInterfaceUnit(InterfaceUnitContext ctx) {
+	public InterfaceUnit visitInterfaceUnit(
+			InterfaceUnitContext ctx) {
 		InterfaceUnit unit = (InterfaceUnit) program.getUnit(ctx.name.getText());
 		currentUnit = unit;
 
@@ -339,7 +356,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public ClassUnit visitClassUnit(ClassUnitContext ctx) {
+	public ClassUnit visitClassUnit(
+			ClassUnitContext ctx) {
 		ClassUnit unit = (ClassUnit) program.getUnit(ctx.name.getText());
 		currentUnit = unit;
 
@@ -386,7 +404,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return unit;
 	}
 
-	private boolean isEntryPoint(CodeMember cm) {
+	private boolean isEntryPoint(
+			CodeMember cm) {
 		if (!(cm instanceof CFG))
 			return false;
 		else if (!onlyMain)
@@ -396,7 +415,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public ConstantGlobal visitConstantDeclaration(ConstantDeclarationContext ctx) {
+	public ConstantGlobal visitConstantDeclaration(
+			ConstantDeclarationContext ctx) {
 		SourceCodeLocation location = new SourceCodeLocation(file, getLine(ctx), getCol(ctx));
 		String name = ctx.name.getText();
 		Annotations annotations = new IMPAnnotationVisitor().visitAnnotations(ctx.annotations());
@@ -405,7 +425,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Global visitFieldDeclaration(FieldDeclarationContext ctx) {
+	public Global visitFieldDeclaration(
+			FieldDeclarationContext ctx) {
 		SourceCodeLocation location = new SourceCodeLocation(file, getLine(ctx), getCol(ctx));
 		String name = ctx.name.getText();
 		Annotations annotations = new IMPAnnotationVisitor().visitAnnotations(ctx.annotations());
@@ -413,7 +434,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public CFG visitConstructorDeclaration(ConstructorDeclarationContext ctx) {
+	public CFG visitConstructorDeclaration(
+			ConstructorDeclarationContext ctx) {
 		CodeMemberDescriptor descr = mkDescriptor(ctx);
 		if (!currentUnit.getName().equals(descr.getName()))
 			throw new IMPSyntaxException("Constructor does not have the same name as its containing class");
@@ -421,18 +443,21 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public CFG visitMethodDeclaration(MethodDeclarationContext ctx) {
+	public CFG visitMethodDeclaration(
+			MethodDeclarationContext ctx) {
 		CodeMemberDescriptor descr = mkDescriptor(ctx);
 		return new IMPCodeMemberVisitor(file, descr).visitCodeMember(ctx.block());
 	}
 
 	@Override
-	public AbstractCodeMember visitSignatureDeclaration(SignatureDeclarationContext ctx) {
+	public AbstractCodeMember visitSignatureDeclaration(
+			SignatureDeclarationContext ctx) {
 		CodeMemberDescriptor descr = mkDescriptor(ctx);
 		return new AbstractCodeMember(descr);
 	}
 
-	private CodeMemberDescriptor mkDescriptor(SignatureDeclarationContext ctx) {
+	private CodeMemberDescriptor mkDescriptor(
+			SignatureDeclarationContext ctx) {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
@@ -443,7 +468,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return descriptor;
 	}
 
-	private CodeMemberDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
+	private CodeMemberDescriptor mkDescriptor(
+			ConstructorDeclarationContext ctx) {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
@@ -454,7 +480,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return descriptor;
 	}
 
-	private CodeMemberDescriptor mkDescriptor(MethodDeclarationContext ctx) {
+	private CodeMemberDescriptor mkDescriptor(
+			MethodDeclarationContext ctx) {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
@@ -471,7 +498,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Parameter[] visitFormals(FormalsContext ctx) {
+	public Parameter[] visitFormals(
+			FormalsContext ctx) {
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
 		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",
 				new ReferenceType(ClassType.lookup(this.currentUnit.getName(), this.currentUnit)));
@@ -482,13 +510,15 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Parameter visitFormal(FormalContext ctx) {
+	public Parameter visitFormal(
+			FormalContext ctx) {
 		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
 				Untyped.INSTANCE, null, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 
 	@Override
-	public Constant visitLiteral(LiteralContext ctx) {
+	public Constant visitLiteral(
+			LiteralContext ctx) {
 		int line = getLine(ctx);
 		int col = getCol(ctx);
 		SourceCodeLocation location = new SourceCodeLocation(file, line, col);

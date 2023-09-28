@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -21,11 +18,14 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
- * cases of {@link #smallStepSemantics(SymbolicExpression, ProgramPoint, SemanticOracle)}. All
- * implementers of {@link HeapDomain} should inherit from this class for
+ * cases of
+ * {@link #smallStepSemantics(SymbolicExpression, ProgramPoint, SemanticOracle)}.
+ * All implementers of {@link HeapDomain} should inherit from this class for
  * ensuring a consistent behavior on the base cases, unless explicitly needed.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -38,7 +38,7 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	@SuppressWarnings("unchecked")
 	default H smallStepSemantics(
 			SymbolicExpression expression,
-			ProgramPoint pp, 
+			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression instanceof HeapExpression)
@@ -84,17 +84,22 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	 * 
 	 * @return a new instance of this domain
 	 */
-	public abstract H mk(H reference);
+	public abstract H mk(
+			H reference);
 
 	@Override
 	@SuppressWarnings("unchecked")
-	default H pushScope(ScopeToken scope) throws SemanticException {
+	default H pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return (H) this;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	default H popScope(ScopeToken scope) throws SemanticException {
+	default H popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return (H) this;
 	}
 
@@ -127,9 +132,11 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	public abstract static class Rewriter implements ExpressionVisitor<ExpressionSet> {
 
 		@Override
-		public ExpressionSet visit(UnaryExpression expression,
+		public ExpressionSet visit(
+				UnaryExpression expression,
 				ExpressionSet arg,
-				Object... params) throws SemanticException {
+				Object... params)
+				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 			for (SymbolicExpression expr : arg) {
 				UnaryExpression e = new UnaryExpression(expression.getStaticType(), expr, expression.getOperator(),
@@ -140,9 +147,12 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 		}
 
 		@Override
-		public ExpressionSet visit(BinaryExpression expression,
+		public ExpressionSet visit(
+				BinaryExpression expression,
 				ExpressionSet left,
-				ExpressionSet right, Object... params) throws SemanticException {
+				ExpressionSet right,
+				Object... params)
+				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 			for (SymbolicExpression l : left)
 				for (SymbolicExpression r : right) {
@@ -155,9 +165,12 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 		}
 
 		@Override
-		public ExpressionSet visit(TernaryExpression expression,
+		public ExpressionSet visit(
+				TernaryExpression expression,
 				ExpressionSet left,
-				ExpressionSet middle, ExpressionSet right, Object... params)
+				ExpressionSet middle,
+				ExpressionSet right,
+				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 			for (SymbolicExpression l : left)
@@ -172,30 +185,41 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 		}
 
 		@Override
-		public ExpressionSet visit(Skip expression, Object... params) throws SemanticException {
-			return new ExpressionSet(expression);
-		}
-
-		@Override
-		public ExpressionSet visit(PushAny expression, Object... params)
+		public ExpressionSet visit(
+				Skip expression,
+				Object... params)
 				throws SemanticException {
 			return new ExpressionSet(expression);
 		}
 
 		@Override
-		public ExpressionSet visit(PushInv expression, Object... params)
+		public ExpressionSet visit(
+				PushAny expression,
+				Object... params)
 				throws SemanticException {
 			return new ExpressionSet(expression);
 		}
 
 		@Override
-		public ExpressionSet visit(Constant expression, Object... params)
+		public ExpressionSet visit(
+				PushInv expression,
+				Object... params)
 				throws SemanticException {
 			return new ExpressionSet(expression);
 		}
 
 		@Override
-		public ExpressionSet visit(Identifier expression, Object... params)
+		public ExpressionSet visit(
+				Constant expression,
+				Object... params)
+				throws SemanticException {
+			return new ExpressionSet(expression);
+		}
+
+		@Override
+		public ExpressionSet visit(
+				Identifier expression,
+				Object... params)
 				throws SemanticException {
 			return new ExpressionSet(expression);
 		}

@@ -37,8 +37,10 @@ import org.apache.commons.lang3.tuple.Pair;
 public abstract class VariableLift<M extends VariableLift<M, E, T>,
 		E extends SymbolicExpression,
 		T extends NonRelationalElement<T, E, M>>
-		extends FunctionalLattice<M, Identifier, T>
-		implements SemanticDomain<M, E, Identifier> {
+		extends
+		FunctionalLattice<M, Identifier, T>
+		implements
+		SemanticDomain<M, E, Identifier> {
 
 	/**
 	 * Builds an empty lift.
@@ -46,7 +48,8 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 	 * @param domain a singleton instance to be used during semantic operations
 	 *                   to retrieve top and bottom values
 	 */
-	public VariableLift(T domain) {
+	public VariableLift(
+			T domain) {
 		super(domain);
 	}
 
@@ -60,13 +63,19 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 	 * @param function the function representing the mapping contained in the
 	 *                     new lift; can be {@code null}
 	 */
-	public VariableLift(T domain, Map<Identifier, T> function) {
+	public VariableLift(
+			T domain,
+			Map<Identifier, T> function) {
 		super(domain, function);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Satisfiability satisfies(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+	public Satisfiability satisfies(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 
@@ -74,7 +83,9 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 	}
 
 	@Override
-	public M pushScope(ScopeToken scope) throws SemanticException {
+	public M pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		AtomicReference<SemanticException> holder = new AtomicReference<>();
 
 		M result = liftIdentifiers(id -> {
@@ -93,7 +104,9 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 	}
 
 	@Override
-	public M popScope(ScopeToken scope) throws SemanticException {
+	public M popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		AtomicReference<SemanticException> holder = new AtomicReference<>();
 
 		M result = liftIdentifiers(id -> {
@@ -112,7 +125,9 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 	}
 
 	@SuppressWarnings("unchecked")
-	private M liftIdentifiers(UnaryOperator<Identifier> lifter) throws SemanticException {
+	private M liftIdentifiers(
+			UnaryOperator<Identifier> lifter)
+			throws SemanticException {
 		if (isBottom() || isTop())
 			return (M) this;
 
@@ -132,7 +147,9 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M forgetIdentifier(Identifier id) throws SemanticException {
+	public M forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return (M) this;
 
@@ -145,7 +162,9 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public M forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return (M) this;
 
@@ -157,7 +176,10 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 	}
 
 	@Override
-	public Set<Identifier> lubKeys(Set<Identifier> k1, Set<Identifier> k2) throws SemanticException {
+	public Set<Identifier> lubKeys(
+			Set<Identifier> k1,
+			Set<Identifier> k2)
+			throws SemanticException {
 		Set<Identifier> keys = new HashSet<>();
 		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, k1,
 				k2);
@@ -175,12 +197,14 @@ public abstract class VariableLift<M extends VariableLift<M, E, T>,
 	}
 
 	@Override
-	public T stateOfUnknown(Identifier key) {
+	public T stateOfUnknown(
+			Identifier key) {
 		return lattice.unknownVariable(key);
 	}
-	
+
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		return getKeys().contains(id);
 	}
 }

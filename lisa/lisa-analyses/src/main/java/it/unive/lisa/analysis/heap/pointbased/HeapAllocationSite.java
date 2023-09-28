@@ -22,7 +22,11 @@ public class HeapAllocationSite extends AllocationSite {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public HeapAllocationSite(Type staticType, String locationName, boolean isWeak, CodeLocation location) {
+	public HeapAllocationSite(
+			Type staticType,
+			String locationName,
+			boolean isWeak,
+			CodeLocation location) {
 		this(staticType, locationName, (String) null, isWeak, location);
 	}
 
@@ -37,7 +41,11 @@ public class HeapAllocationSite extends AllocationSite {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public HeapAllocationSite(Type staticType, String locationName, SymbolicExpression field, boolean isWeak,
+	public HeapAllocationSite(
+			Type staticType,
+			String locationName,
+			SymbolicExpression field,
+			boolean isWeak,
 			CodeLocation location) {
 		super(staticType, locationName, field, isWeak, location);
 	}
@@ -53,7 +61,11 @@ public class HeapAllocationSite extends AllocationSite {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public HeapAllocationSite(Type staticType, String locationName, String field, boolean isWeak,
+	public HeapAllocationSite(
+			Type staticType,
+			String locationName,
+			String field,
+			boolean isWeak,
 			CodeLocation location) {
 		super(staticType, locationName, field, isWeak, location);
 	}
@@ -70,7 +82,8 @@ public class HeapAllocationSite extends AllocationSite {
 	}
 
 	@Override
-	public AllocationSite withField(SymbolicExpression field) {
+	public AllocationSite withField(
+			SymbolicExpression field) {
 		if (getField() != null)
 			throw new IllegalStateException("Cannot add a field to an allocation site that already has one");
 		return new HeapAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());

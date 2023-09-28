@@ -29,7 +29,11 @@ public class Equal extends it.unive.lisa.program.cfg.statement.BinaryExpression 
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Equal(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public Equal(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "==", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
 	}
 

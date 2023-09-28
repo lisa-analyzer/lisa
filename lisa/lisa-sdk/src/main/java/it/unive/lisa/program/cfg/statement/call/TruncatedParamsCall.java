@@ -27,7 +27,8 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	 * 
 	 * @param call the call to be wrapped
 	 */
-	public TruncatedParamsCall(Call call) {
+	public TruncatedParamsCall(
+			Call call) {
 		super(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(), call.getTargetName(),
 				call.getOrder(), call.getStaticType(), call.getParameters());
 		if (!(call instanceof ResolvedCall))
@@ -36,14 +37,16 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		// we do not reset the offsets here
 		Expression[] params = getParameters();
 		return params[params.length - 1].getOffset();
 	}
 
 	@Override
-	public void setSource(UnresolvedCall source) {
+	public void setSource(
+			UnresolvedCall source) {
 		super.setSource(source);
 		call.setSource(source);
 	}
@@ -57,7 +60,8 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

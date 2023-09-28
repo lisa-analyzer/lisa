@@ -57,7 +57,9 @@ public final class ClassType implements InMemoryType, UnitType {
 	 * @return the unique instance of {@link ClassType} representing the class
 	 *             with the given name
 	 */
-	public static ClassType lookup(String name, CompilationUnit unit) {
+	public static ClassType lookup(
+			String name,
+			CompilationUnit unit) {
 		return types.computeIfAbsent(name, x -> new ClassType(name, unit));
 	}
 
@@ -65,7 +67,9 @@ public final class ClassType implements InMemoryType, UnitType {
 
 	private final CompilationUnit unit;
 
-	private ClassType(String name, CompilationUnit unit) {
+	private ClassType(
+			String name,
+			CompilationUnit unit) {
 		Objects.requireNonNull(name, "The name of a class type cannot be null");
 		Objects.requireNonNull(unit, "The unit of a class type cannot be null");
 		this.name = name;
@@ -78,7 +82,8 @@ public final class ClassType implements InMemoryType, UnitType {
 	}
 
 	@Override
-	public final boolean canBeAssignedTo(Type other) {
+	public final boolean canBeAssignedTo(
+			Type other) {
 		if (other instanceof ClassType)
 			return subclass((ClassType) other);
 
@@ -88,16 +93,19 @@ public final class ClassType implements InMemoryType, UnitType {
 		return false;
 	}
 
-	private boolean subclass(ClassType other) {
+	private boolean subclass(
+			ClassType other) {
 		return this == other || unit.isInstanceOf(other.unit);
 	}
 
-	private boolean subclass(InterfaceType other) {
+	private boolean subclass(
+			InterfaceType other) {
 		return unit.isInstanceOf(other.getUnit());
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		if (other.isNullType())
 			return this;
 
@@ -113,7 +121,8 @@ public final class ClassType implements InMemoryType, UnitType {
 		return scanForSupertypeOf((UnitType) other);
 	}
 
-	private Type scanForSupertypeOf(UnitType other) {
+	private Type scanForSupertypeOf(
+			UnitType other) {
 		WorkingSet<ClassType> ws = FIFOWorkingSet.mk();
 		Set<ClassType> seen = new HashSet<>();
 		ws.push(this);
@@ -148,7 +157,8 @@ public final class ClassType implements InMemoryType, UnitType {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -170,7 +180,8 @@ public final class ClassType implements InMemoryType, UnitType {
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		Set<Type> instances = new HashSet<>();
 		for (Unit in : unit.getInstances())
 			instances.add(lookup(in.getName(), null));

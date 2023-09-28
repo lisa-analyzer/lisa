@@ -1,9 +1,5 @@
 package it.unive.lisa.imp.expressions;
 
-import java.util.Objects;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -24,6 +20,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
+import java.util.Objects;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation

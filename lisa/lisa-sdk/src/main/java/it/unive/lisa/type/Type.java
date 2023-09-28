@@ -273,7 +273,8 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	boolean canBeAssignedTo(Type other);
+	boolean canBeAssignedTo(
+			Type other);
 
 	/**
 	 * Yields the most specific common supertype between this {@link Type} and
@@ -285,7 +286,8 @@ public interface Type {
 	 * @return the most specific common supertype between {@code this} and
 	 *             {@code other}
 	 */
-	Type commonSupertype(Type other);
+	Type commonSupertype(
+			Type other);
 
 	/**
 	 * Yields all possible instances of this type, including itself.
@@ -295,7 +297,8 @@ public interface Type {
 	 * 
 	 * @return the possible instances
 	 */
-	Set<Type> allInstances(TypeSystem types);
+	Set<Type> allInstances(
+			TypeSystem types);
 
 	/**
 	 * Yields the most specific common supertype of the given collection of
@@ -307,7 +310,9 @@ public interface Type {
 	 * 
 	 * @return the most specific common supertype, or {@code fallback}
 	 */
-	public static Type commonSupertype(Collection<Type> types, Type fallback) {
+	public static Type commonSupertype(
+			Collection<Type> types,
+			Type fallback) {
 		if (types == null || types.isEmpty())
 			return fallback;
 		Type result = null;

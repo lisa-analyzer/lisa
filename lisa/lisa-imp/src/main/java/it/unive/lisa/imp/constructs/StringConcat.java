@@ -29,7 +29,9 @@ public class StringConcat extends NativeCFG {
 	 * @param location   the location where this construct is defined
 	 * @param stringUnit the unit where this construct is defined
 	 */
-	public StringConcat(CodeLocation location, ClassUnit stringUnit) {
+	public StringConcat(
+			CodeLocation location,
+			ClassUnit stringUnit) {
 		super(new CodeMemberDescriptor(location, stringUnit, true, "concat", StringType.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE),
 				new Parameter(location, "other", StringType.INSTANCE)),
@@ -55,12 +57,16 @@ public class StringConcat extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPStringConcat build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringConcat build(
+				CFG cfg,
+				CodeLocation location,
+				Expression... params) {
 			return new IMPStringConcat(cfg, location, params[0], params[1]);
 		}
 
 		@Override
-		public void setOriginatingStatement(Statement st) {
+		public void setOriginatingStatement(
+				Statement st) {
 			originating = st;
 		}
 
@@ -75,7 +81,13 @@ public class StringConcat extends NativeCFG {
 		 * @param left       the left-hand side of this operation
 		 * @param right      the right-hand side of this operation
 		 */
-		public IMPStringConcat(CFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
+		public IMPStringConcat(
+				CFG cfg,
+				String sourceFile,
+				int line,
+				int col,
+				Expression left,
+				Expression right) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, right);
 		}
 
@@ -87,7 +99,11 @@ public class StringConcat extends NativeCFG {
 		 * @param left     the left-hand side of this operation
 		 * @param right    the right-hand side of this operation
 		 */
-		public IMPStringConcat(CFG cfg, CodeLocation location, Expression left, Expression right) {
+		public IMPStringConcat(
+				CFG cfg,
+				CodeLocation location,
+				Expression left,
+				Expression right) {
 			super(cfg, location, left, right);
 		}
 	}

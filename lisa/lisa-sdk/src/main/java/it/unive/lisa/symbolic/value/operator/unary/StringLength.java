@@ -40,7 +40,9 @@ public class StringLength implements StringOperator, UnaryOperator {
 	}
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> argument) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> argument) {
 		if (argument.stream().noneMatch(Type::isStringType))
 			return Collections.emptySet();
 		return Collections.singleton(types.getIntegerType());

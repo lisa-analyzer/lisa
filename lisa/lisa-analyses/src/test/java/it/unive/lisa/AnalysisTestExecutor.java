@@ -52,7 +52,8 @@ public abstract class AnalysisTestExecutor {
 	 *                 present into the configuration will be ignored, as it
 	 *                 will be overwritten by the computed workdir)
 	 */
-	public void perform(CronConfiguration conf) {
+	public void perform(
+			CronConfiguration conf) {
 		String testMethod = getCaller();
 		System.out.println("### Testing " + testMethod);
 		Objects.requireNonNull(conf);
@@ -190,7 +191,12 @@ public abstract class AnalysisTestExecutor {
 		}
 	}
 
-	private void regen(Path expectedPath, Path actualPath, File expFile, File actFile, Accumulator acc)
+	private void regen(
+			Path expectedPath,
+			Path actualPath,
+			File expFile,
+			File actFile,
+			Accumulator acc)
 			throws IOException {
 		boolean updateReport = acc.changedWarnings || acc.changedConf || acc.changedInfos
 				|| !acc.addedFilePaths.isEmpty() || !acc.removedFilePaths.isEmpty()
@@ -219,7 +225,8 @@ public abstract class AnalysisTestExecutor {
 		}
 	}
 
-	private Program readProgram(Path target) {
+	private Program readProgram(
+			Path target) {
 		Program program = null;
 		try {
 			program = IMPFrontend.processFile(target.toString(), true);
@@ -230,7 +237,9 @@ public abstract class AnalysisTestExecutor {
 		return program;
 	}
 
-	private void run(LiSAConfiguration configuration, Program program) {
+	private void run(
+			LiSAConfiguration configuration,
+			Program program) {
 		LiSA lisa = new LiSA(configuration);
 		try {
 			lisa.run(program);
@@ -240,7 +249,9 @@ public abstract class AnalysisTestExecutor {
 		}
 	}
 
-	private void setupWorkdir(LiSAConfiguration configuration, Path actualPath) {
+	private void setupWorkdir(
+			LiSAConfiguration configuration,
+			Path actualPath) {
 		File workdir = actualPath.toFile();
 		try {
 			FileManager.forceDeleteFolder(workdir.toString());
@@ -262,12 +273,16 @@ public abstract class AnalysisTestExecutor {
 
 		private final Path exp;
 
-		public Accumulator(Path exp) {
+		public Accumulator(
+				Path exp) {
 			this.exp = exp;
 		}
 
 		@Override
-		public void report(REPORTED_COMPONENT component, REPORT_TYPE type, Collection<?> reported) {
+		public void report(
+				REPORTED_COMPONENT component,
+				REPORT_TYPE type,
+				Collection<?> reported) {
 			switch (type) {
 			case ONLY_FIRST:
 				switch (component) {
@@ -313,18 +328,27 @@ public abstract class AnalysisTestExecutor {
 		}
 
 		@Override
-		public void fileDiff(String first, String second, String message) {
+		public void fileDiff(
+				String first,
+				String second,
+				String message) {
 			Path file = Paths.get(first);
 			changedFileName.add(exp.relativize(file));
 		}
 
 		@Override
-		public void infoDiff(String key, String first, String second) {
+		public void infoDiff(
+				String key,
+				String first,
+				String second) {
 			changedInfos = true;
 		}
 
 		@Override
-		public void configurationDiff(String key, String first, String second) {
+		public void configurationDiff(
+				String key,
+				String first,
+				String second) {
 			changedConf = true;
 		}
 	}

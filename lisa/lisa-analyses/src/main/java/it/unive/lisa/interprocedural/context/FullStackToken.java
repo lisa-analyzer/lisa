@@ -22,7 +22,9 @@ public class FullStackToken implements ContextSensitivityToken {
 		calls = Collections.emptyList();
 	}
 
-	private FullStackToken(FullStackToken source, CFGCall newToken) {
+	private FullStackToken(
+			FullStackToken source,
+			CFGCall newToken) {
 		this.calls = new ArrayList<>(source.calls.size() + 1);
 		source.calls.forEach(this.calls::add);
 		this.calls.add(newToken);
@@ -62,7 +64,8 @@ public class FullStackToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -89,7 +92,8 @@ public class FullStackToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken push(CFGCall c) {
+	public ContextSensitivityToken push(
+			CFGCall c) {
 		return new FullStackToken(this, c);
 	}
 }

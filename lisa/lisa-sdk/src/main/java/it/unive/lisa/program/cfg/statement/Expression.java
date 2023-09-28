@@ -47,7 +47,9 @@ public abstract class Expression extends Statement {
 	 * @param location the location where the expression is defined within the
 	 *                     program
 	 */
-	protected Expression(CFG cfg, CodeLocation location) {
+	protected Expression(
+			CFG cfg,
+			CodeLocation location) {
 		this(cfg, location, Untyped.INSTANCE);
 	}
 
@@ -59,7 +61,10 @@ public abstract class Expression extends Statement {
 	 *                       the program
 	 * @param staticType the static type of this expression
 	 */
-	protected Expression(CFG cfg, CodeLocation location, Type staticType) {
+	protected Expression(
+			CFG cfg,
+			CodeLocation location,
+			Type staticType) {
 		super(cfg, location);
 		Objects.requireNonNull(staticType, "The expression type of a CFG cannot be null");
 		this.staticType = staticType;
@@ -102,7 +107,8 @@ public abstract class Expression extends Statement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -126,7 +132,8 @@ public abstract class Expression extends Statement {
 	 * 
 	 * @param st the containing statement
 	 */
-	public final void setParentStatement(Statement st) {
+	public final void setParentStatement(
+			Statement st) {
 		if (this.parent == null)
 			this.parent = st;
 		else
@@ -186,7 +193,8 @@ public abstract class Expression extends Statement {
 	}
 
 	@Override
-	public Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(
+			Statement other) {
 		if (this instanceof Call) {
 			Call original = (Call) this;
 			while (original.getSource() != null)

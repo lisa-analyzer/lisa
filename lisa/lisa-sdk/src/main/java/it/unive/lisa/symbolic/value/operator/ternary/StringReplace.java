@@ -52,7 +52,11 @@ public class StringReplace implements StringOperator, TernaryOperator {
 	}
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> middle, Set<Type> right) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> middle,
+			Set<Type> right) {
 		if (left.stream().noneMatch(Type::isStringType)
 				|| middle.stream().noneMatch(Type::isStringType)
 				|| right.stream().noneMatch(Type::isStringType))

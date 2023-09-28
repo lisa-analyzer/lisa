@@ -52,7 +52,11 @@ public class Concat extends it.unive.lisa.program.cfg.statement.BinaryExpression
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Concat(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public Concat(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "concat", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
 				right);
 	}

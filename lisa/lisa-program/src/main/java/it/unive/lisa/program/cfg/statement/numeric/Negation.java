@@ -30,7 +30,10 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 	 * @param location   the location where this literal is defined
 	 * @param expression the operand of this operation
 	 */
-	public Negation(CFG cfg, CodeLocation location, Expression expression) {
+	public Negation(
+			CFG cfg,
+			CodeLocation location,
+			Expression expression) {
 		super(cfg, location, "-", expression);
 	}
 

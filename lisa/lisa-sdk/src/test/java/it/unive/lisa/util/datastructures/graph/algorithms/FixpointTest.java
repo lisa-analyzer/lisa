@@ -23,29 +23,47 @@ public class FixpointTest {
 	private static class FixpointTester implements FixpointImplementation<TestNode, TestEdge, Set<TestNode>> {
 
 		@Override
-		public Set<TestNode> semantics(TestNode node, Set<TestNode> entrystate) throws Exception {
+		public Set<TestNode> semantics(
+				TestNode node,
+				Set<TestNode> entrystate)
+				throws Exception {
 			Set<TestNode> res = new HashSet<>(entrystate);
 			res.add(node);
 			return res;
 		}
 
 		@Override
-		public Set<TestNode> traverse(TestEdge edge, Set<TestNode> entrystate) throws Exception {
+		public Set<TestNode> traverse(
+				TestEdge edge,
+				Set<TestNode> entrystate)
+				throws Exception {
 			return entrystate;
 		}
 
 		@Override
-		public Set<TestNode> union(TestNode node, Set<TestNode> left, Set<TestNode> right) throws Exception {
+		public Set<TestNode> union(
+				TestNode node,
+				Set<TestNode> left,
+				Set<TestNode> right)
+				throws Exception {
 			return SetUtils.union(left, right);
 		}
 
 		@Override
-		public Set<TestNode> operation(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+		public Set<TestNode> operation(
+				TestNode node,
+				Set<TestNode> approx,
+				Set<TestNode> old)
+				throws Exception {
 			return SetUtils.union(approx, old);
 		}
 
 		@Override
-		public boolean equality(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+		public boolean equality(
+				TestNode node,
+				Set<TestNode> approx,
+				Set<TestNode> old)
+				throws Exception {
 			return old.containsAll(approx);
 		}
 	}
@@ -182,40 +200,59 @@ public class FixpointTest {
 
 		private final int type;
 
-		private ExceptionalTester(int type) {
+		private ExceptionalTester(
+				int type) {
 			this.type = type;
 		}
 
 		@Override
-		public Set<TestNode> semantics(TestNode node, Set<TestNode> entrystate) throws Exception {
+		public Set<TestNode> semantics(
+				TestNode node,
+				Set<TestNode> entrystate)
+				throws Exception {
 			if (type == 0)
 				throw new Exception();
 			return Collections.emptySet();
 		}
 
 		@Override
-		public Set<TestNode> traverse(TestEdge edge, Set<TestNode> entrystate) throws Exception {
+		public Set<TestNode> traverse(
+				TestEdge edge,
+				Set<TestNode> entrystate)
+				throws Exception {
 			if (type == 1)
 				throw new Exception();
 			return Collections.emptySet();
 		}
 
 		@Override
-		public Set<TestNode> union(TestNode node, Set<TestNode> left, Set<TestNode> right) throws Exception {
+		public Set<TestNode> union(
+				TestNode node,
+				Set<TestNode> left,
+				Set<TestNode> right)
+				throws Exception {
 			if (type == 2)
 				throw new Exception();
 			return Collections.emptySet();
 		}
 
 		@Override
-		public Set<TestNode> operation(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+		public Set<TestNode> operation(
+				TestNode node,
+				Set<TestNode> approx,
+				Set<TestNode> old)
+				throws Exception {
 			if (type == 3)
 				throw new Exception();
 			return Collections.emptySet();
 		}
 
 		@Override
-		public boolean equality(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+		public boolean equality(
+				TestNode node,
+				Set<TestNode> approx,
+				Set<TestNode> old)
+				throws Exception {
 			if (type == 4)
 				throw new Exception();
 			return true;

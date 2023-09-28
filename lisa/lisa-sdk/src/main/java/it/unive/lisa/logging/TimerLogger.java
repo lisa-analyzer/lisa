@@ -25,7 +25,10 @@ public final class TimerLogger {
 	 * @param message the message to display
 	 * @param action  the action to execute
 	 */
-	public static void execAction(Logger logger, String message, LoggableAction action) {
+	public static void execAction(
+			Logger logger,
+			String message,
+			LoggableAction action) {
 		execAction(logger, Level.INFO, TimeFormat.UP_TO_MINUTES, message, action);
 	}
 
@@ -38,7 +41,11 @@ public final class TimerLogger {
 	 * @param message  the message to display
 	 * @param action   the action to execute
 	 */
-	public static void execAction(Logger logger, Level logLevel, String message, LoggableAction action) {
+	public static void execAction(
+			Logger logger,
+			Level logLevel,
+			String message,
+			LoggableAction action) {
 		execAction(logger, logLevel, TimeFormat.UP_TO_MINUTES, message, action);
 	}
 
@@ -52,7 +59,11 @@ public final class TimerLogger {
 	 * @param message   the message to display
 	 * @param action    the action to execute
 	 */
-	public static void execAction(Logger logger, Level logLevel, TimeFormat formatter, String message,
+	public static void execAction(
+			Logger logger,
+			Level logLevel,
+			TimeFormat formatter,
+			String message,
 			LoggableAction action) {
 		execAux(logger, logLevel, formatter, message, action);
 	}
@@ -69,7 +80,10 @@ public final class TimerLogger {
 	 * 
 	 * @return the supplied value
 	 */
-	public static <T> T execSupplier(Logger logger, String message, LoggableSupplier<T> supplier) {
+	public static <T> T execSupplier(
+			Logger logger,
+			String message,
+			LoggableSupplier<T> supplier) {
 		return execSupplier(logger, Level.INFO, TimeFormat.UP_TO_MINUTES, message, supplier);
 	}
 
@@ -85,7 +99,11 @@ public final class TimerLogger {
 	 * 
 	 * @return the supplied value
 	 */
-	public static <T> T execSupplier(Logger logger, Level logLevel, String message, LoggableSupplier<T> supplier) {
+	public static <T> T execSupplier(
+			Logger logger,
+			Level logLevel,
+			String message,
+			LoggableSupplier<T> supplier) {
 		return execSupplier(logger, logLevel, TimeFormat.UP_TO_MINUTES, message, supplier);
 	}
 
@@ -102,14 +120,22 @@ public final class TimerLogger {
 	 * 
 	 * @return the supplied value
 	 */
-	public static <T> T execSupplier(Logger logger, Level logLevel, TimeFormat formatter, String message,
+	public static <T> T execSupplier(
+			Logger logger,
+			Level logLevel,
+			TimeFormat formatter,
+			String message,
 			LoggableSupplier<T> supplier) {
 		Wrapper<T> w = new Wrapper<>();
 		execAux(logger, logLevel, formatter, message, () -> w.ret = supplier.run());
 		return w.ret;
 	}
 
-	private static void execAux(Logger logger, Level logLevel, TimeFormat formatter, String message,
+	private static void execAux(
+			Logger logger,
+			Level logLevel,
+			TimeFormat formatter,
+			String message,
 			LoggableAction action) {
 		long startTime = System.nanoTime();
 		logger.log(logLevel, "{} [start]", message);

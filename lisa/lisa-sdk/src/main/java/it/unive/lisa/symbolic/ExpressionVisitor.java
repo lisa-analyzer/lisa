@@ -44,7 +44,12 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(AccessChild expression, T receiver, T child, Object... params) throws SemanticException;
+	T visit(
+			AccessChild expression,
+			T receiver,
+			T child,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link MemoryAllocation}.
@@ -58,7 +63,10 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(MemoryAllocation expression, Object... params) throws SemanticException;
+	T visit(
+			MemoryAllocation expression,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link HeapReference}.
@@ -74,7 +82,11 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(HeapReference expression, T arg, Object... params) throws SemanticException;
+	T visit(
+			HeapReference expression,
+			T arg,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link HeapDereference}.
@@ -90,7 +102,11 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(HeapDereference expression, T arg, Object... params) throws SemanticException;
+	T visit(
+			HeapDereference expression,
+			T arg,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link UnaryExpression}. This callback is invoked after the
@@ -108,7 +124,11 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(UnaryExpression expression, T arg, Object... params) throws SemanticException;
+	T visit(
+			UnaryExpression expression,
+			T arg,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link BinaryExpression}. This callback is invoked after the
@@ -128,7 +148,12 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(BinaryExpression expression, T left, T right, Object... params) throws SemanticException;
+	T visit(
+			BinaryExpression expression,
+			T left,
+			T right,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link TernaryExpression}. This callback is invoked after the
@@ -150,7 +175,13 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(TernaryExpression expression, T left, T middle, T right, Object... params) throws SemanticException;
+	T visit(
+			TernaryExpression expression,
+			T left,
+			T middle,
+			T right,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link Skip}.
@@ -164,7 +195,10 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(Skip expression, Object... params) throws SemanticException;
+	T visit(
+			Skip expression,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link PushAny}.
@@ -178,7 +212,10 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(PushAny expression, Object... params) throws SemanticException;
+	T visit(
+			PushAny expression,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link PushInv}.
@@ -192,7 +229,10 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(PushInv expression, Object... params) throws SemanticException;
+	T visit(
+			PushInv expression,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link Constant}.
@@ -206,7 +246,10 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(Constant expression, Object... params) throws SemanticException;
+	T visit(
+			Constant expression,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits an {@link Identifier}.
@@ -220,5 +263,8 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(Identifier expression, Object... params) throws SemanticException;
+	T visit(
+			Identifier expression,
+			Object... params)
+			throws SemanticException;
 }

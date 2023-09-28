@@ -47,9 +47,12 @@ public class HtmlGraph extends GraphStreamWrapper {
 	 * @param descriptionLabel the display name of the descriptions, used as
 	 *                             label in the collapse/expand toggles
 	 */
-	public HtmlGraph(GraphmlGraph graph, boolean includeSubnodes,
+	public HtmlGraph(
+			GraphmlGraph graph,
+			boolean includeSubnodes,
 			SortedMap<Integer, Pair<String, SerializableNodeDescription>> map,
-			String description, String descriptionLabel) {
+			String description,
+			String descriptionLabel) {
 		super();
 		this.graph = graph;
 		this.descriptions = map;
@@ -59,7 +62,9 @@ public class HtmlGraph extends GraphStreamWrapper {
 	}
 
 	@Override
-	public void dump(Writer writer) throws IOException {
+	public void dump(
+			Writer writer)
+			throws IOException {
 		StringWriter graphWriter = new StringWriter();
 		graph.dump(graphWriter, false);
 		String graphText = graphWriter.toString()
@@ -104,7 +109,10 @@ public class HtmlGraph extends GraphStreamWrapper {
 		}
 	}
 
-	private static void populate(StringBuilder descrs, int depth, SerializableValue value) {
+	private static void populate(
+			StringBuilder descrs,
+			int depth,
+			SerializableValue value) {
 		if (value instanceof SerializableString) {
 			descrs.append(value.toString());
 		} else if (value instanceof SerializableArray) {
@@ -150,7 +158,8 @@ public class HtmlGraph extends GraphStreamWrapper {
 			throw new IllegalArgumentException("Unknown value type: " + value.getClass().getName());
 	}
 
-	private static boolean isStringLike(SerializableValue value) {
+	private static boolean isStringLike(
+			SerializableValue value) {
 		return value instanceof SerializableString
 				|| (value instanceof SerializableArray && ((SerializableArray) value).getElements().stream()
 						.allMatch(SerializableString.class::isInstance));

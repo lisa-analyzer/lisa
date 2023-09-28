@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.type.Type;

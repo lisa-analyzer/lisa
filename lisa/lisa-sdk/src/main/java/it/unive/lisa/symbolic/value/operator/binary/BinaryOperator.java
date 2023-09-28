@@ -28,5 +28,8 @@ public interface BinaryOperator extends Operator {
 	 * 
 	 * @return the runtime types of this expression
 	 */
-	Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right);
+	Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> right);
 }

@@ -20,7 +20,10 @@ public class UInt64Literal extends Literal<Long> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public UInt64Literal(CFG cfg, CodeLocation location, long value) {
+	public UInt64Literal(
+			CFG cfg,
+			CodeLocation location,
+			long value) {
 		super(cfg, location, value, UInt64Type.INSTANCE);
 	}
 }

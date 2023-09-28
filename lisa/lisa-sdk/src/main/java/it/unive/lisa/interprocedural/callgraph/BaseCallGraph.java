@@ -61,7 +61,9 @@ public abstract class BaseCallGraph extends CallGraph {
 	private final Map<UnresolvedCall, Map<List<Set<Type>>, Call>> resolvedCache = new IdentityHashMap<>();
 
 	@Override
-	public void init(Application app) throws CallGraphConstructionException {
+	public void init(
+			Application app)
+			throws CallGraphConstructionException {
 		super.init(app);
 		this.app = app;
 		this.callsites.clear();
@@ -69,7 +71,8 @@ public abstract class BaseCallGraph extends CallGraph {
 	}
 
 	@Override
-	public void registerCall(CFGCall call) {
+	public void registerCall(
+			CFGCall call) {
 		if (call.getSource() != null)
 			// this call has been generated through the resolution of an
 			// UnresolvedCall, and that one has already been registered
@@ -91,7 +94,10 @@ public abstract class BaseCallGraph extends CallGraph {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+	public Call resolve(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			SymbolAliasing aliasing)
 			throws CallResolutionException {
 		List<Set<Type>> typeList = Arrays.asList(types);
 		Call cached = resolvedCache.getOrDefault(call, Map.of()).get(typeList);
@@ -204,7 +210,9 @@ public abstract class BaseCallGraph extends CallGraph {
 		return resolved;
 	}
 
-	private boolean onlyNativeCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean onlyNativeCFGTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
@@ -213,7 +221,9 @@ public abstract class BaseCallGraph extends CallGraph {
 				&& !nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean onlyCFGTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return !targets.isEmpty()
@@ -222,7 +232,9 @@ public abstract class BaseCallGraph extends CallGraph {
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyRewritingTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean onlyRewritingTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
@@ -231,7 +243,9 @@ public abstract class BaseCallGraph extends CallGraph {
 				&& !nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyRewritingNativeTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean onlyRewritingNativeTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
@@ -240,7 +254,9 @@ public abstract class BaseCallGraph extends CallGraph {
 				&& !nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyRewritingCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean onlyRewritingCFGTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
@@ -249,7 +265,9 @@ public abstract class BaseCallGraph extends CallGraph {
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyNonRewritingTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean onlyNonRewritingTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return !targets.isEmpty()
@@ -258,7 +276,9 @@ public abstract class BaseCallGraph extends CallGraph {
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyNonRewritingNativeTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean onlyNonRewritingNativeTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
@@ -267,7 +287,9 @@ public abstract class BaseCallGraph extends CallGraph {
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyNonRewritingCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean onlyNonRewritingCFGTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return !targets.isEmpty()
@@ -276,7 +298,9 @@ public abstract class BaseCallGraph extends CallGraph {
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean noTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+	private boolean noTargets(
+			Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
@@ -301,8 +325,12 @@ public abstract class BaseCallGraph extends CallGraph {
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	public void resolveNonInstance(UnresolvedCall call, Set<Type>[] types, Collection<CFG> targets,
-			Collection<NativeCFG> natives, SymbolAliasing aliasing)
+	public void resolveNonInstance(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			Collection<CFG> targets,
+			Collection<NativeCFG> natives,
+			SymbolAliasing aliasing)
 			throws CallResolutionException {
 		for (CodeMember cm : app.getAllCodeCodeMembers())
 			checkMember(call, types, targets, natives, aliasing, cm, false);
@@ -324,8 +352,12 @@ public abstract class BaseCallGraph extends CallGraph {
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	public void resolveInstance(UnresolvedCall call, Set<Type>[] types, Collection<CFG> targets,
-			Collection<NativeCFG> natives, SymbolAliasing aliasing)
+	public void resolveInstance(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			Collection<CFG> targets,
+			Collection<NativeCFG> natives,
+			SymbolAliasing aliasing)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
 			throw new CallResolutionException(
@@ -441,7 +473,10 @@ public abstract class BaseCallGraph extends CallGraph {
 	 * @return {@code true} if the qualifier and name are compatible with the
 	 *             ones of the call's target
 	 */
-	public boolean matchCodeMemberName(UnresolvedCall call, String qualifier, String name) {
+	public boolean matchCodeMemberName(
+			UnresolvedCall call,
+			String qualifier,
+			String name) {
 		if (!name.equals(call.getTargetName()))
 			return false;
 		if (StringUtils.isBlank(call.getQualifier()))
@@ -462,11 +497,14 @@ public abstract class BaseCallGraph extends CallGraph {
 	 * 
 	 * @throws CallResolutionException if the types cannot be computed
 	 */
-	public abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
+	public abstract Collection<Type> getPossibleTypesOfReceiver(
+			Expression receiver,
+			Set<Type> types)
 			throws CallResolutionException;
 
 	@Override
-	public Collection<Call> getCallSites(CodeMember cm) {
+	public Collection<Call> getCallSites(
+			CodeMember cm) {
 		return callsites.getOrDefault(cm, Collections.emptyList());
 	}
 }

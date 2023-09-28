@@ -28,7 +28,9 @@ public class StringLength extends NativeCFG {
 	 * @param location   the location where this construct is defined
 	 * @param stringUnit the unit where this construct is defined
 	 */
-	public StringLength(CodeLocation location, ClassUnit stringUnit) {
+	public StringLength(
+			CodeLocation location,
+			ClassUnit stringUnit) {
 		super(new CodeMemberDescriptor(location, stringUnit, true, "len", Int32Type.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE)),
 				IMPStringLength.class);
@@ -53,12 +55,16 @@ public class StringLength extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPStringLength build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringLength build(
+				CFG cfg,
+				CodeLocation location,
+				Expression... params) {
 			return new IMPStringLength(cfg, location, params[0]);
 		}
 
 		@Override
-		public void setOriginatingStatement(Statement st) {
+		public void setOriginatingStatement(
+				Statement st) {
 			originating = st;
 		}
 
@@ -72,7 +78,11 @@ public class StringLength extends NativeCFG {
 		 * @param col        the column where this operation is defined
 		 * @param parameter  the operand of this operation
 		 */
-		public IMPStringLength(CFG cfg, String sourceFile, int line, int col,
+		public IMPStringLength(
+				CFG cfg,
+				String sourceFile,
+				int line,
+				int col,
 				Expression parameter) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), parameter);
 		}
@@ -84,7 +94,10 @@ public class StringLength extends NativeCFG {
 		 * @param location  the code location where this operation is defined
 		 * @param parameter the operand of this operation
 		 */
-		public IMPStringLength(CFG cfg, CodeLocation location, Expression parameter) {
+		public IMPStringLength(
+				CFG cfg,
+				CodeLocation location,
+				Expression parameter) {
 			super(cfg, location, parameter);
 		}
 	}

@@ -49,7 +49,11 @@ public abstract class NaryStatement extends Statement {
 	 *                           expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryStatement(CFG cfg, CodeLocation location, String constructName, Expression... subExpressions) {
+	protected NaryStatement(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression... subExpressions) {
 		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, subExpressions);
 	}
 
@@ -64,7 +68,11 @@ public abstract class NaryStatement extends Statement {
 	 * @param order          the evaluation order of the sub-expressions
 	 * @param subExpressions the sub-expressions
 	 */
-	protected NaryStatement(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected NaryStatement(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
 			Expression... subExpressions) {
 		super(cfg, location);
 		Objects.requireNonNull(subExpressions, "The array of sub-expressions of a statement cannot be null");
@@ -108,7 +116,8 @@ public abstract class NaryStatement extends Statement {
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		this.offset = offset;
 		int off = offset;
 		for (Expression sub : subExpressions)
@@ -117,7 +126,9 @@ public abstract class NaryStatement extends Statement {
 	}
 
 	@Override
-	public final <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public final <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		for (Expression sub : subExpressions)
 			if (!sub.accept(visitor, tool))
 				return false;
@@ -130,7 +141,8 @@ public abstract class NaryStatement extends Statement {
 	}
 
 	@Override
-	public Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(
+			Statement other) {
 		int len = subExpressions.length;
 		if (other == this)
 			return len == 0 ? null : subExpressions[order.last(len)];
@@ -154,7 +166,8 @@ public abstract class NaryStatement extends Statement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -223,6 +236,7 @@ public abstract class NaryStatement extends Statement {
 	public abstract <A extends AbstractState<A>> AnalysisState<A> statementSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
-			ExpressionSet[] params, StatementStore<A> expressions)
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
 			throws SemanticException;
 }

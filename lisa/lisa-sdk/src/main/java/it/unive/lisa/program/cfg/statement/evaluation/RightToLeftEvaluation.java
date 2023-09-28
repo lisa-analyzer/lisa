@@ -47,22 +47,28 @@ public class RightToLeftEvaluation implements EvaluationOrder {
 	}
 
 	@Override
-	public int previous(int pos, int len) {
+	public int previous(
+			int pos,
+			int len) {
 		return pos == len - 1 ? -1 : pos + 1;
 	}
 
 	@Override
-	public int next(int pos, int len) {
+	public int next(
+			int pos,
+			int len) {
 		return pos - 1;
 	}
 
 	@Override
-	public int first(int len) {
+	public int first(
+			int len) {
 		return len - 1;
 	}
 
 	@Override
-	public int last(int len) {
+	public int last(
+			int len) {
 		return 0;
 	}
 }

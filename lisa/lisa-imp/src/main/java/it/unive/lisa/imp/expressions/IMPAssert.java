@@ -30,7 +30,12 @@ public class IMPAssert extends UnaryStatement {
 	 * @param col        the column where this operation is defined
 	 * @param expression the expression being asserted
 	 */
-	public IMPAssert(CFG cfg, String sourceFile, int line, int col, Expression expression) {
+	public IMPAssert(
+			CFG cfg,
+			String sourceFile,
+			int line,
+			int col,
+			Expression expression) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "assert", expression);
 	}
 

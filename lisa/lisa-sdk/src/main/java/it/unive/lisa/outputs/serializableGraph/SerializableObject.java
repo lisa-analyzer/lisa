@@ -31,7 +31,9 @@ public class SerializableObject extends SerializableValue {
 	 * @param properties the additional properties to use as metadata
 	 * @param fields     the fields of this object
 	 */
-	public SerializableObject(SortedMap<String, String> properties, SortedMap<String, SerializableValue> fields) {
+	public SerializableObject(
+			SortedMap<String, String> properties,
+			SortedMap<String, SerializableValue> fields) {
 		super(properties);
 		this.fields = fields;
 	}
@@ -62,7 +64,8 @@ public class SerializableObject extends SerializableValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -89,7 +92,8 @@ public class SerializableObject extends SerializableValue {
 	}
 
 	@Override
-	public int compareTo(SerializableValue o) {
+	public int compareTo(
+			SerializableValue o) {
 		if (!(o instanceof SerializableObject))
 			// maps last
 			return 1;

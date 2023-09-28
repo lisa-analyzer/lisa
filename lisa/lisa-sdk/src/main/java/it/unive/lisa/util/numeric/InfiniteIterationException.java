@@ -15,7 +15,8 @@ public class InfiniteIterationException extends RuntimeException {
 	 * 
 	 * @param i the non-finite interval on which some iterates
 	 */
-	public InfiniteIterationException(IntInterval i) {
+	public InfiniteIterationException(
+			IntInterval i) {
 		super("Cannot iterate over the interval " + i);
 	}
 }

@@ -40,7 +40,9 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 	 * @param source      the source statement
 	 * @param destination the destination statement
 	 */
-	protected Edge(Statement source, Statement destination) {
+	protected Edge(
+			Statement source,
+			Statement destination) {
 		Objects.requireNonNull(source, "The source of an edge cannot be null");
 		Objects.requireNonNull(destination, "The destination of an edge cannot be null");
 		this.source = source;
@@ -68,7 +70,8 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -109,12 +112,15 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 			throws SemanticException;
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		return visitor.visit(tool, source.getCFG(), this);
 	}
 
 	@Override
-	public int compareTo(Edge o) {
+	public int compareTo(
+			Edge o) {
 		int cmp;
 		if ((cmp = source.compareTo(o.source)) != 0)
 			return cmp;

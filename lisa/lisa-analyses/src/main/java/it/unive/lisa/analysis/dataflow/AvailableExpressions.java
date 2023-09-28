@@ -24,7 +24,8 @@ import java.util.HashSet;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class AvailableExpressions
-		implements DataflowElement<DefiniteForwardDataflowDomain<AvailableExpressions>, AvailableExpressions> {
+		implements
+		DataflowElement<DefiniteForwardDataflowDomain<AvailableExpressions>, AvailableExpressions> {
 
 	private final ValueExpression expression;
 
@@ -40,7 +41,8 @@ public class AvailableExpressions
 	 * 
 	 * @param expression the expression of this element
 	 */
-	public AvailableExpressions(ValueExpression expression) {
+	public AvailableExpressions(
+			ValueExpression expression) {
 		this.expression = expression;
 	}
 
@@ -54,7 +56,8 @@ public class AvailableExpressions
 		return getIdentifierOperands(expression);
 	}
 
-	private static Collection<Identifier> getIdentifierOperands(ValueExpression expression) {
+	private static Collection<Identifier> getIdentifierOperands(
+			ValueExpression expression) {
 		Collection<Identifier> result = new HashSet<>();
 
 		if (expression == null)
@@ -83,7 +86,10 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public Collection<AvailableExpressions> gen(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<AvailableExpressions> gen(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
 			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
 		Collection<AvailableExpressions> result = new HashSet<>();
 		AvailableExpressions ae = new AvailableExpressions(expression);
@@ -93,7 +99,9 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public Collection<AvailableExpressions> gen(ValueExpression expression, ProgramPoint pp,
+	public Collection<AvailableExpressions> gen(
+			ValueExpression expression,
+			ProgramPoint pp,
 			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
 		Collection<AvailableExpressions> result = new HashSet<>();
 		AvailableExpressions ae = new AvailableExpressions(expression);
@@ -102,7 +110,8 @@ public class AvailableExpressions
 		return result;
 	}
 
-	private static boolean filter(ValueExpression expression) {
+	private static boolean filter(
+			ValueExpression expression) {
 		if (expression instanceof Identifier)
 			return false;
 		if (expression instanceof Constant)
@@ -115,7 +124,10 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public Collection<AvailableExpressions> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<AvailableExpressions> kill(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
 			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
 		Collection<AvailableExpressions> result = new HashSet<>();
 
@@ -130,7 +142,9 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public Collection<AvailableExpressions> kill(ValueExpression expression, ProgramPoint pp,
+	public Collection<AvailableExpressions> kill(
+			ValueExpression expression,
+			ProgramPoint pp,
 			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
 		return Collections.emptyList();
 	}
@@ -144,7 +158,8 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -166,12 +181,16 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public AvailableExpressions pushScope(ScopeToken scope) throws SemanticException {
+	public AvailableExpressions pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return new AvailableExpressions((ValueExpression) expression.pushScope(scope));
 	}
 
 	@Override
-	public AvailableExpressions popScope(ScopeToken scope) throws SemanticException {
+	public AvailableExpressions popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return new AvailableExpressions((ValueExpression) expression.popScope(scope));
 	}
 }

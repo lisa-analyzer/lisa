@@ -16,7 +16,8 @@ public class BasicAnnotationMatcher implements AnnotationMatcher {
 	 * 
 	 * @param annotation the annotation whose name is to be matched
 	 */
-	public BasicAnnotationMatcher(Annotation annotation) {
+	public BasicAnnotationMatcher(
+			Annotation annotation) {
 		this.annotationName = annotation.getAnnotationName();
 	}
 
@@ -25,12 +26,14 @@ public class BasicAnnotationMatcher implements AnnotationMatcher {
 	 * 
 	 * @param annotationName the name of the annotation
 	 */
-	public BasicAnnotationMatcher(String annotationName) {
+	public BasicAnnotationMatcher(
+			String annotationName) {
 		this.annotationName = annotationName;
 	}
 
 	@Override
-	public boolean matches(Annotation annotation) {
+	public boolean matches(
+			Annotation annotation) {
 		return annotation.getAnnotationName().equals(annotationName);
 	}
 
@@ -43,7 +46,8 @@ public class BasicAnnotationMatcher implements AnnotationMatcher {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

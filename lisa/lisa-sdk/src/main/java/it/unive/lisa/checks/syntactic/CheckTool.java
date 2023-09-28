@@ -49,7 +49,9 @@ public class CheckTool {
 	 * @param configuration the configuration of the analysis
 	 * @param fileManager   the file manager of the analysis
 	 */
-	public CheckTool(LiSAConfiguration configuration, FileManager fileManager) {
+	public CheckTool(
+			LiSAConfiguration configuration,
+			FileManager fileManager) {
 		warnings = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.configuration = configuration;
 		this.fileManager = fileManager;
@@ -78,7 +80,8 @@ public class CheckTool {
 	 * 
 	 * @param other the original tool to copy
 	 */
-	protected CheckTool(CheckTool other) {
+	protected CheckTool(
+			CheckTool other) {
 		this(other.configuration, other.fileManager);
 		warnings.addAll(other.warnings);
 	}
@@ -91,7 +94,8 @@ public class CheckTool {
 	 * 
 	 * @param message the message of the warning
 	 */
-	public void warn(String message) {
+	public void warn(
+			String message) {
 		warnings.add(new Warning(message));
 	}
 
@@ -102,7 +106,9 @@ public class CheckTool {
 	 * @param unit    the unit to warn on
 	 * @param message the message of the warning
 	 */
-	public void warnOn(Unit unit, String message) {
+	public void warnOn(
+			Unit unit,
+			String message) {
 		warnings.add(new UnitWarning(unit, message));
 	}
 
@@ -114,7 +120,10 @@ public class CheckTool {
 	 * @param global  the global to warn on
 	 * @param message the message of the warning
 	 */
-	public void warnOn(Unit unit, Global global, String message) {
+	public void warnOn(
+			Unit unit,
+			Global global,
+			String message) {
 		warnings.add(new GlobalWarning(unit, global, message));
 	}
 
@@ -125,7 +134,9 @@ public class CheckTool {
 	 * @param cfg     the cfg to warn on
 	 * @param message the message of the warning
 	 */
-	public void warnOn(CFG cfg, String message) {
+	public void warnOn(
+			CFG cfg,
+			String message) {
 		warnings.add(new CFGWarning(cfg, message));
 	}
 
@@ -136,7 +147,9 @@ public class CheckTool {
 	 * @param descriptor the descriptor cfg to warn on
 	 * @param message    the message of the warning
 	 */
-	public void warnOn(CodeMemberDescriptor descriptor, String message) {
+	public void warnOn(
+			CodeMemberDescriptor descriptor,
+			String message) {
 		warnings.add(new CFGDescriptorWarning(descriptor, message));
 	}
 
@@ -148,7 +161,9 @@ public class CheckTool {
 	 * @param statement the statement to warn on
 	 * @param message   the message of the warning
 	 */
-	public void warnOn(Statement statement, String message) {
+	public void warnOn(
+			Statement statement,
+			String message) {
 		if (statement instanceof Expression)
 			warnOn((Expression) statement, message);
 		else
@@ -161,7 +176,9 @@ public class CheckTool {
 	 * @param expression the expression to warn on
 	 * @param message    the message of the warning
 	 */
-	public void warnOn(Expression expression, String message) {
+	public void warnOn(
+			Expression expression,
+			String message) {
 		warnings.add(new ExpressionWarning(expression, message));
 	}
 

@@ -32,7 +32,8 @@ import java.util.TreeSet;
 public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
-	public Annotations visitAnnotations(AnnotationsContext ctx) {
+	public Annotations visitAnnotations(
+			AnnotationsContext ctx) {
 		if (ctx == null)
 			return new Annotations();
 		Set<Annotation> anns = new TreeSet<>();
@@ -42,7 +43,8 @@ public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Annotation visitAnnotation(AnnotationContext ctx) {
+	public Annotation visitAnnotation(
+			AnnotationContext ctx) {
 		String annotationName = ctx.name.getText();
 		if (annotationName.startsWith("Inherited"))
 			return new Annotation(annotationName, visitAnnotationMembers(ctx.annotationMembers()), true);
@@ -51,7 +53,8 @@ public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public List<AnnotationMember> visitAnnotationMembers(AnnotationMembersContext ctx) {
+	public List<AnnotationMember> visitAnnotationMembers(
+			AnnotationMembersContext ctx) {
 		List<AnnotationMember> arr = new ArrayList<>();
 		if (ctx == null)
 			return arr;
@@ -62,12 +65,14 @@ public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public AnnotationMember visitAnnotationMember(AnnotationMemberContext ctx) {
+	public AnnotationMember visitAnnotationMember(
+			AnnotationMemberContext ctx) {
 		return new AnnotationMember(ctx.IDENTIFIER().getText(), visitAnnotationValue(ctx.annotationValue()));
 	}
 
 	@Override
-	public AnnotationValue visitAnnotationValue(AnnotationValueContext ctx) {
+	public AnnotationValue visitAnnotationValue(
+			AnnotationValueContext ctx) {
 		if (ctx.basicAnnotationValue() != null)
 			return visitBasicAnnotationValue(ctx.basicAnnotationValue());
 		else
@@ -75,7 +80,8 @@ public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public BasicAnnotationValue visitBasicAnnotationValue(BasicAnnotationValueContext ctx) {
+	public BasicAnnotationValue visitBasicAnnotationValue(
+			BasicAnnotationValueContext ctx) {
 		if (ctx.LITERAL_DECIMAL() != null)
 			if (ctx.SUB() != null)
 				return new IntAnnotationValue(Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
@@ -96,7 +102,8 @@ public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public ArrayAnnotationValue visitArrayAnnotationValue(ArrayAnnotationValueContext ctx) {
+	public ArrayAnnotationValue visitArrayAnnotationValue(
+			ArrayAnnotationValueContext ctx) {
 		if (ctx.basicAnnotationValue() == null)
 			return new ArrayAnnotationValue(new BasicAnnotationValue[0]);
 		else {

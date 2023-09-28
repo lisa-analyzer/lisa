@@ -39,7 +39,8 @@ public class VisitOnceFIFOWorkingSet<E> implements VisitOnceWorkingSet<E> {
 	}
 
 	@Override
-	public void push(E e) {
+	public void push(
+			E e) {
 		if (seen.contains(e))
 			return;
 
@@ -92,7 +93,8 @@ public class VisitOnceFIFOWorkingSet<E> implements VisitOnceWorkingSet<E> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

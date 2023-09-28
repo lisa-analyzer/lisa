@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -25,6 +19,11 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -176,6 +175,9 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	 */
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
+		/**
+		 * The singleton instance of this rewriter.
+		 */
 		public static final Rewriter SINGLETON = new Rewriter();
 
 		@Override

@@ -23,7 +23,9 @@ public class UnitWarning extends WarningWithLocation {
 	 * @param unit    the unit where this warning was reported on
 	 * @param message the message of this warning
 	 */
-	public UnitWarning(Unit unit, String message) {
+	public UnitWarning(
+			Unit unit,
+			String message) {
 		super(unit instanceof ClassUnit ? ((ClassUnit) unit).getLocation() : SyntheticLocation.INSTANCE,
 				message);
 		this.unit = unit;
@@ -39,7 +41,8 @@ public class UnitWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public int compareTo(Warning o) {
+	public int compareTo(
+			Warning o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
@@ -63,7 +66,8 @@ public class UnitWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

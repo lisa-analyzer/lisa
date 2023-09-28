@@ -88,7 +88,10 @@ public class DefaultConfiguration extends LiSAConfiguration {
 	 */
 	public static <H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> SimpleAbstractState<H, V, T> simpleState(H heap, V value, T type) {
+			T extends TypeDomain<T>> SimpleAbstractState<H, V, T> simpleState(
+					H heap,
+					V value,
+					T type) {
 		return new SimpleAbstractState<>(heap, value, type);
 	}
 

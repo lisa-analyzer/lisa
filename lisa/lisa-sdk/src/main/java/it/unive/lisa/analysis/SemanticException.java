@@ -22,7 +22,9 @@ public class SemanticException extends Exception {
 	 * @param message the message of this exception
 	 * @param cause   the cause of this exception
 	 */
-	public SemanticException(String message, Throwable cause) {
+	public SemanticException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -31,7 +33,8 @@ public class SemanticException extends Exception {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public SemanticException(String message) {
+	public SemanticException(
+			String message) {
 		super(message);
 	}
 
@@ -40,7 +43,8 @@ public class SemanticException extends Exception {
 	 * 
 	 * @param cause the cause of this exception
 	 */
-	public SemanticException(Throwable cause) {
+	public SemanticException(
+			Throwable cause) {
 		super(cause);
 	}
 

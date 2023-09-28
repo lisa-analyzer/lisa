@@ -15,7 +15,8 @@ public class SymbolicChar {
 	 * 
 	 * @param ch the underlying character
 	 */
-	public SymbolicChar(char ch) {
+	public SymbolicChar(
+			char ch) {
 		this.ch = ch;
 	}
 
@@ -36,7 +37,8 @@ public class SymbolicChar {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean is(char ch) {
+	public boolean is(
+			char ch) {
 		return this.ch == ch;
 	}
 
@@ -49,7 +51,8 @@ public class SymbolicChar {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

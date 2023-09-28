@@ -19,7 +19,9 @@ public class Branching extends TraceToken {
 	 * @param trueBranch whether the condition is traversed to reach the
 	 *                       {@code true} branch or not
 	 */
-	public Branching(ProgramPoint pp, boolean trueBranch) {
+	public Branching(
+			ProgramPoint pp,
+			boolean trueBranch) {
 		super(pp);
 		this.trueBranch = trueBranch;
 	}
@@ -43,7 +45,8 @@ public class Branching extends TraceToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

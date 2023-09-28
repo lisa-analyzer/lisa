@@ -40,7 +40,9 @@ public class TypeOf implements TypeOperator, UnaryOperator {
 	}
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> argument) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> argument) {
 		return Collections.singleton(new TypeTokenType(new HashSet<>(argument)));
 	}
 }

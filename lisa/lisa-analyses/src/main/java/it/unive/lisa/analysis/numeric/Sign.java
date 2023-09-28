@@ -99,7 +99,7 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	public Sign bottom() {
 		return BOTTOM;
 	}
-	
+
 	@Override
 	public String toString() {
 		return representation().toString();

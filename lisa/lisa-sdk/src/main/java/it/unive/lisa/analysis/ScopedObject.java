@@ -25,7 +25,9 @@ public interface ScopedObject<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	T pushScope(ScopeToken token) throws SemanticException;
+	T pushScope(
+			ScopeToken token)
+			throws SemanticException;
 
 	/**
 	 * Pops the scope identified by the given token from this object. This
@@ -41,5 +43,7 @@ public interface ScopedObject<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	T popScope(ScopeToken token) throws SemanticException;
+	T popScope(
+			ScopeToken token)
+			throws SemanticException;
 }

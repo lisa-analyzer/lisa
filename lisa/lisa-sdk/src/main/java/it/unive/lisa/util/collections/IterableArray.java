@@ -23,7 +23,8 @@ public class IterableArray<E> implements Iterable<E> {
 	 * 
 	 * @param array the underlying array
 	 */
-	public IterableArray(E[] array) {
+	public IterableArray(
+			E[] array) {
 		this.array = array;
 	}
 
@@ -46,7 +47,8 @@ public class IterableArray<E> implements Iterable<E> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

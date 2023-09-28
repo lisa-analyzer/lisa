@@ -53,8 +53,14 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	 * @param targets    the NativeCFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public NativeCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			Collection<NativeCFG> targets, Expression... parameters) {
+	public NativeCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			Collection<NativeCFG> targets,
+			Expression... parameters) {
 		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, targets, parameters);
 	}
 
@@ -75,8 +81,15 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	 * @param targets    the NativeCFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public NativeCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Collection<NativeCFG> targets, Expression... parameters) {
+	public NativeCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Collection<NativeCFG> targets,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(targets, "The targets of a native call cannot be null");
 		Objects.requireNonNull(targets, "The native targets of a native call cannot be null");
@@ -93,7 +106,9 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	 * @param targets the {@link NativeCFG}s that the call has been resolved
 	 *                    against
 	 */
-	public NativeCall(UnresolvedCall source, Collection<NativeCFG> targets) {
+	public NativeCall(
+			UnresolvedCall source,
+			Collection<NativeCFG> targets) {
 		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
 				targets, source.getParameters());
 		for (Expression param : source.getParameters())
@@ -101,7 +116,8 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 			param.setParentStatement(source);
 	}
 
-	private static Type getCommonReturnType(Collection<NativeCFG> targets) {
+	private static Type getCommonReturnType(
+			Collection<NativeCFG> targets) {
 		Iterator<NativeCFG> it = targets.iterator();
 		Type result = null;
 		while (it.hasNext()) {
@@ -145,7 +161,8 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

@@ -29,7 +29,9 @@ public class SymbolAliasing extends FunctionalLattice<SymbolAliasing, Symbol, Al
 		super(new Aliases());
 	}
 
-	private SymbolAliasing(Aliases lattice, Map<Symbol, Aliases> function) {
+	private SymbolAliasing(
+			Aliases lattice,
+			Map<Symbol, Aliases> function) {
 		super(lattice, function);
 	}
 
@@ -42,7 +44,9 @@ public class SymbolAliasing extends FunctionalLattice<SymbolAliasing, Symbol, Al
 	 * 
 	 * @return a copy of this domain, with the new alias
 	 */
-	public SymbolAliasing putState(Symbol toAlias, Symbol alias) {
+	public SymbolAliasing putState(
+			Symbol toAlias,
+			Symbol alias) {
 		return super.putState(toAlias, new Aliases(alias));
 	}
 
@@ -57,12 +61,15 @@ public class SymbolAliasing extends FunctionalLattice<SymbolAliasing, Symbol, Al
 	}
 
 	@Override
-	public SymbolAliasing mk(Aliases lattice, Map<Symbol, Aliases> function) {
+	public SymbolAliasing mk(
+			Aliases lattice,
+			Map<Symbol, Aliases> function) {
 		return new SymbolAliasing(lattice, function);
 	}
 
 	@Override
-	public Aliases stateOfUnknown(Symbol key) {
+	public Aliases stateOfUnknown(
+			Symbol key) {
 		return lattice.bottom();
 	}
 
@@ -75,7 +82,9 @@ public class SymbolAliasing extends FunctionalLattice<SymbolAliasing, Symbol, Al
 	 * 
 	 * @return a copy of this analysis state, with the new alias
 	 */
-	public SymbolAliasing alias(Symbol toAlias, Symbol alias) {
+	public SymbolAliasing alias(
+			Symbol toAlias,
+			Symbol alias) {
 		return putState(toAlias, alias);
 	}
 }

@@ -31,7 +31,8 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A>> extends CFG
 	 *                            semantics computations
 	 * @param config          the {@link FixpointConfiguration} to use
 	 */
-	public DescendingNarrowingFixpoint(CFG target,
+	public DescendingNarrowingFixpoint(
+			CFG target,
 			InterproceduralAnalysis<A> interprocedural,
 			FixpointConfiguration config) {
 		super(target, interprocedural);
@@ -40,9 +41,11 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A>> extends CFG
 	}
 
 	@Override
-	public CompoundState<A> operation(Statement node,
+	public CompoundState<A> operation(
+			Statement node,
 			CompoundState<A> approx,
-			CompoundState<A> old) throws SemanticException {
+			CompoundState<A> old)
+			throws SemanticException {
 		if (wideningPoints == null || !wideningPoints.contains(node))
 			// optimization: never apply narrowing on normal instructions,
 			// save time and precision and only apply to widening points
@@ -61,8 +64,11 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A>> extends CFG
 	}
 
 	@Override
-	public boolean equality(Statement node, CompoundState<A> approx,
-			CompoundState<A> old) throws SemanticException {
+	public boolean equality(
+			Statement node,
+			CompoundState<A> approx,
+			CompoundState<A> old)
+			throws SemanticException {
 		return old.lessOrEqual(approx);
 	}
 }

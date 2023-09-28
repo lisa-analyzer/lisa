@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -11,6 +9,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Map;
 
 /**
  * A {@link NonRelationalElement} that can be inferred by
@@ -25,7 +24,8 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @param <T> the concrete type of inferred value
  */
 public interface InferredValue<T extends InferredValue<T>>
-		extends NonRelationalElement<T, ValueExpression, InferenceSystem<T>> {
+		extends
+		NonRelationalElement<T, ValueExpression, InferenceSystem<T>> {
 
 	/**
 	 * Evaluates a {@link ValueExpression}, assuming that the values of program
@@ -77,7 +77,10 @@ public interface InferredValue<T extends InferredValue<T>>
 		 * @param inferred the inferred value
 		 * @param state    the execution state
 		 */
-		public InferredPair(T domain, T inferred, T state) {
+		public InferredPair(
+				T domain,
+				T inferred,
+				T state) {
 			this.domain = domain;
 			this.inferred = inferred;
 			this.state = state;
@@ -124,27 +127,37 @@ public interface InferredValue<T extends InferredValue<T>>
 		}
 
 		@Override
-		public InferredPair<T> lubAux(InferredPair<T> other) throws SemanticException {
+		public InferredPair<T> lubAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return new InferredPair<>(domain, inferred.lub(other.inferred), state.lub(other.state));
 		}
 
 		@Override
-		public InferredPair<T> glbAux(InferredPair<T> other) throws SemanticException {
+		public InferredPair<T> glbAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return new InferredPair<>(domain, inferred.glb(other.inferred), state.glb(other.state));
 		}
 
 		@Override
-		public InferredPair<T> wideningAux(InferredPair<T> other) throws SemanticException {
+		public InferredPair<T> wideningAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return new InferredPair<>(domain, inferred.widening(other.inferred), state.widening(other.state));
 		}
 
 		@Override
-		public InferredPair<T> narrowingAux(InferredPair<T> other) throws SemanticException {
+		public InferredPair<T> narrowingAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return new InferredPair<>(domain, inferred.narrowing(other.inferred), state.narrowing(other.state));
 		}
 
 		@Override
-		public boolean lessOrEqualAux(InferredPair<T> other) throws SemanticException {
+		public boolean lessOrEqualAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return inferred.lessOrEqual(other.inferred) && state.lessOrEqual(other.state);
 		}
 
@@ -159,7 +172,8 @@ public interface InferredValue<T extends InferredValue<T>>
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)

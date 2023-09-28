@@ -39,7 +39,8 @@ public class StringReplacer {
 	 * 
 	 * @param origin the target automaton
 	 */
-	public StringReplacer(RegexAutomaton origin) {
+	public StringReplacer(
+			RegexAutomaton origin) {
 		this.origin = origin.explode();
 		searcher = new StringSearcher(origin);
 	}
@@ -57,7 +58,10 @@ public class StringReplacer {
 	 * 
 	 * @return the replaced automaton
 	 */
-	public RegexAutomaton replace(String toReplace, RegexAutomaton str, boolean must) {
+	public RegexAutomaton replace(
+			String toReplace,
+			RegexAutomaton str,
+			boolean must) {
 		if (toReplace.isEmpty())
 			return emptyStringReplace(str);
 
@@ -121,7 +125,8 @@ public class StringReplacer {
 		return origin;
 	}
 
-	private RegexAutomaton emptyStringReplace(RegexAutomaton str) {
+	private RegexAutomaton emptyStringReplace(
+			RegexAutomaton str) {
 		int maxId = origin.getStates().stream().mapToInt(s -> s.getId()).max().getAsInt();
 		AtomicInteger counter = new AtomicInteger(maxId + 1);
 		SortedSet<State> states = new TreeSet<>();

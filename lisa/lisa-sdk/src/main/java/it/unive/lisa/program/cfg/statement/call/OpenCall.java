@@ -39,7 +39,12 @@ public class OpenCall extends CallWithResult {
 	 * @param targetName the name of the target of this open call
 	 * @param parameters the parameters of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
+	public OpenCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
 			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE,
 				parameters);
@@ -59,8 +64,14 @@ public class OpenCall extends CallWithResult {
 	 * @param order      the evaluation order of the sub-expressions
 	 * @param parameters the parameters of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Expression... parameters) {
+	public OpenCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, Untyped.INSTANCE, parameters);
 	}
 
@@ -80,8 +91,14 @@ public class OpenCall extends CallWithResult {
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			Type staticType, Expression... parameters) {
+	public OpenCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			Type staticType,
+			Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
 		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType,
@@ -103,8 +120,15 @@ public class OpenCall extends CallWithResult {
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Type staticType, Expression... parameters) {
+	public OpenCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, staticType, parameters);
 	}
 
@@ -114,7 +138,8 @@ public class OpenCall extends CallWithResult {
 	 * 
 	 * @param source the unresolved call to copy
 	 */
-	public OpenCall(UnresolvedCall source) {
+	public OpenCall(
+			UnresolvedCall source) {
 		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(),
 				source.getTargetName(), source.getOrder(), source.getStaticType(), source.getParameters());
 		for (Expression param : source.getParameters())

@@ -33,7 +33,6 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.junit.Test;
 
 public class PointBasedHeapTest {
@@ -90,19 +89,28 @@ public class PointBasedHeapTest {
 	private final SemanticOracle fakeOracle = new SemanticOracle() {
 
 		@Override
-		public Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp, SemanticOracle oracle)
+		public Set<Type> getRuntimeTypesOf(
+				SymbolicExpression e,
+				ProgramPoint pp,
+				SemanticOracle oracle)
 				throws SemanticException {
 			return Collections.singleton(e.getStaticType());
 		}
 
 		@Override
-		public Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp, SemanticOracle oracle)
+		public Type getDynamicTypeOf(
+				SymbolicExpression e,
+				ProgramPoint pp,
+				SemanticOracle oracle)
 				throws SemanticException {
 			return e.getStaticType();
 		}
 
 		@Override
-		public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp, SemanticOracle oracle)
+		public ExpressionSet rewrite(
+				SymbolicExpression expression,
+				ProgramPoint pp,
+				SemanticOracle oracle)
 				throws SemanticException {
 			return new ExpressionSet(expression);
 		}

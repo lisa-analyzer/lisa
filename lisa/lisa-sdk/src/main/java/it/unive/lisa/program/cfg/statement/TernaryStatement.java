@@ -32,8 +32,13 @@ public abstract class TernaryStatement extends NaryStatement {
 	 * @param middle        the second sub-expression of this statement
 	 * @param right         the third sub-expression of this statement
 	 */
-	protected TernaryStatement(CFG cfg, CodeLocation location, String constructName,
-			Expression left, Expression middle, Expression right) {
+	protected TernaryStatement(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression left,
+			Expression middle,
+			Expression right) {
 		super(cfg, location, constructName, left, middle, right);
 	}
 
@@ -50,8 +55,14 @@ public abstract class TernaryStatement extends NaryStatement {
 	 * @param middle        the second sub-expression of this statement
 	 * @param right         the third sub-expression of this statement
 	 */
-	protected TernaryStatement(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Expression left, Expression middle, Expression right) {
+	protected TernaryStatement(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Expression left,
+			Expression middle,
+			Expression right) {
 		super(cfg, location, constructName, order, left, middle, right);
 	}
 

@@ -25,7 +25,9 @@ public class MemoryAllocation extends HeapExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public MemoryAllocation(Type staticType, CodeLocation location) {
+	public MemoryAllocation(
+			Type staticType,
+			CodeLocation location) {
 		this(staticType, location, false);
 	}
 
@@ -37,7 +39,10 @@ public class MemoryAllocation extends HeapExpression {
 	 *                              generated this expression
 	 * @param isStackAllocation if this allocation is allocated in the stack
 	 */
-	public MemoryAllocation(Type staticType, CodeLocation location, boolean isStackAllocation) {
+	public MemoryAllocation(
+			Type staticType,
+			CodeLocation location,
+			boolean isStackAllocation) {
 		super(staticType, location);
 		this.isStackAllocation = isStackAllocation;
 	}
@@ -60,7 +65,8 @@ public class MemoryAllocation extends HeapExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -77,7 +83,10 @@ public class MemoryAllocation extends HeapExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
 	}
 }

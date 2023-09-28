@@ -31,7 +31,8 @@ public class DescendingGLBFixpoint<A extends AbstractState<A>> extends CFGFixpoi
 	 *                            semantics computations
 	 * @param config          the {@link FixpointConfiguration} to use
 	 */
-	public DescendingGLBFixpoint(CFG target,
+	public DescendingGLBFixpoint(
+			CFG target,
 			InterproceduralAnalysis<A> interprocedural,
 			FixpointConfiguration config) {
 		super(target, interprocedural);
@@ -40,9 +41,11 @@ public class DescendingGLBFixpoint<A extends AbstractState<A>> extends CFGFixpoi
 	}
 
 	@Override
-	public CompoundState<A> operation(Statement node,
+	public CompoundState<A> operation(
+			Statement node,
 			CompoundState<A> approx,
-			CompoundState<A> old) throws SemanticException {
+			CompoundState<A> old)
+			throws SemanticException {
 		if (maxGLBs < 0)
 			return old;
 
@@ -55,8 +58,11 @@ public class DescendingGLBFixpoint<A extends AbstractState<A>> extends CFGFixpoi
 	}
 
 	@Override
-	public boolean equality(Statement node, CompoundState<A> approx,
-			CompoundState<A> old) throws SemanticException {
+	public boolean equality(
+			Statement node,
+			CompoundState<A> approx,
+			CompoundState<A> old)
+			throws SemanticException {
 		return old.lessOrEqual(approx);
 	}
 }

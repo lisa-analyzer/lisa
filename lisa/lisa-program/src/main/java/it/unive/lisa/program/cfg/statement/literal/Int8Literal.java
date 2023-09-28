@@ -20,7 +20,10 @@ public class Int8Literal extends Literal<Byte> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public Int8Literal(CFG cfg, CodeLocation location, byte value) {
+	public Int8Literal(
+			CFG cfg,
+			CodeLocation location,
+			byte value) {
 		super(cfg, location, value, Int8Type.INSTANCE);
 	}
 }

@@ -1,8 +1,6 @@
 
 package it.unive.lisa.imp.expressions;
 
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -21,6 +19,7 @@ import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
+import java.util.Set;
 
 /**
  * An expression modeling the plus operation ({@code +}) that, in some

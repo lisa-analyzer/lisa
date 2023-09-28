@@ -22,8 +22,10 @@ import java.util.Map;
  *                state
  */
 public class AnalyzedCFG<A extends AbstractState<A>>
-		extends CFG
-		implements BaseLattice<AnalyzedCFG<A>> {
+		extends
+		CFG
+		implements
+		BaseLattice<AnalyzedCFG<A>> {
 
 	/**
 	 * Error message for the inability to lub two graphs.
@@ -77,7 +79,10 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 *                      abstract state of the analysis that was executed,
 	 *                      used to retrieve top and bottom values
 	 */
-	public AnalyzedCFG(CFG cfg, ScopeId id, AnalysisState<A> singleton) {
+	public AnalyzedCFG(
+			CFG cfg,
+			ScopeId id,
+			AnalysisState<A> singleton) {
 		this(cfg, id, singleton, Collections.emptyMap(), Collections.emptyMap());
 	}
 
@@ -94,7 +99,8 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public AnalyzedCFG(CFG cfg,
+	public AnalyzedCFG(
+			CFG cfg,
 			ScopeId id,
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> entryStates,
@@ -117,7 +123,8 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public AnalyzedCFG(CFG cfg,
+	public AnalyzedCFG(
+			CFG cfg,
 			ScopeId id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results) {
@@ -146,7 +153,9 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public AnalysisState<A> getAnalysisStateBefore(Statement st) throws SemanticException {
+	public AnalysisState<A> getAnalysisStateBefore(
+			Statement st)
+			throws SemanticException {
 		Statement pred = st.getEvaluationPredecessor();
 		if (pred != null)
 			results.getState(pred);
@@ -165,7 +174,8 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 *
 	 * @return the result computed at the given statement
 	 */
-	public AnalysisState<A> getAnalysisStateAfter(Statement st) {
+	public AnalysisState<A> getAnalysisStateAfter(
+			Statement st) {
 		return results.getState(st);
 	}
 
@@ -191,7 +201,10 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 		return lub(this.getNormalExitpoints(), false);
 	}
 
-	private AnalysisState<A> lub(Collection<Statement> statements, boolean entry) throws SemanticException {
+	private AnalysisState<A> lub(
+			Collection<Statement> statements,
+			boolean entry)
+			throws SemanticException {
 		AnalysisState<A> result = entryStates.lattice.bottom();
 		for (Statement st : statements)
 			result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st));
@@ -199,7 +212,9 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalyzedCFG<A> lubAux(AnalyzedCFG<A> other) throws SemanticException {
+	public AnalyzedCFG<A> lubAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
@@ -211,7 +226,9 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalyzedCFG<A> glbAux(AnalyzedCFG<A> other) throws SemanticException {
+	public AnalyzedCFG<A> glbAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_GLB_ERROR);
 
@@ -223,7 +240,9 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalyzedCFG<A> wideningAux(AnalyzedCFG<A> other) throws SemanticException {
+	public AnalyzedCFG<A> wideningAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_WIDEN_ERROR);
 
@@ -235,7 +254,9 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalyzedCFG<A> narrowingAux(AnalyzedCFG<A> other) throws SemanticException {
+	public AnalyzedCFG<A> narrowingAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_NARROW_ERROR);
 
@@ -247,7 +268,9 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	}
 
 	@Override
-	public boolean lessOrEqualAux(AnalyzedCFG<A> other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_COMPARE_ERROR);
 
@@ -262,7 +285,8 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	protected boolean sameIDs(AnalyzedCFG<A> other) {
+	protected boolean sameIDs(
+			AnalyzedCFG<A> other) {
 		if (id == null) {
 			if (other.id == null)
 				return true;
@@ -304,7 +328,8 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

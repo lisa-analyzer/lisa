@@ -109,17 +109,18 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	/**
 	 * Default approximation for {@link Identifier}s. This method returns the
 	 * same as
-	 * {@link BaseNonRelationalValueDomain#fixedVariable(Identifier, ProgramPoint)}
+	 * {@link BaseNonRelationalValueDomain#fixedVariable(Identifier, ProgramPoint, SemanticOracle)}
 	 * if the given identifier has no annotations. Otherwise, it relies on the
 	 * presence if {@link #TAINTED_ANNOTATION} and {@link #CLEAN_ANNOTATION} to
 	 * produce abstract values. defaulting to bottom. <br>
 	 * <br>
 	 * If this method does not return bottom, it is used as return value for
-	 * both {@link #fixedVariable(Identifier, ProgramPoint)} and
-	 * {@link #evalIdentifier(Identifier, ValueEnvironment, ProgramPoint)}.
+	 * both {@link #fixedVariable(Identifier, ProgramPoint, SemanticOracle)} and
+	 * {@link #evalIdentifier(Identifier, ValueEnvironment, ProgramPoint, SemanticOracle)}.
 	 * 
-	 * @param id the identifier to evaluate
-	 * @param pp the program point where the evaluation happens
+	 * @param id     the identifier to evaluate
+	 * @param pp     the program point where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return a fixed approximation for the given variable, if any
 	 * 

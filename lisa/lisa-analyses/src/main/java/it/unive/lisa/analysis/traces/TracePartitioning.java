@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.traces;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -26,6 +19,12 @@ import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to
@@ -58,8 +57,10 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  *          "https://doi.org/10.1145/1275497.1275501">https://doi.org/10.1145/1275497.1275501</a>
  */
 public class TracePartitioning<A extends AbstractState<A>>
-		extends FunctionalLattice<TracePartitioning<A>, ExecutionTrace, A>
-		implements AbstractState<TracePartitioning<A>> {
+		extends
+		FunctionalLattice<TracePartitioning<A>, ExecutionTrace, A>
+		implements
+		AbstractState<TracePartitioning<A>> {
 
 	/**
 	 * The maximum number of {@link LoopIteration} tokens that a trace can
@@ -78,16 +79,20 @@ public class TracePartitioning<A extends AbstractState<A>>
 	 * 
 	 * @param lattice a singleton of the underlying abstract states
 	 */
-	public TracePartitioning(A lattice) {
+	public TracePartitioning(
+			A lattice) {
 		super(lattice);
 	}
 
-	private TracePartitioning(A lattice, Map<ExecutionTrace, A> function) {
+	private TracePartitioning(
+			A lattice,
+			Map<ExecutionTrace, A> function) {
 		super(lattice, function);
 	}
 
 	@Override
-	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(Class<D> domain) {
+	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(
+			Class<D> domain) {
 		Collection<D> result = AbstractState.super.getAllDomainInstances(domain);
 		if (isTop())
 			return lattice.top().getAllDomainInstances(domain);
@@ -186,7 +191,10 @@ public class TracePartitioning<A extends AbstractState<A>>
 		return new TracePartitioning<>(lattice, result);
 	}
 
-	private static ExecutionTrace generateTraceFor(ExecutionTrace trace, ControlFlowStructure struct, ProgramPoint src,
+	private static ExecutionTrace generateTraceFor(
+			ExecutionTrace trace,
+			ControlFlowStructure struct,
+			ProgramPoint src,
 			ProgramPoint dest) {
 		if (struct instanceof Loop && ((Loop) struct).getBody().contains(dest)) {
 			// on loop exits we do not generate new traces
@@ -213,7 +221,9 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public TracePartitioning<A> forgetIdentifier(Identifier id) throws SemanticException {
+	public TracePartitioning<A> forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
@@ -224,7 +234,9 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public TracePartitioning<A> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public TracePartitioning<A> forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
@@ -257,7 +269,9 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public TracePartitioning<A> pushScope(ScopeToken token) throws SemanticException {
+	public TracePartitioning<A> pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
@@ -268,7 +282,9 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public TracePartitioning<A> popScope(ScopeToken token) throws SemanticException {
+	public TracePartitioning<A> popScope(
+			ScopeToken token)
+			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
@@ -293,7 +309,9 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public TracePartitioning<A> mk(A lattice, Map<ExecutionTrace, A> function) {
+	public TracePartitioning<A> mk(
+			A lattice,
+			Map<ExecutionTrace, A> function) {
 		return new TracePartitioning<>(lattice, function);
 	}
 
@@ -333,7 +351,7 @@ public class TracePartitioning<A extends AbstractState<A>>
 			throws SemanticException {
 		if (!expression.mightNeedRewriting())
 			return new ExpressionSet(expression);
-		
+
 		if (isTop())
 			return lattice.top().rewrite(expression, pp, oracle);
 		else if (isBottom() || function == null)
@@ -397,12 +415,14 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public A stateOfUnknown(ExecutionTrace key) {
+	public A stateOfUnknown(
+			ExecutionTrace key) {
 		return lattice.bottom();
 	}
 
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		if (isTop() || isBottom() || function == null)
 			return false;
 

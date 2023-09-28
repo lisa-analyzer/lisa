@@ -51,7 +51,10 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @throws IllegalArgumentException if min or max are negative numbers.
 	 */
-	public Brick(int min, int max, Set<String> strings) {
+	public Brick(
+			int min,
+			int max,
+			Set<String> strings) {
 		if (min < 0 || max < 0)
 			throw new IllegalArgumentException();
 		this.interval = new IntInterval(min, max);
@@ -67,7 +70,10 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 *                    the strings set
 	 * @param strings the set of strings
 	 */
-	public Brick(MathNumber min, MathNumber max, Set<String> strings) {
+	public Brick(
+			MathNumber min,
+			MathNumber max,
+			Set<String> strings) {
 		this.interval = new IntInterval(min, max);
 		this.strings = strings;
 	}
@@ -79,13 +85,17 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 *                     maximum of the brick respectively
 	 * @param strings  the set of strings
 	 */
-	public Brick(IntInterval interval, Set<String> strings) {
+	public Brick(
+			IntInterval interval,
+			Set<String> strings) {
 		this.interval = interval;
 		this.strings = strings;
 	}
 
 	@Override
-	public Brick lubAux(Brick other) throws SemanticException {
+	public Brick lubAux(
+			Brick other)
+			throws SemanticException {
 		Set<String> resultStrings;
 		if (strings == null || other.strings == null)
 			resultStrings = null;
@@ -102,7 +112,9 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Brick other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Brick other)
+			throws SemanticException {
 		if (this.getMin().lt(other.getMin()))
 			return false;
 		if (this.getMax().gt(other.getMax()))
@@ -118,7 +130,9 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	}
 
 	@Override
-	public Brick wideningAux(Brick other) throws SemanticException {
+	public Brick wideningAux(
+			Brick other)
+			throws SemanticException {
 		MathNumber minOfMins = getMin().min(other.getMin());
 		MathNumber maxOfMaxs = getMax().max(other.getMax());
 
@@ -134,7 +148,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(
+			Object o) {
 		if (this == o)
 			return true;
 		if (o == null || getClass() != o.getClass())
@@ -232,7 +247,11 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	// Recursive function that gets all the possible combinations of the set
 	// between min and max
-	private void recGetReps(Set<String> reps, int min, int numberOfReps, String currentStr)
+	private void recGetReps(
+			Set<String> reps,
+			int min,
+			int numberOfReps,
+			String currentStr)
 			throws MathNumberConversionException {
 		if (!isFinite())
 			throw new IllegalStateException("Brick must be finite.");

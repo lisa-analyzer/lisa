@@ -23,7 +23,9 @@ public class AnalysisException extends RuntimeException {
 	 * @param message the message of this exception
 	 * @param cause   the cause of this exception
 	 */
-	public AnalysisException(String message, Throwable cause) {
+	public AnalysisException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -32,7 +34,8 @@ public class AnalysisException extends RuntimeException {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public AnalysisException(String message) {
+	public AnalysisException(
+			String message) {
 		super(message);
 	}
 
@@ -41,7 +44,8 @@ public class AnalysisException extends RuntimeException {
 	 * 
 	 * @param cause the cause of this exception
 	 */
-	public AnalysisException(Throwable cause) {
+	public AnalysisException(
+			Throwable cause) {
 		super(cause);
 	}
 }

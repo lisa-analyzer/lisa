@@ -22,7 +22,9 @@ public class PushInv extends ValueExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public PushInv(Type staticType, CodeLocation location) {
+	public PushInv(
+			Type staticType,
+			CodeLocation location) {
 		super(staticType, location);
 	}
 
@@ -32,7 +34,8 @@ public class PushInv extends ValueExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -48,20 +51,26 @@ public class PushInv extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
 		return this;
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
 	}
-	
+
 	@Override
 	public boolean mightNeedRewriting() {
 		return false;

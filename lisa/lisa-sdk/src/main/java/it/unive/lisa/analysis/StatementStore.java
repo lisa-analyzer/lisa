@@ -14,18 +14,22 @@ import java.util.Map;
  * @param <A> the type of {@link AbstractState}
  */
 public class StatementStore<A extends AbstractState<A>>
-		extends FunctionalLattice<StatementStore<A>, Statement, AnalysisState<A>> {
+		extends
+		FunctionalLattice<StatementStore<A>, Statement, AnalysisState<A>> {
 
 	/**
 	 * Builds the store.
 	 * 
 	 * @param state an instance of the underlying lattice
 	 */
-	public StatementStore(AnalysisState<A> state) {
+	public StatementStore(
+			AnalysisState<A> state) {
 		super(state);
 	}
 
-	private StatementStore(AnalysisState<A> state, Map<Statement, AnalysisState<A>> function) {
+	private StatementStore(
+			AnalysisState<A> state,
+			Map<Statement, AnalysisState<A>> function) {
 		super(state, function);
 	}
 
@@ -39,7 +43,9 @@ public class StatementStore<A extends AbstractState<A>>
 	 * 
 	 * @return the previous state mapped to {@code expression}, or {@code null}
 	 */
-	public AnalysisState<A> put(Statement st, AnalysisState<A> state) {
+	public AnalysisState<A> put(
+			Statement st,
+			AnalysisState<A> state) {
 		if (function == null)
 			function = mkNewFunction(null, false);
 		return function.put(st, state);
@@ -50,7 +56,8 @@ public class StatementStore<A extends AbstractState<A>>
 	 * 
 	 * @param st the statement whose state needs to be forgotten
 	 */
-	public void forget(Statement st) {
+	public void forget(
+			Statement st) {
 		if (function == null)
 			return;
 		function.remove(st);
@@ -69,13 +76,15 @@ public class StatementStore<A extends AbstractState<A>>
 	}
 
 	@Override
-	public StatementStore<A> mk(AnalysisState<A> lattice,
+	public StatementStore<A> mk(
+			AnalysisState<A> lattice,
 			Map<Statement, AnalysisState<A>> function) {
 		return new StatementStore<>(lattice, function);
 	}
 
 	@Override
-	public AnalysisState<A> stateOfUnknown(Statement key) {
+	public AnalysisState<A> stateOfUnknown(
+			Statement key) {
 		return lattice.bottom();
 	}
 }

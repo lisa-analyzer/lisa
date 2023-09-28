@@ -38,8 +38,15 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
-	public CallWithResult(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Type staticType, Expression... parameters) {
+	public CallWithResult(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, staticType, parameters);
 	}
 

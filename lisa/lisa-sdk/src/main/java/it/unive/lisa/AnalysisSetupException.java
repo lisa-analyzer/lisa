@@ -22,7 +22,9 @@ public class AnalysisSetupException extends AnalysisException {
 	 * @param message the message of this exception
 	 * @param cause   the cause of this exception
 	 */
-	public AnalysisSetupException(String message, Throwable cause) {
+	public AnalysisSetupException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -31,7 +33,8 @@ public class AnalysisSetupException extends AnalysisException {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public AnalysisSetupException(String message) {
+	public AnalysisSetupException(
+			String message) {
 		super(message);
 	}
 
@@ -40,7 +43,8 @@ public class AnalysisSetupException extends AnalysisException {
 	 * 
 	 * @param cause the cause of this exception
 	 */
-	public AnalysisSetupException(Throwable cause) {
+	public AnalysisSetupException(
+			Throwable cause) {
 		super(cause);
 	}
 }

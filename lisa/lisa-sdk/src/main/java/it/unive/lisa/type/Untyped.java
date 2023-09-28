@@ -32,7 +32,8 @@ public class Untyped implements Type {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(
+			Object other) {
 		return other instanceof Untyped;
 	}
 
@@ -42,17 +43,20 @@ public class Untyped implements Type {
 	}
 
 	@Override
-	public boolean canBeAssignedTo(Type other) {
+	public boolean canBeAssignedTo(
+			Type other) {
 		return other == this;
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		return this;
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return types.getTypes();
 	}
 }

@@ -34,7 +34,9 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * @throws CallGraphConstructionException if an exception happens while
 	 *                                            building the call graph
 	 */
-	public void init(Application app) throws CallGraphConstructionException {
+	public void init(
+			Application app)
+			throws CallGraphConstructionException {
 		entrypoints.clear();
 		adjacencyMatrix.clear();
 	}
@@ -52,7 +54,10 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * @throws CallResolutionException if this call graph is unable to resolve
 	 *                                     the given call
 	 */
-	public abstract Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+	public abstract Call resolve(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			SymbolAliasing aliasing)
 			throws CallResolutionException;
 
 	/**
@@ -60,7 +65,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @param call the call to register
 	 */
-	public abstract void registerCall(CFGCall call);
+	public abstract void registerCall(
+			CFGCall call);
 
 	/**
 	 * Yields all the {@link Call}s that target the given {@link CodeMember}.
@@ -71,7 +77,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of calls that target the code member
 	 */
-	public abstract Collection<Call> getCallSites(CodeMember cm);
+	public abstract Collection<Call> getCallSites(
+			CodeMember cm);
 
 	/**
 	 * Yields all the {@link Call}s that target at least one of the given
@@ -82,7 +89,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of calls that target the code members
 	 */
-	public Collection<Call> getCallSites(Collection<? extends CodeMember> cms) {
+	public Collection<Call> getCallSites(
+			Collection<? extends CodeMember> cms) {
 		Set<Call> result = new HashSet<>();
 		cms.forEach(cm -> getCallSites(cm).stream().forEach(result::add));
 		return result;
@@ -97,7 +105,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callers code members
 	 */
-	public Collection<CodeMember> getCallers(Collection<? extends CodeMember> cms) {
+	public Collection<CodeMember> getCallers(
+			Collection<? extends CodeMember> cms) {
 		Set<CodeMember> result = new HashSet<>();
 		cms.forEach(cm -> getCallers(cm).stream().forEach(result::add));
 		return result;
@@ -112,7 +121,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callers code members computed transitively
 	 */
-	public Collection<CodeMember> getCallersTransitively(CodeMember cm) {
+	public Collection<CodeMember> getCallersTransitively(
+			CodeMember cm) {
 		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
 		getCallers(cm).stream().forEach(ws::push);
 		while (!ws.isEmpty())
@@ -129,7 +139,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callers code members computed transitively
 	 */
-	public Collection<CodeMember> getCallersTransitively(Collection<? extends CodeMember> cms) {
+	public Collection<CodeMember> getCallersTransitively(
+			Collection<? extends CodeMember> cms) {
 		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
 		cms.forEach(cm -> getCallers(cm).stream().forEach(ws::push));
 		while (!ws.isEmpty())
@@ -146,7 +157,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callees code members
 	 */
-	public Collection<CodeMember> getCallees(Collection<? extends CodeMember> cms) {
+	public Collection<CodeMember> getCallees(
+			Collection<? extends CodeMember> cms) {
 		Set<CodeMember> result = new HashSet<>();
 		cms.forEach(cm -> getCallees(cm).stream().forEach(result::add));
 		return result;
@@ -161,7 +173,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callees code members computed transitively
 	 */
-	public Collection<CodeMember> getCalleesTransitively(CodeMember cm) {
+	public Collection<CodeMember> getCalleesTransitively(
+			CodeMember cm) {
 		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
 		getCallees(cm).stream().forEach(ws::push);
 		while (!ws.isEmpty())
@@ -178,7 +191,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callees code members computed transitively
 	 */
-	public Collection<CodeMember> getCalleesTransitively(Collection<? extends CodeMember> cms) {
+	public Collection<CodeMember> getCalleesTransitively(
+			Collection<? extends CodeMember> cms) {
 		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
 		cms.forEach(cm -> getCallees(cm).stream().forEach(ws::push));
 		while (!ws.isEmpty())
@@ -195,7 +209,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of called code members
 	 */
-	public Collection<CodeMember> getCallees(CodeMember cm) {
+	public Collection<CodeMember> getCallees(
+			CodeMember cm) {
 		return followersOf(new CallGraphNode(this, cm)).stream()
 				.map(CallGraphNode::getCodeMember)
 				.collect(Collectors.toList());
@@ -210,7 +225,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callers code members
 	 */
-	public Collection<CodeMember> getCallers(CodeMember cm) {
+	public Collection<CodeMember> getCallers(
+			CodeMember cm) {
 		return predecessorsOf(new CallGraphNode(this, cm)).stream()
 				.map(CallGraphNode::getCodeMember)
 				.collect(Collectors.toList());
@@ -243,7 +259,8 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the recursions
 	 */
-	public Collection<Collection<CodeMember>> getRecursionsContaining(CodeMember cm) {
+	public Collection<Collection<CodeMember>> getRecursionsContaining(
+			CodeMember cm) {
 		Collection<Collection<CallGraphNode>> sccs = new SCCs<
 				CallGraph,
 				CallGraphNode,

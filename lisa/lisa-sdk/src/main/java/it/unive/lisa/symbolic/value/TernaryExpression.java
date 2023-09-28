@@ -47,9 +47,13 @@ public class TernaryExpression extends ValueExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public TernaryExpression(Type staticType, SymbolicExpression left, SymbolicExpression middle,
+	public TernaryExpression(
+			Type staticType,
+			SymbolicExpression left,
+			SymbolicExpression middle,
 			SymbolicExpression right,
-			TernaryOperator operator, CodeLocation location) {
+			TernaryOperator operator,
+			CodeLocation location) {
 		super(staticType, location);
 		this.left = left;
 		this.middle = middle;
@@ -95,14 +99,18 @@ public class TernaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		TernaryExpression expr = new TernaryExpression(getStaticType(), left.pushScope(token), middle.pushScope(token),
 				right.pushScope(token), operator, getCodeLocation());
 		return expr;
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		TernaryExpression expr = new TernaryExpression(getStaticType(), left.popScope(token), middle.popScope(token),
 				right.popScope(token), operator, getCodeLocation());
 		return expr;
@@ -120,7 +128,8 @@ public class TernaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -154,13 +163,16 @@ public class TernaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		T left = this.left.accept(visitor, params);
 		T middle = this.middle.accept(visitor, params);
 		T right = this.right.accept(visitor, params);
 		return visitor.visit(this, left, middle, right, params);
 	}
-	
+
 	@Override
 	public boolean mightNeedRewriting() {
 		return left.mightNeedRewriting() || middle.mightNeedRewriting() || right.mightNeedRewriting();

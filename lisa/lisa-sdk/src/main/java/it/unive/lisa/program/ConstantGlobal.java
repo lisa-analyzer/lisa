@@ -1,10 +1,9 @@
 package it.unive.lisa.program;
 
-import java.util.Objects;
-
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.Constant;
+import java.util.Objects;
 
 /**
  * A global variable, scoped by its container, that is fixed to a statically
@@ -26,7 +25,11 @@ public class ConstantGlobal extends Global {
 	 * @param name      the name of this global
 	 * @param constant  the constant value of this global
 	 */
-	public ConstantGlobal(CodeLocation location, Unit container, String name, Constant constant) {
+	public ConstantGlobal(
+			CodeLocation location,
+			Unit container,
+			String name,
+			Constant constant) {
 		this(location, container, name, constant, new Annotations());
 	}
 
@@ -41,7 +44,11 @@ public class ConstantGlobal extends Global {
 	 * @param constant    the constant value of this global
 	 * @param annotations the annotations of this global variable
 	 */
-	public ConstantGlobal(CodeLocation location, Unit container, String name, Constant constant,
+	public ConstantGlobal(
+			CodeLocation location,
+			Unit container,
+			String name,
+			Constant constant,
 			Annotations annotations) {
 		super(location, container, name, false, constant.getStaticType(), annotations);
 		Objects.requireNonNull(constant, "The constant of a constant global cannot be null");
@@ -66,7 +73,8 @@ public class ConstantGlobal extends Global {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

@@ -82,7 +82,11 @@ public class CodeMemberDescriptor implements CodeElement {
 	 * @param formals  the formal parametersof the CFG associated with this
 	 *                     descriptor
 	 */
-	public CodeMemberDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
+	public CodeMemberDescriptor(
+			CodeLocation location,
+			Unit unit,
+			boolean instance,
+			String name,
 			Parameter... formals) {
 		this(location, unit, instance, name, Untyped.INSTANCE, formals);
 	}
@@ -102,8 +106,13 @@ public class CodeMemberDescriptor implements CodeElement {
 	 * @param formals    the formal parameters of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CodeMemberDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
-			Type returnType, Parameter... formals) {
+	public CodeMemberDescriptor(
+			CodeLocation location,
+			Unit unit,
+			boolean instance,
+			String name,
+			Type returnType,
+			Parameter... formals) {
 		this(location, unit, instance, name, returnType, new Annotations(), formals);
 	}
 
@@ -124,8 +133,14 @@ public class CodeMemberDescriptor implements CodeElement {
 	 * @param formals     the formal parameters of the CFG associated with this
 	 *                        descriptor
 	 */
-	public CodeMemberDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
-			Type returnType, Annotations annotations, Parameter... formals) {
+	public CodeMemberDescriptor(
+			CodeLocation location,
+			Unit unit,
+			boolean instance,
+			String name,
+			Type returnType,
+			Annotations annotations,
+			Parameter... formals) {
 		Objects.requireNonNull(unit, "The unit of a CFG cannot be null");
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
 		Objects.requireNonNull(formals, "The array of formal parameters of a CFG cannot be null");
@@ -262,7 +277,8 @@ public class CodeMemberDescriptor implements CodeElement {
 	 * 
 	 * @param variable the entry to add
 	 */
-	public void addVariable(VariableTableEntry variable) {
+	public void addVariable(
+			VariableTableEntry variable) {
 		if (variable.getIndex() != variables.size())
 			variable.setIndex(variables.size());
 		variables.add(variable);
@@ -285,7 +301,8 @@ public class CodeMemberDescriptor implements CodeElement {
 	 * 
 	 * @param overridable the overridability of the cfg
 	 */
-	public void setOverridable(boolean overridable) {
+	public void setOverridable(
+			boolean overridable) {
 		this.overridable = overridable;
 	}
 
@@ -337,7 +354,8 @@ public class CodeMemberDescriptor implements CodeElement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -417,7 +435,8 @@ public class CodeMemberDescriptor implements CodeElement {
 	 * @return {@code true} if the two signatures are compatible, {@code false}
 	 *             otherwise
 	 */
-	public boolean matchesSignature(CodeMemberDescriptor reference) {
+	public boolean matchesSignature(
+			CodeMemberDescriptor reference) {
 		if (!name.equals(reference.name))
 			return false;
 
@@ -451,7 +470,8 @@ public class CodeMemberDescriptor implements CodeElement {
 	 * 
 	 * @param ann the annotation to be added
 	 */
-	public void addAnnotation(Annotation ann) {
+	public void addAnnotation(
+			Annotation ann) {
 		annotations.addAnnotation(ann);
 	}
 }

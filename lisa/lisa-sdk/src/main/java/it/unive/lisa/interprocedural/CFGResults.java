@@ -21,7 +21,8 @@ import org.apache.commons.lang3.tuple.Pair;
  *                state
  */
 public class CFGResults<A extends AbstractState<A>>
-		extends FunctionalLattice<CFGResults<A>, ScopeId, AnalyzedCFG<A>> {
+		extends
+		FunctionalLattice<CFGResults<A>, ScopeId, AnalyzedCFG<A>> {
 
 	/**
 	 * Builds a new result.
@@ -29,11 +30,13 @@ public class CFGResults<A extends AbstractState<A>>
 	 * @param lattice a singleton instance used for retrieving top and bottom
 	 *                    values
 	 */
-	public CFGResults(AnalyzedCFG<A> lattice) {
+	public CFGResults(
+			AnalyzedCFG<A> lattice) {
 		super(lattice);
 	}
 
-	private CFGResults(AnalyzedCFG<A> lattice,
+	private CFGResults(
+			AnalyzedCFG<A> lattice,
 			Map<ScopeId, AnalyzedCFG<A>> function) {
 		super(lattice, function);
 	}
@@ -64,7 +67,8 @@ public class CFGResults<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, AnalyzedCFG<A>> putResult(ScopeId token,
+	public Pair<Boolean, AnalyzedCFG<A>> putResult(
+			ScopeId token,
 			AnalyzedCFG<A> result)
 			throws SemanticException {
 		if (function == null) {
@@ -107,7 +111,8 @@ public class CFGResults<A extends AbstractState<A>>
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean contains(ScopeId token) {
+	public boolean contains(
+			ScopeId token) {
 		return function != null && function.containsKey(token);
 	}
 
@@ -121,7 +126,8 @@ public class CFGResults<A extends AbstractState<A>>
 	 * 
 	 * @return the result, or {@code null}
 	 */
-	public AnalyzedCFG<A> get(ScopeId token) {
+	public AnalyzedCFG<A> get(
+			ScopeId token) {
 		return function == null ? null : function.get(token);
 	}
 
@@ -146,13 +152,15 @@ public class CFGResults<A extends AbstractState<A>>
 	}
 
 	@Override
-	public CFGResults<A> mk(AnalyzedCFG<A> lattice,
+	public CFGResults<A> mk(
+			AnalyzedCFG<A> lattice,
 			Map<ScopeId, AnalyzedCFG<A>> function) {
 		return new CFGResults<>(lattice, function);
 	}
 
 	@Override
-	public AnalyzedCFG<A> stateOfUnknown(ScopeId key) {
+	public AnalyzedCFG<A> stateOfUnknown(
+			ScopeId key) {
 		return lattice.bottom();
 	}
 }

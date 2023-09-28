@@ -49,7 +49,9 @@ public class NativeCFG implements CodeMember {
 	 * @throws IllegalArgumentException if the class of the construct does not
 	 *                                      implement {@link PluggableStatement}
 	 */
-	public NativeCFG(CodeMemberDescriptor descriptor, Class<? extends NaryExpression> construct) {
+	public NativeCFG(
+			CodeMemberDescriptor descriptor,
+			Class<? extends NaryExpression> construct) {
 		if (!PluggableStatement.class.isAssignableFrom(construct))
 			throw new IllegalArgumentException(construct + " must implement the " + PluggableStatement.class.getName()
 					+ " to be used within native cfgs");
@@ -82,7 +84,9 @@ public class NativeCFG implements CodeMember {
 	 * @throws CallResolutionException if something goes wrong while creating
 	 *                                     the native call
 	 */
-	public NaryExpression rewrite(Statement original, Expression... params)
+	public NaryExpression rewrite(
+			Statement original,
+			Expression... params)
 			throws CallResolutionException {
 
 		try {

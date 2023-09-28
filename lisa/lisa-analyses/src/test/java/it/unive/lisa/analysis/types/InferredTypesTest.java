@@ -5,9 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.program.Program;

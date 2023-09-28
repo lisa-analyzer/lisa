@@ -19,7 +19,10 @@ public class StringLiteral extends Literal<String> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public StringLiteral(CFG cfg, CodeLocation location, String value) {
+	public StringLiteral(
+			CFG cfg,
+			CodeLocation location,
+			String value) {
 		super(cfg, location, value, cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType());
 	}
 

@@ -1,13 +1,5 @@
 package it.unive.lisa.interprocedural.context.recursion;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
@@ -33,6 +25,12 @@ import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A recursion solver that applies the iterates of the recursion starting from
@@ -70,7 +68,9 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 	 *                      used to query call results
 	 * @param recursion the recursion to solve
 	 */
-	public RecursionSolver(ContextBasedAnalysis<A> backing, Recursion<A> recursion) {
+	public RecursionSolver(
+			ContextBasedAnalysis<A> backing,
+			Recursion<A> recursion) {
 		super(backing);
 		this.recursion = recursion;
 		finalEntryStates = new HashMap<>();
@@ -137,7 +137,8 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 	}
 
 	@Override
-	protected boolean canShortcut(CFG cfg) {
+	protected boolean canShortcut(
+			CFG cfg) {
 		// we want to compute the recursive chain with no shortcuts
 		return !recursion.getMembers().contains(cfg);
 	}

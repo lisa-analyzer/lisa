@@ -33,7 +33,9 @@ public abstract class StructuredRepresentation implements Comparable<StructuredR
 	 * @param key   the key of the property
 	 * @param value the value of the property
 	 */
-	public void setProperty(String key, String value) {
+	public void setProperty(
+			String key,
+			String value) {
 		this.properties.put(key, value);
 	}
 
@@ -46,7 +48,8 @@ public abstract class StructuredRepresentation implements Comparable<StructuredR
 	public abstract SerializableValue toSerializableValue();
 
 	@Override
-	public final int compareTo(StructuredRepresentation o) {
+	public final int compareTo(
+			StructuredRepresentation o) {
 		if (o == null)
 			return 1;
 
@@ -65,7 +68,8 @@ public abstract class StructuredRepresentation implements Comparable<StructuredR
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

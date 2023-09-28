@@ -37,7 +37,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @param other the other set
 	 */
-	default void addAll(ExternalSet<T> other) {
+	default void addAll(
+			ExternalSet<T> other) {
 		if (this == other)
 			return;
 		if (other == null)
@@ -80,7 +81,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * @return {@code true} if and only if {@code other} is included into this
 	 *             set
 	 */
-	default boolean contains(ExternalSet<T> other) {
+	default boolean contains(
+			ExternalSet<T> other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -102,7 +104,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return true if and only if this set intersects the other
 	 */
-	default boolean intersects(ExternalSet<T> other) {
+	default boolean intersects(
+			ExternalSet<T> other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -125,7 +128,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the intersection of the two sets
 	 */
-	default ExternalSet<T> intersection(ExternalSet<T> other) {
+	default ExternalSet<T> intersection(
+			ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -150,7 +154,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * @return a set obtained from this by removing the elements in
 	 *             {@code other}
 	 */
-	default ExternalSet<T> difference(ExternalSet<T> other) {
+	default ExternalSet<T> difference(
+			ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -174,7 +179,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the union of this set and {@code other}
 	 */
-	default ExternalSet<T> union(ExternalSet<T> other) {
+	default ExternalSet<T> union(
+			ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -197,7 +203,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
-	default boolean anyMatch(Predicate<T> predicate) {
+	default boolean anyMatch(
+			Predicate<T> predicate) {
 		for (T t : this)
 			if (predicate.test(t))
 				return true;
@@ -213,7 +220,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
-	default boolean noneMatch(Predicate<T> predicate) {
+	default boolean noneMatch(
+			Predicate<T> predicate) {
 		for (T t : this)
 			if (predicate.test(t))
 				return false;
@@ -229,7 +237,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
-	default boolean allMatch(Predicate<T> predicate) {
+	default boolean allMatch(
+			Predicate<T> predicate) {
 		for (T t : this)
 			if (!predicate.test(t))
 				return false;
@@ -245,7 +254,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return a new external set filtered by {@code predicate}
 	 */
-	default ExternalSet<T> filter(Predicate<T> predicate) {
+	default ExternalSet<T> filter(
+			Predicate<T> predicate) {
 		ExternalSet<T> result = copy();
 		for (T t : this)
 			if (!predicate.test(t))
@@ -263,7 +273,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the transformed set
 	 */
-	default ExternalSet<T> transform(UnaryOperator<T> transformer) {
+	default ExternalSet<T> transform(
+			UnaryOperator<T> transformer) {
 		ExternalSet<T> result = getCache().mkEmptySet();
 		for (T t : this)
 			result.add(transformer.apply(t));
@@ -280,7 +291,8 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the transformed set
 	 */
-	default ExternalSet<T> multiTransform(Function<T, Collection<T>> transformer) {
+	default ExternalSet<T> multiTransform(
+			Function<T, Collection<T>> transformer) {
 		ExternalSet<T> result = getCache().mkEmptySet();
 		for (T t : this)
 			result.addAll(transformer.apply(t));
@@ -297,7 +309,9 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the reduced element
 	 */
-	default T reduce(T base, BinaryOperator<T> reducer) {
+	default T reduce(
+			T base,
+			BinaryOperator<T> reducer) {
 		T result = base;
 		for (T t : this)
 			result = reducer.apply(result, t);

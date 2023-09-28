@@ -20,7 +20,8 @@ import org.apache.commons.lang3.tuple.Pair;
  *                state
  */
 public class FixpointResults<A extends AbstractState<A>>
-		extends FunctionalLattice<FixpointResults<A>, CFG, CFGResults<A>> {
+		extends
+		FunctionalLattice<FixpointResults<A>, CFG, CFGResults<A>> {
 
 	/**
 	 * Builds a new result.
@@ -28,11 +29,14 @@ public class FixpointResults<A extends AbstractState<A>>
 	 * @param lattice a singleton instance used for retrieving top and bottom
 	 *                    values
 	 */
-	public FixpointResults(CFGResults<A> lattice) {
+	public FixpointResults(
+			CFGResults<A> lattice) {
 		super(lattice);
 	}
 
-	private FixpointResults(CFGResults<A> lattice, Map<CFG, CFGResults<A>> function) {
+	private FixpointResults(
+			CFGResults<A> lattice,
+			Map<CFG, CFGResults<A>> function) {
 		super(lattice, function);
 	}
 
@@ -50,7 +54,9 @@ public class FixpointResults<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, AnalyzedCFG<A>> putResult(CFG cfg, ScopeId token,
+	public Pair<Boolean, AnalyzedCFG<A>> putResult(
+			CFG cfg,
+			ScopeId token,
 			AnalyzedCFG<A> result)
 			throws SemanticException {
 		if (function == null)
@@ -66,7 +72,8 @@ public class FixpointResults<A extends AbstractState<A>>
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean contains(CFG cfg) {
+	public boolean contains(
+			CFG cfg) {
 		return function != null && function.containsKey(cfg);
 	}
 
@@ -80,7 +87,8 @@ public class FixpointResults<A extends AbstractState<A>>
 	 * 
 	 * @return the result, or {@code null}
 	 */
-	public CFGResults<A> get(CFG cfg) {
+	public CFGResults<A> get(
+			CFG cfg) {
 		return function == null ? null : function.get(cfg);
 	}
 
@@ -99,7 +107,8 @@ public class FixpointResults<A extends AbstractState<A>>
 	 * 
 	 * @param cfg the cfg to forget
 	 */
-	public void forget(CFG cfg) {
+	public void forget(
+			CFG cfg) {
 		if (function == null)
 			return;
 		function.remove(cfg);
@@ -108,13 +117,15 @@ public class FixpointResults<A extends AbstractState<A>>
 	}
 
 	@Override
-	public FixpointResults<A> mk(CFGResults<A> lattice,
+	public FixpointResults<A> mk(
+			CFGResults<A> lattice,
 			Map<CFG, CFGResults<A>> function) {
 		return new FixpointResults<>(lattice, function);
 	}
 
 	@Override
-	public CFGResults<A> stateOfUnknown(CFG key) {
+	public CFGResults<A> stateOfUnknown(
+			CFG key) {
 		return lattice.bottom();
 	}
 }

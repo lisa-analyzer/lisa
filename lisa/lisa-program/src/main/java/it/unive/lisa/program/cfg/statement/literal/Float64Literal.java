@@ -20,7 +20,10 @@ public class Float64Literal extends Literal<Double> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public Float64Literal(CFG cfg, CodeLocation location, double value) {
+	public Float64Literal(
+			CFG cfg,
+			CodeLocation location,
+			double value) {
 		super(cfg, location, value, Float64Type.INSTANCE);
 	}
 }

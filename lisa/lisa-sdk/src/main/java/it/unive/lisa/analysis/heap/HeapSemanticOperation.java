@@ -67,7 +67,8 @@ public interface HeapSemanticOperation {
 		 * 
 		 * @param id the identifier to add
 		 */
-		public void addSource(Identifier id) {
+		public void addSource(
+				Identifier id) {
 			sources.add(id);
 		}
 
@@ -77,7 +78,8 @@ public interface HeapSemanticOperation {
 		 * 
 		 * @param id the identifier to add
 		 */
-		public void addTarget(Identifier id) {
+		public void addTarget(
+				Identifier id) {
 			targets.add(id);
 		}
 
@@ -124,7 +126,8 @@ public interface HeapSemanticOperation {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)

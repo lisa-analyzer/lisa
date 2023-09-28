@@ -23,7 +23,8 @@ public class SyntheticLocation implements CodeLocation {
 	}
 
 	@Override
-	public int compareTo(CodeLocation o) {
+	public int compareTo(
+			CodeLocation o) {
 		return o instanceof SyntheticLocation ? 0 : -1;
 	}
 }

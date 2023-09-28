@@ -15,7 +15,8 @@ public class MathNumberConversionException extends Exception {
 	 * 
 	 * @param m the math number that fails to be converted
 	 */
-	public MathNumberConversionException(MathNumber m) {
+	public MathNumberConversionException(
+			MathNumber m) {
 		super("Cannot convert " + m + " to numerical value");
 	}
 }

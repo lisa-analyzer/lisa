@@ -25,7 +25,8 @@ import java.util.Set;
  * @param <A> The {@link AbstractState} of the analysis
  */
 public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
-		implements InterproceduralAnalysis<A> {
+		implements
+		InterproceduralAnalysis<A> {
 
 	/**
 	 * The call graph used to resolve method calls.
@@ -53,7 +54,8 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 	 * 
 	 * @param other the original analysis to copy
 	 */
-	protected CallGraphBasedAnalysis(CallGraphBasedAnalysis<A> other) {
+	protected CallGraphBasedAnalysis(
+			CallGraphBasedAnalysis<A> other) {
 		this.callgraph = other.callgraph;
 		this.app = other.app;
 		this.policy = other.policy;
@@ -65,7 +67,10 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 	}
 
 	@Override
-	public void init(Application app, CallGraph callgraph, OpenCallPolicy policy)
+	public void init(
+			Application app,
+			CallGraph callgraph,
+			OpenCallPolicy policy)
 			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.app = app;
@@ -73,7 +78,10 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+	public Call resolve(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			SymbolAliasing aliasing)
 			throws CallResolutionException {
 		return callgraph.resolve(call, types, aliasing);
 	}
@@ -89,7 +97,9 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if the analysis fails
 	 */
-	public AnalysisState<A> prepareEntryStateOfEntryPoint(AnalysisState<A> entryState, CFG cfg)
+	public AnalysisState<A> prepareEntryStateOfEntryPoint(
+			AnalysisState<A> entryState,
+			CFG cfg)
 			throws SemanticException {
 		AnalysisState<A> prepared = entryState;
 

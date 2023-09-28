@@ -50,7 +50,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @param node the node to add
 	 */
-	void addNode(N node);
+	void addNode(
+			N node);
 
 	/**
 	 * Adds the given node to the set of nodes, optionally marking this as
@@ -60,7 +61,9 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * @param entrypoint if {@code true} causes the given node to be considered
 	 *                       as an entrypoint.
 	 */
-	void addNode(N node, boolean entrypoint);
+	void addNode(
+			N node,
+			boolean entrypoint);
 
 	/**
 	 * Adds an edge to this graph.
@@ -71,7 +74,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 *                                           the given edge are not part of
 	 *                                           this graph
 	 */
-	void addEdge(E edge);
+	void addEdge(
+			E edge);
 
 	/**
 	 * Yields the total number of nodes of this graph.
@@ -94,7 +98,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return {@code true} if the node is in this graph
 	 */
-	boolean containsNode(N node);
+	boolean containsNode(
+			N node);
 
 	/**
 	 * Yields {@code true} if the given edge is contained in this graph.
@@ -103,7 +108,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return {@code true} if the edge is in this graph
 	 */
-	boolean containsEdge(E edge);
+	boolean containsEdge(
+			E edge);
 
 	/**
 	 * Yields the edge connecting the two given nodes, if any. Yields
@@ -119,7 +125,9 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * @return the edge connecting {@code source} to {@code destination}, or
 	 *             {@code null}
 	 */
-	E getEdgeConnecting(N source, N destination);
+	E getEdgeConnecting(
+			N source,
+			N destination);
 
 	/**
 	 * Yields all edges connecting the two given nodes, if any. Yields an empty
@@ -131,7 +139,9 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return the edges connecting {@code source} to {@code destination}
 	 */
-	Collection<E> getEdgesConnecting(N source, N destination);
+	Collection<E> getEdgesConnecting(
+			N source,
+			N destination);
 
 	/**
 	 * Yields the ingoing edges to the given node.
@@ -140,7 +150,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return the collection of ingoing edges
 	 */
-	Collection<E> getIngoingEdges(N node);
+	Collection<E> getIngoingEdges(
+			N node);
 
 	/**
 	 * Yields the outgoing edges from the given node.
@@ -149,7 +160,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return the collection of outgoing edges
 	 */
-	Collection<E> getOutgoingEdges(N node);
+	Collection<E> getOutgoingEdges(
+			N node);
 
 	/**
 	 * Yields the collection of the nodes that are followers of the given one,
@@ -161,7 +173,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return the collection of followers
 	 */
-	Collection<N> followersOf(N node);
+	Collection<N> followersOf(
+			N node);
 
 	/**
 	 * Yields the collection of the nodes that are predecessors of the given
@@ -173,7 +186,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return the collection of predecessors
 	 */
-	Collection<N> predecessorsOf(N node);
+	Collection<N> predecessorsOf(
+			N node);
 
 	/**
 	 * Yields an instance of {@link SerializableGraph} built from this one. The
@@ -197,7 +211,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * 
 	 * @return a {@link SerializableGraph} instance
 	 */
-	SerializableGraph toSerializableGraph(BiFunction<G, N, SerializableValue> descriptionGenerator);
+	SerializableGraph toSerializableGraph(
+			BiFunction<G, N, SerializableValue> descriptionGenerator);
 
 	/**
 	 * Checks if this graph is effectively equal to the given one, that is, if
@@ -208,7 +223,8 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * @return {@code true} if this graph and the given one are effectively
 	 *             equals
 	 */
-	boolean isEqualTo(G graph);
+	boolean isEqualTo(
+			G graph);
 
 	/**
 	 * Accepts the given {@link GraphVisitor}. This method first invokes
@@ -226,7 +242,9 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 	 * @param tool    the auxiliary tool that {@code visitor} can use
 	 */
 	@SuppressWarnings("unchecked")
-	public default <V> void accept(GraphVisitor<G, N, E, V> visitor, V tool) {
+	public default <V> void accept(
+			GraphVisitor<G, N, E, V> visitor,
+			V tool) {
 		if (!visitor.visit(tool, (G) this))
 			return;
 

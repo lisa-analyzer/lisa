@@ -1,7 +1,5 @@
 package it.unive.lisa.program;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
@@ -9,6 +7,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Objects;
 
 /**
  * A global variable, scoped by its container. Instances of this class can refer
@@ -45,7 +44,11 @@ public class Global implements CodeElement {
 	 * @param name       the name of this global
 	 * @param isInstance whether or not this is an instance global
 	 */
-	public Global(CodeLocation location, Unit container, String name, boolean isInstance) {
+	public Global(
+			CodeLocation location,
+			Unit container,
+			String name,
+			boolean isInstance) {
 		this(location, container, name, isInstance, Untyped.INSTANCE);
 	}
 
@@ -61,7 +64,12 @@ public class Global implements CodeElement {
 	 * @param staticType the type of this global. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
-	public Global(CodeLocation location, Unit container, String name, boolean isInstance, Type staticType) {
+	public Global(
+			CodeLocation location,
+			Unit container,
+			String name,
+			boolean isInstance,
+			Type staticType) {
 		this(location, container, name, isInstance, staticType, new Annotations());
 	}
 
@@ -78,7 +86,12 @@ public class Global implements CodeElement {
 	 *                        {@link Untyped#INSTANCE}
 	 * @param annotations the annotations of this global variable
 	 */
-	public Global(CodeLocation location, Unit container, String name, boolean isInstance, Type staticType,
+	public Global(
+			CodeLocation location,
+			Unit container,
+			String name,
+			boolean isInstance,
+			Type staticType,
 			Annotations annotations) {
 		Objects.requireNonNull(name, "The name of a global cannot be null");
 		Objects.requireNonNull(staticType, "The type of a global cannot be null");
@@ -142,7 +155,8 @@ public class Global implements CodeElement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -204,7 +218,8 @@ public class Global implements CodeElement {
 	 * 
 	 * @param ann the annotation to be added
 	 */
-	public void addAnnotation(Annotation ann) {
+	public void addAnnotation(
+			Annotation ann) {
 		annotations.addAnnotation(ann);
 	}
 
@@ -216,7 +231,8 @@ public class Global implements CodeElement {
 	 * 
 	 * @return the variable representing this parameter
 	 */
-	public Variable toSymbolicVariable(CodeLocation where) {
+	public Variable toSymbolicVariable(
+			CodeLocation where) {
 		return new Variable(staticType, name, annotations, where);
 	}
 }

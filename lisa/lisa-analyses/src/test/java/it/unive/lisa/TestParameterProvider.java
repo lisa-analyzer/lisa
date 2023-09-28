@@ -1,10 +1,5 @@
 package it.unive.lisa;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
@@ -42,6 +37,10 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TestParameterProvider {
 	private TestParameterProvider() {

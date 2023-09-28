@@ -26,7 +26,11 @@ public class HeapLocation extends Identifier {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public HeapLocation(Type staticType, String name, boolean weak, CodeLocation location) {
+	public HeapLocation(
+			Type staticType,
+			String name,
+			boolean weak,
+			CodeLocation location) {
 		super(staticType, name, weak, new Annotations(), location);
 	}
 
@@ -44,7 +48,8 @@ public class HeapLocation extends Identifier {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -58,7 +63,9 @@ public class HeapLocation extends Identifier {
 	}
 
 	@Override
-	public Identifier lub(Identifier other) throws SemanticException {
+	public Identifier lub(
+			Identifier other)
+			throws SemanticException {
 		if (!getName().equals(other.getName()))
 			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
 					+ "' and '" + other + "'");
@@ -71,17 +78,23 @@ public class HeapLocation extends Identifier {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
 		return this;
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
 	}
 }

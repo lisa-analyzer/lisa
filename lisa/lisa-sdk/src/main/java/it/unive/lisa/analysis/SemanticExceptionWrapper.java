@@ -15,7 +15,8 @@ public class SemanticExceptionWrapper extends RuntimeException {
 	 * 
 	 * @param cause the cause of this exception
 	 */
-	public SemanticExceptionWrapper(SemanticException cause) {
+	public SemanticExceptionWrapper(
+			SemanticException cause) {
 		super("A semantic exception happened", cause);
 	}
 

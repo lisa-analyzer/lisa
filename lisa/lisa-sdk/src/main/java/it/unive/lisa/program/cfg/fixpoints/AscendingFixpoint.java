@@ -22,7 +22,8 @@ import java.util.Map;
  *                state
  */
 public class AscendingFixpoint<A extends AbstractState<A>>
-		extends CFGFixpoint<A> {
+		extends
+		CFGFixpoint<A> {
 
 	private final FixpointConfiguration config;
 	private final Map<Statement, Integer> lubs;
@@ -36,7 +37,8 @@ public class AscendingFixpoint<A extends AbstractState<A>>
 	 *                            semantics computations
 	 * @param config          the {@link FixpointConfiguration} to use
 	 */
-	public AscendingFixpoint(CFG target,
+	public AscendingFixpoint(
+			CFG target,
 			InterproceduralAnalysis<A> interprocedural,
 			FixpointConfiguration config) {
 		super(target, interprocedural);
@@ -46,9 +48,11 @@ public class AscendingFixpoint<A extends AbstractState<A>>
 	}
 
 	@Override
-	public CompoundState<A> operation(Statement node,
+	public CompoundState<A> operation(
+			Statement node,
 			CompoundState<A> approx,
-			CompoundState<A> old) throws SemanticException {
+			CompoundState<A> old)
+			throws SemanticException {
 		if (config.wideningThreshold < 0)
 			// invalid threshold means always lub
 			return old.lub(approx);
@@ -77,8 +81,11 @@ public class AscendingFixpoint<A extends AbstractState<A>>
 	}
 
 	@Override
-	public boolean equality(Statement node, CompoundState<A> approx,
-			CompoundState<A> old) throws SemanticException {
+	public boolean equality(
+			Statement node,
+			CompoundState<A> approx,
+			CompoundState<A> old)
+			throws SemanticException {
 		return approx.lessOrEqual(old);
 	}
 }

@@ -37,7 +37,8 @@ public class StringConcat extends StringOperation {
 	}
 
 	@Override
-	protected Type resultType(TypeSystem types) {
+	protected Type resultType(
+			TypeSystem types) {
 		return types.getStringType();
 	}
 }

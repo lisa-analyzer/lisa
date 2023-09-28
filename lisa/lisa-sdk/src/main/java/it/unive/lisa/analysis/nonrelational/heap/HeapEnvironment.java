@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -13,6 +9,9 @@ import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An environment for a {@link NonRelationalHeapDomain}, that maps

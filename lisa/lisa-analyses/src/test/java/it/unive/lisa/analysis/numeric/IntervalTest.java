@@ -4,17 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
-import org.junit.Test;
-
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -38,6 +31,11 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.numeric.InfiniteIterationException;
 import it.unive.lisa.util.numeric.IntInterval;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import org.junit.Test;
 
 public class IntervalTest {
 
@@ -62,7 +60,7 @@ public class IntervalTest {
 	private final ValueEnvironment<
 			Interval> env = new ValueEnvironment<>(singleton).putState(variable, singleton.top());
 	private final SemanticOracle oracle = new SemanticOracle() {
-		
+
 		@Override
 		public Set<Type> getRuntimeTypesOf(
 				SymbolicExpression e,
@@ -71,7 +69,7 @@ public class IntervalTest {
 				throws SemanticException {
 			return null;
 		}
-		
+
 		@Override
 		public Type getDynamicTypeOf(
 				SymbolicExpression e,
@@ -80,7 +78,7 @@ public class IntervalTest {
 				throws SemanticException {
 			return null;
 		}
-		
+
 		@Override
 		public ExpressionSet rewrite(
 				SymbolicExpression expression,
@@ -90,14 +88,15 @@ public class IntervalTest {
 			return null;
 		}
 	};
-	
+
 	@Test
 	public void testEvalConstant() {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			assertTrue("eval(" + val + ") did not return [" + val + ", " + val + "]",
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle).interval
-							.is(val));
+					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp,
+							oracle).interval
+									.is(val));
 		}
 	}
 
@@ -105,7 +104,8 @@ public class IntervalTest {
 	public void testEvalNegationOnSingleton() {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
-			Interval aval = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+			Interval aval = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp,
+					oracle);
 			assertTrue("eval(-" + val + ") did not return [-" + val + ", -" + val + "]",
 					singleton.evalUnaryExpression(NumericNegation.INSTANCE, aval, pp, oracle).interval.is(-val));
 		}
@@ -306,7 +306,8 @@ public class IntervalTest {
 	public void testAssumeEQOnSingleton() throws SemanticException {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
-			Interval aval = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+			Interval aval = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp,
+					oracle);
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " == " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonEq.INSTANCE,
@@ -322,7 +323,8 @@ public class IntervalTest {
 					pp, oracle);
 			// val + 1, +inf
 			aval = aval.widening(
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp, oracle));
+					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp,
+							oracle));
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " > " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonGt.INSTANCE,
@@ -334,10 +336,12 @@ public class IntervalTest {
 	public void testAssumeGEOnSingleton() throws SemanticException {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
-			Interval aval = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+			Interval aval = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp,
+					oracle);
 			// val, +inf
 			aval = aval.widening(
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp, oracle));
+					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp,
+							oracle));
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " >= " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonGe.INSTANCE,
@@ -353,7 +357,8 @@ public class IntervalTest {
 					pp, oracle);
 			// -inf, val - 1
 			aval = aval.widening(
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp, oracle));
+					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp,
+							oracle));
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " < " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonLt.INSTANCE,
@@ -365,10 +370,12 @@ public class IntervalTest {
 	public void testAssumeLEOnSingleton() throws SemanticException {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
-			Interval aval = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+			Interval aval = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp,
+					oracle);
 			// -inf, val
 			aval = aval.widening(
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp, oracle));
+					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp,
+							oracle));
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " <= " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonLe.INSTANCE,
@@ -380,8 +387,10 @@ public class IntervalTest {
 			int val1,
 			int val2)
 			throws SemanticException {
-		Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
-		Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+		Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp,
+				oracle);
+		Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp,
+				oracle);
 		return aval1.lub(aval2);
 	}
 

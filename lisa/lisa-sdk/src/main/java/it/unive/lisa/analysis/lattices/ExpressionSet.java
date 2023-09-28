@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
-		implements ScopedObject<ExpressionSet> {
+		implements
+		ScopedObject<ExpressionSet> {
 
 	/**
 	 * Builds the empty set lattice element.
@@ -34,7 +35,8 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 	 * 
 	 * @param exp the expression
 	 */
-	public ExpressionSet(SymbolicExpression exp) {
+	public ExpressionSet(
+			SymbolicExpression exp) {
 		this(Collections.singleton(exp), false);
 	}
 
@@ -43,15 +45,19 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 	 * 
 	 * @param set the set of expression
 	 */
-	public ExpressionSet(Set<SymbolicExpression> set) {
+	public ExpressionSet(
+			Set<SymbolicExpression> set) {
 		this(set, false);
 	}
 
-	private ExpressionSet(boolean isTop) {
+	private ExpressionSet(
+			boolean isTop) {
 		this(Collections.emptySet(), isTop);
 	}
 
-	private ExpressionSet(Set<SymbolicExpression> set, boolean isTop) {
+	private ExpressionSet(
+			Set<SymbolicExpression> set,
+			boolean isTop) {
 		super(set, isTop);
 	}
 
@@ -66,7 +72,8 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 	}
 
 	@Override
-	public ExpressionSet mk(Set<SymbolicExpression> set) {
+	public ExpressionSet mk(
+			Set<SymbolicExpression> set) {
 		return new ExpressionSet(set);
 	}
 
@@ -79,7 +86,8 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -93,7 +101,9 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 	}
 
 	@Override
-	public ExpressionSet lubAux(ExpressionSet other) throws SemanticException {
+	public ExpressionSet lubAux(
+			ExpressionSet other)
+			throws SemanticException {
 		Set<SymbolicExpression> lub = new HashSet<>();
 
 		// all non-identifiers expressions are part of the lub
@@ -103,14 +113,18 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 
 		// identifiers are added after lubbing the ones with the same name
 		Set<Identifier> idlub = new HashSet<>();
-		CollectionUtilities.join(onlyIds(), other.onlyIds(), idlub, (id1, id2) -> id1.getName().equals(id2.getName()),
+		CollectionUtilities.join(onlyIds(), other.onlyIds(), idlub, (
+				id1,
+				id2) -> id1.getName().equals(id2.getName()),
 				ExpressionSet::wrapper);
 		idlub.forEach(lub::add);
 
 		return new ExpressionSet(lub);
 	}
 
-	private static Identifier wrapper(Identifier id1, Identifier id2) {
+	private static Identifier wrapper(
+			Identifier id1,
+			Identifier id2) {
 		try {
 			return id1.lub(id2);
 		} catch (SemanticException e) {
@@ -124,7 +138,9 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 	}
 
 	@Override
-	public ExpressionSet pushScope(ScopeToken token) throws SemanticException {
+	public ExpressionSet pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		Set<SymbolicExpression> mapped = new HashSet<>();
 		for (SymbolicExpression exp : elements)
 			mapped.add(exp.pushScope(token));
@@ -132,7 +148,9 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 	}
 
 	@Override
-	public ExpressionSet popScope(ScopeToken token) throws SemanticException {
+	public ExpressionSet popScope(
+			ScopeToken token)
+			throws SemanticException {
 		Set<SymbolicExpression> mapped = new HashSet<>();
 		for (SymbolicExpression exp : elements)
 			mapped.add(exp.popScope(token));

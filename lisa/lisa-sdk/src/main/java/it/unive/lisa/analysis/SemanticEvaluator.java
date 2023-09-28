@@ -16,7 +16,8 @@ public interface SemanticEvaluator {
 	 * {@code false} otherwise.
 	 * 
 	 * @param expression the expression
-	 * @param pp         TODO
+	 * @param pp         the program point where this method is queried
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return {@code true} if the domain can process {@code expression},
 	 *             {@code false} otherwise.

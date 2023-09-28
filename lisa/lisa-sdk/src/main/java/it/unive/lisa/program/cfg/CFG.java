@@ -1,21 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -56,6 +40,20 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -91,7 +89,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param descriptor the descriptor of this cfg
 	 */
-	public CFG(CodeMemberDescriptor descriptor) {
+	public CFG(
+			CodeMemberDescriptor descriptor) {
 		super(new SequentialEdge());
 		this.descriptor = descriptor;
 		this.cfStructs = new LinkedList<>();
@@ -106,7 +105,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param list        the node list containing all the statements and the
 	 *                        edges that will be part of this cfg
 	 */
-	public CFG(CodeMemberDescriptor descriptor, Collection<Statement> entrypoints,
+	public CFG(
+			CodeMemberDescriptor descriptor,
+			Collection<Statement> entrypoints,
 			NodeList<CFG, Statement, Edge> list) {
 		super(entrypoints, list);
 		this.descriptor = descriptor;
@@ -118,7 +119,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param other the original cfg
 	 */
-	public CFG(CFG other) {
+	public CFG(
+			CFG other) {
 		super(other.entrypoints, other.list);
 		this.descriptor = other.descriptor;
 		this.cfStructs = other.cfStructs;
@@ -171,7 +173,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @throws IllegalArgumentException if a control flow structure for the same
 	 *                                      condition already exists
 	 */
-	public void addControlFlowStructure(ControlFlowStructure cf) {
+	public void addControlFlowStructure(
+			ControlFlowStructure cf) {
 		if (cfStructs.stream().anyMatch(c -> c.getCondition().equals(cf.getCondition())))
 			throw new IllegalArgumentException(
 					"Cannot have more than one conditional structure happening on the same condition: "
@@ -201,7 +204,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param extractor the extractor to run
 	 */
-	public void extractControlFlowStructures(ControlFlowExtractor extractor) {
+	public void extractControlFlowStructures(
+			ControlFlowExtractor extractor) {
 		LOG.debug("Extracting control flow structures from " + this);
 		extractor.extract(this).forEach(cfStructs::add);
 	}
@@ -272,7 +276,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			InterproceduralAnalysis<A> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id) throws FixpointException {
+			ScopeId id)
+			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, conf, id);
@@ -324,7 +329,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			InterproceduralAnalysis<A> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id) throws FixpointException {
+			ScopeId id)
+			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, conf, id);
@@ -378,7 +384,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			InterproceduralAnalysis<A> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id) throws FixpointException {
+			ScopeId id)
+			throws FixpointException {
 		// we disable optimizations for ascending phases if there is a
 		// descending one: the latter will need full results to start applying
 		// glbs/narrowings from a post-fixpoint
@@ -390,7 +397,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
-		startingPoints.forEach((st, state) -> starting.put(st, CompoundState.of(state, bot)));
+		startingPoints.forEach((
+				st,
+				state) -> starting.put(st, CompoundState.of(state, bot)));
 		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
 
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
@@ -451,17 +460,20 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	}
 
 	@Override
-	public SerializableGraph toSerializableGraph(BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
+	public SerializableGraph toSerializableGraph(
+			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
 		return SerializableCFG.fromCFG(this, descriptionGenerator);
 	}
 
 	@Override
-	public void preSimplify(Statement node) {
+	public void preSimplify(
+			Statement node) {
 		shiftVariableScopes(node);
 		shiftControlFlowStructuresEnd(node);
 	}
 
-	private void shiftControlFlowStructuresEnd(Statement node) {
+	private void shiftControlFlowStructuresEnd(
+			Statement node) {
 		Collection<Statement> followers = followersOf(node);
 
 		Statement candidate;
@@ -482,7 +494,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				}
 	}
 
-	private Statement firstNonNoOpDeterministicFollower(Statement st) {
+	private Statement firstNonNoOpDeterministicFollower(
+			Statement st) {
 		Statement current = st;
 		while (current instanceof NoOp) {
 			Collection<Statement> followers = followersOf(current);
@@ -495,7 +508,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		return current;
 	}
 
-	private void shiftVariableScopes(Statement node) {
+	private void shiftVariableScopes(
+			Statement node) {
 		Collection<
 				VariableTableEntry> starting = descriptor.getVariables().stream().filter(v -> v.getScopeStart() == node)
 						.collect(Collectors.toList());
@@ -638,7 +652,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					+ new HashSet<>(entrypoints).retainAll(list.getNodes()));
 	}
 
-	private Collection<ControlFlowStructure> getControlFlowsContaining(ProgramPoint pp) {
+	private Collection<ControlFlowStructure> getControlFlowsContaining(
+			ProgramPoint pp) {
 		if (!(pp instanceof Statement))
 			// synthetic pp
 			return Collections.emptyList();
@@ -674,7 +689,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return {@code true} if {@code pp} is inside a control flow structure
 	 */
-	public boolean isGuarded(ProgramPoint pp) {
+	public boolean isGuarded(
+			ProgramPoint pp) {
 		return !getControlFlowsContaining(pp).isEmpty();
 	}
 
@@ -690,7 +706,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return {@code true} if {@code pp} is inside a loop
 	 */
-	public boolean isInsideLoop(ProgramPoint pp) {
+	public boolean isInsideLoop(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().anyMatch(Loop.class::isInstance);
 	}
 
@@ -706,7 +723,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return {@code true} if {@code pp} is inside an if-then-else
 	 */
-	public boolean isInsideIfThenElse(ProgramPoint pp) {
+	public boolean isInsideIfThenElse(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().anyMatch(IfThenElse.class::isInstance);
 	}
 
@@ -725,7 +743,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @return the collection of the guards of all structures containing
 	 *             {@code pp}
 	 */
-	public Collection<Statement> getGuards(ProgramPoint pp) {
+	public Collection<Statement> getGuards(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().map(ControlFlowStructure::getCondition)
 				.collect(Collectors.toList());
 	}
@@ -743,7 +762,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the collection of the guards of all loops containing {@code pp}
 	 */
-	public Collection<Statement> getLoopGuards(ProgramPoint pp) {
+	public Collection<Statement> getLoopGuards(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().filter(Loop.class::isInstance)
 				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
 	}
@@ -762,12 +782,15 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @return the collection of the guards of all if-then-elses containing
 	 *             {@code pp}
 	 */
-	public Collection<Statement> getIfThenElseGuards(ProgramPoint pp) {
+	public Collection<Statement> getIfThenElseGuards(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().filter(IfThenElse.class::isInstance)
 				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
 	}
 
-	private Statement getRecent(ProgramPoint pp, Predicate<ControlFlowStructure> filter) {
+	private Statement getRecent(
+			ProgramPoint pp,
+			Predicate<ControlFlowStructure> filter) {
 		if (!(pp instanceof Statement))
 			// synthetic pp
 			return null;
@@ -807,7 +830,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the most recent if-then-else guard, or {@code null}
 	 */
-	public Statement getMostRecentGuard(ProgramPoint pp) {
+	public Statement getMostRecentGuard(
+			ProgramPoint pp) {
 		return getRecent(pp, cf -> true);
 	}
 
@@ -824,7 +848,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the most recent loop guard, or {@code null}
 	 */
-	public Statement getMostRecentLoopGuard(ProgramPoint pp) {
+	public Statement getMostRecentLoopGuard(
+			ProgramPoint pp) {
 		return getRecent(pp, Loop.class::isInstance);
 	}
 
@@ -841,7 +866,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the most recent if-then-else guard, or {@code null}
 	 */
-	public Statement getMostRecentIfThenElseGuard(ProgramPoint pp) {
+	public Statement getMostRecentIfThenElseGuard(
+			ProgramPoint pp) {
 		return getRecent(pp, IfThenElse.class::isInstance);
 	}
 
@@ -853,7 +879,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the control flow structure, or {@code null}
 	 */
-	public ControlFlowStructure getControlFlowStructureOf(ProgramPoint guard) {
+	public ControlFlowStructure getControlFlowStructureOf(
+			ProgramPoint guard) {
 		for (ControlFlowStructure struct : getControlFlowStructures())
 			if (struct.getCondition().equals(guard))
 				return struct;

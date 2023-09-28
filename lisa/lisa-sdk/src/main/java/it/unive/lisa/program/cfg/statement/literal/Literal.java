@@ -38,7 +38,11 @@ public abstract class Literal<E> extends Expression {
 	 * @param value      the value of this literal
 	 * @param staticType the type of this literal
 	 */
-	public Literal(CFG cfg, CodeLocation location, E value, Type staticType) {
+	public Literal(
+			CFG cfg,
+			CodeLocation location,
+			E value,
+			Type staticType) {
 		super(cfg, location, staticType);
 		this.value = value;
 	}
@@ -53,7 +57,8 @@ public abstract class Literal<E> extends Expression {
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		return this.offset = offset;
 	}
 
@@ -66,7 +71,8 @@ public abstract class Literal<E> extends Expression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -97,7 +103,9 @@ public abstract class Literal<E> extends Expression {
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 }

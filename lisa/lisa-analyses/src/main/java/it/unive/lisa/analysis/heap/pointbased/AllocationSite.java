@@ -28,7 +28,10 @@ public abstract class AllocationSite extends HeapLocation {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public AllocationSite(Type staticType, String locationName, CodeLocation location) {
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			CodeLocation location) {
 		this(staticType, locationName, false, location);
 	}
 
@@ -44,7 +47,11 @@ public abstract class AllocationSite extends HeapLocation {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public AllocationSite(Type staticType, String locationName, boolean isWeak, CodeLocation location) {
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			boolean isWeak,
+			CodeLocation location) {
 		this(staticType, locationName, (String) null, isWeak, location);
 	}
 
@@ -59,7 +66,10 @@ public abstract class AllocationSite extends HeapLocation {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public AllocationSite(Type staticType, String locationName, SymbolicExpression field,
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			SymbolicExpression field,
 			CodeLocation location) {
 		this(staticType, locationName, field == null ? null : field.toString(), false, location);
 	}
@@ -77,7 +87,11 @@ public abstract class AllocationSite extends HeapLocation {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public AllocationSite(Type staticType, String locationName, SymbolicExpression field, boolean isWeak,
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			SymbolicExpression field,
+			boolean isWeak,
 			CodeLocation location) {
 		this(staticType, locationName, field == null ? null : field.toString(), isWeak, location);
 	}
@@ -93,7 +107,10 @@ public abstract class AllocationSite extends HeapLocation {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public AllocationSite(Type staticType, String locationName, String field,
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			String field,
 			CodeLocation location) {
 		this(staticType, locationName, field, false, location);
 	}
@@ -111,7 +128,11 @@ public abstract class AllocationSite extends HeapLocation {
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public AllocationSite(Type staticType, String locationName, String field, boolean isWeak,
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			String field,
+			boolean isWeak,
 			CodeLocation location) {
 		super(staticType, "pp@" + locationName + (field == null ? "" : "[" + field + "]"), isWeak, location);
 		this.locationName = locationName;
@@ -156,5 +177,6 @@ public abstract class AllocationSite extends HeapLocation {
 	 * 
 	 * @return the modified allocation site
 	 */
-	public abstract AllocationSite withField(SymbolicExpression field);
+	public abstract AllocationSite withField(
+			SymbolicExpression field);
 }

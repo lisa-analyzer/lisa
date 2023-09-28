@@ -1,7 +1,5 @@
 package it.unive.lisa;
 
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -10,10 +8,13 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicExpression>
-		implements BaseLattice<T>, SemanticDomain<T, E, Identifier> {
+		implements
+		BaseLattice<T>,
+		SemanticDomain<T, E, Identifier> {
 
 	@Override
 	public T top() {
@@ -26,57 +27,88 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 	}
 
 	@Override
-	public T assign(Identifier id, E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+	public T assign(
+			Identifier id,
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public T smallStepSemantics(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+	public T smallStepSemantics(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public T assume(E expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
+	public T assume(
+			E expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public T forgetIdentifier(Identifier id) throws SemanticException {
+	public T forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public T forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public T forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public Satisfiability satisfies(E expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+	public Satisfiability satisfies(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public T pushScope(ScopeToken token) throws SemanticException {
+	public T pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public T popScope(ScopeToken token) throws SemanticException {
+	public T popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public T lubAux(T other) throws SemanticException {
+	public T lubAux(
+			T other)
+			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(T other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			T other)
+			throws SemanticException {
 		return true;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		return obj == this;
 	}
 
@@ -91,7 +123,8 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 	}
 
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		return false;
 	}
 }

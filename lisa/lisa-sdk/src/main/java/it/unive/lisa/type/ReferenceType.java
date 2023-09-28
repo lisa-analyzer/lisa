@@ -22,22 +22,26 @@ public class ReferenceType implements PointerType {
 	 * 
 	 * @param t the type of the referenced location
 	 */
-	public ReferenceType(Type t) {
+	public ReferenceType(
+			Type t) {
 		this.innerType = t;
 	}
 
 	@Override
-	public boolean canBeAssignedTo(Type other) {
+	public boolean canBeAssignedTo(
+			Type other) {
 		return other instanceof PointerType || other.isUntyped();
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		return equals(other) ? this : Untyped.INSTANCE;
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
 	}
 
@@ -55,7 +59,8 @@ public class ReferenceType implements PointerType {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

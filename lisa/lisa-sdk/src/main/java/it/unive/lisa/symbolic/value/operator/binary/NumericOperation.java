@@ -17,7 +17,10 @@ import java.util.Set;
 public abstract class NumericOperation implements BinaryOperator {
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> right) {
 		if (left.stream().noneMatch(Type::isNumericType) || right.stream().noneMatch(Type::isNumericType))
 			return Collections.emptySet();
 		Set<Type> set = NumericType.commonNumericalType(left, right);

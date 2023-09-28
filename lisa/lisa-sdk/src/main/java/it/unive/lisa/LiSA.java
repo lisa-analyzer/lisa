@@ -46,7 +46,8 @@ public class LiSA {
 	 * 
 	 * @param conf the configuration of the analysis to run
 	 */
-	public LiSA(LiSAConfiguration conf) {
+	public LiSA(
+			LiSAConfiguration conf) {
 		this.conf = conf;
 		this.fileManager = new FileManager(conf.workdir);
 	}
@@ -62,7 +63,9 @@ public class LiSA {
 	 * @throws AnalysisException if anything goes wrong during the analysis
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public LiSAReport run(Program... programs) throws AnalysisException {
+	public LiSAReport run(
+			Program... programs)
+			throws AnalysisException {
 		LOG.info(conf.toString());
 
 		DateTime start = new DateTime();

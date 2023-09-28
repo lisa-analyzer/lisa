@@ -17,8 +17,10 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  *                 domain of the Cartesian product
  */
 public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueDomain<T2>>
-		extends CartesianProduct<ValueCartesianProduct<T1, T2>, T1, T2, ValueExpression, Identifier>
-		implements ValueDomain<ValueCartesianProduct<T1, T2>> {
+		extends
+		CartesianProduct<ValueCartesianProduct<T1, T2>, T1, T2, ValueExpression, Identifier>
+		implements
+		ValueDomain<ValueCartesianProduct<T1, T2>> {
 
 	/**
 	 * Builds the value Cartesian product.
@@ -26,12 +28,16 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	 * @param left  the left-hand side of the value Cartesian product
 	 * @param right the right-hand side of the value Cartesian product
 	 */
-	public ValueCartesianProduct(T1 left, T2 right) {
+	public ValueCartesianProduct(
+			T1 left,
+			T2 right) {
 		super(left, right);
 	}
 
 	@Override
-	public ValueCartesianProduct<T1, T2> mk(T1 left, T2 right) {
+	public ValueCartesianProduct<T1, T2> mk(
+			T1 left,
+			T2 right) {
 		return new ValueCartesianProduct<>(left, right);
 	}
 
@@ -39,9 +45,10 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	public boolean isBottom() {
 		return left.isBottom() && right.isBottom();
 	}
-	
+
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		return left.knowsIdentifier(id) || right.knowsIdentifier(id);
 	}
 }

@@ -1,9 +1,5 @@
 package it.unive.lisa.cron;
 
-import java.util.Collection;
-
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AnalysisState;
@@ -26,6 +22,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import org.junit.Test;
 
 public class NonInterferenceTest extends AnalysisTestExecutor {
 

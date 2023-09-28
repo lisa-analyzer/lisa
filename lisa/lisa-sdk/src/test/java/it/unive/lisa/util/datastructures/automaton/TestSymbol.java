@@ -4,12 +4,14 @@ public class TestSymbol implements TransitionSymbol<TestSymbol> {
 
 	private final String symbol;
 
-	public TestSymbol(String symbol) {
+	public TestSymbol(
+			String symbol) {
 		this.symbol = symbol;
 	}
 
 	@Override
-	public int compareTo(TestSymbol o) {
+	public int compareTo(
+			TestSymbol o) {
 		return symbol.compareTo(o.symbol);
 	}
 
@@ -32,7 +34,8 @@ public class TestSymbol implements TransitionSymbol<TestSymbol> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -57,7 +60,8 @@ public class TestSymbol implements TransitionSymbol<TestSymbol> {
 		return symbol;
 	}
 
-	public TestSymbol concat(TestSymbol other) {
+	public TestSymbol concat(
+			TestSymbol other) {
 		if (isEpsilon())
 			return other;
 		if (other.isEpsilon())

@@ -14,14 +14,16 @@ import java.util.Map;
  * @param <V> the type of values of this map
  */
 public class GenericMapLattice<K, V extends Lattice<V>>
-		extends FunctionalLattice<GenericMapLattice<K, V>, K, V> {
+		extends
+		FunctionalLattice<GenericMapLattice<K, V>, K, V> {
 
 	/**
 	 * Builds the map.
 	 * 
 	 * @param lattice the underlying lattice of values
 	 */
-	public GenericMapLattice(V lattice) {
+	public GenericMapLattice(
+			V lattice) {
 		super(lattice);
 	}
 
@@ -33,7 +35,9 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 	 *                     object is top or bottom)
 	 * @param function the function containing the mapping
 	 */
-	public GenericMapLattice(V lattice, Map<K, V> function) {
+	public GenericMapLattice(
+			V lattice,
+			Map<K, V> function) {
 		super(lattice, function);
 	}
 
@@ -48,12 +52,15 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 	}
 
 	@Override
-	public GenericMapLattice<K, V> mk(V lattice, Map<K, V> function) {
+	public GenericMapLattice<K, V> mk(
+			V lattice,
+			Map<K, V> function) {
 		return new GenericMapLattice<>(lattice, function);
 	}
 
 	@Override
-	public V stateOfUnknown(K key) {
+	public V stateOfUnknown(
+			K key) {
 		return isBottom() ? lattice.bottom() : lattice.top();
 	}
 }

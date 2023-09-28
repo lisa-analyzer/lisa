@@ -24,8 +24,16 @@ public class IntIntervalTest {
 		assertEquals(new IntInterval(0, 1), x.div(y, false, true));
 	}
 
-	private static void test(Integer x1, Integer x2, Integer y1, Integer y2, Integer e1, Integer e2, String symbol,
-			BiFunction<IntInterval, IntInterval, IntInterval> operator, boolean expectNaN) {
+	private static void test(
+			Integer x1,
+			Integer x2,
+			Integer y1,
+			Integer y2,
+			Integer e1,
+			Integer e2,
+			String symbol,
+			BiFunction<IntInterval, IntInterval, IntInterval> operator,
+			boolean expectNaN) {
 		IntInterval x = new IntInterval(x1, x2);
 		IntInterval y = new IntInterval(y1, y2);
 		IntInterval actual = operator.apply(x, y);
@@ -37,11 +45,21 @@ public class IntIntervalTest {
 		assertEquals(x + " " + symbol + " " + y + " = " + expected + " (got " + actual + ")", expected, actual);
 	}
 
-	private static void mul(Integer x1, Integer x2, Integer y1, Integer y2, Integer e1, Integer e2) {
+	private static void mul(
+			Integer x1,
+			Integer x2,
+			Integer y1,
+			Integer y2,
+			Integer e1,
+			Integer e2) {
 		test(x1, x2, y1, y2, e1, e2, "*", IntInterval::mul, false);
 	}
 
-	private static void mul(Integer x1, Integer x2, Integer y1, Integer y2) {
+	private static void mul(
+			Integer x1,
+			Integer x2,
+			Integer y1,
+			Integer y2) {
 		test(x1, x2, y1, y2, null, null, "*", IntInterval::mul, true);
 	}
 
@@ -77,13 +95,28 @@ public class IntIntervalTest {
 		mul(0, 0, 0, 0, 0, 0);
 	}
 
-	private static void div(Integer x1, Integer x2, Integer y1, Integer y2, Integer e1, Integer e2,
+	private static void div(
+			Integer x1,
+			Integer x2,
+			Integer y1,
+			Integer y2,
+			Integer e1,
+			Integer e2,
 			boolean ignoreZero) {
-		test(x1, x2, y1, y2, e1, e2, "/", (l, r) -> l.div(r, ignoreZero, false), false);
+		test(x1, x2, y1, y2, e1, e2, "/", (
+				l,
+				r) -> l.div(r, ignoreZero, false), false);
 	}
 
-	private static void div(Integer x1, Integer x2, Integer y1, Integer y2, boolean ignoreZero) {
-		test(x1, x2, y1, y2, null, null, "/", (l, r) -> l.div(r, ignoreZero, false), true);
+	private static void div(
+			Integer x1,
+			Integer x2,
+			Integer y1,
+			Integer y2,
+			boolean ignoreZero) {
+		test(x1, x2, y1, y2, null, null, "/", (
+				l,
+				r) -> l.div(r, ignoreZero, false), true);
 	}
 
 	@Test

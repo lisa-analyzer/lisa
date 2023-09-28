@@ -20,7 +20,10 @@ public class Int32Literal extends Literal<Integer> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public Int32Literal(CFG cfg, CodeLocation location, int value) {
+	public Int32Literal(
+			CFG cfg,
+			CodeLocation location,
+			int value) {
 		super(cfg, location, value, Int32Type.INSTANCE);
 	}
 }

@@ -159,7 +159,9 @@ public class TimeFormatTest {
 
 	private static final Random generator = new Random();
 
-	private void loopRunner(Function<Long, String> expectedGenerator, Function<Long, String> actualGenerator) {
+	private void loopRunner(
+			Function<Long, String> expectedGenerator,
+			Function<Long, String> actualGenerator) {
 		LongStream
 				.iterate(1L + generator.nextInt(9),
 						l -> (1L + generator.nextInt(9)) * ((long) Math.pow(10, Math.log10(l))) + l)

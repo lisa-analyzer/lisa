@@ -33,7 +33,10 @@ public abstract class UnaryExpression extends NaryExpression {
 	 *                          expression
 	 * @param subExpression the sub-expression of this expression
 	 */
-	protected UnaryExpression(CFG cfg, CodeLocation location, String constructName,
+	protected UnaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
 			Expression subExpression) {
 		super(cfg, location, constructName, subExpression);
 	}
@@ -50,7 +53,11 @@ public abstract class UnaryExpression extends NaryExpression {
 	 * @param staticType    the static type of this expression
 	 * @param subExpression the sub-expression of this expression
 	 */
-	protected UnaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
+	protected UnaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Type staticType,
 			Expression subExpression) {
 		super(cfg, location, constructName, staticType, subExpression);
 	}
@@ -67,7 +74,11 @@ public abstract class UnaryExpression extends NaryExpression {
 	 * @param order         the evaluation order of the sub-expressions
 	 * @param subExpression the sub-expression of this expression
 	 */
-	protected UnaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected UnaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
 			Expression subExpression) {
 		super(cfg, location, constructName, order, subExpression);
 	}
@@ -84,8 +95,13 @@ public abstract class UnaryExpression extends NaryExpression {
 	 * @param staticType    the static type of this expression
 	 * @param subExpression the sub-expression of this expression
 	 */
-	protected UnaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Type staticType, Expression subExpression) {
+	protected UnaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression subExpression) {
 		super(cfg, location, constructName, order, staticType, subExpression);
 	}
 

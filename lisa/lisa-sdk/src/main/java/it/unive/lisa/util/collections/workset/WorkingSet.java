@@ -25,7 +25,9 @@ public interface WorkingSet<E> {
 	 * @throws AnalysisSetupException if the working set cannot be created
 	 */
 	@SuppressWarnings("unchecked")
-	public static <E> WorkingSet<E> of(Class<? extends WorkingSet<E>> clazz) throws AnalysisSetupException {
+	public static <E> WorkingSet<E> of(
+			Class<? extends WorkingSet<E>> clazz)
+			throws AnalysisSetupException {
 		if (!WorkingSet.class.isAssignableFrom(clazz))
 			throw new AnalysisSetupException(clazz + " is not a working set");
 
@@ -42,7 +44,8 @@ public interface WorkingSet<E> {
 	 * 
 	 * @param e the element
 	 */
-	void push(E e);
+	void push(
+			E e);
 
 	/**
 	 * Removes the next element to be processed from this working set and

@@ -26,12 +26,15 @@ public class NoOp extends Statement {
 	 * @param location the location where this statement is defined within the
 	 *                     program
 	 */
-	public NoOp(CFG cfg, CodeLocation location) {
+	public NoOp(
+			CFG cfg,
+			CodeLocation location) {
 		super(cfg, location);
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		return this.offset = offset;
 	}
 
@@ -41,7 +44,8 @@ public class NoOp extends Statement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -66,7 +70,9 @@ public class NoOp extends Statement {
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 }

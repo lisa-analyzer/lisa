@@ -19,7 +19,8 @@ public class UnknownSymbolicChar extends SymbolicChar {
 	}
 
 	@Override
-	public boolean is(char ch) {
+	public boolean is(
+			char ch) {
 		return false;
 	}
 }

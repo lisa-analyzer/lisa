@@ -106,7 +106,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 	 * @param token an instance of the tokens to be used to partition w.r.t.
 	 *                  context sensitivity
 	 */
-	public ContextBasedAnalysis(ContextSensitivityToken token) {
+	public ContextBasedAnalysis(
+			ContextSensitivityToken token) {
 		this.token = token;
 		triggers = new HashSet<>();
 	}
@@ -116,7 +117,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 	 * 
 	 * @param other the original analysis to copy
 	 */
-	protected ContextBasedAnalysis(ContextBasedAnalysis<A> other) {
+	protected ContextBasedAnalysis(
+			ContextBasedAnalysis<A> other) {
 		super(other);
 		this.conf = other.conf;
 		this.results = other.results;
@@ -159,7 +161,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 		ContextSensitivityToken empty = (ContextSensitivityToken) token.startingId();
 
 		Collection<CFG> entryPoints = new TreeSet<>(
-				(c1, c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
+				(
+						c1,
+						c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
 		entryPoints.addAll(app.getEntryPoints());
 
 		do {
@@ -189,7 +193,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 		} while (!triggers.isEmpty());
 	}
 
-	private void solveRecursions(Set<Recursion<A>> recursions) {
+	private void solveRecursions(
+			Set<Recursion<A>> recursions) {
 		List<Recursion<A>> orderedRecursions = new ArrayList<>(recursions.size());
 		for (Recursion<A> rec : recursions) {
 			int pos = 0;
@@ -215,7 +220,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 		}
 	}
 
-	private void buildRecursion(AnalysisState<A> entryState, Set<Recursion<A>> recursions,
+	private void buildRecursion(
+			AnalysisState<A> entryState,
+			Set<Recursion<A>> recursions,
 			Collection<CodeMember> rec) {
 		// these are the calls that start the recursion by invoking
 		// one of its members
@@ -260,7 +267,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 		}
 	}
 
-	private void processEntrypoints(AnalysisState<A> entryState, ContextSensitivityToken empty,
+	private void processEntrypoints(
+			AnalysisState<A> entryState,
+			ContextSensitivityToken empty,
 			Collection<CFG> entryPoints) {
 		for (CFG cfg : IterationLogger.iterate(LOG, entryPoints, "Processing entrypoints", "entries"))
 			try {
@@ -284,7 +293,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 	}
 
 	@Override
-	public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(
+			CFG cfg) {
 		if (results.contains(cfg))
 			return results.getState(cfg).getAll();
 		else
@@ -308,7 +318,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 			CFG cfg,
 			ContextSensitivityToken token,
 			AnalysisState<A> entryState)
-			throws FixpointException, SemanticException {
+			throws FixpointException,
+			SemanticException {
 		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(
 				entryState,
 				this,
@@ -333,7 +344,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 	 * 
 	 * @return {@code true} if that condition holds (defaults to {@code true})
 	 */
-	protected boolean canShortcut(CFG cfg) {
+	protected boolean canShortcut(
+			CFG cfg) {
 		return true;
 	}
 

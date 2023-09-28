@@ -32,7 +32,11 @@ public class Division extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Division(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public Division(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "/", left, right);
 	}
 

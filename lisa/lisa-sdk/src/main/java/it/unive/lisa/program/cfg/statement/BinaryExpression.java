@@ -34,8 +34,12 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName,
-			Expression left, Expression right) {
+	protected BinaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, left, right);
 	}
 
@@ -51,8 +55,13 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
-			Expression left, Expression right) {
+	protected BinaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Type staticType,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, staticType, left, right);
 	}
 
@@ -69,8 +78,13 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName,
-			EvaluationOrder order, Expression left, Expression right) {
+	protected BinaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, order, left, right);
 	}
 
@@ -86,8 +100,14 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Type staticType, Expression left, Expression right) {
+	protected BinaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, order, staticType, left, right);
 	}
 

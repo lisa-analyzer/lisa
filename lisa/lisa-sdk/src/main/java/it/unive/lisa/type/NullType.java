@@ -34,7 +34,8 @@ public class NullType implements InMemoryType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(
+			Object other) {
 		return other instanceof NullType;
 	}
 
@@ -44,17 +45,20 @@ public class NullType implements InMemoryType {
 	}
 
 	@Override
-	public boolean canBeAssignedTo(Type other) {
+	public boolean canBeAssignedTo(
+			Type other) {
 		return other.isPointerType() || other.isUntyped();
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		return other != null && other.isPointerType() ? other : Untyped.INSTANCE;
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

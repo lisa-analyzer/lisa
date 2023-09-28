@@ -35,7 +35,8 @@ import java.util.function.Predicate;
  *                state
  */
 public class OptimizedFixpoint<A extends AbstractState<A>>
-		extends Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
+		extends
+		Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
 
 	private final Predicate<Statement> hotspots;
 
@@ -50,7 +51,10 @@ public class OptimizedFixpoint<A extends AbstractState<A>>
 	 *                                statements whose approximation must be
 	 *                                preserved in the results
 	 */
-	public OptimizedFixpoint(CFG graph, boolean forceFullEvaluation, Predicate<Statement> hotspots) {
+	public OptimizedFixpoint(
+			CFG graph,
+			boolean forceFullEvaluation,
+			Predicate<Statement> hotspots) {
 		super(graph, forceFullEvaluation);
 		this.hotspots = hotspots;
 	}

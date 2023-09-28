@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.VariableLift;
@@ -12,6 +10,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Map;
 
 /**
  * An inference system that model standard derivation systems. An inference
@@ -154,6 +153,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 * 
 	 * @param expression the expression to evaluate
 	 * @param pp         the program point where the evaluation happens
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return the abstract result of the evaluation
 	 * 

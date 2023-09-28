@@ -38,7 +38,8 @@ public abstract class GraphStreamWrapper {
 	 * 
 	 * @return the name of the node
 	 */
-	protected static String nodeName(long code) {
+	protected static String nodeName(
+			long code) {
 		return "node" + code;
 	}
 
@@ -52,7 +53,9 @@ public abstract class GraphStreamWrapper {
 	 * 
 	 * @return the name of the edge
 	 */
-	protected static String edgeName(long src, long dest) {
+	protected static String edgeName(
+			long src,
+			long dest) {
 		return "edge-" + src + "-" + dest;
 	}
 
@@ -63,5 +66,7 @@ public abstract class GraphStreamWrapper {
 	 * 
 	 * @throws IOException if an I/O error occurs while writing
 	 */
-	public abstract void dump(Writer writer) throws IOException;
+	public abstract void dump(
+			Writer writer)
+			throws IOException;
 }

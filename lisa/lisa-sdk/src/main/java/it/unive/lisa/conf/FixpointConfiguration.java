@@ -51,7 +51,8 @@ public class FixpointConfiguration extends BaseConfiguration {
 	 * 
 	 * @param parent the root configuration to draw data from.
 	 */
-	public FixpointConfiguration(LiSAConfiguration parent) {
+	public FixpointConfiguration(
+			LiSAConfiguration parent) {
 		this.wideningThreshold = parent.wideningThreshold;
 		this.recursionWideningThreshold = parent.recursionWideningThreshold;
 		this.glbThreshold = parent.glbThreshold;

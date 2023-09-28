@@ -32,7 +32,8 @@ public final class ConcurrentLIFOWorkingSet<E> implements WorkingSet<E> {
 	}
 
 	@Override
-	public void push(E e) {
+	public void push(
+			E e) {
 		ws.addFirst(e);
 	}
 
@@ -75,7 +76,8 @@ public final class ConcurrentLIFOWorkingSet<E> implements WorkingSet<E> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

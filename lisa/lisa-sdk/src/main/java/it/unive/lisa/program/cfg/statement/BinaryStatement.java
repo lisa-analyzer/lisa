@@ -31,8 +31,12 @@ public abstract class BinaryStatement extends NaryStatement {
 	 * @param left          the first sub-expression of this statement
 	 * @param right         the second sub-expression of this statement
 	 */
-	protected BinaryStatement(CFG cfg, CodeLocation location, String constructName,
-			Expression left, Expression right) {
+	protected BinaryStatement(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, left, right);
 	}
 
@@ -48,8 +52,13 @@ public abstract class BinaryStatement extends NaryStatement {
 	 * @param left          the first sub-expression of this statement
 	 * @param right         the second sub-expression of this statement
 	 */
-	protected BinaryStatement(CFG cfg, CodeLocation location, String constructName,
-			EvaluationOrder order, Expression left, Expression right) {
+	protected BinaryStatement(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, order, left, right);
 	}
 

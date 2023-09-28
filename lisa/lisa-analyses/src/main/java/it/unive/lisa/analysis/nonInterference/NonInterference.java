@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis.nonInterference;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -25,6 +21,9 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * The type-system based implementation of the non interference analysis.

@@ -26,5 +26,7 @@ public interface Node<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	 * @return whether or not the visiting should stop when this call returns,
 	 *             as decided by the visitor itself
 	 */
-	<V> boolean accept(GraphVisitor<G, N, E, V> visitor, V tool);
+	<V> boolean accept(
+			GraphVisitor<G, N, E, V> visitor,
+			V tool);
 }

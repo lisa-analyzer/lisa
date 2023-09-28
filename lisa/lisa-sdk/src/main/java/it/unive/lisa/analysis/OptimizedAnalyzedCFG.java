@@ -77,7 +77,8 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	 *                            result, and that can be used to unwind the
 	 *                            results
 	 */
-	public OptimizedAnalyzedCFG(CFG cfg,
+	public OptimizedAnalyzedCFG(
+			CFG cfg,
 			ScopeId id,
 			AnalysisState<A> singleton,
 			InterproceduralAnalysis<A> interprocedural) {
@@ -102,7 +103,8 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	 *                            result, and that can be used to unwind the
 	 *                            results
 	 */
-	public OptimizedAnalyzedCFG(CFG cfg,
+	public OptimizedAnalyzedCFG(
+			CFG cfg,
 			ScopeId id,
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> entryStates,
@@ -125,7 +127,8 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	 *                            result, and that can be used to unwind the
 	 *                            results
 	 */
-	public OptimizedAnalyzedCFG(CFG cfg,
+	public OptimizedAnalyzedCFG(
+			CFG cfg,
 			ScopeId id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results,
@@ -134,7 +137,8 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 		this.interprocedural = interprocedural;
 	}
 
-	private OptimizedAnalyzedCFG(CFG cfg,
+	private OptimizedAnalyzedCFG(
+			CFG cfg,
 			ScopeId id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results,
@@ -157,7 +161,9 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	 *
 	 * @return the result computed at the given statement
 	 */
-	public AnalysisState<A> getUnwindedAnalysisStateAfter(Statement st, FixpointConfiguration conf) {
+	public AnalysisState<A> getUnwindedAnalysisStateAfter(
+			Statement st,
+			FixpointConfiguration conf) {
 		if (results.getKeys().contains(st))
 			return results.getState(st);
 
@@ -177,7 +183,8 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	 * @param conf the {@link FixpointConfiguration} to use for running the fast
 	 *                 fixpoint computation
 	 */
-	public void unwind(FixpointConfiguration conf) {
+	public void unwind(
+			FixpointConfiguration conf) {
 		AnalysisState<A> bottom = results.lattice.bottom();
 		StatementStore<A> bot = new StatementStore<>(bottom);
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
@@ -230,7 +237,8 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	 * 
 	 * @return whether or not a poststate for {@code st} exists
 	 */
-	public boolean hasPostStateOf(Statement st) {
+	public boolean hasPostStateOf(
+			Statement st) {
 		return results.getKeys().contains(st);
 	}
 
@@ -241,14 +249,17 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	 * @param st        the statement
 	 * @param postState the poststate
 	 */
-	public void storePostStateOf(Statement st, AnalysisState<A> postState) {
+	public void storePostStateOf(
+			Statement st,
+			AnalysisState<A> postState) {
 		results.put(st, postState);
 	}
 
 	private class PrecomputedAnalysis implements InterproceduralAnalysis<A> {
 
 		@Override
-		public void init(Application app,
+		public void init(
+				Application app,
 				CallGraph callgraph,
 				OpenCallPolicy policy)
 				throws InterproceduralAnalysisException {
@@ -256,7 +267,8 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 		}
 
 		@Override
-		public void fixpoint(AnalysisState<A> entryState,
+		public void fixpoint(
+				AnalysisState<A> entryState,
 				Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 				FixpointConfiguration conf)
 				throws FixpointException {
@@ -264,7 +276,8 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 		}
 
 		@Override
-		public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(CFG cfg) {
+		public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(
+				CFG cfg) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -291,14 +304,20 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 		}
 
 		@Override
-		public AnalysisState<A> getAbstractResultOf(OpenCall call, AnalysisState<A> entryState,
-				ExpressionSet[] parameters, StatementStore<A> expressions)
+		public AnalysisState<A> getAbstractResultOf(
+				OpenCall call,
+				AnalysisState<A> entryState,
+				ExpressionSet[] parameters,
+				StatementStore<A> expressions)
 				throws SemanticException {
 			return interprocedural.getAbstractResultOf(call, entryState, parameters, expressions);
 		}
 
 		@Override
-		public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+		public Call resolve(
+				UnresolvedCall call,
+				Set<Type>[] types,
+				SymbolAliasing aliasing)
 				throws CallResolutionException {
 			return interprocedural.resolve(call, types, aliasing);
 		}
@@ -316,7 +335,9 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A> lubAux(AnalyzedCFG<A> other) throws SemanticException {
+	public OptimizedAnalyzedCFG<A> lubAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
 				|| !(other instanceof OptimizedAnalyzedCFG<?>))
 			throw new SemanticException(CANNOT_LUB_ERROR);
@@ -332,7 +353,9 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A> glbAux(AnalyzedCFG<A> other) throws SemanticException {
+	public OptimizedAnalyzedCFG<A> glbAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
 				|| !(other instanceof OptimizedAnalyzedCFG<?>))
 			throw new SemanticException(CANNOT_GLB_ERROR);
@@ -348,7 +371,9 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A> wideningAux(AnalyzedCFG<A> other) throws SemanticException {
+	public OptimizedAnalyzedCFG<A> wideningAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
 				|| !(other instanceof OptimizedAnalyzedCFG<?>))
 			throw new SemanticException(CANNOT_WIDEN_ERROR);
@@ -364,7 +389,9 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 	}
 
 	@Override
-	public OptimizedAnalyzedCFG<A> narrowingAux(AnalyzedCFG<A> other) throws SemanticException {
+	public OptimizedAnalyzedCFG<A> narrowingAux(
+			AnalyzedCFG<A> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
 				|| !(other instanceof OptimizedAnalyzedCFG<?>))
 			throw new SemanticException(CANNOT_NARROW_ERROR);

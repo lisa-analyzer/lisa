@@ -40,7 +40,11 @@ public abstract class Identifier extends ValueExpression {
 	 * @param location    the code location of the statement that has generated
 	 *                        this identifier
 	 */
-	protected Identifier(Type staticType, String name, boolean weak, Annotations annotations,
+	protected Identifier(
+			Type staticType,
+			String name,
+			boolean weak,
+			Annotations annotations,
 			CodeLocation location) {
 		super(staticType, location);
 		this.name = name;
@@ -105,7 +109,8 @@ public abstract class Identifier extends ValueExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -137,7 +142,8 @@ public abstract class Identifier extends ValueExpression {
 	 * 
 	 * @param ann the annotation to be added
 	 */
-	public void addAnnotation(Annotation ann) {
+	public void addAnnotation(
+			Annotation ann) {
 		annotations.addAnnotation(ann);
 	}
 
@@ -150,13 +156,15 @@ public abstract class Identifier extends ValueExpression {
 	 * 
 	 * @throws SemanticException if this and other are not equal.
 	 */
-	public Identifier lub(Identifier other) throws SemanticException {
+	public Identifier lub(
+			Identifier other)
+			throws SemanticException {
 		if (!equals(other))
 			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
 					+ "' and '" + other + "'");
 		return this;
 	}
-	
+
 	@Override
 	public boolean mightNeedRewriting() {
 		Type t = getStaticType();

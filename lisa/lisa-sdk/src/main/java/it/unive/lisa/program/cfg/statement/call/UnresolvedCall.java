@@ -43,7 +43,12 @@ public class UnresolvedCall extends Call {
 	 * @param targetName the name of the target of this call
 	 * @param parameters the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
+	public UnresolvedCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
 			Expression... parameters) {
 		this(cfg, location, callType, qualifier, targetName, Untyped.INSTANCE, parameters);
 	}
@@ -64,8 +69,14 @@ public class UnresolvedCall extends Call {
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			Type staticType, Expression... parameters) {
+	public UnresolvedCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			Type staticType,
+			Expression... parameters) {
 		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType, parameters);
 	}
 
@@ -84,8 +95,14 @@ public class UnresolvedCall extends Call {
 	 * @param order      the evaluation order of the sub-expressions
 	 * @param parameters the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Expression... parameters) {
+	public UnresolvedCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Expression... parameters) {
 		this(cfg, location, callType, qualifier, targetName, order, Untyped.INSTANCE, parameters);
 	}
 
@@ -105,8 +122,15 @@ public class UnresolvedCall extends Call {
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Type staticType, Expression... parameters) {
+	public UnresolvedCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, staticType, parameters);
 	}
 

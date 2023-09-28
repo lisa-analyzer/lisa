@@ -27,7 +27,9 @@ public class SerializableString extends SerializableValue {
 	 * @param properties the additional properties to use as metadata
 	 * @param value      the textual representation of the value
 	 */
-	public SerializableString(SortedMap<String, String> properties, String value) {
+	public SerializableString(
+			SortedMap<String, String> properties,
+			String value) {
 		super(properties);
 		this.value = value;
 	}
@@ -55,7 +57,8 @@ public class SerializableString extends SerializableValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -77,7 +80,8 @@ public class SerializableString extends SerializableValue {
 	}
 
 	@Override
-	public int compareTo(SerializableValue o) {
+	public int compareTo(
+			SerializableValue o) {
 		if (!(o instanceof SerializableString))
 			// string first
 			return -1;

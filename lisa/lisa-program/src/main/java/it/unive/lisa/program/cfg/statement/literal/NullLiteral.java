@@ -25,13 +25,16 @@ public class NullLiteral extends Literal<Object> {
 	 * @param location the location where the expression is defined within the
 	 *                     program
 	 */
-	public NullLiteral(CFG cfg, CodeLocation location) {
+	public NullLiteral(
+			CFG cfg,
+			CodeLocation location) {
 		super(cfg, location, null, NullType.INSTANCE);
 	}
 
 	@Override
 	public <A extends AbstractState<A>> AnalysisState<A> semantics(
-			AnalysisState<A> entryState, InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return entryState.smallStepSemantics(new NullConstant(getLocation()), this);

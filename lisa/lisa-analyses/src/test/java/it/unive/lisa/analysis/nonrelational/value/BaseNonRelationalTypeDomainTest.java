@@ -4,16 +4,14 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import it.unive.lisa.TestParameterProvider;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.junit.Test;
-
-import it.unive.lisa.TestParameterProvider;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 
 public class BaseNonRelationalTypeDomainTest {
 

@@ -1,7 +1,5 @@
 package it.unive.lisa.symbolic;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -10,8 +8,10 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
+import java.util.Objects;
 
 /**
  * A symbolic expression that can be evaluated by {@link SemanticDomain}s.
@@ -158,6 +158,15 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 
 	@Override
 	public abstract String toString();
-	
+
+	/**
+	 * Yields whether or not this expression can be considered safe to be
+	 * processed by domains that only focus on {@link ValueExpression}s, or if
+	 * it might need rewriting. This is a definite answer: if this method
+	 * returns {@code true}, than this expression is sure to not contain
+	 * anything that deals with, or points to, the memory.
+	 * 
+	 * @return whether or not this expression might need rewriting
+	 */
 	public abstract boolean mightNeedRewriting();
 }

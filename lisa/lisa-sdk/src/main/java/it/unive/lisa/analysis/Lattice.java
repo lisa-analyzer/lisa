@@ -56,7 +56,9 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	boolean lessOrEqual(L other) throws SemanticException;
+	boolean lessOrEqual(
+			L other)
+			throws SemanticException;
 
 	/**
 	 * Performs the least upper bound operation between this lattice element and
@@ -68,7 +70,9 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L lub(L other) throws SemanticException;
+	L lub(
+			L other)
+			throws SemanticException;
 
 	/**
 	 * Performs the greatest lower upper bound operation between this lattice
@@ -80,7 +84,9 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L glb(L other) throws SemanticException {
+	default L glb(
+			L other)
+			throws SemanticException {
 		return bottom();
 	}
 
@@ -145,7 +151,9 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L widening(L other) throws SemanticException {
+	default L widening(
+			L other)
+			throws SemanticException {
 		return lub(other);
 	}
 
@@ -161,7 +169,9 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L narrowing(L other) throws SemanticException {
+	default L narrowing(
+			L other)
+			throws SemanticException {
 		return glb(other);
 	}
 }

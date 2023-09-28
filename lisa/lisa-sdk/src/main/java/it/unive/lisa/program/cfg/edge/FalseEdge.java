@@ -25,7 +25,9 @@ public class FalseEdge extends Edge {
 	 * @param source      the source statement
 	 * @param destination the destination statement
 	 */
-	public FalseEdge(Statement source, Statement destination) {
+	public FalseEdge(
+			Statement source,
+			Statement destination) {
 		super(source, destination);
 	}
 
@@ -57,7 +59,9 @@ public class FalseEdge extends Edge {
 	}
 
 	@Override
-	public FalseEdge newInstance(Statement source, Statement destination) {
+	public FalseEdge newInstance(
+			Statement source,
+			Statement destination) {
 		return new FalseEdge(source, destination);
 	}
 }

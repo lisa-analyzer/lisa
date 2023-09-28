@@ -26,7 +26,11 @@ public class AdjacencyMatrixTest {
 
 	private static final Random rand = new Random();
 
-	private <T> String msg(String objs, String extra, Collection<T> exp, Collection<T> act) {
+	private <T> String msg(
+			String objs,
+			String extra,
+			Collection<T> exp,
+			Collection<T> act) {
 		Set<T> ex = exp instanceof Set ? (Set<T>) exp : new HashSet<>(exp);
 		Set<T> ac = act instanceof Set ? (Set<T>) act : new HashSet<>(act);
 		return "Set of " + objs + " is different " + extra
@@ -34,15 +38,24 @@ public class AdjacencyMatrixTest {
 				+ "\nonly actual: " + SetUtils.difference(ac, ex);
 	}
 
-	private void verify(Map<TestNode, Collection<TestNode>> adj, Collection<TestNode> nodes, Collection<TestEdge> edges,
-			AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix, Collection<TestNode> entries,
+	private void verify(
+			Map<TestNode, Collection<TestNode>> adj,
+			Collection<TestNode> nodes,
+			Collection<TestEdge> edges,
+			AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix,
+			Collection<TestNode> entries,
 			Collection<TestNode> exits) {
 		verify(adj, nodes, edges, matrix, entries, exits, "");
 	}
 
-	private void verify(Map<TestNode, Collection<TestNode>> adj, Collection<TestNode> nodes, Collection<TestEdge> edges,
-			AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix, Collection<TestNode> entries,
-			Collection<TestNode> exits, String extra) {
+	private void verify(
+			Map<TestNode, Collection<TestNode>> adj,
+			Collection<TestNode> nodes,
+			Collection<TestEdge> edges,
+			AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix,
+			Collection<TestNode> entries,
+			Collection<TestNode> exits,
+			String extra) {
 		TestNode externalNode = new TestNode(-1);
 		TestEdge externalEdge = new TestEdge(externalNode, externalNode);
 
@@ -131,8 +144,11 @@ public class AdjacencyMatrixTest {
 		matrix.toString();
 	}
 
-	private Map<TestNode, Collection<TestNode>> populate(AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix,
-			Collection<TestNode> nodes, Collection<TestEdge> edges, Collection<TestNode> entries,
+	private Map<TestNode, Collection<TestNode>> populate(
+			AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix,
+			Collection<TestNode> nodes,
+			Collection<TestEdge> edges,
+			Collection<TestNode> entries,
 			Collection<TestNode> exits) {
 		for (int i = 20 + rand.nextInt(100); i >= 0; i--) {
 			TestNode node = new TestNode(i);
@@ -534,7 +550,9 @@ public class AdjacencyMatrixTest {
 			nodes.remove(n);
 			edges.removeIf(e -> e.getSource() == n || e.getDestination() == n);
 			adj.remove(n);
-			adj.forEach((nn, follows) -> follows.remove(n));
+			adj.forEach((
+					nn,
+					follows) -> follows.remove(n));
 			matrix.removeNode(n);
 		}
 
@@ -548,7 +566,8 @@ public class AdjacencyMatrixTest {
 		verify(adj, nodes, edges, matrix, entries, exits, "after removing " + removed.toString());
 	}
 
-	private static <T> T random(Collection<T> elements) {
+	private static <T> T random(
+			Collection<T> elements) {
 		int idx = rand.nextInt(elements.size());
 		for (T e : elements)
 			if (--idx < 0)

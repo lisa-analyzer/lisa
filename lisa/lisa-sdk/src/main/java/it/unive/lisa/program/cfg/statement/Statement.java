@@ -42,7 +42,9 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * @param location the location where this statement is defined within the
 	 *                     program
 	 */
-	protected Statement(CFG cfg, CodeLocation location) {
+	protected Statement(
+			CFG cfg,
+			CodeLocation location) {
 		Objects.requireNonNull(cfg, "Containing CFG cannot be null");
 		Objects.requireNonNull(location, "The location of a statement cannot be null");
 		this.cfg = cfg;
@@ -91,7 +93,8 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -145,7 +148,8 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	}
 
 	@Override
-	public int compareTo(Statement o) {
+	public int compareTo(
+			Statement o) {
 		int cmp;
 		if ((cmp = location.compareTo(o.location)) != 0)
 			return cmp;
@@ -183,7 +187,8 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * 
 	 * @return the previous statement, or {@code null}
 	 */
-	public Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(
+			Statement other) {
 		return null;
 	}
 }

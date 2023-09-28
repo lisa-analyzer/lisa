@@ -217,7 +217,10 @@ public class EqualityContractVerificationTest {
 		assertTrue("Not all equals/hashcode have been tested", notTested.isEmpty());
 	}
 
-	private static boolean definesEqualsHashcode(Class<?> clazz) throws NoSuchMethodException, SecurityException {
+	private static boolean definesEqualsHashcode(
+			Class<?> clazz)
+			throws NoSuchMethodException,
+			SecurityException {
 		Class<?> equals = clazz.getMethod("equals", Object.class).getDeclaringClass();
 		Class<?> hashcode = clazz.getMethod("hashCode").getDeclaringClass();
 		// we want to test our implementations, not the one coming from
@@ -225,20 +228,30 @@ public class EqualityContractVerificationTest {
 		return equals.getName().startsWith("it.unive.lisa") || hashcode.getName().startsWith("it.unive.lisa");
 	}
 
-	private static <T> void verify(Class<T> clazz, Warning... suppressions) {
+	private static <T> void verify(
+			Class<T> clazz,
+			Warning... suppressions) {
 		verify(clazz, true, null, suppressions);
 	}
 
-	private static <T> void verify(Class<T> clazz, Consumer<SingleTypeEqualsVerifierApi<T>> extra,
+	private static <T> void verify(
+			Class<T> clazz,
+			Consumer<SingleTypeEqualsVerifierApi<T>> extra,
 			Warning... suppressions) {
 		verify(clazz, true, extra, suppressions);
 	}
 
-	private static <T> void verify(Class<T> clazz, boolean getClass, Warning... suppressions) {
+	private static <T> void verify(
+			Class<T> clazz,
+			boolean getClass,
+			Warning... suppressions) {
 		verify(clazz, getClass, null, suppressions);
 	}
 
-	private static <T> void verify(Class<T> clazz, boolean getClass, Consumer<SingleTypeEqualsVerifierApi<T>> extra,
+	private static <T> void verify(
+			Class<T> clazz,
+			boolean getClass,
+			Consumer<SingleTypeEqualsVerifierApi<T>> extra,
 			Warning... suppressions) {
 		if (clazz.isAnonymousClass() || Modifier.isAbstract(clazz.getModifiers())
 				|| Modifier.isInterface(clazz.getModifiers()))

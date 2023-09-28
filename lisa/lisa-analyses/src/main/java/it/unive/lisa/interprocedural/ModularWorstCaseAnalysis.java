@@ -69,15 +69,18 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 	}
 
 	@Override
-	public void fixpoint(AnalysisState<A> entryState,
+	public void fixpoint(
+			AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
 		// new fixpoint iteration: restart
 		this.results = null;
 
-		Collection<CFG> all = new TreeSet<>((c1, c2) -> c1.getDescriptor().getLocation()
-				.compareTo(c2.getDescriptor().getLocation()));
+		Collection<CFG> all = new TreeSet<>((
+				c1,
+				c2) -> c1.getDescriptor().getLocation()
+						.compareTo(c2.getDescriptor().getLocation()));
 		all.addAll(app.getAllCFGs());
 
 		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program",
@@ -105,7 +108,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 	}
 
 	@Override
-	public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(
+			CFG cfg) {
 		return results.getState(cfg).getAll();
 	}
 
@@ -132,7 +136,10 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 	}
 
 	@Override
-	public void init(Application app, CallGraph callgraph, OpenCallPolicy policy)
+	public void init(
+			Application app,
+			CallGraph callgraph,
+			OpenCallPolicy policy)
 			throws InterproceduralAnalysisException {
 		this.app = app;
 		this.policy = policy;
@@ -140,7 +147,10 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+	public Call resolve(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			SymbolAliasing aliasing)
 			throws CallResolutionException {
 		return new OpenCall(call);
 	}

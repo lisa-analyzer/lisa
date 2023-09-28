@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -10,6 +7,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An oracle that can be queried for information about the static and dynamic

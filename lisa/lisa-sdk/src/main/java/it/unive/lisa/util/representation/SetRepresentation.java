@@ -32,7 +32,9 @@ public class SetRepresentation extends StructuredRepresentation {
 	 * @param mapper   the function that knows how to convert elements to their
 	 *                     representation
 	 */
-	public <E> SetRepresentation(Set<E> elements, Function<E, StructuredRepresentation> mapper) {
+	public <E> SetRepresentation(
+			Set<E> elements,
+			Function<E, StructuredRepresentation> mapper) {
 		this(mapAndSort(elements, mapper));
 	}
 
@@ -41,14 +43,16 @@ public class SetRepresentation extends StructuredRepresentation {
 	 * 
 	 * @param elements the set
 	 */
-	public SetRepresentation(Set<StructuredRepresentation> elements) {
+	public SetRepresentation(
+			Set<StructuredRepresentation> elements) {
 		if (elements instanceof SortedSet)
 			this.elements = (SortedSet<StructuredRepresentation>) elements;
 		else
 			this.elements = new TreeSet<>(elements);
 	}
 
-	private static <E> SortedSet<StructuredRepresentation> mapAndSort(Iterable<E> elements,
+	private static <E> SortedSet<StructuredRepresentation> mapAndSort(
+			Iterable<E> elements,
 			Function<E, StructuredRepresentation> mapper) {
 		SortedSet<StructuredRepresentation> result = new TreeSet<>();
 		for (E e : elements)
@@ -78,7 +82,8 @@ public class SetRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -13,6 +8,10 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is

@@ -51,8 +51,14 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	 * @param targets    the CFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			Collection<CFG> targets, Expression... parameters) {
+	public CFGCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			Collection<CFG> targets,
+			Expression... parameters) {
 		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, targets, parameters);
 	}
 
@@ -73,8 +79,15 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	 * @param targets    the CFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Collection<CFG> targets, Expression... parameters) {
+	public CFGCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Collection<CFG> targets,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(targets, "The targets of a CFG call cannot be null");
 		for (CFG target : targets)
@@ -89,7 +102,9 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	 * @param source  the unresolved call to copy
 	 * @param targets the {@link CFG}s that the call has been resolved against
 	 */
-	public CFGCall(UnresolvedCall source, Collection<CFG> targets) {
+	public CFGCall(
+			UnresolvedCall source,
+			Collection<CFG> targets) {
 		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
 				targets, source.getParameters());
 		for (Expression param : source.getParameters())
@@ -97,7 +112,8 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 			param.setParentStatement(source);
 	}
 
-	private static Type getCommonReturnType(Collection<CFG> targets) {
+	private static Type getCommonReturnType(
+			Collection<CFG> targets) {
 		Iterator<CFG> it = targets.iterator();
 		Type result = null;
 		while (it.hasNext()) {
@@ -141,7 +157,8 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

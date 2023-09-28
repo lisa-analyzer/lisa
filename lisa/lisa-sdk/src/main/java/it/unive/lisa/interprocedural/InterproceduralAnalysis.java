@@ -70,7 +70,11 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 *                                              performing the
 	 *                                              interprocedural analysis
 	 */
-	void init(Application app, CallGraph callgraph, OpenCallPolicy policy) throws InterproceduralAnalysisException;
+	void init(
+			Application app,
+			CallGraph callgraph,
+			OpenCallPolicy policy)
+			throws InterproceduralAnalysisException;
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
@@ -90,7 +94,8 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
-	void fixpoint(AnalysisState<A> entryState,
+	void fixpoint(
+			AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException;
@@ -104,7 +109,8 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * @return the result of the fixpoint computation of {@code valueDomain}
 	 *             over {@code cfg}
 	 */
-	Collection<AnalyzedCFG<A>> getAnalysisResultsOf(CFG cfg);
+	Collection<AnalyzedCFG<A>> getAnalysisResultsOf(
+			CFG cfg);
 
 	/**
 	 * Computes an analysis state that abstracts the execution of the possible
@@ -180,7 +186,11 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * @throws CallResolutionException if this analysis is unable to resolve the
 	 *                                     given call
 	 */
-	Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing) throws CallResolutionException;
+	Call resolve(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			SymbolAliasing aliasing)
+			throws CallResolutionException;
 
 	/**
 	 * Yields the results of the fixpoint computation over the whole
@@ -272,7 +282,9 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	default boolean returnsVoid(Call call, AnalysisState<A> returned) {
+	default boolean returnsVoid(
+			Call call,
+			AnalysisState<A> returned) {
 		if (call.getStaticType().isVoidType())
 			return true;
 

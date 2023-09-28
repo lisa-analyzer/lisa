@@ -17,14 +17,22 @@ import org.junit.Test;
 public class WorksetTest {
 
 	@SuppressWarnings("unchecked")
-	private static <T> void random(WorkingSet<T> ws, boolean lifo, boolean duplicates, T... elements) {
+	private static <T> void random(
+			WorkingSet<T> ws,
+			boolean lifo,
+			boolean duplicates,
+			T... elements) {
 		List<T> list = Arrays.asList(elements);
 		Collections.shuffle(list);
 		linear(ws, lifo, duplicates, (T[]) list.toArray());
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> void linear(WorkingSet<T> ws, boolean lifo, boolean duplicates, T... elements) {
+	private static <T> void linear(
+			WorkingSet<T> ws,
+			boolean lifo,
+			boolean duplicates,
+			T... elements) {
 		assertTrue("The working set is not empty at the beginning", ws.isEmpty());
 
 		try {
@@ -113,11 +121,18 @@ public class WorksetTest {
 
 	interface Tester<T> {
 		@SuppressWarnings("unchecked")
-		void test(WorkingSet<T> ws, boolean lifo, T... elements);
+		void test(
+				WorkingSet<T> ws,
+				boolean lifo,
+				T... elements);
 	}
 
 	@SafeVarargs
-	private static <T> void unique(VisitOnceWorkingSet<T> ws, boolean lifo, Tester<T> tester, T... elements) {
+	private static <T> void unique(
+			VisitOnceWorkingSet<T> ws,
+			boolean lifo,
+			Tester<T> tester,
+			T... elements) {
 		Set<T> set = new HashSet<>();
 		List<T> list = new ArrayList<>();
 		Set<T> elementsSet = new HashSet<>(Arrays.asList(elements));
@@ -135,22 +150,46 @@ public class WorksetTest {
 
 	@Test
 	public void VisitOnceWsTest() {
-		unique(VisitOnceFIFOWorkingSet.mk(), false, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d",
+		unique(VisitOnceFIFOWorkingSet.mk(), false, (
+				ws,
+				lifo,
+				el) -> linear(ws, lifo, false, el), "a", "b", "c", "d",
 				"d", "f", "a", "b", "i");
-		unique(VisitOnceFIFOWorkingSet.mk(), false, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", null, "c", "d",
+		unique(VisitOnceFIFOWorkingSet.mk(), false, (
+				ws,
+				lifo,
+				el) -> linear(ws, lifo, false, el), "a", null, "c", "d",
 				"d", "f", "a", "b", null, "i");
-		unique(VisitOnceFIFOWorkingSet.mk(), false, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d",
+		unique(VisitOnceFIFOWorkingSet.mk(), false, (
+				ws,
+				lifo,
+				el) -> random(ws, lifo, false, el), "a", "b", "c", "d",
 				"d", "f", "a", "b", "i");
-		unique(VisitOnceFIFOWorkingSet.mk(), false, (ws, lifo, el) -> random(ws, lifo, false, el), "a", null, "c", "d",
+		unique(VisitOnceFIFOWorkingSet.mk(), false, (
+				ws,
+				lifo,
+				el) -> random(ws, lifo, false, el), "a", null, "c", "d",
 				"d", "f", "a", "b", null, "i");
 
-		unique(VisitOnceLIFOWorkingSet.mk(), true, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d",
+		unique(VisitOnceLIFOWorkingSet.mk(), true, (
+				ws,
+				lifo,
+				el) -> linear(ws, lifo, false, el), "a", "b", "c", "d",
 				"d", "f", "a", "b", "i");
-		unique(VisitOnceLIFOWorkingSet.mk(), true, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", null, "c", "d",
+		unique(VisitOnceLIFOWorkingSet.mk(), true, (
+				ws,
+				lifo,
+				el) -> linear(ws, lifo, false, el), "a", null, "c", "d",
 				"d", "f", "a", "b", null, "i");
-		unique(VisitOnceLIFOWorkingSet.mk(), true, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d",
+		unique(VisitOnceLIFOWorkingSet.mk(), true, (
+				ws,
+				lifo,
+				el) -> random(ws, lifo, false, el), "a", "b", "c", "d",
 				"d", "f", "a", "b", "i");
-		unique(VisitOnceLIFOWorkingSet.mk(), true, (ws, lifo, el) -> random(ws, lifo, false, el), "a", null, "c", "d",
+		unique(VisitOnceLIFOWorkingSet.mk(), true, (
+				ws,
+				lifo,
+				el) -> random(ws, lifo, false, el), "a", null, "c", "d",
 				"d", "f", "a", "b", null, "i");
 	}
 }

@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 public abstract class RegularExpression implements TransitionSymbol<RegularExpression> {
 
 	@Override
-	public final int compareTo(RegularExpression o) {
+	public final int compareTo(
+			RegularExpression o) {
 		if (getClass() != o.getClass())
 			return getClass().getName().compareTo(o.getClass().getName());
 		return compareToAux(o);
@@ -31,7 +32,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * @return a negative integer, zero, or a positive integer as this object is
 	 *             less than, equal to, or greater than the specified object
 	 */
-	protected abstract int compareToAux(RegularExpression other);
+	protected abstract int compareToAux(
+			RegularExpression other);
 
 	@Override
 	public boolean isEpsilon() {
@@ -58,7 +60,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * @return the automaton
 	 */
 	public abstract <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory);
+			T extends TransitionSymbol<T>> A toAutomaton(
+					AutomataFactory<A, T> factory);
 
 	/**
 	 * Casts this regular expression to an {@link Atom} if this regular
@@ -171,7 +174,9 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return the set of all substrings
 	 */
-	public final Set<SymbolicString> substring(int start, int end) {
+	public final Set<SymbolicString> substring(
+			int start,
+			int end) {
 		return substringAux(start, end - start).stream().filter(ps -> ps.missingChars == 0).map(t -> t.getSubstring())
 				.collect(Collectors.toSet());
 	}
@@ -208,7 +213,10 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 		 * @param charsToStart the number of characters to skip before starting
 		 *                         to collect the substring
 		 */
-		protected PartialSubstring(SymbolicString substring, int charsToStart, int missingChars) {
+		protected PartialSubstring(
+				SymbolicString substring,
+				int charsToStart,
+				int missingChars) {
 			this.substring = substring;
 			this.missingChars = missingChars;
 			this.charsToStart = charsToStart;
@@ -223,7 +231,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 		 * 
 		 * @return the joined partial substring
 		 */
-		protected PartialSubstring concat(PartialSubstring other) {
+		protected PartialSubstring concat(
+				PartialSubstring other) {
 			return new PartialSubstring(substring.concat(other.substring), other.charsToStart, other.missingChars);
 		}
 
@@ -267,7 +276,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)
@@ -308,7 +318,9 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return the set of partial substrings
 	 */
-	protected abstract Set<PartialSubstring> substringAux(int charsToSkip, int missingChars);
+	protected abstract Set<PartialSubstring> substringAux(
+			int charsToSkip,
+			int missingChars);
 
 	/**
 	 * Yields a new regular expression corresponding to the {@code n}-repetition
@@ -319,7 +331,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * @return a new regular expression corresponding to the
 	 *             {@code n}-repetition of {@code this}
 	 */
-	public abstract RegularExpression repeat(long n);
+	public abstract RegularExpression repeat(
+			long n);
 
 	/**
 	 * Yields a new regular expression where leading whitespaces have been
@@ -355,7 +368,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public abstract boolean is(String str);
+	public abstract boolean is(
+			String str);
 
 	/**
 	 * Yields {@code true} if and only if this regular expression <b>may</b>
@@ -365,7 +379,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public abstract boolean mayContain(String s);
+	public abstract boolean mayContain(
+			String s);
 
 	/**
 	 * Yields {@code true} if and only if this regular expression <b>always</b>
@@ -375,7 +390,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public abstract boolean contains(String s);
+	public abstract boolean contains(
+			String s);
 
 	/**
 	 * Yields {@code true} if and only if this regular expression <b>may</b>
@@ -385,7 +401,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public abstract boolean mayStartWith(String s);
+	public abstract boolean mayStartWith(
+			String s);
 
 	/**
 	 * Yields {@code true} if and only if this regular expression <b>always</b>
@@ -395,7 +412,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public abstract boolean startsWith(String s);
+	public abstract boolean startsWith(
+			String s);
 
 	/**
 	 * Yields {@code true} if and only if this regular expression <b>may</b> end
@@ -405,7 +423,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public abstract boolean mayEndWith(String s);
+	public abstract boolean mayEndWith(
+			String s);
 
 	/**
 	 * Yields {@code true} if and only if this regular expression <b>always</b>
@@ -415,7 +434,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public abstract boolean endsWith(String s);
+	public abstract boolean endsWith(
+			String s);
 
 	/**
 	 * Yields a new regular expression where all {@link Star} have been unrolled
@@ -425,7 +445,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return the regular expression with unrolled stars
 	 */
-	protected abstract RegularExpression unrollStarToFixedLength(int length);
+	protected abstract RegularExpression unrollStarToFixedLength(
+			int length);
 
 	/**
 	 * Yields a new regular expression where all {@link TopAtom} are assumed to
@@ -481,7 +502,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return the joined regular expression
 	 */
-	public final RegularExpression comp(RegularExpression other) {
+	public final RegularExpression comp(
+			RegularExpression other) {
 		if (this.isEpsilon())
 			return other;
 		if (other.isEpsilon())
@@ -497,7 +519,8 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * 
 	 * @return the disjunction
 	 */
-	public final RegularExpression or(RegularExpression other) {
+	public final RegularExpression or(
+			RegularExpression other) {
 		if (this.isEpsilon() && other.isEpsilon())
 			return this;
 		return new Or(this, other);

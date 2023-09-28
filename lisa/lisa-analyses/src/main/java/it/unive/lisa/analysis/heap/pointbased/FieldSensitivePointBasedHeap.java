@@ -1,16 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -23,6 +12,16 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A field-insensitive program point-based {@link AllocationSiteBasedAnalysis}.
@@ -265,7 +264,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public class Rewriter extends AllocationSiteBasedAnalysis<FieldSensitivePointBasedHeap>.Rewriter {
-		
+
 		@Override
 		public ExpressionSet visit(
 				AccessChild expression,

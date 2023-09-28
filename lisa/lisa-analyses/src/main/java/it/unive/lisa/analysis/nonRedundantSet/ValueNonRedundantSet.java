@@ -1,11 +1,10 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
-import java.util.SortedSet;
-
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.SortedSet;
 
 /**
  * This class expands the {@link NonRedundantPowerset} class fixing the type of
@@ -16,7 +15,8 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * @param <T> the concrete type of the elements in the sets
  */
 public class ValueNonRedundantSet<T extends ValueDomain<T>>
-		extends NonRedundantPowerset<ValueNonRedundantSet<T>, T, ValueExpression, Identifier> {
+		extends
+		NonRedundantPowerset<ValueNonRedundantSet<T>, T, ValueExpression, Identifier> {
 
 	/**
 	 * Builds the value non redundant set.
@@ -26,12 +26,18 @@ public class ValueNonRedundantSet<T extends ValueDomain<T>>
 	 * @param valueDomain an element representing the types of elements in the
 	 *                        set
 	 */
-	public ValueNonRedundantSet(SortedSet<T> elements, boolean isTop, T valueDomain) {
+	public ValueNonRedundantSet(
+			SortedSet<T> elements,
+			boolean isTop,
+			T valueDomain) {
 		super(elements, isTop, valueDomain);
 	}
 
 	@Override
-	public ValueNonRedundantSet<T> mk(SortedSet<T> set, boolean isTop, T valueDomain) {
+	public ValueNonRedundantSet<T> mk(
+			SortedSet<T> set,
+			boolean isTop,
+			T valueDomain) {
 		return new ValueNonRedundantSet<>(set, isTop, valueDomain);
 	}
 
@@ -46,7 +52,8 @@ public class ValueNonRedundantSet<T extends ValueDomain<T>>
 	}
 
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		return elements.stream().anyMatch(e -> e.knowsIdentifier(id));
 	}
 }

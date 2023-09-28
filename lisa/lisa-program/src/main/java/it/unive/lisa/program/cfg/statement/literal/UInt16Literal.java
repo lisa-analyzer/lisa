@@ -20,7 +20,10 @@ public class UInt16Literal extends Literal<Short> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public UInt16Literal(CFG cfg, CodeLocation location, short value) {
+	public UInt16Literal(
+			CFG cfg,
+			CodeLocation location,
+			short value) {
 		super(cfg, location, value, UInt16Type.INSTANCE);
 	}
 }

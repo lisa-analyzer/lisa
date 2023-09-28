@@ -29,7 +29,8 @@ public class Taint extends BaseTaint<Taint> {
 		this(true);
 	}
 
-	private Taint(Boolean taint) {
+	private Taint(
+			Boolean taint) {
 		this.taint = taint;
 	}
 
@@ -70,17 +71,23 @@ public class Taint extends BaseTaint<Taint> {
 	}
 
 	@Override
-	public Taint lubAux(Taint other) throws SemanticException {
+	public Taint lubAux(
+			Taint other)
+			throws SemanticException {
 		return TAINTED; // should never happen
 	}
 
 	@Override
-	public Taint wideningAux(Taint other) throws SemanticException {
+	public Taint wideningAux(
+			Taint other)
+			throws SemanticException {
 		return TAINTED; // should never happen
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Taint other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Taint other)
+			throws SemanticException {
 		return false; // should never happen
 	}
 
@@ -93,7 +100,8 @@ public class Taint extends BaseTaint<Taint> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

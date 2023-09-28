@@ -14,7 +14,8 @@ public class BoolAnnotationValue implements BasicAnnotationValue {
 	 * 
 	 * @param b the boolean value
 	 */
-	public BoolAnnotationValue(boolean b) {
+	public BoolAnnotationValue(
+			boolean b) {
 		this.b = b;
 	}
 
@@ -27,7 +28,8 @@ public class BoolAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -46,7 +48,8 @@ public class BoolAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof BoolAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

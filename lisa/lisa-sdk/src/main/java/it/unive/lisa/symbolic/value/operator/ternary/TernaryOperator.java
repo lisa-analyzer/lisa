@@ -29,5 +29,9 @@ public interface TernaryOperator extends Operator {
 	 * 
 	 * @return the runtime types of this expression
 	 */
-	Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> middle, Set<Type> right);
+	Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> middle,
+			Set<Type> right);
 }

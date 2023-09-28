@@ -28,7 +28,9 @@ public interface EvaluationOrder {
 	 *             previous sub-expression, that is, {@code pos} is the first
 	 *             that needs to be evaluated)
 	 */
-	int previous(int pos, int len);
+	int previous(
+			int pos,
+			int len);
 
 	/**
 	 * Assuming that {@code pos} is the index of a sub-expression, yields the
@@ -41,7 +43,9 @@ public interface EvaluationOrder {
 	 *             sub-expression, that is, {@code pos} is the last that needs
 	 *             to be evaluated)
 	 */
-	int next(int pos, int len);
+	int next(
+			int pos,
+			int len);
 
 	/**
 	 * Yields the index of the first sub-expression that has to be evaluated.
@@ -50,7 +54,8 @@ public interface EvaluationOrder {
 	 * 
 	 * @return the index of the first expression to evaluate
 	 */
-	int first(int len);
+	int first(
+			int len);
 
 	/**
 	 * Yields the index of the last sub-expression that has to be evaluated.
@@ -59,7 +64,8 @@ public interface EvaluationOrder {
 	 * 
 	 * @return the index of the last expression to evaluate
 	 */
-	int last(int len);
+	int last(
+			int len);
 
 	/**
 	 * Evaluates the given sub-expressions according to this order. This method

@@ -36,7 +36,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <E> the type of the {@link CodeEdge}s in this list
  */
 public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
-		implements Iterable<N> {
+		implements
+		Iterable<N> {
 
 	private static final String EDGE_SIMPLIFY_ERROR = "Cannot simplify an edge with class ";
 
@@ -84,7 +85,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 *                                {@link CodeEdge#newInstance(CodeNode, CodeNode)}
 	 *                                to obtain instances of sequential edges
 	 */
-	public NodeList(E sequentialSingleton) {
+	public NodeList(
+			E sequentialSingleton) {
 		this(sequentialSingleton, true);
 	}
 
@@ -98,7 +100,9 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @param computeOffsets      whether or not offsets should be set to nodes
 	 *                                when added to this list
 	 */
-	public NodeList(E sequentialSingleton, boolean computeOffsets) {
+	public NodeList(
+			E sequentialSingleton,
+			boolean computeOffsets) {
 		this.sequentialSingleton = sequentialSingleton;
 		nodes = new LinkedList<>();
 		cutoff = new HashSet<>();
@@ -112,7 +116,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @param other the list to copy
 	 */
-	public NodeList(NodeList<G, N, E> other) {
+	public NodeList(
+			NodeList<G, N, E> other) {
 		sequentialSingleton = other.sequentialSingleton;
 		nodes = new LinkedList<>(other.nodes);
 		cutoff = new HashSet<>(other.cutoff);
@@ -134,7 +139,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @param node the node to add
 	 */
-	public void addNode(N node) {
+	public void addNode(
+			N node) {
 		if (containsNode(node))
 			// already in the graph
 			return;
@@ -155,7 +161,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @param node the node to remove
 	 */
-	public void removeNode(N node) {
+	public void removeNode(
+			N node) {
 		if (!containsNode(node))
 			return;
 
@@ -222,7 +229,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 *                                           the given edge are not part of
 	 *                                           this list
 	 */
-	public void addEdge(E e) {
+	public void addEdge(
+			E e) {
 		int src = nodes.indexOf(e.getSource());
 		if (src == -1)
 			throw new UnsupportedOperationException("The source node is not in the graph");
@@ -245,7 +253,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @param e the edge to remove
 	 */
-	public void removeEdge(E e) {
+	public void removeEdge(
+			E e) {
 		int src = nodes.indexOf(e.getSource());
 		int dest = nodes.indexOf(e.getDestination());
 		if (src == -1 || dest == -1)
@@ -282,7 +291,9 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the edge connecting {@code source} to {@code destination}, or
 	 *             {@code null}
 	 */
-	public final E getEdgeConnecting(N source, N destination) {
+	public final E getEdgeConnecting(
+			N source,
+			N destination) {
 		int src = nodes.indexOf(source);
 		int dest = nodes.indexOf(destination);
 		if (src == -1 || dest == -1)
@@ -311,7 +322,9 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @return the edges connecting {@code source} to {@code destination}
 	 */
-	public Collection<E> getEdgesConnecting(N source, N destination) {
+	public Collection<E> getEdgesConnecting(
+			N source,
+			N destination) {
 		int src = nodes.indexOf(source);
 		int dest = nodes.indexOf(destination);
 		if (src == -1 || dest == -1)
@@ -337,7 +350,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @return the collection of ingoing edges
 	 */
-	public final Collection<E> getIngoingEdges(N node) {
+	public final Collection<E> getIngoingEdges(
+			N node) {
 		int src = nodes.indexOf(node);
 		if (src == -1)
 			return Collections.emptySet();
@@ -360,7 +374,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @return the collection of outgoing edges
 	 */
-	public final Collection<E> getOutgoingEdges(N node) {
+	public final Collection<E> getOutgoingEdges(
+			N node) {
 		int src = nodes.indexOf(node);
 		if (src == -1)
 			return Collections.emptySet();
@@ -403,7 +418,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @throws IllegalArgumentException if the node is not in the graph
 	 */
-	public final Collection<N> followersOf(N node) {
+	public final Collection<N> followersOf(
+			N node) {
 		int src = nodes.indexOf(node);
 		if (src == -1)
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
@@ -430,7 +446,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @throws IllegalArgumentException if the node is not in the graph
 	 */
-	public final Collection<N> predecessorsOf(N node) {
+	public final Collection<N> predecessorsOf(
+			N node) {
 		int src = nodes.indexOf(node);
 		if (src == -1)
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
@@ -472,7 +489,10 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	public void simplify(Iterable<N> targets, Collection<N> entrypoints, Collection<E> removedEdges,
+	public void simplify(
+			Iterable<N> targets,
+			Collection<N> entrypoints,
+			Collection<E> removedEdges,
 			Map<Pair<E, E>, E> replacedEdges) {
 		removedEdges.clear();
 		replacedEdges.clear();
@@ -537,7 +557,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @return {@code true} if the node is in this list
 	 */
-	public boolean containsNode(N node) {
+	public boolean containsNode(
+			N node) {
 		return nodes.contains(node);
 	}
 
@@ -548,7 +569,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @return {@code true} if the edge is in this list
 	 */
-	public boolean containsEdge(E edge) {
+	public boolean containsEdge(
+			E edge) {
 		int src = nodes.indexOf(edge.getSource());
 		int dest = nodes.indexOf(edge.getDestination());
 		if (src == -1 || dest == -1)
@@ -582,7 +604,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -650,7 +673,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @param root the node to use as root for the removal
 	 */
-	public void removeFrom(N root) {
+	public void removeFrom(
+			N root) {
 		if (!containsNode(root))
 			return;
 
@@ -716,7 +740,9 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the minimum distance, in terms of number of edges to traverse,
 	 *             between the given nodes
 	 */
-	public int distance(N from, N to) {
+	public int distance(
+			N from,
+			N to) {
 		if (!containsNode(from) || !containsNode(to))
 			return -1;
 
@@ -748,7 +774,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * 
 	 * @param other the list to merge into this one
 	 */
-	public void mergeWith(NodeList<G, N, E> other) {
+	public void mergeWith(
+			NodeList<G, N, E> other) {
 		for (N node : other.getNodes())
 			addNode(node);
 
@@ -773,7 +800,9 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @throws ProgramValidationException if one of the aforementioned checks
 	 *                                        fail
 	 */
-	public void validate(Collection<N> entrypoints) throws ProgramValidationException {
+	public void validate(
+			Collection<N> entrypoints)
+			throws ProgramValidationException {
 		// all edges should be connected to statements inside the list
 		for (N node : nodes) {
 			NodeEdges<G, N, E> edges = extraEdges.get(node);
@@ -796,7 +825,10 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		}
 	}
 
-	private void validateEdge(Collection<N> nodes, E edge) throws ProgramValidationException {
+	private void validateEdge(
+			Collection<N> nodes,
+			E edge)
+			throws ProgramValidationException {
 		if (!nodes.contains(edge.getSource()))
 			throw new ProgramValidationException("Invalid edge: '" + edge
 					+ "' originates in a node that is not part of the graph");
@@ -827,7 +859,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 			outgoing = new TreeSet<>();
 		}
 
-		private NodeEdges(NodeEdges<G, N, E> other) {
+		private NodeEdges(
+				NodeEdges<G, N, E> other) {
 			ingoing = new TreeSet<>(other.ingoing);
 			outgoing = new TreeSet<>(other.outgoing);
 		}
@@ -860,7 +893,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)

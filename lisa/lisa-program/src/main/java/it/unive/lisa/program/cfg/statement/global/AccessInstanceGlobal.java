@@ -1,8 +1,5 @@
 package it.unive.lisa.program.cfg.statement.global;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,6 +20,8 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An access to an instance {@link Global} of a {@link ClassUnit}.

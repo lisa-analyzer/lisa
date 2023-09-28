@@ -15,7 +15,9 @@ public class ExpressionWarning extends StatementWarning {
 	 * @param expression the expression where this warning was reported on
 	 * @param message    the message of this warning
 	 */
-	public ExpressionWarning(Expression expression, String message) {
+	public ExpressionWarning(
+			Expression expression,
+			String message) {
 		super(expression, message);
 	}
 

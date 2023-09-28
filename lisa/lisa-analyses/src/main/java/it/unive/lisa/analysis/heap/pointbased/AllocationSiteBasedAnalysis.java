@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -29,6 +22,12 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A base class for heap analyses based on the allocation sites of the objects
@@ -128,7 +127,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			throws SemanticException {
 		A sss = smallStepSemantics(expression, pp, oracle);
 		A result = bottom();
-		List<HeapReplacement> replacements = new LinkedList<>();		
+		List<HeapReplacement> replacements = new LinkedList<>();
 		ExpressionSet rhsExps;
 		if (expression.mightNeedRewriting())
 			rhsExps = rewrite(expression, pp, oracle);
@@ -189,6 +188,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * @param site         the allocation site to be assigned
 	 * @param replacements the list of replacements to be updated
 	 * @param pp           the program point where this operation occurs
+	 * @param oracle       the oracle for inter-domain communication
 	 * 
 	 * @return the point-based heap instance where {@code id} is updated with
 	 *             {@code star_y} and the needed heap replacements

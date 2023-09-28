@@ -20,7 +20,8 @@ public class StringRepresentation extends StructuredRepresentation {
 	 * 
 	 * @param representation the string
 	 */
-	public StringRepresentation(String representation) {
+	public StringRepresentation(
+			String representation) {
 		this.representation = representation;
 	}
 
@@ -31,7 +32,8 @@ public class StringRepresentation extends StructuredRepresentation {
 	 * 
 	 * @param obj the object
 	 */
-	public StringRepresentation(Object obj) {
+	public StringRepresentation(
+			Object obj) {
 		this(String.valueOf(obj));
 	}
 
@@ -54,7 +56,8 @@ public class StringRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

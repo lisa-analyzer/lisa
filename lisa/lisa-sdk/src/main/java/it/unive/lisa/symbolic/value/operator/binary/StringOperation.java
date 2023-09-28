@@ -1,12 +1,11 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.symbolic.value.operator.StringOperator;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * A common implementation for classes implementing {@link BinaryOperator} and
@@ -20,7 +19,10 @@ import it.unive.lisa.type.TypeSystem;
 public abstract class StringOperation implements StringOperator, BinaryOperator {
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> right) {
 		if (left.stream().noneMatch(Type::isStringType) || right.stream().noneMatch(Type::isStringType))
 			return Collections.emptySet();
 		return Collections.singleton(resultType(types));
@@ -34,5 +36,6 @@ public abstract class StringOperation implements StringOperator, BinaryOperator 
 	 * 
 	 * @return the type
 	 */
-	protected abstract Type resultType(TypeSystem types);
+	protected abstract Type resultType(
+			TypeSystem types);
 }

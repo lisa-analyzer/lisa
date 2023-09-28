@@ -18,7 +18,9 @@ import java.util.Set;
 public class RTACallGraph extends BaseCallGraph {
 
 	@Override
-	public Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types) {
+	public Collection<Type> getPossibleTypesOfReceiver(
+			Expression receiver,
+			Set<Type> types) {
 		return types;
 	}
 

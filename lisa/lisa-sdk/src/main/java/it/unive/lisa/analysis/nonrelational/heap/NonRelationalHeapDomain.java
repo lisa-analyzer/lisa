@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation;
@@ -13,6 +10,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A non-relational heap domain, that is able to compute the value of a
@@ -25,7 +24,9 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <T> the concrete type of the domain
  */
 public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
-		extends NonRelationalDomain<T, SymbolicExpression, HeapEnvironment<T>>, HeapSemanticOperation {
+		extends
+		NonRelationalDomain<T, SymbolicExpression, HeapEnvironment<T>>,
+		HeapSemanticOperation {
 
 	/**
 	 * Rewrites a {@link SymbolicExpression}, getting rid of the parts that

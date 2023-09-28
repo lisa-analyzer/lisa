@@ -33,7 +33,8 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 	 * 
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
-	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+	public PointBasedHeap(
+			HeapEnvironment<AllocationSites> heapEnv) {
 		this(heapEnv, Collections.emptyList());
 	}
 
@@ -44,12 +45,16 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 	 * @param heapEnv      the heap environment that this instance tracks
 	 * @param replacements the heap replacements of this instance
 	 */
-	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements) {
+	public PointBasedHeap(
+			HeapEnvironment<AllocationSites> heapEnv,
+			List<HeapReplacement> replacements) {
 		super(heapEnv, replacements.isEmpty() ? Collections.emptyList() : replacements);
 	}
 
 	@Override
-	protected PointBasedHeap mk(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements) {
+	protected PointBasedHeap mk(
+			HeapEnvironment<AllocationSites> heapEnv,
+			List<HeapReplacement> replacements) {
 		return new PointBasedHeap(heapEnv, replacements);
 	}
 
@@ -69,37 +74,51 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 	}
 
 	@Override
-	public PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
+	public PointBasedHeap lubAux(
+			PointBasedHeap other)
+			throws SemanticException {
 		return new PointBasedHeap(heapEnv.lub(other.heapEnv));
 	}
 
 	@Override
-	public PointBasedHeap glbAux(PointBasedHeap other) throws SemanticException {
+	public PointBasedHeap glbAux(
+			PointBasedHeap other)
+			throws SemanticException {
 		return new PointBasedHeap(heapEnv.glb(other.heapEnv));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(PointBasedHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			PointBasedHeap other)
+			throws SemanticException {
 		return heapEnv.lessOrEqual(other.heapEnv);
 	}
 
 	@Override
-	public PointBasedHeap popScope(ScopeToken scope) throws SemanticException {
+	public PointBasedHeap popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return new PointBasedHeap(heapEnv.popScope(scope));
 	}
 
 	@Override
-	public PointBasedHeap pushScope(ScopeToken scope) throws SemanticException {
+	public PointBasedHeap pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return new PointBasedHeap(heapEnv.pushScope(scope));
 	}
 
 	@Override
-	public PointBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
+	public PointBasedHeap forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		return new PointBasedHeap(heapEnv.forgetIdentifier(id));
 	}
 
 	@Override
-	public PointBasedHeap forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public PointBasedHeap forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		return new PointBasedHeap(heapEnv.forgetIdentifiersIf(test));
 	}
 }

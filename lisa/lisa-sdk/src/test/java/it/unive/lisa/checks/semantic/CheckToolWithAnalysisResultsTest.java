@@ -67,31 +67,40 @@ public class CheckToolWithAnalysisResultsTest {
 	private static final CallGraph fakeCallGraph = new CallGraph() {
 
 		@Override
-		public void registerCall(CFGCall call) {
+		public void registerCall(
+				CFGCall call) {
 		}
 
 		@Override
-		public void init(Application app) throws CallGraphConstructionException {
+		public void init(
+				Application app)
+				throws CallGraphConstructionException {
 			super.init(app);
 		}
 
 		@Override
-		public Collection<CodeMember> getCallers(CodeMember cm) {
+		public Collection<CodeMember> getCallers(
+				CodeMember cm) {
 			return null;
 		}
 
 		@Override
-		public Collection<CodeMember> getCallees(CodeMember cm) {
+		public Collection<CodeMember> getCallees(
+				CodeMember cm) {
 			return null;
 		}
 
 		@Override
-		public Collection<Call> getCallSites(CodeMember cm) {
+		public Collection<Call> getCallSites(
+				CodeMember cm) {
 			return null;
 		}
 
 		@Override
-		public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+		public Call resolve(
+				UnresolvedCall call,
+				Set<Type>[] types,
+				SymbolAliasing aliasing)
 				throws CallResolutionException {
 			return null;
 		}
@@ -102,12 +111,16 @@ public class CheckToolWithAnalysisResultsTest {
 		}
 
 		@Override
-		public Collection<Collection<CodeMember>> getRecursionsContaining(CodeMember cm) {
+		public Collection<Collection<CodeMember>> getRecursionsContaining(
+				CodeMember cm) {
 			return null;
 		}
 	};
 
-	private static Warning build(CheckTool tool, Object target, String message) {
+	private static Warning build(
+			CheckTool tool,
+			Object target,
+			String message) {
 		if (target == null) {
 			tool.warn(message);
 			return new Warning(message);

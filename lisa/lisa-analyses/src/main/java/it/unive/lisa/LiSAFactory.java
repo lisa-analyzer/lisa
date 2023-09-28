@@ -1,25 +1,5 @@
 package it.unive.lisa;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
@@ -37,6 +17,24 @@ import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 /**
  * An utility class for instantiating analysis components, that is, modular
@@ -54,7 +52,10 @@ public final class LiSAFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T construct(Class<T> component, Class<?>[] argTypes, Object[] params)
+	private static <T> T construct(
+			Class<T> component,
+			Class<?>[] argTypes,
+			Object[] params)
 			throws AnalysisSetupException {
 		if (argTypes.length == 0)
 			try {
@@ -79,7 +80,9 @@ public final class LiSAFactory {
 		}
 	}
 
-	private static Class<?>[] findConstructorSignature(Class<?> component, Object[] params)
+	private static Class<?>[] findConstructorSignature(
+			Class<?> component,
+			Object[] params)
 			throws AnalysisSetupException {
 		Map<Constructor<?>, List<Integer>> candidates = new IdentityHashMap<>();
 		Class<?>[] types;
@@ -114,7 +117,9 @@ public final class LiSAFactory {
 		return candidates.keySet().iterator().next().getParameterTypes();
 	}
 
-	private static boolean needsWrapping(Class<?> actual, Class<?> desired) {
+	private static boolean needsWrapping(
+			Class<?> actual,
+			Class<?> desired) {
 		if (NonRelationalHeapDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(HeapDomain.class))
 			return true;
 		else if (NonRelationalValueDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
@@ -130,7 +135,8 @@ public final class LiSAFactory {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static Object wrapParam(Object param) {
+	private static Object wrapParam(
+			Object param) {
 		if (NonRelationalHeapDomain.class.isAssignableFrom(param.getClass()))
 			return new HeapEnvironment((NonRelationalHeapDomain<?>) param);
 		else if (NonRelationalValueDomain.class.isAssignableFrom(param.getClass()))
@@ -172,7 +178,10 @@ public final class LiSAFactory {
 	 * 
 	 * @throws AnalysisSetupException if the component cannot be created
 	 */
-	public static <T> T getInstance(Class<T> component, Object... params) throws AnalysisSetupException {
+	public static <T> T getInstance(
+			Class<T> component,
+			Object... params)
+			throws AnalysisSetupException {
 		try {
 			if (params != null && params.length != 0)
 				return construct(component, findConstructorSignature(component, params), params);
@@ -203,7 +212,8 @@ public final class LiSAFactory {
 		private final Class<?> component;
 		private final Set<Class<?>> alternatives;
 
-		private ConfigurableComponent(Class<?> component) {
+		private ConfigurableComponent(
+				Class<?> component) {
 			this.component = component;
 			this.alternatives = new HashSet<>();
 
@@ -249,7 +259,8 @@ public final class LiSAFactory {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)

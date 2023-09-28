@@ -1,12 +1,5 @@
 package it.unive.lisa.program;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Predicate;
-
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.AbstractCodeMember;
@@ -16,6 +9,12 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.language.validation.ProgramValidationLogic;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Predicate;
 
 /**
  * An unit of the program to analyze that is part of a hierarchical structure.
@@ -63,7 +62,11 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * @param name     the name of the unit
 	 * @param sealed   whether or not this unit can be inherited from
 	 */
-	protected CompilationUnit(CodeLocation location, Program program, String name, boolean sealed) {
+	protected CompilationUnit(
+			CodeLocation location,
+			Program program,
+			String name,
+			boolean sealed) {
 		super(location, program, name);
 		this.sealed = sealed;
 		instanceCodeMembers = new TreeMap<>();
@@ -91,7 +94,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * @return {@code true} if the collection of ancestors changed as a result
 	 *             of the call
 	 */
-	public abstract boolean addAncestor(CompilationUnit unit);
+	public abstract boolean addAncestor(
+			CompilationUnit unit);
 
 	/**
 	 * Adds the given unit as an instance of this one, thus marking the former
@@ -101,7 +105,9 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @throws ProgramValidationException if the given unit cannot be added
 	 */
-	public abstract void addInstance(Unit unit) throws ProgramValidationException;
+	public abstract void addInstance(
+			Unit unit)
+			throws ProgramValidationException;
 
 	/**
 	 * {@inheritDoc}<br>
@@ -137,7 +143,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the collection of instance code members
 	 */
-	public Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
+	public Collection<CodeMember> getInstanceCodeMembers(
+			boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> true, traverseHierarchy);
 	}
 
@@ -151,7 +158,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the collection of instance globals
 	 */
-	public Collection<Global> getInstanceGlobals(boolean traverseHierarchy) {
+	public Collection<Global> getInstanceGlobals(
+			boolean traverseHierarchy) {
 		return searchGlobals(g -> true, traverseHierarchy);
 	}
 
@@ -168,7 +176,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the collection of instance cfgs
 	 */
-	public Collection<CFG> getInstanceCFGs(boolean traverseHierarchy) {
+	public Collection<CFG> getInstanceCFGs(
+			boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm instanceof CFG, traverseHierarchy);
 	}
 
@@ -185,7 +194,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the collection of signature cfgs
 	 */
-	public Collection<AbstractCodeMember> getAbstractCodeMembers(boolean traverseHierarchy) {
+	public Collection<AbstractCodeMember> getAbstractCodeMembers(
+			boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm instanceof AbstractCodeMember, traverseHierarchy);
 	}
 
@@ -202,7 +212,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the collection of instance constructs
 	 */
-	public Collection<NativeCFG> getInstanceConstructs(boolean traverseHierarchy) {
+	public Collection<NativeCFG> getInstanceConstructs(
+			boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm instanceof NativeCFG, traverseHierarchy);
 	}
 
@@ -237,7 +248,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @param ann the annotation to be added
 	 */
-	public void addAnnotation(Annotation ann) {
+	public void addAnnotation(
+			Annotation ann) {
 		annotations.addAnnotation(ann);
 	}
 
@@ -260,7 +272,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return {@code true} only if that condition holds
 	 */
-	public abstract boolean isInstanceOf(CompilationUnit unit);
+	public abstract boolean isInstanceOf(
+			CompilationUnit unit);
 
 	/**
 	 * Searches among instance code members, returning a collection containing
@@ -276,7 +289,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * @return the collection of matching code members
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends CodeMember> Collection<T> searchCodeMembers(Predicate<CodeMember> filter,
+	public <T extends CodeMember> Collection<T> searchCodeMembers(
+			Predicate<CodeMember> filter,
 			boolean traverseHierarchy) {
 		Collection<T> result = new HashSet<>();
 
@@ -309,7 +323,9 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the collection of matching globals
 	 */
-	public Collection<Global> searchGlobals(Predicate<Global> filter, boolean traverseHierarchy) {
+	public Collection<Global> searchGlobals(
+			Predicate<Global> filter,
+			boolean traverseHierarchy) {
 		Map<String, Global> result = new HashMap<>();
 		for (Global g : instanceGlobals.values())
 			if (filter.test(g))
@@ -340,7 +356,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 *             this method returns {@code false}, the given global is
 	 *             discarded.
 	 */
-	public boolean addInstanceGlobal(Global global) {
+	public boolean addInstanceGlobal(
+			Global global) {
 		return instanceGlobals.putIfAbsent(global.getName(), global) == null;
 	}
 
@@ -357,7 +374,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 *             If this method returns {@code false}, the given code member
 	 *             is discarded.
 	 */
-	public boolean addInstanceCodeMember(CodeMember cm) {
+	public boolean addInstanceCodeMember(
+			CodeMember cm) {
 		CodeMember c = instanceCodeMembers.putIfAbsent(cm.getDescriptor().getSignature(), cm);
 		if (sealed)
 			if (c == null)
@@ -379,7 +397,9 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * @return the instance code member with the given signature, or
 	 *             {@code null}
 	 */
-	public CodeMember getInstanceCodeMember(String signature, boolean traverseHierarchy) {
+	public CodeMember getInstanceCodeMember(
+			String signature,
+			boolean traverseHierarchy) {
 		Collection<CodeMember> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature),
 				traverseHierarchy);
 		if (res.isEmpty())
@@ -397,7 +417,9 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the instance global with the given name, or {@code null}
 	 */
-	public Global getInstanceGlobal(String name, boolean traverseHierarchy) {
+	public Global getInstanceGlobal(
+			String name,
+			boolean traverseHierarchy) {
 		Collection<Global> res = searchGlobals(cm -> cm.getName().equals(name), traverseHierarchy);
 		if (res.isEmpty())
 			return null;
@@ -414,7 +436,9 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the collection of instance members with the given name
 	 */
-	public Collection<CodeMember> getInstanceCodeMembersByName(String name, boolean traverseHierarchy) {
+	public Collection<CodeMember> getInstanceCodeMembersByName(
+			String name,
+			boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm.getDescriptor().getName().equals(name), traverseHierarchy);
 	}
 
@@ -430,7 +454,8 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * @return the collection of instance code members that match the given
 	 *             signature
 	 */
-	public Collection<CodeMember> getMatchingInstanceCodeMembers(CodeMemberDescriptor signature,
+	public Collection<CodeMember> getMatchingInstanceCodeMembers(
+			CodeMemberDescriptor signature,
 			boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm.getDescriptor().matchesSignature(signature), traverseHierarchy);
 	}
