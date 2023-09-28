@@ -20,7 +20,10 @@ public class Int64Literal extends Literal<Long> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public Int64Literal(CFG cfg, CodeLocation location, long value) {
+	public Int64Literal(
+			CFG cfg,
+			CodeLocation location,
+			long value) {
 		super(cfg, location, value, Int64Type.INSTANCE);
 	}
 }

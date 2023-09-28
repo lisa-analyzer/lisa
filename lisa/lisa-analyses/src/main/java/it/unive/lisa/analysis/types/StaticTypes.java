@@ -3,19 +3,17 @@ package it.unive.lisa.analysis.types;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
@@ -24,6 +22,8 @@ import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.Set;
 
@@ -56,7 +56,9 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 	 *                  this element is created
 	 * @param type  the type to be included in the set of inferred types
 	 */
-	StaticTypes(TypeSystem types, Type type) {
+	StaticTypes(
+			TypeSystem types,
+			Type type) {
 		this.type = type;
 		this.types = types;
 	}
@@ -90,7 +92,7 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isTop())
 			return Lattice.topRepresentation();
 
@@ -101,31 +103,56 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	public StaticTypes evalIdentifier(Identifier id, TypeEnvironment<StaticTypes> environment,
-			ProgramPoint pp) throws SemanticException {
-		StaticTypes eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp);
+	public StaticTypes evalIdentifier(
+			Identifier id,
+			TypeEnvironment<StaticTypes> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		StaticTypes eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp, oracle);
 		if (!eval.isTop() && !eval.isBottom())
 			return eval;
 		return new StaticTypes(pp.getProgram().getTypes(), id.getStaticType());
 	}
 
 	@Override
-	public StaticTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
+	public StaticTypes evalPushAny(
+			PushAny pushAny,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return new StaticTypes(pp.getProgram().getTypes(), pushAny.getStaticType());
 	}
 
 	@Override
-	public StaticTypes evalNullConstant(ProgramPoint pp) {
+	public StaticTypes evalPushInv(
+			PushInv pushInv,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return new StaticTypes(pp.getProgram().getTypes(), pushInv.getStaticType());
+	}
+
+	@Override
+	public StaticTypes evalNullConstant(
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return new StaticTypes(pp.getProgram().getTypes(), NullType.INSTANCE);
 	}
 
 	@Override
-	public StaticTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public StaticTypes evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return new StaticTypes(pp.getProgram().getTypes(), constant.getStaticType());
 	}
 
 	@Override
-	public StaticTypes eval(ValueExpression expression, TypeEnvironment<StaticTypes> environment, ProgramPoint pp)
+	public StaticTypes eval(
+			ValueExpression expression,
+			TypeEnvironment<StaticTypes> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression instanceof BinaryExpression) {
 			TypeSystem types = pp.getProgram().getTypes();
@@ -133,8 +160,8 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 			if (binary.getOperator() instanceof TypeCast || binary.getOperator() instanceof TypeConv) {
 				StaticTypes left = null, right = null;
 				try {
-					left = eval((ValueExpression) binary.getLeft(), environment, pp);
-					right = eval((ValueExpression) binary.getRight(), environment, pp);
+					left = eval((ValueExpression) binary.getLeft(), environment, pp, oracle);
+					right = eval((ValueExpression) binary.getRight(), environment, pp, oracle);
 				} catch (ClassCastException e) {
 					throw new SemanticException(expression + " is not a value expression");
 				}
@@ -151,22 +178,31 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, StaticTypes left,
-			StaticTypes right, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			StaticTypes left,
+			StaticTypes right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.type.allInstances(types);
 		Set<Type> relems = right.type.allInstances(types);
 		return new InferredTypes().satisfiesBinaryExpression(operator, new InferredTypes(types, lelems),
-				new InferredTypes(types, relems), pp);
+				new InferredTypes(types, relems), pp, oracle);
 	}
 
 	@Override
-	public StaticTypes lubAux(StaticTypes other) throws SemanticException {
+	public StaticTypes lubAux(
+			StaticTypes other)
+			throws SemanticException {
 		return new StaticTypes(types, type.commonSupertype(other.type));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(StaticTypes other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			StaticTypes other)
+			throws SemanticException {
 		return type.canBeAssignedTo(other.type);
 	}
 
@@ -179,7 +215,8 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -192,17 +229,6 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 				return false;
 		} else if (!type.equals(other.type))
 			return false;
-		return true;
-	}
-
-	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !(id instanceof MemoryPointer);
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		// Type analysis can process any expression
 		return true;
 	}
 }

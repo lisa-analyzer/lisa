@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
@@ -8,7 +9,6 @@ import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +27,10 @@ import java.util.Map;
  *                instances are mapped in this environment
  */
 public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
-		extends Environment<HeapEnvironment<T>, SymbolicExpression, T>
-		implements HeapDomain<HeapEnvironment<T>> {
+		extends
+		Environment<HeapEnvironment<T>, SymbolicExpression, T>
+		implements
+		HeapDomain<HeapEnvironment<T>> {
 
 	/**
 	 * The substitution
@@ -41,7 +43,8 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	 * @param domain a singleton instance to be used during semantic operations
 	 *                   to retrieve top and bottom values
 	 */
-	public HeapEnvironment(T domain) {
+	public HeapEnvironment(
+			T domain) {
 		super(domain);
 		substitution = Collections.emptyList();
 	}
@@ -53,7 +56,9 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	 *                     to retrieve top and bottom values
 	 * @param function the initial mapping of this heap environment
 	 */
-	public HeapEnvironment(T domain, Map<Identifier, T> function) {
+	public HeapEnvironment(
+			T domain,
+			Map<Identifier, T> function) {
 		this(domain, function, Collections.emptyList());
 	}
 
@@ -70,20 +75,28 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	 * @param substitution the list of substitutions that has been generated
 	 *                         together with the fresh instance being built
 	 */
-	public HeapEnvironment(T domain, Map<Identifier, T> function, List<HeapReplacement> substitution) {
+	public HeapEnvironment(
+			T domain,
+			Map<Identifier, T> function,
+			List<HeapReplacement> substitution) {
 		super(domain, function);
 		this.substitution = substitution;
 	}
 
 	@Override
-	public HeapEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
+	public HeapEnvironment<T> mk(
+			T lattice,
+			Map<Identifier, T> function) {
 		return new HeapEnvironment<>(lattice, function);
 	}
 
 	@Override
-	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		return lattice.rewrite(expression, this, pp);
+		return lattice.rewrite(expression, this, pp, oracle);
 	}
 
 	@Override
@@ -92,11 +105,14 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+	public HeapEnvironment<T> smallStepSemantics(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (isBottom())
 			return this;
-		T eval = lattice.eval(expression, this, pp);
+		T eval = lattice.eval(expression, this, pp, oracle);
 		return new HeapEnvironment<>(lattice, function, eval.getSubstitution());
 	}
 
@@ -125,7 +141,9 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	// TODO how do we lub/widen/glb/narrow the substitutions?
 
 	@Override
-	public boolean lessOrEqualAux(HeapEnvironment<T> other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			HeapEnvironment<T> other)
+			throws SemanticException {
 		if (!super.lessOrEqualAux(other))
 			return false;
 		// TODO how do we check the substitutions?
@@ -141,7 +159,8 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

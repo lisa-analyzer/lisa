@@ -25,19 +25,29 @@ public abstract class HeapExpression extends SymbolicExpression {
 	 * @param location the code location of the statement that has generated
 	 *                     this heap expression
 	 */
-	protected HeapExpression(Type type, CodeLocation location) {
+	protected HeapExpression(
+			Type type,
+			CodeLocation location) {
 		super(type, location);
 	}
 
-	// By default a heap expression does not change the scope.
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
+		// By default a heap expression does not change the scope.
 		return this;
 	}
 
-	// By default a heap expression does not change the scope.
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
+		// By default a heap expression does not change the scope.
 		return this;
+	}
+
+	@Override
+	public final boolean mightNeedRewriting() {
+		return true;
 	}
 }

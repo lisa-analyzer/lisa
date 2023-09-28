@@ -22,7 +22,9 @@ public class ParsingException extends Exception {
 	 * @param message the message of this exception
 	 * @param cause   the inner cause of this exception
 	 */
-	public ParsingException(String message, Throwable cause) {
+	public ParsingException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -31,7 +33,8 @@ public class ParsingException extends Exception {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public ParsingException(String message) {
+	public ParsingException(
+			String message) {
 		super(message);
 	}
 
@@ -40,7 +43,8 @@ public class ParsingException extends Exception {
 	 * 
 	 * @param cause the inner cause of this exception
 	 */
-	public ParsingException(Throwable cause) {
+	public ParsingException(
+			Throwable cause) {
 		super(cause);
 	}
 }

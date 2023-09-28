@@ -4,22 +4,22 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import java.util.Objects;
 
 /**
@@ -47,36 +47,57 @@ public class IMPNewArray extends NaryExpression {
 	 * @param staticallyAllocated if this allocation is static or not
 	 * @param dimensions          the dimensions of the array
 	 */
-	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated,
+	public IMPNewArray(
+			CFG cfg,
+			String sourceFile,
+			int line,
+			int col,
+			Type type,
+			boolean staticallyAllocated,
 			Expression[] dimensions) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type + "[]",
 				ArrayType.lookup(type, dimensions.length), dimensions);
+		if (dimensions.length != 1)
+			throw new UnsupportedOperationException("Multidimensional arrays are not yet supported");
 		this.staticallyAllocated = staticallyAllocated;
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
-		MemoryAllocation alloc = new MemoryAllocation(getStaticType(), getLocation(), new Annotations(),
-				staticallyAllocated);
-		AnalysisState<A, H, V, T> sem = state.smallStepSemantics(alloc, this);
+	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		Type type = getStaticType();
+		MemoryAllocation alloc = new MemoryAllocation(type, getLocation(), staticallyAllocated);
+		AnalysisState<A> allocSt = state.smallStepSemantics(alloc, this);
+		ExpressionSet allocExps = allocSt.getComputedExpressions();
 
-		AnalysisState<A, H, V, T> result = state.bottom();
-		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-			ReferenceType staticType = new ReferenceType(loc.getStaticType());
-			HeapReference ref = new HeapReference(staticType, loc, getLocation());
-			AnalysisState<A, H, V, T> refSem = sem.smallStepSemantics(ref, this);
-			result = result.lub(refSem);
+		AnalysisState<A> initSt = state.bottom();
+		for (SymbolicExpression allocExp : allocExps) {
+			AccessChild len = new AccessChild(
+					Int32Type.INSTANCE,
+					allocExp,
+					new Variable(Untyped.INSTANCE, "len", getLocation()),
+					getLocation());
+
+			AnalysisState<A> lenSt = state.bottom();
+			// TODO fix when we'll support multidimensional arrays
+			for (SymbolicExpression dim : params[0])
+				lenSt = lenSt.lub(allocSt.assign(len, dim, this));
+			initSt = initSt.lub(lenSt);
 		}
 
-		return result;
+		AnalysisState<A> refSt = state.bottom();
+		for (SymbolicExpression loc : allocSt.getComputedExpressions()) {
+			ReferenceType t = new ReferenceType(loc.getStaticType());
+			HeapReference ref = new HeapReference(t, loc, getLocation());
+			AnalysisState<A> refSem = initSt.smallStepSemantics(ref, this);
+			refSt = refSt.lub(refSem);
+		}
+
+		return refSt;
 	}
 
 	@Override
@@ -88,7 +109,8 @@ public class IMPNewArray extends NaryExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

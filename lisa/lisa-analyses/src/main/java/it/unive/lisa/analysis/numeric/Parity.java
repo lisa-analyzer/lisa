@@ -3,10 +3,9 @@ package it.unive.lisa.analysis.numeric;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -21,6 +20,8 @@ import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * The overflow-insensitive Parity abstract domain, tracking if a numeric value
@@ -70,7 +71,8 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 	 * 
 	 * @param parity the sign (0 = top, 1 = bottom, 2 = odd, 3 = even)
 	 */
-	public Parity(byte parity) {
+	public Parity(
+			byte parity) {
 		this.parity = parity;
 	}
 
@@ -85,7 +87,7 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 		if (isTop())
@@ -101,12 +103,17 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	public Parity evalNullConstant(ProgramPoint pp) {
+	public Parity evalNullConstant(
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return top();
 	}
 
 	@Override
-	public Parity evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Parity evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return i % 2 == 0 ? EVEN : ODD;
@@ -134,14 +141,23 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	public Parity evalUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
+	public Parity evalUnaryExpression(
+			UnaryOperator operator,
+			Parity arg,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (operator == NumericNegation.INSTANCE)
 			return arg;
 		return top();
 	}
 
 	@Override
-	public Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
+	public Parity evalBinaryExpression(
+			BinaryOperator operator,
+			Parity left,
+			Parity right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (left.isTop() || right.isTop())
 			return top();
 
@@ -167,12 +183,16 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	public Parity lubAux(Parity other) throws SemanticException {
+	public Parity lubAux(
+			Parity other)
+			throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Parity other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Parity other)
+			throws SemanticException {
 		return false;
 	}
 
@@ -185,7 +205,8 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -205,16 +226,17 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 			ValueExpression left,
 			ValueExpression right,
 			ProgramPoint src,
-			ProgramPoint dest)
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (operator == ComparisonEq.INSTANCE)
 			if (left instanceof Identifier) {
-				Parity eval = eval(right, environment, src);
+				Parity eval = eval(right, environment, src, oracle);
 				if (eval.isBottom())
 					return environment.bottom();
 				return environment.putState((Identifier) left, eval);
 			} else if (right instanceof Identifier) {
-				Parity eval = eval(left, environment, src);
+				Parity eval = eval(left, environment, src, oracle);
 				if (eval.isBottom())
 					return environment.bottom();
 				return environment.putState((Identifier) right, eval);

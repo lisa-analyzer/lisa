@@ -18,7 +18,9 @@ public class FalseLiteral extends Literal<Boolean> {
 	 * @param cfg      the {@link CFG} where this literal lies
 	 * @param location the location where this literal is defined
 	 */
-	public FalseLiteral(CFG cfg, CodeLocation location) {
+	public FalseLiteral(
+			CFG cfg,
+			CodeLocation location) {
 		super(cfg, location, false, cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType());
 	}
 

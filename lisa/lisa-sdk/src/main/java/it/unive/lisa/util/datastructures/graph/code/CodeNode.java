@@ -12,7 +12,9 @@ import it.unive.lisa.util.datastructures.graph.Node;
  * @param <E> the type of the {@link CodeEdge}s in this list
  */
 public interface CodeNode<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
-		extends Node<G, N, E>, Comparable<N> {
+		extends
+		Node<G, N, E>,
+		Comparable<N> {
 
 	/**
 	 * Sets the offset of this node to the given value, and then proceeds by
@@ -23,7 +25,8 @@ public interface CodeNode<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N,
 	 * 
 	 * @return the last offset used while setting the offsets of nested nodes
 	 */
-	int setOffset(int offset);
+	int setOffset(
+			int offset);
 
 	/**
 	 * Yields the offset of this node relative to its containing graph.

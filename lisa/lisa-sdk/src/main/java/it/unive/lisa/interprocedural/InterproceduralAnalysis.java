@@ -6,11 +6,8 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -28,6 +25,7 @@ import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.VoidType;
@@ -44,18 +42,18 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state
- * @param <T> the type of {@link TypeDomain} contained into the computed
- *                abstract state
  */
-public interface InterproceduralAnalysis<
-		A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>> {
+public interface InterproceduralAnalysis<A extends AbstractState<A>> {
+
+	/**
+	 * Yields {@code true} if this analysis needs a {@link CallGraph} instance
+	 * to function. If this method return {@code false} and a {@link CallGraph}
+	 * is passed to LiSA in its configuration, the latter will be ignored and
+	 * won't be initialized nor constructed.
+	 * 
+	 * @return whether or not this analysis needs a call graph
+	 */
+	boolean needsCallGraph();
 
 	/**
 	 * Initializes the interprocedural analysis of the given program. A call to
@@ -72,7 +70,11 @@ public interface InterproceduralAnalysis<
 	 *                                              performing the
 	 *                                              interprocedural analysis
 	 */
-	void init(Application app, CallGraph callgraph, OpenCallPolicy policy) throws InterproceduralAnalysisException;
+	void init(
+			Application app,
+			CallGraph callgraph,
+			OpenCallPolicy policy)
+			throws InterproceduralAnalysisException;
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
@@ -92,7 +94,8 @@ public interface InterproceduralAnalysis<
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
-	void fixpoint(AnalysisState<A, H, V, T> entryState,
+	void fixpoint(
+			AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException;
@@ -106,7 +109,8 @@ public interface InterproceduralAnalysis<
 	 * @return the result of the fixpoint computation of {@code valueDomain}
 	 *             over {@code cfg}
 	 */
-	Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg);
+	Collection<AnalyzedCFG<A>> getAnalysisResultsOf(
+			CFG cfg);
 
 	/**
 	 * Computes an analysis state that abstracts the execution of the possible
@@ -132,11 +136,11 @@ public interface InterproceduralAnalysis<
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	AnalysisState<A, H, V, T> getAbstractResultOf(
+	AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
-			AnalysisState<A, H, V, T> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
 			throws SemanticException;
 
 	/**
@@ -160,11 +164,11 @@ public interface InterproceduralAnalysis<
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	AnalysisState<A, H, V, T> getAbstractResultOf(
+	AnalysisState<A> getAbstractResultOf(
 			OpenCall call,
-			AnalysisState<A, H, V, T> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
 			throws SemanticException;
 
 	/**
@@ -182,7 +186,11 @@ public interface InterproceduralAnalysis<
 	 * @throws CallResolutionException if this analysis is unable to resolve the
 	 *                                     given call
 	 */
-	Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing) throws CallResolutionException;
+	Call resolve(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			SymbolAliasing aliasing)
+			throws CallResolutionException;
 
 	/**
 	 * Yields the results of the fixpoint computation over the whole
@@ -190,7 +198,7 @@ public interface InterproceduralAnalysis<
 	 * 
 	 * @return the results of the fixpoint
 	 */
-	FixpointResults<A, H, V, T> getFixpointResults();
+	FixpointResults<A> getFixpointResults();
 
 	/**
 	 * Converts the pre-state of {@code call} to a valid entry state for one of
@@ -211,14 +219,13 @@ public interface InterproceduralAnalysis<
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	@SuppressWarnings("unchecked")
-	default Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> scope(
-			AnalysisState<A, H, V, T> state,
+	default Pair<AnalysisState<A>, ExpressionSet[]> scope(
+			AnalysisState<A> state,
 			ScopeToken scope,
-			ExpressionSet<SymbolicExpression>[] actuals)
+			ExpressionSet[] actuals)
 			throws SemanticException {
-		ExpressionSet<SymbolicExpression>[] locals = new ExpressionSet[actuals.length];
-		AnalysisState<A, H, V, T> callState = state.pushScope(scope);
+		ExpressionSet[] locals = new ExpressionSet[actuals.length];
+		AnalysisState<A> callState = state.pushScope(scope);
 		for (int i = 0; i < actuals.length; i++)
 			locals[i] = actuals[i].pushScope(scope);
 		return Pair.of(callState, locals);
@@ -242,16 +249,23 @@ public interface InterproceduralAnalysis<
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	default AnalysisState<A, H, V, T> unscope(
+	default AnalysisState<A> unscope(
 			CFGCall call,
 			ScopeToken scope,
-			AnalysisState<A, H, V, T> state)
+			AnalysisState<A> state)
 			throws SemanticException {
 		if (returnsVoid(call, state))
 			return state.popScope(scope);
 
-		AnalysisState<A, H, V, T> tmp = state.bottom();
 		Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
+
+		if (state.getComputedExpressions().isEmpty()) {
+			// a return value is expected, but nothing is left on the stack
+			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
+			return state.popScope(scope).assign(meta, inv, call);
+		}
+
+		AnalysisState<A> tmp = state.bottom();
 		for (SymbolicExpression ret : state.getComputedExpressions())
 			tmp = tmp.lub(state.assign(meta, ret, call));
 
@@ -268,7 +282,9 @@ public interface InterproceduralAnalysis<
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	default boolean returnsVoid(Call call, AnalysisState<A, H, V, T> returned) {
+	default boolean returnsVoid(
+			Call call,
+			AnalysisState<A> returned) {
 		if (call.getStaticType().isVoidType())
 			return true;
 

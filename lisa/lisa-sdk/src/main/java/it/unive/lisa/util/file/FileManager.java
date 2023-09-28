@@ -36,7 +36,8 @@ public class FileManager {
 	 * @param workdir the path to the directory where files will be created by
 	 *                    this manager
 	 */
-	public FileManager(String workdir) {
+	public FileManager(
+			String workdir) {
 		this.workdir = Paths.get(workdir).toFile();
 	}
 
@@ -62,7 +63,10 @@ public class FileManager {
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
-	public void mkOutputFile(String name, WriteAction filler) throws IOException {
+	public void mkOutputFile(
+			String name,
+			WriteAction filler)
+			throws IOException {
 		mkOutputFile(name, false, filler);
 	}
 
@@ -80,7 +84,11 @@ public class FileManager {
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
-	public void mkOutputFile(String path, String name, WriteAction filler) throws IOException {
+	public void mkOutputFile(
+			String path,
+			String name,
+			WriteAction filler)
+			throws IOException {
 		mkOutputFile(path, name, false, filler);
 	}
 
@@ -97,7 +105,10 @@ public class FileManager {
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
-	public void mkDotFile(String name, WriteAction filler) throws IOException {
+	public void mkDotFile(
+			String name,
+			WriteAction filler)
+			throws IOException {
 		mkOutputFile(cleanupCFGName(name) + ".dot", false, filler);
 	}
 
@@ -115,7 +126,10 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 
-	public void mkJsonFile(String name, WriteAction filler) throws IOException {
+	public void mkJsonFile(
+			String name,
+			WriteAction filler)
+			throws IOException {
 		mkOutputFile(cleanupCFGName(name) + ".json", false, filler);
 	}
 
@@ -133,7 +147,10 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 
-	public void mkGraphmlFile(String name, WriteAction filler) throws IOException {
+	public void mkGraphmlFile(
+			String name,
+			WriteAction filler)
+			throws IOException {
 		mkOutputFile(cleanupCFGName(name) + ".graphml", false, filler);
 	}
 
@@ -150,7 +167,10 @@ public class FileManager {
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
-	public void mkHtmlFile(String name, WriteAction filler) throws IOException {
+	public void mkHtmlFile(
+			String name,
+			WriteAction filler)
+			throws IOException {
 		mkOutputFile(cleanupCFGName(name) + ".html", false, filler);
 	}
 
@@ -169,7 +189,9 @@ public class FileManager {
 		 * 
 		 * @throws IOException if an error happens while writing
 		 */
-		void perform(Writer writer) throws IOException;
+		void perform(
+				Writer writer)
+				throws IOException;
 	}
 
 	/**
@@ -187,7 +209,11 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating or writing to
 	 *                         the file
 	 */
-	public void mkOutputFile(String name, boolean bom, WriteAction filler) throws IOException {
+	public void mkOutputFile(
+			String name,
+			boolean bom,
+			WriteAction filler)
+			throws IOException {
 		mkOutputFile(null, name, bom, filler);
 	}
 
@@ -208,7 +234,12 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating or writing to
 	 *                         the file
 	 */
-	public void mkOutputFile(String path, String name, boolean bom, WriteAction filler) throws IOException {
+	public void mkOutputFile(
+			String path,
+			String name,
+			boolean bom,
+			WriteAction filler)
+			throws IOException {
 		File parent = workdir;
 		if (path != null)
 			parent = new File(workdir, cleanFileName(path, true));
@@ -228,7 +259,9 @@ public class FileManager {
 	private final static int[] illegalChars = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
 			20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 34, 42, 47, 58, 60, 62, 63, 92, 124 };
 
-	private static String cleanFileName(String name, boolean keepDirSeparator) {
+	private static String cleanFileName(
+			String name,
+			boolean keepDirSeparator) {
 		// https://stackoverflow.com/questions/1155107/is-there-a-cross-platform-java-method-to-remove-filename-special-chars
 		StringBuilder cleanName = new StringBuilder();
 		int len = name.codePointCount(0, name.length());
@@ -245,7 +278,8 @@ public class FileManager {
 		return cleanName.toString();
 	}
 
-	private static String cleanupCFGName(String name) {
+	private static String cleanupCFGName(
+			String name) {
 		String result = name.replace(' ', '_');
 		result = result.replace("::", ".");
 		return result;
@@ -258,7 +292,9 @@ public class FileManager {
 	 * 
 	 * @throws IOException if an error happens while deleting
 	 */
-	public static void forceDeleteFolder(String path) throws IOException {
+	public static void forceDeleteFolder(
+			String path)
+			throws IOException {
 		File workdir = new File(path);
 		if (workdir.exists())
 			FileUtils.forceDelete(workdir);
@@ -274,7 +310,9 @@ public class FileManager {
 	 * 
 	 * @throws IOException if an error happens during the generation
 	 */
-	public void generateHtmlViewerSupportFiles(boolean compound) throws IOException {
+	public void generateHtmlViewerSupportFiles(
+			boolean compound)
+			throws IOException {
 		List<String> files = new ArrayList<>();
 		files.add("js/cytoscape-3.21.1.min.js");
 		files.add("js/cytoscape-graphml-1.0.6-hier.js");

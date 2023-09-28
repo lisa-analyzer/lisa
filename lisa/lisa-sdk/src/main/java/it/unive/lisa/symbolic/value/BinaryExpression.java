@@ -41,8 +41,12 @@ public class BinaryExpression extends ValueExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public BinaryExpression(Type staticType, SymbolicExpression left, SymbolicExpression right,
-			BinaryOperator operator, CodeLocation location) {
+	public BinaryExpression(
+			Type staticType,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			BinaryOperator operator,
+			CodeLocation location) {
 		super(staticType, location);
 		this.left = left;
 		this.right = right;
@@ -78,20 +82,20 @@ public class BinaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		BinaryExpression expr = new BinaryExpression(getStaticType(), left.pushScope(token), right.pushScope(token),
 				operator, getCodeLocation());
-		if (hasRuntimeTypes())
-			expr.setRuntimeTypes(getRuntimeTypes(null));
 		return expr;
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		BinaryExpression expr = new BinaryExpression(getStaticType(), left.popScope(token), right.popScope(token),
 				operator, getCodeLocation());
-		if (hasRuntimeTypes())
-			expr.setRuntimeTypes(getRuntimeTypes(null));
 		return expr;
 	}
 
@@ -106,7 +110,8 @@ public class BinaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -135,9 +140,17 @@ public class BinaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		T left = this.left.accept(visitor, params);
 		T right = this.right.accept(visitor, params);
 		return visitor.visit(this, left, right, params);
+	}
+
+	@Override
+	public boolean mightNeedRewriting() {
+		return left.mightNeedRewriting() || right.mightNeedRewriting();
 	}
 }

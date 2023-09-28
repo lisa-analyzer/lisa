@@ -19,7 +19,9 @@ public class CallGraphEdge implements Edge<CallGraph, CallGraphNode, CallGraphEd
 	 * @param source      the source node
 	 * @param destination the destination node
 	 */
-	public CallGraphEdge(CallGraphNode source, CallGraphNode destination) {
+	public CallGraphEdge(
+			CallGraphNode source,
+			CallGraphNode destination) {
 		this.source = source;
 		this.destination = destination;
 	}
@@ -35,7 +37,9 @@ public class CallGraphEdge implements Edge<CallGraph, CallGraphNode, CallGraphEd
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CallGraph, CallGraphNode, CallGraphEdge, V> visitor, V tool) {
+	public <V> boolean accept(
+			GraphVisitor<CallGraph, CallGraphNode, CallGraphEdge, V> visitor,
+			V tool) {
 		return visitor.visit(tool, source.getGraph(), this);
 	}
 
@@ -49,7 +53,8 @@ public class CallGraphEdge implements Edge<CallGraph, CallGraphNode, CallGraphEd
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

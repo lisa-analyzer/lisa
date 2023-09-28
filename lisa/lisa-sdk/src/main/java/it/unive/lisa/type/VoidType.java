@@ -31,7 +31,8 @@ public class VoidType implements Type {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(
+			Object other) {
 		return other instanceof VoidType;
 	}
 
@@ -41,17 +42,20 @@ public class VoidType implements Type {
 	}
 
 	@Override
-	public boolean canBeAssignedTo(Type other) {
+	public boolean canBeAssignedTo(
+			Type other) {
 		return false;
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		return other == this ? this : Untyped.INSTANCE;
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

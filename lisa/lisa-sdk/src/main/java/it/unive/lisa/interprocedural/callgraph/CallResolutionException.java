@@ -24,7 +24,9 @@ public class CallResolutionException extends Exception {
 	 * @param message the message of this exception
 	 * @param cause   the cause of this exception
 	 */
-	public CallResolutionException(String message, Throwable cause) {
+	public CallResolutionException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -33,7 +35,8 @@ public class CallResolutionException extends Exception {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public CallResolutionException(String message) {
+	public CallResolutionException(
+			String message) {
 		super(message);
 	}
 
@@ -42,7 +45,8 @@ public class CallResolutionException extends Exception {
 	 * 
 	 * @param cause the cause of this exception
 	 */
-	public CallResolutionException(Throwable cause) {
+	public CallResolutionException(
+			Throwable cause) {
 		super(cause);
 	}
 

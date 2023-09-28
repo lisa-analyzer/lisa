@@ -17,7 +17,8 @@ public abstract class TraceToken {
 	 * 
 	 * @param pp the program point
 	 */
-	protected TraceToken(ProgramPoint pp) {
+	protected TraceToken(
+			ProgramPoint pp) {
 		this.pp = pp;
 	}
 
@@ -39,7 +40,8 @@ public abstract class TraceToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

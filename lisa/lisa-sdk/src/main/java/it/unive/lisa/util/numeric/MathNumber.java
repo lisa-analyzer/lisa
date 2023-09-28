@@ -55,7 +55,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @param number the value
 	 */
-	public MathNumber(long number) {
+	public MathNumber(
+			long number) {
 		this.number = BigDecimal.valueOf(number);
 		this.sign = number > 0 ? (byte) 1 : number == 0 ? (byte) 0 : (byte) -1;
 	}
@@ -65,7 +66,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @param number the value
 	 */
-	public MathNumber(double number) {
+	public MathNumber(
+			double number) {
 		this.number = BigDecimal.valueOf(number);
 		this.sign = number > 0 ? (byte) 1 : number == 0 ? (byte) 0 : (byte) -1;
 	}
@@ -75,12 +77,14 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @param number the value
 	 */
-	public MathNumber(BigDecimal number) {
+	public MathNumber(
+			BigDecimal number) {
 		this.number = number;
 		this.sign = number.signum() > 0 ? (byte) 1 : number.signum() == 0 ? (byte) 0 : (byte) -1;
 	}
 
-	private MathNumber(byte sign) {
+	private MathNumber(
+			byte sign) {
 		this.number = null;
 		this.sign = sign;
 	}
@@ -130,7 +134,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean is(int n) {
+	public boolean is(
+			int n) {
 		return number != null && number.equals(new BigDecimal(n));
 	}
 
@@ -172,7 +177,8 @@ public class MathNumber implements Comparable<MathNumber> {
 		return number == null && sign == (byte) 3;
 	}
 
-	private static MathNumber cached(MathNumber i) {
+	private static MathNumber cached(
+			MathNumber i) {
 		if (i.isZero())
 			return ZERO;
 		if (i.is(1))
@@ -190,7 +196,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return {@code this + other}
 	 */
-	public MathNumber add(MathNumber other) {
+	public MathNumber add(
+			MathNumber other) {
 		if (isNaN() || other.isNaN())
 			return NaN;
 
@@ -217,7 +224,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return {@code this - other}
 	 */
-	public MathNumber subtract(MathNumber other) {
+	public MathNumber subtract(
+			MathNumber other) {
 		if (isNaN() || other.isNaN())
 			return NaN;
 
@@ -244,7 +252,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return {@code this * other}
 	 */
-	public MathNumber multiply(MathNumber other) {
+	public MathNumber multiply(
+			MathNumber other) {
 		if (isNaN() || other.isNaN())
 			return NaN;
 
@@ -282,7 +291,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return {@code this / other}
 	 */
-	public MathNumber divide(MathNumber other) {
+	public MathNumber divide(
+			MathNumber other) {
 		if (isNaN() || other.isNaN() || other.isZero() || (isInfinite() && other.isInfinite()))
 			return NaN;
 
@@ -302,7 +312,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	@Override
-	public int compareTo(MathNumber other) {
+	public int compareTo(
+			MathNumber other) {
 		if (equals(other))
 			return 0;
 
@@ -337,7 +348,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return the minimum between {@code this} and {@code other}
 	 */
-	public MathNumber min(MathNumber other) {
+	public MathNumber min(
+			MathNumber other) {
 		if (isNaN() || other.isNaN())
 			return NaN;
 
@@ -359,7 +371,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return the maximum between {@code this} and {@code other}
 	 */
-	public MathNumber max(MathNumber other) {
+	public MathNumber max(
+			MathNumber other) {
 		if (isNaN() || other.isNaN())
 			return NaN;
 
@@ -379,7 +392,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return true if @code{this} is less or equals than @code{other}.
 	 */
-	public boolean leq(MathNumber other) {
+	public boolean leq(
+			MathNumber other) {
 		return this.max(other).equals(other);
 	}
 
@@ -390,7 +404,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return true if
 	 */
-	public boolean gt(MathNumber other) {
+	public boolean gt(
+			MathNumber other) {
 		return geq(other) && !equals(other);
 	}
 
@@ -401,7 +416,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return true if
 	 */
-	public boolean lt(MathNumber other) {
+	public boolean lt(
+			MathNumber other) {
 		return leq(other) && !equals(other);
 	}
 
@@ -412,7 +428,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return true if
 	 */
-	public boolean geq(MathNumber other) {
+	public boolean geq(
+			MathNumber other) {
 		return this.max(other).equals(this);
 	}
 
@@ -557,7 +574,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

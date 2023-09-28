@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -15,7 +12,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
 import it.unive.lisa.program.language.resolution.PythonLikeMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,23 +61,20 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepare(
-					Call call,
-					AnalysisState<A, H, V, T> callState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					StatementStore<A, H, V, T> expressions,
-					Parameter[] formals,
-					ExpressionSet<SymbolicExpression>[] parameters)
-					throws SemanticException {
+	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
+			Call call,
+			AnalysisState<A> callState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions,
+			Parameter[] formals,
+			ExpressionSet[] parameters)
+			throws SemanticException {
 
-		ExpressionSet<SymbolicExpression>[] slots = new ExpressionSet[formals.length];
+		ExpressionSet[] slots = new ExpressionSet[formals.length];
 		Set<Type>[] slotsTypes = new Set[formals.length];
 		Expression[] actuals = call.getParameters();
 
-		ExpressionSet<SymbolicExpression>[] defaults = new ExpressionSet[formals.length];
+		ExpressionSet[] defaults = new ExpressionSet[formals.length];
 		Set<Type>[] defaultTypes = new Set[formals.length];
 		for (int pos = 0; pos < slots.length; pos++) {
 			Expression def = formals[pos].getDefaultValue();
@@ -89,14 +82,14 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 				callState = def.semantics(callState, interprocedural, expressions);
 				expressions.put(def, callState);
 				defaults[pos] = callState.getComputedExpressions();
-				T typedom = (T) callState.getDomainInstance(TypeDomain.class);
-				defaultTypes[pos] = new HashSet<>();
-				for (SymbolicExpression e : callState.rewrite(defaults[pos], call))
-					defaultTypes[pos].addAll(typedom.getRuntimeTypesOf((ValueExpression) e, call));
+				Set<Type> types = new HashSet<>();
+				for (SymbolicExpression e : defaults[pos])
+					defaultTypes[pos].addAll(callState.getState().getRuntimeTypesOf(e, call, callState.getState()));
+				defaultTypes[pos] = types;
 			}
 		}
 
-		AnalysisState<A, H, V, T> logic = PythonLikeMatchingStrategy.pythonLogic(
+		AnalysisState<A> logic = PythonLikeMatchingStrategy.pythonLogic(
 				formals,
 				actuals,
 				parameters,
@@ -110,16 +103,16 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 			return Pair.of(logic, parameters);
 
 		// prepare the state for the call: assign the value to each parameter
-		AnalysisState<A, H, V, T> prepared = callState;
+		AnalysisState<A> prepared = callState;
 		for (int i = 0; i < formals.length; i++) {
-			AnalysisState<A, H, V, T> temp = prepared.bottom();
+			AnalysisState<A> temp = prepared.bottom();
 			for (SymbolicExpression exp : slots[i])
 				temp = temp.lub(prepared.assign(formals[i].toSymbolicVariable(), exp, call));
 			prepared = temp;
 		}
 
 		// we remove expressions from the stack
-		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet<>(), prepared.getAliasing());
+		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet(), prepared.getFixpointInformation());
 		return Pair.of(prepared, slots);
 	}
 

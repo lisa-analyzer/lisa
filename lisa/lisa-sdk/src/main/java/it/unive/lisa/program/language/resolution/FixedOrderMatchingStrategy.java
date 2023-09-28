@@ -15,7 +15,11 @@ import java.util.Set;
 public abstract class FixedOrderMatchingStrategy implements ParameterMatchingStrategy {
 
 	@Override
-	public final boolean matches(Call call, Parameter[] formals, Expression[] actuals, Set<Type>[] types) {
+	public final boolean matches(
+			Call call,
+			Parameter[] formals,
+			Expression[] actuals,
+			Set<Type>[] types) {
 		if (formals.length != actuals.length)
 			return false;
 
@@ -39,5 +43,10 @@ public abstract class FixedOrderMatchingStrategy implements ParameterMatchingStr
 	 * 
 	 * @return {@code true} if and only if that condition holds
 	 */
-	public abstract boolean matches(Call call, int pos, Parameter formal, Expression actual, Set<Type> types);
+	public abstract boolean matches(
+			Call call,
+			int pos,
+			Parameter formal,
+			Expression actual,
+			Set<Type> types);
 }

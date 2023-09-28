@@ -26,7 +26,8 @@ public class GenericInverseSetLattice<E> extends InverseSetLattice<GenericInvers
 	 * 
 	 * @param element the element
 	 */
-	public GenericInverseSetLattice(E element) {
+	public GenericInverseSetLattice(
+			E element) {
 		super(Collections.singleton(element), true);
 	}
 
@@ -35,7 +36,8 @@ public class GenericInverseSetLattice<E> extends InverseSetLattice<GenericInvers
 	 * 
 	 * @param elements the elements
 	 */
-	public GenericInverseSetLattice(Set<E> elements) {
+	public GenericInverseSetLattice(
+			Set<E> elements) {
 		super(elements, true);
 	}
 
@@ -47,7 +49,9 @@ public class GenericInverseSetLattice<E> extends InverseSetLattice<GenericInvers
 	 * @param isTop    if {@code elements} is empty, specifies if this set
 	 *                     should be considered top or bottom
 	 */
-	public GenericInverseSetLattice(Set<E> elements, boolean isTop) {
+	public GenericInverseSetLattice(
+			Set<E> elements,
+			boolean isTop) {
 		super(elements, isTop);
 	}
 
@@ -62,7 +66,8 @@ public class GenericInverseSetLattice<E> extends InverseSetLattice<GenericInvers
 	}
 
 	@Override
-	public GenericInverseSetLattice<E> mk(Set<E> set) {
+	public GenericInverseSetLattice<E> mk(
+			Set<E> set) {
 		return new GenericInverseSetLattice<>(set);
 	}
 }

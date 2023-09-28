@@ -14,7 +14,8 @@ public class ByteAnnotationValue implements BasicAnnotationValue {
 	 * 
 	 * @param b the byte value
 	 */
-	public ByteAnnotationValue(byte b) {
+	public ByteAnnotationValue(
+			byte b) {
 		this.b = b;
 	}
 
@@ -27,7 +28,8 @@ public class ByteAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -46,7 +48,8 @@ public class ByteAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof ByteAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

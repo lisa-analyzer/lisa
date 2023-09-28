@@ -18,7 +18,10 @@ public class CodeUnit extends ProgramUnit {
 	 * @param program  the program where this unit is defined
 	 * @param name     the name of the unit
 	 */
-	public CodeUnit(CodeLocation location, Program program, String name) {
+	public CodeUnit(
+			CodeLocation location,
+			Program program,
+			String name) {
 		super(location, program, name);
 	}
 

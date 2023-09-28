@@ -34,5 +34,6 @@ public interface ScopeId {
 	 * 
 	 * @return the (optionally) updated id
 	 */
-	ScopeId push(CFGCall c);
+	ScopeId push(
+			CFGCall c);
 }

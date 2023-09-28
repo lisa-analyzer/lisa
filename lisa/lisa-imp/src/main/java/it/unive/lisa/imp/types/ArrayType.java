@@ -50,7 +50,9 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	 * @return the unique instance of {@link ArrayType} representing the class
 	 *             with the given name
 	 */
-	public static ArrayType lookup(Type base, int dimensions) {
+	public static ArrayType lookup(
+			Type base,
+			int dimensions) {
 		return types.computeIfAbsent(Pair.of(base, dimensions), x -> new ArrayType(base, dimensions));
 	}
 
@@ -58,7 +60,9 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 
 	private final int dimensions;
 
-	private ArrayType(Type base, int dimensions) {
+	private ArrayType(
+			Type base,
+			int dimensions) {
 		this.base = base;
 		if (dimensions < 1)
 			throw new IllegalArgumentException("Cannot create an array type with less then 1 dimensions");
@@ -66,12 +70,14 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	}
 
 	@Override
-	public final boolean canBeAssignedTo(Type other) {
+	public final boolean canBeAssignedTo(
+			Type other) {
 		return other instanceof ArrayType && getInnerType().canBeAssignedTo(other.asArrayType().getInnerType());
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		if (canBeAssignedTo(other))
 			return other;
 
@@ -103,7 +109,8 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -134,7 +141,13 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public int getDimensions() {
+		return dimensions;
+	}
+
+	@Override
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

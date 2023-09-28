@@ -18,7 +18,9 @@ public class QualifiedNameSymbol implements Symbol {
 	 * @param qualifier the qualifier represented by this symbol
 	 * @param name      the name represented by this symbol
 	 */
-	public QualifiedNameSymbol(String qualifier, String name) {
+	public QualifiedNameSymbol(
+			String qualifier,
+			String name) {
 		this.qualifier = qualifier;
 		this.name = name;
 	}
@@ -51,7 +53,8 @@ public class QualifiedNameSymbol implements Symbol {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

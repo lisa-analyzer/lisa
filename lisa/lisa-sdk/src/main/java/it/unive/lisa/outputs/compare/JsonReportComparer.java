@@ -151,7 +151,10 @@ public class JsonReportComparer {
 		 * @param reported  the collection of elements that are part of the
 		 *                      report
 		 */
-		void report(REPORTED_COMPONENT component, REPORT_TYPE type, Collection<?> reported);
+		void report(
+				REPORTED_COMPONENT component,
+				REPORT_TYPE type,
+				Collection<?> reported);
 
 		/**
 		 * Callback invoked by a {@link JsonReportComparer} whenever files from
@@ -163,7 +166,10 @@ public class JsonReportComparer {
 		 *                    second file
 		 * @param message the message reporting the difference
 		 */
-		void fileDiff(String first, String second, String message);
+		void fileDiff(
+				String first,
+				String second,
+				String message);
 
 		/**
 		 * Callback invoked by a {@link JsonReportComparer} whenever an analysis
@@ -173,7 +179,10 @@ public class JsonReportComparer {
 		 * @param first  the value in the first report
 		 * @param second the value in the second report
 		 */
-		void infoDiff(String key, String first, String second);
+		void infoDiff(
+				String key,
+				String first,
+				String second);
 
 		/**
 		 * Callback invoked by a {@link JsonReportComparer} whenever a
@@ -183,7 +192,10 @@ public class JsonReportComparer {
 		 * @param first  the value in the first report
 		 * @param second the value in the second report
 		 */
-		void configurationDiff(String key, String first, String second);
+		void configurationDiff(
+				String key,
+				String first,
+				String second);
 
 		/**
 		 * If {@code true}, analysis configurations
@@ -253,7 +265,8 @@ public class JsonReportComparer {
 		 * 
 		 * @return {@code true} if that condition holds
 		 */
-		default boolean isJsonGraph(String path) {
+		default boolean isJsonGraph(
+				String path) {
 			return FilenameUtils.getExtension(path).equals("json");
 		}
 
@@ -266,7 +279,8 @@ public class JsonReportComparer {
 		 * 
 		 * @return {@code true} if that condition holds
 		 */
-		default boolean isVisualizationFile(String path) {
+		default boolean isVisualizationFile(
+				String path) {
 			String ext = FilenameUtils.getExtension(path);
 			return ext.equals("dot")
 					|| ext.equals("graphml")
@@ -287,7 +301,9 @@ public class JsonReportComparer {
 		 *                                           supported for the given
 		 *                                           file type
 		 */
-		default boolean customFileCompare(File expected, File actual) {
+		default boolean customFileCompare(
+				File expected,
+				File actual) {
 			throw new UnsupportedOperationException(format(CANNOT_COMPARE, expected.toString(), actual.toString()));
 		}
 
@@ -403,7 +419,8 @@ public class JsonReportComparer {
 			File secondFileRoot,
 			DiffAlgorithm diff,
 			CollectionsDiffBuilder<String> files)
-			throws FileNotFoundException, IOException {
+			throws FileNotFoundException,
+			IOException {
 		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
 			File left = new File(firstFileRoot, pair.getLeft());
@@ -456,7 +473,10 @@ public class JsonReportComparer {
 				first.getConfiguration(),
 				second.getConfiguration(),
 				diff,
-				(key, fvalue, svalue) -> diff.configurationDiff(key, fvalue, svalue),
+				(
+						key,
+						fvalue,
+						svalue) -> diff.configurationDiff(key, fvalue, svalue),
 				key -> false);
 	}
 
@@ -471,7 +491,10 @@ public class JsonReportComparer {
 				first.getInfo(),
 				second.getInfo(),
 				diff,
-				(key, fvalue, svalue) -> diff.infoDiff(key, fvalue, svalue),
+				(
+						key,
+						fvalue,
+						svalue) -> diff.infoDiff(key, fvalue, svalue),
 				// we are really only interested in code metrics here,
 				// information like timestamps and version are not useful - we
 				// still use a blacklist approach to ensure that new fields are
@@ -538,7 +561,8 @@ public class JsonReportComparer {
 			DiffAlgorithm diff,
 			File left,
 			File right)
-			throws IOException, FileNotFoundException {
+			throws IOException,
+			FileNotFoundException {
 		boolean diffFound = false;
 
 		try (Reader l = new InputStreamReader(new FileInputStream(left), StandardCharsets.UTF_8);
@@ -670,7 +694,10 @@ public class JsonReportComparer {
 		private static final String VALUE_DIFF = "Different values for {} key '{}': '{}' and '{}'";
 
 		@Override
-		public void report(REPORTED_COMPONENT component, REPORT_TYPE type, Collection<?> reported) {
+		public void report(
+				REPORTED_COMPONENT component,
+				REPORT_TYPE type,
+				Collection<?> reported) {
 			if (type == REPORT_TYPE.COMMON)
 				return;
 
@@ -710,29 +737,43 @@ public class JsonReportComparer {
 		}
 
 		@Override
-		public void fileDiff(String first, String second, String message) {
+		public void fileDiff(
+				String first,
+				String second,
+				String message) {
 			LOG.warn(FILE_DIFF, first, second, message);
 		}
 
 		@Override
-		public void infoDiff(String key, String first, String second) {
+		public void infoDiff(
+				String key,
+				String first,
+				String second) {
 			LOG.warn(VALUE_DIFF, "run info", key, first, second);
 		}
 
 		@Override
-		public void configurationDiff(String key, String first, String second) {
+		public void configurationDiff(
+				String key,
+				String first,
+				String second) {
 			LOG.warn(VALUE_DIFF, "configuration", key, first, second);
 		}
 	}
 
-	private static final String diff(SerializableValue first, SerializableValue second) {
+	private static final String diff(
+			SerializableValue first,
+			SerializableValue second) {
 		StringBuilder builder = new StringBuilder();
 		diff(0, builder, first, second);
 		return builder.toString().replaceAll("(?m)^[ \t]*\r?\n", "").trim();
 	}
 
-	private static final boolean diff(int depth, StringBuilder builder,
-			SerializableValue first, SerializableValue second) {
+	private static final boolean diff(
+			int depth,
+			StringBuilder builder,
+			SerializableValue first,
+			SerializableValue second) {
 		if (first.getClass() != second.getClass()) {
 			fillWithDiff(depth, builder, first, second);
 			return true;
@@ -747,7 +788,10 @@ public class JsonReportComparer {
 		return diff(depth, builder, (SerializableObject) first, (SerializableObject) second);
 	}
 
-	private static final boolean diff(int depth, StringBuilder builder, SerializableString first,
+	private static final boolean diff(
+			int depth,
+			StringBuilder builder,
+			SerializableString first,
 			SerializableString second) {
 		if (!first.getValue().equals(second.getValue())) {
 			fillWithDiff(depth, builder, first, second);
@@ -756,7 +800,10 @@ public class JsonReportComparer {
 		return false;
 	}
 
-	private static final boolean diff(int depth, StringBuilder builder, SerializableArray first,
+	private static final boolean diff(
+			int depth,
+			StringBuilder builder,
+			SerializableArray first,
 			SerializableArray second) {
 		List<SerializableValue> felements = first.getElements();
 		List<SerializableValue> selements = second.getElements();
@@ -813,7 +860,10 @@ public class JsonReportComparer {
 		return atLeastOne;
 	}
 
-	private static final boolean diff(int depth, StringBuilder builder, SerializableObject first,
+	private static final boolean diff(
+			int depth,
+			StringBuilder builder,
+			SerializableObject first,
 			SerializableObject second) {
 		SortedMap<String, SerializableValue> felements = first.getFields();
 		SortedMap<String, SerializableValue> selements = second.getFields();
@@ -873,8 +923,11 @@ public class JsonReportComparer {
 		return atLeastOne;
 	}
 
-	private static final void fillWithDiff(int depth, StringBuilder builder,
-			SerializableValue first, SerializableValue second) {
+	private static final void fillWithDiff(
+			int depth,
+			StringBuilder builder,
+			SerializableValue first,
+			SerializableValue second) {
 		builder.append("\t".repeat(depth))
 				.append(first)
 				.append("\n")

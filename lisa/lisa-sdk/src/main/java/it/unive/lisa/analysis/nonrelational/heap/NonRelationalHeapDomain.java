@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
@@ -9,7 +10,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,7 +24,9 @@ import java.util.Set;
  * @param <T> the concrete type of the domain
  */
 public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
-		extends NonRelationalDomain<T, SymbolicExpression, HeapEnvironment<T>>, HeapSemanticOperation {
+		extends
+		NonRelationalDomain<T, SymbolicExpression, HeapEnvironment<T>>,
+		HeapSemanticOperation {
 
 	/**
 	 * Rewrites a {@link SymbolicExpression}, getting rid of the parts that
@@ -44,13 +46,17 @@ public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
 	 *                        program variables
 	 * @param pp          the program point that where this expression is being
 	 *                        rewritten
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return the rewritten expressions, or the original one
 	 * 
 	 * @throws SemanticException if something goes wrong during the rewriting
 	 */
-	ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, HeapEnvironment<T> environment,
-			ProgramPoint pp)
+	ExpressionSet rewrite(
+			SymbolicExpression expression,
+			HeapEnvironment<T> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException;
 
 	/**
@@ -65,8 +71,8 @@ public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
 	 * <br>
 	 * The default implementation of this method simply iterates over the input
 	 * expressions, invoking
-	 * {@link #rewrite(SymbolicExpression, HeapEnvironment, ProgramPoint)} on
-	 * all of them.<br>
+	 * {@link #rewrite(SymbolicExpression, HeapEnvironment, ProgramPoint, SemanticOracle)}
+	 * on all of them.<br>
 	 * <br>
 	 * The collection returned by this method usually contains one expression,
 	 * but instances created through lattice operations (e.g., lub) might
@@ -77,17 +83,22 @@ public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
 	 *                        program variables
 	 * @param pp          the program point that where this expressions are
 	 *                        being rewritten
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return the rewritten expressions, or the original ones
 	 * 
 	 * @throws SemanticException if something goes wrong during the rewriting
 	 */
-	default ExpressionSet<ValueExpression> rewriteAll(ExpressionSet<SymbolicExpression> expressions,
-			HeapEnvironment<T> environment, ProgramPoint pp) throws SemanticException {
-		Set<ValueExpression> result = new HashSet<>();
+	default ExpressionSet rewrite(
+			ExpressionSet expressions,
+			HeapEnvironment<T> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Set<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression expr : expressions)
-			result.addAll(rewrite(expr, environment, pp).elements());
-		return new ExpressionSet<>(result);
+			result.addAll(rewrite(expr, environment, pp, oracle).elements());
+		return new ExpressionSet(result);
 	}
 
 }

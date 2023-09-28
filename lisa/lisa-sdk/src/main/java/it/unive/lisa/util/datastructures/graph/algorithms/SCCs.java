@@ -65,7 +65,8 @@ public class SCCs<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends E
 	 * 
 	 * @return the set of non trivial sccs
 	 */
-	public Collection<Collection<N>> buildNonTrivial(G graph) {
+	public Collection<Collection<N>> buildNonTrivial(
+			G graph) {
 		build(graph);
 		Collection<Collection<N>> toRemove = new HashSet<>();
 		for (Collection<N> scc : sccs) {
@@ -89,7 +90,8 @@ public class SCCs<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends E
 	 * 
 	 * @return the set of all sccs
 	 */
-	public Collection<Collection<N>> build(G graph) {
+	public Collection<Collection<N>> build(
+			G graph) {
 		sccs.clear();
 
 		int index = 0;

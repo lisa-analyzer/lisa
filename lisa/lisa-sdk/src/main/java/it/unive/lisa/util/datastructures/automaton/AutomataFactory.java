@@ -20,7 +20,8 @@ public interface AutomataFactory<A extends Automaton<A, T>, T extends Transition
 	 * 
 	 * @return the new automaton
 	 */
-	A singleString(String string);
+	A singleString(
+			String string);
 
 	/**
 	 * Yields a new automaton recognizing a statically-unknown string.
@@ -51,5 +52,7 @@ public interface AutomataFactory<A extends Automaton<A, T>, T extends Transition
 	 * 
 	 * @return the new automaton
 	 */
-	A from(SortedSet<State> states, SortedSet<Transition<T>> transitions);
+	A from(
+			SortedSet<State> states,
+			SortedSet<Transition<T>> transitions);
 }

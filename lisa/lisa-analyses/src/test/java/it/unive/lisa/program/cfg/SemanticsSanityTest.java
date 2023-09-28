@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.combination.ValueCartesianProduct;
@@ -28,11 +29,9 @@ import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.types.InferredTypes;
-import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
@@ -68,14 +67,14 @@ import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -100,22 +99,42 @@ public class SemanticsSanityTest {
 	private ClassUnit unit;
 	private CFG cfg;
 	private CallGraph cg;
-	private InterproceduralAnalysis<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> interprocedural;
+	private InterproceduralAnalysis<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
+			TypeEnvironment<InferredTypes>>> interprocedural;
 	private AnalysisState<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> as;
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> as;
 	private StatementStore<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> store;
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> store;
 	private Expression fake;
+	private final SemanticOracle fakeOracle = new SemanticOracle() {
+
+		@Override
+		public Set<Type> getRuntimeTypesOf(
+				SymbolicExpression e,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return Collections.singleton(e.getStaticType());
+		}
+
+		@Override
+		public Type getDynamicTypeOf(
+				SymbolicExpression e,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return e.getStaticType();
+		}
+
+		@Override
+		public ExpressionSet rewrite(
+				SymbolicExpression expression,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return new ExpressionSet(expression);
+		}
+	};
 
 	@Before
 	public void setup() throws CallGraphConstructionException, InterproceduralAnalysisException {
@@ -133,17 +152,20 @@ public class SemanticsSanityTest {
 		as = new AnalysisState<>(
 				new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
 						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet<>(), new SymbolAliasing());
+				new ExpressionSet());
 		store = new StatementStore<>(as);
 		fake = new Expression(cfg, unknownLocation) {
 
 			@Override
-			public int setOffset(int offset) {
+			public int setOffset(
+					int offset) {
 				return 0;
 			}
 
 			@Override
-			public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+			public <V> boolean accept(
+					GraphVisitor<CFG, Statement, Edge, V> visitor,
+					V tool) {
 				return false;
 			}
 
@@ -153,13 +175,11 @@ public class SemanticsSanityTest {
 			}
 
 			@Override
-			public <A extends AbstractState<A, H, V, T>,
-					H extends HeapDomain<H>,
-					V extends ValueDomain<V>,
-					T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-							AnalysisState<A, H, V, T> entryState,
-							InterproceduralAnalysis<A, H, V, T> interprocedural, StatementStore<A, H, V, T> expressions)
-							throws SemanticException {
+			public <A extends AbstractState<A>> AnalysisState<A> semantics(
+					AnalysisState<A> entryState,
+					InterproceduralAnalysis<A> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException {
 				return entryState
 						.smallStepSemantics(
 								new Variable(Untyped.INSTANCE, "fake",
@@ -169,7 +189,8 @@ public class SemanticsSanityTest {
 		};
 	}
 
-	private Object valueFor(Class<?> param) {
+	private Object valueFor(
+			Class<?> param) {
 		if (param == CFG.class)
 			return cfg;
 		if (param == String.class)
@@ -249,7 +270,8 @@ public class SemanticsSanityTest {
 			fail(failures.size() + "/" + total + " semantics evaluation failed");
 	}
 
-	private boolean excluded(Class<? extends Statement> statement) {
+	private boolean excluded(
+			Class<? extends Statement> statement) {
 		// these just forward the semantics to the inner call
 		return statement == MultiCall.class
 				|| statement == TruncatedParamsCall.class;
@@ -261,40 +283,59 @@ public class SemanticsSanityTest {
 		private static final NRHeap TOP = new NRHeap();
 
 		@Override
-		public NRHeap eval(SymbolicExpression expression, HeapEnvironment<NRHeap> environment, ProgramPoint pp)
+		public NRHeap eval(
+				SymbolicExpression expression,
+				HeapEnvironment<NRHeap> environment,
+				ProgramPoint pp,
+				SemanticOracle oracle)
 				throws SemanticException {
 			return top();
 		}
 
 		@Override
-		public Satisfiability satisfies(SymbolicExpression expression, HeapEnvironment<NRHeap> environment,
-				ProgramPoint pp) throws SemanticException {
+		public Satisfiability satisfies(
+				SymbolicExpression expression,
+				HeapEnvironment<NRHeap> environment,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
 			return Satisfiability.UNKNOWN;
 		}
 
 		@Override
-		public HeapEnvironment<NRHeap> assume(HeapEnvironment<NRHeap> environment, SymbolicExpression expression,
-				ProgramPoint src, ProgramPoint dest) throws SemanticException {
+		public HeapEnvironment<NRHeap> assume(
+				HeapEnvironment<NRHeap> environment,
+				SymbolicExpression expression,
+				ProgramPoint src,
+				ProgramPoint dest,
+				SemanticOracle oracle)
+				throws SemanticException {
 			return environment;
 		}
 
 		@Override
-		public NRHeap glb(NRHeap other) throws SemanticException {
+		public NRHeap glb(
+				NRHeap other)
+				throws SemanticException {
 			return bottom();
 		}
 
 		@Override
-		public DomainRepresentation representation() {
+		public StructuredRepresentation representation() {
 			return new StringRepresentation("");
 		}
 
 		@Override
-		public NRHeap lub(NRHeap other) throws SemanticException {
+		public NRHeap lub(
+				NRHeap other)
+				throws SemanticException {
 			return top();
 		}
 
 		@Override
-		public boolean lessOrEqual(NRHeap other) throws SemanticException {
+		public boolean lessOrEqual(
+				NRHeap other)
+				throws SemanticException {
 			return false;
 		}
 
@@ -309,12 +350,10 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public boolean tracksIdentifiers(Identifier id) {
-			return true;
-		}
-
-		@Override
-		public boolean canProcess(SymbolicExpression expression) {
+		public boolean canProcess(
+				SymbolicExpression expression,
+				ProgramPoint pp,
+				SemanticOracle oracle) {
 			return true;
 		}
 
@@ -324,14 +363,20 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression,
-				HeapEnvironment<NRHeap> environment, ProgramPoint pp) throws SemanticException {
-			return new ExpressionSet<>();
+		public ExpressionSet rewrite(
+				SymbolicExpression expression,
+				HeapEnvironment<NRHeap> environment,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return new ExpressionSet();
 		}
 
 	}
 
-	private Object domainFor(Class<?> root, Class<?> param) {
+	private Object domainFor(
+			Class<?> root,
+			Class<?> param) {
 		if (root == ValueEnvironment.class)
 			return new Sign();
 		if (root == HeapEnvironment.class)
@@ -350,7 +395,7 @@ public class SemanticsSanityTest {
 		if (param == SymbolicExpression.class)
 			return new Skip(new SourceCodeLocation("unknown", 0, 0));
 		if (param == ExpressionSet.class)
-			return new ExpressionSet<>();
+			return new ExpressionSet();
 		if (param == SymbolAliasing.class)
 			return new SymbolAliasing();
 		if (param == HeapDomain.class)
@@ -392,7 +437,10 @@ public class SemanticsSanityTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> int buildDomainsInstances(Set<Class<? extends T>> classes, Set<T> instances, List<String> failures) {
+	private <T> int buildDomainsInstances(
+			Set<Class<? extends T>> classes,
+			Set<T> instances,
+			List<String> failures) {
 		int total = 0;
 		Constructor<?> nullary, unary, binary, ternary, quaternary;
 		nullary = unary = binary = ternary = quaternary = null;
@@ -477,12 +525,15 @@ public class SemanticsSanityTest {
 			try {
 				instance = (SemanticDomain) ((Lattice) instance).bottom();
 				Variable v = new Variable(bool, "b", new SourceCodeLocation("unknown", 0, 0));
-				instance = instance.assign(v, new PushAny(bool, new SourceCodeLocation("unknown", 0, 0)), fake);
+				instance = instance.assign(v, new PushAny(bool, new SourceCodeLocation("unknown", 0, 0)), fake,
+						fakeOracle);
 				boolean isBottom = ((Lattice) instance).isBottom();
 				if (instance instanceof AnalysisState) {
 					AnalysisState state = (AnalysisState) instance;
-					isBottom = state.getState().isBottom() && state.getAliasing().isBottom()
-					// analysis state keeps the assigned id on the stack
+					isBottom = state.getState().isBottom()
+							&& state.getFixpointInformation() != null
+							&& state.getFixpointInformation().isBottom()
+							// analysis state keeps the assigned id on the stack
 							&& state.getComputedExpressions().size() == 1
 							&& state.getComputedExpressions().iterator().next().equals(v);
 				}

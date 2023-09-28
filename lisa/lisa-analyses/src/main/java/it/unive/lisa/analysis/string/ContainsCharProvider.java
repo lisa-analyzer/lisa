@@ -21,5 +21,7 @@ public interface ContainsCharProvider {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	Satisfiability containsChar(char c) throws SemanticException;
+	Satisfiability containsChar(
+			char c)
+			throws SemanticException;
 }

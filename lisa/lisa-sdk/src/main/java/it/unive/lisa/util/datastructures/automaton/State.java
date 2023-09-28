@@ -30,7 +30,10 @@ public final class State implements Comparable<State> {
 	 * @param isInitial indicates if the state is initial.
 	 * @param isFinal   indicates if the state is final.
 	 */
-	public State(int id, boolean isInitial, boolean isFinal) {
+	public State(
+			int id,
+			boolean isInitial,
+			boolean isFinal) {
 		this.isInitial = isInitial;
 		this.isFinal = isFinal;
 		this.id = id;
@@ -47,7 +50,8 @@ public final class State implements Comparable<State> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -97,7 +101,8 @@ public final class State implements Comparable<State> {
 	}
 
 	@Override
-	public int compareTo(State state) {
+	public int compareTo(
+			State state) {
 		int cmp;
 		if ((cmp = Integer.compare(this.id, state.id)) != 0)
 			return cmp;

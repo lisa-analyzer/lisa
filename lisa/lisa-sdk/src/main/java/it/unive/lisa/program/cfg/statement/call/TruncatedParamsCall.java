@@ -4,14 +4,10 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import java.util.Collection;
 
 /**
@@ -31,7 +27,8 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	 * 
 	 * @param call the call to be wrapped
 	 */
-	public TruncatedParamsCall(Call call) {
+	public TruncatedParamsCall(
+			Call call) {
 		super(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(), call.getTargetName(),
 				call.getOrder(), call.getStaticType(), call.getParameters());
 		if (!(call instanceof ResolvedCall))
@@ -40,14 +37,16 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		// we do not reset the offsets here
 		Expression[] params = getParameters();
 		return params[params.length - 1].getOffset();
 	}
 
 	@Override
-	public void setSource(UnresolvedCall source) {
+	public void setSource(
+			UnresolvedCall source) {
 		super.setSource(source);
 		call.setSource(source);
 	}
@@ -61,7 +60,8 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -78,22 +78,18 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Expression[] actuals = getParameters();
-		AnalysisState<A, H, V, T> post;
+		AnalysisState<A> post;
 		if (params.length == actuals.length) {
 			post = call.expressionSemantics(interprocedural, state, params, expressions);
 		} else {
-			@SuppressWarnings("unchecked")
-			ExpressionSet<SymbolicExpression>[] truncatedParams = new ExpressionSet[actuals.length];
+			ExpressionSet[] truncatedParams = new ExpressionSet[actuals.length];
 			if (actuals.length > 0)
 				System.arraycopy(params, 1, truncatedParams, 0, params.length - 1);
 			post = call.expressionSemantics(interprocedural, state, truncatedParams, expressions);

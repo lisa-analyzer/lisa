@@ -29,8 +29,12 @@ public class IfThenElse extends ControlFlowStructure {
 	 * @param trueBranch    the statements in the true branch
 	 * @param falseBranch   the statements in the false branch
 	 */
-	public IfThenElse(NodeList<CFG, Statement, Edge> cfgMatrix, Statement condition, Statement firstFollower,
-			Collection<Statement> trueBranch, Collection<Statement> falseBranch) {
+	public IfThenElse(
+			NodeList<CFG, Statement, Edge> cfgMatrix,
+			Statement condition,
+			Statement firstFollower,
+			Collection<Statement> trueBranch,
+			Collection<Statement> falseBranch) {
 		super(cfgMatrix, condition, firstFollower);
 		this.trueBranch = trueBranch;
 		this.falseBranch = falseBranch;
@@ -64,7 +68,8 @@ public class IfThenElse extends ControlFlowStructure {
 	}
 
 	@Override
-	public boolean contains(Statement st) {
+	public boolean contains(
+			Statement st) {
 		return trueBranch.contains(st) || falseBranch.contains(st);
 	}
 
@@ -84,7 +89,8 @@ public class IfThenElse extends ControlFlowStructure {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

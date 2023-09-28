@@ -13,7 +13,9 @@ package it.unive.lisa.analysis;
 public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 
 	@Override
-	default boolean lessOrEqual(L other) throws SemanticException {
+	default boolean lessOrEqual(
+			L other)
+			throws SemanticException {
 		if (other == null)
 			return false;
 
@@ -28,7 +30,9 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	default L lub(L other) throws SemanticException {
+	default L lub(
+			L other)
+			throws SemanticException {
 		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
 			return (L) this;
 
@@ -40,7 +44,9 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	default L glb(L other) throws SemanticException {
+	default L glb(
+			L other)
+			throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other))
 			return (L) this;
 
@@ -52,7 +58,9 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	default L widening(L other) throws SemanticException {
+	default L widening(
+			L other)
+			throws SemanticException {
 		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
 			return (L) this;
 
@@ -64,7 +72,9 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	default L narrowing(L other) throws SemanticException {
+	default L narrowing(
+			L other)
+			throws SemanticException {
 		if (other == null || this.isBottom() || this == other || this.equals(other))
 			return (L) this;
 
@@ -92,7 +102,9 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract L lubAux(L other) throws SemanticException;
+	public abstract L lubAux(
+			L other)
+			throws SemanticException;
 
 	/**
 	 * Performs the greatest lower bound operation between this lattice element
@@ -112,7 +124,9 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L glbAux(L other) throws SemanticException {
+	default L glbAux(
+			L other)
+			throws SemanticException {
 		return bottom();
 	}
 
@@ -137,7 +151,9 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L wideningAux(L other) throws SemanticException {
+	default L wideningAux(
+			L other)
+			throws SemanticException {
 		return lubAux(other);
 	}
 
@@ -162,7 +178,9 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L narrowingAux(L other) throws SemanticException {
+	default L narrowingAux(
+			L other)
+			throws SemanticException {
 		return glbAux(other);
 	}
 
@@ -184,10 +202,13 @@ public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract boolean lessOrEqualAux(L other) throws SemanticException;
+	public abstract boolean lessOrEqualAux(
+			L other)
+			throws SemanticException;
 
 	@Override
-	public abstract boolean equals(Object obj);
+	public abstract boolean equals(
+			Object obj);
 
 	@Override
 	public abstract int hashCode();

@@ -27,7 +27,10 @@ public class Constant extends ValueExpression {
 	 * @param location the code location of the statement that has generated
 	 *                     this constant
 	 */
-	public Constant(Type type, Object value, CodeLocation location) {
+	public Constant(
+			Type type,
+			Object value,
+			CodeLocation location) {
 		super(type, location);
 		this.value = value;
 	}
@@ -50,7 +53,8 @@ public class Constant extends ValueExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -67,12 +71,15 @@ public class Constant extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
 		return this;
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return this;
 	}
 
@@ -82,7 +89,16 @@ public class Constant extends ValueExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
+	}
+
+	@Override
+	public boolean mightNeedRewriting() {
+		Type t = getStaticType();
+		return t.isInMemoryType() || t.isPointerType() || t.isUntyped();
 	}
 }

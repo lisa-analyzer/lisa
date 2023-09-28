@@ -11,7 +11,7 @@ import java.util.LinkedList;
  * they were not already added before (even if they have already been popped
  * out). This implementation is <b>not</b> thread-safe.
  * 
- * @author Luca Negrini
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <E> the type of the elements that this working set contains
  */
@@ -39,7 +39,8 @@ public class VisitOnceFIFOWorkingSet<E> implements VisitOnceWorkingSet<E> {
 	}
 
 	@Override
-	public void push(E e) {
+	public void push(
+			E e) {
 		if (seen.contains(e))
 			return;
 
@@ -92,7 +93,8 @@ public class VisitOnceFIFOWorkingSet<E> implements VisitOnceWorkingSet<E> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

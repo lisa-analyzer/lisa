@@ -1,9 +1,11 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredObject;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Predicate;
@@ -20,7 +22,10 @@ import java.util.function.Predicate;
  * @param <I> the type of variable {@link Identifier} that this domain can
  *                handle
  */
-public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends SymbolicExpression, I extends Identifier> {
+public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends SymbolicExpression, I extends Identifier>
+		extends
+		StructuredObject,
+		ScopedObject<D> {
 
 	/**
 	 * Yields a copy of this domain, where {@code id} has been assigned to
@@ -30,12 +35,18 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @param expression the expression to assign
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return a copy of this domain, modified by the assignment
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D assign(I id, E expression, ProgramPoint pp) throws SemanticException;
+	D assign(
+			I id,
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
 
 	/**
 	 * Yields a copy of this domain, that has been modified accordingly to the
@@ -44,13 +55,18 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @param expression the expression whose semantics need to be computed
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return a copy of this domain, modified accordingly to the semantics of
 	 *             {@code expression}
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException;
+	D smallStepSemantics(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
 
 	/**
 	 * Yields a copy of this domain, modified by assuming that the given
@@ -64,12 +80,29 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 *                       the given expression
 	 * @param dest       the program point where the execution will move after
 	 *                       the expression has been assumed
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return the (optionally) modified copy of this domain
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException;
+	D assume(
+			E expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException;
+
+	/**
+	 * Yields {@code true} if this instance is currently tracking abstract
+	 * information for the given identifier.
+	 * 
+	 * @param id the identifier
+	 * 
+	 * @return whether or not this domain knows about {@code id}
+	 */
+	boolean knowsIdentifier(
+			Identifier id);
 
 	/**
 	 * Forgets an {@link Identifier}. This means that all information regarding
@@ -82,7 +115,9 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D forgetIdentifier(Identifier id) throws SemanticException;
+	D forgetIdentifier(
+			Identifier id)
+			throws SemanticException;
 
 	/**
 	 * Forgets all {@link Identifier}s that match the given predicate. This
@@ -95,7 +130,9 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException;
+	D forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException;
 
 	/**
 	 * Forgets all the given {@link Identifier}s. The default implementation of
@@ -108,7 +145,9 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default D forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	default D forgetIdentifiers(
+			Iterable<Identifier> ids)
+			throws SemanticException {
 		@SuppressWarnings("unchecked")
 		D result = (D) this;
 		for (Identifier id : ids)
@@ -123,6 +162,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @param expression the expression whose satisfiability is to be evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied
 	 *             by the values of this domain,
@@ -134,44 +174,20 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException;
-
-	/**
-	 * Pushes a new scope, identified by the give token, in the domain. This
-	 * causes information about all variables not associated with a scope (and
-	 * thus visible) to be mapped to the given scope and hidden away, until the
-	 * scope is popped with {@link #popScope(ScopeToken)}.
-	 *
-	 * @param token the token identifying the scope to push
-	 * 
-	 * @return a copy of this domain where the local variables have been hidden
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	D pushScope(ScopeToken token) throws SemanticException;
-
-	/**
-	 * Pops the scope identified by the given token from the domain. This causes
-	 * all the visible variables (i.e. that are not mapped to a scope) to be
-	 * removed from the domain, while the local variables that were associated
-	 * to the given scope token (and thus hidden) will become visible again.
-	 *
-	 * @param token the token of the scope to be restored
-	 * 
-	 * @return a copy of this domain where the local variables have been
-	 *             removed, while the variables mapped to the given scope are
-	 *             visible again
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	D popScope(ScopeToken token) throws SemanticException;
+	Satisfiability satisfies(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
 
 	/**
 	 * The satisfiability of an expression.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public enum Satisfiability implements Lattice<Satisfiability> {
+	public enum Satisfiability
+			implements
+			Lattice<Satisfiability> {
 		/**
 		 * Represent the fact that an expression is satisfied.
 		 */
@@ -182,29 +198,36 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability and(Satisfiability other) {
+			public Satisfiability and(
+					Satisfiability other) {
 				return other;
 			}
 
 			@Override
-			public Satisfiability or(Satisfiability other) {
+			public Satisfiability or(
+					Satisfiability other) {
 				return this;
 			}
 
 			@Override
-			public Satisfiability lub(Satisfiability other) throws SemanticException {
+			public Satisfiability lub(
+					Satisfiability other)
+					throws SemanticException {
 				if (other == UNKNOWN || other == NOT_SATISFIED)
 					return UNKNOWN;
 				return this;
 			}
 
 			@Override
-			public boolean lessOrEqual(Satisfiability other) throws SemanticException {
+			public boolean lessOrEqual(
+					Satisfiability other)
+					throws SemanticException {
 				return other == this || other == UNKNOWN;
 			}
 
 			@Override
-			public Satisfiability glb(Satisfiability other) {
+			public Satisfiability glb(
+					Satisfiability other) {
 				if (other == BOTTOM || other == NOT_SATISFIED)
 					return BOTTOM;
 				return this;
@@ -221,29 +244,36 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability and(Satisfiability other) {
+			public Satisfiability and(
+					Satisfiability other) {
 				return this;
 			}
 
 			@Override
-			public Satisfiability or(Satisfiability other) {
+			public Satisfiability or(
+					Satisfiability other) {
 				return other;
 			}
 
 			@Override
-			public Satisfiability lub(Satisfiability other) throws SemanticException {
+			public Satisfiability lub(
+					Satisfiability other)
+					throws SemanticException {
 				if (other == UNKNOWN || other == SATISFIED)
 					return UNKNOWN;
 				return this;
 			}
 
 			@Override
-			public boolean lessOrEqual(Satisfiability other) throws SemanticException {
+			public boolean lessOrEqual(
+					Satisfiability other)
+					throws SemanticException {
 				return other == this || other == UNKNOWN;
 			}
 
 			@Override
-			public Satisfiability glb(Satisfiability other) {
+			public Satisfiability glb(
+					Satisfiability other) {
 				if (other == BOTTOM || other == SATISFIED)
 					return BOTTOM;
 				return this;
@@ -261,7 +291,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability and(Satisfiability other) {
+			public Satisfiability and(
+					Satisfiability other) {
 				if (other == NOT_SATISFIED)
 					return other;
 
@@ -269,7 +300,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability or(Satisfiability other) {
+			public Satisfiability or(
+					Satisfiability other) {
 				if (other == SATISFIED)
 					return other;
 
@@ -277,17 +309,22 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability lub(Satisfiability other) throws SemanticException {
+			public Satisfiability lub(
+					Satisfiability other)
+					throws SemanticException {
 				return this;
 			}
 
 			@Override
-			public boolean lessOrEqual(Satisfiability other) throws SemanticException {
+			public boolean lessOrEqual(
+					Satisfiability other)
+					throws SemanticException {
 				return other == UNKNOWN;
 			}
 
 			@Override
-			public Satisfiability glb(Satisfiability other) {
+			public Satisfiability glb(
+					Satisfiability other) {
 				return other;
 			}
 		},
@@ -303,27 +340,34 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability and(Satisfiability other) {
+			public Satisfiability and(
+					Satisfiability other) {
 				return this;
 			}
 
 			@Override
-			public Satisfiability or(Satisfiability other) {
+			public Satisfiability or(
+					Satisfiability other) {
 				return this;
 			}
 
 			@Override
-			public Satisfiability lub(Satisfiability other) throws SemanticException {
+			public Satisfiability lub(
+					Satisfiability other)
+					throws SemanticException {
 				return other;
 			}
 
 			@Override
-			public boolean lessOrEqual(Satisfiability other) throws SemanticException {
+			public boolean lessOrEqual(
+					Satisfiability other)
+					throws SemanticException {
 				return true;
 			}
 
 			@Override
-			public Satisfiability glb(Satisfiability other) {
+			public Satisfiability glb(
+					Satisfiability other) {
 				return this;
 			}
 		};
@@ -342,7 +386,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		 * 
 		 * @return the logical and between the two satisfiability instances
 		 */
-		public abstract Satisfiability and(Satisfiability other);
+		public abstract Satisfiability and(
+				Satisfiability other);
 
 		/**
 		 * Performs a logical or between this satisfiability and the given one.
@@ -351,7 +396,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		 * 
 		 * @return the logical or between the two satisfiability instances
 		 */
-		public abstract Satisfiability or(Satisfiability other);
+		public abstract Satisfiability or(
+				Satisfiability other);
 
 		/**
 		 * Performs the greatest lower bound operation between this
@@ -361,7 +407,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		 * 
 		 * @return the result of the greatest lower bound
 		 */
-		public abstract Satisfiability glb(Satisfiability other);
+		public abstract Satisfiability glb(
+				Satisfiability other);
 
 		/**
 		 * Transforms a boolean value to a {@link Satisfiability} instance.
@@ -371,7 +418,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		 * @return {@link #SATISFIED} if {@code bool} is {@code true},
 		 *             {@link #NOT_SATISFIED} otherwise
 		 */
-		public static Satisfiability fromBoolean(boolean bool) {
+		public static Satisfiability fromBoolean(
+				boolean bool) {
 			return bool ? SATISFIED : NOT_SATISFIED;
 		}
 
@@ -404,15 +452,12 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		public boolean mightBeFalse() {
 			return this == NOT_SATISFIED || this == UNKNOWN;
 		}
-	}
 
-	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
-	 * this domain's instance.
-	 * 
-	 * @return the representation
-	 */
-	DomainRepresentation representation();
+		@Override
+		public StructuredRepresentation representation() {
+			return new StringRepresentation(name());
+		}
+	}
 
 	/**
 	 * Yields a unique instance of the specific domain, of class {@code domain},
@@ -433,7 +478,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @throws SemanticException if an exception happens while lubbing the
 	 *                               results
 	 */
-	default <T extends SemanticDomain<T, ?, ?> & Lattice<T>> T getDomainInstance(Class<T> domain)
+	default <T extends SemanticDomain<T, ?, ?> & Lattice<T>> T getDomainInstance(
+			Class<T> domain)
 			throws SemanticException {
 		Collection<T> all = getAllDomainInstances(domain);
 		T result = null;
@@ -462,7 +508,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @return the instances of that domain
 	 */
 	@SuppressWarnings("unchecked")
-	default <T extends SemanticDomain<?, ?, ?>> Collection<T> getAllDomainInstances(Class<T> domain) {
+	default <T extends SemanticDomain<?, ?, ?>> Collection<T> getAllDomainInstances(
+			Class<T> domain) {
 		Collection<T> result = new HashSet<>();
 		if (domain.isAssignableFrom(getClass()))
 			result.add((T) this);

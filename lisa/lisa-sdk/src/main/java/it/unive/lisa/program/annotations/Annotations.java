@@ -22,11 +22,13 @@ public class Annotations implements Iterable<Annotation> {
 	 * 
 	 * @param annotations the array of annotations
 	 */
-	public Annotations(Annotation... annotations) {
+	public Annotations(
+			Annotation... annotations) {
 		this(make(annotations));
 	}
 
-	private static Set<Annotation> make(Annotation... annotations) {
+	private static Set<Annotation> make(
+			Annotation... annotations) {
 		Set<Annotation> annots = new TreeSet<>();
 		for (Annotation a : annotations)
 			annots.add(a);
@@ -38,7 +40,8 @@ public class Annotations implements Iterable<Annotation> {
 	 * 
 	 * @param annotations the collection of annotations
 	 */
-	public Annotations(Collection<Annotation> annotations) {
+	public Annotations(
+			Collection<Annotation> annotations) {
 		this.annotations = annotations instanceof TreeSet<?>
 				? (TreeSet<Annotation>) annotations
 				: new TreeSet<>(annotations);
@@ -67,7 +70,8 @@ public class Annotations implements Iterable<Annotation> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -93,7 +97,8 @@ public class Annotations implements Iterable<Annotation> {
 	 * 
 	 * @param ann the annotation to be added
 	 */
-	public void addAnnotation(Annotation ann) {
+	public void addAnnotation(
+			Annotation ann) {
 		annotations.add(ann);
 	}
 
@@ -106,7 +111,8 @@ public class Annotations implements Iterable<Annotation> {
 	 * @return {@code true} if {@code matcher} matches at least one of this
 	 *             annotations, {@code false} otherwise
 	 */
-	public final boolean contains(AnnotationMatcher m) {
+	public final boolean contains(
+			AnnotationMatcher m) {
 		return annotations.stream().anyMatch(m::matches);
 	}
 
@@ -117,7 +123,8 @@ public class Annotations implements Iterable<Annotation> {
 	 * 
 	 * @return the annotations that are matched by the matcher {@code m}
 	 */
-	public final Annotations getAnnotations(AnnotationMatcher m) {
+	public final Annotations getAnnotations(
+			AnnotationMatcher m) {
 		return new Annotations(annotations.stream().filter(m::matches).collect(Collectors.toSet()));
 	}
 

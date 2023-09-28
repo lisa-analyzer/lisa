@@ -3,10 +3,9 @@ package it.unive.lisa.analysis.string.fsa;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
@@ -23,6 +22,8 @@ import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -66,22 +67,29 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	 * 
 	 * @param a the {@link SimpleAutomaton} used for object construction.
 	 */
-	public FSA(SimpleAutomaton a) {
+	public FSA(
+			SimpleAutomaton a) {
 		this.a = a;
 	}
 
 	@Override
-	public FSA lubAux(FSA other) throws SemanticException {
+	public FSA lubAux(
+			FSA other)
+			throws SemanticException {
 		return new FSA(this.a.union(other.a).minimize());
 	}
 
 	@Override
-	public FSA glbAux(FSA other) throws SemanticException {
+	public FSA glbAux(
+			FSA other)
+			throws SemanticException {
 		return new FSA(this.a.intersection(other.a).minimize());
 	}
 
 	@Override
-	public FSA wideningAux(FSA other) throws SemanticException {
+	public FSA wideningAux(
+			FSA other)
+			throws SemanticException {
 		return new FSA(this.a.union(other.a).widening(getSizeDiffCapped(other)));
 	}
 
@@ -95,7 +103,8 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 		return a.getStates().size();
 	}
 
-	private int getSizeDiffCapped(FSA other) {
+	private int getSizeDiffCapped(
+			FSA other) {
 		int size = size();
 		int otherSize = other.size();
 		if (size > otherSize)
@@ -107,12 +116,15 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	}
 
 	@Override
-	public boolean lessOrEqualAux(FSA other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			FSA other)
+			throws SemanticException {
 		return this.a.isContained(other.a);
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(
+			Object o) {
 		if (this == o)
 			return true;
 		if (o == null || getClass() != o.getClass())
@@ -144,7 +156,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 		else if (isTop())
@@ -154,7 +166,11 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	}
 
 	@Override
-	public FSA evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+	public FSA evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (constant.getValue() instanceof String) {
 			return new FSA(new SimpleAutomaton((String) constant.getValue()));
 		}
@@ -163,7 +179,12 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 
 	// TODO unary and ternary and all other binary
 	@Override
-	public FSA evalBinaryExpression(BinaryOperator operator, FSA left, FSA right, ProgramPoint pp)
+	public FSA evalBinaryExpression(
+			BinaryOperator operator,
+			FSA left,
+			FSA right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (operator == StringConcat.INSTANCE)
 			return new FSA(left.a.concat(right.a));
@@ -171,7 +192,13 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	}
 
 	@Override
-	public FSA evalTernaryExpression(TernaryOperator operator, FSA left, FSA middle, FSA right, ProgramPoint pp)
+	public FSA evalTernaryExpression(
+			TernaryOperator operator,
+			FSA left,
+			FSA middle,
+			FSA right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (operator == StringReplace.INSTANCE)
 			try {
@@ -183,8 +210,13 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, FSA left, FSA right,
-			ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			FSA left,
+			FSA right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (operator == StringContains.INSTANCE) {
 			return left.contains(right);
 		}
@@ -204,7 +236,10 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	 * @throws CyclicAutomatonException when the automaton is cyclic and its
 	 *                                      language is accessed
 	 */
-	public FSA substring(long begin, long end) throws CyclicAutomatonException {
+	public FSA substring(
+			long begin,
+			long end)
+			throws CyclicAutomatonException {
 		if (isTop() || isBottom())
 			return this;
 
@@ -252,7 +287,9 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	 * @throws CyclicAutomatonException when the automaton is cyclic and its
 	 *                                      language is accessed
 	 */
-	public IntInterval indexOf(FSA s) throws CyclicAutomatonException {
+	public IntInterval indexOf(
+			FSA s)
+			throws CyclicAutomatonException {
 		if (a.hasCycle())
 			return mkInterval(-1, null);
 
@@ -302,15 +339,20 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	 * 
 	 * @return the concatenation between two automata
 	 */
-	public FSA concat(FSA other) {
+	public FSA concat(
+			FSA other) {
 		return new FSA(this.a.concat(other.a));
 	}
 
-	private IntInterval mkInterval(Integer min, Integer max) {
+	private IntInterval mkInterval(
+			Integer min,
+			Integer max) {
 		return new IntInterval(min, max);
 	}
 
-	private IntInterval mkInterval(IntInterval first, IntInterval second) {
+	private IntInterval mkInterval(
+			IntInterval first,
+			IntInterval second) {
 		MathNumber newLow = first.getLow().min(second.getLow());
 		MathNumber newHigh = first.getHigh().max(second.getHigh());
 		return new IntInterval(newLow, newHigh);
@@ -325,7 +367,8 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	 * @return if this automaton recognizes strings recognized by the other
 	 *             automaton
 	 */
-	public Satisfiability contains(FSA other) {
+	public Satisfiability contains(
+			FSA other) {
 
 		if (other.a.isEqualTo(a.emptyString()))
 			return Satisfiability.SATISFIED;
@@ -368,7 +411,9 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	 * 
 	 * @return the domain instance containing the replaced automaton
 	 */
-	public FSA replace(FSA search, FSA repl) {
+	public FSA replace(
+			FSA search,
+			FSA repl) {
 		try {
 			return new FSA(this.a.replace(search.a, repl.a));
 		} catch (CyclicAutomatonException e) {
@@ -377,7 +422,9 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	}
 
 	@Override
-	public Satisfiability containsChar(char c) throws SemanticException {
+	public Satisfiability containsChar(
+			char c)
+			throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 		if (isBottom())
@@ -445,7 +492,9 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	 * @throws MathNumberConversionException if {@code intv} is iterated but is
 	 *                                           not finite
 	 */
-	public FSA repeat(Interval i) throws MathNumberConversionException {
+	public FSA repeat(
+			Interval i)
+			throws MathNumberConversionException {
 		if (isBottom() || isTop())
 			return this;
 		return new FSA(this.a.repeat(i));

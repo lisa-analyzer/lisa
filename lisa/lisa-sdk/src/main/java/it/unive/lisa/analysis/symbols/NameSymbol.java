@@ -14,7 +14,8 @@ public class NameSymbol implements Symbol {
 	 * 
 	 * @param name the name represented by this symbol
 	 */
-	public NameSymbol(String name) {
+	public NameSymbol(
+			String name) {
 		this.name = name;
 	}
 
@@ -36,7 +37,8 @@ public class NameSymbol implements Symbol {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

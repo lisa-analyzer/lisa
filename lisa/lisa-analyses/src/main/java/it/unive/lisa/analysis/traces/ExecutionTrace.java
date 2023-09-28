@@ -23,7 +23,8 @@ public class ExecutionTrace {
 		tokens = EMPTY_TRACE;
 	}
 
-	private ExecutionTrace(TraceToken[] tokens) {
+	private ExecutionTrace(
+			TraceToken[] tokens) {
 		this.tokens = tokens;
 	}
 
@@ -34,7 +35,8 @@ public class ExecutionTrace {
 	 * 
 	 * @return the updated trace
 	 */
-	public ExecutionTrace push(TraceToken token) {
+	public ExecutionTrace push(
+			TraceToken token) {
 		int len = this.tokens.length;
 		TraceToken[] tokens = new TraceToken[len + 1];
 		System.arraycopy(this.tokens, 0, tokens, 0, len);
@@ -88,7 +90,8 @@ public class ExecutionTrace {
 	 * @return the last (top-most) loop token for the given guard, or
 	 *             {@code null} if no such token exist
 	 */
-	public TraceToken lastLoopTokenFor(ProgramPoint guard) {
+	public TraceToken lastLoopTokenFor(
+			ProgramPoint guard) {
 		for (int i = tokens.length - 1; i >= 0; i--) {
 			TraceToken tok = tokens[i];
 			if ((tok instanceof LoopSummary || tok instanceof LoopIteration) && tok.getProgramPoint() == guard)
@@ -107,7 +110,8 @@ public class ExecutionTrace {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

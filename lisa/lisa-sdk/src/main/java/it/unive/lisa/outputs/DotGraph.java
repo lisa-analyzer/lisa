@@ -112,13 +112,15 @@ public class DotGraph extends GraphStreamWrapper {
 	 * 
 	 * @param title the title of the graph, if any
 	 */
-	public DotGraph(String title) {
+	public DotGraph(
+			String title) {
 		super();
 		this.legend = new Legend().graph;
 		this.title = title;
 	}
 
-	private static String dotEscape(String extraLabel) {
+	private static String dotEscape(
+			String extraLabel) {
 		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
 		String replace = escapeHtml4.replace("\n", "<BR/>");
 		replace = replace.replace("\\", "\\\\");
@@ -137,7 +139,11 @@ public class DotGraph extends GraphStreamWrapper {
 	 * @param label the additional label that can be added to each node's text
 	 *                  (can be {@code null})
 	 */
-	public void addNode(SerializableNode node, boolean entry, boolean exit, SerializableValue label) {
+	public void addNode(
+			SerializableNode node,
+			boolean entry,
+			boolean exit,
+			SerializableValue label) {
 		Node n = graph.addNode(nodeName(node.getId()));
 
 		n.setAttribute(SHAPE, NODE_SHAPE);
@@ -156,7 +162,8 @@ public class DotGraph extends GraphStreamWrapper {
 		n.setAttribute(LABEL, "<" + l + extra + ">");
 	}
 
-	private static String format(SerializableValue value) {
+	private static String format(
+			SerializableValue value) {
 		if (value instanceof SerializableString) {
 			return value.toString();
 		} else if (value instanceof SerializableArray) {
@@ -199,7 +206,8 @@ public class DotGraph extends GraphStreamWrapper {
 	 * 
 	 * @param edge the source edge
 	 */
-	public void addEdge(SerializableEdge edge) {
+	public void addEdge(
+			SerializableEdge edge) {
 		long id = edge.getSourceId();
 		long id1 = edge.getDestId();
 
@@ -222,7 +230,9 @@ public class DotGraph extends GraphStreamWrapper {
 	}
 
 	@Override
-	public void dump(Writer writer) throws IOException {
+	public void dump(
+			Writer writer)
+			throws IOException {
 		FileSinkDOT sink = new CustomDotSink() {
 			@Override
 			protected void outputEndOfFile() throws IOException {
@@ -250,7 +260,9 @@ public class DotGraph extends GraphStreamWrapper {
 	 * 
 	 * @throws IOException if an I/O error occurs while reading
 	 */
-	public static DotGraph readDot(Reader reader) throws IOException {
+	public static DotGraph readDot(
+			Reader reader)
+			throws IOException {
 		// we have to re-add the quotes wrapping the labels, otherwise the
 		// parser will break
 		String content;
@@ -309,7 +321,10 @@ public class DotGraph extends GraphStreamWrapper {
 		}
 
 		@Override
-		protected String outputAttribute(String key, Object value, boolean first) {
+		protected String outputAttribute(
+				String key,
+				Object value,
+				boolean first) {
 			boolean quote = true;
 
 			if (value instanceof Number || key.equals(LABEL))
@@ -322,7 +337,8 @@ public class DotGraph extends GraphStreamWrapper {
 		}
 
 		@Override
-		protected String outputAttributes(Element e) {
+		protected String outputAttributes(
+				Element e) {
 			if (e.getAttributeCount() == 0)
 				return "";
 

@@ -14,17 +14,20 @@ public class TestTypeSystem extends TypeSystem {
 		return new BooleanType() {
 
 			@Override
-			public Type commonSupertype(Type other) {
+			public Type commonSupertype(
+					Type other) {
 				return null;
 			}
 
 			@Override
-			public boolean canBeAssignedTo(Type other) {
+			public boolean canBeAssignedTo(
+					Type other) {
 				return false;
 			}
 
 			@Override
-			public Set<Type> allInstances(TypeSystem types) {
+			public Set<Type> allInstances(
+					TypeSystem types) {
 				return null;
 			}
 		};
@@ -35,17 +38,20 @@ public class TestTypeSystem extends TypeSystem {
 		return new StringType() {
 
 			@Override
-			public Type commonSupertype(Type other) {
+			public Type commonSupertype(
+					Type other) {
 				return null;
 			}
 
 			@Override
-			public boolean canBeAssignedTo(Type other) {
+			public boolean canBeAssignedTo(
+					Type other) {
 				return false;
 			}
 
 			@Override
-			public Set<Type> allInstances(TypeSystem types) {
+			public Set<Type> allInstances(
+					TypeSystem types) {
 				return null;
 			}
 		};
@@ -56,17 +62,20 @@ public class TestTypeSystem extends TypeSystem {
 		return new NumericType() {
 
 			@Override
-			public Type commonSupertype(Type other) {
+			public Type commonSupertype(
+					Type other) {
 				return null;
 			}
 
 			@Override
-			public boolean canBeAssignedTo(Type other) {
+			public boolean canBeAssignedTo(
+					Type other) {
 				return false;
 			}
 
 			@Override
-			public Set<Type> allInstances(TypeSystem types) {
+			public Set<Type> allInstances(
+					TypeSystem types) {
 				return null;
 			}
 
@@ -103,7 +112,8 @@ public class TestTypeSystem extends TypeSystem {
 	}
 
 	@Override
-	public boolean canBeReferenced(Type type) {
+	public boolean canBeReferenced(
+			Type type) {
 		return false;
 	}
 

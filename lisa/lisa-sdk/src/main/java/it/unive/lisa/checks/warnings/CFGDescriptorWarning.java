@@ -22,7 +22,9 @@ public class CFGDescriptorWarning extends WarningWithLocation {
 	 * @param descriptor the descriptor where this warning was reported on
 	 * @param message    the message of this warning
 	 */
-	public CFGDescriptorWarning(CodeMemberDescriptor descriptor, String message) {
+	public CFGDescriptorWarning(
+			CodeMemberDescriptor descriptor,
+			String message) {
 		super(descriptor.getLocation(), message);
 		this.descriptor = descriptor;
 	}
@@ -37,7 +39,8 @@ public class CFGDescriptorWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public int compareTo(Warning o) {
+	public int compareTo(
+			Warning o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
@@ -61,7 +64,8 @@ public class CFGDescriptorWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

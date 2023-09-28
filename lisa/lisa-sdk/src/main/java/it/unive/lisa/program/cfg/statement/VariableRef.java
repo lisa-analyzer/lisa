@@ -4,9 +4,6 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
@@ -41,7 +38,10 @@ public class VariableRef extends Expression {
 	 * @param location the location of this variable reference
 	 * @param name     the name of this variable reference
 	 */
-	public VariableRef(CFG cfg, CodeLocation location, String name) {
+	public VariableRef(
+			CFG cfg,
+			CodeLocation location,
+			String name) {
 		this(cfg, location, name, Untyped.INSTANCE);
 	}
 
@@ -55,14 +55,19 @@ public class VariableRef extends Expression {
 	 * @param name     the name of this variable
 	 * @param type     the type of this variable
 	 */
-	public VariableRef(CFG cfg, CodeLocation location, String name, Type type) {
+	public VariableRef(
+			CFG cfg,
+			CodeLocation location,
+			String name,
+			Type type) {
 		super(cfg, location, type);
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		this.name = name;
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		return this.offset = offset;
 	}
 
@@ -84,7 +89,8 @@ public class VariableRef extends Expression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -118,19 +124,19 @@ public class VariableRef extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-					AnalysisState<A, H, V, T> entryState, InterproceduralAnalysis<A, H, V, T> interprocedural,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> semantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		SymbolicExpression expr = getVariable();
 		return entryState.smallStepSemantics(expr, this);
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 

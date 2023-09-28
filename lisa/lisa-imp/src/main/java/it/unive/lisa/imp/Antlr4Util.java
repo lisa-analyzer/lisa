@@ -36,7 +36,9 @@ public class Antlr4Util {
 	 * @return a {@link ParsingException} contained more detailed information
 	 *             about the one thrown by ANTLR4
 	 */
-	static ParsingException handleRecognitionException(String file, RecognitionException e) {
+	static ParsingException handleRecognitionException(
+			String file,
+			RecognitionException e) {
 		Token problem = e.getOffendingToken();
 		StringBuilder message = errorHeader(file, problem);
 
@@ -56,7 +58,10 @@ public class Antlr4Util {
 		return new ParsingException("Error while parsing " + file + ":\n" + message.toString());
 	}
 
-	private static void dumpProblem(String file, Token problem, StringBuilder message) {
+	private static void dumpProblem(
+			String file,
+			Token problem,
+			StringBuilder message) {
 		String base = message.toString();
 
 		message.append(" at: ");
@@ -78,31 +83,43 @@ public class Antlr4Util {
 		}
 	}
 
-	private static void missingAlternative(StringBuilder message) {
+	private static void missingAlternative(
+			StringBuilder message) {
 		message.append("could not decide what path to take");
 	}
 
-	private static void failedPredicate(RecognitionException e, StringBuilder message) {
+	private static void failedPredicate(
+			RecognitionException e,
+			StringBuilder message) {
 		message.append("failed predicate '").append(((FailedPredicateException) e).getPredicate()).append("' ");
 	}
 
-	private static void inputMismatch(RecognitionException e, Token problem, StringBuilder message) {
+	private static void inputMismatch(
+			RecognitionException e,
+			Token problem,
+			StringBuilder message) {
 		message.append("matched '").append(problem.getText()).append("' as <")
 				.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary())).append(">, expecting <")
 				.append(tokenNames(((InputMismatchException) e).getExpectedTokens(), e.getRecognizer().getVocabulary()))
 				.append(">");
 	}
 
-	private static StringBuilder errorHeader(String file, Token problem) {
+	private static StringBuilder errorHeader(
+			String file,
+			Token problem) {
 		return new StringBuilder().append(file).append(":").append(problem.getLine()).append(":")
 				.append(problem.getCharPositionInLine()).append(" - ");
 	}
 
-	private static String tokenName(int type, Vocabulary vocabulary) {
+	private static String tokenName(
+			int type,
+			Vocabulary vocabulary) {
 		return type < 0 ? "<EOF>" : vocabulary.getSymbolicName(type);
 	}
 
-	private static String tokenNames(IntervalSet types, Vocabulary vocabulary) {
+	private static String tokenNames(
+			IntervalSet types,
+			Vocabulary vocabulary) {
 		List<Integer> typeList = types.toList();
 		StringBuilder expectedBuilder = new StringBuilder();
 
@@ -119,7 +136,8 @@ public class Antlr4Util {
 	 * 
 	 * @return the line number where the context appears
 	 */
-	static int getLine(ParserRuleContext ctx) {
+	static int getLine(
+			ParserRuleContext ctx) {
 		return ctx.getStart().getLine();
 	}
 
@@ -130,7 +148,8 @@ public class Antlr4Util {
 	 * 
 	 * @return the column number where the context appears
 	 */
-	static int getCol(ParserRuleContext ctx) {
+	static int getCol(
+			ParserRuleContext ctx) {
 		return ctx.getStop().getCharPositionInLine();
 	}
 
@@ -141,7 +160,8 @@ public class Antlr4Util {
 	 * 
 	 * @return the line number where the token appears
 	 */
-	static int getLine(Token tok) {
+	static int getLine(
+			Token tok) {
 		return tok.getLine();
 	}
 
@@ -152,7 +172,8 @@ public class Antlr4Util {
 	 * 
 	 * @return the column number where the token appears
 	 */
-	static int getCol(Token tok) {
+	static int getCol(
+			Token tok) {
 		return tok.getCharPositionInLine();
 	}
 }

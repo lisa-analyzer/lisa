@@ -29,7 +29,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <E> the type of {@link CodeEdge}s in this graph
  */
 public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
-		implements Graph<G, N, E> {
+		implements
+		Graph<G, N, E> {
 
 	/**
 	 * The node list of this graph.
@@ -50,7 +51,8 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	 *                                {@link CodeEdge#newInstance(CodeNode, CodeNode)}
 	 *                                to obtain instances of sequential edges
 	 */
-	protected CodeGraph(E sequentialSingleton) {
+	protected CodeGraph(
+			E sequentialSingleton) {
 		this.list = new NodeList<>(sequentialSingleton);
 		this.entrypoints = new HashSet<>();
 	}
@@ -62,7 +64,9 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	 *                        other graphs
 	 * @param nodes       the list of nodes contained in this graph
 	 */
-	protected CodeGraph(Collection<N> entrypoints, NodeList<G, N, E> nodes) {
+	protected CodeGraph(
+			Collection<N> entrypoints,
+			NodeList<G, N, E> nodes) {
 		this.list = nodes;
 		this.entrypoints = entrypoints;
 	}
@@ -72,7 +76,8 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	 * 
 	 * @param other the original graph
 	 */
-	protected CodeGraph(G other) {
+	protected CodeGraph(
+			G other) {
 		this.list = new NodeList<>(other.list);
 		this.entrypoints = new ArrayList<>(other.entrypoints);
 	}
@@ -102,19 +107,23 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	}
 
 	@Override
-	public void addNode(N node) {
+	public void addNode(
+			N node) {
 		addNode(node, false);
 	}
 
 	@Override
-	public void addNode(N node, boolean entrypoint) {
+	public void addNode(
+			N node,
+			boolean entrypoint) {
 		list.addNode(node);
 		if (entrypoint)
 			this.entrypoints.add(node);
 	}
 
 	@Override
-	public void addEdge(E edge) {
+	public void addEdge(
+			E edge) {
 		list.addEdge(edge);
 	}
 
@@ -129,52 +138,64 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	}
 
 	@Override
-	public boolean containsNode(N node) {
+	public boolean containsNode(
+			N node) {
 		return list.containsNode(node);
 	}
 
 	@Override
-	public boolean containsEdge(E edge) {
+	public boolean containsEdge(
+			E edge) {
 		return list.containsEdge(edge);
 	}
 
 	@Override
-	public E getEdgeConnecting(N source, N destination) {
+	public E getEdgeConnecting(
+			N source,
+			N destination) {
 		return list.getEdgeConnecting(source, destination);
 	}
 
 	@Override
-	public Collection<E> getEdgesConnecting(N source, N destination) {
+	public Collection<E> getEdgesConnecting(
+			N source,
+			N destination) {
 		return list.getEdgesConnecting(source, destination);
 	}
 
 	@Override
-	public Collection<E> getIngoingEdges(N node) {
+	public Collection<E> getIngoingEdges(
+			N node) {
 		return list.getIngoingEdges(node);
 	}
 
 	@Override
-	public Collection<E> getOutgoingEdges(N node) {
+	public Collection<E> getOutgoingEdges(
+			N node) {
 		return list.getOutgoingEdges(node);
 	}
 
 	@Override
-	public Collection<N> followersOf(N node) {
+	public Collection<N> followersOf(
+			N node) {
 		return list.followersOf(node);
 	}
 
 	@Override
-	public Collection<N> predecessorsOf(N node) {
+	public Collection<N> predecessorsOf(
+			N node) {
 		return list.predecessorsOf(node);
 	}
 
 	@Override
-	public SerializableGraph toSerializableGraph(BiFunction<G, N, SerializableValue> descriptionGenerator) {
+	public SerializableGraph toSerializableGraph(
+			BiFunction<G, N, SerializableValue> descriptionGenerator) {
 		throw new UnsupportedOperationException(getClass().getName() + " does not provide a serialization logic");
 	}
 
 	@Override
-	public boolean isEqualTo(G graph) {
+	public boolean isEqualTo(
+			G graph) {
 		if (this == graph)
 			return true;
 		if (graph == null)
@@ -224,7 +245,9 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	public Set<N> simplify(Class<? extends N> target, Collection<E> removedEdges,
+	public Set<N> simplify(
+			Class<? extends N> target,
+			Collection<E> removedEdges,
 			Map<Pair<E, E>, E> replacedEdges) {
 		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
 				.collect(Collectors.toSet());
@@ -238,7 +261,8 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	 * 
 	 * @param node the node about to be simplified
 	 */
-	public void preSimplify(N node) {
+	public void preSimplify(
+			N node) {
 		// nothing to do, but subclasses might redefine
 	}
 }

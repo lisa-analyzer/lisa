@@ -4,9 +4,6 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -32,21 +29,22 @@ public class Equal extends it.unive.lisa.program.cfg.statement.BinaryExpression 
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Equal(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public Equal(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "==", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> binarySemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		return state.smallStepSemantics(
 				new BinaryExpression(
 						getStaticType(),

@@ -1,14 +1,12 @@
 package it.unive.lisa.analysis.numeric;
 
-import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -31,6 +29,8 @@ import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * The overflow-insensitive interval abstract domain, approximating integer
@@ -44,7 +44,6 @@ import it.unive.lisa.util.numeric.MathNumber;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-@FallbackImplementation
 public class Interval implements BaseNonRelationalValueDomain<Interval>, Comparable<Interval> {
 
 	/**
@@ -72,7 +71,8 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	 * 
 	 * @param interval the underlying {@link IntInterval}
 	 */
-	public Interval(IntInterval interval) {
+	public Interval(
+			IntInterval interval) {
 		this.interval = interval;
 	}
 
@@ -82,7 +82,9 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	 * @param low  the lower bound
 	 * @param high the higher bound
 	 */
-	public Interval(MathNumber low, MathNumber high) {
+	public Interval(
+			MathNumber low,
+			MathNumber high) {
 		this(new IntInterval(low, high));
 	}
 
@@ -92,7 +94,9 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	 * @param low  the lower bound
 	 * @param high the higher bound
 	 */
-	public Interval(int low, int high) {
+	public Interval(
+			int low,
+			int high) {
 		this(new IntInterval(low, high));
 	}
 
@@ -124,7 +128,7 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 
@@ -137,7 +141,10 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public Interval evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Interval evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return new Interval(new MathNumber(i), new MathNumber(i));
@@ -147,7 +154,11 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public Interval evalUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
+	public Interval evalUnaryExpression(
+			UnaryOperator operator,
+			Interval arg,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (operator == NumericNegation.INSTANCE)
 			if (arg.isTop())
 				return top();
@@ -168,12 +179,18 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean is(int n) {
+	public boolean is(
+			int n) {
 		return !isBottom() && interval.is(n);
 	}
 
 	@Override
-	public Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
+	public Interval evalBinaryExpression(
+			BinaryOperator operator,
+			Interval left,
+			Interval right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (!(operator instanceof DivisionOperator) && (left.isTop() || right.isTop()))
 			// with div, we can return zero or bottom even if one of the
 			// operands is top
@@ -253,14 +270,17 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public Interval lubAux(Interval other) throws SemanticException {
+	public Interval lubAux(
+			Interval other)
+			throws SemanticException {
 		MathNumber newLow = interval.getLow().min(other.interval.getLow());
 		MathNumber newHigh = interval.getHigh().max(other.interval.getHigh());
 		return newLow.isMinusInfinity() && newHigh.isPlusInfinity() ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
-	public Interval glbAux(Interval other) {
+	public Interval glbAux(
+			Interval other) {
 		MathNumber newLow = interval.getLow().max(other.interval.getLow());
 		MathNumber newHigh = interval.getHigh().min(other.interval.getHigh());
 
@@ -270,7 +290,9 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public Interval wideningAux(Interval other) throws SemanticException {
+	public Interval wideningAux(
+			Interval other)
+			throws SemanticException {
 		MathNumber newLow, newHigh;
 		if (other.interval.getHigh().compareTo(interval.getHigh()) > 0)
 			newHigh = MathNumber.PLUS_INFINITY;
@@ -286,7 +308,9 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public Interval narrowingAux(Interval other) throws SemanticException {
+	public Interval narrowingAux(
+			Interval other)
+			throws SemanticException {
 		MathNumber newLow, newHigh;
 		newHigh = interval.getHigh().isInfinite() ? other.interval.getHigh() : interval.getHigh();
 		newLow = interval.getLow().isInfinite() ? other.interval.getLow() : interval.getLow();
@@ -294,14 +318,19 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Interval other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Interval other)
+			throws SemanticException {
 		return other.interval.includes(interval);
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
-			ProgramPoint pp) {
-
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			Interval left,
+			Interval right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -319,9 +348,9 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		} else if (operator == ComparisonGe.INSTANCE)
-			return satisfiesBinaryExpression(ComparisonLe.INSTANCE, right, left, pp);
+			return satisfiesBinaryExpression(ComparisonLe.INSTANCE, right, left, pp, oracle);
 		else if (operator == ComparisonGt.INSTANCE)
-			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp);
+			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp, oracle);
 		else if (operator == ComparisonLe.INSTANCE) {
 			Interval glb = null;
 			try {
@@ -371,7 +400,8 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -394,17 +424,18 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 			ValueExpression left,
 			ValueExpression right,
 			ProgramPoint src,
-			ProgramPoint dest)
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		Identifier id;
 		Interval eval;
 		boolean rightIsExpr;
 		if (left instanceof Identifier) {
-			eval = eval(right, environment, src);
+			eval = eval(right, environment, src, oracle);
 			id = (Identifier) left;
 			rightIsExpr = true;
 		} else if (right instanceof Identifier) {
-			eval = eval(left, environment, src);
+			eval = eval(left, environment, src, oracle);
 			id = (Identifier) right;
 			rightIsExpr = false;
 		} else
@@ -453,7 +484,8 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
-	public int compareTo(Interval o) {
+	public int compareTo(
+			Interval o) {
 		if (isBottom())
 			return o.isBottom() ? 0 : -1;
 		if (isTop())

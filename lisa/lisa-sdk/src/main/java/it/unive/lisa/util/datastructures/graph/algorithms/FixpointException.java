@@ -3,7 +3,7 @@ package it.unive.lisa.util.datastructures.graph.algorithms;
 /**
  * An exception raised during the fixpoint computation.
  * 
- * @author Luca Negrini
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class FixpointException extends Exception {
 
@@ -22,7 +22,9 @@ public class FixpointException extends Exception {
 	 * @param message the message associated with this exception
 	 * @param cause   the underlying cause of this exception
 	 */
-	public FixpointException(String message, Throwable cause) {
+	public FixpointException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -31,7 +33,8 @@ public class FixpointException extends Exception {
 	 * 
 	 * @param message the message associated with this exception
 	 */
-	public FixpointException(String message) {
+	public FixpointException(
+			String message) {
 		super(message);
 	}
 
@@ -40,7 +43,8 @@ public class FixpointException extends Exception {
 	 * 
 	 * @param cause the underlying cause of this exception
 	 */
-	public FixpointException(Throwable cause) {
+	public FixpointException(
+			Throwable cause) {
 		super(cause);
 	}
 

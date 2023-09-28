@@ -37,6 +37,11 @@ public class FixpointConfiguration extends BaseConfiguration {
 	public final boolean optimize;
 
 	/**
+	 * Holder of {@link LiSAConfiguration#useWideningPoints}.
+	 */
+	public final boolean useWideningPoints;
+
+	/**
 	 * Holder of {@link LiSAConfiguration#hotspots}.
 	 */
 	public final Predicate<Statement> hotspots;
@@ -46,12 +51,14 @@ public class FixpointConfiguration extends BaseConfiguration {
 	 * 
 	 * @param parent the root configuration to draw data from.
 	 */
-	public FixpointConfiguration(LiSAConfiguration parent) {
+	public FixpointConfiguration(
+			LiSAConfiguration parent) {
 		this.wideningThreshold = parent.wideningThreshold;
 		this.recursionWideningThreshold = parent.recursionWideningThreshold;
 		this.glbThreshold = parent.glbThreshold;
 		this.descendingPhaseType = parent.descendingPhaseType;
 		this.optimize = parent.optimize;
 		this.hotspots = parent.hotspots;
+		this.useWideningPoints = parent.useWideningPoints;
 	}
 }

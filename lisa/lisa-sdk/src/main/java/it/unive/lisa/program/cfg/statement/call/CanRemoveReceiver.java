@@ -32,7 +32,8 @@ public interface CanRemoveReceiver {
 	 * 
 	 * @return the truncated array
 	 */
-	public static Expression[] truncate(Expression[] parameters) {
+	public static Expression[] truncate(
+			Expression[] parameters) {
 		if (parameters.length == 0)
 			return parameters;
 		Expression[] truncatedParams = new Expression[parameters.length - 1];

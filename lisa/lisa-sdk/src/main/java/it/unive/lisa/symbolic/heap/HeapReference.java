@@ -26,7 +26,10 @@ public class HeapReference extends HeapExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public HeapReference(Type staticType, SymbolicExpression expression, CodeLocation location) {
+	public HeapReference(
+			Type staticType,
+			SymbolicExpression expression,
+			CodeLocation location) {
 		super(staticType, location);
 		this.expression = expression;
 	}
@@ -54,7 +57,8 @@ public class HeapReference extends HeapExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -71,7 +75,10 @@ public class HeapReference extends HeapExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		T l = expression.accept(visitor, params);
 		return visitor.visit(this, l, params);
 	}

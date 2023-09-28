@@ -2,28 +2,30 @@ package it.unive.lisa.analysis.nonrelational.inference;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.representation.ObjectRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Map;
 
 /**
  * A {@link NonRelationalElement} that can be inferred by
  * {@link InferenceSystem}s. The main difference between a
  * {@link NonRelationalDomain} and an {@link InferredValue} is that
- * {@link #eval(ValueExpression, InferenceSystem, ProgramPoint)} returns
- * instances of {@link InferredPair}, to model the fact that every semantic
- * evaluation also modifies the execution state.
+ * {@link #eval(ValueExpression, InferenceSystem, ProgramPoint, SemanticOracle)}
+ * returns instances of {@link InferredPair}, to model the fact that every
+ * semantic evaluation also modifies the execution state.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <T> the concrete type of inferred value
  */
 public interface InferredValue<T extends InferredValue<T>>
-		extends NonRelationalElement<T, ValueExpression, InferenceSystem<T>> {
+		extends
+		NonRelationalElement<T, ValueExpression, InferenceSystem<T>> {
 
 	/**
 	 * Evaluates a {@link ValueExpression}, assuming that the values of program
@@ -34,6 +36,7 @@ public interface InferredValue<T extends InferredValue<T>>
 	 *                        variables for the evaluation
 	 * @param pp          the program point that where this operation is being
 	 *                        evaluated
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return an new instance of this domain, representing the abstract result
 	 *             of {@code expression} when evaluated on {@code environment}.
@@ -42,7 +45,11 @@ public interface InferredValue<T extends InferredValue<T>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
+	InferredPair<T> eval(
+			ValueExpression expression,
+			InferenceSystem<T> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException;
 
 	/**
@@ -70,7 +77,10 @@ public interface InferredValue<T extends InferredValue<T>>
 		 * @param inferred the inferred value
 		 * @param state    the execution state
 		 */
-		public InferredPair(T domain, T inferred, T state) {
+		public InferredPair(
+				T domain,
+				T inferred,
+				T state) {
 			this.domain = domain;
 			this.inferred = inferred;
 			this.state = state;
@@ -117,27 +127,37 @@ public interface InferredValue<T extends InferredValue<T>>
 		}
 
 		@Override
-		public InferredPair<T> lubAux(InferredPair<T> other) throws SemanticException {
+		public InferredPair<T> lubAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return new InferredPair<>(domain, inferred.lub(other.inferred), state.lub(other.state));
 		}
 
 		@Override
-		public InferredPair<T> glbAux(InferredPair<T> other) throws SemanticException {
+		public InferredPair<T> glbAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return new InferredPair<>(domain, inferred.glb(other.inferred), state.glb(other.state));
 		}
 
 		@Override
-		public InferredPair<T> wideningAux(InferredPair<T> other) throws SemanticException {
+		public InferredPair<T> wideningAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return new InferredPair<>(domain, inferred.widening(other.inferred), state.widening(other.state));
 		}
 
 		@Override
-		public InferredPair<T> narrowingAux(InferredPair<T> other) throws SemanticException {
+		public InferredPair<T> narrowingAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return new InferredPair<>(domain, inferred.narrowing(other.inferred), state.narrowing(other.state));
 		}
 
 		@Override
-		public boolean lessOrEqualAux(InferredPair<T> other) throws SemanticException {
+		public boolean lessOrEqualAux(
+				InferredPair<T> other)
+				throws SemanticException {
 			return inferred.lessOrEqual(other.inferred) && state.lessOrEqual(other.state);
 		}
 
@@ -152,7 +172,8 @@ public interface InferredValue<T extends InferredValue<T>>
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)
@@ -184,12 +205,12 @@ public interface InferredValue<T extends InferredValue<T>>
 		}
 
 		/**
-		 * Yields a {@link DomainRepresentation} of the information contained in
-		 * this pair.
+		 * Yields a {@link StructuredRepresentation} of the information
+		 * contained in this pair.
 		 * 
 		 * @return the representation
 		 */
-		public DomainRepresentation representation() {
+		public StructuredRepresentation representation() {
 			return new ObjectRepresentation(
 					Map.of("value", inferred.representation(), "state", state.representation()));
 		}

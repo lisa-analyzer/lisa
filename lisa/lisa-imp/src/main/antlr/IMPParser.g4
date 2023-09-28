@@ -93,6 +93,7 @@ expression
    | methodCall
    | assignment
    | stringExpr
+   | arrayExpr
    ;
 
 basicExpr
@@ -159,6 +160,10 @@ binaryStringExpr
 ternaryStringExpr
    : STRREPLACE LPAREN left = expression COMMA middle = expression COMMA right = expression RPAREN
    | STRSUB LPAREN left = expression COMMA middle = expression COMMA right = expression RPAREN
+   ;
+
+arrayExpr
+   : ARRAYLEN LPAREN op = expression RPAREN
    ;
 /*
  * STATEMENT

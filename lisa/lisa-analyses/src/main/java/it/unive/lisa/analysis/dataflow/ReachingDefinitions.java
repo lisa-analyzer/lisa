@@ -2,13 +2,13 @@ package it.unive.lisa.analysis.dataflow;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.ListRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.representation.ListRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,7 +19,8 @@ import java.util.HashSet;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ReachingDefinitions
-		implements DataflowElement<PossibleForwardDataflowDomain<ReachingDefinitions>, ReachingDefinitions> {
+		implements
+		DataflowElement<PossibleForwardDataflowDomain<ReachingDefinitions>, ReachingDefinitions> {
 
 	private final Identifier variable;
 
@@ -38,7 +39,9 @@ public class ReachingDefinitions
 	 * @param variable the variable being defined
 	 * @param pp       the location where the definition happens
 	 */
-	public ReachingDefinitions(Identifier variable, ProgramPoint pp) {
+	public ReachingDefinitions(
+			Identifier variable,
+			ProgramPoint pp) {
 		this.programPoint = pp;
 		this.variable = variable;
 	}
@@ -53,7 +56,8 @@ public class ReachingDefinitions
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -85,19 +89,27 @@ public class ReachingDefinitions
 	}
 
 	@Override
-	public Collection<ReachingDefinitions> gen(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<ReachingDefinitions> gen(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.singleton(new ReachingDefinitions(id, pp));
 	}
 
 	@Override
-	public Collection<ReachingDefinitions> gen(ValueExpression expression, ProgramPoint pp,
+	public Collection<ReachingDefinitions> gen(
+			ValueExpression expression,
+			ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public Collection<ReachingDefinitions> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<ReachingDefinitions> kill(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		Collection<ReachingDefinitions> result = new HashSet<>();
 
@@ -109,23 +121,29 @@ public class ReachingDefinitions
 	}
 
 	@Override
-	public Collection<ReachingDefinitions> kill(ValueExpression expression, ProgramPoint pp,
+	public Collection<ReachingDefinitions> kill(
+			ValueExpression expression,
+			ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new ListRepresentation(new StringRepresentation(variable), new StringRepresentation(programPoint));
 	}
 
 	@Override
-	public ReachingDefinitions pushScope(ScopeToken scope) throws SemanticException {
+	public ReachingDefinitions pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return new ReachingDefinitions((Identifier) variable.pushScope(scope), programPoint);
 	}
 
 	@Override
-	public ReachingDefinitions popScope(ScopeToken scope) throws SemanticException {
+	public ReachingDefinitions popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		if (!(variable instanceof OutOfScopeIdentifier))
 			return null;
 

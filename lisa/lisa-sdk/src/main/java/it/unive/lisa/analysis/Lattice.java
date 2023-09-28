@@ -1,7 +1,8 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredObject;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * An interface for elements that follow a lattice structure. Implementers of
@@ -12,7 +13,7 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
  * 
  * @param <L> the concrete {@link Lattice} instance
  */
-public interface Lattice<L extends Lattice<L>> {
+public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 
 	/**
 	 * A string constant that can be used to represent top values.
@@ -20,12 +21,12 @@ public interface Lattice<L extends Lattice<L>> {
 	String TOP_STRING = "#TOP#";
 
 	/**
-	 * Yields a fresh {@link DomainRepresentation} that can be used to represent
-	 * top values.
+	 * Yields a fresh {@link StructuredRepresentation} that can be used to
+	 * represent top values through {@link #representation()}.
 	 * 
 	 * @return the representation
 	 */
-	public static DomainRepresentation topRepresentation() {
+	public static StructuredRepresentation topRepresentation() {
 		return new StringRepresentation(TOP_STRING);
 	}
 
@@ -35,12 +36,12 @@ public interface Lattice<L extends Lattice<L>> {
 	String BOTTOM_STRING = "_|_";
 
 	/**
-	 * Yields a fresh {@link DomainRepresentation} that can be used to represent
-	 * bottom values.
+	 * Yields a fresh {@link StructuredRepresentation} that can be used to
+	 * represent bottom values through {@link #representation()}.
 	 * 
 	 * @return the representation
 	 */
-	public static DomainRepresentation bottomRepresentation() {
+	public static StructuredRepresentation bottomRepresentation() {
 		return new StringRepresentation(BOTTOM_STRING);
 	}
 
@@ -55,7 +56,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	boolean lessOrEqual(L other) throws SemanticException;
+	boolean lessOrEqual(
+			L other)
+			throws SemanticException;
 
 	/**
 	 * Performs the least upper bound operation between this lattice element and
@@ -67,7 +70,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L lub(L other) throws SemanticException;
+	L lub(
+			L other)
+			throws SemanticException;
 
 	/**
 	 * Performs the greatest lower upper bound operation between this lattice
@@ -79,7 +84,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L glb(L other) throws SemanticException {
+	default L glb(
+			L other)
+			throws SemanticException {
 		return bottom();
 	}
 
@@ -144,7 +151,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L widening(L other) throws SemanticException {
+	default L widening(
+			L other)
+			throws SemanticException {
 		return lub(other);
 	}
 
@@ -160,7 +169,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L narrowing(L other) throws SemanticException {
+	default L narrowing(
+			L other)
+			throws SemanticException {
 		return glb(other);
 	}
 }

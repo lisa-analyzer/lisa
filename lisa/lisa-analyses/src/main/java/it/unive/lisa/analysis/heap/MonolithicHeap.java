@@ -1,11 +1,9 @@
 package it.unive.lisa.analysis.heap;
 
-import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -16,10 +14,11 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +31,6 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-@FallbackImplementation
 public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 	private static final MonolithicHeap TOP = new MonolithicHeap();
@@ -41,12 +39,15 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 	private static final String MONOLITH_NAME = "heap";
 
-	private static final DomainRepresentation REPR = new StringRepresentation("monolith");
+	private static final StructuredRepresentation REPR = new StringRepresentation("monolith");
 
 	@Override
-	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(new Rewriter(), pp);
+		return expression.accept(Rewriter.SINGLETON, pp);
 	}
 
 	@Override
@@ -55,55 +56,81 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public MonolithicHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public MonolithicHeap assign(
+			Identifier id,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap mk(MonolithicHeap reference) {
+	public MonolithicHeap mk(
+			MonolithicHeap reference) {
 		return TOP;
 	}
 
 	@Override
-	public MonolithicHeap semanticsOf(HeapExpression expression, ProgramPoint pp) {
+	public MonolithicHeap semanticsOf(
+			HeapExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public MonolithicHeap assume(
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public MonolithicHeap forgetIdentifier(Identifier id) throws SemanticException {
+	public MonolithicHeap forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public MonolithicHeap forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap lubAux(MonolithicHeap other) throws SemanticException {
+	public MonolithicHeap lubAux(
+			MonolithicHeap other)
+			throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	public MonolithicHeap glbAux(MonolithicHeap other) throws SemanticException {
+	public MonolithicHeap glbAux(
+			MonolithicHeap other)
+			throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(MonolithicHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			MonolithicHeap other)
+			throws SemanticException {
 		return true;
 	}
 
@@ -118,7 +145,7 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return isBottom() ? Lattice.bottomRepresentation() : REPR;
 	}
 
@@ -128,7 +155,8 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -147,9 +175,18 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	 */
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
+		/**
+		 * The singleton instance of this rewriter.
+		 */
+		public static final Rewriter SINGLETON = new Rewriter();
+
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
-				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
+		public ExpressionSet visit(
+				AccessChild expression,
+				ExpressionSet receiver,
+				ExpressionSet child,
+				Object... params)
+				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			Set<Type> acc = new HashSet<>();
@@ -158,25 +195,25 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 			HeapLocation e = new HeapLocation(refType, MONOLITH_NAME, true,
 					expression.getCodeLocation());
-			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes(null));
-			return new ExpressionSet<>(e);
+			return new ExpressionSet(e);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
+		public ExpressionSet visit(
+				MemoryAllocation expression,
+				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
 					expression.getCodeLocation());
-			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes(null));
-			return new ExpressionSet<>(e);
+			return new ExpressionSet(e);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref,
+		public ExpressionSet visit(
+				HeapReference expression,
+				ExpressionSet ref,
 				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
@@ -188,18 +225,24 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			HeapLocation loc = new HeapLocation(refType, MONOLITH_NAME, true,
 					expression.getCodeLocation());
 			MemoryPointer e = new MemoryPointer(new ReferenceType(refType), loc, expression.getCodeLocation());
-			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes(null));
-			return new ExpressionSet<>(e);
+			return new ExpressionSet(e);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref,
+		public ExpressionSet visit(
+				HeapDereference expression,
+				ExpressionSet deref,
 				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			return deref;
 		}
+	}
+
+	@Override
+	public boolean knowsIdentifier(
+			Identifier id) {
+		return false;
 	}
 }

@@ -1,10 +1,8 @@
 package it.unive.lisa.analysis.heap;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.SetRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -15,12 +13,13 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.representation.SetRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +54,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	 * 
 	 * @param names the name of the known types
 	 */
-	public TypeBasedHeap(Set<String> names) {
+	public TypeBasedHeap(
+			Set<String> names) {
 		this.names = names;
 	}
 
@@ -69,41 +69,60 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(new Rewriter(), pp);
+		return expression.accept(Rewriter.SINGLETON, pp, oracle);
 	}
 
 	@Override
-	public TypeBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public TypeBasedHeap assign(
+			Identifier id,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public TypeBasedHeap assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+	public TypeBasedHeap assume(
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public TypeBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
+	public TypeBasedHeap forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public TypeBasedHeap forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public TypeBasedHeap forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new SetRepresentation(names, StringRepresentation::new);
 	}
 
@@ -123,21 +142,26 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public TypeBasedHeap mk(TypeBasedHeap reference) {
+	public TypeBasedHeap mk(
+			TypeBasedHeap reference) {
 		return this;
 	}
 
 	@Override
-	public TypeBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
+	public TypeBasedHeap semanticsOf(
+			HeapExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
-			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
-			return containerState.smallStepSemantics(access.getChild(), pp);
+			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp, oracle);
+			return containerState.smallStepSemantics(access.getChild(), pp, oracle);
 		}
 
 		if (expression instanceof MemoryAllocation) {
 			Set<String> names = new HashSet<>(this.names);
-			for (Type type : expression.getRuntimeTypes(pp.getProgram().getTypes()))
+			for (Type type : oracle.getRuntimeTypesOf(expression, pp, oracle))
 				if (type.isInMemoryType())
 					names.add(type.toString());
 
@@ -145,26 +169,32 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 		}
 
 		if (expression instanceof HeapReference)
-			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
+			return smallStepSemantics(((HeapReference) expression).getExpression(), pp, oracle);
 
 		if (expression instanceof HeapDereference)
-			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp);
+			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp, oracle);
 
 		return top();
 	}
 
 	@Override
-	public TypeBasedHeap lubAux(TypeBasedHeap other) throws SemanticException {
+	public TypeBasedHeap lubAux(
+			TypeBasedHeap other)
+			throws SemanticException {
 		return new TypeBasedHeap(SetUtils.union(names, other.names));
 	}
 
 	@Override
-	public TypeBasedHeap glbAux(TypeBasedHeap other) throws SemanticException {
+	public TypeBasedHeap glbAux(
+			TypeBasedHeap other)
+			throws SemanticException {
 		return new TypeBasedHeap(SetUtils.intersection(names, other.names));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(TypeBasedHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			TypeBasedHeap other)
+			throws SemanticException {
 		return other.names.containsAll(names);
 	}
 
@@ -177,7 +207,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -201,96 +232,108 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	 */
 	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
+		/**
+		 * The singleton instance of this rewriter.
+		 */
+		public static final Rewriter SINGLETON = new Rewriter();
+
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
-				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
+		public ExpressionSet visit(
+				AccessChild expression,
+				ExpressionSet receiver,
+				ExpressionSet child,
+				Object... params)
+				throws SemanticException {
 			// we use the container because we are not field-sensitive
-			Set<ValueExpression> result = new HashSet<>();
+			Set<SymbolicExpression> result = new HashSet<>();
 
 			ProgramPoint pp = (ProgramPoint) params[0];
-			TypeSystem types = pp.getProgram().getTypes();
+			SemanticOracle oracle = (SemanticOracle) params[1];
 
-			for (ValueExpression rec : receiver)
+			for (SymbolicExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
-					for (Type t : pid.getRuntimeTypes(types))
+					for (Type t : oracle.getRuntimeTypesOf(pid, pp, oracle))
 						if (t.isPointerType()) {
 							Type inner = t.asPointerType().getInnerType();
 							HeapLocation e = new HeapLocation(inner, inner.toString(), true,
 									expression.getCodeLocation());
-							e.setRuntimeTypes(Collections.singleton(inner));
 							result.add(e);
 						}
 				}
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
-				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
-			ProgramPoint pp = (ProgramPoint) params[0];
-			TypeSystem types = pp.getProgram().getTypes();
-
-			for (Type t : expression.getRuntimeTypes(types))
-				if (t.isInMemoryType()) {
-					HeapLocation e = new HeapLocation(t, t.toString(), true, expression.getCodeLocation());
-					e.setRuntimeTypes(Collections.singleton(t));
-					result.add(e);
-				}
-			return new ExpressionSet<>(result);
-		}
-
-		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref,
+		public ExpressionSet visit(
+				MemoryAllocation expression,
 				Object... params)
 				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
+			Set<SymbolicExpression> result = new HashSet<>();
+			Type t = expression.getStaticType();
+			if (t.isInMemoryType()) {
+				HeapLocation e = new HeapLocation(t, t.toString(), true, expression.getCodeLocation());
+				result.add(e);
+			}
+			return new ExpressionSet(result);
+		}
+
+		@Override
+		public ExpressionSet visit(
+				HeapReference expression,
+				ExpressionSet ref,
+				Object... params)
+				throws SemanticException {
+			Set<SymbolicExpression> result = new HashSet<>();
 
 			ProgramPoint pp = (ProgramPoint) params[0];
+			SemanticOracle oracle = (SemanticOracle) params[1];
 
-			TypeSystem types = pp.getProgram().getTypes();
-			for (ValueExpression refExp : ref)
+			for (SymbolicExpression refExp : ref)
 				if (refExp instanceof HeapLocation) {
-					Set<Type> rt = refExp.getRuntimeTypes(types);
+					Set<Type> rt = oracle.getRuntimeTypesOf(refExp, pp, oracle);
 					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
 					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(refExp.hasRuntimeTypes() ? sup : Untyped.INSTANCE),
+							new ReferenceType(sup),
 							(HeapLocation) refExp,
 							refExp.getCodeLocation());
-					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				}
 
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref,
+		public ExpressionSet visit(
+				HeapDereference expression,
+				ExpressionSet deref,
 				Object... params)
 				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
+			Set<SymbolicExpression> result = new HashSet<>();
 			ProgramPoint pp = (ProgramPoint) params[0];
-			TypeSystem types = pp.getProgram().getTypes();
+			SemanticOracle oracle = (SemanticOracle) params[1];
 
-			for (ValueExpression derefExp : deref) {
+			for (SymbolicExpression derefExp : deref) {
 				if (derefExp instanceof Variable) {
 					Variable var = (Variable) derefExp;
-					for (Type t : var.getRuntimeTypes(types))
+					for (Type t : oracle.getRuntimeTypesOf(var, pp, oracle))
 						if (t.isPointerType()) {
 							Type inner = t.asPointerType().getInnerType();
 							HeapLocation loc = new HeapLocation(inner, inner.toString(), true,
 									var.getCodeLocation());
-							loc.setRuntimeTypes(Collections.singleton(inner));
-
 							MemoryPointer pointer = new MemoryPointer(t, loc, var.getCodeLocation());
 							result.add(pointer);
 						}
 				}
 			}
 
-			return new ExpressionSet<>(result);
+			return new ExpressionSet(result);
 		}
+	}
+
+	@Override
+	public boolean knowsIdentifier(
+			Identifier id) {
+		return false;
 	}
 }

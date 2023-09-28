@@ -4,9 +4,6 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -17,7 +14,6 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,35 +37,40 @@ public class IMPArrayAccess extends BinaryExpression {
 	 *                       will receive the access
 	 * @param location   the expression representing the accessed element
 	 */
-	public IMPArrayAccess(CFG cfg, String sourceFile, int line, int col, Expression container, Expression location) {
+	public IMPArrayAccess(
+			CFG cfg,
+			String sourceFile,
+			int line,
+			int col,
+			Expression container,
+			Expression location) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "[]", container, location);
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> binarySemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Set<Type> arraytypes = new HashSet<>();
-		TypeSystem types = getProgram().getTypes();
-		for (Type t : left.getRuntimeTypes(types))
+		for (Type t : state.getState().getRuntimeTypesOf(left, this, state.getState()))
 			if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
-				arraytypes.add(t.asPointerType().getInnerType().asArrayType());
+				arraytypes.add(t.asPointerType().getInnerType());
 
 		if (arraytypes.isEmpty())
 			return state.bottom();
 
 		ArrayType arraytype = Type.commonSupertype(arraytypes, getStaticType()).asArrayType();
 		HeapDereference container = new HeapDereference(arraytype, left, getLocation());
-		container.setRuntimeTypes(arraytypes);
+		AccessChild elem = new AccessChild(
+				arraytype.getInnerType(),
+				container,
+				right,
+				getLocation());
 
-		return state.smallStepSemantics(new AccessChild(arraytype.getInnerType(), container, right, getLocation()),
-				this);
+		return state.smallStepSemantics(elem, this);
 	}
 }

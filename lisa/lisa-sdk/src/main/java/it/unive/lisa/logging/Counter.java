@@ -70,7 +70,13 @@ public final class Counter {
 	 * @param updateFactor the percentage of {@code cap} to use as interval
 	 *                         between different log updates
 	 */
-	public Counter(Logger logger, Level level, String message, String objects, int cap, double updateFactor) {
+	public Counter(
+			Logger logger,
+			Level level,
+			String message,
+			String objects,
+			int cap,
+			double updateFactor) {
 		this.level = level;
 		this.logging = false;
 		this.count = 0;

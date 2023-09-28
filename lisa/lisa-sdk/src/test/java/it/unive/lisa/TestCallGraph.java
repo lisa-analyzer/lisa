@@ -9,7 +9,9 @@ import java.util.Set;
 
 public class TestCallGraph extends BaseCallGraph {
 	@Override
-	public Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
+	public Collection<Type> getPossibleTypesOfReceiver(
+			Expression receiver,
+			Set<Type> types)
 			throws CallResolutionException {
 		return receiver.getStaticType().allInstances(receiver.getProgram().getTypes());
 	}

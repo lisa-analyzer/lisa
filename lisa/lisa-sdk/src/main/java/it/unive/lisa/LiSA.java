@@ -1,11 +1,7 @@
 package it.unive.lisa;
 
-import static it.unive.lisa.LiSAFactory.getDefaultFor;
-
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Application;
@@ -50,7 +46,8 @@ public class LiSA {
 	 * 
 	 * @param conf the configuration of the analysis to run
 	 */
-	public LiSA(LiSAConfiguration conf) {
+	public LiSA(
+			LiSAConfiguration conf) {
 		this.conf = conf;
 		this.fileManager = new FileManager(conf.workdir);
 	}
@@ -66,32 +63,13 @@ public class LiSA {
 	 * @throws AnalysisException if anything goes wrong during the analysis
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public LiSAReport run(Program... programs) throws AnalysisException {
+	public LiSAReport run(
+			Program... programs)
+			throws AnalysisException {
 		LOG.info(conf.toString());
 
 		DateTime start = new DateTime();
-
-		CallGraph callGraph;
-		try {
-			callGraph = conf.callGraph == null ? getDefaultFor(CallGraph.class) : conf.callGraph;
-			if (conf.callGraph == null)
-				LOG.warn("No call graph set for this analysis, defaulting to {}", callGraph.getClass().getSimpleName());
-		} catch (AnalysisSetupException e) {
-			throw new AnalysisExecutionException("Unable to create default call graph", e);
-		}
-
-		InterproceduralAnalysis interproc;
-		try {
-			interproc = conf.interproceduralAnalysis == null ? getDefaultFor(InterproceduralAnalysis.class)
-					: conf.interproceduralAnalysis;
-			if (conf.interproceduralAnalysis == null)
-				LOG.warn("No interprocedural analysis set for this analysis, defaulting to {}",
-						interproc.getClass().getSimpleName());
-		} catch (AnalysisSetupException e) {
-			throw new AnalysisExecutionException("Unable to create default interprocedural analysis", e);
-		}
-
-		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.abstractState);
+		LiSARunner runner = new LiSARunner(conf, conf.interproceduralAnalysis, conf.callGraph, conf.abstractState);
 		Application app = new Application(programs);
 		Collection<Warning> warnings;
 

@@ -21,7 +21,8 @@ import java.util.function.BiFunction;
  * @param <E> the type of {@link Edge}s in this graph
  */
 public abstract class BaseGraph<G extends BaseGraph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>>
-		implements Graph<G, N, E> {
+		implements
+		Graph<G, N, E> {
 
 	/**
 	 * The adjacency matrix of this graph, mapping nodes to the collection of
@@ -51,7 +52,9 @@ public abstract class BaseGraph<G extends BaseGraph<G, N, E>, N extends Node<G, 
 	 * @param adjacencyMatrix the matrix containing all the nodes and the edges
 	 *                            that will be part of this graph
 	 */
-	protected BaseGraph(Collection<N> entrypoints, AdjacencyMatrix<G, N, E> adjacencyMatrix) {
+	protected BaseGraph(
+			Collection<N> entrypoints,
+			AdjacencyMatrix<G, N, E> adjacencyMatrix) {
 		this.adjacencyMatrix = adjacencyMatrix;
 		this.entrypoints = entrypoints;
 	}
@@ -61,7 +64,8 @@ public abstract class BaseGraph<G extends BaseGraph<G, N, E>, N extends Node<G, 
 	 * 
 	 * @param other the original graph
 	 */
-	protected BaseGraph(G other) {
+	protected BaseGraph(
+			G other) {
 		this.adjacencyMatrix = new AdjacencyMatrix<>(other.adjacencyMatrix);
 		this.entrypoints = new ArrayList<>(other.entrypoints);
 	}
@@ -91,19 +95,23 @@ public abstract class BaseGraph<G extends BaseGraph<G, N, E>, N extends Node<G, 
 	}
 
 	@Override
-	public void addNode(N node) {
+	public void addNode(
+			N node) {
 		addNode(node, false);
 	}
 
 	@Override
-	public void addNode(N node, boolean entrypoint) {
+	public void addNode(
+			N node,
+			boolean entrypoint) {
 		adjacencyMatrix.addNode(node);
 		if (entrypoint)
 			this.entrypoints.add(node);
 	}
 
 	@Override
-	public void addEdge(E edge) {
+	public void addEdge(
+			E edge) {
 		adjacencyMatrix.addEdge(edge);
 	}
 
@@ -118,52 +126,64 @@ public abstract class BaseGraph<G extends BaseGraph<G, N, E>, N extends Node<G, 
 	}
 
 	@Override
-	public boolean containsNode(N node) {
+	public boolean containsNode(
+			N node) {
 		return adjacencyMatrix.containsNode(node);
 	}
 
 	@Override
-	public boolean containsEdge(E edge) {
+	public boolean containsEdge(
+			E edge) {
 		return adjacencyMatrix.containsEdge(edge);
 	}
 
 	@Override
-	public E getEdgeConnecting(N source, N destination) {
+	public E getEdgeConnecting(
+			N source,
+			N destination) {
 		return adjacencyMatrix.getEdgeConnecting(source, destination);
 	}
 
 	@Override
-	public Collection<E> getEdgesConnecting(N source, N destination) {
+	public Collection<E> getEdgesConnecting(
+			N source,
+			N destination) {
 		return adjacencyMatrix.getEdgesConnecting(source, destination);
 	}
 
 	@Override
-	public Collection<E> getIngoingEdges(N node) {
+	public Collection<E> getIngoingEdges(
+			N node) {
 		return adjacencyMatrix.getIngoingEdges(node);
 	}
 
 	@Override
-	public Collection<E> getOutgoingEdges(N node) {
+	public Collection<E> getOutgoingEdges(
+			N node) {
 		return adjacencyMatrix.getOutgoingEdges(node);
 	}
 
 	@Override
-	public Collection<N> followersOf(N node) {
+	public Collection<N> followersOf(
+			N node) {
 		return adjacencyMatrix.followersOf(node);
 	}
 
 	@Override
-	public Collection<N> predecessorsOf(N node) {
+	public Collection<N> predecessorsOf(
+			N node) {
 		return adjacencyMatrix.predecessorsOf(node);
 	}
 
 	@Override
-	public SerializableGraph toSerializableGraph(BiFunction<G, N, SerializableValue> descriptionGenerator) {
+	public SerializableGraph toSerializableGraph(
+			BiFunction<G, N, SerializableValue> descriptionGenerator) {
 		throw new UnsupportedOperationException(getClass().getName() + " does not provide a serialization logic");
 	}
 
 	@Override
-	public boolean isEqualTo(G graph) {
+	public boolean isEqualTo(
+			G graph) {
 		if (this == graph)
 			return true;
 		if (graph == null)

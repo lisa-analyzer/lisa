@@ -1,14 +1,15 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.VariableLift;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.representation.ObjectRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Map;
 
 /**
@@ -21,8 +22,10 @@ import java.util.Map;
  * @param <T> the type of {@link InferredValue} in this inference system
  */
 public class InferenceSystem<T extends InferredValue<T>>
-		extends VariableLift<InferenceSystem<T>, ValueExpression, T>
-		implements ValueDomain<InferenceSystem<T>> {
+		extends
+		VariableLift<InferenceSystem<T>, ValueExpression, T>
+		implements
+		ValueDomain<InferenceSystem<T>> {
 
 	private final T state;
 
@@ -32,7 +35,8 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 * @param domain a singleton instance to be used during semantic operations
 	 *                   to retrieve top and bottom values
 	 */
-	public InferenceSystem(T domain) {
+	public InferenceSystem(
+			T domain) {
 		super(domain);
 		state = domain.bottom();
 	}
@@ -44,7 +48,9 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 * @param other the inference system to copy
 	 * @param state the new execution state
 	 */
-	public InferenceSystem(InferenceSystem<T> other, T state) {
+	public InferenceSystem(
+			InferenceSystem<T> other,
+			T state) {
 		this(other.lattice, other.function, state);
 	}
 
@@ -60,31 +66,35 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 *                     new environment; can be {@code null}
 	 * @param state    the execution state after the last computed expression
 	 */
-	public InferenceSystem(T domain, Map<Identifier, T> function, T state) {
+	public InferenceSystem(
+			T domain,
+			Map<Identifier, T> function,
+			T state) {
 		super(domain, function);
 		this.state = state;
 	}
 
 	@Override
-	public InferenceSystem<T> mk(T lattice, Map<Identifier, T> function) {
+	public InferenceSystem<T> mk(
+			T lattice,
+			Map<Identifier, T> function) {
 		return new InferenceSystem<>(lattice, function, state);
 	}
 
 	@Override
-	public InferenceSystem<T> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
+	public InferenceSystem<T> assign(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
-		if (isBottom())
-			return this;
-
-		// If id cannot be tracked by the underlying
-		// lattice, return this
-		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
+		if (isBottom() || !lattice.canProcess(expression, pp, oracle))
 			return this;
 
 		Map<Identifier, T> func = mkNewFunction(function, false);
-		InferredPair<T> eval = lattice.eval(expression, this, pp);
+		InferredPair<T> eval = lattice.eval(expression, this, pp, oracle);
 		T value = eval.getInferred();
-		T v = lattice.variable(id, pp);
+		T v = lattice.fixedVariable(id, pp, oracle);
 		if (!v.isBottom())
 			// some domains might provide fixed representations
 			// for some variables
@@ -108,26 +118,34 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public InferenceSystem<T> smallStepSemantics(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (isBottom())
 			return this;
-		return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, pp).getState());
+		return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, pp, oracle).getState());
 	}
 
 	@Override
-	public InferenceSystem<T> assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest)
+	public InferenceSystem<T> assume(
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (isBottom())
 			return this;
 
-		Satisfiability sat = lattice.satisfies(expression, this, src);
+		Satisfiability sat = lattice.satisfies(expression, this, src, oracle);
 		if (sat == Satisfiability.NOT_SATISFIED)
 			return bottom();
 
 		if (sat == Satisfiability.SATISFIED)
-			return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, src).getState());
+			return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, src, oracle).getState());
 
-		return lattice.assume(this, expression, src, dest);
+		return lattice.assume(this, expression, src, dest, oracle);
 	}
 
 	/**
@@ -135,13 +153,18 @@ public class InferenceSystem<T extends InferredValue<T>>
 	 * 
 	 * @param expression the expression to evaluate
 	 * @param pp         the program point where the evaluation happens
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return the abstract result of the evaluation
 	 * 
 	 * @throws SemanticException if an error happens during the evaluation
 	 */
-	public T eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
-		return lattice.eval(expression, this, pp).getInferred();
+	public T eval(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return lattice.eval(expression, this, pp, oracle).getInferred();
 	}
 
 	@Override
@@ -165,34 +188,41 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> lubAux(InferenceSystem<T> other)
+	public InferenceSystem<T> lubAux(
+			InferenceSystem<T> other)
 			throws SemanticException {
-		InferenceSystem<T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
+		InferenceSystem<T> newEnv = super.lubAux(other);
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.lub(other.state));
 	}
 
 	@Override
-	public InferenceSystem<T> wideningAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<
-				T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+	public InferenceSystem<T> wideningAux(
+			InferenceSystem<T> other)
+			throws SemanticException {
+		InferenceSystem<T> newEnv = super.wideningAux(other);
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.widening(other.state));
 	}
 
 	@Override
-	public InferenceSystem<T> glbAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+	public InferenceSystem<T> glbAux(
+			InferenceSystem<T> other)
+			throws SemanticException {
+		InferenceSystem<T> newEnv = super.glbAux(other);
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.glb(other.state));
 	}
 
 	@Override
-	public InferenceSystem<T> narrowingAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<
-				T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
+	public InferenceSystem<T> narrowingAux(
+			InferenceSystem<T> other)
+			throws SemanticException {
+		InferenceSystem<T> newEnv = super.narrowingAux(other);
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, state.narrowing(other.state));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(InferenceSystem<T> other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			InferenceSystem<T> other)
+			throws SemanticException {
 		if (!super.lessOrEqualAux(other))
 			return false;
 
@@ -208,7 +238,8 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -225,7 +256,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom() || isTop())
 			return super.representation();
 

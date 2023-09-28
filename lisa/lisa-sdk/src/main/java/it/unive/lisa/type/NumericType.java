@@ -87,7 +87,8 @@ public interface NumericType extends Type {
 	 * 
 	 * @return whether or not the two instances represent the same type
 	 */
-	default boolean sameNumericTypes(NumericType other) {
+	default boolean sameNumericTypes(
+			NumericType other) {
 		if (is8Bits() != other.is8Bits())
 			return false;
 		if (is16Bits() != other.is16Bits())
@@ -113,7 +114,8 @@ public interface NumericType extends Type {
 	 * 
 	 * @return the supertype between the two
 	 */
-	default NumericType supertype(NumericType other) {
+	default NumericType supertype(
+			NumericType other) {
 		if (is8Bits() && (other.is16Bits() || other.is32Bits() || other.is64Bits()))
 			return other;
 		if (other.is8Bits() && (is16Bits() || is32Bits() || is64Bits()))
@@ -176,7 +178,9 @@ public interface NumericType extends Type {
 	 * 
 	 * @return the set of possible runtime types
 	 */
-	public static Set<Type> commonNumericalType(Set<Type> left, Set<Type> right) {
+	public static Set<Type> commonNumericalType(
+			Set<Type> left,
+			Set<Type> right) {
 		Set<Type> lfiltered = left.stream().filter(type -> type.isNumericType() || type.isUntyped())
 				.collect(Collectors.toSet());
 		Set<Type> rfiltered = right.stream().filter(type -> type.isNumericType() || type.isUntyped())

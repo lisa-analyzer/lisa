@@ -45,7 +45,9 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * @param low  the lower bound
 	 * @param high the upper bound
 	 */
-	public IntInterval(int low, int high) {
+	public IntInterval(
+			int low,
+			int high) {
 		this(new MathNumber(low), new MathNumber(high));
 	}
 
@@ -57,7 +59,9 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * @param low  the lower bound (if {@code null}, -inf will be used)
 	 * @param high the upper bound (if {@code null}, +inf will be used)
 	 */
-	public IntInterval(Integer low, Integer high) {
+	public IntInterval(
+			Integer low,
+			Integer high) {
 		this(low == null ? MathNumber.MINUS_INFINITY : new MathNumber(low),
 				high == null ? MathNumber.PLUS_INFINITY : new MathNumber(high));
 	}
@@ -70,7 +74,9 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * @param low  the lower bound
 	 * @param high the upper bound
 	 */
-	public IntInterval(MathNumber low, MathNumber high) {
+	public IntInterval(
+			MathNumber low,
+			MathNumber high) {
 		if (low.isNaN() || high.isNaN()) {
 			this.low = MathNumber.NaN;
 			this.high = MathNumber.NaN;
@@ -169,11 +175,13 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean is(int n) {
+	public boolean is(
+			int n) {
 		return isSingleton() && low.is(n);
 	}
 
-	private static IntInterval cacheAndRound(IntInterval i) {
+	private static IntInterval cacheAndRound(
+			IntInterval i) {
 		if (i.is(0))
 			return ZERO;
 		if (i.is(1))
@@ -190,7 +198,8 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * 
 	 * @return {@code this + other}
 	 */
-	public IntInterval plus(IntInterval other) {
+	public IntInterval plus(
+			IntInterval other) {
 		if (isInfinity() || other.isInfinity())
 			return INFINITY;
 
@@ -204,14 +213,16 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * 
 	 * @return {@code this - other}
 	 */
-	public IntInterval diff(IntInterval other) {
+	public IntInterval diff(
+			IntInterval other) {
 		if (isInfinity() || other.isInfinity())
 			return INFINITY;
 
 		return cacheAndRound(new IntInterval(low.subtract(other.high), high.subtract(other.low)));
 	}
 
-	private static MathNumber min(MathNumber... nums) {
+	private static MathNumber min(
+			MathNumber... nums) {
 		if (nums.length == 0)
 			throw new IllegalArgumentException("No numbers provided");
 
@@ -222,7 +233,8 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 		return min;
 	}
 
-	private static MathNumber max(MathNumber... nums) {
+	private static MathNumber max(
+			MathNumber... nums) {
 		if (nums.length == 0)
 			throw new IllegalArgumentException("No numbers provided");
 
@@ -241,7 +253,8 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * 
 	 * @return {@code this * other}
 	 */
-	public IntInterval mul(IntInterval other) {
+	public IntInterval mul(
+			IntInterval other) {
 		if (is(0) || other.is(0))
 			return ZERO;
 		if (isInfinity() || other.isInfinity())
@@ -274,7 +287,10 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 *                                 {@code errorOnZero} is set to
 	 *                                 {@code true}
 	 */
-	public IntInterval div(IntInterval other, boolean ignoreZero, boolean errorOnZero) {
+	public IntInterval div(
+			IntInterval other,
+			boolean ignoreZero,
+			boolean errorOnZero) {
 		if (errorOnZero && (other.is(0) || other.includes(ZERO)))
 			throw new ArithmeticException("IntInterval divide by zero");
 
@@ -310,7 +326,8 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * 
 	 * @return {@code true} if it is included, {@code false} otherwise
 	 */
-	public boolean includes(IntInterval other) {
+	public boolean includes(
+			IntInterval other) {
 		return low.compareTo(other.low) <= 0 && high.compareTo(other.high) >= 0;
 	}
 
@@ -321,7 +338,8 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	 * 
 	 * @return {@code true} if those intersects, {@code false} otherwise
 	 */
-	public boolean intersects(IntInterval other) {
+	public boolean intersects(
+			IntInterval other) {
 		return includes(other) || other.includes(this)
 				|| (high.compareTo(other.low) >= 0 && high.compareTo(other.high) <= 0)
 				|| (other.high.compareTo(low) >= 0 && other.high.compareTo(high) <= 0);
@@ -337,7 +355,8 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -375,7 +394,8 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	}
 
 	@Override
-	public int compareTo(IntInterval o) {
+	public int compareTo(
+			IntInterval o) {
 		int cmp;
 		if ((cmp = low.compareTo(o.low)) != 0)
 			return cmp;

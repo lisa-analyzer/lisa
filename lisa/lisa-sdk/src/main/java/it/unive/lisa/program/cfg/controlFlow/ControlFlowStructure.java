@@ -32,7 +32,9 @@ public abstract class ControlFlowStructure {
 	 * @param condition     the condition of the structure
 	 * @param firstFollower the first statement after the structure exits
 	 */
-	protected ControlFlowStructure(NodeList<CFG, Statement, Edge> cfgMatrix, Statement condition,
+	protected ControlFlowStructure(
+			NodeList<CFG, Statement, Edge> cfgMatrix,
+			Statement condition,
 			Statement firstFollower) {
 		this.cfgMatrix = cfgMatrix;
 		this.condition = condition;
@@ -64,7 +66,8 @@ public abstract class ControlFlowStructure {
 	 * 
 	 * @param firstFollower the new follower
 	 */
-	public void setFirstFollower(Statement firstFollower) {
+	public void setFirstFollower(
+			Statement firstFollower) {
 		this.firstFollower = firstFollower;
 	}
 
@@ -98,7 +101,8 @@ public abstract class ControlFlowStructure {
 	 * 
 	 * @return {@code true} if {@code st} is in the body of this structure
 	 */
-	public abstract boolean contains(Statement st);
+	public abstract boolean contains(
+			Statement st);
 
 	/**
 	 * Simplifies this structure, removing all {@link NoOp}s from its body.
@@ -117,7 +121,8 @@ public abstract class ControlFlowStructure {
 	 * @return the minimum distance, in terms of number of edges to traverse,
 	 *             between the condition and the given node
 	 */
-	public int distance(Statement st) {
+	public int distance(
+			Statement st) {
 		if (st == condition)
 			return 0;
 
@@ -164,7 +169,8 @@ public abstract class ControlFlowStructure {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

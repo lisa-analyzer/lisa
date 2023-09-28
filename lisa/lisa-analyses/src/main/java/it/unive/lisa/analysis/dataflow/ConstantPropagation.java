@@ -2,9 +2,6 @@ package it.unive.lisa.analysis.dataflow;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.ListRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -19,6 +16,9 @@ import it.unive.lisa.symbolic.value.operator.ModuloOperator;
 import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.util.representation.ListRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,7 +31,8 @@ import java.util.Set;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ConstantPropagation
-		implements DataflowElement<DefiniteForwardDataflowDomain<ConstantPropagation>, ConstantPropagation> {
+		implements
+		DataflowElement<DefiniteForwardDataflowDomain<ConstantPropagation>, ConstantPropagation> {
 
 	private final Identifier id;
 	private final Integer constant;
@@ -49,7 +50,9 @@ public class ConstantPropagation
 	 * @param id the constant variable
 	 * @param v  the constant value
 	 */
-	public ConstantPropagation(Identifier id, Integer v) {
+	public ConstantPropagation(
+			Identifier id,
+			Integer v) {
 		this.id = id;
 		this.constant = v;
 	}
@@ -64,7 +67,9 @@ public class ConstantPropagation
 		return Collections.singleton(id);
 	}
 
-	private static Integer eval(SymbolicExpression e, DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+	private static Integer eval(
+			SymbolicExpression e,
+			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 
 		if (e instanceof Constant) {
 			Constant c = (Constant) e;
@@ -114,7 +119,10 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public Collection<ConstantPropagation> gen(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<ConstantPropagation> gen(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 		Set<ConstantPropagation> gen = new HashSet<>();
 
@@ -126,13 +134,18 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public Collection<ConstantPropagation> gen(ValueExpression expression, ProgramPoint pp,
+	public Collection<ConstantPropagation> gen(
+			ValueExpression expression,
+			ProgramPoint pp,
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public Collection<ConstantPropagation> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<ConstantPropagation> kill(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 		Collection<ConstantPropagation> result = new HashSet<>();
 
@@ -144,7 +157,9 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public Collection<ConstantPropagation> kill(ValueExpression expression, ProgramPoint pp,
+	public Collection<ConstantPropagation> kill(
+			ValueExpression expression,
+			ProgramPoint pp,
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 		return Collections.emptyList();
 	}
@@ -159,7 +174,8 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -181,17 +197,21 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new ListRepresentation(new StringRepresentation(id), new StringRepresentation(constant));
 	}
 
 	@Override
-	public ConstantPropagation pushScope(ScopeToken scope) throws SemanticException {
+	public ConstantPropagation pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return new ConstantPropagation((Identifier) id.pushScope(scope), constant);
 	}
 
 	@Override
-	public ConstantPropagation popScope(ScopeToken scope) throws SemanticException {
+	public ConstantPropagation popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		if (!(id instanceof OutOfScopeIdentifier))
 			return this;
 

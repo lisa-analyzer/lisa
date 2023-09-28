@@ -53,13 +53,18 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 	 * @param delegate the strategy to delegate the match after the actual
 	 *                     parameters have been shuffled
 	 */
-	public PythonLikeMatchingStrategy(FixedOrderMatchingStrategy delegate) {
+	public PythonLikeMatchingStrategy(
+			FixedOrderMatchingStrategy delegate) {
 		this.delegate = delegate;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean matches(Call call, Parameter[] formals, Expression[] actuals, Set<Type>[] types) {
+	public boolean matches(
+			Call call,
+			Parameter[] formals,
+			Expression[] actuals,
+			Set<Type>[] types) {
 		Expression[] slots = new Expression[formals.length];
 		Set<Type>[] slotTypes = new Set[formals.length];
 

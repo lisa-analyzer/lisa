@@ -14,7 +14,8 @@ public class QualifierSymbol implements Symbol {
 	 * 
 	 * @param qualifier the qualifier represented by this symbol
 	 */
-	public QualifierSymbol(String qualifier) {
+	public QualifierSymbol(
+			String qualifier) {
 		this.qualifier = qualifier;
 	}
 
@@ -36,7 +37,8 @@ public class QualifierSymbol implements Symbol {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

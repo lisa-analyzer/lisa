@@ -25,7 +25,10 @@ public class Loop extends ControlFlowStructure {
 	 * @param firstFollower the first statement after the loop exits
 	 * @param body          the statements in the loop body
 	 */
-	public Loop(NodeList<CFG, Statement, Edge> cfgMatrix, Statement condition, Statement firstFollower,
+	public Loop(
+			NodeList<CFG, Statement, Edge> cfgMatrix,
+			Statement condition,
+			Statement firstFollower,
 			Collection<Statement> body) {
 		super(cfgMatrix, condition, firstFollower);
 		this.body = body;
@@ -46,7 +49,8 @@ public class Loop extends ControlFlowStructure {
 	}
 
 	@Override
-	public boolean contains(Statement st) {
+	public boolean contains(
+			Statement st) {
 		return body.contains(st);
 	}
 
@@ -64,7 +68,8 @@ public class Loop extends ControlFlowStructure {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

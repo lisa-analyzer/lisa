@@ -16,7 +16,9 @@ public class EnumAnnotationValue implements BasicAnnotationValue {
 	 * @param name  the name of the enum
 	 * @param field the field of the enum
 	 */
-	public EnumAnnotationValue(String name, String field) {
+	public EnumAnnotationValue(
+			String name,
+			String field) {
 		this.name = name;
 		this.field = field;
 	}
@@ -31,7 +33,8 @@ public class EnumAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -58,7 +61,8 @@ public class EnumAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof EnumAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

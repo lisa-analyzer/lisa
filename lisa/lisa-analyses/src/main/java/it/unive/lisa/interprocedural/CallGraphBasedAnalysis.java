@@ -4,11 +4,8 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Application;
@@ -17,7 +14,6 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -26,16 +22,11 @@ import java.util.Set;
 /**
  * An interprocedural analysis based on a call graph.
  * 
- * @param <A> The abstract state of the analysis
- * @param <H> The heap domain
- * @param <V> The value domain
- * @param <T> The type domain
+ * @param <A> The {@link AbstractState} of the analysis
  */
-public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		implements InterproceduralAnalysis<A, H, V, T> {
+public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
+		implements
+		InterproceduralAnalysis<A> {
 
 	/**
 	 * The call graph used to resolve method calls.
@@ -63,14 +54,23 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	 * 
 	 * @param other the original analysis to copy
 	 */
-	protected CallGraphBasedAnalysis(CallGraphBasedAnalysis<A, H, V, T> other) {
+	protected CallGraphBasedAnalysis(
+			CallGraphBasedAnalysis<A> other) {
 		this.callgraph = other.callgraph;
 		this.app = other.app;
 		this.policy = other.policy;
 	}
 
 	@Override
-	public void init(Application app, CallGraph callgraph, OpenCallPolicy policy)
+	public boolean needsCallGraph() {
+		return true;
+	}
+
+	@Override
+	public void init(
+			Application app,
+			CallGraph callgraph,
+			OpenCallPolicy policy)
 			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.app = app;
@@ -78,7 +78,10 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+	public Call resolve(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			SymbolAliasing aliasing)
 			throws CallResolutionException {
 		return callgraph.resolve(call, types, aliasing);
 	}
@@ -94,9 +97,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	 * 
 	 * @throws SemanticException if the analysis fails
 	 */
-	public AnalysisState<A, H, V, T> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V, T> entryState, CFG cfg)
+	public AnalysisState<A> prepareEntryStateOfEntryPoint(
+			AnalysisState<A> entryState,
+			CFG cfg)
 			throws SemanticException {
-		AnalysisState<A, H, V, T> prepared = entryState;
+		AnalysisState<A> prepared = entryState;
 
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
 			Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(), arg.getLocation());
@@ -105,15 +110,15 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 		}
 
 		// the stack has to be empty
-		return new AnalysisState<>(prepared.getState(), new ExpressionSet<>(), new SymbolAliasing());
+		return new AnalysisState<>(prepared.getState(), new ExpressionSet());
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			OpenCall call,
-			AnalysisState<A, H, V, T> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
 			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}

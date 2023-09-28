@@ -1,0 +1,29 @@
+class arrays {
+
+	test() {
+		def arr = new int[5]; 
+		arr[0] = 0;
+		arr[1] = 1;
+		arr[2] = 2;
+		arr[3] = 3;
+		arr[4] = 4;
+		def x = arraylen(arr);
+		return x;
+    }
+
+	bitest() {
+		def a1 = new int[3]; 
+		a1[0] = 0;
+		a1[1] = 1;
+		a1[2] = 2;
+		
+		def a2 = new int[2]; 
+		a2[0] = 5;
+		a2[1] = 6;
+		
+		def x = arraylen(a1);
+		def y = arraylen(a2);
+		def z = x + y;
+		return z;
+    }
+}

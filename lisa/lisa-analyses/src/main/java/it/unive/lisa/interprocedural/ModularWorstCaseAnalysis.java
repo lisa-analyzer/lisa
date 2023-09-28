@@ -1,18 +1,13 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.AnalysisSetupException;
-import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -25,7 +20,6 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -40,16 +34,9 @@ import org.apache.logging.log4j.Logger;
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
  * 
- * @param <A> the abstract state of the analysis
- * @param <H> the heap domain
- * @param <V> the value domain
- * @param <T> the type domain
+ * @param <A> the {@link AbstractState} of the analysis
  */
-@FallbackImplementation
-public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
+public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements InterproceduralAnalysis<A> {
 
 	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
@@ -68,7 +55,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	/**
 	 * The cash of the fixpoints' results.
 	 */
-	private FixpointResults<A, H, V, T> results;
+	private FixpointResults<A> results;
 
 	/**
 	 * Builds the interprocedural analysis.
@@ -77,53 +64,61 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public void fixpoint(AnalysisState<A, H, V, T> entryState,
+	public boolean needsCallGraph() {
+		return false;
+	}
+
+	@Override
+	public void fixpoint(
+			AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
 		// new fixpoint iteration: restart
 		this.results = null;
 
-		Collection<CFG> all = new TreeSet<>((c1, c2) -> c1.getDescriptor().getLocation()
-				.compareTo(c2.getDescriptor().getLocation()));
+		Collection<CFG> all = new TreeSet<>((
+				c1,
+				c2) -> c1.getDescriptor().getLocation()
+						.compareTo(c2.getDescriptor().getLocation()));
 		all.addAll(app.getAllCFGs());
 
 		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
 				if (results == null) {
-					AnalyzedCFG<A, H, V, T> graph = conf.optimize
+					AnalyzedCFG<A> graph = conf.optimize
 							? new OptimizedAnalyzedCFG<>(cfg, ID, entryState.bottom(), this)
 							: new AnalyzedCFG<>(cfg, ID, entryState);
-					CFGResults<A, H, V, T> value = new CFGResults<>(graph);
+					CFGResults<A> value = new CFGResults<>(graph);
 					this.results = new FixpointResults<>(value.top());
 				}
 
-				AnalysisState<A, H, V, T> prepared = entryState;
+				AnalysisState<A> prepared = entryState;
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
-					Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(),
-							arg.getLocation());
+					Variable id = arg.toSymbolicVariable();
 					prepared = prepared.assign(id, new PushAny(arg.getStaticType(), arg.getLocation()),
 							cfg.getGenericProgramPoint());
 				}
 
 				results.putResult(cfg, ID, cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), conf, ID));
-			} catch (SemanticException | AnalysisSetupException e) {
+			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
 	}
 
 	@Override
-	public Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A>> getAnalysisResultsOf(
+			CFG cfg) {
 		return results.getState(cfg).getAll();
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
-			AnalysisState<A, H, V, T> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
 			throws SemanticException {
 		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(),
 				call.getTargetName(), call.getStaticType(), call.getParameters());
@@ -131,17 +126,20 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			OpenCall call,
-			AnalysisState<A, H, V, T> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
 			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}
 
 	@Override
-	public void init(Application app, CallGraph callgraph, OpenCallPolicy policy)
+	public void init(
+			Application app,
+			CallGraph callgraph,
+			OpenCallPolicy policy)
 			throws InterproceduralAnalysisException {
 		this.app = app;
 		this.policy = policy;
@@ -149,13 +147,16 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+	public Call resolve(
+			UnresolvedCall call,
+			Set<Type>[] types,
+			SymbolAliasing aliasing)
 			throws CallResolutionException {
 		return new OpenCall(call);
 	}
 
 	@Override
-	public FixpointResults<A, H, V, T> getFixpointResults() {
+	public FixpointResults<A> getFixpointResults() {
 		return results;
 	}
 }

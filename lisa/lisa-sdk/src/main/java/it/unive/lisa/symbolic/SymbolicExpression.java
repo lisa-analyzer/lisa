@@ -1,23 +1,24 @@
 package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A symbolic expression that can be evaluated by {@link SemanticDomain}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class SymbolicExpression {
+public abstract class SymbolicExpression implements ScopedObject<SymbolicExpression> {
 
 	/**
 	 * The code location of the statement that has generated this symbolic
@@ -32,18 +33,16 @@ public abstract class SymbolicExpression {
 	private final Type staticType;
 
 	/**
-	 * The runtime types of this expression
-	 */
-	private Set<Type> types;
-
-	/**
 	 * Builds the symbolic expression.
 	 * 
-	 * @param staticType the static type of this expression
+	 * @param staticType the static type of this expression, determined at its
+	 *                       construction
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	protected SymbolicExpression(Type staticType, CodeLocation location) {
+	protected SymbolicExpression(
+			Type staticType,
+			CodeLocation location) {
 		Objects.requireNonNull(staticType, "The static type of a symbolic expression cannot be null");
 		Objects.requireNonNull(location, "The location of a symbolic expression cannot be null");
 		this.staticType = staticType;
@@ -51,66 +50,15 @@ public abstract class SymbolicExpression {
 	}
 
 	/**
-	 * Yields the static type of this expression.
+	 * Yields the static type of this expression, as provided during
+	 * construction. The returned type should (but might not) be a supertype of
+	 * all the runtime types determined during the analysis, with the exception
+	 * of {@link HeapLocation}s representing more memory locations.
 	 * 
 	 * @return the static type
 	 */
 	public Type getStaticType() {
 		return staticType;
-	}
-
-	/**
-	 * Yields the runtime types of this expression. If
-	 * {@link #setRuntimeTypes(Set)} has never been called before, this method
-	 * will return all instances of the static type.
-	 * 
-	 * @param types the type system that knows about the types of the program
-	 *                  point where this method is called. If
-	 *                  {@link #hasRuntimeTypes()} returns {@code true}, this
-	 *                  parameter can be {@code null}
-	 * 
-	 * @return the runtime types
-	 */
-	public final Set<Type> getRuntimeTypes(TypeSystem types) {
-		if (this.types != null)
-			return this.types;
-		if (types == null)
-			throw new IllegalArgumentException("Cannot use a null type system if no runtime types are available");
-		return staticType.allInstances(types);
-	}
-
-	/**
-	 * Sets the runtime types to the given set of types.
-	 * 
-	 * @param types the runtime types
-	 */
-	public void setRuntimeTypes(Set<Type> types) {
-		this.types = types;
-	}
-
-	/**
-	 * Yields {@code true} if this expression's runtime types have been set
-	 * (even to the empty set). If this method returns {@code false}, then
-	 * {@link #getDynamicType()} will yield the same as
-	 * {@link #getStaticType()}, and {@link #getRuntimeTypes(TypeSystem)}
-	 * returns all possible instances of the static type.
-	 * 
-	 * @return whether or not runtime types are set for this expression
-	 */
-	public boolean hasRuntimeTypes() {
-		return types != null;
-	}
-
-	/**
-	 * Yields the dynamic type of this expression, that is, the most specific
-	 * common supertype of all its runtime types (available through
-	 * {@link #getRuntimeTypes(TypeSystem)}. If {@link #setRuntimeTypes(Set)}
-	 * has never been called before, this method will return the static type.
-	 * 
-	 * @return the dynamic type of this expression
-	 */
-	public final Type getDynamicType() {
-		return Type.commonSupertype(types, staticType);
 	}
 
 	/**
@@ -126,7 +74,10 @@ public abstract class SymbolicExpression {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract SymbolicExpression pushScope(ScopeToken token) throws SemanticException;
+	@Override
+	public abstract SymbolicExpression pushScope(
+			ScopeToken token)
+			throws SemanticException;
 
 	/**
 	 * Pops the scope identified by the given token from the expression. This
@@ -144,7 +95,10 @@ public abstract class SymbolicExpression {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract SymbolicExpression popScope(ScopeToken token) throws SemanticException;
+	@Override
+	public abstract SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException;
 
 	/**
 	 * Accepts an {@link ExpressionVisitor}, visiting this expression
@@ -159,7 +113,10 @@ public abstract class SymbolicExpression {
 	 * 
 	 * @throws SemanticException if an error occurs during the visiting
 	 */
-	public abstract <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException;
+	public abstract <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException;
 
 	@Override
 	public int hashCode() {
@@ -170,7 +127,8 @@ public abstract class SymbolicExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -200,4 +158,15 @@ public abstract class SymbolicExpression {
 
 	@Override
 	public abstract String toString();
+
+	/**
+	 * Yields whether or not this expression can be considered safe to be
+	 * processed by domains that only focus on {@link ValueExpression}s, or if
+	 * it might need rewriting. This is a definite answer: if this method
+	 * returns {@code true}, than this expression is sure to not contain
+	 * anything that deals with, or points to, the memory.
+	 * 
+	 * @return whether or not this expression might need rewriting
+	 */
+	public abstract boolean mightNeedRewriting();
 }

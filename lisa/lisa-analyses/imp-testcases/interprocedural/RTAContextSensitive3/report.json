@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_A.A(A__this)_1679709079.json", "untyped_A.identity(A__this,_untyped_i)_1679722781.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_1679727400.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_1679732267.json", "untyped_tests.main(tests__this).json" ],
   "info" : {
     "cfgs" : "6",
-    "duration" : "110ms",
-    "end" : "2023-04-20T12:45:24.681+02:00",
+    "duration" : "75ms",
+    "end" : "2023-09-07T11:45:44.334+02:00",
     "expressions" : "32",
     "files" : "5",
     "globals" : "0",
     "members" : "6",
     "programs" : "1",
-    "start" : "2023-04-20T12:45:24.571+02:00",
+    "start" : "2023-09-07T11:45:44.259+02:00",
     "statements" : "16",
     "units" : "2",
-    "version" : "0.1b7",
+    "version" : "0.1b8",
     "warnings" : "0"
   },
   "configuration" : {
@@ -31,6 +31,7 @@
     "serializeInputs" : "false",
     "serializeResults" : "true",
     "syntacticChecks" : "",
+    "useWideningPoints" : "true",
     "wideningThreshold" : "5",
     "workdir" : "test-outputs/interprocedural/RTAContextSensitive3"
   }

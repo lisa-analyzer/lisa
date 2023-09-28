@@ -28,7 +28,10 @@ public class MemoryPointer extends Identifier {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public MemoryPointer(Type staticType, HeapLocation loc, CodeLocation location) {
+	public MemoryPointer(
+			Type staticType,
+			HeapLocation loc,
+			CodeLocation location) {
 		this(staticType, loc, new Annotations(), location);
 	}
 
@@ -41,7 +44,11 @@ public class MemoryPointer extends Identifier {
 	 * @param location    the code location of the statement that has generated
 	 *                        this expression
 	 */
-	public MemoryPointer(Type staticType, HeapLocation loc, Annotations annotations, CodeLocation location) {
+	public MemoryPointer(
+			Type staticType,
+			HeapLocation loc,
+			Annotations annotations,
+			CodeLocation location) {
 		// A pointer identifier is always a strong identifier
 		super(staticType, loc.getName(), false, annotations, location);
 		this.loc = loc;
@@ -53,12 +60,15 @@ public class MemoryPointer extends Identifier {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
 		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return null;
 	}
 
@@ -72,7 +82,10 @@ public class MemoryPointer extends Identifier {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
 	}
 

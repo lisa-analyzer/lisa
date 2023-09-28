@@ -23,7 +23,9 @@ public class InterproceduralAnalysisException extends Exception {
 	 * @param message the message of this exception
 	 * @param cause   the cause of this exception
 	 */
-	public InterproceduralAnalysisException(String message, Throwable cause) {
+	public InterproceduralAnalysisException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -32,7 +34,8 @@ public class InterproceduralAnalysisException extends Exception {
 	 *
 	 * @param message the message of this exception
 	 */
-	public InterproceduralAnalysisException(String message) {
+	public InterproceduralAnalysisException(
+			String message) {
 		super(message);
 	}
 
@@ -41,7 +44,8 @@ public class InterproceduralAnalysisException extends Exception {
 	 *
 	 * @param cause the cause of this exception
 	 */
-	public InterproceduralAnalysisException(Throwable cause) {
+	public InterproceduralAnalysisException(
+			Throwable cause) {
 		super(cause);
 	}
 

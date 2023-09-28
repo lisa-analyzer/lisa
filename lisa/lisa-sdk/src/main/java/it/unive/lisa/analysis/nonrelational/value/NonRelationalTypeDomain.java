@@ -17,7 +17,8 @@ import java.util.Set;
  * @param <T> the concrete type of the domain
  */
 public interface NonRelationalTypeDomain<T extends NonRelationalTypeDomain<T>>
-		extends NonRelationalDomain<T, ValueExpression, TypeEnvironment<T>> {
+		extends
+		NonRelationalDomain<T, ValueExpression, TypeEnvironment<T>> {
 
 	/**
 	 * Yields the set containing the types held by this instance.

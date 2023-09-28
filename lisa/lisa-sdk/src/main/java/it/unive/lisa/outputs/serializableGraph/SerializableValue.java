@@ -33,7 +33,8 @@ public abstract class SerializableValue implements Comparable<SerializableValue>
 	 * 
 	 * @param properties the additional properties to use as metadata
 	 */
-	protected SerializableValue(SortedMap<String, String> properties) {
+	protected SerializableValue(
+			SortedMap<String, String> properties) {
 		this.properties = properties;
 	}
 
@@ -53,7 +54,9 @@ public abstract class SerializableValue implements Comparable<SerializableValue>
 	 * @param key   the key of the property
 	 * @param value the value of the property
 	 */
-	public void setProperty(String key, String value) {
+	public void setProperty(
+			String key,
+			String value) {
 		properties.put(key, value);
 	}
 
@@ -76,7 +79,8 @@ public abstract class SerializableValue implements Comparable<SerializableValue>
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -93,7 +97,8 @@ public abstract class SerializableValue implements Comparable<SerializableValue>
 	}
 
 	@Override
-	public int compareTo(SerializableValue o) {
+	public int compareTo(
+			SerializableValue o) {
 		int cmp;
 		if ((cmp = Integer.compare(properties.keySet().size(), o.properties.keySet().size())) != 0)
 			return cmp;

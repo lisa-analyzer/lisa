@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.nonrelational;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -25,7 +26,8 @@ import java.util.Map;
 public abstract class Environment<M extends Environment<M, E, T>,
 		E extends SymbolicExpression,
 		T extends NonRelationalDomain<T, E, M>>
-		extends VariableLift<M, E, T> {
+		extends
+		VariableLift<M, E, T> {
 
 	/**
 	 * Builds an empty environment.
@@ -33,7 +35,8 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 * @param domain a singleton instance to be used during semantic operations
 	 *                   to retrieve top and bottom values
 	 */
-	public Environment(T domain) {
+	public Environment(
+			T domain) {
 		super(domain);
 	}
 
@@ -48,29 +51,34 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 * @param function the function representing the mapping contained in the
 	 *                     new environment; can be {@code null}
 	 */
-	public Environment(T domain, Map<Identifier, T> function) {
+	public Environment(
+			T domain,
+			Map<Identifier, T> function) {
 		super(domain, function);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M assign(Identifier id, E expression, ProgramPoint pp) throws SemanticException {
+	public M assign(
+			Identifier id,
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (isBottom())
 			return (M) this;
 
-		// If id cannot be tracked by the underlying
-		// lattice, return this
-		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
+		if (!lattice.canProcess(expression, pp, oracle))
 			return (M) this;
 
 		Map<Identifier, T> func = mkNewFunction(function, false);
-		T value = lattice.eval(expression, (M) this, pp);
-		T v = lattice.variable(id, pp);
+		T value = lattice.eval(expression, (M) this, pp, oracle);
+		T v = lattice.fixedVariable(id, pp, oracle);
 		if (!v.isBottom())
 			// some domains might provide fixed representations
 			// for some variables
 			value = v;
-		if (id.isWeak() && function != null && function.containsKey(id))
+		else if (id.isWeak() && function != null && function.containsKey(id))
 			// if we have a weak identifier for which we already have
 			// information, we we perform a weak assignment
 			value = value.lub(getState(id));
@@ -80,7 +88,11 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException {
+	public M smallStepSemantics(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		// environments do not change without assignments
 		return (M) this;
 	}
@@ -90,21 +102,31 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 * 
 	 * @param expression the expression to evaluate
 	 * @param pp         the program point where the evaluation happens
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return the abstract result of the evaluation
 	 * 
 	 * @throws SemanticException if an error happens during the evaluation
 	 */
 	@SuppressWarnings("unchecked")
-	public T eval(E expression, ProgramPoint pp) throws SemanticException {
-		return lattice.eval(expression, (M) this, pp);
+	public T eval(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return lattice.eval(expression, (M) this, pp, oracle);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+	public M assume(
+			E expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (isBottom())
 			return (M) this;
-		return lattice.assume((M) this, expression, src, dest);
+		return lattice.assume((M) this, expression, src, dest, oracle);
 	}
 }

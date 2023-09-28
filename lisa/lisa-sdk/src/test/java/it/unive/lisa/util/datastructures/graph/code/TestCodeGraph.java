@@ -12,17 +12,21 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 
 		private final int id;
 
-		public TestCodeNode(int id) {
+		public TestCodeNode(
+				int id) {
 			this.id = id;
 		}
 
 		@Override
-		public <V> boolean accept(GraphVisitor<TestCodeGraph, TestCodeNode, TestCodeEdge, V> visitor, V tool) {
+		public <V> boolean accept(
+				GraphVisitor<TestCodeGraph, TestCodeNode, TestCodeEdge, V> visitor,
+				V tool) {
 			return false;
 		}
 
 		@Override
-		public int setOffset(int offset) {
+		public int setOffset(
+				int offset) {
 			return offset;
 		}
 
@@ -40,7 +44,8 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)
@@ -54,7 +59,8 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 		}
 
 		@Override
-		public int compareTo(TestCodeNode o) {
+		public int compareTo(
+				TestCodeNode o) {
 			return id - o.id;
 		}
 
@@ -68,7 +74,9 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 
 		private final TestCodeNode source, destination;
 
-		public TestCodeEdge(TestCodeNode source, TestCodeNode destination) {
+		public TestCodeEdge(
+				TestCodeNode source,
+				TestCodeNode destination) {
 			this.source = source;
 			this.destination = destination;
 		}
@@ -84,7 +92,9 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 		}
 
 		@Override
-		public <V> boolean accept(GraphVisitor<TestCodeGraph, TestCodeNode, TestCodeEdge, V> visitor, V tool) {
+		public <V> boolean accept(
+				GraphVisitor<TestCodeGraph, TestCodeNode, TestCodeEdge, V> visitor,
+				V tool) {
 			return false;
 		}
 
@@ -94,7 +104,9 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 		}
 
 		@Override
-		public TestCodeEdge newInstance(TestCodeNode source, TestCodeNode destination) {
+		public TestCodeEdge newInstance(
+				TestCodeNode source,
+				TestCodeNode destination) {
 			return new TestCodeEdge(source, destination);
 		}
 
@@ -113,7 +125,8 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)
@@ -135,7 +148,8 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 		}
 
 		@Override
-		public int compareTo(TestCodeEdge o) {
+		public int compareTo(
+				TestCodeEdge o) {
 			if (source.id - o.source.id != 0)
 				return source.id - o.source.id;
 			return destination.id - o.destination.id;

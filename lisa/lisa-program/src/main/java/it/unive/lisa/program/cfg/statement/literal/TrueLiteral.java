@@ -18,7 +18,9 @@ public class TrueLiteral extends Literal<Boolean> {
 	 * @param cfg      the {@link CFG} where this literal lies
 	 * @param location the location where this literal is defined
 	 */
-	public TrueLiteral(CFG cfg, CodeLocation location) {
+	public TrueLiteral(
+			CFG cfg,
+			CodeLocation location) {
 		super(cfg, location, true, cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType());
 	}
 }

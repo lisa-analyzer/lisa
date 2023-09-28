@@ -20,7 +20,10 @@ public class Float32Literal extends Literal<Float> {
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public Float32Literal(CFG cfg, CodeLocation location, float value) {
+	public Float32Literal(
+			CFG cfg,
+			CodeLocation location,
+			float value) {
 		super(cfg, location, value, Float32Type.INSTANCE);
 	}
 }

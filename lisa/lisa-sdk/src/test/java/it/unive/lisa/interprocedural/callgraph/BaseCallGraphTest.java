@@ -37,34 +37,40 @@ public class BaseCallGraphTest {
 
 	private final class StrType implements StringType {
 		@Override
-		public Type commonSupertype(Type other) {
+		public Type commonSupertype(
+				Type other) {
 			return canBeAssignedTo(other) ? this : Untyped.INSTANCE;
 		}
 
 		@Override
-		public boolean canBeAssignedTo(Type other) {
+		public boolean canBeAssignedTo(
+				Type other) {
 			return other.getClass() == getClass();
 		}
 
 		@Override
-		public Set<Type> allInstances(TypeSystem types) {
+		public Set<Type> allInstances(
+				TypeSystem types) {
 			return Collections.singleton(this);
 		}
 	}
 
 	private final class BoolType implements BooleanType {
 		@Override
-		public Type commonSupertype(Type other) {
+		public Type commonSupertype(
+				Type other) {
 			return canBeAssignedTo(other) ? this : Untyped.INSTANCE;
 		}
 
 		@Override
-		public boolean canBeAssignedTo(Type other) {
+		public boolean canBeAssignedTo(
+				Type other) {
 			return other.getClass() == getClass();
 		}
 
 		@Override
-		public Set<Type> allInstances(TypeSystem types) {
+		public Set<Type> allInstances(
+				TypeSystem types) {
 			return Collections.singleton(this);
 		}
 	}

@@ -34,7 +34,11 @@ public final class IterationLogger {
 	 * 
 	 * @return an iterable that automatically logs while traversing the array
 	 */
-	public static <E> Iterable<E> iterate(Logger logger, E[] array, String message, String objects) {
+	public static <E> Iterable<E> iterate(
+			Logger logger,
+			E[] array,
+			String message,
+			String objects) {
 		return iterate(logger, Level.INFO, new IterableArray<>(array), message, objects, array.length);
 	}
 
@@ -51,7 +55,12 @@ public final class IterationLogger {
 	 * 
 	 * @return an iterable that automatically logs while traversing the array
 	 */
-	public static <E> Iterable<E> iterate(Logger logger, Level level, E[] array, String message, String objects) {
+	public static <E> Iterable<E> iterate(
+			Logger logger,
+			Level level,
+			E[] array,
+			String message,
+			String objects) {
 		return iterate(logger, level, new IterableArray<>(array), message, objects, array.length);
 	}
 
@@ -69,7 +78,11 @@ public final class IterationLogger {
 	 * @return an iterable that automatically logs while traversing the
 	 *             collection
 	 */
-	public static <E> Iterable<E> iterate(Logger logger, Collection<E> collection, String message, String objects) {
+	public static <E> Iterable<E> iterate(
+			Logger logger,
+			Collection<E> collection,
+			String message,
+			String objects) {
 		return iterate(logger, Level.INFO, collection, message, objects, collection.size());
 	}
 
@@ -87,7 +100,11 @@ public final class IterationLogger {
 	 * @return an iterable that automatically logs while traversing the
 	 *             collection
 	 */
-	public static <E> Iterable<E> iterate(Logger logger, Level level, Collection<E> collection, String message,
+	public static <E> Iterable<E> iterate(
+			Logger logger,
+			Level level,
+			Collection<E> collection,
+			String message,
 			String objects) {
 		return iterate(logger, level, collection, message, objects, collection.size());
 	}
@@ -105,7 +122,11 @@ public final class IterationLogger {
 	 * 
 	 * @return an iterable that automatically logs while traversing the iterable
 	 */
-	public static <E> Iterable<E> iterate(Logger logger, Iterable<E> iterable, String message, String objects) {
+	public static <E> Iterable<E> iterate(
+			Logger logger,
+			Iterable<E> iterable,
+			String message,
+			String objects) {
 		return iterate(logger, Level.INFO, iterable, message, objects);
 	}
 
@@ -122,7 +143,11 @@ public final class IterationLogger {
 	 * 
 	 * @return an iterable that automatically logs while traversing the iterable
 	 */
-	public static <E> Iterable<E> iterate(Logger logger, Level level, Iterable<E> iterable, String message,
+	public static <E> Iterable<E> iterate(
+			Logger logger,
+			Level level,
+			Iterable<E> iterable,
+			String message,
 			String objects) {
 		int size;
 		Iterator<E> it;
@@ -145,7 +170,11 @@ public final class IterationLogger {
 	 * @return an iterable that automatically logs while traversing the
 	 *             collection created from the stream
 	 */
-	public static <E> Iterable<E> iterate(Logger logger, Stream<E> stream, String message, String objects) {
+	public static <E> Iterable<E> iterate(
+			Logger logger,
+			Stream<E> stream,
+			String message,
+			String objects) {
 		return iterate(logger, Level.INFO, stream, message, objects);
 	}
 
@@ -163,13 +192,22 @@ public final class IterationLogger {
 	 * @return an iterable that automatically logs while traversing the
 	 *             collection created from the stream
 	 */
-	public static <E> Iterable<E> iterate(Logger logger, Level level, Stream<E> stream, String message,
+	public static <E> Iterable<E> iterate(
+			Logger logger,
+			Level level,
+			Stream<E> stream,
+			String message,
 			String objects) {
 		List<E> list = stream.collect(Collectors.toList());
 		return iterate(logger, level, list, message, objects, list.size());
 	}
 
-	private static <E> Iterable<E> iterate(Logger logger, Level level, Iterable<E> it, String message, String objects,
+	private static <E> Iterable<E> iterate(
+			Logger logger,
+			Level level,
+			Iterable<E> it,
+			String message,
+			String objects,
 			int size) {
 		return new CountingIterable<>(it, new Counter(logger, level, message, objects, size, 0.025));
 	}

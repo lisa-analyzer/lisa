@@ -23,7 +23,10 @@ public class Variable extends Identifier {
 	 * @param location   the code location of the statement that has generated
 	 *                       this variable
 	 */
-	public Variable(Type staticType, String name, CodeLocation location) {
+	public Variable(
+			Type staticType,
+			String name,
+			CodeLocation location) {
 		this(staticType, name, new Annotations(), location);
 	}
 
@@ -36,7 +39,11 @@ public class Variable extends Identifier {
 	 * @param location    the code location of the statement that has generated
 	 *                        this variable
 	 */
-	public Variable(Type staticType, String name, Annotations annotations, CodeLocation location) {
+	public Variable(
+			Type staticType,
+			String name,
+			Annotations annotations,
+			CodeLocation location) {
 		super(staticType, name, false, annotations, location);
 	}
 
@@ -46,12 +53,15 @@ public class Variable extends Identifier {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
 		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return null;
 	}
 
@@ -61,7 +71,10 @@ public class Variable extends Identifier {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
 	}
 }

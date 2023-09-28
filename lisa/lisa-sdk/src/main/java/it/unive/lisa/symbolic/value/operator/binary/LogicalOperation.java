@@ -19,7 +19,10 @@ import java.util.Set;
 public abstract class LogicalOperation implements LogicalOperator, BinaryOperator {
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> right) {
 		if (left.stream().noneMatch(Type::isBooleanType) || right.stream().noneMatch(Type::isBooleanType))
 			return Collections.emptySet();
 		return Collections.singleton(types.getBooleanType());

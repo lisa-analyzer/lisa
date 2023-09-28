@@ -27,7 +27,9 @@ public class SerializableNodeDescription implements Comparable<SerializableNodeD
 	 * @param description the {@link SerializableValue} to be used as
 	 *                        description
 	 */
-	public SerializableNodeDescription(int id, SerializableValue description) {
+	public SerializableNodeDescription(
+			int id,
+			SerializableValue description) {
 		this.nodeId = id;
 		this.description = description;
 	}
@@ -61,7 +63,8 @@ public class SerializableNodeDescription implements Comparable<SerializableNodeD
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -85,7 +88,8 @@ public class SerializableNodeDescription implements Comparable<SerializableNodeD
 	}
 
 	@Override
-	public int compareTo(SerializableNodeDescription o) {
+	public int compareTo(
+			SerializableNodeDescription o) {
 		int cmp;
 		if ((cmp = Integer.compare(nodeId, o.nodeId)) != 0)
 			return cmp;

@@ -3,6 +3,9 @@ package it.unive.lisa.analysis.lattices;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.representation.MapRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,7 +26,9 @@ import java.util.Set;
  * @param <V> the concrete {@link Lattice} type of the values of this function
  */
 public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K, V extends Lattice<V>>
-		implements BaseLattice<F>, Iterable<Map.Entry<K, V>> {
+		implements
+		BaseLattice<F>,
+		Iterable<Map.Entry<K, V>> {
 
 	/**
 	 * The function implemented by this lattice.
@@ -40,7 +45,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @param lattice the underlying lattice
 	 */
-	public FunctionalLattice(V lattice) {
+	public FunctionalLattice(
+			V lattice) {
 		this(lattice, null);
 	}
 
@@ -50,7 +56,9 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @param lattice  the underlying lattice
 	 * @param function the function to clone
 	 */
-	public FunctionalLattice(V lattice, Map<K, V> function) {
+	public FunctionalLattice(
+			V lattice,
+			Map<K, V> function) {
 		this.lattice = lattice;
 		this.function = function != null && function.isEmpty() ? null : function;
 	}
@@ -66,7 +74,9 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @return a new function
 	 */
-	public Map<K, V> mkNewFunction(Map<K, V> other, boolean preserveNull) {
+	public Map<K, V> mkNewFunction(
+			Map<K, V> other,
+			boolean preserveNull) {
 		if (other == null)
 			return preserveNull ? null : new HashMap<>();
 		return new HashMap<>(other);
@@ -84,21 +94,63 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	/**
-	 * Yields the state associated to the given key.
+	 * Yields the state associated to the given key. This operation is defined
+	 * in term of lattices: it always returns bottom of {@link #isBottom()}
+	 * holds, top if {@link #isTop()} holds, the stored value when key is part
+	 * of the mapping, or {@link #stateOfUnknown(Object)} otherwise. This method
+	 * is the primary way in which information mapped to a key should be
+	 * extracted from this function.
 	 * 
 	 * @param key the key
 	 * 
 	 * @return the state
 	 */
-	public V getState(K key) {
+	public V getState(
+			K key) {
 		if (isBottom())
 			return lattice.bottom();
 		if (isTop())
 			return lattice.top();
 		if (function != null && function.containsKey(key))
 			return function.get(key);
-		return lattice.bottom();
+		return stateOfUnknown(key);
 	}
+
+	/**
+	 * Similar to {@link #getState(Object)}, but yields a custom default value
+	 * for keys that are not part of the mapping (instead of using
+	 * {@link #stateOfUnknown(Object)}). This is useful for implementing
+	 * specific operation that need to use an operation-neutral element as
+	 * fallback.
+	 * 
+	 * @param key the key
+	 * @param def the default value to return when there is no mapping for
+	 *                {@code key}
+	 * 
+	 * @return the state
+	 */
+	public V getOtDefault(
+			K key,
+			V def) {
+		if (isBottom())
+			return lattice.bottom();
+		if (isTop())
+			return lattice.top();
+		if (function != null && function.containsKey(key))
+			return function.get(key);
+		return def;
+	}
+
+	/**
+	 * Yields the value that should be returned by {@link #getState(Object)}
+	 * whenever the given key is not present in this map.
+	 * 
+	 * @param key the key that is missing
+	 * 
+	 * @return the lattice element for keys not in the mapping
+	 */
+	public abstract V stateOfUnknown(
+			K key);
 
 	/**
 	 * Yields an instance of this class equal to the receiver of the call, but
@@ -109,7 +161,9 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @return the new instance of this class with the updated mapping
 	 */
-	public F putState(K key, V state) {
+	public F putState(
+			K key,
+			V state) {
 		// we are only adding elements here, so it is fine to not preserve null
 		Map<K, V> result = mkNewFunction(function, false);
 		result.put(key, state);
@@ -127,26 +181,44 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @return a new instance of this class
 	 */
-	public abstract F mk(V lattice, Map<K, V> function);
+	public abstract F mk(
+			V lattice,
+			Map<K, V> function);
 
 	@Override
-	public F lubAux(F other) throws SemanticException {
-		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
+	public F lubAux(
+			F other)
+			throws SemanticException {
+		return functionalLift(other, lattice.bottom(), this::lubKeys, (
+				o1,
+				o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
-	public F glbAux(F other) throws SemanticException {
-		return functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+	public F glbAux(
+			F other)
+			throws SemanticException {
+		return functionalLift(other, lattice.top(), this::glbKeys, (
+				o1,
+				o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
 	@Override
-	public F wideningAux(F other) throws SemanticException {
-		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+	public F wideningAux(
+			F other)
+			throws SemanticException {
+		return functionalLift(other, lattice.bottom(), this::lubKeys, (
+				o1,
+				o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
 	@Override
-	public F narrowingAux(F other) throws SemanticException {
-		return functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
+	public F narrowingAux(
+			F other)
+			throws SemanticException {
+		return functionalLift(other, lattice.top(), this::glbKeys, (
+				o1,
+				o2) -> o1 == null ? o2 : o1.narrowing(o2));
 	}
 
 	/**
@@ -170,7 +242,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		 * @throws SemanticException if something goes wrong while lifting the
 		 *                               values
 		 */
-		V lift(V first, V second) throws SemanticException;
+		V lift(
+				V first,
+				V second)
+				throws SemanticException;
 	}
 
 	/**
@@ -194,13 +269,20 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		 * @throws SemanticException if something goes wrong while lifting the
 		 *                               key sets
 		 */
-		Set<K> keyLift(Set<K> first, Set<K> second) throws SemanticException;
+		Set<K> keyLift(
+				Set<K> first,
+				Set<K> second)
+				throws SemanticException;
 	}
 
 	/**
 	 * Yields the functional lift between {@code this} and {@code other}.
 	 * 
 	 * @param other       the other functional lattice
+	 * @param missing     the lattice element to use for the lift when a key has
+	 *                        no mapping in one of the two functions (e.g., for
+	 *                        lub, missing should be bottom, while for glb it
+	 *                        should be top)
 	 * @param keyLifter   the key lifter
 	 * @param valueLifter the value lifter
 	 * 
@@ -209,13 +291,19 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @throws SemanticException if something goes wrong while lifting the
 	 *                               lattice elements
 	 */
-	public F functionalLift(F other, KeyFunctionalLift<K> keyLifter, FunctionalLift<V> valueLifter)
+	public F functionalLift(
+			F other,
+			V missing,
+			KeyFunctionalLift<K> keyLifter,
+			FunctionalLift<V> valueLifter)
 			throws SemanticException {
 		Map<K, V> function = mkNewFunction(null, false);
 		Set<K> keys = keyLifter.keyLift(this.getKeys(), other.getKeys());
 		for (K key : keys)
 			try {
-				function.put(key, valueLifter.lift(getState(key), other.getState(key)));
+				V s1 = getOtDefault(key, missing);
+				V s2 = other.getOtDefault(key, missing);
+				function.put(key, valueLifter.lift(s1, s2));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
 			}
@@ -232,7 +320,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @throws SemanticException if something goes wrong while lifting the keys
 	 */
-	public Set<K> lubKeys(Set<K> k1, Set<K> k2) throws SemanticException {
+	public Set<K> lubKeys(
+			Set<K> k1,
+			Set<K> k2)
+			throws SemanticException {
 		Set<K> keys = new HashSet<>(k1);
 		keys.addAll(k2);
 		return keys;
@@ -249,18 +340,25 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @throws SemanticException if something goes wrong while lifting the key
 	 *                               sets
 	 */
-	public Set<K> glbKeys(Set<K> k1, Set<K> k2) throws SemanticException {
+	public Set<K> glbKeys(
+			Set<K> k1,
+			Set<K> k2)
+			throws SemanticException {
 		Set<K> keys = new HashSet<>(k1);
 		keys.retainAll(k2);
 		return keys;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(F other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			F other)
+			throws SemanticException {
 		if (function != null)
-			for (K key : function.keySet())
-				if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
+			for (K key : function.keySet()) {
+				V state = getState(key);
+				if (state != null && !state.lessOrEqual(other.getState(key)))
 					return false;
+			}
 
 		return true;
 	}
@@ -297,7 +395,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -353,6 +452,22 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return the map associated with this functional lattice element.
 	 */
 	public Map<K, V> getMap() {
+		if (function == null)
+			return Map.of();
 		return function;
+	}
+
+	@Override
+	public StructuredRepresentation representation() {
+		if (isTop())
+			return Lattice.topRepresentation();
+
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+
+		if (function == null)
+			return new StringRepresentation("empty");
+
+		return new MapRepresentation(function, StringRepresentation::new, Lattice::representation);
 	}
 }

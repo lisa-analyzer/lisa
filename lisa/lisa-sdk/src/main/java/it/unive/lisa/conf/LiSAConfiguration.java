@@ -1,7 +1,6 @@
 package it.unive.lisa.conf;
 
 import it.unive.lisa.LiSA;
-import it.unive.lisa.LiSAFactory;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -12,6 +11,8 @@ import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
@@ -136,27 +137,19 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * through {@link #callGraph}) that has been built. Defaults to an empty
 	 * set.
 	 */
-	public final Collection<SemanticCheck<?, ?, ?, ?>> semanticChecks = new HashSet<>();
+	public final Collection<SemanticCheck<?>> semanticChecks = new HashSet<>();
 
 	/**
 	 * The {@link CallGraph} instance to use during the analysis. Defaults to
-	 * {@code null}. Setting this field is optional: if an analysis is to be
-	 * executed (that is, if {@link #abstractState} has been set), a default
-	 * {@link CallGraph} instance will be created through
-	 * {@link LiSAFactory#getDefaultFor(Class, Object...)} in order to perform
-	 * the analysis.
+	 * {@code null}.
 	 */
 	public CallGraph callGraph;
 
 	/**
 	 * The {@link InterproceduralAnalysis} instance to use during the analysis.
-	 * Defaults to {@code null}. Setting this field is optional: if an analysis
-	 * is to be executed (that is, if {@link #abstractState} has been set), a
-	 * default {@link InterproceduralAnalysis} instance will be created through
-	 * {@link LiSAFactory#getDefaultFor(Class, Object...)} in order to perform
-	 * the analysis.
+	 * Defaults to {@code null}.
 	 */
-	public InterproceduralAnalysis<?, ?, ?, ?> interproceduralAnalysis;
+	public InterproceduralAnalysis<?> interproceduralAnalysis;
 
 	/**
 	 * The {@link AbstractState} instance to run during the analysis. This will
@@ -164,7 +157,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * analysis, and can thus be any lattice element. If no value is set for
 	 * this field, no analysis will be executed. Defaults to {@code null}.
 	 */
-	public AbstractState<?, ?, ?, ?> abstractState;
+	public AbstractState<?> abstractState;
 
 	/**
 	 * Sets the format to use for dumping graph files, named
@@ -221,9 +214,10 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * The number of fixpoint iteration on a given node after which calls to
 	 * {@link Lattice#lub(Lattice)} gets replaced with
 	 * {@link Lattice#widening(Lattice)}. Defaults to
-	 * {@link #DEFAULT_WIDENING_THRESHOLD}. Note that widening is only invoked
-	 * on widening points (that is, on loop guards) to reduce cost and increase
-	 * precision. Use to always apply lubs.
+	 * {@link #DEFAULT_WIDENING_THRESHOLD}. Note that widening can be invoked
+	 * only on widening points (that is, on loop guards) to reduce cost and
+	 * increase precision by setting {@link #useWideningPoints} to {@code true}.
+	 * Use 0 or a negative number to always apply lubs.
 	 */
 	public int wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 
@@ -239,7 +233,8 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * The number of descending fixpoint iteration on a given node where
 	 * {@link Lattice#glb(Lattice)} can be applied. After the threshold is
 	 * reached, no more glbs will be applied on that node and the descending
-	 * chain will stop. Defaults to {@link #DEFAULT_GLB_THRESHOLD}.
+	 * chain will stop. Defaults to {@link #DEFAULT_GLB_THRESHOLD}. Use 0 or a
+	 * negative number to never apply glbs.
 	 */
 	public int glbThreshold = DEFAULT_GLB_THRESHOLD;
 
@@ -271,9 +266,24 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * of a non-widening point is queried, a fast fixpoint iteration will be ran
 	 * to unwind (that is, re-propagate) the results and compute the missing
 	 * states. Note that results are <b>not</b> unwinded for dumping results.
+	 * Defaults to {@code false}.
+	 */
+	public boolean optimize = false;
+
+	/**
+	 * If {@code true}, will cause fixpoint iterations to use widening (and
+	 * narrowing) only on widening points, using lub (or glb) on all other nodes
+	 * regardless of the threshold. As widening is typically more expensive,
+	 * this reduces resource consumption. Note that widening points correspond
+	 * to the conditions of loops, as identified by
+	 * {@link CFG#getCycleEntries()}. The latter relies on the
+	 * {@link ControlFlowStructure}s of each CFG (either provided during
+	 * construction of the CFG itself or extracted by a
+	 * {@link ControlFlowExtractor}): this option should thus be set to
+	 * {@code false} whenever such structures are not available by-design.
 	 * Defaults to {@code true}.
 	 */
-	public boolean optimize = true;
+	public boolean useWideningPoints = true;
 
 	/**
 	 * When {@link #optimize} is {@code true}, this predicate will be used to

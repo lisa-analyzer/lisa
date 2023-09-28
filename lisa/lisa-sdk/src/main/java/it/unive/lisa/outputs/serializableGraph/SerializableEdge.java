@@ -39,7 +39,10 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 	 * @param destId   the id of the destination {@link SerializableNode}
 	 * @param kind     the kind of this edge
 	 */
-	public SerializableEdge(int sourceId, int destId, String kind) {
+	public SerializableEdge(
+			int sourceId,
+			int destId,
+			String kind) {
 		this.sourceId = sourceId;
 		this.destId = destId;
 		this.kind = kind;
@@ -90,7 +93,9 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 	 * @param value the value of the field
 	 */
 	@JsonAnySetter
-	public void setOtherField(String name, String value) {
+	public void setOtherField(
+			String name,
+			String value) {
 		unknownFields.put(name, value);
 	}
 
@@ -106,7 +111,8 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -137,7 +143,8 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 	}
 
 	@Override
-	public int compareTo(SerializableEdge o) {
+	public int compareTo(
+			SerializableEdge o) {
 		int cmp;
 		if ((cmp = Integer.compare(sourceId, o.sourceId)) != 0)
 			return cmp;

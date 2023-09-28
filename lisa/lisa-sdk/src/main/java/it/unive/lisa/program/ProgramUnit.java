@@ -27,7 +27,10 @@ public abstract class ProgramUnit extends Unit implements CodeElement {
 	 * @param program  the program where this unit is defined
 	 * @param name     the name of the unit
 	 */
-	public ProgramUnit(CodeLocation location, Program program, String name) {
+	public ProgramUnit(
+			CodeLocation location,
+			Program program,
+			String name) {
 		super(name);
 		this.program = program;
 		this.location = location;

@@ -27,7 +27,8 @@ public class Application {
 	 * 
 	 * @param programs the programs composing the application
 	 */
-	public Application(Program... programs) {
+	public Application(
+			Program... programs) {
 		this.programs = programs;
 	}
 

@@ -32,12 +32,14 @@ public class BoolType implements BooleanType {
 	}
 
 	@Override
-	public boolean canBeAssignedTo(Type other) {
+	public boolean canBeAssignedTo(
+			Type other) {
 		return other.isBooleanType() || other.isUntyped();
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		return other.isBooleanType() ? this : Untyped.INSTANCE;
 	}
 
@@ -47,7 +49,8 @@ public class BoolType implements BooleanType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(
+			Object other) {
 		return other instanceof BooleanType;
 	}
 
@@ -57,7 +60,8 @@ public class BoolType implements BooleanType {
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

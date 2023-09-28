@@ -31,12 +31,15 @@ public final class TopAtom extends Atom {
 
 	@Override
 	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+			T extends TransitionSymbol<T>> A toAutomaton(
+					AutomataFactory<A, T> factory) {
 		return factory.unknownString();
 	}
 
 	@Override
-	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(
+			int charsToSkip,
+			int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
 
 		for (int i = 0; i <= charsToSkip; i++)
@@ -53,7 +56,8 @@ public final class TopAtom extends Atom {
 	}
 
 	@Override
-	public boolean is(String str) {
+	public boolean is(
+			String str) {
 		return false;
 	}
 
@@ -68,32 +72,38 @@ public final class TopAtom extends Atom {
 	}
 
 	@Override
-	public boolean mayContain(String s) {
+	public boolean mayContain(
+			String s) {
 		return true;
 	}
 
 	@Override
-	public boolean contains(String s) {
+	public boolean contains(
+			String s) {
 		return s.isEmpty(); // epsilon is contained everywhere
 	}
 
 	@Override
-	public boolean mayStartWith(String s) {
+	public boolean mayStartWith(
+			String s) {
 		return true;
 	}
 
 	@Override
-	public boolean startsWith(String s) {
+	public boolean startsWith(
+			String s) {
 		return s.isEmpty(); // epsilon is contained everywhere
 	}
 
 	@Override
-	public boolean mayEndWith(String s) {
+	public boolean mayEndWith(
+			String s) {
 		return true;
 	}
 
 	@Override
-	public boolean endsWith(String s) {
+	public boolean endsWith(
+			String s) {
 		return s.isEmpty(); // epsilon is contained everywhere
 	}
 
@@ -107,7 +117,8 @@ public final class TopAtom extends Atom {
 			}
 
 			@Override
-			public boolean is(String str) {
+			public boolean is(
+					String str) {
 				return false;
 			}
 
@@ -122,32 +133,38 @@ public final class TopAtom extends Atom {
 			}
 
 			@Override
-			public boolean mayContain(String s) {
+			public boolean mayContain(
+					String s) {
 				return s.length() >= 1;
 			}
 
 			@Override
-			public boolean contains(String s) {
+			public boolean contains(
+					String s) {
 				return s.isEmpty(); // epsilon is contained everywhere
 			}
 
 			@Override
-			public boolean mayStartWith(String s) {
+			public boolean mayStartWith(
+					String s) {
 				return s.length() >= 1;
 			}
 
 			@Override
-			public boolean startsWith(String s) {
+			public boolean startsWith(
+					String s) {
 				return s.isEmpty(); // epsilon is contained everywhere
 			}
 
 			@Override
-			public boolean mayEndWith(String s) {
+			public boolean mayEndWith(
+					String s) {
 				return s.length() >= 1;
 			}
 
 			@Override
-			public boolean endsWith(String s) {
+			public boolean endsWith(
+					String s) {
 				return s.isEmpty(); // epsilon is contained everywhere
 			}
 		};
@@ -169,7 +186,8 @@ public final class TopAtom extends Atom {
 	}
 
 	@Override
-	protected int compareToAux(RegularExpression other) {
+	protected int compareToAux(
+			RegularExpression other) {
 		return 0;
 	}
 }

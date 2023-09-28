@@ -4,14 +4,15 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.util.representation.SetRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -35,7 +36,8 @@ import java.util.TreeSet;
 public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 		C extends NonRedundantPowersetOfBaseNonRelationalValueDomain<C, E>,
 		E extends BaseNonRelationalValueDomain<E>>
-		implements BaseNonRelationalValueDomain<C> {
+		implements
+		BaseNonRelationalValueDomain<C> {
 
 	/**
 	 * The set that containing the elements.
@@ -55,7 +57,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * @param elements the set of elements in the set
 	 * @param element  the underlying {@link BaseNonRelationalValueDomain}
 	 */
-	protected NonRedundantPowersetOfBaseNonRelationalValueDomain(SortedSet<E> elements, E element) {
+	protected NonRedundantPowersetOfBaseNonRelationalValueDomain(
+			SortedSet<E> elements,
+			E element) {
 		elementsSet = new TreeSet<>(elements);
 		valueDomain = element.bottom();
 	}
@@ -70,7 +74,8 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * @return a new concrete instance of {@link NonRedundantPowerset}
 	 *             containing the elements of the given set
 	 */
-	protected abstract C mk(SortedSet<E> elements);
+	protected abstract C mk(
+			SortedSet<E> elements);
 
 	/**
 	 * Yields a new concrete set of elements equivalent to this but that is not
@@ -150,7 +155,10 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected E removeOverlappingBetweenElements(E e1, E e2) throws SemanticException {
+	protected E removeOverlappingBetweenElements(
+			E e1,
+			E e2)
+			throws SemanticException {
 		return e1.lub(e2);
 	}
 
@@ -171,7 +179,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected C EgliMilnerConnector(C other) throws SemanticException {
+	protected C EgliMilnerConnector(
+			C other)
+			throws SemanticException {
 		SortedSet<E> newSet = new TreeSet<>();
 		if (elementsSet.isEmpty() && other.elementsSet.isEmpty())
 			return mk(newSet);
@@ -185,7 +195,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 
@@ -207,7 +217,8 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -234,14 +245,18 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * removed of redundancy.
 	 */
 	@Override
-	public C lubAux(C other) throws SemanticException {
+	public C lubAux(
+			C other)
+			throws SemanticException {
 		SortedSet<E> lubSet = new TreeSet<>(elementsSet);
 		lubSet.addAll(other.elementsSet);
 		return mk(lubSet).removeRedundancy().removeOverlapping();
 	}
 
 	@Override
-	public C glbAux(C other) throws SemanticException {
+	public C glbAux(
+			C other)
+			throws SemanticException {
 		SortedSet<E> glbSet = new TreeSet<>();
 		for (E s1 : elementsSet)
 			for (E s2 : other.elementsSet)
@@ -280,7 +295,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected C extrapolationHeuristic(C other) throws SemanticException {
+	protected C extrapolationHeuristic(
+			C other)
+			throws SemanticException {
 		SortedSet<E> extrapolatedSet = new TreeSet<>();
 		for (E s1 : elementsSet)
 			for (E s2 : other.elementsSet)
@@ -297,10 +314,8 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * Given two subset S<sub>1</sub> and S<sub>2</sub> of the domain of a
 	 * lattice widening(S<sub>1</sub>, S<sub>2</sub>) =
 	 * h<sup>&nabla;</sup>(S<sub>1</sub>, T<sub>2</sub>), where
-	 * h<sup>&nabla;</sup> is a
-	 * {@link #extrapolationHeuristic(NonRedundantPowersetOfBaseNonRelationalValueDomain)
-	 * widenining-connected extrapolation heuristic} and T<sub>2</sub> is equal
-	 * to:
+	 * h<sup>&nabla;</sup> is a widenining-connected extrapolation heuristic and
+	 * T<sub>2</sub> is equal to:
 	 * <ul>
 	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
@@ -308,12 +323,12 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowersetOfBaseNonRelationalValueDomain)
-	 * Egli-Milner relation} and +<sub>EM</sub> is an
-	 * {@link #EgliMilnerConnector(NonRedundantPowersetOfBaseNonRelationalValueDomain)
-	 * Egli-Milner connector}.
+	 * Egli-Milner relation} and +<sub>EM</sub> is an Egli-Milner connector.
 	 */
 	@Override
-	public C wideningAux(C other) throws SemanticException {
+	public C wideningAux(
+			C other)
+			throws SemanticException {
 		C arg = lessOrEqualEgliMilner(other) ? other : EgliMilnerConnector(other);
 		return extrapolationHeuristic(arg).removeRedundancy().removeOverlapping();
 	}
@@ -336,7 +351,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public boolean lessOrEqualEgliMilner(C other) throws SemanticException {
+	public boolean lessOrEqualEgliMilner(
+			C other)
+			throws SemanticException {
 		if (!lessOrEqual(other))
 			return false;
 		if (isBottom())
@@ -361,7 +378,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * s<sub>1</sub> &le; s<sub>2</sub>.
 	 */
 	@Override
-	public boolean lessOrEqualAux(C other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			C other)
+			throws SemanticException {
 		for (E s1 : elementsSet) {
 			boolean existsGreaterElement = false;
 			for (E s2 : other.elementsSet)
@@ -376,37 +395,52 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	}
 
 	@Override
-	public C evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+	public C evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		SortedSet<E> newSet = new TreeSet<>();
-		newSet.add(valueDomain.evalNonNullConstant(constant, pp));
+		newSet.add(valueDomain.evalNonNullConstant(constant, pp, oracle));
 		return mk(newSet).removeRedundancy().removeOverlapping();
 	}
 
 	@Override
-	public C evalUnaryExpression(UnaryOperator operator, C arg, ProgramPoint pp) throws SemanticException {
+	public C evalUnaryExpression(
+			UnaryOperator operator,
+			C arg,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		SortedSet<E> newSet = new TreeSet<>();
 		for (E s : arg.elementsSet)
-			newSet.add(valueDomain.evalUnaryExpression(operator, s, pp));
+			newSet.add(valueDomain.evalUnaryExpression(operator, s, pp, oracle));
 		return mk(newSet).removeRedundancy().removeOverlapping();
 	}
 
 	@Override
-	public C evalBinaryExpression(BinaryOperator operator,
+	public C evalBinaryExpression(
+			BinaryOperator operator,
 			C left,
 			C right,
-			ProgramPoint pp) throws SemanticException {
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		SortedSet<E> newSet = new TreeSet<>();
 		for (E sLeft : left.elementsSet)
 			for (E sRight : right.elementsSet)
-				newSet.add(valueDomain.evalBinaryExpression(operator, sLeft, sRight, pp));
+				newSet.add(valueDomain.evalBinaryExpression(operator, sLeft, sRight, pp, oracle));
 		return mk(newSet).removeRedundancy().removeOverlapping();
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator,
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
 			C left,
 			C right,
-			ProgramPoint pp) throws SemanticException {
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
@@ -414,7 +448,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 		Satisfiability sat = Satisfiability.BOTTOM;
 		for (E sLeft : left.elementsSet)
 			for (E sRight : right.elementsSet)
-				sat = sat.lub(valueDomain.satisfiesBinaryExpression(operator, sLeft, sRight, pp));
+				sat = sat.lub(valueDomain.satisfiesBinaryExpression(operator, sLeft, sRight, pp, oracle));
 		return sat;
 	}
 

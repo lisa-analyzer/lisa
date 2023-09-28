@@ -21,8 +21,10 @@ import java.util.Map;
  *                whose instances are mapped in this environment
  */
 public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
-		extends Environment<ValueEnvironment<T>, ValueExpression, T>
-		implements ValueDomain<ValueEnvironment<T>> {
+		extends
+		Environment<ValueEnvironment<T>, ValueExpression, T>
+		implements
+		ValueDomain<ValueEnvironment<T>> {
 
 	/**
 	 * Builds an empty environment.
@@ -30,7 +32,8 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	 * @param domain a singleton instance to be used during semantic operations
 	 *                   to retrieve top and bottom values
 	 */
-	public ValueEnvironment(T domain) {
+	public ValueEnvironment(
+			T domain) {
 		super(domain);
 	}
 
@@ -45,12 +48,16 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	 * @param function the function representing the mapping contained in the
 	 *                     new environment; can be {@code null}
 	 */
-	public ValueEnvironment(T domain, Map<Identifier, T> function) {
+	public ValueEnvironment(
+			T domain,
+			Map<Identifier, T> function) {
 		super(domain, function);
 	}
 
 	@Override
-	public ValueEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
+	public ValueEnvironment<T> mk(
+			T lattice,
+			Map<Identifier, T> function) {
 		return new ValueEnvironment<>(lattice, function);
 	}
 

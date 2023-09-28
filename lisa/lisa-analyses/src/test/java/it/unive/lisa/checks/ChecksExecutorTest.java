@@ -16,7 +16,10 @@ public class ChecksExecutorTest extends AnalysisTestExecutor {
 	private static class VariableI implements SyntacticCheck {
 
 		@Override
-		public boolean visit(CheckTool tool, CFG graph, Statement node) {
+		public boolean visit(
+				CheckTool tool,
+				CFG graph,
+				Statement node) {
 			if (node instanceof VariableRef && ((VariableRef) node).getName().equals("i"))
 				tool.warnOn(node, "Found variable i");
 			return true;

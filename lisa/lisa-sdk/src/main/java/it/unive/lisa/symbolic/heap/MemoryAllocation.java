@@ -30,10 +30,41 @@ public class MemoryAllocation extends HeapExpression {
 	 * @param staticType the static type of this expression
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
+	 */
+	public MemoryAllocation(
+			Type staticType,
+			CodeLocation location) {
+		this(staticType, location, false);
+	}
+
+	/**
+	 * Builds the heap allocation.
+	 * 
+	 * @param staticType the static type of this expression
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 * @param anns       the annotations of this memory allocation
 	 */
-	public MemoryAllocation(Type staticType, CodeLocation location, Annotations anns) {
+	public MemoryAllocation(
+			Type staticType,
+			CodeLocation location,
+			Annotations anns) {
 		this(staticType, location, anns, false);
+	}
+
+	/**
+	 * Builds the heap allocation.
+	 * 
+	 * @param staticType        the static type of this expression
+	 * @param location          the code location of the statement that has
+	 *                              generated this expression
+	 * @param isStackAllocation if this allocation is allocated in the stack
+	 */
+	public MemoryAllocation(
+			Type staticType,
+			CodeLocation location,
+			boolean isStackAllocation) {
+		this(staticType, location, new Annotations(), isStackAllocation);
 	}
 
 	/**
@@ -45,7 +76,11 @@ public class MemoryAllocation extends HeapExpression {
 	 * @param anns              the annotations of this memory allocation
 	 * @param isStackAllocation if this allocation is allocated in the stack
 	 */
-	public MemoryAllocation(Type staticType, CodeLocation location, Annotations anns, boolean isStackAllocation) {
+	public MemoryAllocation(
+			Type staticType,
+			CodeLocation location,
+			Annotations anns,
+			boolean isStackAllocation) {
 		super(staticType, location);
 		this.isStackAllocation = isStackAllocation;
 		this.anns = anns;
@@ -78,7 +113,8 @@ public class MemoryAllocation extends HeapExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -95,7 +131,10 @@ public class MemoryAllocation extends HeapExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
 	}
 }

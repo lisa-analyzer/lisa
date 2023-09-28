@@ -15,7 +15,8 @@ public class LoopSummary extends TraceToken {
 	 * 
 	 * @param pp the program point associated with the summary
 	 */
-	public LoopSummary(ProgramPoint pp) {
+	public LoopSummary(
+			ProgramPoint pp) {
 		super(pp);
 	}
 
@@ -28,7 +29,8 @@ public class LoopSummary extends TraceToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

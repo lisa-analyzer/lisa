@@ -5,9 +5,6 @@ import static java.lang.String.format;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
@@ -15,7 +12,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,27 +23,20 @@ import java.util.function.Predicate;
 
 /**
  * A fixpoint algorithm for a {@link Graph}, parametric to the
- * {@link FixpointImplementation} that one wants to use to compute the results.
- * This fixpoint algorithms is optimized: it works exploiting the basic blocks
- * of the target graph, and only yields approximations of widening points,
- * stopping statements and user-defined hotspots.
+ * {@link it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation}
+ * that one wants to use to compute the results. This fixpoint algorithms is
+ * optimized: it works exploiting the basic blocks of the target graph, and only
+ * yields approximations of widening points, stopping statements and
+ * user-defined hotspots.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state
- * @param <T> the type of {@link TypeDomain} contained into the computed
- *                abstract state
  */
-public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> {
+public class OptimizedFixpoint<A extends AbstractState<A>>
+		extends
+		Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
 
 	private final Predicate<Statement> hotspots;
 
@@ -62,19 +51,22 @@ public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
 	 *                                statements whose approximation must be
 	 *                                preserved in the results
 	 */
-	public OptimizedFixpoint(CFG graph, boolean forceFullEvaluation, Predicate<Statement> hotspots) {
+	public OptimizedFixpoint(
+			CFG graph,
+			boolean forceFullEvaluation,
+			Predicate<Statement> hotspots) {
 		super(graph, forceFullEvaluation);
 		this.hotspots = hotspots;
 	}
 
 	@Override
-	public Map<Statement, CompoundState<A, H, V, T>> fixpoint(
-			Map<Statement, CompoundState<A, H, V, T>> startingPoints,
+	public Map<Statement, CompoundState<A>> fixpoint(
+			Map<Statement, CompoundState<A>> startingPoints,
 			WorkingSet<Statement> ws,
-			FixpointImplementation<Statement, Edge, CompoundState<A, H, V, T>> implementation,
-			Map<Statement, CompoundState<A, H, V, T>> initialResult)
+			FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
+			Map<Statement, CompoundState<A>> initialResult)
 			throws FixpointException {
-		Map<Statement, CompoundState<A, H, V, T>> result = initialResult == null
+		Map<Statement, CompoundState<A>> result = initialResult == null
 				? new HashMap<>(graph.getNodesCount())
 				: new HashMap<>(initialResult);
 
@@ -85,7 +77,7 @@ public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
 		if (forceFullEvaluation)
 			toProcess = new HashSet<>(bbs.keySet());
 
-		CompoundState<A, H, V, T> newApprox;
+		CompoundState<A> newApprox;
 		while (!ws.isEmpty()) {
 			Statement current = ws.pop();
 
@@ -98,7 +90,7 @@ public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
 			if (bb == null)
 				throw new FixpointException("'" + current + "' is not the leader of a basic block of '" + graph + "'");
 
-			CompoundState<A, H, V, T> entrystate = getEntryState(
+			CompoundState<A> entrystate = getEntryState(
 					current,
 					startingPoints.get(current),
 					implementation,
@@ -109,7 +101,7 @@ public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
 			newApprox = analyze(result, implementation, entrystate, bb);
 
 			Statement closing = bb[bb.length - 1];
-			CompoundState<A, H, V, T> oldApprox = result.get(closing);
+			CompoundState<A> oldApprox = result.get(closing);
 			if (oldApprox != null)
 				try {
 					newApprox = implementation.operation(closing, newApprox, oldApprox);
@@ -150,17 +142,17 @@ public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
 		return result;
 	}
 
-	private CompoundState<A, H, V, T> analyze(
-			Map<Statement, CompoundState<A, H, V, T>> result,
-			FixpointImplementation<Statement, Edge, CompoundState<A, H, V, T>> implementation,
-			CompoundState<A, H, V, T> entrystate,
+	private CompoundState<A> analyze(
+			Map<Statement, CompoundState<A>> result,
+			FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
+			CompoundState<A> entrystate,
 			Statement[] bb)
 			throws FixpointException {
-		StatementStore<A, H, V, T> emptyIntermediate = entrystate.intermediateStates.bottom();
-		CompoundState<A, H, V, T> newApprox = CompoundState.of(
+		StatementStore<A> emptyIntermediate = entrystate.intermediateStates.bottom();
+		CompoundState<A> newApprox = CompoundState.of(
 				entrystate.postState.bottom(),
 				emptyIntermediate);
-		CompoundState<A, H, V, T> entry = entrystate;
+		CompoundState<A> entry = entrystate;
 		for (Statement cursor : bb)
 			try {
 				newApprox = implementation.semantics(cursor, entry);
@@ -168,7 +160,7 @@ public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
 				// storing approximations into result is a trick: it won't ever
 				// be used in fixpoint comparisons, but it will still make
 				// it out as part of the final result
-				for (Entry<Statement, AnalysisState<A, H, V, T>> intermediate : newApprox.intermediateStates)
+				for (Entry<Statement, AnalysisState<A>> intermediate : newApprox.intermediateStates)
 					if (intermediate.getKey().stopsExecution()
 							|| (hotspots != null && hotspots.test(intermediate.getKey())))
 						result.put(intermediate.getKey(), CompoundState.of(intermediate.getValue(), emptyIntermediate));

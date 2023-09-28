@@ -25,5 +25,7 @@ public interface UnaryOperator extends Operator {
 	 * 
 	 * @return the runtime types of this expression
 	 */
-	Set<Type> typeInference(TypeSystem types, Set<Type> argument);
+	Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> argument);
 }

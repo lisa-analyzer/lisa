@@ -27,7 +27,8 @@ public class Atom extends RegularExpression {
 	 * 
 	 * @param s the string to be represented by this atom
 	 */
-	public Atom(String s) {
+	public Atom(
+			String s) {
 		this.string = s;
 	}
 
@@ -56,7 +57,8 @@ public class Atom extends RegularExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -79,12 +81,15 @@ public class Atom extends RegularExpression {
 
 	@Override
 	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+			T extends TransitionSymbol<T>> A toAutomaton(
+					AutomataFactory<A, T> factory) {
 		return isEmpty() ? factory.emptyString() : factory.singleString(string);
 	}
 
 	@Override
-	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(
+			int charsToSkip,
+			int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
 
 		int len = string.length();
@@ -108,7 +113,8 @@ public class Atom extends RegularExpression {
 	}
 
 	@Override
-	public boolean is(String str) {
+	public boolean is(
+			String str) {
 		return string.equals(str);
 	}
 
@@ -123,37 +129,44 @@ public class Atom extends RegularExpression {
 	}
 
 	@Override
-	public boolean mayContain(String s) {
+	public boolean mayContain(
+			String s) {
 		return contains(s);
 	}
 
 	@Override
-	public boolean contains(String s) {
+	public boolean contains(
+			String s) {
 		return string.contains(s);
 	}
 
 	@Override
-	public boolean mayStartWith(String s) {
+	public boolean mayStartWith(
+			String s) {
 		return startsWith(s);
 	}
 
 	@Override
-	public boolean startsWith(String s) {
+	public boolean startsWith(
+			String s) {
 		return string.startsWith(s);
 	}
 
 	@Override
-	public boolean mayEndWith(String s) {
+	public boolean mayEndWith(
+			String s) {
 		return endsWith(s);
 	}
 
 	@Override
-	public boolean endsWith(String s) {
+	public boolean endsWith(
+			String s) {
 		return string.endsWith(s);
 	}
 
 	@Override
-	protected RegularExpression unrollStarToFixedLength(int length) {
+	protected RegularExpression unrollStarToFixedLength(
+			int length) {
 		return this;
 	}
 
@@ -179,12 +192,14 @@ public class Atom extends RegularExpression {
 	}
 
 	@Override
-	protected int compareToAux(RegularExpression other) {
+	protected int compareToAux(
+			RegularExpression other) {
 		return string.compareTo(other.asAtom().string);
 	}
 
 	@Override
-	public RegularExpression repeat(long n) {
+	public RegularExpression repeat(
+			long n) {
 		if (n == 0)
 			return Atom.EPSILON;
 

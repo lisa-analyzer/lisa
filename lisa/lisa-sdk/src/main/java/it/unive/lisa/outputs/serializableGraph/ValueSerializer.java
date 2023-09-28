@@ -51,12 +51,17 @@ public class ValueSerializer extends StdSerializer<SerializableValue> {
 	 * 
 	 * @param t the class to be serialized
 	 */
-	public ValueSerializer(Class<SerializableValue> t) {
+	public ValueSerializer(
+			Class<SerializableValue> t) {
 		super(t);
 	}
 
 	@Override
-	public void serialize(SerializableValue value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+	public void serialize(
+			SerializableValue value,
+			JsonGenerator gen,
+			SerializerProvider provider)
+			throws IOException {
 		SortedMap<String, String> props = value.getProperties();
 		boolean hasProps = !props.isEmpty();
 		if (hasProps) {

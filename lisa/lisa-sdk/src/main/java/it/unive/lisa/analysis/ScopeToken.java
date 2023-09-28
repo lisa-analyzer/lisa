@@ -20,7 +20,8 @@ public class ScopeToken {
 	 * 
 	 * @param scoper the code element
 	 */
-	public ScopeToken(CodeElement scoper) {
+	public ScopeToken(
+			CodeElement scoper) {
 		this.scoper = scoper;
 	}
 
@@ -42,7 +43,8 @@ public class ScopeToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

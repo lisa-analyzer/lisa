@@ -53,7 +53,9 @@ public class Program extends Unit {
 	 * @param types    the type system knowing about the types that appear in
 	 *                     the program
 	 */
-	public Program(LanguageFeatures features, TypeSystem types) {
+	public Program(
+			LanguageFeatures features,
+			TypeSystem types) {
 		super(PROGRAM_NAME);
 		this.features = features;
 		this.types = types;
@@ -94,7 +96,8 @@ public class Program extends Unit {
 	 * @throws IllegalArgumentException if the given unit is an instance of this
 	 *                                      class
 	 */
-	public final boolean addUnit(Unit unit) {
+	public final boolean addUnit(
+			Unit unit) {
 		if (unit instanceof Program)
 			throw new IllegalArgumentException("Cannot add a program to another one");
 		return units.putIfAbsent(unit.getName(), unit) == null;
@@ -108,7 +111,8 @@ public class Program extends Unit {
 	 * @return {@code true} if the entry point was successfully added. If this
 	 *             method returns {@code false}, the given cfg is discarded.
 	 */
-	public final boolean addEntryPoint(CFG cm) {
+	public final boolean addEntryPoint(
+			CFG cm) {
 		return entrypoints.add(cm);
 	}
 
@@ -141,7 +145,8 @@ public class Program extends Unit {
 	 * 
 	 * @return the compilation unit with the given name, or {@code null}
 	 */
-	public final Unit getUnit(String name) {
+	public final Unit getUnit(
+			String name) {
 		return units.get(name);
 	}
 

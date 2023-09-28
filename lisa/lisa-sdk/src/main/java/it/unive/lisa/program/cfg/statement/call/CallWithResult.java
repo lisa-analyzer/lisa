@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -41,8 +38,15 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
-	public CallWithResult(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Type staticType, Expression... parameters) {
+	public CallWithResult(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, staticType, parameters);
 	}
 
@@ -60,9 +64,6 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param parameters      the expressions representing the actual parameters
 	 *                            of the call
 	 * @param <A>             the type of {@link AbstractState}
-	 * @param <H>             the type of the {@link HeapDomain}
-	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param <T>             the type of {@link TypeDomain}
 	 * 
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the cfg call. The
@@ -72,32 +73,26 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> compute(
-					AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					StatementStore<A, H, V, T> expressions,
-					ExpressionSet<SymbolicExpression>[] parameters)
-					throws SemanticException;
+	public abstract <A extends AbstractState<A>> AnalysisState<A> compute(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] parameters)
+			throws SemanticException;
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		// the stack has to be empty
-		state = new AnalysisState<>(state.getState(), new ExpressionSet<>(), state.getAliasing());
+		state = new AnalysisState<>(state.getState(), new ExpressionSet(), state.getFixpointInformation());
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V, T> returned = compute(state, interprocedural, expressions, params);
+		AnalysisState<A> returned = compute(state, interprocedural, expressions, params);
 
 		if (interprocedural.returnsVoid(this, returned))
 			// no need to add the meta variable since nothing has been pushed on

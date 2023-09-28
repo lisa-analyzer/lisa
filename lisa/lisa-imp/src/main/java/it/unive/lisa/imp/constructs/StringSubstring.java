@@ -32,7 +32,9 @@ public class StringSubstring extends NativeCFG {
 	 * @param location   the location where this construct is defined
 	 * @param stringUnit the unit where this construct is defined
 	 */
-	public StringSubstring(CodeLocation location, ClassUnit stringUnit) {
+	public StringSubstring(
+			CodeLocation location,
+			ClassUnit stringUnit) {
 		super(new CodeMemberDescriptor(location, stringUnit, true, "substring", BoolType.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE),
 				new Parameter(location, "start", Int32Type.INSTANCE),
@@ -60,12 +62,16 @@ public class StringSubstring extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPStringSubstring build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringSubstring build(
+				CFG cfg,
+				CodeLocation location,
+				Expression... params) {
 			return new IMPStringSubstring(cfg, location, params[0], params[1], params[2]);
 		}
 
 		@Override
-		public void setOriginatingStatement(Statement st) {
+		public void setOriginatingStatement(
+				Statement st) {
 			originating = st;
 		}
 
@@ -81,8 +87,14 @@ public class StringSubstring extends NativeCFG {
 		 * @param middle     the middle operand of this operation
 		 * @param right      the right-hand side of this operation
 		 */
-		public IMPStringSubstring(CFG cfg, String sourceFile, int line, int col, Expression left,
-				Expression middle, Expression right) {
+		public IMPStringSubstring(
+				CFG cfg,
+				String sourceFile,
+				int line,
+				int col,
+				Expression left,
+				Expression middle,
+				Expression right) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, middle, right);
 		}
 
@@ -95,7 +107,11 @@ public class StringSubstring extends NativeCFG {
 		 * @param middle   the middle operand of this operation
 		 * @param right    the right-hand side of this operation
 		 */
-		public IMPStringSubstring(CFG cfg, CodeLocation location, Expression left, Expression middle,
+		public IMPStringSubstring(
+				CFG cfg,
+				CodeLocation location,
+				Expression left,
+				Expression middle,
 				Expression right) {
 			super(cfg, location, left, middle, right);
 		}

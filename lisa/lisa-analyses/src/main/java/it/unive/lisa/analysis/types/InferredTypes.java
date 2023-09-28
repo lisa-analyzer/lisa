@@ -2,24 +2,20 @@ package it.unive.lisa.analysis.types;
 
 import static org.apache.commons.collections4.CollectionUtils.intersection;
 
-import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.SetRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
@@ -31,6 +27,9 @@ import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
+import it.unive.lisa.util.representation.SetRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,7 +42,6 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-@FallbackImplementation
 public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes> {
 
 	private static final InferredTypes BOTTOM = new InferredTypes(null, Collections.emptySet());
@@ -67,7 +65,9 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	 *                       where this element is created
 	 * @param type       the type to be included in the set of inferred types
 	 */
-	public InferredTypes(TypeSystem typeSystem, Type type) {
+	public InferredTypes(
+			TypeSystem typeSystem,
+			Type type) {
 		this(typeSystem, Collections.singleton(type));
 	}
 
@@ -79,7 +79,9 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	 *                       where this element is created
 	 * @param types      the types to be included in the set of inferred types
 	 */
-	public InferredTypes(TypeSystem typeSystem, Set<Type> types) {
+	public InferredTypes(
+			TypeSystem typeSystem,
+			Set<Type> types) {
 		this(typeSystem != null && types.equals(typeSystem.getTypes()), types);
 	}
 
@@ -91,7 +93,9 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	 *                  types
 	 * @param types the types to be included in the set of inferred types
 	 */
-	public InferredTypes(boolean isTop, Set<Type> types) {
+	public InferredTypes(
+			boolean isTop,
+			Set<Type> types) {
 		this.elements = types;
 		this.isTop = isTop;
 	}
@@ -133,7 +137,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isTop())
 			return Lattice.topRepresentation();
 
@@ -144,36 +148,61 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public InferredTypes evalIdentifier(Identifier id, TypeEnvironment<InferredTypes> environment,
-			ProgramPoint pp) throws SemanticException {
-		InferredTypes eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp);
+	public InferredTypes evalIdentifier(
+			Identifier id,
+			TypeEnvironment<InferredTypes> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		InferredTypes eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp, oracle);
 		if (!eval.isTop() && !eval.isBottom())
 			return eval;
 		TypeSystem types = pp.getProgram().getTypes();
-		return new InferredTypes(types, id.getRuntimeTypes(types));
+		return new InferredTypes(types, id.getStaticType().allInstances(types));
 	}
 
 	@Override
-	public InferredTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
+	public InferredTypes evalPushAny(
+			PushAny pushAny,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		TypeSystem types = pp.getProgram().getTypes();
 		if (pushAny.getStaticType().isUntyped())
 			return new InferredTypes(true, types.getTypes());
-		return new InferredTypes(types, pushAny.getRuntimeTypes(types));
+		return new InferredTypes(types, pushAny.getStaticType().allInstances(types));
 	}
 
 	@Override
-	public InferredTypes evalNullConstant(ProgramPoint pp) {
+	public InferredTypes evalPushInv(
+			PushInv pushInv,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return bottom();
+	}
+
+	@Override
+	public InferredTypes evalNullConstant(
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return new InferredTypes(pp.getProgram().getTypes(), NullType.INSTANCE);
 	}
 
 	@Override
-	public InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public InferredTypes evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return new InferredTypes(pp.getProgram().getTypes(), constant.getStaticType());
 	}
 
 	@Override
-	public InferredTypes evalUnaryExpression(UnaryOperator operator, InferredTypes arg,
-			ProgramPoint pp) {
+	public InferredTypes evalUnaryExpression(
+			UnaryOperator operator,
+			InferredTypes arg,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> elems = arg.isTop() ? types.getTypes() : arg.elements;
 		Set<Type> inferred = operator.typeInference(types, elems);
@@ -183,8 +212,12 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left,
-			InferredTypes right, ProgramPoint pp) {
+	public InferredTypes evalBinaryExpression(
+			BinaryOperator operator,
+			InferredTypes left,
+			InferredTypes right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
 		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
@@ -195,8 +228,13 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public InferredTypes evalTernaryExpression(TernaryOperator operator, InferredTypes left,
-			InferredTypes middle, InferredTypes right, ProgramPoint pp) {
+	public InferredTypes evalTernaryExpression(
+			TernaryOperator operator,
+			InferredTypes left,
+			InferredTypes middle,
+			InferredTypes right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
 		Set<Type> melems = middle.isTop() ? types.getTypes() : middle.elements;
@@ -208,8 +246,12 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, InferredTypes left,
-			InferredTypes right, ProgramPoint pp) {
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			InferredTypes left,
+			InferredTypes right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
 		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
@@ -245,7 +287,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 					return Satisfiability.UNKNOWN;
 			}
 		} else if (operator == TypeCheck.INSTANCE) {
-			if (evalBinaryExpression(TypeCast.INSTANCE, left, right, pp).isBottom())
+			if (evalBinaryExpression(TypeCast.INSTANCE, left, right, pp, oracle).isBottom())
 				// no common types, the check will always fail
 				return Satisfiability.NOT_SATISFIED;
 			AtomicBoolean mightFail = new AtomicBoolean();
@@ -282,7 +324,9 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	 *                                  {@link TypeTokenType} (this is due to
 	 *                                  the conversion)
 	 */
-	static boolean typeTokensIntersect(Set<Type> lfiltered, Set<Type> rfiltered) {
+	static boolean typeTokensIntersect(
+			Set<Type> lfiltered,
+			Set<Type> rfiltered) {
 		for (Type l : lfiltered)
 			for (Type r : rfiltered)
 				if (!intersection(l.asTypeTokenType().getTypes(), r.asTypeTokenType().getTypes())
@@ -293,14 +337,18 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public InferredTypes lubAux(InferredTypes other) throws SemanticException {
+	public InferredTypes lubAux(
+			InferredTypes other)
+			throws SemanticException {
 		Set<Type> lub = new HashSet<>(elements);
 		lub.addAll(other.elements);
 		return new InferredTypes(null, lub);
 	}
 
 	@Override
-	public boolean lessOrEqualAux(InferredTypes other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			InferredTypes other)
+			throws SemanticException {
 		return other.elements.containsAll(elements);
 	}
 
@@ -314,7 +362,8 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -333,8 +382,12 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public InferredTypes evalTypeCast(BinaryExpression cast, InferredTypes left, InferredTypes right,
-			ProgramPoint pp) {
+	public InferredTypes evalTypeCast(
+			BinaryExpression cast,
+			InferredTypes left,
+			InferredTypes right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
 		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
@@ -345,8 +398,12 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
-	public InferredTypes evalTypeConv(BinaryExpression conv, InferredTypes left, InferredTypes right,
-			ProgramPoint pp) {
+	public InferredTypes evalTypeConv(
+			BinaryExpression conv,
+			InferredTypes left,
+			InferredTypes right,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
 		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
@@ -354,16 +411,5 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		if (inferred.isEmpty())
 			return BOTTOM;
 		return new InferredTypes(types, inferred);
-	}
-
-	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !(id instanceof MemoryPointer);
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		// Type analysis can process any expression
-		return true;
 	}
 }

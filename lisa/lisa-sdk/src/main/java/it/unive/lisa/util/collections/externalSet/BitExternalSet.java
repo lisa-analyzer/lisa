@@ -35,7 +35,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	 * 
 	 * @param cache the cache
 	 */
-	BitExternalSet(ExternalSetCache<T> cache) {
+	BitExternalSet(
+			ExternalSetCache<T> cache) {
 		this.bits = new long[1];
 		this.cache = cache;
 	}
@@ -46,7 +47,9 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	 * @param bits  the bits
 	 * @param cache the cache
 	 */
-	BitExternalSet(long[] bits, ExternalSetCache<T> cache) {
+	BitExternalSet(
+			long[] bits,
+			ExternalSetCache<T> cache) {
 		this.bits = bits;
 		this.cache = cache;
 	}
@@ -56,7 +59,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	 * 
 	 * @param other the other set
 	 */
-	BitExternalSet(BitExternalSet<T> other) {
+	BitExternalSet(
+			BitExternalSet<T> other) {
 		this.bits = other.bits.clone();
 		this.cache = other.cache;
 	}
@@ -68,7 +72,9 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	 * @param cache   the cache
 	 * @param element the element
 	 */
-	BitExternalSet(ExternalSetCache<T> cache, T element) {
+	BitExternalSet(
+			ExternalSetCache<T> cache,
+			T element) {
 		this.cache = cache;
 		int pos = cache.indexOfOrAdd(element);
 		bits = new long[1 + (pos >> 6)];
@@ -82,7 +88,9 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	 * @param cache    the cache that must be used for this set
 	 * @param elements the elements put inside the set
 	 */
-	BitExternalSet(ExternalSetCache<T> cache, Iterable<T> elements) {
+	BitExternalSet(
+			ExternalSetCache<T> cache,
+			Iterable<T> elements) {
 		this(cache);
 		for (T e : elements)
 			add(e);
@@ -93,20 +101,23 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 		return cache;
 	}
 
-	private void expand(int targetLength) {
+	private void expand(
+			int targetLength) {
 		long[] localbits = bits;
 		bits = new long[targetLength];
 		System.arraycopy(localbits, 0, bits, 0, localbits.length);
 	}
 
-	private void shrink(int targetLength) {
+	private void shrink(
+			int targetLength) {
 		long[] localbits = bits;
 		bits = new long[targetLength];
 		System.arraycopy(localbits, 0, bits, 0, targetLength);
 	}
 
 	@Override
-	public boolean add(T e) {
+	public boolean add(
+			T e) {
 		long[] localbits = bits;
 		int pos = cache.indexOfOrAdd(e);
 		int bitvector = pos >> 6;
@@ -125,7 +136,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public void addAll(ExternalSet<T> other) {
+	public void addAll(
+			ExternalSet<T> other) {
 		if (this == other)
 			return;
 		if (other == null)
@@ -150,7 +162,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean remove(Object e) {
+	public boolean remove(
+			Object e) {
 		int pos;
 		try {
 			pos = cache.indexOf((T) e);
@@ -227,7 +240,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (obj == null)
 			return false;
 		if (this == obj)
@@ -265,7 +279,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public boolean contains(ExternalSet<T> other) {
+	public boolean contains(
+			ExternalSet<T> other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -292,7 +307,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public boolean intersects(ExternalSet<T> other) {
+	public boolean intersects(
+			ExternalSet<T> other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -315,7 +331,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public ExternalSet<T> intersection(ExternalSet<T> other) {
+	public ExternalSet<T> intersection(
+			ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -353,7 +370,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public ExternalSet<T> difference(ExternalSet<T> other) {
+	public ExternalSet<T> difference(
+			ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -382,7 +400,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public ExternalSet<T> union(ExternalSet<T> other) {
+	public ExternalSet<T> union(
+			ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -507,7 +526,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean contains(Object o) {
+	public boolean contains(
+			Object o) {
 		int pos;
 		try {
 			pos = cache.indexOf((T) o);
@@ -534,12 +554,14 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public <E> E[] toArray(E[] a) {
+	public <E> E[] toArray(
+			E[] a) {
 		return new ArrayList<>(this).toArray(a);
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+	public boolean containsAll(
+			Collection<?> c) {
 		for (Object o : c)
 			if (!contains(o))
 				return false;
@@ -547,7 +569,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends T> c) {
+	public boolean addAll(
+			Collection<? extends T> c) {
 		boolean result = false;
 		for (T o : c)
 			result |= add(o);
@@ -555,7 +578,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(
+			Collection<?> c) {
 		Collection<T> toRemove = new ArrayList<>();
 		for (T o : this)
 			if (!c.contains(o))
@@ -567,7 +591,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(
+			Collection<?> c) {
 		Collection<T> toRemove = new ArrayList<>();
 		for (T o : this)
 			if (c.contains(o))

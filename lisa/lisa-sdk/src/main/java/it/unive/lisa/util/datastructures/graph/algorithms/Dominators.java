@@ -62,7 +62,8 @@ public class Dominators<G extends Graph<G, N, E>, N extends Node<G, N, E>, E ext
 	 * @return a map containing, for each node of the graph, the set of nodes
 	 *             that dominates it
 	 */
-	public Map<N, Set<N>> build(G graph) {
+	public Map<N, Set<N>> build(
+			G graph) {
 		dominators.clear();
 		Collection<N> entries = graph.getEntrypoints();
 		WorkingSet<N> ws = FIFOWorkingSet.mk();
@@ -86,7 +87,8 @@ public class Dominators<G extends Graph<G, N, E>, N extends Node<G, N, E>, E ext
 		return dominators;
 	}
 
-	private Set<N> intersect(Collection<N> nodes) {
+	private Set<N> intersect(
+			Collection<N> nodes) {
 		if (nodes == null || nodes.isEmpty())
 			return Collections.emptySet();
 

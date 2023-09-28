@@ -14,7 +14,8 @@ public class FloatAnnotationValue implements BasicAnnotationValue {
 	 * 
 	 * @param f the float value
 	 */
-	public FloatAnnotationValue(float f) {
+	public FloatAnnotationValue(
+			float f) {
 		this.f = f;
 	}
 
@@ -27,7 +28,8 @@ public class FloatAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -46,7 +48,8 @@ public class FloatAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof FloatAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

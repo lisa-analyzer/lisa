@@ -15,7 +15,8 @@ import java.util.SortedSet;
  * @param <T> the concrete type of the elements in the sets
  */
 public class ValueNonRedundantSet<T extends ValueDomain<T>>
-		extends NonRedundantPowerset<ValueNonRedundantSet<T>, T, ValueExpression, Identifier> {
+		extends
+		NonRedundantPowerset<ValueNonRedundantSet<T>, T, ValueExpression, Identifier> {
 
 	/**
 	 * Builds the value non redundant set.
@@ -25,12 +26,18 @@ public class ValueNonRedundantSet<T extends ValueDomain<T>>
 	 * @param valueDomain an element representing the types of elements in the
 	 *                        set
 	 */
-	public ValueNonRedundantSet(SortedSet<T> elements, boolean isTop, T valueDomain) {
+	public ValueNonRedundantSet(
+			SortedSet<T> elements,
+			boolean isTop,
+			T valueDomain) {
 		super(elements, isTop, valueDomain);
 	}
 
 	@Override
-	public ValueNonRedundantSet<T> mk(SortedSet<T> set, boolean isTop, T valueDomain) {
+	public ValueNonRedundantSet<T> mk(
+			SortedSet<T> set,
+			boolean isTop,
+			T valueDomain) {
 		return new ValueNonRedundantSet<>(set, isTop, valueDomain);
 	}
 
@@ -44,4 +51,9 @@ public class ValueNonRedundantSet<T extends ValueDomain<T>>
 		return this.isTop && this.elements.isEmpty();
 	}
 
+	@Override
+	public boolean knowsIdentifier(
+			Identifier id) {
+		return elements.stream().anyMatch(e -> e.knowsIdentifier(id));
+	}
 }

@@ -1,6 +1,8 @@
 package it.unive.lisa.analysis.string;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.SemanticException;
 import org.junit.Test;

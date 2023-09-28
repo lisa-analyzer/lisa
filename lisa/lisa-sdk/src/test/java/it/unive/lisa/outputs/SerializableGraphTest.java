@@ -33,14 +33,19 @@ public class SerializableGraphTest {
 	private static final ClassUnit unit = new ClassUnit(SyntheticLocation.INSTANCE,
 			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "Testing", false);
 
-	private static void addNode(SortedSet<SerializableNode> nodes, Statement st, Statement... inner) {
+	private static void addNode(
+			SortedSet<SerializableNode> nodes,
+			Statement st,
+			Statement... inner) {
 		List<Integer> list = new ArrayList<>(inner.length);
 		for (int i = 0; i < inner.length; i++)
 			list.add(inner[i].getOffset());
 		nodes.add(new SerializableNode(st.getOffset(), list, st.toString()));
 	}
 
-	private static void addEdge(SortedSet<SerializableEdge> edges, Edge e) {
+	private static void addEdge(
+			SortedSet<SerializableEdge> edges,
+			Edge e) {
 		edges.add(new SerializableEdge(e.getSource().getOffset(), e.getDestination().getOffset(),
 				e.getClass().getSimpleName()));
 	}

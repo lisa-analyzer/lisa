@@ -32,7 +32,8 @@ public final class EmptySet extends RegularExpression {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(
+			Object other) {
 		return other instanceof EmptySet;
 	}
 
@@ -43,12 +44,15 @@ public final class EmptySet extends RegularExpression {
 
 	@Override
 	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+			T extends TransitionSymbol<T>> A toAutomaton(
+					AutomataFactory<A, T> factory) {
 		return factory.emptyLanguage();
 	}
 
 	@Override
-	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(
+			int charsToSkip,
+			int missingChars) {
 		return Collections.emptySet();
 	}
 
@@ -58,7 +62,8 @@ public final class EmptySet extends RegularExpression {
 	}
 
 	@Override
-	public boolean is(String str) {
+	public boolean is(
+			String str) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -73,37 +78,44 @@ public final class EmptySet extends RegularExpression {
 	}
 
 	@Override
-	public boolean mayContain(String s) {
+	public boolean mayContain(
+			String s) {
 		return false;
 	}
 
 	@Override
-	public boolean contains(String s) {
+	public boolean contains(
+			String s) {
 		return false;
 	}
 
 	@Override
-	public boolean mayStartWith(String s) {
+	public boolean mayStartWith(
+			String s) {
 		return false;
 	}
 
 	@Override
-	public boolean startsWith(String s) {
+	public boolean startsWith(
+			String s) {
 		return false;
 	}
 
 	@Override
-	public boolean mayEndWith(String s) {
+	public boolean mayEndWith(
+			String s) {
 		return false;
 	}
 
 	@Override
-	public boolean endsWith(String s) {
+	public boolean endsWith(
+			String s) {
 		return false;
 	}
 
 	@Override
-	protected RegularExpression unrollStarToFixedLength(int length) {
+	protected RegularExpression unrollStarToFixedLength(
+			int length) {
 		return this;
 	}
 
@@ -128,12 +140,14 @@ public final class EmptySet extends RegularExpression {
 	}
 
 	@Override
-	protected int compareToAux(RegularExpression other) {
+	protected int compareToAux(
+			RegularExpression other) {
 		return 0;
 	}
 
 	@Override
-	public RegularExpression repeat(long n) {
+	public RegularExpression repeat(
+			long n) {
 		return this;
 	}
 

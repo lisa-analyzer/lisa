@@ -31,5 +31,9 @@ public interface ParameterMatchingStrategy {
 	 * 
 	 * @return {@code true} if and only if that condition holds
 	 */
-	boolean matches(Call call, Parameter[] formals, Expression[] actuals, Set<Type>[] types);
+	boolean matches(
+			Call call,
+			Parameter[] formals,
+			Expression[] actuals,
+			Set<Type>[] types);
 }

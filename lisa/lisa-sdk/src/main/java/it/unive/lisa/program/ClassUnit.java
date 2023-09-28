@@ -37,7 +37,11 @@ public class ClassUnit extends CompilationUnit {
 	 *                     cannot be used as super unit of other compilation
 	 *                     units
 	 */
-	public ClassUnit(CodeLocation location, Program program, String name, boolean sealed) {
+	public ClassUnit(
+			CodeLocation location,
+			Program program,
+			String name,
+			boolean sealed) {
 		super(location, program, name, sealed);
 		Objects.requireNonNull(location, "The location of a unit cannot be null.");
 		superclasses = new LinkedList<>();
@@ -75,7 +79,8 @@ public class ClassUnit extends CompilationUnit {
 	 * @return {@code true} if the collection of superclasses changed as a
 	 *             result of the call
 	 */
-	public final boolean addSuperclass(ClassUnit unit) {
+	public final boolean addSuperclass(
+			ClassUnit unit) {
 		return superclasses.add(unit);
 	}
 
@@ -87,18 +92,22 @@ public class ClassUnit extends CompilationUnit {
 	 * @return {@code true} if the collection of interfaces changed as a result
 	 *             of the call
 	 */
-	public final boolean addInterface(InterfaceUnit unit) {
+	public final boolean addInterface(
+			InterfaceUnit unit) {
 		return interfaces.add(unit);
 	}
 
 	@Override
-	public boolean isInstanceOf(CompilationUnit unit) {
+	public boolean isInstanceOf(
+			CompilationUnit unit) {
 		return this == unit || unit.instances.contains(this)
 				|| getImmediateAncestors().stream().anyMatch(u -> u.isInstanceOf(unit));
 	}
 
 	@Override
-	public void addInstance(Unit unit) throws ProgramValidationException {
+	public void addInstance(
+			Unit unit)
+			throws ProgramValidationException {
 		if (superclasses.contains(unit) || interfaces.contains(unit))
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
 					+ " is both an ancestor and an instance of " + this);
@@ -117,7 +126,8 @@ public class ClassUnit extends CompilationUnit {
 	}
 
 	@Override
-	public boolean addAncestor(CompilationUnit unit) {
+	public boolean addAncestor(
+			CompilationUnit unit) {
 		if (unit instanceof ClassUnit)
 			return superclasses.add((ClassUnit) unit);
 		else

@@ -40,7 +40,9 @@ public class BitwiseNegation implements BitwiseOperator, UnaryOperator {
 	}
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> argument) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> argument) {
 		if (argument.stream().noneMatch(Type::isNumericType))
 			return Collections.emptySet();
 		return argument.stream().filter(Type::isNumericType).collect(Collectors.toSet());

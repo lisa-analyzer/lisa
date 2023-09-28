@@ -2,16 +2,15 @@ package it.unive.lisa.analysis.heap.pointbased;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +26,8 @@ import java.util.function.Predicate;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
-		implements NonRelationalHeapDomain<AllocationSites> {
+		implements
+		NonRelationalHeapDomain<AllocationSites> {
 
 	private static final AllocationSites TOP = new AllocationSites(new HashSet<>(), true);
 	private static final AllocationSites BOTTOM = new AllocationSites(new HashSet<>(), false);
@@ -46,7 +46,9 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	 * @param set   the set of {@link AllocationSite}s
 	 * @param isTop whether this instance is the top of the lattice
 	 */
-	AllocationSites(Set<AllocationSite> set, boolean isTop) {
+	AllocationSites(
+			Set<AllocationSite> set,
+			boolean isTop) {
 		super(set, isTop);
 	}
 
@@ -61,7 +63,8 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public AllocationSites mk(Set<AllocationSite> set) {
+	public AllocationSites mk(
+			Set<AllocationSite> set) {
 		return new AllocationSites(set, false);
 	}
 
@@ -71,20 +74,21 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public AllocationSites eval(SymbolicExpression expression,
-			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) {
+	public AllocationSites eval(
+			SymbolicExpression expression,
+			HeapEnvironment<AllocationSites> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return new AllocationSites(Collections.singleton((AllocationSite) expression), false);
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression,
-			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) {
+	public Satisfiability satisfies(
+			SymbolicExpression expression,
+			HeapEnvironment<AllocationSites> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	public DomainRepresentation representation() {
-		return new StringRepresentation(toString());
 	}
 
 	@Override
@@ -93,7 +97,9 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public AllocationSites lubAux(AllocationSites other) throws SemanticException {
+	public AllocationSites lubAux(
+			AllocationSites other)
+			throws SemanticException {
 		Map<String, AllocationSite> lub = new HashMap<>();
 
 		// all weak identifiers are part of the lub
@@ -115,24 +121,71 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return id.getDynamicType().isPointerType() || id.getDynamicType().isUntyped();
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
+	public boolean canProcess(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		return expression instanceof AllocationSite;
 	}
 
 	@Override
-	public HeapEnvironment<AllocationSites> assume(HeapEnvironment<AllocationSites> environment,
-			SymbolicExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+	public HeapEnvironment<AllocationSites> assume(
+			HeapEnvironment<AllocationSites> environment,
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return environment;
 	}
 
 	@Override
-	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression,
-			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) throws SemanticException {
-		return new ExpressionSet<>();
+	public ExpressionSet rewrite(
+			SymbolicExpression expression,
+			HeapEnvironment<AllocationSites> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return new ExpressionSet();
+	}
+
+	/**
+	 * Applies a substitution to the contents of this set of allocation sites,
+	 * similarly to
+	 * {@link ValueDomain#applyReplacement(it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement, ProgramPoint, SemanticOracle)}.
+	 * 
+	 * @param r  the substitution
+	 * @param pp the program point where the substitution is applied
+	 * 
+	 * @return a copy of this set of sites where the substitution has been
+	 *             applied
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public AllocationSites applyReplacement(
+			HeapReplacement r,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isTop() || isBottom() || r.getSources().isEmpty())
+			return this;
+
+		Set<AllocationSite> copy = new HashSet<>(elements);
+		if (copy.removeAll(r.getSources())) {
+			r.getTargets().stream()
+					.filter(AllocationSite.class::isInstance)
+					.map(AllocationSite.class::cast)
+					.forEach(copy::add);
+			return new AllocationSites(copy, false);
+		} else
+			return this;
+	}
+
+	@Override
+	public AllocationSites unknownVariable(
+			Identifier id) {
+		// we use bottom since heap environments track all possible keys: the
+		// absence of a key means no information (bottom) instead of any
+		// possible information (top)
+		return bottom();
 	}
 }
