@@ -97,7 +97,8 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 	}
 
 	@Override
-	protected boolean canShortcut(CFG cfg) {
+	protected boolean canShortcut(
+			CFG cfg) {
 		// we want to compute the recursive chain with no shortcuts
 		return !recursion.getMembers().contains(cfg);
 	}
@@ -130,6 +131,9 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 		ExpressionSet[] params = new ExpressionSet[actuals.length];
 		for (int i = 0; i < params.length; i++)
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
-		return start.expressionSemantics(this, entryState.postState.top(), params, entryState.intermediateStates);
+		// it should be enough to send values to top, retaining all type
+		// information
+		return start.expressionSemantics(this, entryState.postState.withTopValues(), params,
+				entryState.intermediateStates);
 	}
 }

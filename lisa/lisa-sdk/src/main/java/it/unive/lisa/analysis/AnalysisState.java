@@ -26,7 +26,8 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @param <A> the type of {@link AbstractState} embedded in this state
  */
 public class AnalysisState<A extends AbstractState<A>>
-		implements BaseLattice<AnalysisState<A>>,
+		implements
+		BaseLattice<AnalysisState<A>>,
 		StructuredObject,
 		ScopedObject<AnalysisState<A>> {
 
@@ -53,7 +54,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	 *                               analysis state
 	 * @param computedExpression the expression that has been computed
 	 */
-	public AnalysisState(A state, SymbolicExpression computedExpression) {
+	public AnalysisState(
+			A state,
+			SymbolicExpression computedExpression) {
 		this(state, new ExpressionSet(computedExpression), null);
 	}
 
@@ -64,7 +67,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	 *                                analysis state
 	 * @param computedExpressions the expressions that have been computed
 	 */
-	public AnalysisState(A state, ExpressionSet computedExpressions) {
+	public AnalysisState(
+			A state,
+			ExpressionSet computedExpressions) {
 		this(state, computedExpressions, null);
 	}
 
@@ -77,7 +82,10 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @param info               the additional information to be computed
 	 *                               during fixpoint computations
 	 */
-	public AnalysisState(A state, SymbolicExpression computedExpression, FixpointInfo info) {
+	public AnalysisState(
+			A state,
+			SymbolicExpression computedExpression,
+			FixpointInfo info) {
 		this(state, new ExpressionSet(computedExpression), info);
 	}
 
@@ -90,7 +98,10 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @param info                the additional information to be computed
 	 *                                during fixpoint computations
 	 */
-	public AnalysisState(A state, ExpressionSet computedExpressions, FixpointInfo info) {
+	public AnalysisState(
+			A state,
+			ExpressionSet computedExpressions,
+			FixpointInfo info) {
 		this.state = state;
 		this.computedExpressions = computedExpressions;
 		this.info = info;
@@ -125,7 +136,8 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @return the mapped information
 	 */
-	public Lattice<?> getInfo(String key) {
+	public Lattice<?> getInfo(
+			String key) {
 		return info == null ? null : info.get(key);
 	}
 
@@ -140,7 +152,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @return the mapped information
 	 */
-	public <T> T getInfo(String key, Class<T> type) {
+	public <T> T getInfo(
+			String key,
+			Class<T> type) {
 		return info == null ? null : info.get(key, type);
 	}
 
@@ -156,7 +170,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @return a new instance with the updated mapping
 	 */
-	public AnalysisState<A> storeInfo(String key, Lattice<?> info) {
+	public AnalysisState<A> storeInfo(
+			String key,
+			Lattice<?> info) {
 		FixpointInfo fixinfo = this.info == null ? new FixpointInfo() : this.info;
 		fixinfo = fixinfo.put(key, info);
 		return new AnalysisState<>(state, computedExpressions, fixinfo);
@@ -177,7 +193,10 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the lub
 	 */
-	public AnalysisState<A> weakStoreInfo(String key, Lattice<?> info) throws SemanticException {
+	public AnalysisState<A> weakStoreInfo(
+			String key,
+			Lattice<?> info)
+			throws SemanticException {
 		FixpointInfo fixinfo = this.info == null ? new FixpointInfo() : this.info;
 		fixinfo = fixinfo.putWeak(key, info);
 		return new AnalysisState<>(state, computedExpressions, fixinfo);
@@ -330,7 +349,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalysisState<A> pushScope(ScopeToken scope) throws SemanticException {
+	public AnalysisState<A> pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return new AnalysisState<>(
 				state.pushScope(scope),
 				onAllExpressions(this.computedExpressions, scope, true),
@@ -339,7 +360,9 @@ public class AnalysisState<A extends AbstractState<A>>
 
 	private static ExpressionSet onAllExpressions(
 			ExpressionSet computedExpressions,
-			ScopeToken scope, boolean push) throws SemanticException {
+			ScopeToken scope,
+			boolean push)
+			throws SemanticException {
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression exp : computedExpressions)
 			result.add(push ? exp.pushScope(scope) : exp.popScope(scope));
@@ -347,7 +370,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalysisState<A> popScope(ScopeToken scope) throws SemanticException {
+	public AnalysisState<A> popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		return new AnalysisState<>(
 				state.popScope(scope),
 				onAllExpressions(this.computedExpressions, scope, false),
@@ -355,7 +380,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalysisState<A> lubAux(AnalysisState<A> other) throws SemanticException {
+	public AnalysisState<A> lubAux(
+			AnalysisState<A> other)
+			throws SemanticException {
 		return new AnalysisState<>(
 				state.lub(other.state),
 				computedExpressions.lub(other.computedExpressions),
@@ -363,7 +390,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalysisState<A> glbAux(AnalysisState<A> other) throws SemanticException {
+	public AnalysisState<A> glbAux(
+			AnalysisState<A> other)
+			throws SemanticException {
 		return new AnalysisState<>(
 				state.glb(other.state),
 				computedExpressions.glb(other.computedExpressions),
@@ -371,7 +400,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalysisState<A> wideningAux(AnalysisState<A> other) throws SemanticException {
+	public AnalysisState<A> wideningAux(
+			AnalysisState<A> other)
+			throws SemanticException {
 		return new AnalysisState<>(
 				state.widening(other.state),
 				computedExpressions.lub(other.computedExpressions),
@@ -379,7 +410,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalysisState<A> narrowingAux(AnalysisState<A> other) throws SemanticException {
+	public AnalysisState<A> narrowingAux(
+			AnalysisState<A> other)
+			throws SemanticException {
 		return new AnalysisState<>(
 				state.narrowing(other.state),
 				computedExpressions.glb(other.computedExpressions),
@@ -387,7 +420,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public boolean lessOrEqualAux(AnalysisState<A> other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			AnalysisState<A> other)
+			throws SemanticException {
 		return state.lessOrEqual(other.state)
 				&& computedExpressions.lessOrEqual(other.computedExpressions)
 				&& (info == null ? true : info.lessOrEqual(other.info));
@@ -424,7 +459,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public AnalysisState<A> forgetIdentifier(Identifier id) throws SemanticException {
+	public AnalysisState<A> forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions, info);
 	}
 
@@ -439,7 +476,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public AnalysisState<A> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public AnalysisState<A> forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		return new AnalysisState<>(state.forgetIdentifiersIf(test), computedExpressions, info);
 	}
 
@@ -453,7 +492,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public AnalysisState<A> forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public AnalysisState<A> forgetIdentifiers(
+			Iterable<Identifier> ids)
+			throws SemanticException {
 		AnalysisState<A> result = this;
 		for (Identifier id : ids)
 			result = result.forgetIdentifier(id);
@@ -471,7 +512,8 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -532,5 +574,39 @@ public class AnalysisState<A extends AbstractState<A>>
 	@Override
 	public String toString() {
 		return representation().toString();
+	}
+
+	/**
+	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * memory abstraction set to top. This is useful to represent effects of
+	 * unknown calls that arbitrarily manipulate the memory.
+	 * 
+	 * @return the copy with top memory
+	 */
+	public AnalysisState<A> withTopMemory() {
+		return new AnalysisState<>(state.withTopMemory(), computedExpressions, info);
+	}
+
+	/**
+	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * value abstraction set to top. This is useful to represent effects of
+	 * unknown calls that arbitrarily manipulate the values of variables.
+	 * 
+	 * @return the copy with top value
+	 */
+	public AnalysisState<A> withTopValues() {
+		return new AnalysisState<>(state.withTopValues(), computedExpressions, info);
+	}
+
+	/**
+	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * type abstraction set to top. This is useful to represent effects of
+	 * unknown calls that arbitrarily manipulate the values of variables (and
+	 * their type accordingly).
+	 * 
+	 * @return the copy with top type
+	 */
+	public AnalysisState<A> withTopTypes() {
+		return new AnalysisState<>(state.withTopTypes(), computedExpressions, info);
 	}
 }

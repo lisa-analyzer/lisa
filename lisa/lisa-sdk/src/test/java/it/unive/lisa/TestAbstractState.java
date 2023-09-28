@@ -58,4 +58,35 @@ public class TestAbstractState extends TestDomain<TestAbstractState, SymbolicExp
 			throws SemanticException {
 		return Untyped.INSTANCE;
 	}
+
+	@Override
+	public boolean lessOrEqual(
+			TestAbstractState other)
+			throws SemanticException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public TestAbstractState lub(
+			TestAbstractState other)
+			throws SemanticException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TestAbstractState withTopMemory() {
+		return this;
+	}
+
+	@Override
+	public TestAbstractState withTopValues() {
+		return this;
+	}
+
+	@Override
+	public TestAbstractState withTopTypes() {
+		return this;
+	}
 }

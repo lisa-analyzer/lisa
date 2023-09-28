@@ -14,5 +14,35 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <A> the concrete type of the {@link AbstractState}
  */
 public interface AbstractState<A extends AbstractState<A>>
-		extends SemanticOracle, Lattice<A>, SemanticDomain<A, SymbolicExpression, Identifier> {
+		extends
+		SemanticOracle,
+		Lattice<A>,
+		SemanticDomain<A, SymbolicExpression, Identifier> {
+
+	/**
+	 * Yields a copy of this state, but with its memory abstraction set to top.
+	 * This is useful to represent effects of unknown calls that arbitrarily
+	 * manipulate the memory.
+	 * 
+	 * @return the copy with top memory
+	 */
+	A withTopMemory();
+
+	/**
+	 * Yields a copy of this state, but with its value abstraction set to top.
+	 * This is useful to represent effects of unknown calls that arbitrarily
+	 * manipulate the values of variables.
+	 * 
+	 * @return the copy with top values
+	 */
+	A withTopValues();
+
+	/**
+	 * Yields a copy of this state, but with its type abstraction set to top.
+	 * This is useful to represent effects of unknown calls that arbitrarily
+	 * manipulate the values of variables (and their type accordingly).
+	 * 
+	 * @return the copy with top types
+	 */
+	A withTopTypes();
 }

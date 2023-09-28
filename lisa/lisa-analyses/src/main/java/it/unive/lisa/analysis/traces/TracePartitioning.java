@@ -411,4 +411,37 @@ public class TracePartitioning<A extends AbstractState<A>>
 				return true;
 		return false;
 	}
+
+	@Override
+	public TracePartitioning<A> withTopMemory() {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		for (Entry<ExecutionTrace, A> trace : this)
+			result.put(trace.getKey(), trace.getValue().withTopMemory());
+		return new TracePartitioning<>(lattice, result);
+	}
+
+	@Override
+	public TracePartitioning<A> withTopValues() {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		for (Entry<ExecutionTrace, A> trace : this)
+			result.put(trace.getKey(), trace.getValue().withTopValues());
+		return new TracePartitioning<>(lattice, result);
+	}
+
+	@Override
+	public TracePartitioning<A> withTopTypes() {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		for (Entry<ExecutionTrace, A> trace : this)
+			result.put(trace.getKey(), trace.getValue().withTopTypes());
+		return new TracePartitioning<>(lattice, result);
+	}
 }

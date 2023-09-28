@@ -593,6 +593,21 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		return heapState.knowsIdentifier(id) || valueState.knowsIdentifier(id) || typeState.knowsIdentifier(id);
 	}
 
+	@Override
+	public SimpleAbstractState<H, V, T> withTopMemory() {
+		return new SimpleAbstractState<>(heapState.top(), valueState, typeState);
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> withTopValues() {
+		return new SimpleAbstractState<>(heapState, valueState.top(), typeState);
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> withTopTypes() {
+		return new SimpleAbstractState<>(heapState, valueState, typeState.top());
+	}
+
 	private static class MutableOracle<H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> implements SemanticOracle {

@@ -82,7 +82,7 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of calls that target the code members
 	 */
-	public Collection<Call> getCallSites(Collection<CodeMember> cms) {
+	public Collection<Call> getCallSites(Collection<? extends CodeMember> cms) {
 		Set<Call> result = new HashSet<>();
 		cms.forEach(cm -> getCallSites(cm).stream().forEach(result::add));
 		return result;
@@ -97,7 +97,7 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callers code members
 	 */
-	public Collection<CodeMember> getCallers(Collection<CodeMember> cms) {
+	public Collection<CodeMember> getCallers(Collection<? extends CodeMember> cms) {
 		Set<CodeMember> result = new HashSet<>();
 		cms.forEach(cm -> getCallers(cm).stream().forEach(result::add));
 		return result;
@@ -129,7 +129,7 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callers code members computed transitively
 	 */
-	public Collection<CodeMember> getCallersTransitively(Collection<CodeMember> cms) {
+	public Collection<CodeMember> getCallersTransitively(Collection<? extends CodeMember> cms) {
 		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
 		cms.forEach(cm -> getCallers(cm).stream().forEach(ws::push));
 		while (!ws.isEmpty())
@@ -146,7 +146,7 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callees code members
 	 */
-	public Collection<CodeMember> getCallees(Collection<CodeMember> cms) {
+	public Collection<CodeMember> getCallees(Collection<? extends CodeMember> cms) {
 		Set<CodeMember> result = new HashSet<>();
 		cms.forEach(cm -> getCallees(cm).stream().forEach(result::add));
 		return result;
@@ -178,7 +178,7 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * 
 	 * @return the collection of callees code members computed transitively
 	 */
-	public Collection<CodeMember> getCalleesTransitively(Collection<CodeMember> cms) {
+	public Collection<CodeMember> getCalleesTransitively(Collection<? extends CodeMember> cms) {
 		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
 		cms.forEach(cm -> getCallees(cm).stream().forEach(ws::push));
 		while (!ws.isEmpty())
