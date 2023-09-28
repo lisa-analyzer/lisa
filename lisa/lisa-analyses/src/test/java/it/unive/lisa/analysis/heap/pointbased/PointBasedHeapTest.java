@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -174,7 +175,7 @@ public class PointBasedHeapTest {
 		// result.
 
 		// 1. Heap allocation
-		HeapExpression heapExpression = new MemoryAllocation(untyped, loc1);
+		HeapExpression heapExpression = new MemoryAllocation(untyped, loc1, new Annotations());
 
 		// from topState
 		PointBasedHeap sss = topHeap.semanticsOf(heapExpression, pp1, fakeOracle);
@@ -194,7 +195,7 @@ public class PointBasedHeapTest {
 
 		// 2. Heap reference
 		heapExpression = new HeapReference(untyped,
-				new MemoryAllocation(untyped, loc1), loc1);
+				new MemoryAllocation(untyped, loc1, new Annotations()), loc1);
 
 		// from topState
 		sss = topHeap.semanticsOf(heapExpression, pp1, fakeOracle);
@@ -225,7 +226,7 @@ public class PointBasedHeapTest {
 
 		// 4. Heap dereference
 		heapExpression = new HeapDereference(untyped, new HeapReference(untyped,
-				new MemoryAllocation(untyped, loc1), loc1), loc1);
+				new MemoryAllocation(untyped, loc1, new Annotations()), loc1), loc1);
 
 		// from topState
 		sss = topHeap.semanticsOf(heapExpression, pp1, fakeOracle);
@@ -483,7 +484,7 @@ public class PointBasedHeapTest {
 	public void testHeapDereferenceRewrite() throws SemanticException {
 		// *(&(new loc(pp1, fakeOracle)) rewritten in top -> pp1
 		HeapDereference deref = new HeapDereference(untyped, new HeapReference(untyped,
-				new MemoryAllocation(untyped, loc1), loc1), loc1);
+				new MemoryAllocation(untyped, loc1, new Annotations()), loc1), loc1);
 
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
 		assertEquals(expectedRewritten, topHeap.rewrite(deref, fakeProgramPoint, fakeOracle));

@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.GenericMapLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -308,6 +309,13 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 							target,
 							site.isWeak(),
 							site.getCodeLocation());
+
+				// propagates the annotations of the child value expression to
+				// the newly created allocation site
+				if (target instanceof Identifier)
+					for (Annotation ann : e.getAnnotations())
+						e.addAnnotation(ann);
+
 				result.add(e);
 			}
 		}
@@ -330,6 +338,12 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 				e = new StackAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
 			else
 				e = new HeapAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+
+			// propagates the annotations of expression
+			// to the newly created allocation site
+			for (Annotation ann : expression.getAnnotations())
+				e.getAnnotations().addAnnotation(ann);
+
 			return new ExpressionSet(e);
 		}
 	}

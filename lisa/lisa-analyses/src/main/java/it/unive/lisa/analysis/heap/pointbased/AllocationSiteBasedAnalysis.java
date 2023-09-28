@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -348,6 +349,14 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 								site.getLocationName(),
 								true,
 								expression.getCodeLocation());
+
+					// propagates the annotations of the child value expression
+					// to the newly created allocation site
+					for (SymbolicExpression f : child)
+						if (f instanceof Identifier)
+							for (Annotation ann : e.getAnnotations())
+								e.addAnnotation(ann);
+
 					result.add(e);
 				} else if (rec instanceof AllocationSite)
 					result.add(rec);
@@ -373,6 +382,12 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 						expression.getCodeLocation().getCodeLocation(),
 						true,
 						expression.getCodeLocation());
+
+			// propagates the annotations of expression
+			// to the newly created allocation site
+			for (Annotation ann : expression.getAnnotations())
+				id.addAnnotation(ann);
+
 			return new ExpressionSet(id);
 		}
 
@@ -386,10 +401,17 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 
 			for (SymbolicExpression loc : arg)
 				if (loc instanceof AllocationSite) {
+					AllocationSite allocSite = (AllocationSite) loc;
 					MemoryPointer e = new MemoryPointer(
 							new ReferenceType(loc.getStaticType()),
-							(AllocationSite) loc,
+							allocSite,
 							loc.getCodeLocation());
+
+					// propagates the annotations of the allocation site
+					// to the newly created memory pointer
+					for (Annotation ann : allocSite.getAnnotations())
+						e.addAnnotation(ann);
+
 					result.add(e);
 				} else
 					result.add(loc);
@@ -424,6 +446,12 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 						else
 							throw new SemanticException("The type " + id.getStaticType()
 									+ " cannot be allocated by point-based heap domains");
+
+						// propagates the annotations of the variable
+						// to the newly created allocation site
+						for (Annotation ann : id.getAnnotations())
+							site.addAnnotation(ann);
+
 						result.add(site);
 					}
 				} else
