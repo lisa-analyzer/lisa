@@ -453,12 +453,6 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	public boolean tracksIdentifiers(
-			Identifier id, ProgramPoint pp, SemanticOracle oracle) {
-		return true;
-	}
-
-	@Override
 	public InferenceSystem<NonInterference> assume(
 			InferenceSystem<NonInterference> environment,
 			ValueExpression expression,

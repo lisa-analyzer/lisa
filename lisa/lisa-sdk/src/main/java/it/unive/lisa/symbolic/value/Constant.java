@@ -85,4 +85,10 @@ public class Constant extends ValueExpression {
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		return visitor.visit(this, params);
 	}
+	
+	@Override
+	public boolean mightNeedRewriting() {
+		Type t = getStaticType();
+		return t.isInMemoryType() || t.isPointerType() || t.isUntyped();
+	}
 }

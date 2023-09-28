@@ -87,7 +87,6 @@ import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.Variable;
@@ -112,19 +111,28 @@ public class SemanticsSanityTest {
 	private final SemanticOracle fakeOracle = new SemanticOracle() {
 
 		@Override
-		public Set<Type> getRuntimeTypesOf(SymbolicExpression e, ProgramPoint pp, SemanticOracle oracle)
+		public Set<Type> getRuntimeTypesOf(
+				SymbolicExpression e,
+				ProgramPoint pp,
+				SemanticOracle oracle)
 				throws SemanticException {
 			return Collections.singleton(e.getStaticType());
 		}
 
 		@Override
-		public Type getDynamicTypeOf(SymbolicExpression e, ProgramPoint pp, SemanticOracle oracle)
+		public Type getDynamicTypeOf(
+				SymbolicExpression e,
+				ProgramPoint pp,
+				SemanticOracle oracle)
 				throws SemanticException {
 			return e.getStaticType();
 		}
 
 		@Override
-		public ExpressionSet rewrite(SymbolicExpression expression, ProgramPoint pp, SemanticOracle oracle)
+		public ExpressionSet rewrite(
+				SymbolicExpression expression,
+				ProgramPoint pp,
+				SemanticOracle oracle)
 				throws SemanticException {
 			return new ExpressionSet(expression);
 		}
@@ -151,12 +159,15 @@ public class SemanticsSanityTest {
 		fake = new Expression(cfg, unknownLocation) {
 
 			@Override
-			public int setOffset(int offset) {
+			public int setOffset(
+					int offset) {
 				return 0;
 			}
 
 			@Override
-			public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+			public <V> boolean accept(
+					GraphVisitor<CFG, Statement, Edge, V> visitor,
+					V tool) {
 				return false;
 			}
 
@@ -168,7 +179,8 @@ public class SemanticsSanityTest {
 			@Override
 			public <A extends AbstractState<A>> AnalysisState<A> semantics(
 					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A> interprocedural, StatementStore<A> expressions)
+					InterproceduralAnalysis<A> interprocedural,
+					StatementStore<A> expressions)
 					throws SemanticException {
 				return entryState
 						.smallStepSemantics(
@@ -179,7 +191,8 @@ public class SemanticsSanityTest {
 		};
 	}
 
-	private Object valueFor(Class<?> param) {
+	private Object valueFor(
+			Class<?> param) {
 		if (param == CFG.class)
 			return cfg;
 		if (param == String.class)
@@ -259,7 +272,8 @@ public class SemanticsSanityTest {
 			fail(failures.size() + "/" + total + " semantics evaluation failed");
 	}
 
-	private boolean excluded(Class<? extends Statement> statement) {
+	private boolean excluded(
+			Class<? extends Statement> statement) {
 		// these just forward the semantics to the inner call
 		return statement == MultiCall.class
 				|| statement == TruncatedParamsCall.class;
@@ -302,7 +316,9 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public NRHeap glb(NRHeap other) throws SemanticException {
+		public NRHeap glb(
+				NRHeap other)
+				throws SemanticException {
 			return bottom();
 		}
 
@@ -312,12 +328,16 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public NRHeap lub(NRHeap other) throws SemanticException {
+		public NRHeap lub(
+				NRHeap other)
+				throws SemanticException {
 			return top();
 		}
 
 		@Override
-		public boolean lessOrEqual(NRHeap other) throws SemanticException {
+		public boolean lessOrEqual(
+				NRHeap other)
+				throws SemanticException {
 			return false;
 		}
 
@@ -332,12 +352,10 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public boolean tracksIdentifiers(Identifier id, ProgramPoint pp, SemanticOracle oracle) {
-			return true;
-		}
-
-		@Override
-		public boolean canProcess(SymbolicExpression expression, ProgramPoint pp, SemanticOracle oracle) {
+		public boolean canProcess(
+				SymbolicExpression expression,
+				ProgramPoint pp,
+				SemanticOracle oracle) {
 			return true;
 		}
 
@@ -358,7 +376,9 @@ public class SemanticsSanityTest {
 
 	}
 
-	private Object domainFor(Class<?> root, Class<?> param) {
+	private Object domainFor(
+			Class<?> root,
+			Class<?> param) {
 		if (root == ValueEnvironment.class)
 			return new Sign();
 		if (root == HeapEnvironment.class)
@@ -419,7 +439,10 @@ public class SemanticsSanityTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> int buildDomainsInstances(Set<Class<? extends T>> classes, Set<T> instances, List<String> failures) {
+	private <T> int buildDomainsInstances(
+			Set<Class<? extends T>> classes,
+			Set<T> instances,
+			List<String> failures) {
 		int total = 0;
 		Constructor<?> nullary, unary, binary, ternary, quaternary;
 		nullary = unary = binary = ternary = quaternary = null;

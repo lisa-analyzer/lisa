@@ -127,16 +127,10 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 			throws SemanticException;
 
 	@Override
-	default boolean tracksIdentifiers(
-			Identifier id,
-			ProgramPoint pp, SemanticOracle oracle) {
-		return canProcess(id, pp, oracle);
-	}
-
-	@Override
 	default boolean canProcess(
 			SymbolicExpression expression,
-			ProgramPoint pp, SemanticOracle oracle) {
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		try {
 			return oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
 					.anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());

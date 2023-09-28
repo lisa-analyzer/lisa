@@ -802,17 +802,10 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	}
 
 	@Override
-	default boolean tracksIdentifiers(
-			Identifier id,
-			ProgramPoint pp, SemanticOracle oracle) {
-		// As default, base inferred values tracks only non-pointer identifier
-		return canProcess(id, pp, oracle);
-	}
-
-	@Override
 	default boolean canProcess(
 			SymbolicExpression expression,
-			ProgramPoint pp, SemanticOracle oracle) {
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		try {
 			return oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
 					.anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());

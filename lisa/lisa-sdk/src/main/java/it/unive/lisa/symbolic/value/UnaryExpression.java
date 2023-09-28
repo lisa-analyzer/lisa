@@ -137,7 +137,7 @@ public class UnaryExpression extends ValueExpression {
 	}
 	
 	@Override
-	public boolean dealsWithMemory() {
-		return expression.dealsWithMemory();
+	public boolean mightNeedRewriting() {
+		return expression.mightNeedRewriting();
 	}
 }

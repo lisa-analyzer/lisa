@@ -42,7 +42,7 @@ public abstract class HeapExpression extends SymbolicExpression {
 	}
 	
 	@Override
-	public final boolean dealsWithMemory() {
+	public final boolean mightNeedRewriting() {
 		return true;
 	}
 }

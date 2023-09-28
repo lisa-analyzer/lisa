@@ -136,7 +136,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (!expression.dealsWithMemory()) {
+		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
 			return new SimpleAbstractState<>(
 					heapState.assign(id, expression, pp, this),
@@ -154,7 +154,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (expr.dealsWithMemory())
+			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type.assign(id, ve, pp, mo);
@@ -165,7 +165,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		T typeRes = mo.type.bottom();
 		V valueRes = mo.value.bottom();
 		for (SymbolicExpression expr : exprs) {
-			if (expr.dealsWithMemory())
+			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type.assign(id, ve, pp, mo);
@@ -183,7 +183,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (!expression.dealsWithMemory()) {
+		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
 			return new SimpleAbstractState<>(
 					heapState.smallStepSemantics(expression, pp, this),
@@ -201,7 +201,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (expr.dealsWithMemory())
+			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type.smallStepSemantics(ve, pp, mo);
@@ -216,7 +216,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		T typeRes = mo.type.bottom();
 		V valueRes = mo.value.bottom();
 		for (SymbolicExpression expr : exprs) {
-			if (expr.dealsWithMemory())
+			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type.smallStepSemantics(ve, pp, mo);
@@ -257,7 +257,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (!expression.dealsWithMemory()) {
+		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
 			H h = heapState.assume(expression, src, dest, this);
 			if (h.isBottom())
@@ -283,7 +283,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (expr.dealsWithMemory())
+			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type.assume(ve, src, dest, mo);
@@ -298,7 +298,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		T typeRes = mo.type.bottom();
 		V valueRes = mo.value.bottom();
 		for (SymbolicExpression expr : exprs) {
-			if (expr.dealsWithMemory())
+			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type.assume(ve, src, dest, mo);
@@ -323,7 +323,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		if (heapsat == Satisfiability.BOTTOM)
 			return Satisfiability.BOTTOM;
 
-		if (!expression.dealsWithMemory()) {
+		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
 			Satisfiability typesat = typeState.satisfies(ve, pp, this);
 			if (typesat == Satisfiability.BOTTOM)
@@ -340,7 +340,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (expr.dealsWithMemory())
+			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expression;
 			Satisfiability typesat = typeState.satisfies(ve, pp, this);
@@ -355,7 +355,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		Satisfiability typesat = Satisfiability.BOTTOM;
 		Satisfiability valuesat = Satisfiability.BOTTOM;
 		for (SymbolicExpression expr : exprs) {
-			if (expr.dealsWithMemory())
+			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			Satisfiability sat = typeState.satisfies(ve, pp, this);
@@ -555,7 +555,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (!expression.dealsWithMemory())
+		if (!expression.mightNeedRewriting())
 			return new ExpressionSet(expression);
 		return heapState.rewrite(expression, pp, oracle);
 	}
@@ -631,7 +631,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 				ProgramPoint pp,
 				SemanticOracle oracle)
 				throws SemanticException {
-			if (!expression.dealsWithMemory())
+			if (!expression.mightNeedRewriting())
 				return new ExpressionSet(expression);
 			return heap.rewrite(expression, pp, this);
 		}

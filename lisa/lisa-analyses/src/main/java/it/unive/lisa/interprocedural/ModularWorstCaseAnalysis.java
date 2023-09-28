@@ -93,8 +93,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 
 				AnalysisState<A> prepared = entryState;
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
-					Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(),
-							arg.getLocation());
+					Variable id = arg.toSymbolicVariable();
 					prepared = prepared.assign(id, new PushAny(arg.getStaticType(), arg.getLocation()),
 							cfg.getGenericProgramPoint());
 				}

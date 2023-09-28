@@ -250,16 +250,10 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public boolean tracksIdentifiers(
-			Identifier id,
-			ProgramPoint pp, SemanticOracle oracle) {
-		return true;
-	}
-
-	@Override
 	public boolean canProcess(
 			SymbolicExpression expression,
-			ProgramPoint pp, SemanticOracle oracle) {
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		try {
 			Type dyn = oracle.getDynamicTypeOf(expression, pp, oracle);
 			return !dyn.isPointerType() && !dyn.isInMemoryType();

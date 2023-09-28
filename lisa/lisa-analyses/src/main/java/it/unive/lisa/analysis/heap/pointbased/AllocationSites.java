@@ -20,7 +20,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.type.Type;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.
@@ -120,19 +119,6 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 				.forEach(e -> lub.put(e.getName(), e));
 
 		return new AllocationSites(new HashSet<>(lub.values()), false);
-	}
-
-	@Override
-	public boolean tracksIdentifiers(
-			Identifier id,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		try {
-			Type dyn = oracle.getDynamicTypeOf(id, pp, oracle);
-			return dyn.isPointerType() || dyn.isUntyped();
-		} catch (SemanticException e) {
-			return false;
-		}
 	}
 
 	@Override

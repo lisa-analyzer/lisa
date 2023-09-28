@@ -331,7 +331,7 @@ public class TracePartitioning<A extends AbstractState<A>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (!expression.dealsWithMemory())
+		if (!expression.mightNeedRewriting())
 			return new ExpressionSet(expression);
 		
 		if (isTop())

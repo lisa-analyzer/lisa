@@ -59,4 +59,9 @@ public class Skip extends ValueExpression {
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		return visitor.visit(this, params);
 	}
+	
+	@Override
+	public boolean mightNeedRewriting() {
+		return false;
+	}
 }

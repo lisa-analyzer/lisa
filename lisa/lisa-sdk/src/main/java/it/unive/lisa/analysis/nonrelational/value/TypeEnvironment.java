@@ -91,9 +91,11 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (!e.dealsWithMemory())
+		if (!e.mightNeedRewriting() || e instanceof Identifier)
+			// we shortcut the evaluation of identifiers as those will be in the
+			// mapping if we know something about them
 			return eval((ValueExpression) e, pp, oracle).getRuntimeTypes();
-		
+
 		ExpressionSet vexps = oracle.rewrite(e, pp, oracle);
 		Set<Type> result = new HashSet<>();
 		for (SymbolicExpression vexp : vexps)

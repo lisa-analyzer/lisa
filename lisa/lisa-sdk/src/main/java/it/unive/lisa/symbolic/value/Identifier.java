@@ -156,4 +156,10 @@ public abstract class Identifier extends ValueExpression {
 					+ "' and '" + other + "'");
 		return this;
 	}
+	
+	@Override
+	public boolean mightNeedRewriting() {
+		Type t = getStaticType();
+		return t.isInMemoryType() || t.isPointerType() || t.isUntyped();
+	}
 }

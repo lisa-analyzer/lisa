@@ -163,7 +163,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 			Map<AllocationSite, ExpressionSet> mapping = new HashMap<>(sss.fields.getMap());
 
 			ExpressionSet exprs;
-			if (accessChild.getContainer().dealsWithMemory())
+			if (accessChild.getContainer().mightNeedRewriting())
 				exprs = rewrite(accessChild.getContainer(), pp, oracle);
 			else
 				exprs = new ExpressionSet(accessChild.getContainer());

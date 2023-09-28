@@ -89,7 +89,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (isBottom() || !lattice.canProcess(expression, pp, oracle) || !lattice.tracksIdentifiers(id, pp, oracle))
+		if (isBottom() || !lattice.canProcess(expression, pp, oracle))
 			return this;
 
 		Map<Identifier, T> func = mkNewFunction(function, false);

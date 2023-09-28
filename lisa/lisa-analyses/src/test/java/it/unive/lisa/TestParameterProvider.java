@@ -108,14 +108,6 @@ public class TestParameterProvider {
 		}
 
 		@Override
-		public boolean tracksIdentifiers(
-				Identifier id,
-				ProgramPoint pp,
-				SemanticOracle oracle) {
-			return true;
-		}
-
-		@Override
 		public boolean canProcess(
 				SymbolicExpression expression,
 				ProgramPoint pp,

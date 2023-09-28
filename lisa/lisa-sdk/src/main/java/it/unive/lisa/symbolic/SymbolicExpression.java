@@ -159,5 +159,5 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 	@Override
 	public abstract String toString();
 	
-	public abstract boolean dealsWithMemory();
+	public abstract boolean mightNeedRewriting();
 }

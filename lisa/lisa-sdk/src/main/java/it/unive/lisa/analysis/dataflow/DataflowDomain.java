@@ -95,7 +95,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 			throws SemanticException {
 		// if id cannot be tracked by the underlying lattice,
 		// or if the expression cannot be processed, return this
-		return update(() -> !domain.tracksIdentifiers(id, pp, oracle) || !domain.canProcess(expression, pp, oracle),
+		return update(() -> !domain.canProcess(expression, pp, oracle),
 				() -> domain.gen(id, expression, pp, (D) this),
 				() -> domain.kill(id, expression, pp, (D) this));
 	}

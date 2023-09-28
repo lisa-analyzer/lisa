@@ -42,7 +42,8 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @param <A> the concrete type of analysis that methods of this class return
  */
 public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedAnalysis<A>>
-		implements BaseHeapDomain<A> {
+		implements
+		BaseHeapDomain<A> {
 
 	/**
 	 * An heap environment tracking which allocation sites are associated to
@@ -69,7 +70,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * 
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
-	public AllocationSiteBasedAnalysis(HeapEnvironment<AllocationSites> heapEnv) {
+	public AllocationSiteBasedAnalysis(
+			HeapEnvironment<AllocationSites> heapEnv) {
 		this(heapEnv, Collections.emptyList());
 	}
 
@@ -80,13 +82,16 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * @param heapEnv      the heap environment that this instance tracks
 	 * @param replacements the heap replacements of this instance
 	 */
-	public AllocationSiteBasedAnalysis(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements) {
+	public AllocationSiteBasedAnalysis(
+			HeapEnvironment<AllocationSites> heapEnv,
+			List<HeapReplacement> replacements) {
 		this.heapEnv = heapEnv;
 		this.replacements = replacements.isEmpty() ? Collections.emptyList() : replacements;
 	}
 
 	@Override
-	public A mk(A reference) {
+	public A mk(
+			A reference) {
 		return mk(reference.heapEnv, Collections.emptyList());
 	}
 
@@ -97,7 +102,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * 
 	 * @return the new instance
 	 */
-	protected A mk(HeapEnvironment<AllocationSites> heapEnv) {
+	protected A mk(
+			HeapEnvironment<AllocationSites> heapEnv) {
 		return mk(heapEnv, Collections.emptyList());
 	}
 
@@ -109,7 +115,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * 
 	 * @return the new instance
 	 */
-	protected abstract A mk(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements);
+	protected abstract A mk(
+			HeapEnvironment<AllocationSites> heapEnv,
+			List<HeapReplacement> replacements);
 
 	@Override
 	public A assign(
@@ -122,7 +130,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		A result = bottom();
 		List<HeapReplacement> replacements = new LinkedList<>();		
 		ExpressionSet rhsExps;
-		if (expression.dealsWithMemory())
+		if (expression.mightNeedRewriting())
 			rhsExps = rewrite(expression, pp, oracle);
 		else
 			rhsExps = new ExpressionSet(expression);
@@ -161,7 +169,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * @return an allocation site name {@code id} if it is tracked by this
 	 *             domain, {@code null} otherwise
 	 */
-	protected Set<AllocationSite> getAllocatedAt(String location) {
+	protected Set<AllocationSite> getAllocatedAt(
+			String location) {
 		Set<AllocationSite> sites = new HashSet<>();
 		for (AllocationSites set : heapEnv.getValues())
 			for (AllocationSite site : set)
@@ -223,7 +232,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	public Satisfiability satisfies(
 			SymbolicExpression expression,
 			ProgramPoint pp,
-			SemanticOracle oracle) throws SemanticException {
+			SemanticOracle oracle)
+			throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
 	}
@@ -255,7 +265,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	}
 
 	@Override
-	public boolean lessOrEqualAux(A other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			A other)
+			throws SemanticException {
 		return heapEnv.lessOrEqual(other.heapEnv);
 	}
 
@@ -265,7 +277,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -279,7 +292,11 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public A semanticsOf(HeapExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+	public A semanticsOf(
+			HeapExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return (A) this;
 	}
 
@@ -307,8 +324,12 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		 */
 
 		@Override
-		public ExpressionSet visit(AccessChild expression, ExpressionSet receiver,
-				ExpressionSet child, Object... params) throws SemanticException {
+		public ExpressionSet visit(
+				AccessChild expression,
+				ExpressionSet receiver,
+				ExpressionSet child,
+				Object... params)
+				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 			for (SymbolicExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
@@ -335,7 +356,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		}
 
 		@Override
-		public ExpressionSet visit(MemoryAllocation expression, Object... params)
+		public ExpressionSet visit(
+				MemoryAllocation expression,
+				Object... params)
 				throws SemanticException {
 			AllocationSite id;
 			if (expression.isStackAllocation())
@@ -354,7 +377,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		}
 
 		@Override
-		public ExpressionSet visit(HeapReference expression, ExpressionSet arg,
+		public ExpressionSet visit(
+				HeapReference expression,
+				ExpressionSet arg,
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
@@ -372,7 +397,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		}
 
 		@Override
-		public ExpressionSet visit(HeapDereference expression, ExpressionSet arg,
+		public ExpressionSet visit(
+				HeapDereference expression,
+				ExpressionSet arg,
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
@@ -406,7 +433,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		}
 
 		@Override
-		public ExpressionSet visit(Identifier expression, Object... params)
+		public ExpressionSet visit(
+				Identifier expression,
+				Object... params)
 				throws SemanticException {
 			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
 				return new ExpressionSet(resolveIdentifier(expression));
@@ -414,7 +443,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			return new ExpressionSet(expression);
 		}
 
-		private Set<SymbolicExpression> resolveIdentifier(Identifier v) {
+		private Set<SymbolicExpression> resolveIdentifier(
+				Identifier v) {
 			Set<SymbolicExpression> result = new HashSet<>();
 			for (AllocationSite site : heapEnv.getState(v)) {
 				MemoryPointer e = new MemoryPointer(
@@ -428,7 +458,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		}
 
 		@Override
-		public ExpressionSet visit(PushAny expression, Object... params)
+		public ExpressionSet visit(
+				PushAny expression,
+				Object... params)
 				throws SemanticException {
 			if (expression.getStaticType().isPointerType()) {
 				Type inner = expression.getStaticType().asPointerType().getInnerType();
@@ -447,7 +479,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	}
 
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		return heapEnv.knowsIdentifier(id) || (id instanceof AllocationSite
 				&& heapEnv.getValues().stream().anyMatch(as -> as.contains((AllocationSite) id)));
 	}

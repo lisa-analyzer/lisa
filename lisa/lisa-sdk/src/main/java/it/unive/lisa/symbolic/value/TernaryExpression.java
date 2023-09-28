@@ -162,7 +162,7 @@ public class TernaryExpression extends ValueExpression {
 	}
 	
 	@Override
-	public boolean dealsWithMemory() {
-		return left.dealsWithMemory() || middle.dealsWithMemory() || right.dealsWithMemory();
+	public boolean mightNeedRewriting() {
+		return left.mightNeedRewriting() || middle.mightNeedRewriting() || right.mightNeedRewriting();
 	}
 }

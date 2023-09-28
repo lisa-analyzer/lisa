@@ -138,7 +138,7 @@ public class BinaryExpression extends ValueExpression {
 	}
 	
 	@Override
-	public boolean dealsWithMemory() {
-		return left.dealsWithMemory() || right.dealsWithMemory();
+	public boolean mightNeedRewriting() {
+		return left.mightNeedRewriting() || right.mightNeedRewriting();
 	}
 }

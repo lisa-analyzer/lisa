@@ -15,7 +15,6 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
@@ -293,14 +292,10 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 	}
 
 	@Override
-	default boolean tracksIdentifiers(
-			Identifier id, ProgramPoint pp, SemanticOracle oracle) {
-		return !(id instanceof MemoryPointer);
-	}
-
-	@Override
 	default boolean canProcess(
-			SymbolicExpression expression, ProgramPoint pp, SemanticOracle oracle) {
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
 		// Type analysis can process any expression
 		return true;
 	}
