@@ -32,4 +32,22 @@ public class StringUtilities {
 
 		return i + "rd";
 	}
+
+	/**
+	 * Indents all lines of {@code target} by using {@code indent} repeated
+	 * {@code amount} times.
+	 * 
+	 * @param target the string to indent
+	 * @param indent the string to use as indentation
+	 * @param amount the number of times {@code indent} should be repeated
+	 * 
+	 * @return the indented string
+	 */
+	public static String indent(
+			String target,
+			String indent,
+			int amount) {
+		String offset = indent.repeat(amount);
+		return offset + target.replace("\n", "\n" + offset);
+	}
 }

@@ -104,16 +104,25 @@ public abstract class BaseCallGraph extends CallGraph {
 		if (cached != null)
 			return cached;
 
-		if (types == null)
+		Expression[] params = call.getParameters();
+		if (types == null || types.length != params.length)
 			// we allow types to be null only for calls that we already resolved
 			throw new CallResolutionException("Cannot resolve call without runtime types");
+
+		if (Arrays.stream(types).anyMatch(rts -> rts == null || rts.isEmpty())) {
+			// if we do not have runtime types of a parameter, we consider it to
+			// be of any possible type compatible with its static one
+			types = Arrays.copyOf(types, types.length);
+			for (int i = 0; i < types.length; i++)
+				if (types[i] == null || types[i].isEmpty())
+					types[i] = params[i].getStaticType().allInstances(call.getProgram().getTypes());
+		}
 
 		Collection<CFG> targets = new HashSet<>();
 		Collection<NativeCFG> nativeTargets = new HashSet<>();
 		Collection<CFG> targetsNoRec = new HashSet<>();
 		Collection<NativeCFG> nativeTargetsNoRec = new HashSet<>();
 
-		Expression[] params = call.getParameters();
 		switch (call.getCallType()) {
 		case INSTANCE:
 			resolveInstance(call, types, targets, nativeTargets, aliasing);

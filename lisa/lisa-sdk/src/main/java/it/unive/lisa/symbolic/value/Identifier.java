@@ -168,6 +168,6 @@ public abstract class Identifier extends ValueExpression {
 	@Override
 	public boolean mightNeedRewriting() {
 		Type t = getStaticType();
-		return t.isInMemoryType() || t.isPointerType() || t.isUntyped();
+		return !t.isValueType() || t.isUntyped();
 	}
 }

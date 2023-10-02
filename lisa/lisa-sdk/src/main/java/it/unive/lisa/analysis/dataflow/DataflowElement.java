@@ -7,9 +7,12 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.representation.StructuredObject;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * An element of the dataflow domain, that contains a collection of
@@ -131,11 +134,26 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		if (expression instanceof PushInv)
+			// the type approximation of a pushinv is bottom, so the below check
+			// will always fail regardless of the kind of value we are tracking
+			return expression.getStaticType().isValueType();
+
+		Set<Type> rts = null;
 		try {
-			return oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
-					.anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+			rts = oracle.getRuntimeTypesOf(expression, pp, oracle);
 		} catch (SemanticException e) {
 			return false;
 		}
+
+		if (rts == null || rts.isEmpty())
+			// if we have no runtime types, either the type domain has no type
+			// information for the given expression (thus it can be anything,
+			// also something that we can track) or the computation returned
+			// bottom (and the whole state is likely going to go to bottom
+			// anyway).
+			return true;
+
+		return rts.stream().anyMatch(Type::isValueType);
 	}
 }

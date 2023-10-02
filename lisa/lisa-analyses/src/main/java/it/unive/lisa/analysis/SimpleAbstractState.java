@@ -652,5 +652,21 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 				throws SemanticException {
 			return type.getDynamicTypeOf(e, pp, this);
 		}
+
+		@Override
+		public String toString() {
+			if (heap.isBottom() || type.isBottom() || value.isBottom())
+				return Lattice.bottomRepresentation().toString();
+			if (heap.isTop() && type.isTop() && value.isTop())
+				return Lattice.topRepresentation().toString();
+
+			StructuredRepresentation h = heap.representation();
+			StructuredRepresentation t = type.representation();
+			StructuredRepresentation v = value.representation();
+			return new ObjectRepresentation(Map.of(
+					HEAP_REPRESENTATION_KEY, h,
+					TYPE_REPRESENTATION_KEY, t,
+					VALUE_REPRESENTATION_KEY, v)).toString();
+		}
 	}
 }

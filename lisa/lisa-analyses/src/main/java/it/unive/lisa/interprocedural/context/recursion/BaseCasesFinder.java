@@ -133,7 +133,10 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
 		// it should be enough to send values to top, retaining all type
 		// information
-		return start.expressionSemantics(this, entryState.postState.withTopValues(), params,
+		return start.expressionSemantics(
+				this,
+				entryState.postState.withTopValues(),
+				params,
 				entryState.intermediateStates);
 	}
 }

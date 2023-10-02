@@ -265,6 +265,16 @@ public interface Type {
 	}
 
 	/**
+	 * Yields {@code true} if and only if both {@link #isInMemoryType()} and
+	 * {@link #isPointerType()} both return {@code false} on this type.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isValueType() {
+		return !isInMemoryType() && !isPointerType();
+	}
+
+	/**
 	 * Determines if the type represented by this {@link Type} object is either
 	 * the same as, or is a subtype of, the type represented by {@code other}.
 	 * It returns {@code true} if so, and returns {@code false} otherwise.

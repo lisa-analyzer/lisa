@@ -224,6 +224,18 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 					// base case
 					AnalysisState<A> local = transferToCallsite(start, call, base);
 					AnalysisState<A> returned = callEntry.lub(recursiveApprox.getState(call).lub(local));
+					Identifier meta = call.getMetaVariable();
+					if (!returned.getState().knowsIdentifier(meta)) {
+						// if we have no information for the return value, we
+						// want to
+						// force it to bottom as it means that this is either
+						// the first
+						// execution (that must start from bottom) or that the
+						// recursion
+						// diverges
+						PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
+						returned = returned.assign(meta, inv, call);
+					}
 
 					// finally, we store it in the result
 					caller.storePostStateOf(source, returned);

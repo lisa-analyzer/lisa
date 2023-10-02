@@ -2,6 +2,7 @@ package it.unive.lisa.util.representation;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableArray;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.StringUtilities;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,7 +68,22 @@ public class ListRepresentation extends StructuredRepresentation {
 
 	@Override
 	public String toString() {
-		return "[" + StringUtils.join(elements, ", ") + "]";
+		if (elements.isEmpty())
+			return "[]";
+
+		List<String> strs = elements.stream().map(Object::toString).collect(Collectors.toList());
+		if (strs.stream().noneMatch(s -> s.contains("\n")))
+			return "[" + StringUtils.join(strs, ", ") + "]";
+
+		StringBuilder sb = new StringBuilder("[");
+		boolean first = true;
+		for (String e : strs) {
+			sb.append(first ? "\n" : ",\n")
+					.append(StringUtilities.indent(e.toString(), "  ", 1));
+			first = false;
+		}
+		sb.append("\n]");
+		return sb.toString();
 	}
 
 	@Override

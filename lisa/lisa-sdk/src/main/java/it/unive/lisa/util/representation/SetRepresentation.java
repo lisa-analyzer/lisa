@@ -2,12 +2,14 @@ package it.unive.lisa.util.representation;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableArray;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.StringUtilities;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -70,7 +72,22 @@ public class SetRepresentation extends StructuredRepresentation {
 
 	@Override
 	public String toString() {
-		return "[" + StringUtils.join(elements, ", ") + "]";
+		if (elements.isEmpty())
+			return "()";
+
+		List<String> strs = elements.stream().map(Object::toString).collect(Collectors.toList());
+		if (strs.stream().noneMatch(s -> s.contains("\n")))
+			return "(" + StringUtils.join(strs, ", ") + ")";
+
+		StringBuilder sb = new StringBuilder("(");
+		boolean first = true;
+		for (String e : strs) {
+			sb.append(first ? "\n" : ",\n")
+					.append(StringUtilities.indent(e.toString(), "  ", 1));
+			first = false;
+		}
+		sb.append("\n)");
+		return sb.toString();
 	}
 
 	@Override

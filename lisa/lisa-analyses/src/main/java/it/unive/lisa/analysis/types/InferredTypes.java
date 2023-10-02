@@ -100,14 +100,10 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		this.isTop = isTop;
 	}
 
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * Caution: invoking this method on the top instance obtained through
-	 * {@code new InferredTypes().top()} will return a {@code null} value.
-	 */
 	@Override
 	public Set<Type> getRuntimeTypes() {
+		if (elements == null)
+			Collections.emptySet();
 		return elements;
 	}
 
@@ -155,7 +151,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 			SemanticOracle oracle)
 			throws SemanticException {
 		InferredTypes eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp, oracle);
-		if (!eval.isTop() && !eval.isBottom())
+		if (!eval.isTop())
 			return eval;
 		TypeSystem types = pp.getProgram().getTypes();
 		return new InferredTypes(types, id.getStaticType().allInstances(types));

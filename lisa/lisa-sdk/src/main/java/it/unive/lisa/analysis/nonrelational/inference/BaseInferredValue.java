@@ -29,6 +29,8 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.type.Type;
+import java.util.Set;
 
 /**
  * Base implementation for {@link InferredValue}s. This class extends
@@ -824,12 +826,27 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		if (expression instanceof PushInv)
+			// the type approximation of a pushinv is bottom, so the below check
+			// will always fail regardless of the kind of value we are tracking
+			return expression.getStaticType().isValueType();
+
+		Set<Type> rts = null;
 		try {
-			return oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
-					.anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+			rts = oracle.getRuntimeTypesOf(expression, pp, oracle);
 		} catch (SemanticException e) {
 			return false;
 		}
+
+		if (rts == null || rts.isEmpty())
+			// if we have no runtime types, either the type domain has no type
+			// information for the given expression (thus it can be anything,
+			// also something that we can track) or the computation returned
+			// bottom (and the whole state is likely going to go to bottom
+			// anyway).
+			return true;
+
+		return rts.stream().anyMatch(Type::isValueType);
 	}
 
 	@Override

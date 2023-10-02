@@ -2,6 +2,7 @@ package it.unive.lisa.util.representation;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.StringUtilities;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -65,12 +66,28 @@ public class MapRepresentation extends StructuredRepresentation {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
+		if (map.isEmpty())
+			return "{}";
 
-		for (Entry<StructuredRepresentation, StructuredRepresentation> e : map.entrySet())
-			builder.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
-
-		return builder.toString().trim();
+		StringBuilder sb = new StringBuilder("{");
+		boolean first = true;
+		for (Entry<StructuredRepresentation, StructuredRepresentation> e : map.entrySet()) {
+			String key = e.getKey().toString();
+			String val = e.getValue().toString();
+			if (!key.contains("\n") && !val.contains("\n"))
+				sb.append(first ? "\n  " : ",\n  ")
+						.append(key)
+						.append(": ")
+						.append(val);
+			else
+				sb.append(first ? "\n  " : ",\n  ")
+						.append(StringUtilities.indent(key, "  ", 1))
+						.append(":\n")
+						.append(StringUtilities.indent(val, "  ", 2));
+			first = false;
+		}
+		sb.append("\n}");
+		return sb.toString();
 	}
 
 	@Override

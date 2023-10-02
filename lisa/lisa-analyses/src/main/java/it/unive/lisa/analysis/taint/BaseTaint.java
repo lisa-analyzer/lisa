@@ -10,7 +10,6 @@ import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import it.unive.lisa.program.annotations.matcher.BasicAnnotationMatcher;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -19,7 +18,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import it.unive.lisa.type.Type;
 
 /**
  * A taint analysis, that is, an information-flow analysis tracking only
@@ -248,19 +246,6 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 			SemanticOracle oracle)
 			throws SemanticException {
 		return left;
-	}
-
-	@Override
-	public boolean canProcess(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		try {
-			Type dyn = oracle.getDynamicTypeOf(expression, pp, oracle);
-			return !dyn.isPointerType() && !dyn.isInMemoryType();
-		} catch (SemanticException e) {
-			return false;
-		}
 	}
 
 	@Override

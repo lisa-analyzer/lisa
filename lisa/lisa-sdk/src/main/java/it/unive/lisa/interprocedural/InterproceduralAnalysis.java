@@ -262,7 +262,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 		if (state.getComputedExpressions().isEmpty()) {
 			// a return value is expected, but nothing is left on the stack
 			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-			return state.popScope(scope).assign(meta, inv, call);
+			return state.assign(meta, inv, call).popScope(scope);
 		}
 
 		AnalysisState<A> tmp = state.bottom();

@@ -690,7 +690,7 @@ public class JsonReportComparer {
 		private static final String WARNINGS_ONLY = "Warnings only in the {} report:";
 		private static final String INFOS_ONLY = "Run info keys only in the {} report:";
 		private static final String CONFS_ONLY = "Configuration keys only in the {} report:";
-		private static final String FILE_DIFF = "['{}', '{}'] {}";
+		private static final String FILE_DIFF = "['{}'] {}";
 		private static final String VALUE_DIFF = "Different values for {} key '{}': '{}' and '{}'";
 
 		@Override
@@ -741,7 +741,8 @@ public class JsonReportComparer {
 				String first,
 				String second,
 				String message) {
-			LOG.warn(FILE_DIFF, first, second, message);
+			String fname = FilenameUtils.getName(first);
+			LOG.warn(FILE_DIFF, fname, message);
 		}
 
 		@Override
@@ -766,6 +767,7 @@ public class JsonReportComparer {
 			SerializableValue second) {
 		StringBuilder builder = new StringBuilder();
 		diff(0, builder, first, second);
+		// this removes empty/whitespace lines in the middle
 		return builder.toString().replaceAll("(?m)^[ \t]*\r?\n", "").trim();
 	}
 

@@ -184,7 +184,7 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 
 		@Override
 		public String toString() {
-			return postState + " [" + StringUtils.join(intermediateStates, "\n") + "]";
+			return postState + "\n[" + StringUtils.join(intermediateStates, "\n") + "]";
 		}
 
 		@Override

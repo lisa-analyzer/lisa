@@ -63,12 +63,6 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 		this.types = types;
 	}
 
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * Caution: invoking this method on the top instance obtained through
-	 * {@code new StaticTypes().top()} will return a {@code null} value.
-	 */
 	@Override
 	public Set<Type> getRuntimeTypes() {
 		if (this.isBottom())

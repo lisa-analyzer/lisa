@@ -31,11 +31,6 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/full";
 		conf.programFile = "fibonacci.imp";
-		// as the test uses addition, there is a spurious x strcat y placed in
-		// the computed expressions in the first fixpoint round as the types of
-		// x and y cannot be determined (the state is bottom). This does not
-		// happen when unwinding the results, causing a difference.
-		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 
@@ -52,11 +47,6 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/kdepth";
 		conf.programFile = "fibonacci.imp";
-		// as the test uses addition, there is a spurious x strcat y placed in
-		// the computed expressions in the first fixpoint round as the types of
-		// x and y cannot be determined (the state is bottom). This does not
-		// happen when unwinding the results, causing a difference.
-		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 
@@ -73,11 +63,6 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/last";
 		conf.programFile = "fibonacci.imp";
-		// as the test uses addition, there is a spurious x strcat y placed in
-		// the computed expressions in the first fixpoint round as the types of
-		// x and y cannot be determined (the state is bottom). This does not
-		// happen when unwinding the results, causing a difference.
-		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 
@@ -94,11 +79,6 @@ public class RecursionsTest extends AnalysisTestExecutor {
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/insensitive";
 		conf.programFile = "fibonacci.imp";
-		// as the test uses addition, there is a spurious x strcat y placed in
-		// the computed expressions in the first fixpoint round as the types of
-		// x and y cannot be determined (the state is bottom). This does not
-		// happen when unwinding the results, causing a difference.
-		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 
