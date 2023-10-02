@@ -17,6 +17,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -599,7 +600,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 			@Override
 			public CodeLocation getLocation() {
-				return null;
+				return SyntheticLocation.INSTANCE;
 			}
 		};
 	}

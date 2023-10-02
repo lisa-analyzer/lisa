@@ -14,14 +14,15 @@ import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -86,9 +87,12 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
+				AnalysisState<A> st = entryState.bottom();
+				StatementStore<A> store = new StatementStore<>(st);
+
 				if (results == null) {
 					AnalyzedCFG<A> graph = conf.optimize
-							? new OptimizedAnalyzedCFG<>(cfg, ID, entryState.bottom(), this)
+							? new OptimizedAnalyzedCFG<>(cfg, ID, st, this)
 							: new AnalyzedCFG<>(cfg, ID, entryState);
 					CFGResults<A> value = new CFGResults<>(graph);
 					this.results = new FixpointResults<>(value.top());
@@ -96,9 +100,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 
 				AnalysisState<A> prepared = entryState;
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
-					Variable id = arg.toSymbolicVariable();
-					prepared = prepared.assign(id, new PushAny(arg.getStaticType(), arg.getLocation()),
-							cfg.getGenericProgramPoint());
+					CodeLocation loc = arg.getLocation();
+					Assignment a = new Assignment(cfg, loc,
+							new VariableRef(cfg, loc, arg.getName()),
+							arg.getStaticType().unknownValue(cfg, loc));
+					prepared = a.semantics(prepared, this, store);
 				}
 
 				results.putResult(cfg, ID, cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), conf, ID));

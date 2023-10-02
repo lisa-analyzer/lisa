@@ -10,12 +10,13 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import java.util.Set;
 
@@ -102,11 +103,15 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 			CFG cfg)
 			throws SemanticException {
 		AnalysisState<A> prepared = entryState;
+		AnalysisState<A> st = entryState.bottom();
+		StatementStore<A> store = new StatementStore<>(st);
 
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
-			Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(), arg.getLocation());
-			prepared = prepared.assign(id, new PushAny(arg.getStaticType(), arg.getLocation()),
-					cfg.getGenericProgramPoint());
+			CodeLocation loc = arg.getLocation();
+			Assignment a = new Assignment(cfg, loc,
+					new VariableRef(cfg, loc, arg.getName()),
+					arg.getStaticType().unknownValue(cfg, loc));
+			prepared = a.semantics(prepared, this, store);
 		}
 
 		// the stack has to be empty
