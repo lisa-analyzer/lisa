@@ -4,7 +4,7 @@ import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.dataflow.AvailableExpressions;
-import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
+import it.unive.lisa.analysis.dataflow.DefiniteDataflowDomain;
 import org.junit.Test;
 
 public class AvailableExpressionsTest extends AnalysisTestExecutor {
@@ -15,7 +15,7 @@ public class AvailableExpressionsTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
 				DefaultConfiguration.defaultHeapDomain(),
-				new DefiniteForwardDataflowDomain<>(new AvailableExpressions()),
+				new DefiniteDataflowDomain<>(new AvailableExpressions()),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "available-expressions";
 		conf.programFile = "available-expressions.imp";

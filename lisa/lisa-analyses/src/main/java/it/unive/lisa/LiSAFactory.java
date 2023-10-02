@@ -2,8 +2,8 @@ package it.unive.lisa;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
-import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
-import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
+import it.unive.lisa.analysis.dataflow.DefiniteDataflowDomain;
+import it.unive.lisa.analysis.dataflow.PossibleDataflowDomain;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
@@ -153,10 +153,10 @@ public final class LiSAFactory {
 			for (Type gi : elem.getGenericInterfaces())
 				if (gi instanceof ParameterizedType && ((ParameterizedType) gi).getRawType() == DataflowElement.class) {
 					Type domain = ((ParameterizedType) gi).getActualTypeArguments()[0];
-					if (((ParameterizedType) domain).getRawType() == PossibleForwardDataflowDomain.class)
-						return new PossibleForwardDataflowDomain((DataflowElement<?, ?>) param);
-					else if (((ParameterizedType) domain).getRawType() == DefiniteForwardDataflowDomain.class)
-						return new DefiniteForwardDataflowDomain((DataflowElement<?, ?>) param);
+					if (((ParameterizedType) domain).getRawType() == PossibleDataflowDomain.class)
+						return new PossibleDataflowDomain((DataflowElement<?, ?>) param);
+					else if (((ParameterizedType) domain).getRawType() == DefiniteDataflowDomain.class)
+						return new DefiniteDataflowDomain((DataflowElement<?, ?>) param);
 					else
 						return param;
 				}

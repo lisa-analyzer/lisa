@@ -25,7 +25,7 @@ import java.util.HashSet;
  */
 public class AvailableExpressions
 		implements
-		DataflowElement<DefiniteForwardDataflowDomain<AvailableExpressions>, AvailableExpressions> {
+		DataflowElement<DefiniteDataflowDomain<AvailableExpressions>, AvailableExpressions> {
 
 	private final ValueExpression expression;
 
@@ -90,7 +90,7 @@ public class AvailableExpressions
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
-			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
+			DefiniteDataflowDomain<AvailableExpressions> domain) {
 		Collection<AvailableExpressions> result = new HashSet<>();
 		AvailableExpressions ae = new AvailableExpressions(expression);
 		if (!ae.getInvolvedIdentifiers().contains(id) && filter(expression))
@@ -102,7 +102,7 @@ public class AvailableExpressions
 	public Collection<AvailableExpressions> gen(
 			ValueExpression expression,
 			ProgramPoint pp,
-			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
+			DefiniteDataflowDomain<AvailableExpressions> domain) {
 		Collection<AvailableExpressions> result = new HashSet<>();
 		AvailableExpressions ae = new AvailableExpressions(expression);
 		if (filter(expression))
@@ -128,7 +128,7 @@ public class AvailableExpressions
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
-			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
+			DefiniteDataflowDomain<AvailableExpressions> domain) {
 		Collection<AvailableExpressions> result = new HashSet<>();
 
 		for (AvailableExpressions ae : domain.getDataflowElements()) {
@@ -145,7 +145,7 @@ public class AvailableExpressions
 	public Collection<AvailableExpressions> kill(
 			ValueExpression expression,
 			ProgramPoint pp,
-			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
+			DefiniteDataflowDomain<AvailableExpressions> domain) {
 		return Collections.emptyList();
 	}
 

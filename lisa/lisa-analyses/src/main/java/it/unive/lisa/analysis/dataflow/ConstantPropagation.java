@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class ConstantPropagation
 		implements
-		DataflowElement<DefiniteForwardDataflowDomain<ConstantPropagation>, ConstantPropagation> {
+		DataflowElement<DefiniteDataflowDomain<ConstantPropagation>, ConstantPropagation> {
 
 	private final Identifier id;
 	private final Integer constant;
@@ -69,7 +69,7 @@ public class ConstantPropagation
 
 	private static Integer eval(
 			SymbolicExpression e,
-			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+			DefiniteDataflowDomain<ConstantPropagation> domain) {
 
 		if (e instanceof Constant) {
 			Constant c = (Constant) e;
@@ -123,7 +123,7 @@ public class ConstantPropagation
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
-			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+			DefiniteDataflowDomain<ConstantPropagation> domain) {
 		Set<ConstantPropagation> gen = new HashSet<>();
 
 		Integer v = eval(expression, domain);
@@ -137,7 +137,7 @@ public class ConstantPropagation
 	public Collection<ConstantPropagation> gen(
 			ValueExpression expression,
 			ProgramPoint pp,
-			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+			DefiniteDataflowDomain<ConstantPropagation> domain) {
 		return Collections.emptyList();
 	}
 
@@ -146,7 +146,7 @@ public class ConstantPropagation
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
-			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+			DefiniteDataflowDomain<ConstantPropagation> domain) {
 		Collection<ConstantPropagation> result = new HashSet<>();
 
 		for (ConstantPropagation cp : domain.getDataflowElements())
@@ -160,7 +160,7 @@ public class ConstantPropagation
 	public Collection<ConstantPropagation> kill(
 			ValueExpression expression,
 			ProgramPoint pp,
-			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+			DefiniteDataflowDomain<ConstantPropagation> domain) {
 		return Collections.emptyList();
 	}
 

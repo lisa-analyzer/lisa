@@ -14,8 +14,8 @@ import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.combination.ValueCartesianProduct;
 import it.unive.lisa.analysis.dataflow.AvailableExpressions;
-import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
-import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
+import it.unive.lisa.analysis.dataflow.DefiniteDataflowDomain;
+import it.unive.lisa.analysis.dataflow.PossibleDataflowDomain;
 import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
@@ -385,9 +385,9 @@ public class SemanticsSanityTest {
 			return new InferredTypes();
 		if (root == InferenceSystem.class)
 			return new NonInterference();
-		if (root == PossibleForwardDataflowDomain.class)
+		if (root == PossibleDataflowDomain.class)
 			return new ReachingDefinitions();
-		if (root == DefiniteForwardDataflowDomain.class)
+		if (root == DefiniteDataflowDomain.class)
 			return new AvailableExpressions();
 		if (param == AbstractState.class)
 			return new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),

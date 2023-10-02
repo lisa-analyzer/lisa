@@ -20,7 +20,7 @@ import java.util.HashSet;
  */
 public class ReachingDefinitions
 		implements
-		DataflowElement<PossibleForwardDataflowDomain<ReachingDefinitions>, ReachingDefinitions> {
+		DataflowElement<PossibleDataflowDomain<ReachingDefinitions>, ReachingDefinitions> {
 
 	private final Identifier variable;
 
@@ -93,7 +93,7 @@ public class ReachingDefinitions
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
-			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
+			PossibleDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.singleton(new ReachingDefinitions(id, pp));
 	}
 
@@ -101,7 +101,7 @@ public class ReachingDefinitions
 	public Collection<ReachingDefinitions> gen(
 			ValueExpression expression,
 			ProgramPoint pp,
-			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
+			PossibleDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.emptyList();
 	}
 
@@ -110,7 +110,7 @@ public class ReachingDefinitions
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
-			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
+			PossibleDataflowDomain<ReachingDefinitions> domain) {
 		Collection<ReachingDefinitions> result = new HashSet<>();
 
 		for (ReachingDefinitions rd : domain.getDataflowElements())
@@ -124,7 +124,7 @@ public class ReachingDefinitions
 	public Collection<ReachingDefinitions> kill(
 			ValueExpression expression,
 			ProgramPoint pp,
-			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
+			PossibleDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.emptyList();
 	}
 
