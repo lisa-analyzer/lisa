@@ -37,20 +37,27 @@ public class FalseEdge extends Edge {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> traverse(
-			AnalysisState<A> sourceState)
+	public <A extends AbstractState<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state)
 			throws SemanticException {
-		ExpressionSet exprs = sourceState.getComputedExpressions();
-		AnalysisState<A> result = sourceState.bottom();
+		ExpressionSet exprs = state.getComputedExpressions();
+		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : exprs) {
 			UnaryExpression negated = new UnaryExpression(
 					expr.getStaticType(),
 					expr,
 					LogicalNegation.INSTANCE,
 					expr.getCodeLocation());
-			result = result.lub(sourceState.assume(negated, getSource(), getDestination()));
+			result = result.lub(state.assume(negated, getSource(), getDestination()));
 		}
 		return result;
+	}
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state)
+			throws SemanticException {
+		return traverseForward(state);
 	}
 
 	@Override

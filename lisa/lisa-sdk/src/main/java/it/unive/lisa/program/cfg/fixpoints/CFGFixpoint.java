@@ -76,7 +76,7 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 			Edge edge,
 			CompoundState<A> entrystate)
 			throws SemanticException {
-		AnalysisState<A> approx = edge.traverse(entrystate.postState);
+		AnalysisState<A> approx = edge.traverseForward(entrystate.postState);
 
 		// we remove out of scope variables here
 		List<VariableTableEntry> toRemove = new LinkedList<>();

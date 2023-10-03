@@ -96,19 +96,37 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 	public abstract String toString();
 
 	/**
-	 * Traverses this edge, optionally modifying the given {@code sourceState}
-	 * by applying semantic assumptions.
+	 * Traverses this edge in the forward direction, proceeding from source to
+	 * destination, optionally modifying the given {@code sourceState} by
+	 * applying semantic assumptions.
 	 * 
-	 * @param <A>         the concrete {@link AbstractState} instance
-	 * @param sourceState the {@link AnalysisState} computed at the source of
-	 *                        this edge
+	 * @param <A>   the concrete {@link AbstractState} instance
+	 * @param state the {@link AnalysisState} computed at the source of this
+	 *                  edge
 	 * 
 	 * @return the {@link AnalysisState} after traversing this edge
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> traverse(
-			AnalysisState<A> sourceState)
+	public abstract <A extends AbstractState<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state)
+			throws SemanticException;
+
+	/**
+	 * Traverses this edge in the backward direction, from destination to
+	 * source, optionally modifying the given {@code sourceState} by applying
+	 * semantic assumptions.
+	 * 
+	 * @param <A>   the concrete {@link AbstractState} instance
+	 * @param state the {@link AnalysisState} computed at the destination of
+	 *                  this edge
+	 * 
+	 * @return the {@link AnalysisState} after traversing this edge
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public abstract <A extends AbstractState<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state)
 			throws SemanticException;
 
 	@Override

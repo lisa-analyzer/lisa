@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.edge;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
@@ -37,9 +38,16 @@ public class SequentialEdge extends Edge {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> traverse(
-			AnalysisState<A> sourceState) {
-		return sourceState;
+	public <A extends AbstractState<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state) {
+		return state;
+	}
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state)
+			throws SemanticException {
+		return traverseForward(state);
 	}
 
 	@Override
