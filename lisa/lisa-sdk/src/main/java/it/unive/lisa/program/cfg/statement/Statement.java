@@ -158,7 +158,7 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 
 	/**
 	 * Yields the {@link Statement} that is evaluated right before this one,
-	 * such that querying for the entry state of {@code this} expression is
+	 * such that querying for the entry state of {@code this} statement is
 	 * equivalent to querying the exit state of the returned one. If this method
 	 * returns {@code null}, then this is the first expression evaluated when an
 	 * entire statement is evaluated.
@@ -179,7 +179,7 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 
 	/**
 	 * Yields the {@link Statement} that precedes the given one, assuming that
-	 * {@code other} is contained into this expression. If this method returns
+	 * {@code other} is contained into this statement. If this method returns
 	 * {@code null}, then {@code other} is the first expression evaluated when
 	 * this statement is evaluated.
 	 *
@@ -188,6 +188,42 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * @return the previous statement, or {@code null}
 	 */
 	public Statement getStatementEvaluatedBefore(
+			Statement other) {
+		return null;
+	}
+
+	/**
+	 * Yields the {@link Statement} that is evaluated right after this one, such
+	 * that querying for the exit state of {@code this} statement is equivalent
+	 * to querying the entry state of the returned one. If this method returns
+	 * {@code null}, then this is either a statement or the last expression
+	 * evaluated when an entire statement is evaluated.
+	 * 
+	 * @return the next statement, or {@code null}
+	 */
+	public final Statement getEvaluationSuccessor() {
+		if (this instanceof Call) {
+			Call original = (Call) this;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != this)
+				return getStatementEvaluatedAfter(original);
+		}
+
+		return getStatementEvaluatedAfter(this);
+	}
+
+	/**
+	 * Yields the {@link Statement} that follows the given one, assuming that
+	 * {@code other} is contained into this statement. If this method returns
+	 * {@code null}, then {@code other} is the last expression evaluated when
+	 * this statement is evaluated.
+	 *
+	 * @param other the other statement
+	 * 
+	 * @return the next statement, or {@code null}
+	 */
+	public Statement getStatementEvaluatedAfter(
 			Statement other) {
 		return null;
 	}

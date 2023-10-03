@@ -208,4 +208,21 @@ public abstract class Expression extends Statement {
 
 		return parent.getStatementEvaluatedBefore(this);
 	}
+
+	@Override
+	public Statement getStatementEvaluatedAfter(
+			Statement other) {
+		if (this instanceof Call) {
+			Call original = (Call) this;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != this)
+				return original.getStatementEvaluatedAfter(other);
+		}
+
+		if (other != this || parent == null)
+			return null;
+
+		return parent.getStatementEvaluatedAfter(this);
+	}
 }

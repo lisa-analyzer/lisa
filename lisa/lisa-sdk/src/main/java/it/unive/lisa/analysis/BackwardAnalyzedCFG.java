@@ -22,11 +22,11 @@ import java.util.Map;
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
  */
-public class AnalyzedCFG<A extends AbstractState<A>>
+public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 		extends
 		CFG
 		implements
-		BaseLattice<AnalyzedCFG<A>> {
+		BaseLattice<BackwardAnalyzedCFG<A>> {
 
 	/**
 	 * Error message for the inability to lub two graphs.
@@ -61,7 +61,7 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	/**
 	 * The map storing the entry state of each entry point.
 	 */
-	protected final StatementStore<A> entryStates;
+	protected final StatementStore<A> exitStates;
 
 	/**
 	 * An id meant to identify this specific result, based on how it has been
@@ -80,7 +80,7 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 *                      abstract state of the analysis that was executed,
 	 *                      used to retrieve top and bottom values
 	 */
-	public AnalyzedCFG(
+	public BackwardAnalyzedCFG(
 			CFG cfg,
 			ScopeId id,
 			AnalysisState<A> singleton) {
@@ -100,7 +100,7 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public AnalyzedCFG(
+	public BackwardAnalyzedCFG(
 			CFG cfg,
 			ScopeId id,
 			AnalysisState<A> singleton,
@@ -109,8 +109,8 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 		super(cfg);
 		this.results = new StatementStore<>(singleton);
 		results.forEach(this.results::put);
-		this.entryStates = new StatementStore<>(singleton);
-		entryStates.forEach(this.entryStates::put);
+		this.exitStates = new StatementStore<>(singleton);
+		entryStates.forEach(this.exitStates::put);
 		this.id = id;
 	}
 
@@ -124,14 +124,14 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public AnalyzedCFG(
+	public BackwardAnalyzedCFG(
 			CFG cfg,
 			ScopeId id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results) {
 		super(cfg);
 		this.results = results;
-		this.entryStates = entryStates;
+		this.exitStates = entryStates;
 		this.id = id;
 	}
 
@@ -151,10 +151,29 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 * @param st the statement
 	 *
 	 * @return the result computed before the given statement
+	 */
+	public AnalysisState<A> getAnalysisStateBefore(
+			Statement st) {
+		if (st instanceof Call) {
+			Call original = (Call) st;
+			while (original.getSource() != null)
+				original = original.getSource();
+			st = original;
+		}
+
+		return results.getState(st);
+	}
+
+	/**
+	 * Yields the computed result at a given statement (exit state).
+	 *
+	 * @param st the statement
+	 *
+	 * @return the result computed at the given statement
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public AnalysisState<A> getAnalysisStateBefore(
+	public AnalysisState<A> getAnalysisStateAfter(
 			Statement st)
 			throws SemanticException {
 		if (st instanceof Call) {
@@ -165,40 +184,21 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 		}
 
 		if (!(st instanceof Expression) || ((Expression) st).getParentStatement() == null)
-			return lub(predecessorsOf(st), false);
+			return lub(followersOf(st), true);
 
 		// st is not a statement
 		// st is not a root-level expression
-		Statement pred = st.getEvaluationPredecessor();
-		if (pred != null)
-			return results.getState(pred);
+		Statement succ = st.getEvaluationSuccessor();
+		if (succ != null)
+			return results.getState(succ);
 
-		// last chance: there is no predecessor, so it might be an entry point
-		// of the analysis
+		// last chance: there is no successor, so it might be an exit point of
+		// the analysis
 		Statement target = ((Expression) st).getRootStatement();
-		if (getEntrypoints().contains(target))
-			return entryStates.getState(target);
+		if (getAllExitpoints().contains(target))
+			return exitStates.getState(target);
 
-		return entryStates.lattice.bottom();
-	}
-
-	/**
-	 * Yields the computed result at a given statement (exit state).
-	 *
-	 * @param st the statement
-	 *
-	 * @return the result computed at the given statement
-	 */
-	public AnalysisState<A> getAnalysisStateAfter(
-			Statement st) {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
-
-		return results.getState(st);
+		return exitStates.lattice.bottom();
 	}
 
 	/**
@@ -227,76 +227,76 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 			Collection<Statement> statements,
 			boolean entry)
 			throws SemanticException {
-		AnalysisState<A> result = entryStates.lattice.bottom();
+		AnalysisState<A> result = exitStates.lattice.bottom();
 		for (Statement st : statements)
 			result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st));
 		return result;
 	}
 
 	@Override
-	public AnalyzedCFG<A> lubAux(
-			AnalyzedCFG<A> other)
+	public BackwardAnalyzedCFG<A> lubAux(
+			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
-		return new AnalyzedCFG<>(
+		return new BackwardAnalyzedCFG<>(
 				this,
 				id,
-				entryStates.lub(other.entryStates),
+				exitStates.lub(other.exitStates),
 				results.lub(other.results));
 	}
 
 	@Override
-	public AnalyzedCFG<A> glbAux(
-			AnalyzedCFG<A> other)
+	public BackwardAnalyzedCFG<A> glbAux(
+			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_GLB_ERROR);
 
-		return new AnalyzedCFG<>(
+		return new BackwardAnalyzedCFG<>(
 				this,
 				id,
-				entryStates.glb(other.entryStates),
+				exitStates.glb(other.exitStates),
 				results.glb(other.results));
 	}
 
 	@Override
-	public AnalyzedCFG<A> wideningAux(
-			AnalyzedCFG<A> other)
+	public BackwardAnalyzedCFG<A> wideningAux(
+			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_WIDEN_ERROR);
 
-		return new AnalyzedCFG<>(
+		return new BackwardAnalyzedCFG<>(
 				this,
 				id,
-				entryStates.widening(other.entryStates),
+				exitStates.widening(other.exitStates),
 				results.widening(other.results));
 	}
 
 	@Override
-	public AnalyzedCFG<A> narrowingAux(
-			AnalyzedCFG<A> other)
+	public BackwardAnalyzedCFG<A> narrowingAux(
+			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_NARROW_ERROR);
 
-		return new AnalyzedCFG<>(
+		return new BackwardAnalyzedCFG<>(
 				this,
 				id,
-				entryStates.narrowing(other.entryStates),
+				exitStates.narrowing(other.exitStates),
 				results.narrowing(other.results));
 	}
 
 	@Override
 	public boolean lessOrEqualAux(
-			AnalyzedCFG<A> other)
+			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_COMPARE_ERROR);
 
-		return entryStates.lessOrEqual(other.entryStates) && results.lessOrEqual(other.results);
+		return exitStates.lessOrEqual(other.exitStates) && results.lessOrEqual(other.results);
 	}
 
 	/**
@@ -308,7 +308,7 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	 * @return {@code true} if that condition holds
 	 */
 	protected boolean sameIDs(
-			AnalyzedCFG<A> other) {
+			BackwardAnalyzedCFG<A> other) {
 		if (id == null) {
 			if (other.id == null)
 				return true;
@@ -320,30 +320,30 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 	}
 
 	@Override
-	public AnalyzedCFG<A> top() {
-		return new AnalyzedCFG<>(this, id.startingId(), entryStates.top(), results.top());
+	public BackwardAnalyzedCFG<A> top() {
+		return new BackwardAnalyzedCFG<>(this, id.startingId(), exitStates.top(), results.top());
 	}
 
 	@Override
 	public boolean isTop() {
-		return entryStates.isTop() && results.isTop();
+		return exitStates.isTop() && results.isTop();
 	}
 
 	@Override
-	public AnalyzedCFG<A> bottom() {
-		return new AnalyzedCFG<>(this, id.startingId(), entryStates.bottom(), results.bottom());
+	public BackwardAnalyzedCFG<A> bottom() {
+		return new BackwardAnalyzedCFG<>(this, id.startingId(), exitStates.bottom(), results.bottom());
 	}
 
 	@Override
 	public boolean isBottom() {
-		return entryStates.isBottom() && results.isBottom();
+		return exitStates.isBottom() && results.isBottom();
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((entryStates == null) ? 0 : entryStates.hashCode());
+		result = prime * result + ((exitStates == null) ? 0 : exitStates.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((results == null) ? 0 : results.hashCode());
 		return result;
@@ -358,11 +358,11 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AnalyzedCFG<?> other = (AnalyzedCFG<?>) obj;
-		if (entryStates == null) {
-			if (other.entryStates != null)
+		BackwardAnalyzedCFG<?> other = (BackwardAnalyzedCFG<?>) obj;
+		if (exitStates == null) {
+			if (other.exitStates != null)
 				return false;
-		} else if (!entryStates.equals(other.entryStates))
+		} else if (!exitStates.equals(other.exitStates))
 			return false;
 		if (id == null) {
 			if (other.id != null)

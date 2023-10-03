@@ -157,6 +157,22 @@ public abstract class NaryStatement extends Statement {
 	}
 
 	@Override
+	public Statement getStatementEvaluatedAfter(
+			Statement other) {
+		if (other == this)
+			return null;
+
+		int len = subExpressions.length;
+		for (int i = 0; i < len; i++)
+			if (subExpressions[i] == other)
+				if (i == order.last(len))
+					return this;
+				else
+					return subExpressions[order.next(i, len)];
+		return null;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
