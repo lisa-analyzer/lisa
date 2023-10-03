@@ -38,7 +38,7 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> unarySemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> unaryFwdSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,

@@ -114,10 +114,10 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	public abstract String toString();
 
 	/**
-	 * Computes the semantics of the statement, expressing how semantic
+	 * Computes the forward semantics of the statement, expressing how semantic
 	 * information is transformed by the execution of this statement. This
 	 * method is also responsible for recursively invoking the
-	 * {@link #semantics(AnalysisState, InterproceduralAnalysis, StatementStore)}
+	 * {@link #forwardSemantics(AnalysisState, InterproceduralAnalysis, StatementStore)}
 	 * of each nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}.
 	 * 
@@ -136,7 +136,7 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> semantics(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions)

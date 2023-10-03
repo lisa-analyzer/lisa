@@ -63,7 +63,7 @@ public class IMPNewArray extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,

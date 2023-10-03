@@ -104,7 +104,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 					Assignment a = new Assignment(cfg, loc,
 							new VariableRef(cfg, loc, arg.getName()),
 							arg.getStaticType().unknownValue(cfg, loc));
-					prepared = a.semantics(prepared, this, store);
+					prepared = a.forwardSemantics(prepared, this, store);
 				}
 
 				results.putResult(cfg, ID, cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), conf, ID));

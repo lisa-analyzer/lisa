@@ -40,7 +40,7 @@ public class Or extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> binarySemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> binaryFwdSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,

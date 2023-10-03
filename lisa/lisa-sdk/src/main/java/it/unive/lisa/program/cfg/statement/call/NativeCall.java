@@ -184,7 +184,7 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -201,7 +201,7 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 
 				NaryExpression rewritten = nat.rewrite(this, parameters);
 				result = result
-						.lub(rewritten.expressionSemantics(interprocedural, state, prepared.getRight(), expressions));
+						.lub(rewritten.fwdSemAux(interprocedural, state, prepared.getRight(), expressions));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

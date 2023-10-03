@@ -259,7 +259,7 @@ public abstract class NaryExpression extends Expression {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> semantics(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions)
@@ -267,7 +267,7 @@ public abstract class NaryExpression extends Expression {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
-		AnalysisState<A> result = expressionSemantics(interprocedural, eval, computed, expressions);
+		AnalysisState<A> result = fwdSemAux(interprocedural, eval, computed, expressions);
 
 		Collection<Identifier> vars = getMetaVariables();
 		for (Expression sub : subExpressions) {
@@ -280,7 +280,7 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	/**
-	 * Computes the semantics of the expression, after the semantics of all
+	 * Computes the forward semantics of the expression, after the semantics of all
 	 * sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this call returns.
 	 * 
@@ -301,7 +301,7 @@ public abstract class NaryExpression extends Expression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,

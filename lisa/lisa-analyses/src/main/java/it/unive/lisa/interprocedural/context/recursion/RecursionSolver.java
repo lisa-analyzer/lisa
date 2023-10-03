@@ -180,7 +180,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 			// we reset the analysis at the point where the starting call can be
 			// evaluated
 			token = recursion.getInvocationToken();
-			AnalysisState<A> post = start.expressionSemantics(
+			AnalysisState<A> post = start.fwdSemAux(
 					this,
 					entryState.postState,
 					params,

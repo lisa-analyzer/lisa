@@ -65,7 +65,7 @@ public class IMPNewObj extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -81,7 +81,7 @@ public class IMPNewObj extends NaryExpression {
 		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
 
 		// we also have to add the receiver inside the state
-		AnalysisState<A> callstate = paramThis.semantics(state, interprocedural, expressions);
+		AnalysisState<A> callstate = paramThis.forwardSemantics(state, interprocedural, expressions);
 		AnalysisState<A> tmp = state.bottom();
 		for (SymbolicExpression v : callstate.getComputedExpressions())
 			tmp = tmp.lub(callstate.assign(v, ref, paramThis));
@@ -91,7 +91,7 @@ public class IMPNewObj extends NaryExpression {
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(), CallType.INSTANCE, type.toString(),
 				type.toString(), fullExpressions);
-		AnalysisState<A> sem = call.expressionSemantics(interprocedural, tmp, fullParams, expressions);
+		AnalysisState<A> sem = call.fwdSemAux(interprocedural, tmp, fullParams, expressions);
 
 		// now remove the instrumented receiver
 		expressions.forget(paramThis);

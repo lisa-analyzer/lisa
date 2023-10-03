@@ -37,7 +37,7 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 
 		AnalysisState<A> postState = entryState;
 		for (int i = 0; i < computed.length; i++) {
-			AnalysisState<A> tmp = subExpressions[i].semantics(postState, interprocedural, expressions);
+			AnalysisState<A> tmp = subExpressions[i].forwardSemantics(postState, interprocedural, expressions);
 			expressions.put(subExpressions[i], tmp);
 			computed[i] = tmp.getComputedExpressions();
 			postState = tmp;

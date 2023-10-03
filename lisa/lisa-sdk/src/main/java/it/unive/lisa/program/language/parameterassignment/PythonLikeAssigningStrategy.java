@@ -79,7 +79,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 		for (int pos = 0; pos < slots.length; pos++) {
 			Expression def = formals[pos].getDefaultValue();
 			if (def != null) {
-				callState = def.semantics(callState, interprocedural, expressions);
+				callState = def.forwardSemantics(callState, interprocedural, expressions);
 				expressions.put(def, callState);
 				defaults[pos] = callState.getComputedExpressions();
 				Set<Type> types = new HashSet<>();

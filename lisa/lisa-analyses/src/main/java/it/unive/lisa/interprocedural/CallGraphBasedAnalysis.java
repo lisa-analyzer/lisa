@@ -111,7 +111,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 			Assignment a = new Assignment(cfg, loc,
 					new VariableRef(cfg, loc, arg.getName()),
 					arg.getStaticType().unknownValue(cfg, loc));
-			prepared = a.semantics(prepared, this, store);
+			prepared = a.forwardSemantics(prepared, this, store);
 		}
 
 		// the stack has to be empty

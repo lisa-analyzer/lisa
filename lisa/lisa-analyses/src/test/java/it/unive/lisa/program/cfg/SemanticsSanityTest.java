@@ -175,7 +175,7 @@ public class SemanticsSanityTest {
 			}
 
 			@Override
-			public <A extends AbstractState<A>> AnalysisState<A> semantics(
+			public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
 					AnalysisState<A> entryState,
 					InterproceduralAnalysis<A> interprocedural,
 					StatementStore<A> expressions)
@@ -253,7 +253,7 @@ public class SemanticsSanityTest {
 						for (int i = 0; i < params.length; i++)
 							params[i] = valueFor(types[i]);
 						Statement st = (Statement) c.newInstance(params);
-						st.semantics(as, interprocedural, store);
+						st.forwardSemantics(as, interprocedural, store);
 					} catch (Exception e) {
 						failures.computeIfAbsent(statement, s -> new HashMap<>())
 								.put(Arrays.toString(c.getParameterTypes()), e);

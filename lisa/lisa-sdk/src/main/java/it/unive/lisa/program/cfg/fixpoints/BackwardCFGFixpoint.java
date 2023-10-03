@@ -61,7 +61,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 			CompoundState<A> entrystate)
 			throws SemanticException {
 		StatementStore<A> expressions = new StatementStore<>(entrystate.postState.bottom());
-		AnalysisState<A> approx = node.semantics(entrystate.postState, interprocedural, expressions);
+		AnalysisState<A> approx = node.forwardSemantics(entrystate.postState, interprocedural, expressions);
 		if (node instanceof Expression)
 			// we forget the meta variables now as the values are popped from
 			// the stack here

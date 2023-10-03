@@ -115,7 +115,7 @@ public abstract class UnaryExpression extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -123,14 +123,14 @@ public abstract class UnaryExpression extends NaryExpression {
 			throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : params[0])
-			result = result.lub(unarySemantics(interprocedural, state, expr, expressions));
+			result = result.lub(unaryFwdSemantics(interprocedural, state, expr, expressions));
 		return result;
 	}
 
 	/**
-	 * Computes the semantics of the expression, after the semantics of the
-	 * sub-expression has been computed. Meta variables from the sub-expression
-	 * will be forgotten after this expression returns.
+	 * Computes the forward semantics of the expression, after the semantics of
+	 * the sub-expression has been computed. Meta variables from the
+	 * sub-expression will be forgotten after this expression returns.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param interprocedural the interprocedural analysis of the program to
@@ -148,7 +148,7 @@ public abstract class UnaryExpression extends NaryExpression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> unarySemantics(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> unaryFwdSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,

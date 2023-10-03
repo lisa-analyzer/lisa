@@ -82,7 +82,7 @@ public class NamedParameterExpression extends UnaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> unarySemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> unaryFwdSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,

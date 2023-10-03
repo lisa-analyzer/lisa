@@ -130,7 +130,7 @@ public abstract class BinaryExpression extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> expressionSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -139,13 +139,13 @@ public abstract class BinaryExpression extends NaryExpression {
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
-				result = result.lub(binarySemantics(interprocedural, state, left, right, expressions));
+				result = result.lub(binaryFwdSemantics(interprocedural, state, left, right, expressions));
 
 		return result;
 	}
 
 	/**
-	 * Computes the semantics of the expression, after the semantics of the
+	 * Computes the forward semantics of the expression, after the semantics of the
 	 * sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this expression returns.
 	 * 
@@ -169,7 +169,7 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> binarySemantics(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> binaryFwdSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,

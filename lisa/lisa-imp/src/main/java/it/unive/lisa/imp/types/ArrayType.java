@@ -175,7 +175,7 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 			CodeLocation location) {
 		return new DefaultParamInitialization(cfg, location, this) {
 			@Override
-			public <A extends AbstractState<A>> AnalysisState<A> semantics(
+			public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
 					AnalysisState<A> entryState,
 					InterproceduralAnalysis<A> interprocedural,
 					StatementStore<A> expressions)

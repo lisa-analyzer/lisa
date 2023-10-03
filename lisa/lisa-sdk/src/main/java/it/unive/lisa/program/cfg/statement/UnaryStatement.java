@@ -68,7 +68,7 @@ public abstract class UnaryStatement extends NaryStatement {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> statementSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -76,14 +76,14 @@ public abstract class UnaryStatement extends NaryStatement {
 			throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : params[0])
-			result = result.lub(unarySemantics(interprocedural, state, expr, expressions));
+			result = result.lub(unaryFwdSemantics(interprocedural, state, expr, expressions));
 		return result;
 	}
 
 	/**
-	 * Computes the semantics of the statement, after the semantics of the
-	 * sub-expression has been computed. Meta variables from the sub-expression
-	 * will be forgotten after this statement returns.
+	 * Computes the forward semantics of the statement, after the semantics of
+	 * the sub-expression has been computed. Meta variables from the
+	 * sub-expression will be forgotten after this statement returns.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param interprocedural the interprocedural analysis of the program to
@@ -101,7 +101,7 @@ public abstract class UnaryStatement extends NaryStatement {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> unarySemantics(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> unaryFwdSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,

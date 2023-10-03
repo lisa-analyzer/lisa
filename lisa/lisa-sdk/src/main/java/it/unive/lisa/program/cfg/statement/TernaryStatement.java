@@ -94,7 +94,7 @@ public abstract class TernaryStatement extends NaryStatement {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> statementSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -104,13 +104,13 @@ public abstract class TernaryStatement extends NaryStatement {
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
-					result = result.lub(ternarySemantics(interprocedural, state, left, middle, right, expressions));
+					result = result.lub(ternaryFwdSemantics(interprocedural, state, left, middle, right, expressions));
 
 		return result;
 	}
 
 	/**
-	 * Computes the semantics of the statement, after the semantics of the
+	 * Computes the forward semantics of the statement, after the semantics of the
 	 * sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this statement returns.
 	 * 
@@ -137,7 +137,7 @@ public abstract class TernaryStatement extends NaryStatement {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> ternarySemantics(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> ternaryFwdSemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,

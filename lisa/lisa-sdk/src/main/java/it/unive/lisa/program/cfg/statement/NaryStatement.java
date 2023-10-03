@@ -210,7 +210,7 @@ public abstract class NaryStatement extends Statement {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> semantics(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions)
@@ -218,7 +218,7 @@ public abstract class NaryStatement extends Statement {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
-		AnalysisState<A> result = statementSemantics(interprocedural, eval, computed, expressions);
+		AnalysisState<A> result = fwdSemAux(interprocedural, eval, computed, expressions);
 
 		for (Expression sub : subExpressions)
 			// we forget the meta variables now as the values are popped from
@@ -228,8 +228,8 @@ public abstract class NaryStatement extends Statement {
 	}
 
 	/**
-	 * Computes the semantics of the statement, after the semantics of all
-	 * sub-expressions have been computed. Meta variables from the
+	 * Computes the forward semantics of the statement, after the semantics of
+	 * all sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this call returns.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
@@ -249,7 +249,7 @@ public abstract class NaryStatement extends Statement {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> statementSemantics(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
