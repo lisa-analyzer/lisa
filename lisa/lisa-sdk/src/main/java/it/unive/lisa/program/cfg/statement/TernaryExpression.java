@@ -149,7 +149,7 @@ public abstract class TernaryExpression extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -159,14 +159,14 @@ public abstract class TernaryExpression extends NaryExpression {
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
-					result = result.lub(ternaryFwdSemantics(interprocedural, state, left, middle, right, expressions));
+					result = result.lub(fwdTernarySemantics(interprocedural, state, left, middle, right, expressions));
 
 		return result;
 	}
 
 	/**
-	 * Computes the forward semantics of the expression, after the semantics of the
-	 * sub-expressions have been computed. Meta variables from the
+	 * Computes the forward semantics of the expression, after the semantics of
+	 * the sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this expression returns.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
@@ -192,7 +192,7 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> ternaryFwdSemantics(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> fwdTernarySemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,
@@ -200,4 +200,63 @@ public abstract class TernaryExpression extends NaryExpression {
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException;
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		AnalysisState<A> result = state.bottom();
+		for (SymbolicExpression left : params[0])
+			for (SymbolicExpression middle : params[1])
+				for (SymbolicExpression right : params[2])
+					result = result.lub(bwdTernarySemantics(interprocedural, state, left, middle, right, expressions));
+
+		return result;
+	}
+
+	/**
+	 * Computes the backward semantics of the expression, after the semantics of
+	 * the sub-expressions have been computed. Meta variables from the
+	 * sub-expressions will be forgotten after this expression returns. By
+	 * default, this method delegates to
+	 * {@link #fwdTernarySemantics(InterproceduralAnalysis, AnalysisState, SymbolicExpression, SymbolicExpression, SymbolicExpression, StatementStore)},
+	 * as it is fine for most atomic statements. One should redefine this method
+	 * if a statement's semantics is composed of a series of smaller operations.
+	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state where the expression is to be evaluated
+	 * @param left            the symbolic expression representing the computed
+	 *                            value of the first sub-expression of this
+	 *                            expression
+	 * @param middle          the symbolic expression representing the computed
+	 *                            value of the second sub-expression of this
+	 *                            expression
+	 * @param right           the symbolic expression representing the computed
+	 *                            value of the third sub-expression of this
+	 *                            expression
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions are stored and that can be
+	 *                            accessed to query for post-states of
+	 *                            parameters expressions
+	 * 
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this expression
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public <A extends AbstractState<A>> AnalysisState<A> bwdTernarySemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression middle,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return fwdTernarySemantics(interprocedural, state, left, middle, right, expressions);
+	}
 }

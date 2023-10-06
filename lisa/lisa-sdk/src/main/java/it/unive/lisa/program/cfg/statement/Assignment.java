@@ -111,7 +111,7 @@ public class Assignment extends BinaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> binaryFwdSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdBinarySemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,

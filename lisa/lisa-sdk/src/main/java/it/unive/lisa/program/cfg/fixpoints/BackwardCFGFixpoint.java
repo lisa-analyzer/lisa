@@ -1,9 +1,5 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -18,6 +14,9 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A {@link FixpointImplementation} for {@link CFG}s.
@@ -61,7 +60,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 			CompoundState<A> entrystate)
 			throws SemanticException {
 		StatementStore<A> expressions = new StatementStore<>(entrystate.postState.bottom());
-		AnalysisState<A> approx = node.forwardSemantics(entrystate.postState, interprocedural, expressions);
+		AnalysisState<A> approx = node.backwardSemantics(entrystate.postState, interprocedural, expressions);
 		if (node instanceof Expression)
 			// we forget the meta variables now as the values are popped from
 			// the stack here

@@ -66,7 +66,7 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> ternaryFwdSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdTernarySemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,

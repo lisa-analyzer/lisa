@@ -446,7 +446,9 @@ public class SemanticsSanityTest {
 		nullary = unary = binary = ternary = quaternary = null;
 		T instance;
 		for (Class<? extends T> clazz : classes)
-			if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())
+			if (!Modifier.isAbstract(clazz.getModifiers())
+					&& !Modifier.isInterface(clazz.getModifiers())
+					&& !clazz.isAnonymousClass()
 					&& !Satisfiability.class.isAssignableFrom(clazz)
 					&& !CompoundState.class.isAssignableFrom(clazz)
 					// some testing domain that we do not care about end up here
@@ -464,7 +466,8 @@ public class SemanticsSanityTest {
 					else if (c.getParameterCount() == 4)
 						quaternary = c;
 				}
-
+				if (clazz.getName().contains("FixpointInfo"))
+					System.out.println();
 				try {
 					if (nullary != null)
 						instance = (T) nullary.newInstance();
@@ -498,7 +501,7 @@ public class SemanticsSanityTest {
 
 					instances.add(instance);
 
-					nullary = unary = binary = ternary = null;
+					nullary = unary = binary = ternary = quaternary = null;
 				} catch (Exception e) {
 					failures.add(clazz.getName());
 					System.err.println("Instantiation of class " + clazz.getName() + " failed due to " + e);

@@ -51,9 +51,9 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	}
 
 	/**
-	 * Computes an analysis state that abstracts the forward result of this call
-	 * when {@code parameters} are used as actual parameters, and the state when
-	 * the call is executed is {@code entryState}.
+	 * Computes an analysis state that abstracts the result of this call when
+	 * {@code parameters} are used as actual parameters, and the state when the
+	 * call is executed is {@code entryState}.
 	 * 
 	 * @param entryState      the abstract analysis state when the call is
 	 *                            reached
@@ -73,7 +73,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> fwdCompute(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> compute(
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,
@@ -81,7 +81,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 			throws SemanticException;
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -92,7 +92,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A> returned = fwdCompute(state, interprocedural, expressions, params);
+		AnalysisState<A> returned = compute(state, interprocedural, expressions, params);
 
 		if (interprocedural.returnsVoid(this, returned))
 			// no need to add the meta variable since nothing has been pushed on
@@ -104,5 +104,17 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 			getMetaVariables().add((Identifier) expr);
 		getMetaVariables().add(meta);
 		return returned;
+	}
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		// TODO implement this when backward analysis will be out of
+		// beta
+		throw new UnsupportedOperationException();
 	}
 }

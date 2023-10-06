@@ -64,7 +64,7 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> ternaryFwdSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdTernarySemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,

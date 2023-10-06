@@ -135,7 +135,7 @@ public class UnresolvedCall extends Call {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -150,7 +150,7 @@ public class UnresolvedCall extends Call {
 		} catch (CallResolutionException e) {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}
-		AnalysisState<A> result = resolved.fwdSemAux(interprocedural, state, params, expressions);
+		AnalysisState<A> result = resolved.forwardSemanticsAux(interprocedural, state, params, expressions);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
 	}

@@ -209,6 +209,17 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 
 				return refSt;
 			}
+
+			@Override
+			public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
+					AnalysisState<A> exitState,
+					InterproceduralAnalysis<A> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException {
+				// TODO implement this when backward analysis will be out of
+				// beta
+				throw new UnsupportedOperationException();
+			}
 		};
 	}
 }

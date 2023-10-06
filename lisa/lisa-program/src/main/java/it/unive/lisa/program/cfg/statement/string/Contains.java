@@ -63,7 +63,7 @@ public class Contains extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> binaryFwdSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdBinarySemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,

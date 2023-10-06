@@ -65,7 +65,7 @@ public class IMPNewObj extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -91,7 +91,7 @@ public class IMPNewObj extends NaryExpression {
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(), CallType.INSTANCE, type.toString(),
 				type.toString(), fullExpressions);
-		AnalysisState<A> sem = call.fwdSemAux(interprocedural, tmp, fullParams, expressions);
+		AnalysisState<A> sem = call.forwardSemanticsAux(interprocedural, tmp, fullParams, expressions);
 
 		// now remove the instrumented receiver
 		expressions.forget(paramThis);
@@ -109,6 +109,18 @@ public class IMPNewObj extends NaryExpression {
 		}
 
 		return result;
+	}
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		// TODO implement this when backward analysis will be out of
+		// beta
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -131,5 +143,4 @@ public class IMPNewObj extends NaryExpression {
 		IMPNewObj other = (IMPNewObj) obj;
 		return staticallyAllocated == other.staticallyAllocated;
 	}
-
 }

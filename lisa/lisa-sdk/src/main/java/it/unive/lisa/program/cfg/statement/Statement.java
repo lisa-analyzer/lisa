@@ -142,6 +142,39 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 			StatementStore<A> expressions)
 			throws SemanticException;
 
+	/**
+	 * Computes the backward semantics of the statement, expressing how semantic
+	 * information is transformed by the execution of this statement. This
+	 * method is also responsible for recursively invoking the
+	 * {@link #forwardSemantics(AnalysisState, InterproceduralAnalysis, StatementStore)}
+	 * of each nested {@link Expression}, saving the result of each call in
+	 * {@code expressions}. By default, this method delegates to
+	 * {@link #forwardSemantics(AnalysisState, InterproceduralAnalysis, StatementStore)},
+	 * as it is fine for most atomic statements. One should redefine this method
+	 * if a statement's semantics is composed of a series of smaller operations.
+	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param exitState       the exit state that represents the abstract values
+	 *                            of each program variable and memory location
+	 *                            when the execution reaches this statement
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions must be stored
+	 *
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this statement
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return forwardSemantics(exitState, interprocedural, expressions);
+	}
+
 	@Override
 	public CodeLocation getLocation() {
 		return location;

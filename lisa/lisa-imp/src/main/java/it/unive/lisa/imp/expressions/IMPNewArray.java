@@ -63,7 +63,7 @@ public class IMPNewArray extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -98,6 +98,18 @@ public class IMPNewArray extends NaryExpression {
 		}
 
 		return refSt;
+	}
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		// TODO implement this when backward analysis will be out of
+		// beta
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

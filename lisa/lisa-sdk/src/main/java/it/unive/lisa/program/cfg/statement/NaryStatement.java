@@ -218,7 +218,7 @@ public abstract class NaryStatement extends Statement {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
-		AnalysisState<A> result = fwdSemAux(interprocedural, eval, computed, expressions);
+		AnalysisState<A> result = forwardSemanticsAux(interprocedural, eval, computed, expressions);
 
 		for (Expression sub : subExpressions)
 			// we forget the meta variables now as the values are popped from
@@ -249,10 +249,74 @@ public abstract class NaryStatement extends Statement {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException;
+
+	/**
+	 * Semantics of an n-ary statements is evaluated by computing the semantics
+	 * of its sub-expressions, in the specified order, using the analysis state
+	 * from each sub-expression's computation as entry state for the next one.
+	 * Then, the semantics of the statement itself is evaluated.<br>
+	 * <br>
+	 * {@inheritDoc}
+	 */
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
+
+		// TODO this evaluation should also happen backward, but the current
+		// structure won't allow it as we need the symbolic expressions from the
+		// child before evaluating the semantics of the parent
+		AnalysisState<A> sem = order.bwdEvaluate(subExpressions, exitState, interprocedural, expressions, computed);
+		AnalysisState<A> result = backwardSemanticsAux(interprocedural, sem, computed, expressions);
+
+		for (Expression sub : subExpressions)
+			// we forget the meta variables now as the values are popped from
+			// the stack here
+			result = result.forgetIdentifiers(sub.getMetaVariables());
+		return result;
+	}
+
+	/**
+	 * Computes the backward semantics of the statement, after the semantics of
+	 * all sub-expressions have been computed. Meta variables from the
+	 * sub-expressions will be forgotten after this call returns. By default,
+	 * this method delegates to
+	 * {@link #forwardSemanticsAux(InterproceduralAnalysis, AnalysisState, ExpressionSet[], StatementStore)},
+	 * as it is fine for most atomic statements. One should redefine this method
+	 * if a statement's semantics is composed of a series of smaller operations.
+	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state where the statement is to be evaluated
+	 * @param params          the symbolic expressions representing the computed
+	 *                            values of the sub-expressions of this
+	 *                            statement
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions are stored and that can be
+	 *                            accessed to query for post-states of
+	 *                            parameters expressions
+	 * 
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this statement
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return forwardSemanticsAux(interprocedural, state, params, expressions);
+	}
 }

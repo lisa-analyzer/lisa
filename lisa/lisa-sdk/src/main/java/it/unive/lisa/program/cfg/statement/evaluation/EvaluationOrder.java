@@ -100,4 +100,35 @@ public interface EvaluationOrder {
 			StatementStore<A> expressions,
 			ExpressionSet[] computed)
 			throws SemanticException;
+
+	/**
+	 * Evaluates the given sub-expressions according to this order, but in
+	 * reverse order and using the backward semantics.
+	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param subExpressions  the sub-expressions to evaluate
+	 * @param entryState      the state to use as starting point for the
+	 *                            evaluation
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions must be stored (this method is
+	 *                            responsible for storing the results of the
+	 *                            sub-expressions)
+	 * @param computed        an array containing, for each sub-expression, the
+	 *                            symbolic expressions produced by its
+	 *                            evaluation
+	 * 
+	 * @return the last computed state, where the source expression can be
+	 *             evaluated
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
+	 */
+	<A extends AbstractState<A>> AnalysisState<A> bwdEvaluate(
+			Expression[] subExpressions,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] computed)
+			throws SemanticException;
 }

@@ -47,6 +47,28 @@ public class RightToLeftEvaluation implements EvaluationOrder {
 	}
 
 	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> bwdEvaluate(
+			Expression[] subExpressions,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] computed)
+			throws SemanticException {
+		if (subExpressions.length == 0)
+			return entryState;
+
+		AnalysisState<A> postState = entryState;
+		for (int i = 0; i < computed.length; i++) {
+			AnalysisState<A> tmp = subExpressions[i].backwardSemantics(postState, interprocedural, expressions);
+			expressions.put(subExpressions[i], tmp);
+			computed[i] = tmp.getComputedExpressions();
+			postState = tmp;
+		}
+
+		return postState;
+	}
+
+	@Override
 	public int previous(
 			int pos,
 			int len) {

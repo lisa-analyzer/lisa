@@ -1,9 +1,5 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -13,6 +9,9 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A {@link CFGFixpoint} that traverses ascending chains using lubs and

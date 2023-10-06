@@ -1,14 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
@@ -38,11 +29,18 @@ import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A {@link BackwardAnalyzedCFG} that has been built using an
- * {@link OptimizedBackwardFixpoint}. This means that this graph will only contain
- * results for widening points (that is, {@link Statement}s that part of
+ * {@link OptimizedBackwardFixpoint}. This means that this graph will only
+ * contain results for widening points (that is, {@link Statement}s that part of
  * {@link #getCycleEntries()}), exit statements (that is, {@link Statement}s
  * such that {@link Statement#stopsExecution()} holds), and hotspots (that is,
  * {@link Statement}s such that {@link LiSAConfiguration#hotspots} holds).
@@ -248,7 +246,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 	 * Stores the given prestate for the statement in the non-unwinded results
 	 * of this cfg, overwriting any existing value.
 	 * 
-	 * @param st        the statement
+	 * @param st       the statement
 	 * @param prestate the prestate
 	 */
 	public void storePreStateOf(
@@ -415,6 +413,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 
 	@Override
 	public BackwardOptimizedAnalyzedCFG<A> bottom() {
-		return new BackwardOptimizedAnalyzedCFG<>(this, id.startingId(), exitStates.bottom(), results.bottom(), null, null);
+		return new BackwardOptimizedAnalyzedCFG<>(this, id.startingId(), exitStates.bottom(), results.bottom(), null,
+				null);
 	}
 }

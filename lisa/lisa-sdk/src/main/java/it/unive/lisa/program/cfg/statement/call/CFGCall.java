@@ -191,7 +191,7 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdCompute(
+	public <A extends AbstractState<A>> AnalysisState<A> compute(
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A> interprocedural,
 			StatementStore<A> expressions,

@@ -267,7 +267,7 @@ public abstract class NaryExpression extends Expression {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
-		AnalysisState<A> result = fwdSemAux(interprocedural, eval, computed, expressions);
+		AnalysisState<A> result = forwardSemanticsAux(interprocedural, eval, computed, expressions);
 
 		Collection<Identifier> vars = getMetaVariables();
 		for (Expression sub : subExpressions) {
@@ -280,8 +280,8 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	/**
-	 * Computes the forward semantics of the expression, after the semantics of all
-	 * sub-expressions have been computed. Meta variables from the
+	 * Computes the forward semantics of the expression, after the semantics of
+	 * all sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this call returns.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
@@ -301,10 +301,69 @@ public abstract class NaryExpression extends Expression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public abstract <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException;
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
+
+		// TODO this evaluation should also happen backward, but the current
+		// structure won't allow it as we need the symbolic expressions from the
+		// child before evaluating the semantics of the parent
+		AnalysisState<A> sem = order.bwdEvaluate(subExpressions, exitState, interprocedural, expressions, computed);
+		AnalysisState<A> result = backwardSemanticsAux(interprocedural, sem, computed, expressions);
+
+		Collection<Identifier> vars = getMetaVariables();
+		for (Expression sub : subExpressions) {
+			// we propagate the meta variables backward
+			Collection<Identifier> subvars = sub.getMetaVariables();
+			vars.addAll(subvars);
+			subvars.clear();
+		}
+		return result;
+	}
+
+	/**
+	 * Computes the backward semantics of the expression, after the semantics of
+	 * all sub-expressions have been computed. Meta variables from the
+	 * sub-expressions will be forgotten after this call returns. By default,
+	 * this method delegates to
+	 * {@link #forwardSemanticsAux(InterproceduralAnalysis, AnalysisState, ExpressionSet[], StatementStore)},
+	 * as it is fine for most atomic statements. One should redefine this method
+	 * if a statement's semantics is composed of a series of smaller operations.
+	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state where the expression is to be evaluated
+	 * @param params          the symbolic expressions representing the computed
+	 *                            values of the sub-expressions of this
+	 *                            expression
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions are stored and that can be
+	 *                            accessed to query for post-states of
+	 *                            parameters expressions
+	 * 
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this expression
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return forwardSemanticsAux(interprocedural, state, params, expressions);
+	}
 }

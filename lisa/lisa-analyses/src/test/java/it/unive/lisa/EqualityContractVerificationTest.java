@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.BackwardAnalyzedCFG;
+import it.unive.lisa.analysis.BackwardOptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
@@ -465,7 +467,10 @@ public class EqualityContractVerificationTest {
 				verify(subject, Warning.NONFINAL_FIELDS);
 			else if (subject == StaticTypes.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("types"));
-			else if (subject != AnalyzedCFG.class && subject != OptimizedAnalyzedCFG.class)
+			else if (subject != AnalyzedCFG.class
+					&& subject != OptimizedAnalyzedCFG.class
+					&& subject != BackwardAnalyzedCFG.class
+					&& subject != BackwardOptimizedAnalyzedCFG.class)
 				// we test the cfg separately
 				verify(subject);
 	}
@@ -479,9 +484,14 @@ public class EqualityContractVerificationTest {
 		// id is mutable
 		verify(AnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
 				Warning.NONFINAL_FIELDS);
+		verify(BackwardAnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
+				Warning.NONFINAL_FIELDS);
 		// we do not consider the expanded results or interprocedural
 		// as they do not identify the results
 		verify(OptimizedAnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+				Warning.NONFINAL_FIELDS);
+		verify(BackwardOptimizedAnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
 				Warning.NONFINAL_FIELDS);
 
 		verify(ExecutionTrace.class);

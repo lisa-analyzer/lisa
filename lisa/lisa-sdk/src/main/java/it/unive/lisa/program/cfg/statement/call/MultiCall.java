@@ -184,7 +184,7 @@ public class MultiCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -193,7 +193,7 @@ public class MultiCall extends Call implements ResolvedCall {
 		AnalysisState<A> result = state.bottom();
 
 		for (Call call : calls) {
-			result = result.lub(call.fwdSemAux(interprocedural, state, params, expressions));
+			result = result.lub(call.forwardSemanticsAux(interprocedural, state, params, expressions));
 			getMetaVariables().addAll(call.getMetaVariables());
 		}
 

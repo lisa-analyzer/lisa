@@ -106,7 +106,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> unaryFwdSemantics(
+	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,

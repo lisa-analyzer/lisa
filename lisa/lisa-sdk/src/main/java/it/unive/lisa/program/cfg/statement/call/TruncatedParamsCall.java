@@ -78,7 +78,7 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdSemAux(
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
@@ -87,12 +87,12 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 		Expression[] actuals = getParameters();
 		AnalysisState<A> post;
 		if (params.length == actuals.length) {
-			post = call.fwdSemAux(interprocedural, state, params, expressions);
+			post = call.forwardSemanticsAux(interprocedural, state, params, expressions);
 		} else {
 			ExpressionSet[] truncatedParams = new ExpressionSet[actuals.length];
 			if (actuals.length > 0)
 				System.arraycopy(params, 1, truncatedParams, 0, params.length - 1);
-			post = call.fwdSemAux(interprocedural, state, truncatedParams, expressions);
+			post = call.forwardSemanticsAux(interprocedural, state, truncatedParams, expressions);
 		}
 
 		getMetaVariables().addAll(call.getMetaVariables());
