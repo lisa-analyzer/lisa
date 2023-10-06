@@ -291,7 +291,6 @@ public class ContainsTest {
 				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
-	// TODO to check
 	@Test
 	public void test13() throws SemanticException {
 		Tarsis t1 = new Tarsis(RegexAutomaton.string("ba"));

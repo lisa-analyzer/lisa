@@ -476,7 +476,6 @@ public class PointBasedHeapTest {
 		assertEquals(xAssign.rewrite(x, fakeProgramPoint, fakeOracle), expectedRewritten);
 
 		// y rewritten in x -> pp1 = {y}
-		// TODO to verify
 		assertEquals(xAssign.rewrite(y, fakeProgramPoint, fakeOracle), new ExpressionSet(y));
 	}
 

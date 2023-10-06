@@ -7,12 +7,47 @@ import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CHACallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
+
 import org.junit.Test;
 
-public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
+public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
+
+	@Test
+	public void testWorstCaseCHACallGraph() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Sign()),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
+		conf.callGraph = new CHACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "CHA";
+		conf.programFile = "program.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testWorstCaseRTACallGraph() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new Sign()),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "RTA";
+		conf.programFile = "program.imp";
+		perform(conf);
+	}
 
 	@Test
 	public void testRTAContextSensitive1() {

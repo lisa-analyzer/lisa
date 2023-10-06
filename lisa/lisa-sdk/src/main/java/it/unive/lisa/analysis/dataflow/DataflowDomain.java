@@ -145,7 +145,6 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		// TODO could be refined
 		return (D) this;
 	}
 
@@ -197,7 +196,6 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		// TODO could be refined
 		return Satisfiability.UNKNOWN;
 	}
 
