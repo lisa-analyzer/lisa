@@ -165,7 +165,10 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 		}
 
 		if (!(st instanceof Expression) || ((Expression) st).getParentStatement() == null)
-			return lub(predecessorsOf(st), false);
+			if (getEntrypoints().contains(st))
+				return entryStates.getState(st);
+			else
+				return lub(predecessorsOf(st), false);
 
 		// st is not a statement
 		// st is not a root-level expression
@@ -175,9 +178,9 @@ public class AnalyzedCFG<A extends AbstractState<A>>
 
 		// last chance: there is no predecessor, so it might be an entry point
 		// of the analysis
-		Statement target = ((Expression) st).getRootStatement();
-		if (getEntrypoints().contains(target))
-			return entryStates.getState(target);
+		Statement root = ((Expression) st).getRootStatement();
+		if (getEntrypoints().contains(root))
+			return entryStates.getState(root);
 
 		return entryStates.lattice.bottom();
 	}

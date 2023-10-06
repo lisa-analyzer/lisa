@@ -97,7 +97,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 	 *                            containing the abstract state of the analysis
 	 *                            that was executed, used to retrieve top and
 	 *                            bottom values
-	 * @param entryStates     the entry state for each entry point of the cfg
+	 * @param exitStates      the exit state for each exit point of the cfg
 	 * @param results         the results of the fixpoint computation
 	 * @param interprocedural the analysis that have been used to produce this
 	 *                            result, and that can be used to unwind the
@@ -107,10 +107,10 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			CFG cfg,
 			ScopeId id,
 			AnalysisState<A> singleton,
-			Map<Statement, AnalysisState<A>> entryStates,
+			Map<Statement, AnalysisState<A>> exitStates,
 			Map<Statement, AnalysisState<A>> results,
 			InterproceduralAnalysis<A> interprocedural) {
-		super(cfg, id, singleton, entryStates, results);
+		super(cfg, id, singleton, exitStates, results);
 		this.interprocedural = interprocedural;
 	}
 
@@ -121,7 +121,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 	 * @param cfg             the original control flow graph
 	 * @param id              a {@link ScopeId} meant to identify this specific
 	 *                            result based on how it has been produced
-	 * @param entryStates     the entry state for each entry point of the cfg
+	 * @param exitStates      the exit state for each exit point of the cfg
 	 * @param results         the results of the fixpoint computation
 	 * @param interprocedural the analysis that have been used to produce this
 	 *                            result, and that can be used to unwind the
@@ -130,21 +130,21 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 	public BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
 			ScopeId id,
-			StatementStore<A> entryStates,
+			StatementStore<A> exitStates,
 			StatementStore<A> results,
 			InterproceduralAnalysis<A> interprocedural) {
-		super(cfg, id, entryStates, results);
+		super(cfg, id, exitStates, results);
 		this.interprocedural = interprocedural;
 	}
 
 	private BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
 			ScopeId id,
-			StatementStore<A> entryStates,
+			StatementStore<A> exitStates,
 			StatementStore<A> results,
 			StatementStore<A> expanded,
 			InterproceduralAnalysis<A> interprocedural) {
-		super(cfg, id, entryStates, results);
+		super(cfg, id, exitStates, results);
 		this.interprocedural = interprocedural;
 		this.expanded = expanded;
 	}
@@ -268,7 +268,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 
 		@Override
 		public void fixpoint(
-				AnalysisState<A> entryState,
+				AnalysisState<A> exitState,
 				Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 				FixpointConfiguration conf)
 				throws FixpointException {
@@ -284,7 +284,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 		@Override
 		public AnalysisState<A> getAbstractResultOf(
 				CFGCall call,
-				AnalysisState<A> entryState,
+				AnalysisState<A> exitState,
 				ExpressionSet[] parameters,
 				StatementStore<A> expressions)
 				throws SemanticException {
@@ -295,7 +295,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
 			ScopeId id = getId().push(call);
-			AnalysisState<A> state = entryState.bottom();
+			AnalysisState<A> state = exitState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();
 				state = state.lub(unscope(call, scope, res));
@@ -306,11 +306,11 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 		@Override
 		public AnalysisState<A> getAbstractResultOf(
 				OpenCall call,
-				AnalysisState<A> entryState,
+				AnalysisState<A> exitState,
 				ExpressionSet[] parameters,
 				StatementStore<A> expressions)
 				throws SemanticException {
-			return interprocedural.getAbstractResultOf(call, entryState, parameters, expressions);
+			return interprocedural.getAbstractResultOf(call, exitState, parameters, expressions);
 		}
 
 		@Override

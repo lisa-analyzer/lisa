@@ -59,7 +59,7 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 	protected final StatementStore<A> results;
 
 	/**
-	 * The map storing the entry state of each entry point.
+	 * The map storing the exit state of each exit point.
 	 */
 	protected final StatementStore<A> exitStates;
 
@@ -91,26 +91,26 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
 	 * 
-	 * @param cfg         the original control flow graph
-	 * @param id          a {@link ScopeId} meant to identify this specific
-	 *                        result based on how it has been produced
-	 * @param singleton   an instance of the {@link AnalysisState} containing
-	 *                        the abstract state of the analysis that was
-	 *                        executed, used to retrieve top and bottom values
-	 * @param entryStates the entry state for each entry point of the cfg
-	 * @param results     the results of the fixpoint computation
+	 * @param cfg        the original control flow graph
+	 * @param id         a {@link ScopeId} meant to identify this specific
+	 *                       result based on how it has been produced
+	 * @param singleton  an instance of the {@link AnalysisState} containing the
+	 *                       abstract state of the analysis that was executed,
+	 *                       used to retrieve top and bottom values
+	 * @param exitStates the exit state for each exit point of the cfg
+	 * @param results    the results of the fixpoint computation
 	 */
 	public BackwardAnalyzedCFG(
 			CFG cfg,
 			ScopeId id,
 			AnalysisState<A> singleton,
-			Map<Statement, AnalysisState<A>> entryStates,
+			Map<Statement, AnalysisState<A>> exitStates,
 			Map<Statement, AnalysisState<A>> results) {
 		super(cfg);
 		this.results = new StatementStore<>(singleton);
 		results.forEach(this.results::put);
 		this.exitStates = new StatementStore<>(singleton);
-		entryStates.forEach(this.exitStates::put);
+		exitStates.forEach(this.exitStates::put);
 		this.id = id;
 	}
 
@@ -118,20 +118,20 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
 	 * 
-	 * @param cfg         the original control flow graph
-	 * @param id          a {@link ScopeId} meant to identify this specific
-	 *                        result based on how it has been produced
-	 * @param entryStates the entry state for each entry point of the cfg
-	 * @param results     the results of the fixpoint computation
+	 * @param cfg        the original control flow graph
+	 * @param id         a {@link ScopeId} meant to identify this specific
+	 *                       result based on how it has been produced
+	 * @param exitStates the exit state for each exit point of the cfg
+	 * @param results    the results of the fixpoint computation
 	 */
 	public BackwardAnalyzedCFG(
 			CFG cfg,
 			ScopeId id,
-			StatementStore<A> entryStates,
+			StatementStore<A> exitStates,
 			StatementStore<A> results) {
 		super(cfg);
 		this.results = results;
-		this.exitStates = entryStates;
+		this.exitStates = exitStates;
 		this.id = id;
 	}
 
@@ -184,7 +184,10 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 		}
 
 		if (!(st instanceof Expression) || ((Expression) st).getParentStatement() == null)
-			return lub(followersOf(st), true);
+			if (getAllExitpoints().contains(st))
+				return exitStates.getState(st);
+			else
+				return lub(followersOf(st), true);
 
 		// st is not a statement
 		// st is not a root-level expression
@@ -215,7 +218,7 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 	/**
 	 * Yields the exit state.
 	 * 
-	 * @return the entry state of the CFG
+	 * @return the exit state of the CFG
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
