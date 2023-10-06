@@ -487,7 +487,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		getAllExitpoints().forEach(e -> start.put(e, exitState));
-		return fixpoint(exitState, start, interprocedural, ws, conf, id);
+		return backwardFixpoint(exitState, start, interprocedural, ws, conf, id);
 	}
 
 	/**
@@ -536,7 +536,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		exitpoints.forEach(e -> start.put(e, exitState));
-		return fixpoint(exitState, start, interprocedural, ws, conf, id);
+		return backwardFixpoint(exitState, start, interprocedural, ws, conf, id);
 	}
 
 	/**

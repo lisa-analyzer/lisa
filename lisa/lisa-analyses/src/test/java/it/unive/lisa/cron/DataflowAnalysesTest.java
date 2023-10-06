@@ -6,12 +6,10 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.dataflow.AvailableExpressions;
 import it.unive.lisa.analysis.dataflow.ConstantPropagation;
 import it.unive.lisa.analysis.dataflow.DefiniteDataflowDomain;
+import it.unive.lisa.analysis.dataflow.Liveness;
 import it.unive.lisa.analysis.dataflow.PossibleDataflowDomain;
 import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
-import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.BackwardModularWorstCaseAnalysis;
-
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class DataflowAnalysesTest extends AnalysisTestExecutor {
@@ -56,19 +54,16 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	@Ignore
 	public void testLiveness() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.interproceduralAnalysis = new BackwardModularWorstCaseAnalysis<>();
 		conf.abstractState = DefaultConfiguration.simpleState(
 				DefaultConfiguration.defaultHeapDomain(),
-				new DefiniteDataflowDomain<>(new AvailableExpressions()),
+				new PossibleDataflowDomain<>(new Liveness()),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "liveness";
 		conf.programFile = "liveness.imp";
-		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
-		conf.forceUpdate = true;
 		perform(conf);
 	}
 }
