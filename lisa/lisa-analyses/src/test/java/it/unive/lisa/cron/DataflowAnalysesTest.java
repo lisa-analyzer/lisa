@@ -64,6 +64,7 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "liveness";
 		conf.programFile = "liveness.imp";
+		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 }

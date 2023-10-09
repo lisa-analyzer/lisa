@@ -71,6 +71,9 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
+		if (conf.optimize)
+			LOG.warn("Optimizations are turned on: this feature is experimental with backward analyses");
+
 		// new fixpoint iteration: restart
 		this.results = null;
 
