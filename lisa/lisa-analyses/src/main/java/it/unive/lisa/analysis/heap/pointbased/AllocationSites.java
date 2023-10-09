@@ -1,9 +1,9 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
@@ -187,5 +187,27 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 		// absence of a key means no information (bottom) instead of any
 		// possible information (top)
 		return bottom();
+	}
+
+	@Override
+	public Satisfiability alias(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			HeapEnvironment<AllocationSites> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public Satisfiability isReachableFrom(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			HeapEnvironment<AllocationSites> environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return Satisfiability.UNKNOWN;
 	}
 }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -16,7 +17,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.Int32Type;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
@@ -33,7 +33,6 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 import org.junit.Test;
 
 public class PointBasedHeapTest {
@@ -72,53 +71,10 @@ public class PointBasedHeapTest {
 		}
 	};
 
-	private final CodeLocation fakeLocation = new SourceCodeLocation("fake", 0, 0);
+	private final SemanticOracle fakeOracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
 
-	private final ProgramPoint fakeProgramPoint = new ProgramPoint() {
-
-		@Override
-		public CodeLocation getLocation() {
-			return fakeLocation;
-		}
-
-		@Override
-		public CFG getCFG() {
-			return null;
-		}
-	};
-
-	private final SemanticOracle fakeOracle = new SemanticOracle() {
-
-		@Override
-		public Set<Type> getRuntimeTypesOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return Collections.singleton(e.getStaticType());
-		}
-
-		@Override
-		public Type getDynamicTypeOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return e.getStaticType();
-		}
-
-		@Override
-		public ExpressionSet rewrite(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return new ExpressionSet(expression);
-		}
-	};
-
-	private final Variable x = new Variable(untyped, "x", fakeProgramPoint.getLocation());
-	private final Variable y = new Variable(untyped, "y", fakeProgramPoint.getLocation());
+	private final Variable x = new Variable(untyped, "x", pp1.getLocation());
+	private final Variable y = new Variable(untyped, "y", pp1.getLocation());
 
 	private final PointBasedHeap emptyHeap = new PointBasedHeap();
 	private final PointBasedHeap topHeap = new PointBasedHeap().top();
@@ -131,14 +87,14 @@ public class PointBasedHeapTest {
 	public void testAssign() throws SemanticException {
 		Constant one = new Constant(Int32Type.INSTANCE, 1, loc1);
 		Constant zero = new Constant(Int32Type.INSTANCE, 0, loc1);
-		PointBasedHeap assignResult = topHeap.assign(x, one, fakeProgramPoint, fakeOracle);
+		PointBasedHeap assignResult = topHeap.assign(x, one, pp1, fakeOracle);
 
 		// constants do not affect heap abstract domain
 		assertEquals(topHeap, assignResult);
 
 		assignResult = topHeap.assign(x,
-				new BinaryExpression(intType, one, zero, NumericNonOverflowingAdd.INSTANCE, fakeLocation),
-				fakeProgramPoint, fakeOracle);
+				new BinaryExpression(intType, one, zero, NumericNonOverflowingAdd.INSTANCE, loc1),
+				pp1, fakeOracle);
 
 		// binary expressions do not affect heap abstract domain
 		assertEquals(assignResult, topHeap);
@@ -457,26 +413,26 @@ public class PointBasedHeapTest {
 		AccessChild accessChild = new AccessChild(untyped, x, y, loc1);
 
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
-		assertEquals(expectedRewritten, xAssign.rewrite(accessChild, fakeProgramPoint, fakeOracle));
+		assertEquals(expectedRewritten, xAssign.rewrite(accessChild, pp1, fakeOracle));
 
 		// y.x rewritten in x -> pp1 = empty set
 		accessChild = new AccessChild(untyped, y, x, loc1);
-		assertEquals(new ExpressionSet(), xAssign.rewrite(accessChild, fakeProgramPoint, fakeOracle));
+		assertEquals(new ExpressionSet(), xAssign.rewrite(accessChild, pp1, fakeOracle));
 	}
 
 	@Test
 	public void testIdentifierRewrite() throws SemanticException {
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new MemoryAllocation(untyped, loc1), fakeLocation),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1, fakeOracle);
 		// x rewritten in x -> pp1 = pp1
 		ExpressionSet expectedRewritten = new ExpressionSet(
-				new MemoryPointer(untyped, alloc1, fakeLocation));
-		assertEquals(xAssign.rewrite(x, fakeProgramPoint, fakeOracle), expectedRewritten);
+				new MemoryPointer(untyped, alloc1, loc1));
+		assertEquals(xAssign.rewrite(x, pp1, fakeOracle), expectedRewritten);
 
 		// y rewritten in x -> pp1 = {y}
-		assertEquals(xAssign.rewrite(y, fakeProgramPoint, fakeOracle), new ExpressionSet(y));
+		assertEquals(xAssign.rewrite(y, pp1, fakeOracle), new ExpressionSet(y));
 	}
 
 	@Test
@@ -486,21 +442,21 @@ public class PointBasedHeapTest {
 				new MemoryAllocation(untyped, loc1, new Annotations()), loc1), loc1);
 
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
-		assertEquals(expectedRewritten, topHeap.rewrite(deref, fakeProgramPoint, fakeOracle));
+		assertEquals(expectedRewritten, topHeap.rewrite(deref, pp1, fakeOracle));
 
 		// *(x) rewritten in x -> pp1 -> pp1
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new MemoryAllocation(untyped, loc1), fakeLocation),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1, fakeOracle);
 		deref = new HeapDereference(untyped, x, loc1);
 		expectedRewritten = new ExpressionSet(alloc1);
-		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint, fakeOracle));
+		assertEquals(expectedRewritten, xAssign.rewrite(deref, pp1, fakeOracle));
 
 		// *(y) rewritten in x -> pp1 -> empty set
-		AllocationSite expectedUnknownAlloc = new StackAllocationSite(untyped, "unknown@y", true, fakeLocation);
+		AllocationSite expectedUnknownAlloc = new StackAllocationSite(untyped, "unknown@y", true, loc1);
 		deref = new HeapDereference(untyped, y, loc1);
 		expectedRewritten = new ExpressionSet(expectedUnknownAlloc);
-		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint, fakeOracle));
+		assertEquals(expectedRewritten, xAssign.rewrite(deref, pp1, fakeOracle));
 	}
 }

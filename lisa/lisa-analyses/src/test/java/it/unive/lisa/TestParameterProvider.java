@@ -192,7 +192,7 @@ public class TestParameterProvider {
 
 		@Override
 		public CodeLocation getLocation() {
-			return null;
+			return SyntheticLocation.INSTANCE;
 		}
 
 		@Override

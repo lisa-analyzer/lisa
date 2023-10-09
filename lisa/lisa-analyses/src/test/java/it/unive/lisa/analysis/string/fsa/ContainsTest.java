@@ -2,53 +2,21 @@ package it.unive.lisa.analysis.string.fsa;
 
 import static org.junit.Assert.assertEquals;
 
-import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
-import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import java.util.Collections;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.Test;
 
 public class ContainsTest {
 
-	private final SemanticOracle oracle = new SemanticOracle() {
-
-		@Override
-		public Set<Type> getRuntimeTypesOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-
-		@Override
-		public Type getDynamicTypeOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-
-		@Override
-		public ExpressionSet rewrite(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-	};
+	private final SemanticOracle oracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
 
 	@Test
 	public void test01() throws SemanticException {
@@ -82,7 +50,7 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+		assertEquals(Satisfiability.UNKNOWN,
 				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
 	}
 
@@ -118,7 +86,7 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.NOT_SATISFIED,
+		assertEquals(Satisfiability.NOT_SATISFIED,
 				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
 	}
 
@@ -154,7 +122,7 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.SATISFIED,
+		assertEquals(Satisfiability.SATISFIED,
 				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
 	}
 
@@ -192,7 +160,7 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+		assertEquals(Satisfiability.UNKNOWN,
 				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
 	}
 
@@ -227,7 +195,7 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+		assertEquals(Satisfiability.UNKNOWN,
 				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
 	}
 

@@ -3,8 +3,10 @@ package it.unive.lisa.analysis;
 import static it.unive.lisa.util.collections.CollectionUtilities.collect;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -14,7 +16,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -24,7 +25,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 import org.junit.Test;
 
@@ -182,37 +182,10 @@ public class SubstitutionTest {
 			Collection<SymbolicExpression> remexpected)
 			throws SemanticException {
 		Collector c = new Collector();
+		TestAbstractState oracle = new TestAbstractState();
 		if (sub != null)
 			for (HeapReplacement repl : sub)
-				c = c.lub(c.applyReplacement(repl, fake, new SemanticOracle() {
-
-					@Override
-					public Set<Type> getRuntimeTypesOf(
-							SymbolicExpression e,
-							ProgramPoint pp,
-							SemanticOracle oracle)
-							throws SemanticException {
-						return null;
-					}
-
-					@Override
-					public Type getDynamicTypeOf(
-							SymbolicExpression e,
-							ProgramPoint pp,
-							SemanticOracle oracle)
-							throws SemanticException {
-						return null;
-					}
-
-					@Override
-					public ExpressionSet rewrite(
-							SymbolicExpression expression,
-							ProgramPoint pp,
-							SemanticOracle oracle)
-							throws SemanticException {
-						return null;
-					}
-				}));
+				c = c.lub(c.applyReplacement(repl, fake, oracle));
 
 		CollectionsDiffBuilder<
 				SymbolicExpression> add = new CollectionsDiffBuilder<>(SymbolicExpression.class, addexpected,

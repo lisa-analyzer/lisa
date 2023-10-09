@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractState;
@@ -20,6 +19,7 @@ import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonRedundantSet.ValueNonRedundantSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -133,6 +133,26 @@ public class SemanticsSanityTest {
 				SemanticOracle oracle)
 				throws SemanticException {
 			return new ExpressionSet(expression);
+		}
+
+		@Override
+		public Satisfiability alias(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return Satisfiability.UNKNOWN;
+		}
+
+		@Override
+		public Satisfiability isReachableFrom(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return Satisfiability.UNKNOWN;
 		}
 	};
 
@@ -370,6 +390,28 @@ public class SemanticsSanityTest {
 				SemanticOracle oracle)
 				throws SemanticException {
 			return new ExpressionSet();
+		}
+
+		@Override
+		public Satisfiability alias(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				HeapEnvironment<NRHeap> environment,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return Satisfiability.UNKNOWN;
+		}
+
+		@Override
+		public Satisfiability isReachableFrom(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				HeapEnvironment<NRHeap> environment,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return Satisfiability.UNKNOWN;
 		}
 
 	}

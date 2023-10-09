@@ -4,17 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.Int32Type;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -28,13 +24,11 @@ import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingDiv;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingMul;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingSub;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import it.unive.lisa.type.Type;
 import it.unive.lisa.util.numeric.InfiniteIterationException;
 import it.unive.lisa.util.numeric.IntInterval;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import org.junit.Test;
 
 public class IntervalTest {
@@ -42,52 +36,13 @@ public class IntervalTest {
 	private static final int TEST_LIMIT = 5000;
 
 	private final Random rand = new Random();
-	private final ProgramPoint pp = new ProgramPoint() {
-
-		@Override
-		public CodeLocation getLocation() {
-			return new SourceCodeLocation("fake", 0, 0);
-		}
-
-		@Override
-		public CFG getCFG() {
-			return null;
-		}
-	};
+	private final ProgramPoint pp = TestParameterProvider.provideParam(null, ProgramPoint.class);;
 	private final Interval singleton = new Interval();
 	private final Variable variable = new Variable(Int32Type.INSTANCE, "x", pp.getLocation());
 	private final Variable varAux = new Variable(Int32Type.INSTANCE, "aux", pp.getLocation());
 	private final ValueEnvironment<
 			Interval> env = new ValueEnvironment<>(singleton).putState(variable, singleton.top());
-	private final SemanticOracle oracle = new SemanticOracle() {
-
-		@Override
-		public Set<Type> getRuntimeTypesOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-
-		@Override
-		public Type getDynamicTypeOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-
-		@Override
-		public ExpressionSet rewrite(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-	};
+	private final SemanticOracle oracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
 
 	@Test
 	public void testEvalConstant() {

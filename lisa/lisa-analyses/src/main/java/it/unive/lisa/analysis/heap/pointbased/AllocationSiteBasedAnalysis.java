@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -22,6 +23,8 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashSet;
@@ -511,5 +514,75 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			Identifier id) {
 		return heapEnv.knowsIdentifier(id) || (id instanceof AllocationSite
 				&& heapEnv.getValues().stream().anyMatch(as -> as.contains((AllocationSite) id)));
+	}
+
+	@Override
+	public Satisfiability alias(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+
+		boolean atLeastOne = false;
+		boolean all = true;
+
+		ExpressionSet xrs = rewrite(x, pp, oracle);
+		ExpressionSet yrs = rewrite(y, pp, oracle);
+
+		for (SymbolicExpression xr : xrs)
+			for (SymbolicExpression yr : yrs)
+				if (xr instanceof MemoryPointer && yr instanceof MemoryPointer) {
+					HeapLocation xloc = ((MemoryPointer) xr).getReferencedLocation();
+					HeapLocation yloc = ((MemoryPointer) yr).getReferencedLocation();
+					if (xloc.equals(yloc)) {
+						atLeastOne = true;
+						all &= true;
+					} else
+						all = false;
+				} else
+					// they cannot be alias
+					all = false;
+
+		if (all && atLeastOne)
+			return Satisfiability.SATISFIED;
+		else if (atLeastOne)
+			return Satisfiability.UNKNOWN;
+		else
+			return Satisfiability.NOT_SATISFIED;
+	}
+
+	@Override
+	public Satisfiability isReachableFrom(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+
+		WorkingSet<SymbolicExpression> ws = VisitOnceFIFOWorkingSet.mk();
+		rewrite(x, pp, oracle).elements().forEach(ws::push);
+		ExpressionSet targets = rewrite(y, pp, oracle);
+
+		while (!ws.isEmpty()) {
+			SymbolicExpression current = ws.peek();
+			if (targets.elements().contains(current))
+				return Satisfiability.SATISFIED;
+
+			if (current instanceof Identifier && heapEnv.knowsIdentifier((Identifier) current))
+				heapEnv.getState((Identifier) current).elements().forEach(ws::push);
+			else
+				rewrite(current, pp, oracle).elements().forEach(ws::push);
+		}
+
+		return Satisfiability.NOT_SATISFIED;
 	}
 }

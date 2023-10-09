@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.representation.StringRepresentation;
@@ -32,5 +33,25 @@ public class TestHeapDomain extends TestDomain<TestHeapDomain, SymbolicExpressio
 			SemanticOracle oracle)
 			throws SemanticException {
 		return new ExpressionSet();
+	}
+
+	@Override
+	public Satisfiability alias(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public Satisfiability isReachableFrom(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return Satisfiability.UNKNOWN;
 	}
 }

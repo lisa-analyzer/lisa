@@ -4,21 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.imp.IMPFeatures;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.imp.types.IMPTypeSystem;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.program.type.StringType;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
@@ -107,53 +102,9 @@ public class InferredTypesTest {
 
 	private final InferredTypes domain = new InferredTypes();
 
-	private final ProgramPoint fake = new ProgramPoint() {
+	private final ProgramPoint fake = TestParameterProvider.provideParam(null, ProgramPoint.class);
 
-		@Override
-		public CFG getCFG() {
-			return null;
-		}
-
-		@Override
-		public CodeLocation getLocation() {
-			return null;
-		}
-
-		@Override
-		public Program getProgram() {
-			return new Program(new IMPFeatures(), new IMPTypeSystem());
-		}
-	};
-
-	private final SemanticOracle oracle = new SemanticOracle() {
-
-		@Override
-		public Set<Type> getRuntimeTypesOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-
-		@Override
-		public Type getDynamicTypeOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-
-		@Override
-		public ExpressionSet rewrite(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null;
-		}
-	};
+	private final SemanticOracle oracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
 
 	@Test
 	public void testCastWithNoTokens() {

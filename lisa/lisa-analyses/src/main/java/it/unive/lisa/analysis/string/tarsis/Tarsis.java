@@ -1,10 +1,9 @@
 package it.unive.lisa.analysis.string.tarsis;
 
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.string.ContainsCharProvider;
@@ -229,7 +228,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 			throws SemanticException {
 		if (operator == StringContains.INSTANCE)
 			return left.contains(right);
-		return SemanticDomain.Satisfiability.UNKNOWN;
+		return Satisfiability.UNKNOWN;
 	}
 
 	/**

@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.heap;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -25,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 
 /**
@@ -335,5 +337,40 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	public boolean knowsIdentifier(
 			Identifier id) {
 		return false;
+	}
+
+	@Override
+	public Satisfiability alias(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+
+		Set<Type> ltypes = new HashSet<>();
+		for (SymbolicExpression e : rewrite(x, pp, oracle))
+			ltypes.addAll(oracle.getRuntimeTypesOf(e, pp, oracle));
+		Set<Type> rtypes = new HashSet<>();
+		for (SymbolicExpression e : rewrite(y, pp, oracle))
+			rtypes.addAll(oracle.getRuntimeTypesOf(e, pp, oracle));
+		if (CollectionUtils.intersection(ltypes, rtypes).isEmpty())
+			// no common types -> they cannot be "smashed" to the same location
+			return Satisfiability.NOT_SATISFIED;
+
+		return Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public Satisfiability isReachableFrom(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return Satisfiability.UNKNOWN;
 	}
 }

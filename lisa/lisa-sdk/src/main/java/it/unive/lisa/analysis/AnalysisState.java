@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -340,7 +340,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public SemanticDomain.Satisfiability satisfies(
+	public Satisfiability satisfies(
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {

@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -463,5 +464,51 @@ public class TracePartitioning<A extends AbstractState<A>>
 		for (Entry<ExecutionTrace, A> trace : this)
 			result.put(trace.getKey(), trace.getValue().withTopTypes());
 		return new TracePartitioning<>(lattice, result);
+	}
+
+	@Override
+	public Satisfiability alias(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+
+		if (isBottom() || function == null)
+			return Satisfiability.BOTTOM;
+
+		Satisfiability result = Satisfiability.BOTTOM;
+		for (Entry<ExecutionTrace, A> trace : this) {
+			Satisfiability sat = trace.getValue().alias(x, y, pp, oracle);
+			if (sat == Satisfiability.BOTTOM)
+				return sat;
+			result = result.lub(sat);
+		}
+		return result;
+	}
+
+	@Override
+	public Satisfiability isReachableFrom(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+
+		if (isBottom() || function == null)
+			return Satisfiability.BOTTOM;
+
+		Satisfiability result = Satisfiability.BOTTOM;
+		for (Entry<ExecutionTrace, A> trace : this) {
+			Satisfiability sat = trace.getValue().isReachableFrom(x, y, pp, oracle);
+			if (sat == Satisfiability.BOTTOM)
+				return sat;
+			result = result.lub(sat);
+		}
+		return result;
 	}
 }

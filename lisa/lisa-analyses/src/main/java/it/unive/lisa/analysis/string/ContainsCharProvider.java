@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.string;
 
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 
 /**
  * Interface for a string analysis that exposes the {@link #containsChar(char)}

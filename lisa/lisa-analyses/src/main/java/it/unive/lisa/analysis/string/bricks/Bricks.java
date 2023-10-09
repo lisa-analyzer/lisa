@@ -1,10 +1,9 @@
 package it.unive.lisa.analysis.string.bricks;
 
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -215,7 +214,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (left.isTop() || right.isBottom())
-			return SemanticDomain.Satisfiability.UNKNOWN;
+			return Satisfiability.UNKNOWN;
 
 		if (operator == StringContains.INSTANCE)
 			return left.contains(right);

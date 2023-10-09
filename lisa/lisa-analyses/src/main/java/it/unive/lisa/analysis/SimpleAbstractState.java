@@ -3,6 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -668,5 +669,45 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 					TYPE_REPRESENTATION_KEY, t,
 					VALUE_REPRESENTATION_KEY, v)).toString();
 		}
+
+		@Override
+		public Satisfiability alias(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return heap.alias(x, y, pp, oracle);
+		}
+
+		@Override
+		public Satisfiability isReachableFrom(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return heap.isReachableFrom(x, y, pp, oracle);
+		}
+	}
+
+	@Override
+	public Satisfiability alias(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return heapState.alias(x, y, pp, oracle);
+	}
+
+	@Override
+	public Satisfiability isReachableFrom(
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return heapState.isReachableFrom(x, y, pp, oracle);
 	}
 }
