@@ -12,7 +12,9 @@ import it.unive.lisa.util.datastructures.graph.Edge;
  * @param <E> the type of the {@link CodeEdge}s in this list
  */
 public interface CodeEdge<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
-		extends Edge<G, N, E>, Comparable<E> {
+		extends
+		Edge<G, N, E>,
+		Comparable<E> {
 
 	/**
 	 * Yields {@code true} if and only if this edge represent unconditional
@@ -33,5 +35,7 @@ public interface CodeEdge<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N,
 	 * 
 	 * @return a new instance of this edge, connecting the given nodes
 	 */
-	E newInstance(N source, N destination);
+	E newInstance(
+			N source,
+			N destination);
 }

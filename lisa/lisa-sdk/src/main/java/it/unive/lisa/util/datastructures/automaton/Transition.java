@@ -27,7 +27,10 @@ public final class Transition<T extends TransitionSymbol<T>> implements Comparab
 	 * @param symbol      the character that have to be read to execute the
 	 *                        transition.
 	 */
-	public Transition(State source, State destination, T symbol) {
+	public Transition(
+			State source,
+			State destination,
+			T symbol) {
 		Objects.requireNonNull(source);
 		Objects.requireNonNull(destination);
 		this.source = source;
@@ -41,7 +44,8 @@ public final class Transition<T extends TransitionSymbol<T>> implements Comparab
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -97,7 +101,8 @@ public final class Transition<T extends TransitionSymbol<T>> implements Comparab
 	}
 
 	@Override
-	public int compareTo(Transition<T> transition) {
+	public int compareTo(
+			Transition<T> transition) {
 		int cmp;
 		if ((cmp = source.compareTo(transition.source)) != 0)
 			return cmp;

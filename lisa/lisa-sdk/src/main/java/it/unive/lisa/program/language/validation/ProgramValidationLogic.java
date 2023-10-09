@@ -28,5 +28,7 @@ public interface ProgramValidationLogic {
 	 * @throws ProgramValidationException if the program has an invalid
 	 *                                        structure
 	 */
-	void validateAndFinalize(Program program) throws ProgramValidationException;
+	void validateAndFinalize(
+			Program program)
+			throws ProgramValidationException;
 }

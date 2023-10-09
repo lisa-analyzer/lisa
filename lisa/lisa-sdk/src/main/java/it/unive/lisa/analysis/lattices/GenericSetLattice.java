@@ -26,7 +26,8 @@ public class GenericSetLattice<E> extends SetLattice<GenericSetLattice<E>, E> {
 	 * 
 	 * @param element the element
 	 */
-	public GenericSetLattice(E element) {
+	public GenericSetLattice(
+			E element) {
 		super(Collections.singleton(element), true);
 	}
 
@@ -35,7 +36,8 @@ public class GenericSetLattice<E> extends SetLattice<GenericSetLattice<E>, E> {
 	 * 
 	 * @param elements the elements
 	 */
-	public GenericSetLattice(Set<E> elements) {
+	public GenericSetLattice(
+			Set<E> elements) {
 		super(elements, true);
 	}
 
@@ -47,7 +49,9 @@ public class GenericSetLattice<E> extends SetLattice<GenericSetLattice<E>, E> {
 	 * @param isTop    if {@code elements} is empty, specifies if this set
 	 *                     should be considered top or bottom
 	 */
-	public GenericSetLattice(Set<E> elements, boolean isTop) {
+	public GenericSetLattice(
+			Set<E> elements,
+			boolean isTop) {
 		super(elements, isTop);
 	}
 
@@ -62,7 +66,8 @@ public class GenericSetLattice<E> extends SetLattice<GenericSetLattice<E>, E> {
 	}
 
 	@Override
-	public GenericSetLattice<E> mk(Set<E> set) {
+	public GenericSetLattice<E> mk(
+			Set<E> set) {
 		return new GenericSetLattice<>(set);
 	}
 }

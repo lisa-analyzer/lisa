@@ -53,7 +53,11 @@ public class StringSubstring implements StringOperator, TernaryOperator {
 	}
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> middle, Set<Type> right) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> middle,
+			Set<Type> right) {
 		if (left.stream().noneMatch(Type::isStringType))
 			return Collections.emptySet();
 		if (middle.stream().filter(Type::isNumericType).map(Type::asNumericType).noneMatch(NumericType::isIntegral))

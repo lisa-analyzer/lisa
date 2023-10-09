@@ -37,7 +37,8 @@ import org.apache.commons.lang3.tuple.Triple;
  *                this class have on their transitions
  */
 public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionSymbol<T>>
-		implements AutomataFactory<A, T> {
+		implements
+		AutomataFactory<A, T> {
 
 	/**
 	 * The states of this automaton.
@@ -82,7 +83,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @throws IllegalArgumentException if the set of states contains multiple
 	 *                                      states with the same ids
 	 */
-	protected Automaton(SortedSet<State> states, SortedSet<Transition<T>> transitions) {
+	protected Automaton(
+			SortedSet<State> states,
+			SortedSet<Transition<T>> transitions) {
 		if (states.size() != states.stream().map(State::getId).distinct().count())
 			throw new IllegalArgumentException("The automaton being created contains multiple states with the same id");
 		this.states = states;
@@ -117,7 +120,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @throws IllegalArgumentException a state with the given id is already
 	 *                                      part of this automaton
 	 */
-	public void addState(State s) {
+	public void addState(
+			State s) {
 		if (states.stream().filter(ss -> ss.getId() == s.getId()).findAny().isPresent())
 			throw new IllegalArgumentException("A state with id " + s.getId() + " aready exists");
 		states.add(s);
@@ -134,7 +138,10 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @param to    the destination node
 	 * @param input the input to be recognized by the transition
 	 */
-	public void addTransition(State from, State to, T input) {
+	public void addTransition(
+			State from,
+			State to,
+			T input) {
 		addTransition(new Transition<>(from, to, input));
 	}
 
@@ -143,7 +150,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @param t the transition to add
 	 */
-	public void addTransition(Transition<T> t) {
+	public void addTransition(
+			Transition<T> t) {
 		transitions.add(t);
 		this.deterministic = Optional.empty();
 		this.minimized = Optional.empty();
@@ -155,7 +163,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @param ts the set of transitions to remove
 	 */
-	public void removeTransitions(Set<Transition<T>> ts) {
+	public void removeTransitions(
+			Set<Transition<T>> ts) {
 		transitions.removeAll(ts);
 		this.deterministic = Optional.empty();
 		this.minimized = Optional.empty();
@@ -166,7 +175,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @param ts the set of states to remove
 	 */
-	public void removeStates(Set<State> ts) {
+	public void removeStates(
+			Set<State> ts) {
 		states.removeAll(ts);
 		this.deterministic = Optional.empty();
 		this.minimized = Optional.empty();
@@ -205,7 +215,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the set of outgoing transitions
 	 */
-	public SortedSet<Transition<T>> getOutgoingTransitionsFrom(State s) {
+	public SortedSet<Transition<T>> getOutgoingTransitionsFrom(
+			State s) {
 		return new TreeSet<>(transitions.stream().filter(t -> t.getSource().equals(s)).collect(Collectors.toSet()));
 	}
 
@@ -216,7 +227,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the set of ingoing transitions
 	 */
-	public SortedSet<Transition<T>> getIngoingTransitionsFrom(State s) {
+	public SortedSet<Transition<T>> getIngoingTransitionsFrom(
+			State s) {
 		return new TreeSet<>(
 				transitions.stream().filter(t -> t.getDestination().equals(s)).collect(Collectors.toSet()));
 	}
@@ -340,7 +352,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return the set of states that are reachable from {@code s} just with
 	 *             epsilon transitions
 	 */
-	public SortedSet<State> epsilonClosure(State s) {
+	public SortedSet<State> epsilonClosure(
+			State s) {
 		SortedSet<State> paths = new TreeSet<>();
 		SortedSet<State> previous = new TreeSet<>();
 		SortedSet<State> partial;
@@ -371,7 +384,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return the set of states that are reachable from {@code set} just with
 	 *             epsilon transitions
 	 */
-	public SortedSet<State> epsilonClosure(Set<State> set) {
+	public SortedSet<State> epsilonClosure(
+			Set<State> set) {
 		SortedSet<State> solution = new TreeSet<>();
 
 		for (State s : set)
@@ -389,7 +403,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the set of states that can be reached
 	 */
-	public SortedSet<State> nextStatesNFA(Set<State> set, T sym) {
+	public SortedSet<State> nextStatesNFA(
+			Set<State> set,
+			T sym) {
 		SortedSet<State> solution = new TreeSet<>();
 		for (State s : set)
 			for (Transition<T> t : getOutgoingTransitionsFrom(s))
@@ -399,7 +415,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return solution;
 	}
 
-	private static boolean containsInitialState(Set<State> states) {
+	private static boolean containsInitialState(
+			Set<State> states) {
 		for (State s : states)
 			if (s.isInitial())
 				return true;
@@ -407,7 +424,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return false;
 	}
 
-	private static boolean containsFinalState(Set<State> states) {
+	private static boolean containsFinalState(
+			Set<State> states) {
 		for (State s : states)
 			if (s.isFinal())
 				return true;
@@ -423,7 +441,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the set of symbols that can be read
 	 */
-	public SortedSet<T> getReadableSymbolsFromStates(Set<State> states) {
+	public SortedSet<T> getReadableSymbolsFromStates(
+			Set<State> states) {
 		SortedSet<T> result = new TreeSet<>();
 
 		for (State s : states)
@@ -442,7 +461,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the set of symbols that can be read
 	 */
-	public SortedSet<T> getReadableSymbolsFromState(State state) {
+	public SortedSet<T> getReadableSymbolsFromState(
+			State state) {
 		SortedSet<T> result = new TreeSet<>();
 
 		for (Transition<T> t : getOutgoingTransitionsFrom(state))
@@ -555,7 +575,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 *             of the languages recognized by {@code this} and {@code other}
 	 */
 	@SuppressWarnings("unchecked")
-	public A union(A other) {
+	public A union(
+			A other) {
 		if (this == other)
 			return (A) this;
 
@@ -637,7 +658,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the set of possible successors
 	 */
-	public SortedSet<State> getNextStates(State node) {
+	public SortedSet<State> getNextStates(
+			State node) {
 		SortedSet<State> neighbors = new TreeSet<>();
 		for (Transition<T> edge : getOutgoingTransitionsFrom(node))
 			neighbors.add(edge.getDestination());
@@ -697,7 +719,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the totalized automaton
 	 */
-	public A totalize(Set<T> sigma) {
+	public A totalize(
+			Set<T> sigma) {
 		SortedSet<State> newStates = new TreeSet<>(states);
 		SortedSet<Transition<T>> newTransitions = new TreeSet<>(transitions);
 
@@ -728,7 +751,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the complement Automaton of {@code this}.
 	 */
-	public A complement(Set<T> sigma) {
+	public A complement(
+			Set<T> sigma) {
 		SortedSet<State> sts = new TreeSet<>();
 		SortedSet<Transition<T>> delta = new TreeSet<>();
 		Map<State, State> oldToNew = new HashMap<>();
@@ -757,7 +781,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 *             langauge.
 	 */
 	@SuppressWarnings("unchecked")
-	public A intersection(A other) {
+	public A intersection(
+			A other) {
 		if (this == other)
 			return (A) this;
 
@@ -795,7 +820,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the state associated to the pair in the given state mapping
 	 */
-	protected State getStateFromPair(Map<State, Pair<State, State>> mapping, Pair<State, State> pair) {
+	protected State getStateFromPair(
+			Map<State, Pair<State, State>> mapping,
+			Pair<State, State> pair) {
 		for (Entry<State, Pair<State, State>> entry : mapping.entrySet())
 			if (entry.getValue().getLeft().equals(pair.getLeft())
 					&& entry.getValue().getRight().equals(pair.getRight()))
@@ -824,7 +851,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean isContained(A other) {
+	public boolean isContained(
+			A other) {
 		SortedSet<T> commonAlphabet = commonAlphabet(other);
 		A complement = other.complement(commonAlphabet);
 		A intersection = intersection(complement);
@@ -842,7 +870,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return a boolean value that points out if the automata are equivalent
 	 */
-	public boolean isEqualTo(A other) {
+	public boolean isEqualTo(
+			A other) {
 		A o = (A) other;
 		if (!hasCycle() && !o.hasCycle())
 			try {
@@ -906,7 +935,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return a set of strings representing the common alphabet.
 	 */
-	public SortedSet<T> commonAlphabet(A other) {
+	public SortedSet<T> commonAlphabet(
+			A other) {
 		SortedSet<T> fa = getAlphabet();
 		SortedSet<T> sa = other.getAlphabet();
 
@@ -950,7 +980,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the computed set of symbols
 	 */
-	public SortedSet<T> getNextSymbols(State s, int n) {
+	public SortedSet<T> getNextSymbols(
+			State s,
+			int n) {
 		SortedSet<T> result = new TreeSet<>();
 		if (n == 0)
 			return result;
@@ -989,7 +1021,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return a newly created automaton representing the widening automaton.
 	 */
-	public A widening(int n) {
+	public A widening(
+			int n) {
 		Map<SortedSet<T>, SortedSet<State>> powerStates = new HashMap<>();
 		Map<State, SortedSet<T>> languages = new HashMap<>();
 		SortedSet<State> newStates = new TreeSet<>();
@@ -1069,7 +1102,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return a newly created automaton representing the concatenation of the
 	 *             given automata.
 	 */
-	public A concat(A other) {
+	public A concat(
+			A other) {
 		SortedSet<State> newStates = new TreeSet<>();
 		SortedSet<Transition<T>> newTransitions = new TreeSet<>();
 
@@ -1260,7 +1294,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return B[0];
 	}
 
-	private static State nextNonInitialState(Iterator<State> it) {
+	private static State nextNonInitialState(
+			Iterator<State> it) {
 		while (it.hasNext()) {
 			State cursor = it.next();
 			if (!cursor.isInitial())
@@ -1278,7 +1313,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the set of transitions connecting the two states
 	 */
-	public SortedSet<Transition<T>> getAllTransitionsConnecting(State s1, State s2) {
+	public SortedSet<Transition<T>> getAllTransitionsConnecting(
+			State s1,
+			State s2) {
 		SortedSet<Transition<T>> result = new TreeSet<>();
 
 		for (Transition<T> t : this.transitions)
@@ -1334,7 +1371,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return {@code true} if and only if {@code s1} and {@code s2} are
 	 *             mutually reachable
 	 */
-	public boolean areMutuallyReachable(State s1, State s2) {
+	public boolean areMutuallyReachable(
+			State s1,
+			State s2) {
 		return !minimumPath(s1, s2).isEmpty() && !minimumPath(s2, s1).isEmpty();
 	}
 
@@ -1369,7 +1408,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	}
 
 	@SuppressWarnings("unchecked")
-	private Set<Transition<T>[]> depthFirst(State src) {
+	private Set<Transition<T>[]> depthFirst(
+			State src) {
 		Set<Transition<T>[]> paths = new HashSet<>();
 		Stack<Triple<State, Transition<T>[], int[]>> ws = new Stack<>();
 		ws.push(Triple.of(src, new Transition[0], new int[0]));
@@ -1411,7 +1451,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return paths;
 	}
 
-	private static void simplify(List<State> path) {
+	private static void simplify(
+			List<State> path) {
 		ListIterator<State> it = path.listIterator();
 		while (it.hasNext()) {
 			if (!it.hasPrevious()) {
@@ -1438,7 +1479,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the minimum path
 	 */
-	public List<State> minimumPath(State src, State target) {
+	public List<State> minimumPath(
+			State src,
+			State target) {
 		Set<State> unSettledNodes = new HashSet<>();
 		Map<State, Integer> distance = new HashMap<>();
 		Map<State, State> predecessors = new HashMap<>();
@@ -1455,7 +1498,10 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return getPath(target, predecessors);
 	}
 
-	private void findMinimalDistances(State node, Map<State, Integer> distance, Map<State, State> predecessors,
+	private void findMinimalDistances(
+			State node,
+			Map<State, Integer> distance,
+			Map<State, State> predecessors,
 			Set<State> unSettledNodes) {
 		Set<State> adjacentNodes = getNextStates(node);
 		int shortest = getShortestDistance(node, distance);
@@ -1469,14 +1515,18 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		}
 	}
 
-	private int getDistance(State node, State target) {
+	private int getDistance(
+			State node,
+			State target) {
 		if (!getAllTransitionsConnecting(node, target).isEmpty())
 			return 1;
 		// should never happen
 		return -1; // TODO exception?
 	}
 
-	private static State getMinimum(Set<State> vertexes, Map<State, Integer> distance) {
+	private static State getMinimum(
+			Set<State> vertexes,
+			Map<State, Integer> distance) {
 		State minimum = null;
 		for (State vertex : vertexes)
 			if (minimum == null)
@@ -1487,7 +1537,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return minimum;
 	}
 
-	private static int getShortestDistance(State destination, Map<State, Integer> distance) {
+	private static int getShortestDistance(
+			State destination,
+			Map<State, Integer> distance) {
 		Integer d = distance.get(destination);
 		if (d == null)
 			return Integer.MAX_VALUE;
@@ -1495,7 +1547,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 			return d;
 	}
 
-	private static List<State> getPath(State target, Map<State, State> predecessors) {
+	private static List<State> getPath(
+			State target,
+			Map<State, State> predecessors) {
 		List<State> path = new LinkedList<>();
 		State step = target;
 
@@ -1525,7 +1579,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the maximum path
 	 */
-	public List<State> maximumPath(State src, State target) {
+	public List<State> maximumPath(
+			State src,
+			State target) {
 		Set<State> unSettledNodes = new HashSet<>();
 		Map<State, Integer> distance = new HashMap<>();
 		Map<State, State> predecessors = new HashMap<>();
@@ -1542,7 +1598,10 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return getPath(target, predecessors);
 	}
 
-	private void findMaximumDistances(State node, Map<State, Integer> distance, Map<State, State> predecessors,
+	private void findMaximumDistances(
+			State node,
+			Map<State, Integer> distance,
+			Map<State, State> predecessors,
 			Set<State> unSettledNodes) {
 		Set<State> adjacentNodes = getNextStates(node);
 		int longest = getLongestDistance(node, distance);
@@ -1556,7 +1615,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		}
 	}
 
-	private static State getMaximum(Set<State> vertexes, Map<State, Integer> distance) {
+	private static State getMaximum(
+			Set<State> vertexes,
+			Map<State, Integer> distance) {
 		State maximum = null;
 		for (State vertex : vertexes)
 			if (maximum == null)
@@ -1567,7 +1628,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return maximum;
 	}
 
-	private static int getLongestDistance(State destination, Map<State, Integer> distance) {
+	private static int getLongestDistance(
+			State destination,
+			Map<State, Integer> distance) {
 		Integer d = distance.get(destination);
 		if (d == null)
 			return Integer.MIN_VALUE;
@@ -1785,7 +1848,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return max;
 	}
 
-	private int maxStringLengthTraversing(List<State> path) {
+	private int maxStringLengthTraversing(
+			List<State> path) {
 		if (path.size() == 0)
 			return 0;
 
@@ -1804,7 +1868,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return len;
 	}
 
-	private int maxStringLength(State from, State to) {
+	private int maxStringLength(
+			State from,
+			State to) {
 		Set<Transition<T>> transitions = getAllTransitionsConnecting(from, to);
 		if (transitions.isEmpty())
 			return 0;
@@ -1848,7 +1914,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the modified copy of this automaton
 	 */
-	public A factorsChangingInitialState(State s) {
+	public A factorsChangingInitialState(
+			State s) {
 		SortedSet<State> newStates = new TreeSet<>();
 		Map<Integer, State> nameToStates = new HashMap<Integer, State>();
 		SortedSet<Transition<T>> newDelta = new TreeSet<>();
@@ -1874,7 +1941,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -1901,7 +1969,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the result of the concatenation
 	 */
-	public abstract T concat(T first, T second);
+	public abstract T concat(
+			T first,
+			T second);
 
 	/**
 	 * Yields a {@link RegularExpression} representing the given symbol.
@@ -1910,5 +1980,6 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * 
 	 * @return the equivalent regular expression
 	 */
-	public abstract RegularExpression symbolToRegex(T symbol);
+	public abstract RegularExpression symbolToRegex(
+			T symbol);
 }

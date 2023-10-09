@@ -18,7 +18,9 @@ public class LoopIteration extends TraceToken {
 	 * @param pp        the program point associated with the iteration
 	 * @param iteration the iteration number
 	 */
-	public LoopIteration(ProgramPoint pp, int iteration) {
+	public LoopIteration(
+			ProgramPoint pp,
+			int iteration) {
 		super(pp);
 		this.iteration = iteration;
 	}
@@ -41,7 +43,8 @@ public class LoopIteration extends TraceToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

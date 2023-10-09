@@ -23,7 +23,9 @@ public class OutputDumpingException extends RuntimeException {
 	 * @param message the message of this exception
 	 * @param cause   the cause of this exception
 	 */
-	public OutputDumpingException(String message, Throwable cause) {
+	public OutputDumpingException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -32,7 +34,8 @@ public class OutputDumpingException extends RuntimeException {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public OutputDumpingException(String message) {
+	public OutputDumpingException(
+			String message) {
 		super(message);
 	}
 
@@ -41,7 +44,8 @@ public class OutputDumpingException extends RuntimeException {
 	 * 
 	 * @param cause the cause of this exception
 	 */
-	public OutputDumpingException(Throwable cause) {
+	public OutputDumpingException(
+			Throwable cause) {
 		super(cause);
 	}
 

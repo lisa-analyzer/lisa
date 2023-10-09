@@ -19,7 +19,8 @@ public class ArrayAnnotationValue implements AnnotationValue {
 	 * 
 	 * @param arr the array of basic annotation values
 	 */
-	public ArrayAnnotationValue(BasicAnnotationValue[] arr) {
+	public ArrayAnnotationValue(
+			BasicAnnotationValue[] arr) {
 		this.arr = arr;
 	}
 
@@ -32,7 +33,8 @@ public class ArrayAnnotationValue implements AnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -51,7 +53,8 @@ public class ArrayAnnotationValue implements AnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof ArrayAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

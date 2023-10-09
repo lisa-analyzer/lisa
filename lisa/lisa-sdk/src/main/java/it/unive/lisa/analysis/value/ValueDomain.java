@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.value;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -21,7 +22,10 @@ import it.unive.lisa.symbolic.value.Variable;
  * @param <D> the concrete type of the {@link ValueDomain}
  */
 public interface ValueDomain<D extends ValueDomain<D>>
-		extends SemanticDomain<D, ValueExpression, Identifier>, Lattice<D> {
+		extends
+		ValueOracle,
+		SemanticDomain<D, ValueExpression, Identifier>,
+		Lattice<D> {
 
 	/**
 	 * Applies a substitution of identifiers that is caused by a modification of
@@ -29,15 +33,21 @@ public interface ValueDomain<D extends ValueDomain<D>>
 	 * substitution is composed by a list of {@link HeapReplacement} instances,
 	 * that <b>must be applied in order</b>.
 	 * 
-	 * @param r  the replacement to apply
-	 * @param pp the program point that where this operation is being evaluated
+	 * @param r      the replacement to apply
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the value domain instance modified by the substitution
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	default D applyReplacement(HeapReplacement r, ProgramPoint pp) throws SemanticException {
+	default D applyReplacement(
+			HeapReplacement r,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (isTop() || isBottom() || r.getSources().isEmpty())
 			return (D) this;
 
@@ -46,7 +56,7 @@ public interface ValueDomain<D extends ValueDomain<D>>
 		for (Identifier source : r.getSources()) {
 			D partial = result;
 			for (Identifier target : r.getTargets())
-				partial = partial.assign(target, source, pp);
+				partial = partial.assign(target, source, pp, oracle);
 			lub = lub.lub(partial);
 		}
 		return lub.forgetIdentifiers(r.getIdsToForget());

@@ -14,7 +14,8 @@ public class DoubleAnnotationValue implements BasicAnnotationValue {
 	 * 
 	 * @param d the double value
 	 */
-	public DoubleAnnotationValue(double d) {
+	public DoubleAnnotationValue(
+			double d) {
 		this.d = d;
 	}
 
@@ -29,7 +30,8 @@ public class DoubleAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -48,7 +50,8 @@ public class DoubleAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof DoubleAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

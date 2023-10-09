@@ -14,7 +14,8 @@ public class LongAnnotationValue implements BasicAnnotationValue {
 	 * 
 	 * @param l the long value
 	 */
-	public LongAnnotationValue(long l) {
+	public LongAnnotationValue(
+			long l) {
 		this.l = l;
 	}
 
@@ -27,7 +28,8 @@ public class LongAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -46,7 +48,8 @@ public class LongAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof LongAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

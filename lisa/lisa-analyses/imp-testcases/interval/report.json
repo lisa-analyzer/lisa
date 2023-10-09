@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_tutorial.constants(tutorial__this).json", "untyped_tutorial.div(tutorial__this,_untyped_i,_untyped_j).json", "untyped_tutorial.gcd(tutorial__this,_untyped_a,_untyped_b).json", "untyped_tutorial.glb(tutorial__this,_untyped_x,_untyped_y).json", "untyped_tutorial.intv_dec(tutorial__this).json", "untyped_tutorial.sat(tutorial__this,_untyped_x,_untyped_y).json", "untyped_tutorial.sign_parity_example(tutorial__this).json", "untyped_tutorial.ub_example(tutorial__this,_untyped_y,_untyped_z).json" ],
   "info" : {
     "cfgs" : "8",
-    "duration" : "156ms",
-    "end" : "2023-04-20T12:45:38.467+02:00",
+    "duration" : "105ms",
+    "end" : "2023-09-07T11:45:56.514+02:00",
     "expressions" : "110",
     "files" : "8",
     "globals" : "0",
     "members" : "8",
     "programs" : "1",
-    "start" : "2023-04-20T12:45:38.311+02:00",
+    "start" : "2023-09-07T11:45:56.409+02:00",
     "statements" : "45",
     "units" : "1",
-    "version" : "0.1b7",
+    "version" : "0.1b8",
     "warnings" : "0"
   },
   "configuration" : {
@@ -31,6 +31,7 @@
     "serializeInputs" : "false",
     "serializeResults" : "true",
     "syntacticChecks" : "",
+    "useWideningPoints" : "true",
     "wideningThreshold" : "5",
     "workdir" : "test-outputs/interval"
   }

@@ -27,7 +27,8 @@ public class Aliases extends SetLattice<Aliases, Symbol> {
 	 * 
 	 * @param symbol the only symbol contained in this set
 	 */
-	public Aliases(Symbol symbol) {
+	public Aliases(
+			Symbol symbol) {
 		this(Collections.singleton(symbol), false);
 	}
 
@@ -36,11 +37,14 @@ public class Aliases extends SetLattice<Aliases, Symbol> {
 	 * 
 	 * @param symbols the symbols contained in this set
 	 */
-	public Aliases(Set<Symbol> symbols) {
+	public Aliases(
+			Set<Symbol> symbols) {
 		this(symbols, false);
 	}
 
-	private Aliases(Set<Symbol> symbols, boolean isTop) {
+	private Aliases(
+			Set<Symbol> symbols,
+			boolean isTop) {
 		super(symbols, isTop);
 	}
 
@@ -55,7 +59,8 @@ public class Aliases extends SetLattice<Aliases, Symbol> {
 	}
 
 	@Override
-	public Aliases mk(Set<Symbol> set) {
+	public Aliases mk(
+			Set<Symbol> set) {
 		return new Aliases(set);
 	}
 
@@ -69,7 +74,8 @@ public class Aliases extends SetLattice<Aliases, Symbol> {
 	 * 
 	 * @return a {@link CastIterable} that casts the elements
 	 */
-	public <T extends Symbol> Iterable<T> castElements(Class<T> type) {
+	public <T extends Symbol> Iterable<T> castElements(
+			Class<T> type) {
 		return new CastIterable<>(this, type);
 	}
 }

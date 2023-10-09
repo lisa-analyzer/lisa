@@ -4,9 +4,6 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.ConstantGlobal;
 import it.unive.lisa.program.Global;
@@ -46,7 +43,11 @@ public class AccessGlobal extends Expression {
 	 * @param container the unit containing the accessed global
 	 * @param target    the accessed global
 	 */
-	public AccessGlobal(CFG cfg, CodeLocation location, Unit container, Global target) {
+	public AccessGlobal(
+			CFG cfg,
+			CodeLocation location,
+			Unit container,
+			Global target) {
 		super(cfg, location, target.getStaticType());
 		this.container = container;
 		this.target = target;
@@ -72,12 +73,15 @@ public class AccessGlobal extends Expression {
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		return this.offset = offset;
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 
@@ -91,7 +95,8 @@ public class AccessGlobal extends Expression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -118,12 +123,11 @@ public class AccessGlobal extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural, StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		if (target instanceof ConstantGlobal)
 			return entryState.smallStepSemantics(((ConstantGlobal) target).getConstant(), this);
 

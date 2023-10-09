@@ -8,7 +8,7 @@ import java.util.LinkedList;
  * A last-in, first-out working set. This implementation is <b>not</b>
  * thread-safe.
  * 
- * @author Luca Negrini
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <E> the type of the elements that this working set contains
  */
@@ -33,7 +33,8 @@ public final class LIFOWorkingSet<E> implements WorkingSet<E> {
 	}
 
 	@Override
-	public void push(E e) {
+	public void push(
+			E e) {
 		ws.push(e);
 	}
 
@@ -76,7 +77,8 @@ public final class LIFOWorkingSet<E> implements WorkingSet<E> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

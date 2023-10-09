@@ -45,7 +45,9 @@ public class LogicalNegation implements LogicalOperator, UnaryOperator {
 	}
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> argument) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> argument) {
 		if (argument.stream().noneMatch(Type::isBooleanType))
 			return Collections.emptySet();
 		return Collections.singleton(types.getBooleanType());

@@ -7,6 +7,7 @@ import it.unive.lisa.imp.antlr.IMPParser.ArgContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArgumentsContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArrayAccessContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArrayCreatorRestContext;
+import it.unive.lisa.imp.antlr.IMPParser.ArrayExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.AssignmentContext;
 import it.unive.lisa.imp.antlr.IMPParser.BasicExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.BinaryStringExprContext;
@@ -31,6 +32,7 @@ import it.unive.lisa.imp.antlr.IMPParser.TernaryStringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnaryStringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.WhileLoopContext;
 import it.unive.lisa.imp.antlr.IMPParserBaseVisitor;
+import it.unive.lisa.imp.constructs.ArrayLength;
 import it.unive.lisa.imp.constructs.StringConcat;
 import it.unive.lisa.imp.constructs.StringContains;
 import it.unive.lisa.imp.constructs.StringEndsWith;
@@ -138,7 +140,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	 *                       appears
 	 * @param descriptor the descriptor of the method or constructor
 	 */
-	IMPCodeMemberVisitor(String file, CodeMemberDescriptor descriptor) {
+	IMPCodeMemberVisitor(
+			String file,
+			CodeMemberDescriptor descriptor) {
 		this.file = file;
 		this.descriptor = descriptor;
 		list = new NodeList<>(new SequentialEdge());
@@ -160,7 +164,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @return the {@link CFG} built from the block
 	 */
-	CFG visitCodeMember(BlockContext ctx) {
+	CFG visitCodeMember(
+			BlockContext ctx) {
 		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visited = visitBlock(ctx);
 		entrypoints.add(visited.getLeft());
 		list.mergeWith(visited.getMiddle());
@@ -194,7 +199,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitBlock(BlockContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitBlock(
+			BlockContext ctx) {
 		Map<String, Pair<VariableRef,
 				Annotations>> backup = new HashMap<>(visibleIds);
 		NodeList<CFG, Statement, Edge> block = new NodeList<>(new SequentialEdge());
@@ -243,7 +249,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitStatement(StatementContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitStatement(
+			StatementContext ctx) {
 		Statement st;
 		if (ctx.localDeclaration() != null)
 			st = visitLocalDeclaration(ctx.localDeclaration());
@@ -274,7 +281,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		return Triple.of(st, adj, st);
 	}
 
-	private Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitIf(StatementContext ctx) {
+	private Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitIf(
+			StatementContext ctx) {
 		NodeList<CFG, Statement, Edge> ite = new NodeList<>(new SequentialEdge());
 
 		Statement condition = visitParExpr(ctx.parExpr());
@@ -306,12 +314,14 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitParExpr(ParExprContext ctx) {
+	public Expression visitParExpr(
+			ParExprContext ctx) {
 		return visitExpression(ctx.expression());
 	}
 
 	@Override
-	public Assignment visitLocalDeclaration(LocalDeclarationContext ctx) {
+	public Assignment visitLocalDeclaration(
+			LocalDeclarationContext ctx) {
 		Expression expression = visitExpression(ctx.expression());
 		VariableRef ref = visitVar(ctx.IDENTIFIER(), false);
 
@@ -327,7 +337,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitLoop(LoopContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitLoop(
+			LoopContext ctx) {
 		if (ctx.whileLoop() != null)
 			return visitWhileLoop(ctx.whileLoop());
 		else
@@ -335,7 +346,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitWhileLoop(WhileLoopContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitWhileLoop(
+			WhileLoopContext ctx) {
 		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		Statement condition = visitParExpr(ctx.parExpr());
 		loop.addNode(condition);
@@ -356,7 +368,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitForLoop(ForLoopContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitForLoop(
+			ForLoopContext ctx) {
 		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		LocalDeclarationContext initDecl = ctx.forDeclaration().initDecl;
 		ExpressionContext initExpr = ctx.forDeclaration().initExpr;
@@ -417,7 +430,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Assignment visitAssignment(AssignmentContext ctx) {
+	public Assignment visitAssignment(
+			AssignmentContext ctx) {
 		Expression expression = visitExpression(ctx.expression());
 		Expression target = null;
 		if (ctx.IDENTIFIER() != null)
@@ -433,7 +447,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), target, expression);
 	}
 
-	private VariableRef visitVar(TerminalNode identifier, boolean localReference) {
+	private VariableRef visitVar(
+			TerminalNode identifier,
+			boolean localReference) {
 		VariableRef ref = new VariableRef(cfg,
 				new SourceCodeLocation(file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol())),
 				identifier.getText(), Untyped.INSTANCE);
@@ -444,14 +460,16 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public AccessInstanceGlobal visitFieldAccess(FieldAccessContext ctx) {
+	public AccessInstanceGlobal visitFieldAccess(
+			FieldAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
 		return new AccessInstanceGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver,
 				ctx.name.getText());
 	}
 
 	@Override
-	public Expression visitReceiver(ReceiverContext ctx) {
+	public Expression visitReceiver(
+			ReceiverContext ctx) {
 		if (ctx.THIS() != null)
 			return visitVar(ctx.THIS(), false);
 		else if (ctx.SUPER() != null)
@@ -461,7 +479,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public IMPArrayAccess visitArrayAccess(ArrayAccessContext ctx) {
+	public IMPArrayAccess visitArrayAccess(
+			ArrayAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
 		Expression result = receiver;
 		for (IndexContext i : ctx.index())
@@ -471,7 +490,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitIndex(IndexContext ctx) {
+	public Expression visitIndex(
+			IndexContext ctx) {
 		if (ctx.IDENTIFIER() != null)
 			return visitVar(ctx.IDENTIFIER(), true);
 		else
@@ -480,7 +500,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitExpression(ExpressionContext ctx) {
+	public Expression visitExpression(
+			ExpressionContext ctx) {
 		int line = getLine(ctx);
 		int col = getCol(ctx);
 		if (ctx.paren != null)
@@ -551,12 +572,15 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return visitMethodCall(ctx.methodCall());
 		else if (ctx.stringExpr() != null)
 			return visitStringExpr(ctx.stringExpr());
+		else if (ctx.arrayExpr() != null)
+			return visitArrayExpr(ctx.arrayExpr());
 
 		throw new UnsupportedOperationException("Type of expression not supported: " + ctx);
 	}
 
 	@Override
-	public Expression visitStringExpr(StringExprContext ctx) {
+	public Expression visitStringExpr(
+			StringExprContext ctx) {
 		Expression returned = null;
 		if (ctx.unaryStringExpr() != null)
 			returned = visitUnaryStringExpr(ctx.unaryStringExpr());
@@ -575,14 +599,22 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitUnaryStringExpr(UnaryStringExprContext ctx) {
+	public Expression visitArrayExpr(
+			ArrayExprContext ctx) {
+		return new ArrayLength.IMPArrayLength(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.op));
+	}
+
+	@Override
+	public Expression visitUnaryStringExpr(
+			UnaryStringExprContext ctx) {
 		if (ctx.STRLEN() != null)
 			return new StringLength.IMPStringLength(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.op));
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
 
 	@Override
-	public Expression visitBinaryStringExpr(BinaryStringExprContext ctx) {
+	public Expression visitBinaryStringExpr(
+			BinaryStringExprContext ctx) {
 		if (ctx.STRCAT() != null)
 			return new StringConcat.IMPStringConcat(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
 					visitExpression(ctx.right));
@@ -606,7 +638,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitTernaryStringExpr(TernaryStringExprContext ctx) {
+	public Expression visitTernaryStringExpr(
+			TernaryStringExprContext ctx) {
 		if (ctx.STRREPLACE() != null)
 			return new StringReplace.IMPStringReplace(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
 					visitExpression(ctx.middle), visitExpression(ctx.right));
@@ -618,19 +651,22 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
 
-	private Expression visitBumpBasicArrayExpr(NewBasicArrayExprContext ctx) {
+	private Expression visitBumpBasicArrayExpr(
+			NewBasicArrayExprContext ctx) {
 		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
 				true, visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
-	public Expression visitNewBasicArrayExpr(NewBasicArrayExprContext ctx) {
+	public Expression visitNewBasicArrayExpr(
+			NewBasicArrayExprContext ctx) {
 		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
 				false, visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
-	public Expression[] visitArrayCreatorRest(ArrayCreatorRestContext ctx) {
+	public Expression[] visitArrayCreatorRest(
+			ArrayCreatorRestContext ctx) {
 		Expression[] result = new Expression[ctx.index().size()];
 		for (int i = 0; i < result.length; i++)
 			result[i] = visitIndex(ctx.index(i));
@@ -638,7 +674,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Type visitPrimitiveType(PrimitiveTypeContext ctx) {
+	public Type visitPrimitiveType(
+			PrimitiveTypeContext ctx) {
 		if (ctx.BOOLEAN() != null)
 			return BoolType.INSTANCE;
 		else if (ctx.INT() != null)
@@ -647,7 +684,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return Float32Type.INSTANCE;
 	}
 
-	private Expression visitBumpReferenceType(NewReferenceTypeContext ctx) {
+	private Expression visitBumpReferenceType(
+			NewReferenceTypeContext ctx) {
 		// null since we do not want to create a new one, class types should
 		// have been created during the preprocessing
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
@@ -659,7 +697,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitNewReferenceType(NewReferenceTypeContext ctx) {
+	public Expression visitNewReferenceType(
+			NewReferenceTypeContext ctx) {
 		// null since we do not want to create a new one, class types should
 		// have been created during the preprocessing
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
@@ -671,7 +710,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression[] visitArguments(ArgumentsContext ctx) {
+	public Expression[] visitArguments(
+			ArgumentsContext ctx) {
 		Expression[] args = new Expression[ctx.arg().size()];
 		int i = 0;
 		for (ArgContext arg : ctx.arg())
@@ -680,7 +720,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitArg(ArgContext ctx) {
+	public Expression visitArg(
+			ArgContext ctx) {
 		if (ctx.literal() != null)
 			return visitLiteral(ctx.literal());
 		else if (ctx.fieldAccess() != null)
@@ -696,7 +737,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitMethodCall(MethodCallContext ctx) {
+	public Expression visitMethodCall(
+			MethodCallContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
 		String name = ctx.name.getText();
 		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
@@ -705,7 +747,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Expression visitBasicExpr(BasicExprContext ctx) {
+	public Expression visitBasicExpr(
+			BasicExprContext ctx) {
 		if (ctx.literal() != null)
 			return visitLiteral(ctx.literal());
 		else if (ctx.THIS() != null)
@@ -717,7 +760,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Literal<?> visitLiteral(LiteralContext ctx) {
+	public Literal<?> visitLiteral(
+			LiteralContext ctx) {
 		int line = getLine(ctx);
 		int col = getCol(ctx);
 		if (ctx.LITERAL_NULL() != null)
@@ -754,7 +798,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @return the cleaned string
 	 */
-	static String clean(LiteralContext ctx) {
+	static String clean(
+			LiteralContext ctx) {
 		String text = ctx.LITERAL_STRING().getText();
 		if (text.startsWith("\"") && text.endsWith("\""))
 			return text.substring(1, text.length() - 1);

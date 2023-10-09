@@ -20,7 +20,9 @@ public class StatementWarning extends WarningWithLocation {
 	 * @param statement the statement where this warning was reported on
 	 * @param message   the message of this warning
 	 */
-	public StatementWarning(Statement statement, String message) {
+	public StatementWarning(
+			Statement statement,
+			String message) {
 		super(statement.getLocation(), message);
 		this.statement = statement;
 	}
@@ -35,7 +37,8 @@ public class StatementWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public int compareTo(Warning o) {
+	public int compareTo(
+			Warning o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
@@ -59,7 +62,8 @@ public class StatementWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

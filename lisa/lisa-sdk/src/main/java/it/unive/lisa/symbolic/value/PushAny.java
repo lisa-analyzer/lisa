@@ -8,8 +8,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
- * An expression converting that push any possible value on the stack. This is
- * useful to represent top values.
+ * An expression that pushes any possible value on the stack. This is useful to
+ * represent top values.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -22,7 +22,9 @@ public class PushAny extends ValueExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public PushAny(Type staticType, CodeLocation location) {
+	public PushAny(
+			Type staticType,
+			CodeLocation location) {
 		super(staticType, location);
 	}
 
@@ -32,7 +34,8 @@ public class PushAny extends ValueExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -48,17 +51,29 @@ public class PushAny extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
 		return this;
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
+	}
+
+	@Override
+	public boolean mightNeedRewriting() {
+		Type t = getStaticType();
+		return !t.isValueType() || t.isUntyped();
 	}
 }

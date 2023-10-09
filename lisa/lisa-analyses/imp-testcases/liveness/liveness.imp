@@ -1,0 +1,53 @@
+class ae {
+
+	f0(a, b) {
+		def x = a + b;
+		def y = a * b;
+		def z = x * y;
+		def d = y + 7;
+		def w = x + y;
+
+		return;
+	}
+
+	f1(a, b) {
+		def x = a + b;
+		def y = a * b;
+			
+		while (y > a) {
+			a = a + 1;
+			x = a + b;
+		}	
+
+		return x;
+	}
+
+	f2(c) {
+		def a = 0;
+		
+		while (a < 10) {	
+			def b = a + 1;
+			c = c + b;
+			a = b * 2;
+		}
+		
+		return c;
+	}
+
+
+	f3() {
+		def x = 2;
+		def y = 4;
+		x = 1;
+		def z = 0;
+		
+		if (y > 0) {
+			z = x;
+		} else {
+			z = y * y;
+		}
+		
+		x = z;
+		return x;
+	}
+}

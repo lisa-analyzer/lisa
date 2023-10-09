@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_A.A(A__this)_845473647.graphml", "untyped_A.getOne(A__this)_845491937.graphml", "untyped_A.getPositive(A__this,_untyped_i)_845492898.graphml", "untyped_A.identity(A__this,_untyped_i)_1285788509.graphml", "untyped_A.identity(A__this,_untyped_i)_845488124.graphml", "untyped_A.identity(A__this,_untyped_i)_845492991.graphml", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_845487256.graphml", "untyped_tests.main(tests__this).graphml" ],
   "info" : {
     "cfgs" : "6",
-    "duration" : "139ms",
-    "end" : "2023-04-20T12:45:49.881+02:00",
+    "duration" : "227ms",
+    "end" : "2023-09-07T11:46:05.019+02:00",
     "expressions" : "49",
     "files" : "8",
     "globals" : "0",
     "members" : "6",
     "programs" : "1",
-    "start" : "2023-04-20T12:45:49.742+02:00",
+    "start" : "2023-09-07T11:46:04.792+02:00",
     "statements" : "21",
     "units" : "2",
-    "version" : "0.1b7",
+    "version" : "0.1b8",
     "warnings" : "0"
   },
   "configuration" : {
@@ -31,6 +31,7 @@
     "serializeInputs" : "false",
     "serializeResults" : "false",
     "syntacticChecks" : "",
+    "useWideningPoints" : "true",
     "wideningThreshold" : "5",
     "workdir" : "test-outputs/visualization/graphml"
   }

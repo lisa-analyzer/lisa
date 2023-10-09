@@ -16,7 +16,8 @@ public class UniqueScope implements ScopeId {
 	}
 
 	@Override
-	public ScopeId push(CFGCall scopeToken) {
+	public ScopeId push(
+			CFGCall scopeToken) {
 		return this;
 	}
 

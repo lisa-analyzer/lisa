@@ -1,11 +1,11 @@
 package it.unive.lisa.analysis.nonrelational;
 
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -27,7 +27,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 		E extends SymbolicExpression,
 		F extends FunctionalLattice<F, Identifier, T>>
-		extends Lattice<T>, SemanticEvaluator {
+		extends
+		Lattice<T>,
+		SemanticEvaluator {
 
 	/**
 	 * Checks whether {@code expression} is satisfied in {@code environment},
@@ -39,6 +41,7 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 *                        variables for the satisfiability
 	 * @param pp          the program point that where this operation is being
 	 *                        evaluated
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by the environment, {@link Satisfiability#NOT_SATISFIED} if
@@ -49,7 +52,12 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	Satisfiability satisfies(E expression, F environment, ProgramPoint pp) throws SemanticException;
+	Satisfiability satisfies(
+			E expression,
+			F environment,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
 
 	/**
 	 * Yields the environment {@code environment} on which the expression
@@ -65,39 +73,61 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 *                        the given expression
 	 * @param dest        the program point where the execution will move after
 	 *                        the expression has been assumed
+	 * @param oracle      the oracle for inter-domain communication
 	 * 
 	 * @return the environment {@code environment} where {@code expression} is
 	 *             assumed to hold
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	F assume(F environment, E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException;
+	F assume(
+			F environment,
+			E expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException;
 
 	/**
 	 * Yields a fixed abstraction of the given variable. The abstraction does
 	 * not depend on the abstract values that get assigned to the variable, but
 	 * is instead fixed among all possible execution paths. If this method does
 	 * not return the bottom element (as the default implementation does), then
-	 * {@link Environment#assign(Identifier, SymbolicExpression, ProgramPoint)}
+	 * {@link Environment#assign(Identifier, SymbolicExpression, ProgramPoint, SemanticOracle)}
 	 * will store that abstract element instead of the one computed starting
 	 * from the expression.
 	 * 
-	 * @param id The identifier representing the variable being assigned
-	 * @param pp the program point that where this operation is being evaluated
+	 * @param id     The identifier representing the variable being assigned
+	 * @param pp     the program point that where this operation is being
+	 *                   evaluated
+	 * @param oracle the oracle for inter-domain communication
 	 * 
 	 * @return the fixed abstraction of the variable
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T variable(Identifier id, ProgramPoint pp) throws SemanticException {
+	default T fixedVariable(
+			Identifier id,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return bottom();
 	}
 
 	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
-	 * this domain's instance.
+	 * Yields the default abstraction returned whenever a functional lattice
+	 * using this element as values is queried for the state of a variable not
+	 * currently part of its mapping. Abstraction for such a variable might have
+	 * been lost, for instance, due to a call to {@link Lattice#top()} on the
+	 * function itself. The default implementation of this method returns
+	 * {@link Lattice#top()}.
 	 * 
-	 * @return the representation
+	 * @param id the variable that is missing from the mapping
+	 * 
+	 * @return a default abstraction for the variable
 	 */
-	DomainRepresentation representation();
+	default T unknownVariable(
+			Identifier id) {
+		return top();
+	}
 }

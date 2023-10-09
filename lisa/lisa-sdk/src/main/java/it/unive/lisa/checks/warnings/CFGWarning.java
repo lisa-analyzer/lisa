@@ -21,7 +21,9 @@ public class CFGWarning extends WarningWithLocation {
 	 * @param cfg     the cfg where this warning was reported on
 	 * @param message the message of this warning
 	 */
-	public CFGWarning(CFG cfg, String message) {
+	public CFGWarning(
+			CFG cfg,
+			String message) {
 		super(cfg.getDescriptor().getLocation(), message);
 		this.cfg = cfg;
 	}
@@ -36,7 +38,8 @@ public class CFGWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public int compareTo(Warning o) {
+	public int compareTo(
+			Warning o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
@@ -60,7 +63,8 @@ public class CFGWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

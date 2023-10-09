@@ -14,7 +14,8 @@ public class LastCallToken implements ContextSensitivityToken {
 
 	private final CFGCall call;
 
-	private LastCallToken(CFGCall call) {
+	private LastCallToken(
+			CFGCall call) {
 		this.call = call;
 	}
 
@@ -33,7 +34,8 @@ public class LastCallToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -75,7 +77,8 @@ public class LastCallToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken push(CFGCall c) {
+	public ContextSensitivityToken push(
+			CFGCall c) {
 		return new LastCallToken(c);
 	}
 }

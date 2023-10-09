@@ -15,5 +15,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * @param <T> the concrete type of the domain
  */
 public interface NonRelationalValueDomain<T extends NonRelationalValueDomain<T>>
-		extends NonRelationalDomain<T, ValueExpression, ValueEnvironment<T>> {
+		extends
+		NonRelationalDomain<T, ValueExpression, ValueEnvironment<T>> {
 }

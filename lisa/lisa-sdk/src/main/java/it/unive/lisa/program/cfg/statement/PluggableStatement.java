@@ -27,5 +27,6 @@ public interface PluggableStatement {
 	 * 
 	 * @param st the original statement
 	 */
-	void setOriginatingStatement(Statement st);
+	void setOriginatingStatement(
+			Statement st);
 }

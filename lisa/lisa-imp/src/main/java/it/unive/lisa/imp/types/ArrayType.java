@@ -1,5 +1,23 @@
 package it.unive.lisa.imp.types;
 
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.DefaultParamInitialization;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
@@ -50,7 +68,9 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	 * @return the unique instance of {@link ArrayType} representing the class
 	 *             with the given name
 	 */
-	public static ArrayType lookup(Type base, int dimensions) {
+	public static ArrayType lookup(
+			Type base,
+			int dimensions) {
 		return types.computeIfAbsent(Pair.of(base, dimensions), x -> new ArrayType(base, dimensions));
 	}
 
@@ -58,7 +78,9 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 
 	private final int dimensions;
 
-	private ArrayType(Type base, int dimensions) {
+	private ArrayType(
+			Type base,
+			int dimensions) {
 		this.base = base;
 		if (dimensions < 1)
 			throw new IllegalArgumentException("Cannot create an array type with less then 1 dimensions");
@@ -66,12 +88,14 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	}
 
 	@Override
-	public final boolean canBeAssignedTo(Type other) {
+	public final boolean canBeAssignedTo(
+			Type other) {
 		return other instanceof ArrayType && getInnerType().canBeAssignedTo(other.asArrayType().getInnerType());
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		if (canBeAssignedTo(other))
 			return other;
 
@@ -103,7 +127,8 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -134,7 +159,67 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public int getDimensions() {
+		return dimensions;
+	}
+
+	@Override
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
+	}
+
+	@Override
+	public Expression unknownValue(
+			CFG cfg,
+			CodeLocation location) {
+		return new DefaultParamInitialization(cfg, location, this) {
+			@Override
+			public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
+					AnalysisState<A> entryState,
+					InterproceduralAnalysis<A> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException {
+				Type type = getStaticType();
+				MemoryAllocation alloc = new MemoryAllocation(type, getLocation(), false);
+				AnalysisState<A> allocSt = entryState.smallStepSemantics(alloc, this);
+				ExpressionSet allocExps = allocSt.getComputedExpressions();
+
+				AnalysisState<A> initSt = entryState.bottom();
+				for (SymbolicExpression allocExp : allocExps) {
+					AccessChild len = new AccessChild(
+							Int32Type.INSTANCE,
+							allocExp,
+							new Variable(Untyped.INSTANCE, "len", getLocation()),
+							getLocation());
+
+					AnalysisState<A> lenSt = entryState.bottom();
+					// TODO fix when we'll support multidimensional arrays
+					lenSt = lenSt.lub(allocSt.assign(len, new PushAny(Int32Type.INSTANCE, getLocation()), this));
+					initSt = initSt.lub(lenSt);
+				}
+
+				AnalysisState<A> refSt = entryState.bottom();
+				for (SymbolicExpression loc : allocSt.getComputedExpressions()) {
+					ReferenceType t = new ReferenceType(loc.getStaticType());
+					HeapReference ref = new HeapReference(t, loc, getLocation());
+					AnalysisState<A> refSem = initSt.smallStepSemantics(ref, this);
+					refSt = refSt.lub(refSem);
+				}
+
+				return refSt;
+			}
+
+			@Override
+			public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
+					AnalysisState<A> exitState,
+					InterproceduralAnalysis<A> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException {
+				// TODO implement this when backward analysis will be out of
+				// beta
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 }

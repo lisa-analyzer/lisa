@@ -16,5 +16,6 @@ public interface ContextSensitivityToken extends ScopeId {
 	ContextSensitivityToken startingId();
 
 	@Override
-	ContextSensitivityToken push(CFGCall c);
+	ContextSensitivityToken push(
+			CFGCall c);
 }

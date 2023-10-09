@@ -20,7 +20,8 @@ public class Skip extends ValueExpression {
 	 * @param location the code location of the statement that has generated
 	 *                     this expression
 	 */
-	public Skip(CodeLocation location) {
+	public Skip(
+			CodeLocation location) {
 		super(VoidType.INSTANCE, location);
 	}
 
@@ -30,7 +31,8 @@ public class Skip extends ValueExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -46,17 +48,28 @@ public class Skip extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
 		return this;
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
+	}
+
+	@Override
+	public boolean mightNeedRewriting() {
+		return false;
 	}
 }

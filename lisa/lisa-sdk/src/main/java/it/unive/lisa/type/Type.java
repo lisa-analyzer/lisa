@@ -1,5 +1,11 @@
 package it.unive.lisa.type;
 
+import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.DefaultParamInitialization;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import java.util.Collection;
 import java.util.Set;
 
@@ -265,6 +271,16 @@ public interface Type {
 	}
 
 	/**
+	 * Yields {@code true} if and only if both {@link #isInMemoryType()} and
+	 * {@link #isPointerType()} both return {@code false} on this type.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isValueType() {
+		return !isInMemoryType() && !isPointerType();
+	}
+
+	/**
 	 * Determines if the type represented by this {@link Type} object is either
 	 * the same as, or is a subtype of, the type represented by {@code other}.
 	 * It returns {@code true} if so, and returns {@code false} otherwise.
@@ -273,7 +289,8 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	boolean canBeAssignedTo(Type other);
+	boolean canBeAssignedTo(
+			Type other);
 
 	/**
 	 * Yields the most specific common supertype between this {@link Type} and
@@ -285,7 +302,8 @@ public interface Type {
 	 * @return the most specific common supertype between {@code this} and
 	 *             {@code other}
 	 */
-	Type commonSupertype(Type other);
+	Type commonSupertype(
+			Type other);
 
 	/**
 	 * Yields all possible instances of this type, including itself.
@@ -295,7 +313,64 @@ public interface Type {
 	 * 
 	 * @return the possible instances
 	 */
-	Set<Type> allInstances(TypeSystem types);
+	Set<Type> allInstances(
+			TypeSystem types);
+
+	/**
+	 * Yields an expression that can be used as the right-hand side of an
+	 * assignment to initialize a variable or parameter having this type to its
+	 * default value. The returned expression's semantics function should leave
+	 * a {@link SymbolicExpression} on the stack that can be used as second
+	 * parameter in a
+	 * {@link SemanticDomain#assign(it.unive.lisa.symbolic.value.Identifier, SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint, it.unive.lisa.analysis.SemanticOracle)}
+	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
+	 * for instance, define fields or second-level memory regions initialized
+	 * together with the main target of the returned expression (e.g., if the
+	 * returned expression initializes an array, it should also initialize its
+	 * length). <br>
+	 * <br>
+	 * The default implementation of this method yields a {@code null}.
+	 * 
+	 * @param cfg      the {@link CFG} where the initialization will happen
+	 * @param location the {@link CodeLocation} where the initialization will
+	 *                     happen
+	 * 
+	 * @return an initializing expression, or {@code null} if no default value
+	 *             exists
+	 */
+	default Expression defaultValue(
+			CFG cfg,
+			CodeLocation location) {
+		return null;
+	}
+
+	/**
+	 * Yields an expression that can be used as the right-hand side of an
+	 * assignment to initialize a variable or parameter having this type to a
+	 * statically unknown value. The returned expression's semantics function
+	 * should leave a {@link SymbolicExpression} on the stack that can be used
+	 * as second parameter in a
+	 * {@link SemanticDomain#assign(it.unive.lisa.symbolic.value.Identifier, SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint, it.unive.lisa.analysis.SemanticOracle)}
+	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
+	 * for instance, define fields or second-level memory regions initialized
+	 * together with the main target of the returned expression (e.g., if the
+	 * returned expression initializes an array, it should also initialize its
+	 * length). <br>
+	 * <br>
+	 * The default implementation of this method yields a
+	 * {@link DefaultParamInitialization}.
+	 * 
+	 * @param cfg      the {@link CFG} where the initialization will happen
+	 * @param location the {@link CodeLocation} where the initialization will
+	 *                     happen
+	 * 
+	 * @return an initializing expression
+	 */
+	default Expression unknownValue(
+			CFG cfg,
+			CodeLocation location) {
+		return new DefaultParamInitialization(cfg, location, this);
+	}
 
 	/**
 	 * Yields the most specific common supertype of the given collection of
@@ -307,7 +382,9 @@ public interface Type {
 	 * 
 	 * @return the most specific common supertype, or {@code fallback}
 	 */
-	public static Type commonSupertype(Collection<Type> types, Type fallback) {
+	public static Type commonSupertype(
+			Collection<Type> types,
+			Type fallback) {
 		if (types == null || types.isEmpty())
 			return fallback;
 		Type result = null;

@@ -23,7 +23,9 @@ public class CastIterable<E, T extends E> implements Iterable<T> {
 	 * @param type   the class to which elements of the wrapped iterable should
 	 *                   be casted to
 	 */
-	public CastIterable(Iterable<E> parent, Class<T> type) {
+	public CastIterable(
+			Iterable<E> parent,
+			Class<T> type) {
 		this.parent = parent;
 		this.type = type;
 	}
@@ -37,7 +39,8 @@ public class CastIterable<E, T extends E> implements Iterable<T> {
 
 		private final Iterator<E> wrapped;
 
-		public CastIterator(Iterator<E> wrapped) {
+		public CastIterator(
+				Iterator<E> wrapped) {
 			this.wrapped = wrapped;
 		}
 

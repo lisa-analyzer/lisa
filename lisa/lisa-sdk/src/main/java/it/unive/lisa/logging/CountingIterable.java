@@ -25,7 +25,9 @@ final class CountingIterable<E> implements Iterable<E> {
 	 * @param iterable the iterable to wrap
 	 * @param counter  the counter to use
 	 */
-	CountingIterable(Iterable<E> iterable, Counter counter) {
+	CountingIterable(
+			Iterable<E> iterable,
+			Counter counter) {
 		Iterator<E> it = iterable.iterator();
 		this.iterator = new Iterator<E>() {
 

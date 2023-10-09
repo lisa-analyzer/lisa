@@ -29,7 +29,10 @@ public class GlobalWarning extends WarningWithLocation {
 	 * @param global  the global where this warning was reported on
 	 * @param message the message of this warning
 	 */
-	public GlobalWarning(Unit unit, Global global, String message) {
+	public GlobalWarning(
+			Unit unit,
+			Global global,
+			String message) {
 		super(global.getLocation(), message);
 		this.unit = unit;
 		this.global = global;
@@ -54,7 +57,8 @@ public class GlobalWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public int compareTo(Warning o) {
+	public int compareTo(
+			Warning o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
@@ -81,7 +85,8 @@ public class GlobalWarning extends WarningWithLocation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

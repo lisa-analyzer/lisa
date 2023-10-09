@@ -14,7 +14,8 @@ public class CompilationUnitAnnotationValue implements BasicAnnotationValue {
 	 * 
 	 * @param unitName the name of the compilation unit
 	 */
-	public CompilationUnitAnnotationValue(String unitName) {
+	public CompilationUnitAnnotationValue(
+			String unitName) {
 		this.unitName = unitName;
 	}
 
@@ -27,7 +28,8 @@ public class CompilationUnitAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -49,7 +51,8 @@ public class CompilationUnitAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof CompilationUnitAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

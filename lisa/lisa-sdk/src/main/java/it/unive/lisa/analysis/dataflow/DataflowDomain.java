@@ -3,12 +3,14 @@ package it.unive.lisa.analysis.dataflow;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.SetRepresentation;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.representation.SetRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -28,7 +30,9 @@ import java.util.function.Predicate;
  *                domain
  */
 public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends DataflowElement<D, E>>
-		implements BaseLattice<D>, ValueDomain<D> {
+		implements
+		BaseLattice<D>,
+		ValueDomain<D> {
 
 	private final boolean isTop;
 
@@ -51,7 +55,11 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	 * @param isTop    whether or not this domain is the top of the lattice
 	 * @param isBottom whether or not this domain is the bottom of the lattice
 	 */
-	public DataflowDomain(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
+	public DataflowDomain(
+			E domain,
+			Set<E> elements,
+			boolean isTop,
+			boolean isBottom) {
 		this.elements = elements;
 		this.domain = domain;
 		this.isTop = isTop;
@@ -71,23 +79,36 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	 * 
 	 * @return the concrete instance of domain
 	 */
-	public abstract D mk(E domain, Set<E> elements, boolean isTop, boolean isBottom);
+	public abstract D mk(
+			E domain,
+			Set<E> elements,
+			boolean isTop,
+			boolean isBottom);
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public D assign(Identifier id, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public D assign(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		// if id cannot be tracked by the underlying lattice,
 		// or if the expression cannot be processed, return this
-		return update(() -> !domain.tracksIdentifiers(id) || !domain.canProcess(expression),
+		return update(() -> !domain.canProcess(expression, pp, oracle),
 				() -> domain.gen(id, expression, pp, (D) this),
 				() -> domain.kill(id, expression, pp, (D) this));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public D smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public D smallStepSemantics(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		// if expression cannot be processed, return this
-		return update(() -> !domain.canProcess(expression),
+		return update(() -> !domain.canProcess(expression, pp, oracle),
 				() -> domain.gen(expression, pp, (D) this),
 				() -> domain.kill(expression, pp, (D) this));
 	}
@@ -97,7 +118,10 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	}
 
 	@SuppressWarnings("unchecked")
-	private D update(BooleanSupplier guard, SemanticElementsSupplier<E> gen, SemanticElementsSupplier<E> kill)
+	private D update(
+			BooleanSupplier guard,
+			SemanticElementsSupplier<E> gen,
+			SemanticElementsSupplier<E> kill)
 			throws SemanticException {
 		if (isBottom())
 			return (D) this;
@@ -116,14 +140,20 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public D assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
-		// TODO could be refined
+	public D assume(
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return (D) this;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public D forgetIdentifier(Identifier id) throws SemanticException {
+	public D forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		if (isTop())
 			return (D) this;
 
@@ -142,7 +172,9 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public D forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public D forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		if (isTop())
 			return (D) this;
 
@@ -160,8 +192,11 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	}
 
 	@Override
-	public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp) throws SemanticException {
-		// TODO could be refined
+	public Satisfiability satisfies(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -177,7 +212,8 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -203,7 +239,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new SetRepresentation(elements, DataflowElement::representation);
 	}
 
@@ -238,7 +274,9 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public D pushScope(ScopeToken scope) throws SemanticException {
+	public D pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		if (isTop() || isBottom())
 			return (D) this;
 
@@ -253,7 +291,9 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public D popScope(ScopeToken scope) throws SemanticException {
+	public D popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		if (isTop() || isBottom())
 			return (D) this;
 
@@ -269,5 +309,11 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	@Override
 	public final String toString() {
 		return representation().toString();
+	}
+
+	@Override
+	public boolean knowsIdentifier(
+			Identifier id) {
+		return elements.stream().anyMatch(e -> e.getInvolvedIdentifiers().contains(id));
 	}
 }

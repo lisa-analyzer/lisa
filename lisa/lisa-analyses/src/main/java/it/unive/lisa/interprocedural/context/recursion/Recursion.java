@@ -1,9 +1,6 @@
 package it.unive.lisa.interprocedural.context.recursion;
 
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
@@ -18,18 +15,8 @@ import java.util.Collection;
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state
- * @param <T> the type of {@link TypeDomain} contained into the computed
- *                abstract state
  */
-public class Recursion<
-		A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>> {
+public class Recursion<A extends AbstractState<A>> {
 
 	private final Call start;
 
@@ -39,7 +26,7 @@ public class Recursion<
 
 	private final ContextSensitivityToken invocationToken;
 
-	private final CompoundState<A, H, V, T> entryState;
+	private final CompoundState<A> entryState;
 
 	/**
 	 * Builds the recursion.
@@ -57,7 +44,7 @@ public class Recursion<
 	public Recursion(
 			Call invocation,
 			ContextSensitivityToken invocationToken,
-			CompoundState<A, H, V, T> entryState,
+			CompoundState<A> entryState,
 			CFG recursionHead,
 			Collection<CodeMember> members) {
 		this.start = invocation;
@@ -80,14 +67,15 @@ public class Recursion<
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Recursion<?, ?, ?, ?> other = (Recursion<?, ?, ?, ?>) obj;
+		Recursion<?> other = (Recursion<?>) obj;
 		if (entryState == null) {
 			if (other.entryState != null)
 				return false;
@@ -153,7 +141,7 @@ public class Recursion<
 	 * 
 	 * @return the entry state
 	 */
-	public CompoundState<A, H, V, T> getEntryState() {
+	public CompoundState<A> getEntryState() {
 		return entryState;
 	}
 

@@ -1,15 +1,18 @@
 package it.unive.lisa.analysis.dataflow;
 
-import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.representation.StructuredObject;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * An element of the dataflow domain, that contains a collection of
@@ -27,7 +30,10 @@ import java.util.Collection;
  * @param <E> the concrete type of {@link DataflowElement}
  */
 public interface DataflowElement<D extends DataflowDomain<D, E>, E extends DataflowElement<D, E>>
-		extends SemanticEvaluator {
+		extends
+		SemanticEvaluator,
+		StructuredObject,
+		ScopedObject<E> {
 
 	/**
 	 * Yields all the {@link Identifier}s that are involved in the definition of
@@ -53,7 +59,12 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Collection<E> gen(Identifier id, ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
+	Collection<E> gen(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			D domain)
+			throws SemanticException;
 
 	/**
 	 * The dataflow <i>gen</i> operation, yielding the dataflow elements that
@@ -69,7 +80,11 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Collection<E> gen(ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
+	Collection<E> gen(
+			ValueExpression expression,
+			ProgramPoint pp,
+			D domain)
+			throws SemanticException;
 
 	/**
 	 * The dataflow <i>kill</i> operation, yielding the dataflow elements that
@@ -87,7 +102,12 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Collection<E> kill(Identifier id, ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
+	Collection<E> kill(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			D domain)
+			throws SemanticException;
 
 	/**
 	 * The dataflow <i>kill</i> operation, yielding the dataflow elements that
@@ -103,51 +123,37 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Collection<E> kill(ValueExpression expression, ProgramPoint pp, D domain) throws SemanticException;
-
-	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
-	 * this domain's instance.
-	 * 
-	 * @return the representation
-	 */
-	DomainRepresentation representation();
-
-	/**
-	 * Push a scope to the dataflow element.
-	 * 
-	 * @param token the scope to be pushed
-	 * 
-	 * @return the element with the pushed scope
-	 * 
-	 * @throws SemanticException if the scope cannot be pushed
-	 * 
-	 * @see SemanticDomain#pushScope(ScopeToken)
-	 */
-	E pushScope(ScopeToken token) throws SemanticException;
-
-	/**
-	 * Pop a scope to the dataflow element.
-	 * 
-	 * @param token the scope to be popped
-	 * 
-	 * @return the element with the popped scope
-	 * 
-	 * @throws SemanticException if the scope cannot be popped
-	 * 
-	 * @see SemanticDomain#popScope(ScopeToken)
-	 */
-	E popScope(ScopeToken token) throws SemanticException;
+	Collection<E> kill(
+			ValueExpression expression,
+			ProgramPoint pp,
+			D domain)
+			throws SemanticException;
 
 	@Override
-	default boolean tracksIdentifiers(Identifier id) {
-		return canProcess(id);
-	}
+	default boolean canProcess(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		if (expression instanceof PushInv)
+			// the type approximation of a pushinv is bottom, so the below check
+			// will always fail regardless of the kind of value we are tracking
+			return expression.getStaticType().isValueType();
 
-	@Override
-	default boolean canProcess(SymbolicExpression expression) {
-		if (expression.hasRuntimeTypes())
-			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
-		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
+		Set<Type> rts = null;
+		try {
+			rts = oracle.getRuntimeTypesOf(expression, pp, oracle);
+		} catch (SemanticException e) {
+			return false;
+		}
+
+		if (rts == null || rts.isEmpty())
+			// if we have no runtime types, either the type domain has no type
+			// information for the given expression (thus it can be anything,
+			// also something that we can track) or the computation returned
+			// bottom (and the whole state is likely going to go to bottom
+			// anyway).
+			return true;
+
+		return rts.stream().anyMatch(Type::isValueType);
 	}
 }

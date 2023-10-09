@@ -43,12 +43,16 @@ public class JsonReport {
 	 * 
 	 * @param report the original report
 	 */
-	public JsonReport(LiSAReport report) {
+	public JsonReport(
+			LiSAReport report) {
 		this(report.getWarnings(), report.getCreatedFiles(), report.getInfo().toPropertyBag(),
 				report.getConfiguration().toPropertyBag());
 	}
 
-	private JsonReport(Collection<Warning> warnings, Collection<String> files, Map<String, String> info,
+	private JsonReport(
+			Collection<Warning> warnings,
+			Collection<String> files,
+			Map<String, String> info,
 			Map<String, String> configuration) {
 		this.files = new TreeSet<>(files);
 		this.info = info;
@@ -110,7 +114,9 @@ public class JsonReport {
 	 * 
 	 * @throws IOException if some I/O error happens while writing to the writer
 	 */
-	public void dump(Writer writer) throws IOException {
+	public void dump(
+			Writer writer)
+			throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 		mapper.writeValue(writer, this);
@@ -127,7 +133,9 @@ public class JsonReport {
 	 * @throws IOException if some I/O error happens while reading from the
 	 *                         reader
 	 */
-	public static JsonReport read(Reader reader) throws IOException {
+	public static JsonReport read(
+			Reader reader)
+			throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(reader, JsonReport.class);
 	}
@@ -144,7 +152,8 @@ public class JsonReport {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -203,7 +212,8 @@ public class JsonReport {
 		 * 
 		 * @param warning the warning to clone
 		 */
-		public JsonWarning(Warning warning) {
+		public JsonWarning(
+				Warning warning) {
 			this.message = warning.toString();
 		}
 
@@ -221,7 +231,8 @@ public class JsonReport {
 		 * 
 		 * @param message the message
 		 */
-		public void setMessage(String message) {
+		public void setMessage(
+				String message) {
 			this.message = message;
 		}
 
@@ -239,7 +250,8 @@ public class JsonReport {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)
@@ -256,7 +268,8 @@ public class JsonReport {
 		}
 
 		@Override
-		public int compareTo(JsonWarning o) {
+		public int compareTo(
+				JsonWarning o) {
 			return message.compareTo(o.message);
 		}
 	}

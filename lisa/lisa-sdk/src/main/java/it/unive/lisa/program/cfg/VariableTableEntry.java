@@ -60,7 +60,10 @@ public class VariableTableEntry implements CodeElement {
 	 * @param index    the index of the variable entry
 	 * @param name     the name of this variable
 	 */
-	public VariableTableEntry(CodeLocation location, int index, String name) {
+	public VariableTableEntry(
+			CodeLocation location,
+			int index,
+			String name) {
 		this(location, index, null, null, name, Untyped.INSTANCE);
 	}
 
@@ -78,7 +81,12 @@ public class VariableTableEntry implements CodeElement {
 	 *                       until the end of the cfg
 	 * @param name       the name of this variable
 	 */
-	public VariableTableEntry(CodeLocation location, int index, Statement scopeStart, Statement scopeEnd, String name) {
+	public VariableTableEntry(
+			CodeLocation location,
+			int index,
+			Statement scopeStart,
+			Statement scopeEnd,
+			String name) {
 		this(location, index, scopeStart, scopeEnd, name, Untyped.INSTANCE);
 	}
 
@@ -99,8 +107,13 @@ public class VariableTableEntry implements CodeElement {
 	 * @param staticType the type of this variable. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
-	public VariableTableEntry(CodeLocation location, int index, Statement scopeStart, Statement scopeEnd,
-			String name, Type staticType) {
+	public VariableTableEntry(
+			CodeLocation location,
+			int index,
+			Statement scopeStart,
+			Statement scopeEnd,
+			String name,
+			Type staticType) {
 		this(location, index, scopeStart, scopeEnd, name, staticType, new Annotations());
 	}
 
@@ -123,8 +136,14 @@ public class VariableTableEntry implements CodeElement {
 	 *                        {@link Untyped#INSTANCE}
 	 * @param annotations the annotations of this variable
 	 */
-	public VariableTableEntry(CodeLocation location, int index, Statement scopeStart, Statement scopeEnd,
-			String name, Type staticType, Annotations annotations) {
+	public VariableTableEntry(
+			CodeLocation location,
+			int index,
+			Statement scopeStart,
+			Statement scopeEnd,
+			String name,
+			Type staticType,
+			Annotations annotations) {
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		Objects.requireNonNull(staticType, "The type of a variable cannot be null");
 		Objects.requireNonNull(location, "The location of a variable cannot be null");
@@ -151,7 +170,8 @@ public class VariableTableEntry implements CodeElement {
 	 * 
 	 * @param index the new index of this variable
 	 */
-	public void setIndex(int index) {
+	public void setIndex(
+			int index) {
 		this.index = index;
 	}
 
@@ -174,7 +194,8 @@ public class VariableTableEntry implements CodeElement {
 	 * 
 	 * @param scopeStart the scope start, or {@code null}
 	 */
-	public void setScopeStart(Statement scopeStart) {
+	public void setScopeStart(
+			Statement scopeStart) {
 		this.scopeStart = scopeStart;
 	}
 
@@ -196,7 +217,8 @@ public class VariableTableEntry implements CodeElement {
 	 * 
 	 * @param scopeEnd the scope end, or {@code null}
 	 */
-	public void setScopeEnd(Statement scopeEnd) {
+	public void setScopeEnd(
+			Statement scopeEnd) {
 		this.scopeEnd = scopeEnd;
 	}
 
@@ -226,7 +248,8 @@ public class VariableTableEntry implements CodeElement {
 	 * 
 	 * @return a reference to the variable depicted by this entry
 	 */
-	public VariableRef createReference(CFG cfg) {
+	public VariableRef createReference(
+			CFG cfg) {
 		return new VariableRef(cfg, cfg.getDescriptor().getLocation(), name, staticType);
 	}
 
@@ -245,7 +268,8 @@ public class VariableTableEntry implements CodeElement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -312,7 +336,8 @@ public class VariableTableEntry implements CodeElement {
 	 * 
 	 * @param ann the annotation to be added
 	 */
-	public void addAnnotation(Annotation ann) {
+	public void addAnnotation(
+			Annotation ann) {
 		annotations.addAnnotation(ann);
 	}
 }

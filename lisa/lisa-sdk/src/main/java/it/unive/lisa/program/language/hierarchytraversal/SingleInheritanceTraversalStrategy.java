@@ -26,7 +26,9 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 	}
 
 	@Override
-	public Iterable<CompilationUnit> traverse(Statement st, CompilationUnit start) {
+	public Iterable<CompilationUnit> traverse(
+			Statement st,
+			CompilationUnit start) {
 		return new Iterable<CompilationUnit>() {
 
 			@Override
@@ -44,7 +46,8 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 
 		private final Set<CompilationUnit> seen;
 
-		private SingleInheritanceIterator(CompilationUnit start) {
+		private SingleInheritanceIterator(
+				CompilationUnit start) {
 			current = start;
 			remaining = new LinkedList<>(start.getImmediateAncestors());
 			remaining.addFirst(start);

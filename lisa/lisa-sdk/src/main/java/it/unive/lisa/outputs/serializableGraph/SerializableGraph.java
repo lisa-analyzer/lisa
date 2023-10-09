@@ -131,7 +131,8 @@ public class SerializableGraph {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -181,7 +182,9 @@ public class SerializableGraph {
 	 * 
 	 * @throws IOException if an I/O error occurs while writing
 	 */
-	public void dump(Writer writer) throws IOException {
+	public void dump(
+			Writer writer)
+			throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, System.getProperty("lisa.json.indent") != null);
 		mapper.writeValue(writer, this);
@@ -195,7 +198,8 @@ public class SerializableGraph {
 	 * @throws IllegalArgumentException if a node with the same id already
 	 *                                      exists in the graph
 	 */
-	public void addNode(SerializableNode node) {
+	public void addNode(
+			SerializableNode node) {
 		if (nodes.stream().map(n -> n.getId()).anyMatch(i -> i == node.getId()))
 			throw new IllegalArgumentException("A node with the same id " + node.getId() + " is already in the graph");
 		nodes.add(node);
@@ -209,7 +213,8 @@ public class SerializableGraph {
 	 * @throws IllegalArgumentException if a description for the same node
 	 *                                      already exists in the graph
 	 */
-	public void addNodeDescription(SerializableNodeDescription desc) {
+	public void addNodeDescription(
+			SerializableNodeDescription desc) {
 		if (descriptions.stream().map(d -> d.getNodeId()).anyMatch(i -> i == desc.getNodeId()))
 			throw new IllegalArgumentException(
 					"A description for node " + desc.getNodeId() + " is already in the graph");
@@ -221,7 +226,8 @@ public class SerializableGraph {
 	 * 
 	 * @param edge the edge to add
 	 */
-	public void addEdge(SerializableEdge edge) {
+	public void addEdge(
+			SerializableEdge edge) {
 		edges.add(edge);
 	}
 
@@ -264,7 +270,8 @@ public class SerializableGraph {
 	 * 
 	 * @return the converted graph
 	 */
-	public GraphmlGraph toGraphml(boolean includeSubnodes) {
+	public GraphmlGraph toGraphml(
+			boolean includeSubnodes) {
 		GraphmlGraph graph = new GraphmlGraph(name);
 
 		Set<Integer> hasFollows = new HashSet<>();
@@ -321,7 +328,9 @@ public class SerializableGraph {
 	 * 
 	 * @return the converted graph
 	 */
-	public HtmlGraph toHtml(boolean includeSubnodes, String descriptionLabel) {
+	public HtmlGraph toHtml(
+			boolean includeSubnodes,
+			String descriptionLabel) {
 		SerializableGraph g = new SerializableGraph(name, description, nodes, edges, Collections.emptySortedSet());
 		GraphmlGraph graphml = g.toGraphml(includeSubnodes);
 
@@ -345,7 +354,9 @@ public class SerializableGraph {
 	 * 
 	 * @throws IOException if an I/O error occurs while reading
 	 */
-	public static SerializableGraph readGraph(Reader reader) throws IOException {
+	public static SerializableGraph readGraph(
+			Reader reader)
+			throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(reader, SerializableGraph.class);
 	}
@@ -361,7 +372,8 @@ public class SerializableGraph {
 	 * @return {@code true} if the given graph has the same structure as this
 	 *             one
 	 */
-	public boolean sameStructure(SerializableGraph other) {
+	public boolean sameStructure(
+			SerializableGraph other) {
 		if (name == null) {
 			if (other.name != null)
 				return false;

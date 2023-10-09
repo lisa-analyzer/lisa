@@ -54,7 +54,8 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the set
 	 */
-	public ExternalSet<T> mkSet(Iterable<T> iterable) {
+	public ExternalSet<T> mkSet(
+			Iterable<T> iterable) {
 		return new BitExternalSet<>(this, iterable);
 	}
 
@@ -66,7 +67,8 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the set
 	 */
-	public ExternalSet<T> mkSingletonSet(T element) {
+	public ExternalSet<T> mkSingletonSet(
+			T element) {
 		return new BitExternalSet<>(this, element);
 	}
 
@@ -87,7 +89,8 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the index of {@code e}, or {@code -1}
 	 */
-	protected final synchronized int indexOf(T e) {
+	protected final synchronized int indexOf(
+			T e) {
 		if (e == null)
 			return indexOfNull;
 
@@ -103,7 +106,8 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the index of {@code e}
 	 */
-	protected final synchronized int indexOfOrAdd(T e) {
+	protected final synchronized int indexOfOrAdd(
+			T e) {
 		if (e == null) {
 			if (indexOfNull == -1) {
 				elements.add(null);
@@ -129,7 +133,8 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the element
 	 */
-	protected final synchronized T get(int pos) {
+	protected final synchronized T get(
+			int pos) {
 		return elements.get(pos);
 	}
 

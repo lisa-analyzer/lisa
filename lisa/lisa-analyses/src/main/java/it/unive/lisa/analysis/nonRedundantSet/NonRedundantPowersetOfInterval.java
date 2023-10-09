@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -27,7 +28,8 @@ import java.util.TreeSet;
  * widening} and others operations needed to calculate the previous ones).
  */
 public class NonRedundantPowersetOfInterval
-		extends NonRedundantPowersetOfBaseNonRelationalValueDomain<NonRedundantPowersetOfInterval, Interval> {
+		extends
+		NonRedundantPowersetOfBaseNonRelationalValueDomain<NonRedundantPowersetOfInterval, Interval> {
 
 	/**
 	 * Constructs an empty non redundant set of intervals.
@@ -41,7 +43,8 @@ public class NonRedundantPowersetOfInterval
 	 * 
 	 * @param elements the set of intervals
 	 */
-	public NonRedundantPowersetOfInterval(SortedSet<Interval> elements) {
+	public NonRedundantPowersetOfInterval(
+			SortedSet<Interval> elements) {
 		super(elements, Interval.BOTTOM);
 	}
 
@@ -62,7 +65,8 @@ public class NonRedundantPowersetOfInterval
 	 * {@link #middlePoint(Interval) middle point}).
 	 */
 	@Override
-	protected NonRedundantPowersetOfInterval EgliMilnerConnector(NonRedundantPowersetOfInterval other)
+	protected NonRedundantPowersetOfInterval EgliMilnerConnector(
+			NonRedundantPowersetOfInterval other)
 			throws SemanticException {
 		SortedSet<Interval> newElementsSet = new TreeSet<>();
 		SortedSet<Interval> notCoverSet = new TreeSet<>();
@@ -117,7 +121,8 @@ public class NonRedundantPowersetOfInterval
 	 * 
 	 * @return the middle point of the interval
 	 */
-	protected MathNumber middlePoint(Interval interval) {
+	protected MathNumber middlePoint(
+			Interval interval) {
 		if (interval.interval.isFinite())
 			return interval.interval.getLow().add(interval.interval.getHigh()).divide(new MathNumber(2));
 		else if (interval.interval.getHigh().isFinite() && !interval.interval.getLow().isFinite())
@@ -135,17 +140,18 @@ public class NonRedundantPowersetOfInterval
 			ValueExpression left,
 			ValueExpression right,
 			ProgramPoint src,
-			ProgramPoint dest)
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		Identifier id;
 		NonRedundantPowersetOfInterval eval;
 		boolean rightIsExpr;
 		if (left instanceof Identifier) {
-			eval = eval(right, environment, src);
+			eval = eval(right, environment, src, oracle);
 			id = (Identifier) left;
 			rightIsExpr = true;
 		} else if (right instanceof Identifier) {
-			eval = eval(left, environment, src);
+			eval = eval(left, environment, src, oracle);
 			id = (Identifier) right;
 			rightIsExpr = false;
 		} else
@@ -210,7 +216,8 @@ public class NonRedundantPowersetOfInterval
 	}
 
 	@Override
-	protected NonRedundantPowersetOfInterval mk(SortedSet<Interval> elements) {
+	protected NonRedundantPowersetOfInterval mk(
+			SortedSet<Interval> elements) {
 		return new NonRedundantPowersetOfInterval(elements);
 	}
 

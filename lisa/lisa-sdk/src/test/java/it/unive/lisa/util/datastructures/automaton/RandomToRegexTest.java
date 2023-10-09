@@ -42,7 +42,8 @@ public class RandomToRegexTest {
 		mapping.put(4, q4);
 	}
 
-	private static void check(TestAutomaton a) {
+	private static void check(
+			TestAutomaton a) {
 		RegularExpression fromRegex = a.toRegex().simplify();
 		TestAutomaton revert = fromRegex.toAutomaton(a);
 		assertTrue(a + " is different from " + revert, a.isEqualTo(revert));

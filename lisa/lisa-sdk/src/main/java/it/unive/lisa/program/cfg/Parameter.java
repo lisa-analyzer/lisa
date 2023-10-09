@@ -43,7 +43,9 @@ public class Parameter implements CodeElement {
 	 * @param location the location of this parameter
 	 * @param name     the name of this parameter
 	 */
-	public Parameter(CodeLocation location, String name) {
+	public Parameter(
+			CodeLocation location,
+			String name) {
 		this(location, name, Untyped.INSTANCE, null, new Annotations());
 	}
 
@@ -57,7 +59,10 @@ public class Parameter implements CodeElement {
 	 * @param staticType the type of this parameter. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
-	public Parameter(CodeLocation location, String name, Type staticType) {
+	public Parameter(
+			CodeLocation location,
+			String name,
+			Type staticType) {
 		this(location, name, staticType, null, new Annotations());
 	}
 
@@ -71,7 +76,10 @@ public class Parameter implements CodeElement {
 	 * @param defaultValue the default value for this parameter that can be used
 	 *                         when a call does not specify a value for it
 	 */
-	public Parameter(CodeLocation location, String name, Expression defaultValue) {
+	public Parameter(
+			CodeLocation location,
+			String name,
+			Expression defaultValue) {
 		this(location, name, defaultValue.getStaticType(), defaultValue, new Annotations());
 	}
 
@@ -88,7 +96,11 @@ public class Parameter implements CodeElement {
 	 *                         when a call does not specify a value for it
 	 * @param annotations  the annotations of this parameter
 	 */
-	public Parameter(CodeLocation location, String name, Type staticType, Expression defaultValue,
+	public Parameter(
+			CodeLocation location,
+			String name,
+			Type staticType,
+			Expression defaultValue,
 			Annotations annotations) {
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
 		Objects.requireNonNull(staticType, "The type of a parameter cannot be null");
@@ -130,7 +142,8 @@ public class Parameter implements CodeElement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -185,7 +198,8 @@ public class Parameter implements CodeElement {
 	 * 
 	 * @param ann the annotation to be added
 	 */
-	public void addAnnotation(Annotation ann) {
+	public void addAnnotation(
+			Annotation ann) {
 		annotations.addAnnotation(ann);
 	}
 

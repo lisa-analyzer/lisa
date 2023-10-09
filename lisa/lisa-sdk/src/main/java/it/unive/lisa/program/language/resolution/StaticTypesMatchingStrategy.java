@@ -25,7 +25,12 @@ public class StaticTypesMatchingStrategy extends FixedOrderMatchingStrategy {
 	}
 
 	@Override
-	public boolean matches(Call call, int pos, Parameter formal, Expression actual, Set<Type> types) {
+	public boolean matches(
+			Call call,
+			int pos,
+			Parameter formal,
+			Expression actual,
+			Set<Type> types) {
 		return actual.getStaticType().canBeAssignedTo(formal.getStaticType());
 	}
 }

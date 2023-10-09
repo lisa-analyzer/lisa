@@ -33,7 +33,10 @@ public class AccessChild extends HeapExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public AccessChild(Type staticType, SymbolicExpression container, SymbolicExpression child,
+	public AccessChild(
+			Type staticType,
+			SymbolicExpression container,
+			SymbolicExpression child,
 			CodeLocation location) {
 		super(staticType, location);
 		this.container = container;
@@ -68,7 +71,8 @@ public class AccessChild extends HeapExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -95,7 +99,10 @@ public class AccessChild extends HeapExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		T cont = container.accept(visitor, params);
 		T ch = child.accept(visitor, params);
 		return visitor.visit(this, cont, ch, params);

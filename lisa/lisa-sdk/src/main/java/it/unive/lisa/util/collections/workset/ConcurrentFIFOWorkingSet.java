@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 /**
  * A first-in, first-out working set. This implementation is thread-safe.
  * 
- * @author Luca Negrini
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <E> the type of the elements that this working set contains
  */
@@ -32,7 +32,8 @@ public final class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 	}
 
 	@Override
-	public void push(E e) {
+	public void push(
+			E e) {
 		ws.addLast(e);
 	}
 
@@ -75,7 +76,8 @@ public final class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

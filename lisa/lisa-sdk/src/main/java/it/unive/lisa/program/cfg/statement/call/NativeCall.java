@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
@@ -19,7 +16,6 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collection;
@@ -57,8 +53,14 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	 * @param targets    the NativeCFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public NativeCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			Collection<NativeCFG> targets, Expression... parameters) {
+	public NativeCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			Collection<NativeCFG> targets,
+			Expression... parameters) {
 		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, targets, parameters);
 	}
 
@@ -79,8 +81,15 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	 * @param targets    the NativeCFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public NativeCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Collection<NativeCFG> targets, Expression... parameters) {
+	public NativeCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Collection<NativeCFG> targets,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(targets, "The targets of a native call cannot be null");
 		Objects.requireNonNull(targets, "The native targets of a native call cannot be null");
@@ -97,7 +106,9 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	 * @param targets the {@link NativeCFG}s that the call has been resolved
 	 *                    against
 	 */
-	public NativeCall(UnresolvedCall source, Collection<NativeCFG> targets) {
+	public NativeCall(
+			UnresolvedCall source,
+			Collection<NativeCFG> targets) {
 		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
 				targets, source.getParameters());
 		for (Expression param : source.getParameters())
@@ -105,7 +116,8 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 			param.setParentStatement(source);
 	}
 
-	private static Type getCommonReturnType(Collection<NativeCFG> targets) {
+	private static Type getCommonReturnType(
+			Collection<NativeCFG> targets) {
 		Iterator<NativeCFG> it = targets.iterator();
 		Type result = null;
 		while (it.hasNext()) {
@@ -149,7 +161,8 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -171,27 +184,24 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
-		AnalysisState<A, H, V, T> result = state.bottom();
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		AnalysisState<A> result = state.bottom();
 
 		Expression[] parameters = getSubExpressions();
 		ParameterAssigningStrategy strategy = getProgram().getFeatures().getAssigningStrategy();
 		for (NativeCFG nat : targets)
 			try {
-				Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(this,
+				Pair<AnalysisState<A>, ExpressionSet[]> prepared = strategy.prepare(this,
 						state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
 
 				NaryExpression rewritten = nat.rewrite(this, parameters);
 				result = result
-						.lub(rewritten.expressionSemantics(interprocedural, state, prepared.getRight(), expressions));
+						.lub(rewritten.forwardSemanticsAux(interprocedural, state, prepared.getRight(), expressions));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

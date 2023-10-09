@@ -21,14 +21,14 @@
   "files" : [ "report.json" ],
   "info" : {
     "cfgs" : "9",
-    "duration" : "909ms",
-    "end" : "2023-04-20T12:44:49.939+02:00",
+    "duration" : "1s 285ms",
+    "end" : "2023-09-07T11:43:52.735+02:00",
     "expressions" : "34",
     "files" : "0",
     "globals" : "0",
     "members" : "9",
     "programs" : "1",
-    "start" : "2023-04-20T12:44:49.030+02:00",
+    "start" : "2023-09-07T11:43:51.450+02:00",
     "statements" : "16",
     "units" : "1",
     "version" : "0.1b7",
@@ -49,6 +49,7 @@
     "serializeInputs" : "false",
     "serializeResults" : "false",
     "syntacticChecks" : "VariableI",
+    "useWideningPoints" : "true",
     "wideningThreshold" : "5",
     "workdir" : "test-outputs/syntactic"
   }

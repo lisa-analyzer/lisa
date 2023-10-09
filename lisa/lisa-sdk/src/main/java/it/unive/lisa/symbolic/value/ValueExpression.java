@@ -24,7 +24,9 @@ public abstract class ValueExpression extends SymbolicExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this value expression
 	 */
-	protected ValueExpression(Type staticType, CodeLocation location) {
+	protected ValueExpression(
+			Type staticType,
+			CodeLocation location) {
 		super(staticType, location);
 	}
 

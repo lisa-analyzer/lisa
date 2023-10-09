@@ -32,7 +32,9 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *             returns. If this method returns {@code false}, the visiting
 	 *             will be interrupted
 	 */
-	default boolean visit(V tool, G graph) {
+	default boolean visit(
+			V tool,
+			G graph) {
 		return true;
 	}
 
@@ -48,7 +50,10 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *             returns. If this method returns {@code false}, the visiting
 	 *             will be interrupted
 	 */
-	default boolean visit(V tool, G graph, N node) {
+	default boolean visit(
+			V tool,
+			G graph,
+			N node) {
 		return true;
 	}
 
@@ -64,7 +69,10 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *             returns. If this method returns {@code false}, the visiting
 	 *             will be interrupted
 	 */
-	default boolean visit(V tool, G graph, E edge) {
+	default boolean visit(
+			V tool,
+			G graph,
+			E edge) {
 		return true;
 	}
 }

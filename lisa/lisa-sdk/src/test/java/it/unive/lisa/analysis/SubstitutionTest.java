@@ -3,19 +3,22 @@ package it.unive.lisa.analysis;
 import static it.unive.lisa.util.collections.CollectionUtilities.collect;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,70 +32,98 @@ public class SubstitutionTest {
 
 	private static class Collector implements ValueDomain<Collector> {
 
-		private final ExpressionSet<Identifier> assigned, removed;
+		private final ExpressionSet assigned, removed;
 
 		private Collector() {
-			this.assigned = new ExpressionSet<>(new HashSet<>());
-			this.removed = new ExpressionSet<>(new HashSet<>());
+			this.assigned = new ExpressionSet(new HashSet<>());
+			this.removed = new ExpressionSet(new HashSet<>());
 		}
 
-		private Collector(Collector other) {
-			this.assigned = new ExpressionSet<>(other.assigned.elements());
-			this.removed = new ExpressionSet<>(other.removed.elements());
+		private Collector(
+				Collector other) {
+			this.assigned = new ExpressionSet(other.assigned.elements());
+			this.removed = new ExpressionSet(other.removed.elements());
 		}
 
 		@Override
-		public Collector assign(Identifier id, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		public Collector assign(
+				Identifier id,
+				ValueExpression expression,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
 			Collector add = new Collector(this);
 			add.assigned.elements().add(id);
 			return add;
 		}
 
 		@Override
-		public Collector smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
-			return null; // not used
-		}
-
-		@Override
-		public Collector assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest)
+		public Collector smallStepSemantics(
+				ValueExpression expression,
+				ProgramPoint pp,
+				SemanticOracle oracle)
 				throws SemanticException {
 			return null; // not used
 		}
 
 		@Override
-		public Collector forgetIdentifier(Identifier id) throws SemanticException {
+		public Collector assume(
+				ValueExpression expression,
+				ProgramPoint src,
+				ProgramPoint dest,
+				SemanticOracle oracle)
+				throws SemanticException {
+			return null; // not used
+		}
+
+		@Override
+		public Collector forgetIdentifier(
+				Identifier id)
+				throws SemanticException {
 			Collector rem = new Collector(this);
 			rem.removed.elements().add(id);
 			return rem;
 		}
 
 		@Override
-		public Collector forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+		public Collector forgetIdentifiersIf(
+				Predicate<Identifier> test)
+				throws SemanticException {
 			return null;
 		}
 
 		@Override
-		public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		public Satisfiability satisfies(
+				ValueExpression expression,
+				ProgramPoint pp,
+				SemanticOracle oracle)
+				throws SemanticException {
 			return null; // not used
 		}
 
 		@Override
-		public Collector pushScope(ScopeToken token) throws SemanticException {
+		public Collector pushScope(
+				ScopeToken token)
+				throws SemanticException {
 			return null; // not used
 		}
 
 		@Override
-		public Collector popScope(ScopeToken token) throws SemanticException {
+		public Collector popScope(
+				ScopeToken token)
+				throws SemanticException {
 			return null; // not used
 		}
 
 		@Override
-		public DomainRepresentation representation() {
+		public StructuredRepresentation representation() {
 			return null; // not used
 		}
 
 		@Override
-		public Collector lub(Collector other) throws SemanticException {
+		public Collector lub(
+				Collector other)
+				throws SemanticException {
 			Collector lub = new Collector(this);
 			lub.assigned.elements().addAll(other.assigned.elements());
 			lub.removed.elements().addAll(other.removed.elements());
@@ -100,7 +131,9 @@ public class SubstitutionTest {
 		}
 
 		@Override
-		public boolean lessOrEqual(Collector other) throws SemanticException {
+		public boolean lessOrEqual(
+				Collector other)
+				throws SemanticException {
 			return false; // not used
 		}
 
@@ -114,6 +147,11 @@ public class SubstitutionTest {
 			return new Collector();
 		}
 
+		@Override
+		public boolean knowsIdentifier(
+				Identifier id) {
+			return false; // not used
+		}
 	}
 
 	private static final ProgramPoint fake = new ProgramPoint() {
@@ -133,21 +171,28 @@ public class SubstitutionTest {
 	private final Variable y = new Variable(Untyped.INSTANCE, "y", SyntheticLocation.INSTANCE);
 	private final Variable z = new Variable(Untyped.INSTANCE, "z", SyntheticLocation.INSTANCE);
 	private final Variable w = new Variable(Untyped.INSTANCE, "w", SyntheticLocation.INSTANCE);
-	private final Comparator<Identifier> comparer = (l, r) -> l.getName().compareTo(r.getName());
+	private final Comparator<
+			SymbolicExpression> comparer = (
+					l,
+					r) -> ((Identifier) l).getName().compareTo(((Identifier) r).getName());
 
-	private void check(List<HeapReplacement> sub,
-			Collection<Identifier> addexpected,
-			Collection<Identifier> remexpected)
+	private void check(
+			List<HeapReplacement> sub,
+			Collection<SymbolicExpression> addexpected,
+			Collection<SymbolicExpression> remexpected)
 			throws SemanticException {
 		Collector c = new Collector();
+		TestAbstractState oracle = new TestAbstractState();
 		if (sub != null)
 			for (HeapReplacement repl : sub)
-				c = c.lub(c.applyReplacement(repl, fake));
+				c = c.lub(c.applyReplacement(repl, fake, oracle));
 
 		CollectionsDiffBuilder<
-				Identifier> add = new CollectionsDiffBuilder<>(Identifier.class, addexpected, c.assigned.elements());
+				SymbolicExpression> add = new CollectionsDiffBuilder<>(SymbolicExpression.class, addexpected,
+						c.assigned.elements());
 		CollectionsDiffBuilder<
-				Identifier> rem = new CollectionsDiffBuilder<>(Identifier.class, remexpected, c.removed.elements());
+				SymbolicExpression> rem = new CollectionsDiffBuilder<>(SymbolicExpression.class, remexpected,
+						c.removed.elements());
 		add.compute(comparer);
 		rem.compute(comparer);
 

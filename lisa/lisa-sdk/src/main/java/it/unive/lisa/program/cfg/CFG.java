@@ -3,12 +3,9 @@ package it.unive.lisa.program.cfg;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.BackwardAnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -17,6 +14,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -24,9 +22,11 @@ import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.DescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.DescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
@@ -36,6 +36,7 @@ import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
@@ -89,7 +90,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param descriptor the descriptor of this cfg
 	 */
-	public CFG(CodeMemberDescriptor descriptor) {
+	public CFG(
+			CodeMemberDescriptor descriptor) {
 		super(new SequentialEdge());
 		this.descriptor = descriptor;
 		this.cfStructs = new LinkedList<>();
@@ -104,7 +106,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param list        the node list containing all the statements and the
 	 *                        edges that will be part of this cfg
 	 */
-	public CFG(CodeMemberDescriptor descriptor, Collection<Statement> entrypoints,
+	public CFG(
+			CodeMemberDescriptor descriptor,
+			Collection<Statement> entrypoints,
 			NodeList<CFG, Statement, Edge> list) {
 		super(entrypoints, list);
 		this.descriptor = descriptor;
@@ -116,7 +120,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param other the original cfg
 	 */
-	public CFG(CFG other) {
+	public CFG(
+			CFG other) {
 		super(other.entrypoints, other.list);
 		this.descriptor = other.descriptor;
 		this.cfStructs = other.cfStructs;
@@ -169,7 +174,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @throws IllegalArgumentException if a control flow structure for the same
 	 *                                      condition already exists
 	 */
-	public void addControlFlowStructure(ControlFlowStructure cf) {
+	public void addControlFlowStructure(
+			ControlFlowStructure cf) {
 		if (cfStructs.stream().anyMatch(c -> c.getCondition().equals(cf.getCondition())))
 			throw new IllegalArgumentException(
 					"Cannot have more than one conditional structure happening on the same condition: "
@@ -199,7 +205,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param extractor the extractor to run
 	 */
-	public void extractControlFlowStructures(ControlFlowExtractor extractor) {
+	public void extractControlFlowStructures(
+			ControlFlowExtractor extractor) {
 		LOG.debug("Extracting control flow structures from " + this);
 		extractor.extract(this).forEach(cfStructs::add);
 	}
@@ -228,13 +235,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
 	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to the
-	 * {@link AnalysisState} computed by this method. The computation uses
-	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
-	 * iterations, up to {@code widenAfter * predecessors_number} times, where
-	 * {@code predecessors_number} is the number of expressions that are
-	 * predecessors of the one being processed. After overcoming that threshold,
-	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
-	 * statements returned by {@link #getEntrypoints()}, using
+	 * {@link AnalysisState} computed by this method. The computation starts at
+	 * the statements returned by {@link #getEntrypoints()}, using
 	 * {@code entryState} as entry state for all of them.
 	 * {@code interprocedural} will be invoked to get the approximation of all
 	 * invoked cfgs, while {@code ws} is used as working set for the statements
@@ -242,12 +244,6 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param <A>             the type of {@link AbstractState} contained into
 	 *                            the analysis state
-	 * @param <H>             the type of {@link HeapDomain} contained into the
-	 *                            computed abstract state
-	 * @param <V>             the type of {@link ValueDomain} contained into the
-	 *                            computed abstract state
-	 * @param <T>             the type of {@link TypeDomain} contained into the
-	 *                            computed abstract state
 	 * @param entryState      the entry states to apply to each
 	 *                            {@link Statement} returned by
 	 *                            {@link #getEntrypoints()}
@@ -271,16 +267,14 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalyzedCFG<A, H, V, T> fixpoint(
-					AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id) throws FixpointException {
-		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
+	public <A extends AbstractState<A>> AnalyzedCFG<A> fixpoint(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
+		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, conf, id);
 	}
@@ -288,32 +282,22 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
 	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to the
-	 * {@link AnalysisState} computed by this method. The computation uses
-	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
-	 * iterations, up to {@code widenAfter * predecessors_number} times, where
-	 * {@code predecessors_number} is the number of expressions that are
-	 * predecessors of the one being processed. After overcoming that threshold,
-	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
-	 * statements in {@code entrypoints}, using {@code entryState} as entry
+	 * {@link AnalysisState} computed by this method. The computation starts at
+	 * the statements in {@code entrypoints}, using {@code entryState} as entry
 	 * state for all of them. {@code interprocedural} will be invoked to get the
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
 	 * @param <A>             the type of {@link AbstractState} contained into
 	 *                            the analysis state
-	 * @param <H>             the type of {@link HeapDomain} contained into the
-	 *                            computed abstract state
-	 * @param <V>             the type of {@link ValueDomain} contained into the
-	 *                            computed abstract state
-	 * @param <T>             the type of {@link TypeDomain} contained into the
-	 *                            computed abstract state
 	 * @param entrypoints     the collection of {@link Statement}s that to use
 	 *                            as a starting point of the computation (that
 	 *                            must be nodes of this cfg)
 	 * @param entryState      the entry states to apply to each
 	 *                            {@link Statement} in {@code entrypoints}
-	 * @param interprocedural the callgraph that can be queried when a call
-	 *                            towards an other cfg is encountered
+	 * @param interprocedural the interprocedural analysis that can be queried
+	 *                            when a call towards an other cfg is
+	 *                            encountered
 	 * @param ws              the {@link WorkingSet} instance to use for this
 	 *                            computation
 	 * @param conf            the {@link FixpointConfiguration} containing the
@@ -331,17 +315,15 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalyzedCFG<A, H, V, T> fixpoint(
-					Collection<Statement> entrypoints,
-					AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id) throws FixpointException {
-		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
+	public <A extends AbstractState<A>> AnalyzedCFG<A> fixpoint(
+			Collection<Statement> entrypoints,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
+		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, conf, id);
 	}
@@ -349,25 +331,14 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
 	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to the
-	 * {@link AnalysisState} computed by this method. The computation uses
-	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
-	 * iterations, up to {@code widenAfter * predecessors_number} times, where
-	 * {@code predecessors_number} is the number of expressions that are
-	 * predecessors of the one being processed. After overcoming that threshold,
-	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
-	 * statements in {@code startingPoints}, using as its entry state their
+	 * {@link AnalysisState} computed by this method. The computation starts at
+	 * the statements in {@code startingPoints}, using as its entry state their
 	 * respective value. {@code interprocedural} will be invoked to get the
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
 	 * @param <A>             the type of {@link AbstractState} contained into
 	 *                            the analysis state
-	 * @param <H>             the type of {@link HeapDomain} contained into the
-	 *                            computed abstract state
-	 * @param <V>             the type of {@link ValueDomain} contained into the
-	 *                            computed abstract state
-	 * @param <T>             the type of {@link TypeDomain} contained into the
-	 *                            computed abstract state
 	 * @param singleton       an instance of the {@link AnalysisState}
 	 *                            containing the abstract state of the analysis
 	 *                            to run, used to retrieve top and bottom values
@@ -375,8 +346,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            starting point of the computation (that must
 	 *                            be nodes of this cfg) and the entry states to
 	 *                            apply on them
-	 * @param interprocedural the callgraph that can be queried when a call
-	 *                            towards an other cfg is encountered
+	 * @param interprocedural the interprocedural analysis that can be queried
+	 *                            when a call towards an other cfg is
+	 *                            encountered
 	 * @param ws              the {@link WorkingSet} instance to use for this
 	 *                            computation
 	 * @param conf            the {@link FixpointConfiguration} containing the
@@ -394,45 +366,42 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalyzedCFG<A, H, V, T> fixpoint(
-					AnalysisState<A, H, V, T> singleton,
-					Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id) throws FixpointException {
+	public <A extends AbstractState<A>> AnalyzedCFG<A> fixpoint(
+			AnalysisState<A> singleton,
+			Map<Statement, AnalysisState<A>> startingPoints,
+			InterproceduralAnalysis<A> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
 		// we disable optimizations for ascending phases if there is a
 		// descending one: the latter will need full results to start applying
 		// glbs/narrowings from a post-fixpoint
 		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
-		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = isOptimized
+		Fixpoint<CFG, Statement, Edge, CompoundState<A>> fix = isOptimized
 				? new OptimizedFixpoint<>(this, false, conf.hotspots)
 				: new Fixpoint<>(this, false);
-		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, conf.wideningThreshold, interprocedural);
+		AscendingFixpoint<A> asc = new AscendingFixpoint<>(this, interprocedural, conf);
 
-		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
-		StatementStore<A, H, V, T> bot = new StatementStore<>(singleton.bottom());
-		startingPoints.forEach((st, state) -> starting.put(st, CompoundState.of(state, bot)));
-		Map<Statement, CompoundState<A, H, V, T>> ascending = fix.fixpoint(starting, ws, asc);
+		Map<Statement, CompoundState<A>> starting = new HashMap<>();
+		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
+		startingPoints.forEach((
+				st,
+				state) -> starting.put(st, CompoundState.of(state, bot)));
+		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
 
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
 			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
 
 		fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new Fixpoint<>(this, true);
-		Map<Statement, CompoundState<A, H, V, T>> descending;
+		Map<Statement, CompoundState<A>> descending;
 		switch (conf.descendingPhaseType) {
 		case GLB:
-			DescendingGLBFixpoint<A, H, V, T> dg = new DescendingGLBFixpoint<>(
-					this,
-					conf.glbThreshold,
-					interprocedural);
+			DescendingGLBFixpoint<A> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
 			descending = fix.fixpoint(starting, ws, dg, ascending);
 			break;
 		case NARROWING:
-			DescendingNarrowingFixpoint<A, H, V, T> dn = new DescendingNarrowingFixpoint<>(this, interprocedural);
+			DescendingNarrowingFixpoint<A> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
 			descending = fix.fixpoint(starting, ws, dn, ascending);
 			break;
 		case NONE:
@@ -445,25 +414,22 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		return flatten(conf.optimize, singleton, startingPoints, interprocedural, id, descending);
 	}
 
-	private <V extends ValueDomain<V>,
-			T extends TypeDomain<T>,
-			A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>> AnalyzedCFG<A, H, V, T> flatten(
-					boolean isOptimized,
-					AnalysisState<A, H, V, T> singleton,
-					Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					ScopeId id,
-					Map<Statement, CompoundState<A, H, V, T>> fixpointResults) {
-		Map<Statement, AnalysisState<A, H, V, T>> finalResults = new HashMap<>(fixpointResults.size());
-		for (Entry<Statement, CompoundState<A, H, V, T>> e : fixpointResults.entrySet()) {
+	private <A extends AbstractState<A>> AnalyzedCFG<A> flatten(
+			boolean isOptimized,
+			AnalysisState<A> singleton,
+			Map<Statement, AnalysisState<A>> startingPoints,
+			InterproceduralAnalysis<A> interprocedural,
+			ScopeId id,
+			Map<Statement, CompoundState<A>> fixpointResults) {
+		Map<Statement, AnalysisState<A>> finalResults = new HashMap<>(fixpointResults.size());
+		for (Entry<Statement, CompoundState<A>> e : fixpointResults.entrySet()) {
 			finalResults.put(e.getKey(), e.getValue().postState);
-			for (Entry<Statement, AnalysisState<A, H, V, T>> ee : e.getValue().intermediateStates)
+			for (Entry<Statement, AnalysisState<A>> ee : e.getValue().intermediateStates)
 				finalResults.put(ee.getKey(), ee.getValue());
 		}
 
 		return isOptimized
-				? new OptimizedAnalyzedCFG<A, H, V, T>(
+				? new OptimizedAnalyzedCFG<A>(
 						this,
 						id,
 						singleton,
@@ -478,18 +444,203 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 						finalResults);
 	}
 
+	/**
+	 * Computes a backward fixpoint over this control flow graph. This method
+	 * returns a {@link BackwardAnalyzedCFG} instance mapping each
+	 * {@link Statement} to the {@link AnalysisState} computed by this method.
+	 * The computation starts at the statements returned by
+	 * {@link #getAllExitpoints()}, using {@code exitState} as exit state for
+	 * all of them. {@code interprocedural} will be invoked to get the
+	 * approximation of all invoked cfgs, while {@code ws} is used as working
+	 * set for the statements to process.
+	 * 
+	 * @param <A>             the type of {@link AbstractState} contained into
+	 *                            the analysis state
+	 * @param exitState       the exit states to apply to each {@link Statement}
+	 *                            returned by {@link #getAllExitpoints()}
+	 * @param interprocedural the interprocedural analysis that can be queried
+	 *                            when a call towards an other cfg is
+	 *                            encountered
+	 * @param ws              the {@link WorkingSet} instance to use for this
+	 *                            computation
+	 * @param conf            the {@link FixpointConfiguration} containing the
+	 *                            parameters tuning fixpoint behavior
+	 * @param id              a {@link ScopeId} meant to identify this specific
+	 *                            result based on how it has been produced, that
+	 *                            will be embedded in the returned cfg
+	 * 
+	 * @return a {@link BackwardAnalyzedCFG} instance that is equivalent to this
+	 *             control flow graph, and that stores for each
+	 *             {@link Statement} the result of the fixpoint computation
+	 * 
+	 * @throws FixpointException if an error occurs during the semantic
+	 *                               computation of a statement, or if some
+	 *                               unknown/invalid statement ends up in the
+	 *                               working set
+	 */
+	public <A extends AbstractState<A>> AnalyzedCFG<A> backwardFixpoint(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
+		Map<Statement, AnalysisState<A>> start = new HashMap<>();
+		getAllExitpoints().forEach(e -> start.put(e, exitState));
+		return backwardFixpoint(exitState, start, interprocedural, ws, conf, id);
+	}
+
+	/**
+	 * Computes a backward fixpoint over this control flow graph. This method
+	 * returns a {@link BackwardAnalyzedCFG} instance mapping each
+	 * {@link Statement} to the {@link AnalysisState} computed by this method.
+	 * The computation starts at the statements in {@code exitpoints}, using
+	 * {@code exitState} as exit state for all of them. {@code interprocedural}
+	 * will be invoked to get the approximation of all invoked cfgs, while
+	 * {@code ws} is used as working set for the statements to process.
+	 * 
+	 * @param <A>             the type of {@link AbstractState} contained into
+	 *                            the analysis state
+	 * @param exitpoints      the collection of {@link Statement}s that to use
+	 *                            as a starting point of the computation (that
+	 *                            must be nodes of this cfg)
+	 * @param exitState       the exit states to apply to each {@link Statement}
+	 *                            in {@code exitpoints}
+	 * @param interprocedural the interprocedural analysis that can be queried
+	 *                            when a call towards an other cfg is
+	 *                            encountered
+	 * @param ws              the {@link WorkingSet} instance to use for this
+	 *                            computation
+	 * @param conf            the {@link FixpointConfiguration} containing the
+	 *                            parameters tuning fixpoint behavior
+	 * @param id              a {@link ScopeId} meant to identify this specific
+	 *                            result based on how it has been produced, that
+	 *                            will be embedded in the returned cfg
+	 * 
+	 * @return a {@link BackwardAnalyzedCFG} instance that is equivalent to this
+	 *             control flow graph, and that stores for each
+	 *             {@link Statement} the result of the fixpoint computation
+	 * 
+	 * @throws FixpointException if an error occurs during the semantic
+	 *                               computation of a statement, or if some
+	 *                               unknown/invalid statement ends up in the
+	 *                               working set
+	 */
+	public <A extends AbstractState<A>> AnalyzedCFG<A> backwardFixpoint(
+			Collection<Statement> exitpoints,
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
+		Map<Statement, AnalysisState<A>> start = new HashMap<>();
+		exitpoints.forEach(e -> start.put(e, exitState));
+		return backwardFixpoint(exitState, start, interprocedural, ws, conf, id);
+	}
+
+	/**
+	 * Computes a backward fixpoint over this control flow graph. This method
+	 * returns a {@link BackwardAnalyzedCFG} instance mapping each
+	 * {@link Statement} to the {@link AnalysisState} computed by this method.
+	 * The computation starts at the statements in {@code startingPoints}, using
+	 * as its exit state their respective value. {@code interprocedural} will be
+	 * invoked to get the approximation of all invoked cfgs, while {@code ws} is
+	 * used as working set for the statements to process.
+	 * 
+	 * @param <A>             the type of {@link AbstractState} contained into
+	 *                            the analysis state
+	 * @param singleton       an instance of the {@link AnalysisState}
+	 *                            containing the abstract state of the analysis
+	 *                            to run, used to retrieve top and bottom values
+	 * @param startingPoints  a map between {@link Statement}s to use as a
+	 *                            starting point of the computation (that must
+	 *                            be nodes of this cfg) and the exit states to
+	 *                            apply on them
+	 * @param interprocedural the interprocedural analysis that can be queried
+	 *                            when a call towards an other cfg is
+	 *                            encountered
+	 * @param ws              the {@link WorkingSet} instance to use for this
+	 *                            computation
+	 * @param conf            the {@link FixpointConfiguration} containing the
+	 *                            parameters tuning fixpoint behavior
+	 * @param id              a {@link ScopeId} meant to identify this specific
+	 *                            result based on how it has been produced, that
+	 *                            will be embedded in the returned cfg
+	 * 
+	 * @return a {@link BackwardAnalyzedCFG} instance that is equivalent to this
+	 *             control flow graph, and that stores for each
+	 *             {@link Statement} the result of the fixpoint computation
+	 * 
+	 * @throws FixpointException if an error occurs during the semantic
+	 *                               computation of a statement, or if some
+	 *                               unknown/invalid statement ends up in the
+	 *                               working set
+	 */
+	public <A extends AbstractState<A>> AnalyzedCFG<A> backwardFixpoint(
+			AnalysisState<A> singleton,
+			Map<Statement, AnalysisState<A>> startingPoints,
+			InterproceduralAnalysis<A> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
+		// we disable optimizations for ascending phases if there is a
+		// descending one: the latter will need full results to start applying
+		// glbs/narrowings from a post-fixpoint
+		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
+		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = isOptimized
+				? new OptimizedBackwardFixpoint<>(this, false, conf.hotspots)
+				: new BackwardFixpoint<>(this, false);
+		BackwardAscendingFixpoint<A> asc = new BackwardAscendingFixpoint<>(this, interprocedural, conf);
+
+		Map<Statement, CompoundState<A>> starting = new HashMap<>();
+		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
+		startingPoints.forEach((
+				st,
+				state) -> starting.put(st, CompoundState.of(state, bot)));
+		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
+
+		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
+			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
+
+		fix = conf.optimize ? new OptimizedBackwardFixpoint<>(this, true, conf.hotspots)
+				: new BackwardFixpoint<>(this, true);
+		Map<Statement, CompoundState<A>> descending;
+		switch (conf.descendingPhaseType) {
+		case GLB:
+			DescendingGLBFixpoint<A> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
+			descending = fix.fixpoint(starting, ws, dg, ascending);
+			break;
+		case NARROWING:
+			DescendingNarrowingFixpoint<A> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
+			descending = fix.fixpoint(starting, ws, dn, ascending);
+			break;
+		case NONE:
+		default:
+			// should never happen
+			descending = ascending;
+			break;
+		}
+
+		return flatten(conf.optimize, singleton, startingPoints, interprocedural, id, descending);
+	}
+
 	@Override
-	public SerializableGraph toSerializableGraph(BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
+	public SerializableGraph toSerializableGraph(
+			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
 		return SerializableCFG.fromCFG(this, descriptionGenerator);
 	}
 
 	@Override
-	public void preSimplify(Statement node) {
+	public void preSimplify(
+			Statement node) {
 		shiftVariableScopes(node);
 		shiftControlFlowStructuresEnd(node);
 	}
 
-	private void shiftControlFlowStructuresEnd(Statement node) {
+	private void shiftControlFlowStructuresEnd(
+			Statement node) {
 		Collection<Statement> followers = followersOf(node);
 
 		Statement candidate;
@@ -510,7 +661,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				}
 	}
 
-	private Statement firstNonNoOpDeterministicFollower(Statement st) {
+	private Statement firstNonNoOpDeterministicFollower(
+			Statement st) {
 		Statement current = st;
 		while (current instanceof NoOp) {
 			Collection<Statement> followers = followersOf(current);
@@ -523,7 +675,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		return current;
 	}
 
-	private void shiftVariableScopes(Statement node) {
+	private void shiftVariableScopes(
+			Statement node) {
 		Collection<
 				VariableTableEntry> starting = descriptor.getVariables().stream().filter(v -> v.getScopeStart() == node)
 						.collect(Collectors.toList());
@@ -613,7 +766,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 			@Override
 			public CodeLocation getLocation() {
-				return null;
+				return SyntheticLocation.INSTANCE;
 			}
 		};
 	}
@@ -666,7 +819,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					+ new HashSet<>(entrypoints).retainAll(list.getNodes()));
 	}
 
-	private Collection<ControlFlowStructure> getControlFlowsContaining(ProgramPoint pp) {
+	private Collection<ControlFlowStructure> getControlFlowsContaining(
+			ProgramPoint pp) {
 		if (!(pp instanceof Statement))
 			// synthetic pp
 			return Collections.emptyList();
@@ -702,7 +856,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return {@code true} if {@code pp} is inside a control flow structure
 	 */
-	public boolean isGuarded(ProgramPoint pp) {
+	public boolean isGuarded(
+			ProgramPoint pp) {
 		return !getControlFlowsContaining(pp).isEmpty();
 	}
 
@@ -718,7 +873,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return {@code true} if {@code pp} is inside a loop
 	 */
-	public boolean isInsideLoop(ProgramPoint pp) {
+	public boolean isInsideLoop(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().anyMatch(Loop.class::isInstance);
 	}
 
@@ -734,7 +890,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return {@code true} if {@code pp} is inside an if-then-else
 	 */
-	public boolean isInsideIfThenElse(ProgramPoint pp) {
+	public boolean isInsideIfThenElse(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().anyMatch(IfThenElse.class::isInstance);
 	}
 
@@ -753,7 +910,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @return the collection of the guards of all structures containing
 	 *             {@code pp}
 	 */
-	public Collection<Statement> getGuards(ProgramPoint pp) {
+	public Collection<Statement> getGuards(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().map(ControlFlowStructure::getCondition)
 				.collect(Collectors.toList());
 	}
@@ -771,7 +929,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the collection of the guards of all loops containing {@code pp}
 	 */
-	public Collection<Statement> getLoopGuards(ProgramPoint pp) {
+	public Collection<Statement> getLoopGuards(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().filter(Loop.class::isInstance)
 				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
 	}
@@ -790,12 +949,15 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @return the collection of the guards of all if-then-elses containing
 	 *             {@code pp}
 	 */
-	public Collection<Statement> getIfThenElseGuards(ProgramPoint pp) {
+	public Collection<Statement> getIfThenElseGuards(
+			ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().filter(IfThenElse.class::isInstance)
 				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
 	}
 
-	private Statement getRecent(ProgramPoint pp, Predicate<ControlFlowStructure> filter) {
+	private Statement getRecent(
+			ProgramPoint pp,
+			Predicate<ControlFlowStructure> filter) {
 		if (!(pp instanceof Statement))
 			// synthetic pp
 			return null;
@@ -835,7 +997,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the most recent if-then-else guard, or {@code null}
 	 */
-	public Statement getMostRecentGuard(ProgramPoint pp) {
+	public Statement getMostRecentGuard(
+			ProgramPoint pp) {
 		return getRecent(pp, cf -> true);
 	}
 
@@ -852,7 +1015,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the most recent loop guard, or {@code null}
 	 */
-	public Statement getMostRecentLoopGuard(ProgramPoint pp) {
+	public Statement getMostRecentLoopGuard(
+			ProgramPoint pp) {
 		return getRecent(pp, Loop.class::isInstance);
 	}
 
@@ -869,7 +1033,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the most recent if-then-else guard, or {@code null}
 	 */
-	public Statement getMostRecentIfThenElseGuard(ProgramPoint pp) {
+	public Statement getMostRecentIfThenElseGuard(
+			ProgramPoint pp) {
 		return getRecent(pp, IfThenElse.class::isInstance);
 	}
 
@@ -881,7 +1046,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the control flow structure, or {@code null}
 	 */
-	public ControlFlowStructure getControlFlowStructureOf(ProgramPoint guard) {
+	public ControlFlowStructure getControlFlowStructureOf(
+			ProgramPoint guard) {
 		for (ControlFlowStructure struct : getControlFlowStructures())
 			if (struct.getCondition().equals(guard))
 				return struct;

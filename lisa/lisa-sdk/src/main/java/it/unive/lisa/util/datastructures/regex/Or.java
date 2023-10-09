@@ -30,7 +30,9 @@ public final class Or extends RegularExpression {
 	 * @param first  the first regular expression
 	 * @param second the second regular expression
 	 */
-	public Or(RegularExpression first, RegularExpression second) {
+	public Or(
+			RegularExpression first,
+			RegularExpression second) {
 		// make things deterministic: order the branches
 		if (first.compareTo(second) <= 0) {
 			this.first = first;
@@ -84,7 +86,8 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -183,12 +186,15 @@ public final class Or extends RegularExpression {
 
 	@Override
 	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+			T extends TransitionSymbol<T>> A toAutomaton(
+					AutomataFactory<A, T> factory) {
 		return first.toAutomaton(factory).union(second.toAutomaton(factory));
 	}
 
 	@Override
-	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(
+			int charsToSkip,
+			int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
 		result.addAll(first.substringAux(charsToSkip, missingChars));
 		result.addAll(second.substringAux(charsToSkip, missingChars));
@@ -201,7 +207,8 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	public boolean is(String str) {
+	public boolean is(
+			String str) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -216,37 +223,44 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	public boolean mayContain(String s) {
+	public boolean mayContain(
+			String s) {
 		return first.mayContain(s) || second.mayContain(s);
 	}
 
 	@Override
-	public boolean contains(String s) {
+	public boolean contains(
+			String s) {
 		return first.contains(s) && second.contains(s);
 	}
 
 	@Override
-	public boolean mayStartWith(String s) {
+	public boolean mayStartWith(
+			String s) {
 		return first.mayStartWith(s) || second.mayEndWith(s);
 	}
 
 	@Override
-	public boolean startsWith(String s) {
+	public boolean startsWith(
+			String s) {
 		return first.startsWith(s) && second.startsWith(s);
 	}
 
 	@Override
-	public boolean mayEndWith(String s) {
+	public boolean mayEndWith(
+			String s) {
 		return first.mayEndWith(s) || second.mayEndWith(s);
 	}
 
 	@Override
-	public boolean endsWith(String s) {
+	public boolean endsWith(
+			String s) {
 		return first.endsWith(s) && second.endsWith(s);
 	}
 
 	@Override
-	protected RegularExpression unrollStarToFixedLength(int length) {
+	protected RegularExpression unrollStarToFixedLength(
+			int length) {
 		return first.unrollStarToFixedLength(length).or(second.unrollStarToFixedLength(length));
 	}
 
@@ -271,7 +285,8 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	protected int compareToAux(RegularExpression other) {
+	protected int compareToAux(
+			RegularExpression other) {
 		int cmp;
 		if ((cmp = first.compareTo(other.asOr().first)) != 0)
 			return cmp;
@@ -279,7 +294,8 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression repeat(long n) {
+	public RegularExpression repeat(
+			long n) {
 		return new Or(first.repeat(n), second.repeat(n)).simplify();
 	}
 

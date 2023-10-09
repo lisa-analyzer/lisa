@@ -22,7 +22,11 @@ public class AbstractClassUnit extends ClassUnit {
 	 *                     cannot be used as super unit of other compilation
 	 *                     units
 	 */
-	public AbstractClassUnit(CodeLocation location, Program program, String name, boolean sealed) {
+	public AbstractClassUnit(
+			CodeLocation location,
+			Program program,
+			String name,
+			boolean sealed) {
 		super(location, program, name, sealed);
 	}
 

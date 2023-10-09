@@ -22,7 +22,9 @@ public class IMPSyntaxException extends RuntimeException {
 	 * @param message the message of this exception
 	 * @param cause   the inner cause of this exception
 	 */
-	public IMPSyntaxException(String message, Throwable cause) {
+	public IMPSyntaxException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -31,7 +33,8 @@ public class IMPSyntaxException extends RuntimeException {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public IMPSyntaxException(String message) {
+	public IMPSyntaxException(
+			String message) {
 		super(message);
 	}
 
@@ -40,7 +43,8 @@ public class IMPSyntaxException extends RuntimeException {
 	 * 
 	 * @param cause the inner cause of this exception
 	 */
-	public IMPSyntaxException(Throwable cause) {
+	public IMPSyntaxException(
+			Throwable cause) {
 		super(cause);
 	}
 }

@@ -1,12 +1,10 @@
 package it.unive.lisa.analysis.string.bricks;
 
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
@@ -19,6 +17,8 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -70,12 +70,15 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	 *
 	 * @param bricks the list of brick
 	 */
-	public Bricks(List<Brick> bricks) {
+	public Bricks(
+			List<Brick> bricks) {
 		this.bricks = bricks;
 	}
 
 	@Override
-	public Bricks lubAux(Bricks other) throws SemanticException {
+	public Bricks lubAux(
+			Bricks other)
+			throws SemanticException {
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
@@ -95,7 +98,9 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Bricks other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Bricks other)
+			throws SemanticException {
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
@@ -115,7 +120,9 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	}
 
 	@Override
-	public Bricks wideningAux(Bricks other) throws SemanticException {
+	public Bricks wideningAux(
+			Bricks other)
+			throws SemanticException {
 		boolean rel = this.lessOrEqual(other);
 		if (!rel && !other.lessOrEqual(this))
 			return TOP;
@@ -129,7 +136,9 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 			return other.w(this);
 	}
 
-	private Bricks w(Bricks other) throws SemanticException {
+	private Bricks w(
+			Bricks other)
+			throws SemanticException {
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
@@ -153,7 +162,12 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	}
 
 	@Override
-	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp)
+	public Bricks evalBinaryExpression(
+			BinaryOperator operator,
+			Bricks left,
+			Bricks right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (operator == StringConcat.INSTANCE) {
 			List<Brick> resultList = new ArrayList<>(left.bricks);
@@ -171,7 +185,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	}
 
 	@Override
-	public Bricks evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+	public Bricks evalNonNullConstant(
+			Constant constant,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (constant.getValue() instanceof String) {
 			String str = (String) constant.getValue();
 
@@ -188,10 +206,15 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	}
 
 	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp)
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
+			Bricks left,
+			Bricks right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		if (left.isTop() || right.isBottom())
-			return SemanticDomain.Satisfiability.UNKNOWN;
+			return Satisfiability.UNKNOWN;
 
 		if (operator == StringContains.INSTANCE)
 			return left.contains(right);
@@ -199,7 +222,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 		return Satisfiability.UNKNOWN;
 	}
 
-	private Satisfiability contains(Bricks right) {
+	private Satisfiability contains(
+			Bricks right) {
 		if (right.bricks.size() != 1)
 			return Satisfiability.UNKNOWN;
 
@@ -232,7 +256,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	}
 
 	@Override
-	public boolean equals(Object object) {
+	public boolean equals(
+			Object object) {
 		if (this == object)
 			return true;
 		if (object == null || getClass() != object.getClass())
@@ -262,7 +287,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 		if (isTop())
@@ -271,7 +296,9 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 		return new StringRepresentation(StringUtils.join(this.bricks, " "));
 	}
 
-	private void rule2(int first, int second) {
+	private void rule2(
+			int first,
+			int second) {
 		Brick firstBrick = this.bricks.get(first);
 		Brick secondBrick = this.bricks.get(second);
 
@@ -288,13 +315,16 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 		this.bricks.remove(second);
 	}
 
-	private void rule3(int index) {
+	private void rule3(
+			int index) {
 		Brick brick = this.bricks.get(index);
 
 		this.bricks.set(index, new Brick(1, 1, brick.getReps()));
 	}
 
-	private void rule4(int first, int second) {
+	private void rule4(
+			int first,
+			int second) {
 		Brick firstBrick = this.bricks.get(first);
 		Brick secondBrick = this.bricks.get(second);
 
@@ -305,7 +335,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 		this.bricks.remove(second);
 	}
 
-	private void rule5(int index) {
+	private void rule5(
+			int index) {
 		Brick brick = this.bricks.get(index);
 
 		Brick br = new Brick(brick.getMin(), brick.getMin(), brick.getStrings());
@@ -377,7 +408,9 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	 * @return A new Bricks with all possible substrings if the conditions are
 	 *             met or TOP.
 	 */
-	public Bricks substring(long e, long b) {
+	public Bricks substring(
+			long e,
+			long b) {
 		this.normBricks();
 
 		Brick first = this.bricks.get(0);
@@ -419,7 +452,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	 * @throws IllegalArgumentException if the other brick list is longer or
 	 *                                      equal than the caller bricks object
 	 */
-	public List<Brick> padList(final Bricks other) {
+	public List<Brick> padList(
+			final Bricks other) {
 		if (this.bricks.size() >= other.bricks.size())
 			throw new IllegalArgumentException("Other bricks list is longer or equal");
 
@@ -464,12 +498,15 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	 * 
 	 * @return the minimum and maximum index of {@code s} in {@code this}
 	 */
-	public IntInterval indexOf(Bricks s) {
+	public IntInterval indexOf(
+			Bricks s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
-	public Satisfiability containsChar(char c) throws SemanticException {
+	public Satisfiability containsChar(
+			char c)
+			throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 		if (isBottom())

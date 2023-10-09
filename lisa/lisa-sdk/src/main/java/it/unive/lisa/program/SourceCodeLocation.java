@@ -42,7 +42,10 @@ public class SourceCodeLocation implements CodeLocation {
 	 * @param col        the column where this code element happens in the
 	 *                       source file. If unknown, use {@code -1}
 	 */
-	public SourceCodeLocation(String sourceFile, int line, int col) {
+	public SourceCodeLocation(
+			String sourceFile,
+			int line,
+			int col) {
 		Objects.requireNonNull(sourceFile, "The source file cannot be null");
 		if (line == -1)
 			throw new IllegalArgumentException("Line number cannot be negative");
@@ -104,7 +107,8 @@ public class SourceCodeLocation implements CodeLocation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -125,7 +129,8 @@ public class SourceCodeLocation implements CodeLocation {
 	}
 
 	@Override
-	public int compareTo(CodeLocation other) {
+	public int compareTo(
+			CodeLocation other) {
 		if (!(other instanceof SourceCodeLocation))
 			return -1;
 

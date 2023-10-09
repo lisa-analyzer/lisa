@@ -38,7 +38,8 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		// instances are still unique
 		return this == obj;
 	}
@@ -54,7 +55,8 @@ public class ContextInsensitiveToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken push(CFGCall c) {
+	public ContextSensitivityToken push(
+			CFGCall c) {
 		return this;
 	}
 }

@@ -17,12 +17,16 @@ public class KDepthToken implements ContextSensitivityToken {
 
 	private final int k;
 
-	private KDepthToken(int k) {
+	private KDepthToken(
+			int k) {
 		this.k = k;
 		this.calls = Collections.emptyList();
 	}
 
-	private KDepthToken(int k, KDepthToken source, CFGCall newToken) {
+	private KDepthToken(
+			int k,
+			KDepthToken source,
+			CFGCall newToken) {
 		this.k = k;
 		int oldlen = source.calls.size();
 		if (oldlen < k) {
@@ -44,7 +48,8 @@ public class KDepthToken implements ContextSensitivityToken {
 	 * 
 	 * @return an empty token
 	 */
-	public static KDepthToken getSingleton(int k) {
+	public static KDepthToken getSingleton(
+			int k) {
 		return new KDepthToken(k);
 	}
 
@@ -57,7 +62,8 @@ public class KDepthToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -103,7 +109,8 @@ public class KDepthToken implements ContextSensitivityToken {
 	}
 
 	@Override
-	public ContextSensitivityToken push(CFGCall c) {
+	public ContextSensitivityToken push(
+			CFGCall c) {
 		return new KDepthToken(k, this, c);
 	}
 }

@@ -4,6 +4,9 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.BackwardAnalyzedCFG;
+import it.unive.lisa.analysis.BackwardOptimizedAnalyzedCFG;
+import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
@@ -17,8 +20,6 @@ import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
 import it.unive.lisa.analysis.string.fsa.StringSymbol;
 import it.unive.lisa.analysis.string.tarsis.RegexAutomaton;
@@ -116,6 +117,8 @@ import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
@@ -165,8 +168,8 @@ public class EqualityContractVerificationTest {
 	private static final Interval int1 = Interval.TOP;
 	private static final Interval int2 = Interval.BOTTOM;
 
-	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
-	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
+	private static final StructuredRepresentation dr1 = new StringRepresentation("foo");
+	private static final StructuredRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
@@ -216,7 +219,10 @@ public class EqualityContractVerificationTest {
 		assertTrue("Not all equals/hashcode have been tested", notTested.isEmpty());
 	}
 
-	private static boolean definesEqualsHashcode(Class<?> clazz) throws NoSuchMethodException, SecurityException {
+	private static boolean definesEqualsHashcode(
+			Class<?> clazz)
+			throws NoSuchMethodException,
+			SecurityException {
 		Class<?> equals = clazz.getMethod("equals", Object.class).getDeclaringClass();
 		Class<?> hashcode = clazz.getMethod("hashCode").getDeclaringClass();
 		// we want to test our implementations, not the one coming from
@@ -224,20 +230,30 @@ public class EqualityContractVerificationTest {
 		return equals.getName().startsWith("it.unive.lisa") || hashcode.getName().startsWith("it.unive.lisa");
 	}
 
-	private static <T> void verify(Class<T> clazz, Warning... suppressions) {
+	private static <T> void verify(
+			Class<T> clazz,
+			Warning... suppressions) {
 		verify(clazz, true, null, suppressions);
 	}
 
-	private static <T> void verify(Class<T> clazz, Consumer<SingleTypeEqualsVerifierApi<T>> extra,
+	private static <T> void verify(
+			Class<T> clazz,
+			Consumer<SingleTypeEqualsVerifierApi<T>> extra,
 			Warning... suppressions) {
 		verify(clazz, true, extra, suppressions);
 	}
 
-	private static <T> void verify(Class<T> clazz, boolean getClass, Warning... suppressions) {
+	private static <T> void verify(
+			Class<T> clazz,
+			boolean getClass,
+			Warning... suppressions) {
 		verify(clazz, getClass, null, suppressions);
 	}
 
-	private static <T> void verify(Class<T> clazz, boolean getClass, Consumer<SingleTypeEqualsVerifierApi<T>> extra,
+	private static <T> void verify(
+			Class<T> clazz,
+			boolean getClass,
+			Consumer<SingleTypeEqualsVerifierApi<T>> extra,
 			Warning... suppressions) {
 		if (clazz.isAnonymousClass() || Modifier.isAbstract(clazz.getModifiers())
 				|| Modifier.isInterface(clazz.getModifiers()))
@@ -253,7 +269,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(NodeList.class, adj1, adj2)
-				.withPrefabValues(DomainRepresentation.class, dr1, dr2)
+				.withPrefabValues(StructuredRepresentation.class, dr1, dr2)
 				.withPrefabValues(RegularExpression.class, re1, re2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
@@ -275,6 +291,7 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testConfiguration() {
 		verify(LiSAConfiguration.class, Warning.NONFINAL_FIELDS);
+		verify(DefaultConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(FixpointConfiguration.class);
 		verify(ConfigurableComponent.class);
 		verify(CronConfiguration.class, Warning.NONFINAL_FIELDS);
@@ -361,7 +378,7 @@ public class EqualityContractVerificationTest {
 			else
 				// location is excluded on purpose: it only brings syntactic
 				// information
-				verify(expr, verifier -> verifier.withIgnoredFields("location", "types"));
+				verify(expr, verifier -> verifier.withIgnoredFields("location"));
 	}
 
 	@Test
@@ -424,7 +441,7 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testRepresentations() {
 		Reflections scanner = mkReflections();
-		for (Class<? extends DomainRepresentation> repr : scanner.getSubTypesOf(DomainRepresentation.class))
+		for (Class<? extends StructuredRepresentation> repr : scanner.getSubTypesOf(StructuredRepresentation.class))
 			verify(repr);
 	}
 
@@ -444,12 +461,16 @@ public class EqualityContractVerificationTest {
 			else if (FunctionalLattice.class.isAssignableFrom(subject)
 					|| SetLattice.class.isAssignableFrom(subject)
 					|| InverseSetLattice.class.isAssignableFrom(subject)
-					|| NonInterference.class == subject)
+					|| NonInterference.class == subject
+					|| FixpointInfo.class == subject)
 				// fields function and elements and guards can be null
 				verify(subject, Warning.NONFINAL_FIELDS);
 			else if (subject == StaticTypes.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("types"));
-			else if (subject != AnalyzedCFG.class && subject != OptimizedAnalyzedCFG.class)
+			else if (subject != AnalyzedCFG.class
+					&& subject != OptimizedAnalyzedCFG.class
+					&& subject != BackwardAnalyzedCFG.class
+					&& subject != BackwardOptimizedAnalyzedCFG.class)
 				// we test the cfg separately
 				verify(subject);
 	}
@@ -463,9 +484,14 @@ public class EqualityContractVerificationTest {
 		// id is mutable
 		verify(AnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
 				Warning.NONFINAL_FIELDS);
+		verify(BackwardAnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
+				Warning.NONFINAL_FIELDS);
 		// we do not consider the expanded results or interprocedural
 		// as they do not identify the results
 		verify(OptimizedAnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+				Warning.NONFINAL_FIELDS);
+		verify(BackwardOptimizedAnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
 				Warning.NONFINAL_FIELDS);
 
 		verify(ExecutionTrace.class);

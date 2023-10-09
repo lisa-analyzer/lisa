@@ -33,7 +33,8 @@ public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 	 * @param tool the auxiliary tool that this check can use during the
 	 *                 execution
 	 */
-	default void beforeExecution(T tool) {
+	default void beforeExecution(
+			T tool) {
 	}
 
 	/**
@@ -44,7 +45,8 @@ public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 	 * @param tool the auxiliary tool that this check can use during the
 	 *                 execution
 	 */
-	default void afterExecution(T tool) {
+	default void afterExecution(
+			T tool) {
 	}
 
 	/**
@@ -58,7 +60,9 @@ public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 	 *             returns. If this method returns {@code false}, all members of
 	 *             the unit will not be visited.
 	 */
-	default boolean visitUnit(T tool, Unit unit) {
+	default boolean visitUnit(
+			T tool,
+			Unit unit) {
 		return true;
 	}
 
@@ -71,6 +75,10 @@ public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 	 * @param instance whether or not the global is an instance member of the
 	 *                     unit
 	 */
-	default void visitGlobal(T tool, Unit unit, Global global, boolean instance) {
+	default void visitGlobal(
+			T tool,
+			Unit unit,
+			Global global,
+			boolean instance) {
 	}
 }

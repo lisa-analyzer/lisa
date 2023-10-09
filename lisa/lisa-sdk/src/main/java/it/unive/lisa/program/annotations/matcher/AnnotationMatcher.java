@@ -19,5 +19,6 @@ public interface AnnotationMatcher {
 	 * @return {@code true} if this matcher matches the input annotation,
 	 *             {@code false} otherwise
 	 */
-	boolean matches(Annotation annotation);
+	boolean matches(
+			Annotation annotation);
 }

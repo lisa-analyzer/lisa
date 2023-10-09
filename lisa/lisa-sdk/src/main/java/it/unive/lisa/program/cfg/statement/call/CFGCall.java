@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CFG;
@@ -16,7 +13,6 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -55,8 +51,14 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	 * @param targets    the CFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			Collection<CFG> targets, Expression... parameters) {
+	public CFGCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			Collection<CFG> targets,
+			Expression... parameters) {
 		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, targets, parameters);
 	}
 
@@ -77,8 +79,15 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	 * @param targets    the CFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			EvaluationOrder order, Collection<CFG> targets, Expression... parameters) {
+	public CFGCall(
+			CFG cfg,
+			CodeLocation location,
+			CallType callType,
+			String qualifier,
+			String targetName,
+			EvaluationOrder order,
+			Collection<CFG> targets,
+			Expression... parameters) {
 		super(cfg, location, callType, qualifier, targetName, order, getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(targets, "The targets of a CFG call cannot be null");
 		for (CFG target : targets)
@@ -93,7 +102,9 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	 * @param source  the unresolved call to copy
 	 * @param targets the {@link CFG}s that the call has been resolved against
 	 */
-	public CFGCall(UnresolvedCall source, Collection<CFG> targets) {
+	public CFGCall(
+			UnresolvedCall source,
+			Collection<CFG> targets) {
 		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
 				targets, source.getParameters());
 		for (Expression param : source.getParameters())
@@ -101,7 +112,8 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 			param.setParentStatement(source);
 	}
 
-	private static Type getCommonReturnType(Collection<CFG> targets) {
+	private static Type getCommonReturnType(
+			Collection<CFG> targets) {
 		Iterator<CFG> it = targets.iterator();
 		Type result = null;
 		while (it.hasNext()) {
@@ -145,7 +157,8 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -178,15 +191,12 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> compute(
-					AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					StatementStore<A, H, V, T> expressions,
-					ExpressionSet<SymbolicExpression>[] parameters)
-					throws SemanticException {
+	public <A extends AbstractState<A>> AnalysisState<A> compute(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] parameters)
+			throws SemanticException {
 		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
 	}
 

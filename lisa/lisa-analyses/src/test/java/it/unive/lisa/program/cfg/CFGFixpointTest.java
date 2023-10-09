@@ -11,7 +11,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
-import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -51,16 +50,13 @@ public class CFGFixpointTest {
 	}
 
 	private ModularWorstCaseAnalysis<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> mkAnalysis(Program p)
-					throws InterproceduralAnalysisException, CallGraphConstructionException {
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> mkAnalysis(
+					Program p)
+					throws InterproceduralAnalysisException,
+					CallGraphConstructionException {
 		ModularWorstCaseAnalysis<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap,
-				ValueEnvironment<Sign>,
-				TypeEnvironment<InferredTypes>> analysis = new ModularWorstCaseAnalysis<>();
+				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
+						TypeEnvironment<InferredTypes>>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
 		Application app = new Application(p);
 		callgraph.init(app);
@@ -69,21 +65,20 @@ public class CFGFixpointTest {
 	}
 
 	private AnalysisState<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-			MonolithicHeap,
-			ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>> mkState() {
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> mkState() {
 		return new AnalysisState<>(
 				new SimpleAbstractState<>(
 						new MonolithicHeap(),
 						new ValueEnvironment<>(new Sign()),
 						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet<>(), new SymbolAliasing());
+				new ExpressionSet());
 	}
 
 	@Test
 	public void testEmptyCFG()
-			throws InterproceduralAnalysisException, CallGraphConstructionException, ParsingException {
+			throws InterproceduralAnalysisException,
+			CallGraphConstructionException,
+			ParsingException {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
@@ -96,7 +91,9 @@ public class CFGFixpointTest {
 
 	@Test
 	public void testEmptyIMPMethod()
-			throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
+			throws ParsingException,
+			InterproceduralAnalysisException,
+			CallGraphConstructionException {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
@@ -109,7 +106,9 @@ public class CFGFixpointTest {
 
 	@Test
 	public void testIMPMethodWithEmptyIfBranch()
-			throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
+			throws ParsingException,
+			InterproceduralAnalysisException,
+			CallGraphConstructionException {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
@@ -122,23 +121,21 @@ public class CFGFixpointTest {
 
 	@Test
 	public void testMetaVariablesOfRootExpressions()
-			throws FixpointException, InterproceduralAnalysisException, CallGraphConstructionException {
+			throws FixpointException,
+			InterproceduralAnalysisException,
+			CallGraphConstructionException {
 		Program program = new Program(new IMPFeatures(), new IMPTypeSystem());
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, program, false, "cfg"));
 		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");
 		cfg.addNode(call, true);
 
 		AnalysisState<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap,
-				ValueEnvironment<Sign>,
-				TypeEnvironment<InferredTypes>> domain = mkState();
+				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
+						TypeEnvironment<InferredTypes>>> domain = mkState();
 		AnalyzedCFG<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap,
-				ValueEnvironment<Sign>,
-				TypeEnvironment<InferredTypes>> result = cfg.fixpoint(domain,
-						mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
+				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
+						TypeEnvironment<InferredTypes>>> result = cfg.fixpoint(domain,
+								mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
 
 		assertTrue(result.getAnalysisStateAfter(call).getState().getValueState().getKeys().isEmpty());
 	}

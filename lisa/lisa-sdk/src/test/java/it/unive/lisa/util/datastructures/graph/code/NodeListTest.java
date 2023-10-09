@@ -26,7 +26,11 @@ public class NodeListTest {
 
 	private static final Random rand = new Random();
 
-	private <T> String msg(String objs, String extra, Collection<T> exp, Collection<T> act) {
+	private <T> String msg(
+			String objs,
+			String extra,
+			Collection<T> exp,
+			Collection<T> act) {
 		Set<T> ex = exp instanceof Set ? (Set<T>) exp : new HashSet<>(exp);
 		Set<T> ac = act instanceof Set ? (Set<T>) act : new HashSet<>(act);
 		return "Set of " + objs + " is different " + extra
@@ -34,17 +38,24 @@ public class NodeListTest {
 				+ "\nonly actual: " + SetUtils.difference(ac, ex);
 	}
 
-	private void verify(Map<TestCodeNode, Collection<TestCodeNode>> adj, Collection<TestCodeNode> nodes,
+	private void verify(
+			Map<TestCodeNode, Collection<TestCodeNode>> adj,
+			Collection<TestCodeNode> nodes,
 			Collection<TestCodeEdge> edges,
-			NodeList<TestCodeGraph, TestCodeNode, TestCodeEdge> matrix, Collection<TestCodeNode> entries,
+			NodeList<TestCodeGraph, TestCodeNode, TestCodeEdge> matrix,
+			Collection<TestCodeNode> entries,
 			Collection<TestCodeNode> exits) {
 		verify(adj, nodes, edges, matrix, entries, exits, "");
 	}
 
-	private void verify(Map<TestCodeNode, Collection<TestCodeNode>> adj, Collection<TestCodeNode> nodes,
+	private void verify(
+			Map<TestCodeNode, Collection<TestCodeNode>> adj,
+			Collection<TestCodeNode> nodes,
 			Collection<TestCodeEdge> edges,
-			NodeList<TestCodeGraph, TestCodeNode, TestCodeEdge> matrix, Collection<TestCodeNode> entries,
-			Collection<TestCodeNode> exits, String extra) {
+			NodeList<TestCodeGraph, TestCodeNode, TestCodeEdge> matrix,
+			Collection<TestCodeNode> entries,
+			Collection<TestCodeNode> exits,
+			String extra) {
 		TestCodeNode externalNode = new TestCodeNode(-1);
 		TestCodeEdge externalEdge = new TestCodeEdge(externalNode, externalNode);
 
@@ -138,7 +149,9 @@ public class NodeListTest {
 
 	private Map<TestCodeNode, Collection<TestCodeNode>> populate(
 			NodeList<TestCodeGraph, TestCodeNode, TestCodeEdge> matrix,
-			Collection<TestCodeNode> nodes, Collection<TestCodeEdge> edges, Collection<TestCodeNode> entries,
+			Collection<TestCodeNode> nodes,
+			Collection<TestCodeEdge> edges,
+			Collection<TestCodeNode> entries,
 			Collection<TestCodeNode> exits) {
 		for (int i = 20 + rand.nextInt(100); i >= 0; i--) {
 			TestCodeNode node = new TestCodeNode(i);
@@ -543,7 +556,9 @@ public class NodeListTest {
 			exits.remove(n);
 			edges.removeIf(e -> e.getSource() == n || e.getDestination() == n);
 			adj.remove(n);
-			adj.forEach((nn, follows) -> follows.remove(n));
+			adj.forEach((
+					nn,
+					follows) -> follows.remove(n));
 			matrix.removeNode(n);
 		}
 
@@ -556,7 +571,8 @@ public class NodeListTest {
 		verify(adj, nodes, edges, matrix, entries, exits, "after removing " + removed.toString());
 	}
 
-	private static <T> T random(Collection<T> elements) {
+	private static <T> T random(
+			Collection<T> elements) {
 		int idx = rand.nextInt(elements.size());
 		for (T e : elements)
 			if (--idx < 0)

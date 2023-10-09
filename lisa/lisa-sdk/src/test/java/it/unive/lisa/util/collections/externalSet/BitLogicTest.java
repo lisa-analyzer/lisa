@@ -67,14 +67,16 @@ public class BitLogicTest {
 		}
 	}
 
-	private static long smash(long[] bits) {
+	private static long smash(
+			long[] bits) {
 		long res = 0L;
 		for (long l : bits)
 			res += l;
 		return res;
 	}
 
-	private static int[] actives(long[] bits) {
+	private static int[] actives(
+			long[] bits) {
 		List<Integer> res = new ArrayList<>();
 		for (int i = 0; i < bits.length; i++)
 			if (bits[i] != 0) {

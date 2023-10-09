@@ -24,7 +24,8 @@ public class StringSymbol implements TransitionSymbol<StringSymbol> {
 	 * 
 	 * @param symbol the string
 	 */
-	public StringSymbol(String symbol) {
+	public StringSymbol(
+			String symbol) {
 		this.symbol = symbol;
 	}
 
@@ -33,12 +34,14 @@ public class StringSymbol implements TransitionSymbol<StringSymbol> {
 	 * 
 	 * @param symbol the character
 	 */
-	public StringSymbol(char symbol) {
+	public StringSymbol(
+			char symbol) {
 		this.symbol = Character.toString(symbol);
 	}
 
 	@Override
-	public int compareTo(StringSymbol o) {
+	public int compareTo(
+			StringSymbol o) {
 		return symbol.compareTo(o.symbol);
 	}
 
@@ -61,7 +64,8 @@ public class StringSymbol implements TransitionSymbol<StringSymbol> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -98,7 +102,8 @@ public class StringSymbol implements TransitionSymbol<StringSymbol> {
 	 * 
 	 * @return the merged (joined) symbol
 	 */
-	public StringSymbol concat(StringSymbol other) {
+	public StringSymbol concat(
+			StringSymbol other) {
 		if (isEpsilon())
 			return other;
 		if (other.isEpsilon())

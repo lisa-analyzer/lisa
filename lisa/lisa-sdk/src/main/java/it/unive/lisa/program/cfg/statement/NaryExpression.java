@@ -4,17 +4,13 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -58,7 +54,11 @@ public abstract class NaryExpression extends Expression {
 	 *                           expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, Expression... subExpressions) {
+	protected NaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression... subExpressions) {
 		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE, subExpressions);
 	}
 
@@ -74,7 +74,11 @@ public abstract class NaryExpression extends Expression {
 	 * @param order          the evaluation order of the sub-expressions
 	 * @param subExpressions the sub-expressions
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected NaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
 			Expression... subExpressions) {
 		this(cfg, location, constructName, order, Untyped.INSTANCE, subExpressions);
 	}
@@ -91,7 +95,11 @@ public abstract class NaryExpression extends Expression {
 	 * @param staticType     the static type of this expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
+	protected NaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Type staticType,
 			Expression... subExpressions) {
 		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, staticType, subExpressions);
 	}
@@ -108,8 +116,13 @@ public abstract class NaryExpression extends Expression {
 	 * @param staticType     the static type of this expression
 	 * @param subExpressions the sub-expressions
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Type staticType, Expression... subExpressions) {
+	protected NaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression... subExpressions) {
 		super(cfg, location, staticType);
 		Objects.requireNonNull(subExpressions, "The array of sub-expressions of an expression cannot be null");
 		for (int i = 0; i < subExpressions.length; i++)
@@ -152,7 +165,8 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public int setOffset(int offset) {
+	public int setOffset(
+			int offset) {
 		this.offset = offset;
 		int off = offset;
 		for (Expression sub : subExpressions)
@@ -161,7 +175,8 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(
+			Statement other) {
 		int len = subExpressions.length;
 		if (other == this)
 			return len == 0 ? null : subExpressions[order.last(len)];
@@ -176,7 +191,25 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public final <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public Statement getStatementEvaluatedAfter(
+			Statement other) {
+		if (other == this)
+			return null;
+
+		int len = subExpressions.length;
+		for (int i = 0; i < len; i++)
+			if (subExpressions[i] == other)
+				if (i == order.last(len))
+					return this;
+				else
+					return subExpressions[order.next(i, len)];
+		return null;
+	}
+
+	@Override
+	public final <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		for (Expression sub : subExpressions)
 			if (!sub.accept(visitor, tool))
 				return false;
@@ -198,7 +231,8 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -225,20 +259,15 @@ public abstract class NaryExpression extends Expression {
 	 * {@inheritDoc}
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-					AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
-		ExpressionSet<SymbolicExpression>[] computed = new ExpressionSet[subExpressions.length];
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
-		AnalysisState<A, H, V,
-				T> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
-		AnalysisState<A, H, V, T> result = expressionSemantics(interprocedural, eval, computed, expressions);
+		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
+		AnalysisState<A> result = forwardSemanticsAux(interprocedural, eval, computed, expressions);
 
 		Collection<Identifier> vars = getMetaVariables();
 		for (Expression sub : subExpressions) {
@@ -251,14 +280,11 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	/**
-	 * Computes the semantics of the expression, after the semantics of all
-	 * sub-expressions have been computed. Meta variables from the
+	 * Computes the forward semantics of the expression, after the semantics of
+	 * all sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this call returns.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
-	 * @param <H>             the type of the {@link HeapDomain}
-	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param <T>             the type of {@link TypeDomain}
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the expression is to be evaluated
@@ -275,12 +301,69 @@ public abstract class NaryExpression extends Expression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params, StatementStore<A, H, V, T> expressions)
-					throws SemanticException;
+	public abstract <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException;
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
+
+		// TODO this evaluation should also happen backward, but the current
+		// structure won't allow it as we need the symbolic expressions from the
+		// child before evaluating the semantics of the parent
+		AnalysisState<A> sem = order.bwdEvaluate(subExpressions, exitState, interprocedural, expressions, computed);
+		AnalysisState<A> result = backwardSemanticsAux(interprocedural, sem, computed, expressions);
+
+		Collection<Identifier> vars = getMetaVariables();
+		for (Expression sub : subExpressions) {
+			// we propagate the meta variables backward
+			Collection<Identifier> subvars = sub.getMetaVariables();
+			vars.addAll(subvars);
+			subvars.clear();
+		}
+		return result;
+	}
+
+	/**
+	 * Computes the backward semantics of the expression, after the semantics of
+	 * all sub-expressions have been computed. Meta variables from the
+	 * sub-expressions will be forgotten after this call returns. By default,
+	 * this method delegates to
+	 * {@link #forwardSemanticsAux(InterproceduralAnalysis, AnalysisState, ExpressionSet[], StatementStore)},
+	 * as it is fine for most atomic statements. One should redefine this method
+	 * if a statement's semantics is composed of a series of smaller operations.
+	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state where the expression is to be evaluated
+	 * @param params          the symbolic expressions representing the computed
+	 *                            values of the sub-expressions of this
+	 *                            expression
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions are stored and that can be
+	 *                            accessed to query for post-states of
+	 *                            parameters expressions
+	 * 
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this expression
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return forwardSemanticsAux(interprocedural, state, params, expressions);
+	}
 }

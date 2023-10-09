@@ -39,7 +39,10 @@ public class CollectionsDiffBuilder<T> {
 	 * @param first       the first collection
 	 * @param second      the second colelction
 	 */
-	public CollectionsDiffBuilder(Class<T> elementType, Collection<T> first, Collection<T> second) {
+	public CollectionsDiffBuilder(
+			Class<T> elementType,
+			Collection<T> first,
+			Collection<T> second) {
 		this.elementType = elementType;
 		this.first = first;
 		this.second = second;
@@ -77,7 +80,8 @@ public class CollectionsDiffBuilder<T> {
 	 *                     elements in the two collections
 	 */
 	@SuppressWarnings("unchecked")
-	public void compute(Comparator<T> comparer) {
+	public void compute(
+			Comparator<T> comparer) {
 		commons.clear();
 		onlyFirst.clear();
 		onlySecond.clear();
@@ -95,7 +99,10 @@ public class CollectionsDiffBuilder<T> {
 		queueDiff(f, s, comparer);
 	}
 
-	private void queueDiff(Deque<T> f, Deque<T> s, Comparator<T> comparer) {
+	private void queueDiff(
+			Deque<T> f,
+			Deque<T> s,
+			Comparator<T> comparer) {
 		T currentF = null;
 		T currentS = null;
 

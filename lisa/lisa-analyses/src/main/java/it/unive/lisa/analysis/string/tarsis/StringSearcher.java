@@ -38,7 +38,8 @@ public class StringSearcher {
 	 * 
 	 * @param origin the target automaton
 	 */
-	public StringSearcher(RegexAutomaton origin) {
+	public StringSearcher(
+			RegexAutomaton origin) {
 		automaton = origin;
 		searchString = null;
 		matching = false;
@@ -52,7 +53,8 @@ public class StringSearcher {
 	 * 
 	 * @return the set of sequences of transitions
 	 */
-	public Set<Vector<Transition<RegularExpression>>> searchInAllPaths(String toSearch) {
+	public Set<Vector<Transition<RegularExpression>>> searchInAllPaths(
+			String toSearch) {
 		Set<Vector<Transition<RegularExpression>>> collected = new HashSet<>();
 
 		Set<List<State>> paths = automaton.getAllPaths();
@@ -67,7 +69,9 @@ public class StringSearcher {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Set<Vector<Transition<RegularExpression>>> searchInPath(List<State> v, String toSearch) {
+	private Set<Vector<Transition<RegularExpression>>> searchInPath(
+			List<State> v,
+			String toSearch) {
 
 		Set<Vector<Transition<RegularExpression>>> collected = new HashSet<>();
 		if (v.size() == 1 && toSearch.length() == 1)
@@ -119,7 +123,8 @@ public class StringSearcher {
 		return collected;
 	}
 
-	private Set<Vector<Transition<RegularExpression>>> handleSelfLoop(List<State> v,
+	private Set<Vector<Transition<RegularExpression>>> handleSelfLoop(
+			List<State> v,
 			Set<Vector<Transition<RegularExpression>>> collected) {
 		// self loop!
 		Set<Transition<RegularExpression>> transitions = automaton.getAllTransitionsConnecting(v.get(0), v.get(0));
@@ -137,17 +142,23 @@ public class StringSearcher {
 		return collected;
 	}
 
-	private void advanceSearch(Vector<Transition<RegularExpression>> path, Transition<RegularExpression> t) {
+	private void advanceSearch(
+			Vector<Transition<RegularExpression>> path,
+			Transition<RegularExpression> t) {
 		searchString = searchString.substring(1);
 		path.add(t);
 	}
 
-	private void startSearch(Vector<Transition<RegularExpression>> path, Transition<RegularExpression> t) {
+	private void startSearch(
+			Vector<Transition<RegularExpression>> path,
+			Transition<RegularExpression> t) {
 		matching = true;
 		advanceSearch(path, t);
 	}
 
-	private void resetSearchState(Vector<Transition<RegularExpression>> path, String toSearch) {
+	private void resetSearchState(
+			Vector<Transition<RegularExpression>> path,
+			String toSearch) {
 		matching = false;
 		searchString = toSearch;
 		path.clear();

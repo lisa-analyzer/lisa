@@ -24,7 +24,9 @@ public class ProgramValidationException extends Exception {
 	 * @param message the message of this exception
 	 * @param cause   the cause of this exception
 	 */
-	public ProgramValidationException(String message, Throwable cause) {
+	public ProgramValidationException(
+			String message,
+			Throwable cause) {
 		super(message, cause);
 	}
 
@@ -33,7 +35,8 @@ public class ProgramValidationException extends Exception {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public ProgramValidationException(String message) {
+	public ProgramValidationException(
+			String message) {
 		super(message);
 	}
 
@@ -42,7 +45,8 @@ public class ProgramValidationException extends Exception {
 	 * 
 	 * @param cause the cause of this exception
 	 */
-	public ProgramValidationException(Throwable cause) {
+	public ProgramValidationException(
+			Throwable cause) {
 		super(cause);
 	}
 }

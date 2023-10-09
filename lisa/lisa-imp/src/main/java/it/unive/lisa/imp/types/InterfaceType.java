@@ -55,7 +55,9 @@ public final class InterfaceType implements UnitType {
 	 * @return the unique instance of {@link InterfaceType} representing the
 	 *             interface with the given name
 	 */
-	public static InterfaceType lookup(String name, InterfaceUnit unit) {
+	public static InterfaceType lookup(
+			String name,
+			InterfaceUnit unit) {
 		return types.computeIfAbsent(name, x -> new InterfaceType(name, unit));
 	}
 
@@ -63,7 +65,9 @@ public final class InterfaceType implements UnitType {
 
 	private final InterfaceUnit unit;
 
-	private InterfaceType(String name, InterfaceUnit unit) {
+	private InterfaceType(
+			String name,
+			InterfaceUnit unit) {
 		Objects.requireNonNull(name, "The name of an interface type cannot be null");
 		Objects.requireNonNull(unit, "The unit of a interface type cannot be null");
 		this.name = name;
@@ -76,19 +80,22 @@ public final class InterfaceType implements UnitType {
 	}
 
 	@Override
-	public final boolean canBeAssignedTo(Type other) {
+	public final boolean canBeAssignedTo(
+			Type other) {
 		if (other instanceof InterfaceType)
 			return subclass((InterfaceType) other);
 
 		return false;
 	}
 
-	private boolean subclass(InterfaceType other) {
+	private boolean subclass(
+			InterfaceType other) {
 		return this == other || unit.isInstanceOf(other.unit);
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		if (other.isNullType())
 			return this;
 
@@ -101,7 +108,8 @@ public final class InterfaceType implements UnitType {
 		return scanForSupertypeOf((UnitType) other);
 	}
 
-	private Type scanForSupertypeOf(UnitType other) {
+	private Type scanForSupertypeOf(
+			UnitType other) {
 		WorkingSet<InterfaceType> ws = FIFOWorkingSet.mk();
 		Set<InterfaceType> seen = new HashSet<>();
 		ws.push(this);
@@ -136,7 +144,8 @@ public final class InterfaceType implements UnitType {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -158,7 +167,8 @@ public final class InterfaceType implements UnitType {
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		Set<Type> instances = new HashSet<>();
 		for (Unit un : unit.getInstances())
 			if (un instanceof InterfaceUnit)

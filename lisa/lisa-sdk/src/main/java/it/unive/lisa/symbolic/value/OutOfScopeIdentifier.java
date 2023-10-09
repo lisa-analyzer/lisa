@@ -28,12 +28,13 @@ public class OutOfScopeIdentifier extends Identifier {
 	 * @param location the code location of the statement that has generated
 	 *                     this expression
 	 */
-	public OutOfScopeIdentifier(Identifier id, ScopeToken scope, CodeLocation location) {
+	public OutOfScopeIdentifier(
+			Identifier id,
+			ScopeToken scope,
+			CodeLocation location) {
 		super(id.getStaticType(), scope.toString() + ":" + id.getName(), id.isWeak(), id.getAnnotations(), location);
 		this.id = id;
 		this.scope = scope;
-		if (id.hasRuntimeTypes())
-			setRuntimeTypes(id.getRuntimeTypes(null));
 	}
 
 	@Override
@@ -42,12 +43,15 @@ public class OutOfScopeIdentifier extends Identifier {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(
+			ScopeToken token) {
 		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override
-	public Identifier popScope(ScopeToken token) throws SemanticException {
+	public Identifier popScope(
+			ScopeToken token)
+			throws SemanticException {
 		if (getScope().equals(token))
 			return this.id;
 		return null;
@@ -73,7 +77,10 @@ public class OutOfScopeIdentifier extends Identifier {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		return visitor.visit(this, params);
 	}
 }

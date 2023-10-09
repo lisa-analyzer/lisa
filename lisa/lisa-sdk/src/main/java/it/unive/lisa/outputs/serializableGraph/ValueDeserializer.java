@@ -35,13 +35,17 @@ public class ValueDeserializer extends StdDeserializer<SerializableValue> {
 	 * 
 	 * @param t the class to be deserialized
 	 */
-	public ValueDeserializer(Class<SerializableValue> t) {
+	public ValueDeserializer(
+			Class<SerializableValue> t) {
 		super(t);
 	}
 
 	@Override
-	public SerializableValue deserialize(JsonParser p, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+	public SerializableValue deserialize(
+			JsonParser p,
+			DeserializationContext ctxt)
+			throws IOException,
+			JsonProcessingException {
 		JsonNode node = p.getCodec().readTree(p);
 		JsonNode props = node.get(ValueSerializer.LISA_PROPERTIES_FIELD);
 		SortedMap<String, String> properties = new TreeMap<>();

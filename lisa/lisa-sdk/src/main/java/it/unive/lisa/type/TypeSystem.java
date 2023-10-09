@@ -48,7 +48,8 @@ public abstract class TypeSystem {
 	 * 
 	 * @return the type, or {@code null}
 	 */
-	public Type getType(String name) {
+	public Type getType(
+			String name) {
 		return types.get(name);
 	}
 
@@ -61,7 +62,8 @@ public abstract class TypeSystem {
 	 *             {@code false} otherwise. If this method returns
 	 *             {@code false}, the given type is discarded.
 	 */
-	public final boolean registerType(Type type) {
+	public final boolean registerType(
+			Type type) {
 		return types.putIfAbsent(type.toString(), type) == null;
 	}
 
@@ -83,7 +85,9 @@ public abstract class TypeSystem {
 	 * 
 	 * @return the set of possible types after the cast
 	 */
-	public Set<Type> cast(Set<Type> types, Set<Type> tokens) {
+	public Set<Type> cast(
+			Set<Type> types,
+			Set<Type> tokens) {
 		return cast(types, tokens, null);
 	}
 
@@ -105,7 +109,10 @@ public abstract class TypeSystem {
 	 * 
 	 * @return the set of possible types after the cast
 	 */
-	public Set<Type> cast(Set<Type> types, Set<Type> tokens, AtomicBoolean mightFail) {
+	public Set<Type> cast(
+			Set<Type> types,
+			Set<Type> tokens,
+			AtomicBoolean mightFail) {
 		if (mightFail != null)
 			mightFail.set(false);
 
@@ -137,7 +144,9 @@ public abstract class TypeSystem {
 	 * 
 	 * @return the set of possible types after the type conversion
 	 */
-	public Set<Type> convert(Set<Type> types, Set<Type> tokens) {
+	public Set<Type> convert(
+			Set<Type> types,
+			Set<Type> tokens) {
 		Set<Type> result = new HashSet<>();
 		Set<Type> filtered = tokens.stream().filter(Type::isTypeTokenType)
 				.flatMap(t -> t.asTypeTokenType().getTypes().stream())
@@ -184,5 +193,6 @@ public abstract class TypeSystem {
 	 * 
 	 * @return {@code true} if and only if the given type can be referenced
 	 */
-	public abstract boolean canBeReferenced(Type type);
+	public abstract boolean canBeReferenced(
+			Type type);
 }

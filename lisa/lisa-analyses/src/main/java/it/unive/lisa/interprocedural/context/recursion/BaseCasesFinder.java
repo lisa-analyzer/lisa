@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
@@ -20,7 +17,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 
@@ -35,20 +31,10 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
  * 
  * @param <A> the type of {@link AbstractState} contained into the analysis
  *                state
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state
- * @param <T> the type of {@link TypeDomain} contained into the computed
- *                abstract state
  */
-public class BaseCasesFinder<A extends AbstractState<A, H, V, T>,
-		H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		extends ContextBasedAnalysis<A, H, V, T> {
+public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAnalysis<A> {
 
-	private final Recursion<A, H, V, T> recursion;
+	private final Recursion<A> recursion;
 
 	private final boolean returnsVoid;
 
@@ -61,8 +47,8 @@ public class BaseCasesFinder<A extends AbstractState<A, H, V, T>,
 	 * @param returnsVoid whether or not the recursion returns void
 	 */
 	public BaseCasesFinder(
-			ContextBasedAnalysis<A, H, V, T> backing,
-			Recursion<A, H, V, T> recursion,
+			ContextBasedAnalysis<A> backing,
+			Recursion<A> recursion,
 			boolean returnsVoid) {
 		super(backing);
 		this.recursion = recursion;
@@ -82,7 +68,7 @@ public class BaseCasesFinder<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public void fixpoint(
-			AnalysisState<A, H, V, T> entryState,
+			AnalysisState<A> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
@@ -92,11 +78,11 @@ public class BaseCasesFinder<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAbstractResultOf(
+	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
-			AnalysisState<A, H, V, T> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V, T> expressions)
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
 			throws SemanticException {
 		boolean inRecursion = recursion.getMembers().contains(call.getCFG());
 		if (inRecursion && call.getTargetedCFGs().contains(recursion.getRecursionHead())) {
@@ -104,17 +90,15 @@ public class BaseCasesFinder<A extends AbstractState<A, H, V, T>,
 			if (returnsVoid)
 				return entryState.bottom();
 			else
-				return new AnalysisState<>(
-						entryState.getState().bottom(),
-						call.getMetaVariable(),
-						entryState.getAliasing().bottom());
+				return entryState.bottom().smallStepSemantics(call.getMetaVariable(), call);
 		}
 
 		return super.getAbstractResultOf(call, entryState, parameters, expressions);
 	}
 
 	@Override
-	protected boolean canShortcut(CFG cfg) {
+	protected boolean canShortcut(
+			CFG cfg) {
 		// we want to compute the recursive chain with no shortcuts
 		return !recursion.getMembers().contains(cfg);
 	}
@@ -136,18 +120,23 @@ public class BaseCasesFinder<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @throws SemanticException if an exception happens during the computation
 	 */
-	public AnalysisState<A, H, V, T> find() throws SemanticException {
+	public AnalysisState<A> find() throws SemanticException {
 		Call start = recursion.getInvocation();
-		CompoundState<A, H, V, T> entryState = recursion.getEntryState();
+		CompoundState<A> entryState = recursion.getEntryState();
 
 		// we reset the analysis at the point where the starting call can be
 		// evaluated
 		token = recursion.getInvocationToken();
 		Expression[] actuals = start.getParameters();
-		@SuppressWarnings("unchecked")
-		ExpressionSet<SymbolicExpression>[] params = new ExpressionSet[actuals.length];
+		ExpressionSet[] params = new ExpressionSet[actuals.length];
 		for (int i = 0; i < params.length; i++)
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
-		return start.expressionSemantics(this, entryState.postState.top(), params, entryState.intermediateStates);
+		// it should be enough to send values to top, retaining all type
+		// information
+		return start.forwardSemanticsAux(
+				this,
+				entryState.postState.withTopValues(),
+				params,
+				entryState.intermediateStates);
 	}
 }

@@ -29,7 +29,9 @@ public class StringIndexOf extends NativeCFG {
 	 * @param location   the location where this construct is defined
 	 * @param stringUnit the unit where this construct is defined
 	 */
-	public StringIndexOf(CodeLocation location, ClassUnit stringUnit) {
+	public StringIndexOf(
+			CodeLocation location,
+			ClassUnit stringUnit) {
 		super(new CodeMemberDescriptor(location, stringUnit, true, "indexOf", StringType.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE),
 				new Parameter(location, "search", StringType.INSTANCE)),
@@ -55,12 +57,16 @@ public class StringIndexOf extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPStringIndexOf build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringIndexOf build(
+				CFG cfg,
+				CodeLocation location,
+				Expression... params) {
 			return new IMPStringIndexOf(cfg, location, params[0], params[1]);
 		}
 
 		@Override
-		public void setOriginatingStatement(Statement st) {
+		public void setOriginatingStatement(
+				Statement st) {
 			originating = st;
 		}
 
@@ -75,8 +81,13 @@ public class StringIndexOf extends NativeCFG {
 		 * @param left       the left-hand side of this operation
 		 * @param right      the right-hand side of this operation
 		 */
-		public IMPStringIndexOf(CFG cfg, String sourceFile, int line, int col,
-				Expression left, Expression right) {
+		public IMPStringIndexOf(
+				CFG cfg,
+				String sourceFile,
+				int line,
+				int col,
+				Expression left,
+				Expression right) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, right);
 		}
 
@@ -88,7 +99,11 @@ public class StringIndexOf extends NativeCFG {
 		 * @param left     the left-hand side of this operation
 		 * @param right    the right-hand side of this operation
 		 */
-		public IMPStringIndexOf(CFG cfg, CodeLocation location, Expression left, Expression right) {
+		public IMPStringIndexOf(
+				CFG cfg,
+				CodeLocation location,
+				Expression left,
+				Expression right) {
 			super(cfg, location, left, right);
 		}
 	}

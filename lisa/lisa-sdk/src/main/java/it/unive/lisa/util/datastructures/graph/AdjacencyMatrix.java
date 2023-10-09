@@ -28,7 +28,8 @@ import org.apache.commons.lang3.StringUtils;
  * @param <E> the type of the {@link Edge}s in this matrix
  */
 public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>>
-		implements Iterable<Entry<N, AdjacencyMatrix.NodeEdges<G, N, E>>> {
+		implements
+		Iterable<Entry<N, AdjacencyMatrix.NodeEdges<G, N, E>>> {
 
 	/**
 	 * The matrix. The left set in the mapped value is the set of ingoing edges,
@@ -49,7 +50,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @param other the matrix to copy
 	 */
-	public AdjacencyMatrix(AdjacencyMatrix<G, N, E> other) {
+	public AdjacencyMatrix(
+			AdjacencyMatrix<G, N, E> other) {
 		matrix = new HashMap<>();
 		for (Map.Entry<N, NodeEdges<G, N, E>> entry : other.matrix.entrySet())
 			matrix.put(entry.getKey(), new NodeEdges<>(entry.getValue()));
@@ -61,7 +63,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @param node the node to add
 	 */
-	public void addNode(N node) {
+	public void addNode(
+			N node) {
 		matrix.putIfAbsent(node, new NodeEdges<>());
 	}
 
@@ -71,7 +74,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @param node the node to remove
 	 */
-	public void removeNode(N node) {
+	public void removeNode(
+			N node) {
 		if (!containsNode(node))
 			return;
 
@@ -100,7 +104,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 *                                           the given edge are not part of
 	 *                                           this matrix
 	 */
-	public void addEdge(E e) {
+	public void addEdge(
+			E e) {
 		if (!matrix.containsKey(e.getSource()))
 			throw new UnsupportedOperationException("The source node is not in the graph");
 
@@ -116,7 +121,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @param e the edge to remove
 	 */
-	public void removeEdge(E e) {
+	public void removeEdge(
+			E e) {
 		if (!matrix.containsKey(e.getSource()) || !matrix.containsKey(e.getDestination()))
 			return;
 
@@ -135,7 +141,9 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * @return the edge connecting {@code source} to {@code destination}, or
 	 *             {@code null}
 	 */
-	public E getEdgeConnecting(N source, N destination) {
+	public E getEdgeConnecting(
+			N source,
+			N destination) {
 		if (!matrix.containsKey(source))
 			return null;
 
@@ -156,7 +164,9 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @return the edges connecting {@code source} to {@code destination}
 	 */
-	public Collection<E> getEdgesConnecting(N source, N destination) {
+	public Collection<E> getEdgesConnecting(
+			N source,
+			N destination) {
 		if (!matrix.containsKey(source))
 			return Collections.emptyList();
 
@@ -175,7 +185,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @return the collection of ingoing edges
 	 */
-	public Collection<E> getIngoingEdges(N node) {
+	public Collection<E> getIngoingEdges(
+			N node) {
 		return matrix.get(node).ingoing;
 	}
 
@@ -186,7 +197,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @return the collection of outgoing edges
 	 */
-	public Collection<E> getOutgoingEdges(N node) {
+	public Collection<E> getOutgoingEdges(
+			N node) {
 		return matrix.get(node).outgoing;
 	}
 
@@ -213,7 +225,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @throws IllegalArgumentException if the node is not in the graph
 	 */
-	public Collection<N> followersOf(N node) {
+	public Collection<N> followersOf(
+			N node) {
 		if (!matrix.containsKey(node))
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
@@ -231,7 +244,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @throws IllegalArgumentException if the node is not in the graph
 	 */
-	public Collection<N> predecessorsOf(N node) {
+	public Collection<N> predecessorsOf(
+			N node) {
 		if (!matrix.containsKey(node))
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
@@ -245,7 +259,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @return {@code true} if the node is in this matrix
 	 */
-	public boolean containsNode(N node) {
+	public boolean containsNode(
+			N node) {
 		return matrix.containsKey(node);
 	}
 
@@ -256,7 +271,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @return {@code true} if the edge is in this matrix
 	 */
-	public boolean containsEdge(E edge) {
+	public boolean containsEdge(
+			E edge) {
 		for (NodeEdges<G, N, E> edges : matrix.values())
 			for (E e : edges.outgoing)
 				if (e == edge || e.equals(edge))
@@ -279,7 +295,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -343,7 +360,9 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * @return the minimum distance, in terms of number of edges to traverse,
 	 *             between the given nodes
 	 */
-	public int distance(N from, N to) {
+	public int distance(
+			N from,
+			N to) {
 		if (!containsNode(from) || !containsNode(to))
 			return -1;
 
@@ -375,7 +394,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * 
 	 * @param other the matrix to merge into this one
 	 */
-	public void mergeWith(AdjacencyMatrix<G, N, E> other) {
+	public void mergeWith(
+			AdjacencyMatrix<G, N, E> other) {
 		for (N node : other.getNodes())
 			addNode(node);
 
@@ -400,7 +420,9 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * @throws ProgramValidationException if one of the aforementioned checks
 	 *                                        fail
 	 */
-	public void validate(Collection<N> entrypoints) throws ProgramValidationException {
+	public void validate(
+			Collection<N> entrypoints)
+			throws ProgramValidationException {
 		Collection<N> nodes = getNodes();
 
 		// all edges should be connected to statements inside the matrix
@@ -418,7 +440,10 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 		}
 	}
 
-	private void validateEdge(Collection<N> nodes, E edge) throws ProgramValidationException {
+	private void validateEdge(
+			Collection<N> nodes,
+			E edge)
+			throws ProgramValidationException {
 		if (!nodes.contains(edge.getSource()))
 			throw new ProgramValidationException("Invalid edge: '" + edge
 					+ "' originates in a node that is not part of the graph");
@@ -447,7 +472,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 			outgoing = new HashSet<>();
 		}
 
-		private NodeEdges(NodeEdges<G, N, E> other) {
+		private NodeEdges(
+				NodeEdges<G, N, E> other) {
 			ingoing = new HashSet<>(other.ingoing);
 			outgoing = new HashSet<>(other.outgoing);
 		}
@@ -480,7 +506,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)

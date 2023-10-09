@@ -3,12 +3,8 @@ package it.unive.lisa.interprocedural;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
  * Policy that determines what happens to the {@link AnalysisState} when an
@@ -24,12 +20,6 @@ public interface OpenCallPolicy {
 	 * 
 	 * @param <A>        the type of {@link AbstractState} contained into the
 	 *                       analysis state
-	 * @param <H>        the type of {@link HeapDomain} contained into the
-	 *                       computed abstract state
-	 * @param <V>        the type of {@link ValueDomain} contained into the
-	 *                       computed abstract state
-	 * @param <T>        the type of {@link TypeDomain} contained into the
-	 *                       computed abstract state
 	 * @param call       the {@link OpenCall} under evaluation
 	 * @param entryState the state when the call is executed
 	 * @param params     the symbolic expressions representing the computed
@@ -40,12 +30,9 @@ public interface OpenCallPolicy {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> apply(
-					OpenCall call,
-					AnalysisState<A, H, V, T> entryState,
-					ExpressionSet<SymbolicExpression>[] params)
-					throws SemanticException;
+	<A extends AbstractState<A>> AnalysisState<A> apply(
+			OpenCall call,
+			AnalysisState<A> entryState,
+			ExpressionSet[] params)
+			throws SemanticException;
 }

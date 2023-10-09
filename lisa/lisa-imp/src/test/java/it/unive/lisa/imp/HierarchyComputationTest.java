@@ -17,13 +17,17 @@ import org.junit.Test;
 
 public class HierarchyComputationTest {
 
-	private static Unit findUnit(Program prog, String name) {
+	private static Unit findUnit(
+			Program prog,
+			String name) {
 		Unit unit = prog.getUnits().stream().filter(u -> u.getName().equals(name)).findFirst().get();
 		assertNotNull("'" + name + "' unit not found", unit);
 		return unit;
 	}
 
-	private static CFG findCFG(ClassUnit unit, String name) {
+	private static CFG findCFG(
+			ClassUnit unit,
+			String name) {
 		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
@@ -31,7 +35,9 @@ public class HierarchyComputationTest {
 		return cfg;
 	}
 
-	private static AbstractCodeMember findSignatureCFG(ClassUnit unit, String name) {
+	private static AbstractCodeMember findSignatureCFG(
+			ClassUnit unit,
+			String name) {
 		AbstractCodeMember cfg = unit.getAbstractCodeMembers(false).stream()
 				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
@@ -40,7 +46,9 @@ public class HierarchyComputationTest {
 		return cfg;
 	}
 
-	private static AbstractCodeMember findSignatureCFG(InterfaceUnit unit, String name) {
+	private static AbstractCodeMember findSignatureCFG(
+			InterfaceUnit unit,
+			String name) {
 		AbstractCodeMember cfg = unit.getAbstractCodeMembers(false).stream()
 				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
@@ -49,7 +57,9 @@ public class HierarchyComputationTest {
 		return cfg;
 	}
 
-	private static CFG findImplementedCFG(InterfaceUnit unit, String name) {
+	private static CFG findImplementedCFG(
+			InterfaceUnit unit,
+			String name) {
 		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
@@ -57,7 +67,9 @@ public class HierarchyComputationTest {
 		return cfg;
 	}
 
-	private static void isInstance(CompilationUnit sup, Unit unit) {
+	private static void isInstance(
+			CompilationUnit sup,
+			Unit unit) {
 		assertTrue("'" + unit.getName() + "' is not among '" + sup.getName() + "' instances",
 				sup.getInstances().contains(unit));
 		if (sup != unit) {
@@ -70,7 +82,9 @@ public class HierarchyComputationTest {
 		}
 	}
 
-	private static void notInstance(CompilationUnit sup, CompilationUnit unit) {
+	private static void notInstance(
+			CompilationUnit sup,
+			CompilationUnit unit) {
 		assertFalse("'" + unit.getName() + "' is among '" + sup.getName() + "' instances",
 				sup.getInstances().contains(unit));
 		if (sup != unit)
@@ -78,7 +92,9 @@ public class HierarchyComputationTest {
 					unit.getImmediateAncestors().contains(sup));
 	}
 
-	private static void overrides(CodeMember sup, CodeMember cfg) {
+	private static void overrides(
+			CodeMember sup,
+			CodeMember cfg) {
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
@@ -89,7 +105,9 @@ public class HierarchyComputationTest {
 				cfg.getDescriptor().overrides().contains(sup));
 	}
 
-	private static void notOverrides(CFG sup, CFG cfg) {
+	private static void notOverrides(
+			CFG sup,
+			CFG cfg) {
 		assertFalse(
 				"'" + sup.getDescriptor().getFullName() + "' is overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",

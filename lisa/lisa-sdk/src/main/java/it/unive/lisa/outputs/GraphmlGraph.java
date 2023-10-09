@@ -58,7 +58,8 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	 * 
 	 * @param title the title of the graph, if any
 	 */
-	public GraphmlGraph(String title) {
+	public GraphmlGraph(
+			String title) {
 		super();
 		this.graph.setAttribute(GRAPH_TITLE, title);
 		this.title = title;
@@ -85,7 +86,11 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	 * @param label the additional label that can be added to each node as a
 	 *                  subnode
 	 */
-	public void addNode(SerializableNode node, boolean entry, boolean exit, SerializableValue label) {
+	public void addNode(
+			SerializableNode node,
+			boolean entry,
+			boolean exit,
+			SerializableValue label) {
 		Node n = graph.addNode(nodeName(node.getId()));
 
 		if (entry)
@@ -111,17 +116,25 @@ public class GraphmlGraph extends GraphStreamWrapper {
 		}
 	}
 
-	private void populate(String prefix, int depth, MultiGraph g, SerializableValue value) {
+	private void populate(
+			String prefix,
+			int depth,
+			MultiGraph g,
+			SerializableValue value) {
 		if (value instanceof SerializableString) {
 			Node node = g.addNode(prefix + ELEMENT_QUALIFIER);
 			node.setAttribute(LABEL_TEXT, value.toString());
-			value.getProperties().forEach((k, v) -> node.setAttribute(k, v));
+			value.getProperties().forEach((
+					k,
+					v) -> node.setAttribute(k, v));
 		} else if (value instanceof SerializableArray) {
 			SerializableArray array = (SerializableArray) value;
 			if (array.getElements().stream().allMatch(SerializableString.class::isInstance)) {
 				Node node = g.addNode(prefix + ELEMENT_QUALIFIER);
 				node.setAttribute(LABEL_TEXT, value.toString());
-				value.getProperties().forEach((k, v) -> node.setAttribute(k, v));
+				value.getProperties().forEach((
+						k,
+						v) -> node.setAttribute(k, v));
 			} else
 				for (int i = 0; i < array.getElements().size(); i++) {
 					String graphname = prefix + QUALIFIER + depth + ARRAY_QUALIFIER + QUALIFIER + i;
@@ -131,7 +144,9 @@ public class GraphmlGraph extends GraphStreamWrapper {
 					populate(graphname, depth + 1, labelgraph, array_element);
 					node.setAttribute(LABEL_ARRAY, labelgraph);
 					node.setAttribute(LABEL_TEXT, "Element " + i);
-					array_element.getProperties().forEach((k, v) -> node.setAttribute(k, v));
+					array_element.getProperties().forEach((
+							k,
+							v) -> node.setAttribute(k, v));
 				}
 		} else if (value instanceof SerializableObject) {
 			SerializableObject object = (SerializableObject) value;
@@ -142,7 +157,9 @@ public class GraphmlGraph extends GraphStreamWrapper {
 				populate(graphname, depth + 1, labelgraph, field.getValue());
 				node.setAttribute(LABEL_FIELD_PREFIX + field.getKey(), labelgraph);
 				node.setAttribute(LABEL_TEXT, field.getKey());
-				field.getValue().getProperties().forEach((k, v) -> node.setAttribute(k, v));
+				field.getValue().getProperties().forEach((
+						k,
+						v) -> node.setAttribute(k, v));
 			}
 		} else
 			throw new IllegalArgumentException("Unknown value type: " + value.getClass().getName());
@@ -156,7 +173,9 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	 * @param node  the parent node
 	 * @param inner the subnode
 	 */
-	public void markSubNode(SerializableNode node, SerializableNode inner) {
+	public void markSubNode(
+			SerializableNode node,
+			SerializableNode inner) {
 		Node sub = graph.removeNode(nodeName(inner.getId()));
 		Node outer = graph.getNode(nodeName(node.getId()));
 
@@ -176,7 +195,8 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	 * 
 	 * @param edge the source edge
 	 */
-	public void addEdge(SerializableEdge edge) {
+	public void addEdge(
+			SerializableEdge edge) {
 		long id = edge.getSourceId();
 		long id1 = edge.getDestId();
 
@@ -185,7 +205,9 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	}
 
 	@Override
-	public void dump(Writer writer) throws IOException {
+	public void dump(
+			Writer writer)
+			throws IOException {
 		dump(writer, true);
 	}
 
@@ -198,7 +220,10 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	 * 
 	 * @throws IOException if an I/O error occurs while writing
 	 */
-	public void dump(Writer writer, boolean format) throws IOException {
+	public void dump(
+			Writer writer,
+			boolean format)
+			throws IOException {
 		FileSinkGraphML sink = new CustomGraphMLSink(format);
 		sink.writeAll(graph, writer);
 	}
@@ -210,11 +235,16 @@ public class GraphmlGraph extends GraphStreamWrapper {
 
 		private final boolean format;
 
-		private CustomGraphMLSink(boolean format) {
+		private CustomGraphMLSink(
+				boolean format) {
 			this.format = format;
 		}
 
-		private void print(int indent, String format, Object... args) throws IOException {
+		private void print(
+				int indent,
+				String format,
+				Object... args)
+				throws IOException {
 			String out = "";
 			if (this.format)
 				out += "\t".repeat(indent);
@@ -241,13 +271,15 @@ public class GraphmlGraph extends GraphStreamWrapper {
 			print(1, "   http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">");
 		}
 
-		private static String escapeXmlString(String string) {
+		private static String escapeXmlString(
+				String string) {
 			return string.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
 					.replace("'", "&apos;");
 		}
 
 		@Override
-		protected void exportGraph(Graph g) {
+		protected void exportGraph(
+				Graph g) {
 			Map<String, String> nodeAttributes = new TreeMap<>();
 			Map<String, String> edgeAttributes = new TreeMap<>();
 			collectKeys(g, nodeAttributes, edgeAttributes);
@@ -255,8 +287,12 @@ public class GraphmlGraph extends GraphStreamWrapper {
 			dumpGraph(g, nodeAttributes, edgeAttributes);
 		}
 
-		protected void processAttribute(String key, Object value, Map<String, String> attributes,
-				Map<String, String> nodeAttributes, Map<String, String> edgeAttributes) {
+		protected void processAttribute(
+				String key,
+				Object value,
+				Map<String, String> attributes,
+				Map<String, String> nodeAttributes,
+				Map<String, String> edgeAttributes) {
 			String type;
 
 			if (value == null)
@@ -286,7 +322,10 @@ public class GraphmlGraph extends GraphStreamWrapper {
 				throw new OutputDumpingException("Attributes with the same name have different value type");
 		}
 
-		protected void collectKeys(Graph g, Map<String, String> nodeAttributes, Map<String, String> edgeAttributes) {
+		protected void collectKeys(
+				Graph g,
+				Map<String, String> nodeAttributes,
+				Map<String, String> edgeAttributes) {
 			g.nodes().forEach(n -> n.attributeKeys().forEach(
 					k -> processAttribute(k, n.getAttribute(k), nodeAttributes, nodeAttributes, edgeAttributes)));
 
@@ -294,7 +333,8 @@ public class GraphmlGraph extends GraphStreamWrapper {
 					k -> processAttribute(k, e.getAttribute(k), edgeAttributes, nodeAttributes, edgeAttributes)));
 		}
 
-		protected void dumpKeys(Map<String, String> nodeAttributes,
+		protected void dumpKeys(
+				Map<String, String> nodeAttributes,
 				Map<String, String> edgeAttributes) {
 			for (Entry<String, String> entry : nodeAttributes.entrySet())
 				try {
@@ -317,7 +357,9 @@ public class GraphmlGraph extends GraphStreamWrapper {
 				}
 		}
 
-		protected void dumpGraph(Graph g, Map<String, String> nodeAttributes,
+		protected void dumpGraph(
+				Graph g,
+				Map<String, String> nodeAttributes,
 				Map<String, String> edgeAttributes) {
 			try {
 				print(1, "<graph id=\"%s\" edgedefault=\"directed\">", escapeXmlString(g.getId()));

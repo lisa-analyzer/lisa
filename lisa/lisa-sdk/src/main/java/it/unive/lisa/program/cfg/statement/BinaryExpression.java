@@ -4,10 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -37,8 +34,12 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName,
-			Expression left, Expression right) {
+	protected BinaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, left, right);
 	}
 
@@ -54,8 +55,13 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
-			Expression left, Expression right) {
+	protected BinaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			Type staticType,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, staticType, left, right);
 	}
 
@@ -72,8 +78,13 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName,
-			EvaluationOrder order, Expression left, Expression right) {
+	protected BinaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, order, left, right);
 	}
 
@@ -89,8 +100,14 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Type staticType, Expression left, Expression right) {
+	protected BinaryExpression(
+			CFG cfg,
+			CodeLocation location,
+			String constructName,
+			EvaluationOrder order,
+			Type staticType,
+			Expression left,
+			Expression right) {
 		super(cfg, location, constructName, order, staticType, left, right);
 	}
 
@@ -113,32 +130,26 @@ public abstract class BinaryExpression extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
-		AnalysisState<A, H, V, T> result = state.bottom();
+	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
-				result = result.lub(binarySemantics(interprocedural, state, left, right, expressions));
+				result = result.lub(fwdBinarySemantics(interprocedural, state, left, right, expressions));
 
 		return result;
 	}
 
 	/**
-	 * Computes the semantics of the expression, after the semantics of the
-	 * sub-expressions have been computed. Meta variables from the
+	 * Computes the forward semantics of the expression, after the semantics of
+	 * the sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this expression returns.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
-	 * @param <H>             the type of the {@link HeapDomain}
-	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param <T>             the type of {@link TypeDomain}
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the expression is to be evaluated
@@ -158,14 +169,65 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException;
+	public abstract <A extends AbstractState<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException;
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		AnalysisState<A> result = state.bottom();
+		for (SymbolicExpression left : params[0])
+			for (SymbolicExpression right : params[1])
+				result = result.lub(bwdBinarySemantics(interprocedural, state, left, right, expressions));
+
+		return result;
+	}
+
+	/**
+	 * Computes the backward semantics of the expression, after the semantics of
+	 * the sub-expressions have been computed. Meta variables from the
+	 * sub-expressions will be forgotten after this expression returns. By
+	 * default, this method delegates to
+	 * {@link #fwdBinarySemantics(InterproceduralAnalysis, AnalysisState, SymbolicExpression, SymbolicExpression, StatementStore)},
+	 * as it is fine for most atomic statements. One should redefine this method
+	 * if a statement's semantics is composed of a series of smaller operations.
+	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state where the expression is to be evaluated
+	 * @param left            the symbolic expression representing the computed
+	 *                            value of the first sub-expression of this
+	 *                            expression
+	 * @param right           the symbolic expression representing the computed
+	 *                            value of the second sub-expression of this
+	 *                            expression
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions are stored and that can be
+	 *                            accessed to query for post-states of
+	 *                            parameters expressions
+	 * 
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this expression
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public <A extends AbstractState<A>> AnalysisState<A> bwdBinarySemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return fwdBinarySemantics(interprocedural, state, left, right, expressions);
+	}
 }

@@ -28,5 +28,7 @@ public interface HierarcyTraversalStrategy {
 	 * @return an iterable that contains the units in order in which they must
 	 *             be visited
 	 */
-	Iterable<CompilationUnit> traverse(Statement st, CompilationUnit start);
+	Iterable<CompilationUnit> traverse(
+			Statement st,
+			CompilationUnit start);
 }

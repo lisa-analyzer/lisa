@@ -6,12 +6,15 @@ public class TestGraph extends BaseGraph<TestGraph, TestGraph.TestNode, TestGrap
 
 		private final int id;
 
-		public TestNode(int id) {
+		public TestNode(
+				int id) {
 			this.id = id;
 		}
 
 		@Override
-		public <V> boolean accept(GraphVisitor<TestGraph, TestNode, TestEdge, V> visitor, V tool) {
+		public <V> boolean accept(
+				GraphVisitor<TestGraph, TestNode, TestEdge, V> visitor,
+				V tool) {
 			return false;
 		}
 
@@ -29,7 +32,8 @@ public class TestGraph extends BaseGraph<TestGraph, TestGraph.TestNode, TestGrap
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)
@@ -47,7 +51,9 @@ public class TestGraph extends BaseGraph<TestGraph, TestGraph.TestNode, TestGrap
 
 		private final TestNode source, destination;
 
-		public TestEdge(TestNode source, TestNode destination) {
+		public TestEdge(
+				TestNode source,
+				TestNode destination) {
 			this.source = source;
 			this.destination = destination;
 		}
@@ -63,7 +69,9 @@ public class TestGraph extends BaseGraph<TestGraph, TestGraph.TestNode, TestGrap
 		}
 
 		@Override
-		public <V> boolean accept(GraphVisitor<TestGraph, TestNode, TestEdge, V> visitor, V tool) {
+		public <V> boolean accept(
+				GraphVisitor<TestGraph, TestNode, TestEdge, V> visitor,
+				V tool) {
 			return false;
 		}
 
@@ -82,7 +90,8 @@ public class TestGraph extends BaseGraph<TestGraph, TestGraph.TestNode, TestGrap
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(
+				Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)

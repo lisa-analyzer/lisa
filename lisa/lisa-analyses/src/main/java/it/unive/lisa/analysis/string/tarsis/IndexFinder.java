@@ -39,7 +39,9 @@ public class IndexFinder {
 	 * 
 	 * @throws CyclicAutomatonException if {@code search} contains a loop
 	 */
-	public static Pair<Integer, Integer> findIndexesOf(RegexAutomaton automaton, RegexAutomaton search)
+	public static Pair<Integer, Integer> findIndexesOf(
+			RegexAutomaton automaton,
+			RegexAutomaton search)
 			throws CyclicAutomatonException {
 		RegexAutomaton exploded = automaton.explode();
 		StringSearcher searcher = new StringSearcher(exploded);

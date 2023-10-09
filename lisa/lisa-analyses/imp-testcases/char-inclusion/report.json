@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_ci.m1(ci__this).json", "untyped_ci.m2(ci__this,_untyped_x).json", "untyped_ci.m3(ci__this,_untyped_x).json" ],
   "info" : {
     "cfgs" : "3",
-    "duration" : "44ms",
-    "end" : "2023-04-20T12:45:39.324+02:00",
+    "duration" : "25ms",
+    "end" : "2023-09-07T11:45:57.326+02:00",
     "expressions" : "24",
     "files" : "3",
     "globals" : "0",
     "members" : "3",
     "programs" : "1",
-    "start" : "2023-04-20T12:45:39.280+02:00",
+    "start" : "2023-09-07T11:45:57.301+02:00",
     "statements" : "13",
     "units" : "1",
-    "version" : "0.1b7",
+    "version" : "0.1b8",
     "warnings" : "0"
   },
   "configuration" : {
@@ -31,6 +31,7 @@
     "serializeInputs" : "false",
     "serializeResults" : "true",
     "syntacticChecks" : "",
+    "useWideningPoints" : "true",
     "wideningThreshold" : "5",
     "workdir" : "test-outputs/char-inclusion"
   }

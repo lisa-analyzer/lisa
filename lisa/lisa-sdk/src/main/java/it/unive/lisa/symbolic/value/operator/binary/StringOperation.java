@@ -12,14 +12,17 @@ import java.util.Set;
  * {@link StringOperator}, providing a
  * {@link #typeInference(TypeSystem, Set, Set)} implementation that returns an
  * empty set if no {@link StringType} can be found in one of the arguments, and
- * a singleton set containing {@link #resultType(TypeSystem)} otherwise.
+ * a singleton set containing their result type otherwise.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class StringOperation implements StringOperator, BinaryOperator {
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> right) {
 		if (left.stream().noneMatch(Type::isStringType) || right.stream().noneMatch(Type::isStringType))
 			return Collections.emptySet();
 		return Collections.singleton(resultType(types));
@@ -33,5 +36,6 @@ public abstract class StringOperation implements StringOperator, BinaryOperator 
 	 * 
 	 * @return the type
 	 */
-	protected abstract Type resultType(TypeSystem types);
+	protected abstract Type resultType(
+			TypeSystem types);
 }

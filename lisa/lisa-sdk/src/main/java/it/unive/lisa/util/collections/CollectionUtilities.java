@@ -45,7 +45,11 @@ public final class CollectionUtilities {
 	 * @return an integer value determined by the ordering relation between
 	 *             objects, as in {@link Comparator#compare(Object, Object)}
 	 */
-	public static <T> int nullSafeCompare(boolean nullFirst, T left, T right, Comparator<T> comparator) {
+	public static <T> int nullSafeCompare(
+			boolean nullFirst,
+			T left,
+			T right,
+			Comparator<T> comparator) {
 		if (left == null && right != null)
 			return nullFirst ? -1 : 1;
 
@@ -73,7 +77,10 @@ public final class CollectionUtilities {
 	 * @return {@code true} only if the collections contain exactly the same set
 	 *             of elements (order-insensitive)
 	 */
-	public static <T, C extends Collection<T>> boolean equals(C first, C second, BiPredicate<T, T> equalityTest) {
+	public static <T, C extends Collection<T>> boolean equals(
+			C first,
+			C second,
+			BiPredicate<T, T> equalityTest) {
 		// the following keeps track of the unmatched nodes in second
 		Collection<T> copy = new HashSet<>(second);
 		boolean found;
@@ -116,7 +123,11 @@ public final class CollectionUtilities {
 	 * @param joiner       the function that computes the join of two equal
 	 *                         elements
 	 */
-	public static <T, C extends Collection<T>> void join(C first, C second, C result, BiPredicate<T, T> equalityTest,
+	public static <T, C extends Collection<T>> void join(
+			C first,
+			C second,
+			C result,
+			BiPredicate<T, T> equalityTest,
 			BinaryOperator<T> joiner) {
 		// the following keeps track of the unmatched nodes in second
 		Collection<T> copy = new HashSet<>(second);
@@ -141,6 +152,41 @@ public final class CollectionUtilities {
 	}
 
 	/**
+	 * Meets (intersection) two collections, using a custom equality test to
+	 * determine if two elements are to be considered equals and thus met
+	 * together through the given {@code meet}. All elements that, according to
+	 * the given {@code equalityTest} are contained only in one of the input
+	 * collections, will not be part of the result.
+	 * 
+	 * @param <T>          the type of elements in the collections
+	 * @param <C>          the type of the collections to meet
+	 * @param first        the first collection
+	 * @param second       the second collection
+	 * @param result       the collection to be used as result, where met
+	 *                         elements will be added
+	 * @param equalityTest the tester for equality of the objects within the
+	 *                         collections
+	 * @param meet         the function that computes the meet of two equal
+	 *                         elements
+	 */
+	public static <T, C extends Collection<T>> void meet(
+			C first,
+			C second,
+			C result,
+			BiPredicate<T, T> equalityTest,
+			BinaryOperator<T> meet) {
+		// the following keeps track of the unmatched nodes in second
+		Collection<T> copy = new HashSet<>(second);
+		for (T t1 : first)
+			for (T t2 : second)
+				if (copy.contains(t2) && equalityTest.test(t1, t2)) {
+					copy.remove(t2);
+					result.add(meet.apply(t1, t2));
+					break;
+				}
+	}
+
+	/**
 	 * Stores the given objects into a collection and returns it.
 	 * 
 	 * @param <T>  the type of objects
@@ -149,7 +195,8 @@ public final class CollectionUtilities {
 	 * @return a (modifiable) collection containing the given objects
 	 */
 	@SafeVarargs
-	public static <T> Collection<T> collect(T... objs) {
+	public static <T> Collection<T> collect(
+			T... objs) {
 		ArrayList<T> res = new ArrayList<>(objs.length);
 		for (T o : objs)
 			res.add(o);
@@ -172,12 +219,16 @@ public final class CollectionUtilities {
 
 		@Override
 		public BiConsumer<SortedSet<E>, E> accumulator() {
-			return (set, e) -> set.add(e);
+			return (
+					set,
+					e) -> set.add(e);
 		}
 
 		@Override
 		public BinaryOperator<SortedSet<E>> combiner() {
-			return (result, partial) -> {
+			return (
+					result,
+					partial) -> {
 				result.addAll(partial);
 				return result;
 			};
@@ -212,7 +263,8 @@ public final class CollectionUtilities {
 		 * 
 		 * @param separator the separator to use when concatenating items.
 		 */
-		public StringCollector(String separator) {
+		public StringCollector(
+				String separator) {
 			this.separator = separator;
 		}
 
@@ -223,7 +275,9 @@ public final class CollectionUtilities {
 
 		@Override
 		public BiConsumer<StringBuilder, E> accumulator() {
-			return (builder, e) -> {
+			return (
+					builder,
+					e) -> {
 				if (builder.length() == 0)
 					builder.append(e);
 				else
@@ -233,7 +287,9 @@ public final class CollectionUtilities {
 
 		@Override
 		public BinaryOperator<StringBuilder> combiner() {
-			return (result, partial) -> result.append(partial);
+			return (
+					result,
+					partial) -> result.append(partial);
 		}
 
 		@Override

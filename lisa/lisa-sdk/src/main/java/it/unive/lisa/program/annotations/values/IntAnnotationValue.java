@@ -14,7 +14,8 @@ public class IntAnnotationValue implements BasicAnnotationValue {
 	 * 
 	 * @param i the integer value
 	 */
-	public IntAnnotationValue(int i) {
+	public IntAnnotationValue(
+			int i) {
 		this.i = i;
 	}
 
@@ -27,7 +28,8 @@ public class IntAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -46,7 +48,8 @@ public class IntAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof IntAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

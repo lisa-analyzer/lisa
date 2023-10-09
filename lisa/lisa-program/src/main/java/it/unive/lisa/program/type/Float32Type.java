@@ -73,12 +73,14 @@ public class Float32Type implements NumericType {
 	}
 
 	@Override
-	public boolean canBeAssignedTo(Type other) {
+	public boolean canBeAssignedTo(
+			Type other) {
 		return other.isNumericType() || other.isUntyped();
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		if (!other.isNumericType())
 			return Untyped.INSTANCE;
 
@@ -91,7 +93,8 @@ public class Float32Type implements NumericType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(
+			Object other) {
 		if (!(other instanceof NumericType))
 			return false;
 
@@ -104,7 +107,8 @@ public class Float32Type implements NumericType {
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

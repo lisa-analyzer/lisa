@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_-718248077.json", "untyped_fibonacci.main(fibonacci__this,_untyped_a).json" ],
   "info" : {
     "cfgs" : "2",
-    "duration" : "75ms",
-    "end" : "2023-04-20T12:45:29.502+02:00",
+    "duration" : "645ms",
+    "end" : "2023-10-02T21:22:16.467+02:00",
     "expressions" : "22",
     "files" : "2",
     "globals" : "0",
     "members" : "2",
     "programs" : "1",
-    "start" : "2023-04-20T12:45:29.427+02:00",
+    "start" : "2023-10-02T21:22:15.822+02:00",
     "statements" : "7",
     "units" : "1",
-    "version" : "0.1b7",
+    "version" : "0.1b8",
     "warnings" : "0"
   },
   "configuration" : {
@@ -31,6 +31,7 @@
     "serializeInputs" : "false",
     "serializeResults" : "true",
     "syntacticChecks" : "",
+    "useWideningPoints" : "true",
     "wideningThreshold" : "5",
     "workdir" : "test-outputs/interprocedural/fibonacci/full"
   }

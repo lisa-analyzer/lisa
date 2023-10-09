@@ -22,7 +22,8 @@ public final class Star extends RegularExpression {
 	 * 
 	 * @param op the inner regular expression
 	 */
-	public Star(RegularExpression op) {
+	public Star(
+			RegularExpression op) {
 		this.op = op;
 	}
 
@@ -35,7 +36,8 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -91,12 +93,15 @@ public final class Star extends RegularExpression {
 
 	@Override
 	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+			T extends TransitionSymbol<T>> A toAutomaton(
+					AutomataFactory<A, T> factory) {
 		return op.toAutomaton(factory).star();
 	}
 
 	@Override
-	public Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	public Set<PartialSubstring> substringAux(
+			int charsToSkip,
+			int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>(), partial = new HashSet<>();
 
 		result.add(new PartialSubstring(SymbolicString.mkEmptyString(), charsToSkip, missingChars));
@@ -123,7 +128,8 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	public boolean is(String str) {
+	public boolean is(
+			String str) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -138,7 +144,8 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	public boolean mayContain(String s) {
+	public boolean mayContain(
+			String s) {
 		if (s.isEmpty() || op.mayContain(s))
 			return true;
 
@@ -152,12 +159,14 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	public boolean contains(String s) {
+	public boolean contains(
+			String s) {
 		return s.isEmpty(); // epsilon is contained everywhere
 	}
 
 	@Override
-	public boolean mayStartWith(String s) {
+	public boolean mayStartWith(
+			String s) {
 		if (s.isEmpty() || op.mayStartWith(s))
 			return true;
 
@@ -171,12 +180,14 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	public boolean startsWith(String s) {
+	public boolean startsWith(
+			String s) {
 		return s.isEmpty(); // epsilon is contained everywhere
 	}
 
 	@Override
-	public boolean mayEndWith(String s) {
+	public boolean mayEndWith(
+			String s) {
 		if (s.isEmpty() || op.mayEndWith(s))
 			return true;
 
@@ -190,12 +201,14 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	public boolean endsWith(String s) {
+	public boolean endsWith(
+			String s) {
 		return s.isEmpty(); // epsilon is contained everywhere
 	}
 
 	@Override
-	protected RegularExpression unrollStarToFixedLength(int length) {
+	protected RegularExpression unrollStarToFixedLength(
+			int length) {
 		if (length == 0)
 			return Atom.EPSILON;
 
@@ -231,12 +244,14 @@ public final class Star extends RegularExpression {
 	}
 
 	@Override
-	protected int compareToAux(RegularExpression other) {
+	protected int compareToAux(
+			RegularExpression other) {
 		return op.compareTo(other.asStar().op);
 	}
 
 	@Override
-	public RegularExpression repeat(long n) {
+	public RegularExpression repeat(
+			long n) {
 		return this;
 	}
 

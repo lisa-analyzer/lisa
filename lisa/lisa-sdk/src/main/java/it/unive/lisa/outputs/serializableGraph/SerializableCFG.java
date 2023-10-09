@@ -36,7 +36,8 @@ public class SerializableCFG {
 	 *
 	 * @return the serializable version of that cfg
 	 */
-	public static SerializableGraph fromCFG(CFG source) {
+	public static SerializableGraph fromCFG(
+			CFG source) {
 		return fromCFG(source, null);
 	}
 
@@ -51,12 +52,13 @@ public class SerializableCFG {
 	 *
 	 * @return the serializable version of that cfg
 	 */
-	public static SerializableGraph fromCFG(CFG source,
+	public static SerializableGraph fromCFG(
+			CFG source,
 			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
 		String name = source.getDescriptor().getFullSignatureWithParNames();
 		String desc;
-		if (source instanceof AnalyzedCFG<?, ?, ?, ?> && !((AnalyzedCFG<?, ?, ?, ?>) source).getId().isStartingId())
-			desc = ((AnalyzedCFG<?, ?, ?, ?>) source).getId().toString();
+		if (source instanceof AnalyzedCFG<?> && !((AnalyzedCFG<?>) source).getId().isStartingId())
+			desc = ((AnalyzedCFG<?>) source).getId().toString();
 		else
 			desc = null;
 
@@ -100,10 +102,14 @@ public class SerializableCFG {
 	}
 
 	private static class InnerNodeExtractor
-			implements GraphVisitor<CFG, Statement, Edge, Map<Statement, List<Statement>>> {
+			implements
+			GraphVisitor<CFG, Statement, Edge, Map<Statement, List<Statement>>> {
 
 		@Override
-		public boolean visit(Map<Statement, List<Statement>> tool, CFG graph, Statement node) {
+		public boolean visit(
+				Map<Statement, List<Statement>> tool,
+				CFG graph,
+				Statement node) {
 			List<Statement> inners = tool.computeIfAbsent(node, st -> new LinkedList<>());
 			if (node instanceof NaryStatement)
 				inners.addAll(Arrays.asList(((NaryStatement) node).getSubExpressions()));

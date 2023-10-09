@@ -32,12 +32,14 @@ public class StringType implements it.unive.lisa.type.StringType {
 	}
 
 	@Override
-	public boolean canBeAssignedTo(Type other) {
+	public boolean canBeAssignedTo(
+			Type other) {
 		return other.isStringType() || other.isUntyped();
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		return other.isStringType() ? this : Untyped.INSTANCE;
 	}
 
@@ -47,7 +49,8 @@ public class StringType implements it.unive.lisa.type.StringType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(
+			Object other) {
 		return other instanceof it.unive.lisa.type.StringType;
 	}
 
@@ -57,7 +60,8 @@ public class StringType implements it.unive.lisa.type.StringType {
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

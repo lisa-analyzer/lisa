@@ -4,12 +4,14 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.Environment;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.ListRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.representation.ListRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.function.Predicate;
 
@@ -53,7 +55,9 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	 * @param left  the left-hand side of the Cartesian product
 	 * @param right the right-hand side of the Cartesian product
 	 */
-	public CartesianProduct(T1 left, T2 right) {
+	public CartesianProduct(
+			T1 left,
+			T2 right) {
 		this.left = left;
 		this.right = right;
 	}
@@ -68,7 +72,8 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -128,57 +133,81 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	 * 
 	 * @return the new instance of product
 	 */
-	public abstract C mk(T1 left, T2 right);
+	public abstract C mk(
+			T1 left,
+			T2 right);
 
 	@Override
-	public DomainRepresentation representation() {
+	public StructuredRepresentation representation() {
 		return new ListRepresentation(left.representation(), right.representation());
 	}
 
 	@Override
-	public C assign(I id, E expression, ProgramPoint pp) throws SemanticException {
-		T1 newLeft = left.assign(id, expression, pp);
-		T2 newRight = right.assign(id, expression, pp);
+	public C assign(
+			I id,
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		T1 newLeft = left.assign(id, expression, pp, oracle);
+		T2 newRight = right.assign(id, expression, pp, oracle);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException {
-		T1 newLeft = left.smallStepSemantics(expression, pp);
-		T2 newRight = right.smallStepSemantics(expression, pp);
+	public C smallStepSemantics(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		T1 newLeft = left.smallStepSemantics(expression, pp, oracle);
+		T2 newRight = right.smallStepSemantics(expression, pp, oracle);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
-		T1 newLeft = left.assume(expression, src, dest);
-		T2 newRight = right.assume(expression, src, dest);
+	public C assume(
+			E expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		T1 newLeft = left.assume(expression, src, dest, oracle);
+		T2 newRight = right.assume(expression, src, dest, oracle);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C forgetIdentifier(Identifier id) throws SemanticException {
+	public C forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		T1 newLeft = left.forgetIdentifier(id);
 		T2 newRight = right.forgetIdentifier(id);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public C forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		T1 newLeft = left.forgetIdentifiersIf(test);
 		T2 newRight = right.forgetIdentifiersIf(test);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C pushScope(ScopeToken scope) throws SemanticException {
+	public C pushScope(
+			ScopeToken scope)
+			throws SemanticException {
 		T1 newLeft = left.pushScope(scope);
 		T2 newRight = right.pushScope(scope);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C popScope(ScopeToken scope) throws SemanticException {
+	public C popScope(
+			ScopeToken scope)
+			throws SemanticException {
 		T1 newLeft = left.popScope(scope);
 		T2 newRight = right.popScope(scope);
 		return mk(newLeft, newRight);
@@ -186,22 +215,32 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
-		return left.satisfies(expression, pp).and(right.satisfies(expression, pp));
+	public Satisfiability satisfies(
+			E expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return left.satisfies(expression, pp, oracle).and(right.satisfies(expression, pp, oracle));
 	}
 
 	@Override
-	public C lub(C other) throws SemanticException {
+	public C lub(
+			C other)
+			throws SemanticException {
 		return mk(left.lub(other.left), right.lub(other.right));
 	}
 
 	@Override
-	public C widening(C other) throws SemanticException {
+	public C widening(
+			C other)
+			throws SemanticException {
 		return mk(left.widening(other.left), right.widening(other.right));
 	}
 
 	@Override
-	public boolean lessOrEqual(C other) throws SemanticException {
+	public boolean lessOrEqual(
+			C other)
+			throws SemanticException {
 		return left.lessOrEqual(other.left) && right.lessOrEqual(other.right);
 	}
 
@@ -226,7 +265,8 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public <T extends SemanticDomain<?, ?, ?>> Collection<T> getAllDomainInstances(Class<T> domain) {
+	public <T extends SemanticDomain<?, ?, ?>> Collection<T> getAllDomainInstances(
+			Class<T> domain) {
 		Collection<T> result = SemanticDomain.super.getAllDomainInstances(domain);
 		result.addAll(left.getAllDomainInstances(domain));
 		result.addAll(right.getAllDomainInstances(domain));

@@ -42,7 +42,8 @@ public class ControlFlowExtractor {
 	 * 
 	 * @return the collection of extracted structures
 	 */
-	public Collection<ControlFlowStructure> extract(CFG target) {
+	public Collection<ControlFlowStructure> extract(
+			CFG target) {
 		Collection<Statement> conditionals = new LinkedList<>();
 		target.accept(new ConditionalsExtractor(), conditionals);
 		if (conditionals.isEmpty())
@@ -74,7 +75,10 @@ public class ControlFlowExtractor {
 		private final Statement conditional;
 		private final Statement tail;
 
-		private LoopReconstructor(CFG target, Statement conditional, Statement tail) {
+		private LoopReconstructor(
+				CFG target,
+				Statement conditional,
+				Statement tail) {
 			this.target = target;
 			this.conditional = conditional;
 			this.tail = tail;
@@ -104,7 +108,8 @@ public class ControlFlowExtractor {
 			return new Loop(target.getNodeList(), conditional, exit.getDestination(), body.getNodes());
 		}
 
-		private Edge findExitEdge(NodeList<CFG, Statement, Edge> body) {
+		private Edge findExitEdge(
+				NodeList<CFG, Statement, Edge> body) {
 			Edge exit = null;
 			for (Edge out : target.getOutgoingEdges(conditional))
 				// in empty loops, the conditional is a follower of itself
@@ -131,7 +136,10 @@ public class ControlFlowExtractor {
 
 		private final Map<Statement, ControlFlowStructure> computed;
 
-		private IfReconstructor(CFG target, Statement conditional, Map<Statement, ControlFlowStructure> computed) {
+		private IfReconstructor(
+				CFG target,
+				Statement conditional,
+				Map<Statement, ControlFlowStructure> computed) {
 			this.target = target;
 			this.conditional = conditional;
 			this.computed = computed;
@@ -267,7 +275,9 @@ public class ControlFlowExtractor {
 			}
 		}
 
-		private ControlFlowStructure tryClose(Statement trueNext, Statement falseNext) {
+		private ControlFlowStructure tryClose(
+				Statement trueNext,
+				Statement falseNext) {
 			if (falseBranch.containsNode(trueNext)) {
 				// need to cut the extra part from the false branch
 				falseBranch.removeFrom(trueNext);
@@ -291,13 +301,16 @@ public class ControlFlowExtractor {
 			return null;
 		}
 
-		private ControlFlowStructure store(ControlFlowStructure struct) {
+		private ControlFlowStructure store(
+				ControlFlowStructure struct) {
 			computed.put(struct.getCondition(), struct);
 			return struct;
 		}
 	}
 
-	private static boolean isConditional(CFG graph, Statement node) {
+	private static boolean isConditional(
+			CFG graph,
+			Statement node) {
 		Collection<Edge> out = graph.getOutgoingEdges(node);
 		if (out.size() != 2)
 			return false;
@@ -318,7 +331,10 @@ public class ControlFlowExtractor {
 	private static class ConditionalsExtractor implements GraphVisitor<CFG, Statement, Edge, Collection<Statement>> {
 
 		@Override
-		public boolean visit(Collection<Statement> tool, CFG graph, Statement node) {
+		public boolean visit(
+				Collection<Statement> tool,
+				CFG graph,
+				Statement node) {
 			if (node instanceof Expression && ((Expression) node).getRootStatement() != node)
 				// we only consider root statements
 				return true;

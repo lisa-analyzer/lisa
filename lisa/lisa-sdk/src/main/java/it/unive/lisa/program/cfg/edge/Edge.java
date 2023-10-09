@@ -3,9 +3,6 @@ package it.unive.lisa.program.cfg.edge;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -43,7 +40,9 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 	 * @param source      the source statement
 	 * @param destination the destination statement
 	 */
-	protected Edge(Statement source, Statement destination) {
+	protected Edge(
+			Statement source,
+			Statement destination) {
 		Objects.requireNonNull(source, "The source of an edge cannot be null");
 		Objects.requireNonNull(destination, "The destination of an edge cannot be null");
 		this.source = source;
@@ -71,7 +70,8 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -96,34 +96,49 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 	public abstract String toString();
 
 	/**
-	 * Traverses this edge, optionally modifying the given {@code sourceState}
-	 * by applying semantic assumptions.
+	 * Traverses this edge in the forward direction, proceeding from source to
+	 * destination, optionally modifying the given {@code sourceState} by
+	 * applying semantic assumptions.
 	 * 
-	 * @param <A>         the concrete {@link AbstractState} instance
-	 * @param <H>         the concrete {@link HeapDomain} instance
-	 * @param <V>         the concrete {@link ValueDomain} instance
-	 * @param <T>         the concrete {@link TypeDomain} instance
-	 * @param sourceState the {@link AnalysisState} computed at the source of
-	 *                        this edge
+	 * @param <A>   the concrete {@link AbstractState} instance
+	 * @param state the {@link AnalysisState} computed at the source of this
+	 *                  edge
 	 * 
 	 * @return the {@link AnalysisState} after traversing this edge
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> traverse(
-					AnalysisState<A, H, V, T> sourceState)
-					throws SemanticException;
+	public abstract <A extends AbstractState<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state)
+			throws SemanticException;
+
+	/**
+	 * Traverses this edge in the backward direction, from destination to
+	 * source, optionally modifying the given {@code sourceState} by applying
+	 * semantic assumptions.
+	 * 
+	 * @param <A>   the concrete {@link AbstractState} instance
+	 * @param state the {@link AnalysisState} computed at the destination of
+	 *                  this edge
+	 * 
+	 * @return the {@link AnalysisState} after traversing this edge
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public abstract <A extends AbstractState<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state)
+			throws SemanticException;
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(
+			GraphVisitor<CFG, Statement, Edge, V> visitor,
+			V tool) {
 		return visitor.visit(tool, source.getCFG(), this);
 	}
 
 	@Override
-	public int compareTo(Edge o) {
+	public int compareTo(
+			Edge o) {
 		int cmp;
 		if ((cmp = source.compareTo(o.source)) != 0)
 			return cmp;

@@ -14,7 +14,8 @@ public class CharAnnotationValue implements BasicAnnotationValue {
 	 * 
 	 * @param c the char value
 	 */
-	public CharAnnotationValue(char c) {
+	public CharAnnotationValue(
+			char c) {
 		this.c = c;
 	}
 
@@ -27,7 +28,8 @@ public class CharAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -46,7 +48,8 @@ public class CharAnnotationValue implements BasicAnnotationValue {
 	}
 
 	@Override
-	public int compareTo(AnnotationValue o) {
+	public int compareTo(
+			AnnotationValue o) {
 		if (!(o instanceof CharAnnotationValue))
 			return getClass().getName().compareTo(o.getClass().getName());
 

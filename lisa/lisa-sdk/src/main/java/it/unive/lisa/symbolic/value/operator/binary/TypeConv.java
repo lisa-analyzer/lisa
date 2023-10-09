@@ -46,7 +46,10 @@ public class TypeConv implements TypeOperator, BinaryOperator {
 	}
 
 	@Override
-	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
+	public Set<Type> typeInference(
+			TypeSystem types,
+			Set<Type> left,
+			Set<Type> right) {
 		if (right.stream().noneMatch(Type::isTypeTokenType))
 			return Collections.emptySet();
 		Set<Type> set = types.convert(left, right);

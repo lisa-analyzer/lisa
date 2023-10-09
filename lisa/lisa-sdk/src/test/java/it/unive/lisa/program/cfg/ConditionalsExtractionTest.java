@@ -37,7 +37,9 @@ public class ConditionalsExtractionTest {
 			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
 			"Testing", false);
 
-	private static void checkMatrix(String label, Collection<Statement> nodes,
+	private static void checkMatrix(
+			String label,
+			Collection<Statement> nodes,
 			Collection<Statement> expected) {
 
 		Collection<Statement> missingNodes = new HashSet<>(expected), extraNodes = new HashSet<>(nodes);
@@ -53,15 +55,23 @@ public class ConditionalsExtractionTest {
 				missingNodes.isEmpty() && extraNodes.isEmpty());
 	}
 
-	private void assertIf(Statement condition, Statement follower, Collection<Statement> tnodes,
-			Collection<Statement> fnodes, IfThenElse ith) {
+	private void assertIf(
+			Statement condition,
+			Statement follower,
+			Collection<Statement> tnodes,
+			Collection<Statement> fnodes,
+			IfThenElse ith) {
 		assertEquals("Wrong condition: " + ith.getCondition(), condition, ith.getCondition());
 		assertEquals("Wrong follower: " + ith.getFirstFollower(), follower, ith.getFirstFollower());
 		checkMatrix("true branch", ith.getTrueBranch(), tnodes);
 		checkMatrix("false branch", ith.getFalseBranch(), fnodes);
 	}
 
-	private void assertLoop(Statement condition, Statement follower, Collection<Statement> nodes, Loop loop) {
+	private void assertLoop(
+			Statement condition,
+			Statement follower,
+			Collection<Statement> nodes,
+			Loop loop) {
 		assertEquals("Wrong condition: " + loop.getCondition(), condition, loop.getCondition());
 		assertEquals("Wrong follower: " + loop.getFirstFollower(), follower, loop.getFirstFollower());
 		checkMatrix("loop body", loop.getBody(), nodes);

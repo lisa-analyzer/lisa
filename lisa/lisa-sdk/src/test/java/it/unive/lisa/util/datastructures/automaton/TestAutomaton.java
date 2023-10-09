@@ -10,7 +10,8 @@ import java.util.stream.Collectors;
 public final class TestAutomaton extends Automaton<TestAutomaton, TestSymbol> {
 
 	@Override
-	public TestAutomaton singleString(String string) {
+	public TestAutomaton singleString(
+			String string) {
 		return new TestAutomaton(string);
 	}
 
@@ -35,7 +36,9 @@ public final class TestAutomaton extends Automaton<TestAutomaton, TestSymbol> {
 	}
 
 	@Override
-	public TestAutomaton from(SortedSet<State> states, SortedSet<Transition<TestSymbol>> transitions) {
+	public TestAutomaton from(
+			SortedSet<State> states,
+			SortedSet<Transition<TestSymbol>> transitions) {
 		return new TestAutomaton(states, transitions);
 	}
 
@@ -45,12 +48,15 @@ public final class TestAutomaton extends Automaton<TestAutomaton, TestSymbol> {
 	}
 
 	@Override
-	public TestSymbol concat(TestSymbol first, TestSymbol second) {
+	public TestSymbol concat(
+			TestSymbol first,
+			TestSymbol second) {
 		return first.concat(second);
 	}
 
 	@Override
-	public RegularExpression symbolToRegex(TestSymbol symbol) {
+	public RegularExpression symbolToRegex(
+			TestSymbol symbol) {
 		return new Atom(symbol.getSymbol());
 	}
 
@@ -60,7 +66,9 @@ public final class TestAutomaton extends Automaton<TestAutomaton, TestSymbol> {
 	 * @param states      the set of states of the new automaton
 	 * @param transitions the set of the transitions of the new automaton
 	 */
-	public TestAutomaton(SortedSet<State> states, SortedSet<Transition<TestSymbol>> transitions) {
+	public TestAutomaton(
+			SortedSet<State> states,
+			SortedSet<Transition<TestSymbol>> transitions) {
 		super(states, transitions);
 	}
 
@@ -69,7 +77,8 @@ public final class TestAutomaton extends Automaton<TestAutomaton, TestSymbol> {
 	 * 
 	 * @param s the only string accepted by the automaton.
 	 */
-	public TestAutomaton(String s) {
+	public TestAutomaton(
+			String s) {
 		super();
 
 		if (s.isEmpty())
@@ -100,7 +109,8 @@ public final class TestAutomaton extends Automaton<TestAutomaton, TestSymbol> {
 	 * @return a boolean value that indicates either if {@code str} has been
 	 *             accepted or not.
 	 */
-	public boolean validateString(String str) {
+	public boolean validateString(
+			String str) {
 		// stores all the possible states reached by the automaton after each
 		// input char
 		Set<State> currentStates = epsilonClosure(getInitialStates());

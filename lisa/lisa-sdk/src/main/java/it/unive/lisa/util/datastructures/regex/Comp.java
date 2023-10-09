@@ -31,7 +31,9 @@ public final class Comp extends RegularExpression {
 	 * @param first  the first regular expression
 	 * @param second the second regular expression
 	 */
-	public Comp(RegularExpression first, RegularExpression second) {
+	public Comp(
+			RegularExpression first,
+			RegularExpression second) {
 		this.first = first;
 		this.second = second;
 	}
@@ -69,7 +71,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -141,12 +144,15 @@ public final class Comp extends RegularExpression {
 
 	@Override
 	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(AutomataFactory<A, T> factory) {
+			T extends TransitionSymbol<T>> A toAutomaton(
+					AutomataFactory<A, T> factory) {
 		return first.toAutomaton(factory).concat(second.toAutomaton(factory));
 	}
 
 	@Override
-	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(
+			int charsToSkip,
+			int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
 
 		Set<PartialSubstring> firstSS = first.substringAux(charsToSkip, missingChars);
@@ -168,7 +174,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public boolean is(String str) {
+	public boolean is(
+			String str) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -187,7 +194,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public boolean mayContain(String s) {
+	public boolean mayContain(
+			String s) {
 		if (first.mayContain(s) || second.mayContain(s))
 			return true;
 
@@ -201,7 +209,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public boolean contains(String s) {
+	public boolean contains(
+			String s) {
 		if (first.contains(s) || second.contains(s))
 			return true;
 
@@ -215,7 +224,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public boolean mayStartWith(String s) {
+	public boolean mayStartWith(
+			String s) {
 		if (first.mayStartWith(s))
 			return true;
 
@@ -228,7 +238,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public boolean startsWith(String s) {
+	public boolean startsWith(
+			String s) {
 		if (first.startsWith(s))
 			return true;
 
@@ -241,7 +252,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public boolean mayEndWith(String s) {
+	public boolean mayEndWith(
+			String s) {
 		if (second.mayEndWith(s))
 			return true;
 
@@ -249,7 +261,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public boolean endsWith(String s) {
+	public boolean endsWith(
+			String s) {
 		if (second.endsWith(s))
 			return true;
 
@@ -257,7 +270,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	protected RegularExpression unrollStarToFixedLength(int length) {
+	protected RegularExpression unrollStarToFixedLength(
+			int length) {
 		return first.unrollStarToFixedLength(length).comp(second.unrollStarToFixedLength(length));
 	}
 
@@ -282,7 +296,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	protected int compareToAux(RegularExpression other) {
+	protected int compareToAux(
+			RegularExpression other) {
 		int cmp;
 		if ((cmp = first.compareTo(other.asComp().first)) != 0)
 			return cmp;
@@ -290,7 +305,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public RegularExpression repeat(long n) {
+	public RegularExpression repeat(
+			long n) {
 		if (n == 0)
 			return Atom.EPSILON;
 

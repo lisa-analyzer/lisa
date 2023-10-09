@@ -39,7 +39,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return the extended string
 	 */
-	public static SymbolicString mkTopString(int length) {
+	public static SymbolicString mkTopString(
+			int length) {
 		SymbolicChar[] value = new SymbolicChar[length];
 		for (int i = 0; i < value.length; i++)
 			value[i] = UnknownSymbolicChar.INSTANCE;
@@ -54,7 +55,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return the strings set
 	 */
-	public static Set<String> toStrings(Iterable<SymbolicString> extStrings) {
+	public static Set<String> toStrings(
+			Iterable<SymbolicString> extStrings) {
 		Set<String> result = new HashSet<String>();
 
 		for (SymbolicString e : extStrings)
@@ -70,7 +72,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return the extended string
 	 */
-	public static SymbolicString mkString(String str) {
+	public static SymbolicString mkString(
+			String str) {
 		SymbolicChar[] value = new SymbolicChar[str.length()];
 		for (int i = 0; i < value.length; i++)
 			value[i] = new SymbolicChar(str.charAt(i));
@@ -85,7 +88,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return the extended strings
 	 */
-	public static SymbolicString[] mkStrings(String... strings) {
+	public static SymbolicString[] mkStrings(
+			String... strings) {
 		SymbolicString[] result = new SymbolicString[strings.length];
 		for (int i = 0; i < result.length; i++)
 			result[i] = mkString(strings[i]);
@@ -100,11 +104,13 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return the extended string
 	 */
-	public static SymbolicString mkStringFromChar(char ch) {
+	public static SymbolicString mkStringFromChar(
+			char ch) {
 		return new SymbolicString(new SymbolicChar[] { new SymbolicChar(ch) });
 	}
 
-	private SymbolicString(SymbolicChar[] value) {
+	private SymbolicString(
+			SymbolicChar[] value) {
 		this.value = value;
 	}
 
@@ -114,7 +120,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	}
 
 	@Override
-	public int compareTo(SymbolicString other) {
+	public int compareTo(
+			SymbolicString other) {
 		int lim = Math.min(length(), other.length());
 
 		for (int k = 0; k < lim; k++) {
@@ -136,7 +143,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -156,7 +164,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return the concatenation
 	 */
-	public SymbolicString concat(SymbolicString str) {
+	public SymbolicString concat(
+			SymbolicString str) {
 		int olen = str.length();
 		if (olen == 0)
 			return this;
@@ -204,7 +213,9 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 		return value.length;
 	}
 
-	private boolean startsWith(String prefix, int toffset) {
+	private boolean startsWith(
+			String prefix,
+			int toffset) {
 		if (toffset < 0 || toffset > length() - prefix.length())
 			return false;
 
@@ -223,7 +234,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean startsWith(String prefix) {
+	public boolean startsWith(
+			String prefix) {
 		return startsWith(prefix, 0);
 	}
 
@@ -235,11 +247,13 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean endsWith(String suffix) {
+	public boolean endsWith(
+			String suffix) {
 		return startsWith(suffix, length() - suffix.length());
 	}
 
-	private int indexOf(String str) {
+	private int indexOf(
+			String str) {
 		char first = str.charAt(0);
 		int max = (length() - str.length());
 		for (int i = 0; i <= max; i++) {
@@ -273,7 +287,8 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean contains(CharSequence s) {
+	public boolean contains(
+			CharSequence s) {
 		return indexOf(s.toString()) >= 0;
 	}
 

@@ -19,7 +19,8 @@ public class Warning implements Comparable<Warning> {
 	 * 
 	 * @param message the message of this warning
 	 */
-	public Warning(String message) {
+	public Warning(
+			String message) {
 		this.message = message;
 	}
 
@@ -52,7 +53,8 @@ public class Warning implements Comparable<Warning> {
 	}
 
 	@Override
-	public int compareTo(Warning o) {
+	public int compareTo(
+			Warning o) {
 		return StringUtils.compare(message, o.message);
 	}
 
@@ -65,7 +67,8 @@ public class Warning implements Comparable<Warning> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

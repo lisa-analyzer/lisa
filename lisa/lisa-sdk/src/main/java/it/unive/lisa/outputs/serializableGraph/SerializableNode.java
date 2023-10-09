@@ -44,7 +44,10 @@ public class SerializableNode implements Comparable<SerializableNode> {
 	 *                     order they appear
 	 * @param text     the text of this node
 	 */
-	public SerializableNode(int id, List<Integer> subNodes, String text) {
+	public SerializableNode(
+			int id,
+			List<Integer> subNodes,
+			String text) {
 		this.id = id;
 		this.subNodes = subNodes;
 		this.text = text;
@@ -99,12 +102,15 @@ public class SerializableNode implements Comparable<SerializableNode> {
 	 * @param value the value of the field
 	 */
 	@JsonAnySetter
-	public void setOtherField(String name, String value) {
+	public void setOtherField(
+			String name,
+			String value) {
 		unknownFields.put(name, value);
 	}
 
 	@Override
-	public int compareTo(SerializableNode o) {
+	public int compareTo(
+			SerializableNode o) {
 		int cmp;
 		if ((cmp = Integer.compare(id, o.id)) != 0)
 			return cmp;
@@ -151,7 +157,8 @@ public class SerializableNode implements Comparable<SerializableNode> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

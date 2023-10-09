@@ -19,7 +19,9 @@ public class AnnotationMember implements Comparable<AnnotationMember> {
 	 * @param id    the identifier
 	 * @param value the annotation value
 	 */
-	public AnnotationMember(String id, AnnotationValue value) {
+	public AnnotationMember(
+			String id,
+			AnnotationValue value) {
 		this.id = id;
 		this.value = value;
 	}
@@ -52,7 +54,8 @@ public class AnnotationMember implements Comparable<AnnotationMember> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -79,7 +82,8 @@ public class AnnotationMember implements Comparable<AnnotationMember> {
 	}
 
 	@Override
-	public int compareTo(AnnotationMember o) {
+	public int compareTo(
+			AnnotationMember o) {
 		int cmp = 0;
 		if ((cmp = id.compareTo(o.id)) != 0)
 			return cmp;

@@ -18,7 +18,8 @@ public class TypeTokenType implements Type {
 	 * 
 	 * @param types the types
 	 */
-	public TypeTokenType(Set<Type> types) {
+	public TypeTokenType(
+			Set<Type> types) {
 		this.types = types;
 	}
 
@@ -48,7 +49,8 @@ public class TypeTokenType implements Type {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -65,17 +67,20 @@ public class TypeTokenType implements Type {
 	}
 
 	@Override
-	public boolean canBeAssignedTo(Type other) {
-		return other instanceof TypeTokenType;
+	public boolean canBeAssignedTo(
+			Type other) {
+		return other instanceof TypeTokenType || other.isUntyped();
 	}
 
 	@Override
-	public Type commonSupertype(Type other) {
+	public Type commonSupertype(
+			Type other) {
 		return other == this ? this : Untyped.INSTANCE;
 	}
 
 	@Override
-	public Set<Type> allInstances(TypeSystem types) {
+	public Set<Type> allInstances(
+			TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

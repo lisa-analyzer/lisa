@@ -31,7 +31,9 @@ public class SerializableArray extends SerializableValue {
 	 * @param properties the additional properties to use as metadata
 	 * @param elements   the elements of the array
 	 */
-	public SerializableArray(SortedMap<String, String> properties, List<SerializableValue> elements) {
+	public SerializableArray(
+			SortedMap<String, String> properties,
+			List<SerializableValue> elements) {
 		super(properties);
 		this.elements = elements;
 	}
@@ -62,7 +64,8 @@ public class SerializableArray extends SerializableValue {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -84,7 +87,8 @@ public class SerializableArray extends SerializableValue {
 	}
 
 	@Override
-	public int compareTo(SerializableValue o) {
+	public int compareTo(
+			SerializableValue o) {
 		// arrays in the middle
 		if (o instanceof SerializableString)
 			return 1;

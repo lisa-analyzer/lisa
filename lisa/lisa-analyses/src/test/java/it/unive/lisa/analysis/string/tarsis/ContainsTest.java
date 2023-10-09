@@ -2,9 +2,10 @@ package it.unive.lisa.analysis.string.tarsis;
 
 import static org.junit.Assert.assertEquals;
 
-import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
@@ -16,6 +17,8 @@ import java.util.TreeSet;
 import org.junit.Test;
 
 public class ContainsTest {
+
+	private final SemanticOracle oracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
 
 	@Test
 	public void test01() throws SemanticException {
@@ -49,8 +52,8 @@ public class ContainsTest {
 		Tarsis t1 = new Tarsis(a);
 		Tarsis t2 = new Tarsis(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
@@ -85,8 +88,8 @@ public class ContainsTest {
 		Tarsis t1 = new Tarsis(a);
 		Tarsis t2 = new Tarsis(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.NOT_SATISFIED,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.NOT_SATISFIED,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
@@ -121,8 +124,8 @@ public class ContainsTest {
 		Tarsis t1 = new Tarsis(a);
 		Tarsis t2 = new Tarsis(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.SATISFIED,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.SATISFIED,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
@@ -159,8 +162,8 @@ public class ContainsTest {
 		Tarsis t1 = new Tarsis(a);
 		Tarsis t2 = new Tarsis(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
@@ -194,32 +197,32 @@ public class ContainsTest {
 		Tarsis t1 = new Tarsis(a);
 		Tarsis t2 = new Tarsis(a2);
 
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
 	public void test06() throws SemanticException {
 		Tarsis t1 = new Tarsis(RegexAutomaton.topString());
 		Tarsis t2 = new Tarsis(RegexAutomaton.string("a"));
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
 	public void test07() throws SemanticException {
 		Tarsis t1 = new Tarsis(RegexAutomaton.string("a"));
 		Tarsis t2 = new Tarsis(RegexAutomaton.topString());
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
 	public void test08() throws SemanticException {
 		Tarsis t1 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
 		Tarsis t2 = new Tarsis(RegexAutomaton.string("a"));
-		assertEquals(SemanticDomain.Satisfiability.SATISFIED,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.SATISFIED,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
@@ -227,41 +230,40 @@ public class ContainsTest {
 		Tarsis t1 = new Tarsis(RegexAutomaton.string("a"));
 		Tarsis t2 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
 
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
 	public void test10() throws SemanticException {
 		Tarsis t1 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
 		Tarsis t2 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("b")));
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
 	public void test11() throws SemanticException {
 		Tarsis t1 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
 		Tarsis t2 = new Tarsis(RegexAutomaton.string("ba"));
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test
 	public void test12() throws SemanticException {
 		Tarsis t1 = new Tarsis(RegexAutomaton.string("ba"));
 		Tarsis t2 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("a")));
-		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.UNKNOWN,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
-	// TODO to check
 	@Test
 	public void test13() throws SemanticException {
 		Tarsis t1 = new Tarsis(RegexAutomaton.string("ba"));
 		Tarsis t2 = new Tarsis(RegexAutomaton.topString().concat(RegexAutomaton.string("c")));
-		assertEquals(SemanticDomain.Satisfiability.NOT_SATISFIED,
-				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null));
+		assertEquals(Satisfiability.NOT_SATISFIED,
+				t1.satisfiesBinaryExpression(StringContains.INSTANCE, t1, t2, null, oracle));
 	}
 
 	@Test

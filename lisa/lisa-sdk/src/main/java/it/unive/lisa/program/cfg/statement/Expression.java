@@ -10,6 +10,8 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An expression that is part of a statement of the program.
@@ -17,6 +19,8 @@ import java.util.Objects;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class Expression extends Statement {
+
+	private static final Logger LOG = LogManager.getLogger(Expression.class);
 
 	/**
 	 * The static type of this expression.
@@ -43,7 +47,9 @@ public abstract class Expression extends Statement {
 	 * @param location the location where the expression is defined within the
 	 *                     program
 	 */
-	protected Expression(CFG cfg, CodeLocation location) {
+	protected Expression(
+			CFG cfg,
+			CodeLocation location) {
 		this(cfg, location, Untyped.INSTANCE);
 	}
 
@@ -55,7 +61,10 @@ public abstract class Expression extends Statement {
 	 *                       the program
 	 * @param staticType the static type of this expression
 	 */
-	protected Expression(CFG cfg, CodeLocation location, Type staticType) {
+	protected Expression(
+			CFG cfg,
+			CodeLocation location,
+			Type staticType) {
 		super(cfg, location);
 		Objects.requireNonNull(staticType, "The expression type of a CFG cannot be null");
 		this.staticType = staticType;
@@ -98,7 +107,8 @@ public abstract class Expression extends Statement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -122,8 +132,16 @@ public abstract class Expression extends Statement {
 	 * 
 	 * @param st the containing statement
 	 */
-	public final void setParentStatement(Statement st) {
-		this.parent = st;
+	public final void setParentStatement(
+			Statement st) {
+		if (this.parent == null)
+			this.parent = st;
+		else
+			// this usually happens either with a bad code parsing process
+			// or when constructing resolved calls or similar constructs
+			// inside semantic functions. Either way, the syntactic structure
+			// of the code should not change once set
+			LOG.trace("Attempt to change the parent of " + this + " ignored");
 	}
 
 	/**
@@ -175,7 +193,8 @@ public abstract class Expression extends Statement {
 	}
 
 	@Override
-	public Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(
+			Statement other) {
 		if (this instanceof Call) {
 			Call original = (Call) this;
 			while (original.getSource() != null)
@@ -188,5 +207,22 @@ public abstract class Expression extends Statement {
 			return null;
 
 		return parent.getStatementEvaluatedBefore(this);
+	}
+
+	@Override
+	public Statement getStatementEvaluatedAfter(
+			Statement other) {
+		if (this instanceof Call) {
+			Call original = (Call) this;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != this)
+				return original.getStatementEvaluatedAfter(other);
+		}
+
+		if (other != this || parent == null)
+			return null;
+
+		return parent.getStatementEvaluatedAfter(this);
 	}
 }

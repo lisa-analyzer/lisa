@@ -79,7 +79,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * 
 	 * @return the automaton
 	 */
-	public static RegexAutomaton string(String string) {
+	public static RegexAutomaton string(
+			String string) {
 		State q0 = new State(0, true, false);
 		State q1 = new State(1, false, true);
 
@@ -103,7 +104,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * 
 	 * @return the automaton
 	 */
-	public static RegexAutomaton string(SymbolicString s) {
+	public static RegexAutomaton string(
+			SymbolicString s) {
 		List<RegexAutomaton> result = new ArrayList<>();
 		String collector = "";
 		for (SymbolicChar ch : s.collapseTopChars()) {
@@ -162,7 +164,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * 
 	 * @return the automaton
 	 */
-	public static RegexAutomaton strings(String... strings) {
+	public static RegexAutomaton strings(
+			String... strings) {
 		RegexAutomaton a = emptyLang();
 
 		for (String s : strings)
@@ -172,7 +175,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	}
 
 	@Override
-	public RegexAutomaton singleString(String string) {
+	public RegexAutomaton singleString(
+			String string) {
 		return string(string);
 	}
 
@@ -192,7 +196,9 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	}
 
 	@Override
-	public RegexAutomaton from(SortedSet<State> states, SortedSet<Transition<RegularExpression>> transitions) {
+	public RegexAutomaton from(
+			SortedSet<State> states,
+			SortedSet<Transition<RegularExpression>> transitions) {
 		return new RegexAutomaton(states, transitions);
 	}
 
@@ -202,12 +208,15 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	}
 
 	@Override
-	public RegularExpression concat(RegularExpression first, RegularExpression second) {
+	public RegularExpression concat(
+			RegularExpression first,
+			RegularExpression second) {
 		return first.comp(second);
 	}
 
 	@Override
-	public RegularExpression symbolToRegex(RegularExpression symbol) {
+	public RegularExpression symbolToRegex(
+			RegularExpression symbol) {
 		return symbol;
 	}
 
@@ -217,7 +226,9 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * @param states      the set of states of the new automaton
 	 * @param transitions the set of the transitions of the new automaton
 	 */
-	public RegexAutomaton(SortedSet<State> states, SortedSet<Transition<RegularExpression>> transitions) {
+	public RegexAutomaton(
+			SortedSet<State> states,
+			SortedSet<Transition<RegularExpression>> transitions) {
 		super(states, transitions);
 	}
 
@@ -282,7 +293,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	}
 
 	@Override
-	public RegexAutomaton intersection(RegexAutomaton other) {
+	public RegexAutomaton intersection(
+			RegexAutomaton other) {
 		if (this == other)
 			return this;
 
@@ -372,7 +384,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return collapsed.minimize();
 	}
 
-	private Set<Vector<State>> findMergableStatesInPath(List<State> v) {
+	private Set<Vector<State>> findMergableStatesInPath(
+			List<State> v) {
 		Set<Vector<State>> collected = new HashSet<>();
 		if (v.size() == 1)
 			return collected;
@@ -435,7 +448,10 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * 
 	 * @throws CyclicAutomatonException if {@code toReplace} contains loops
 	 */
-	public RegexAutomaton replace(RegexAutomaton toReplace, RegexAutomaton str) throws CyclicAutomatonException {
+	public RegexAutomaton replace(
+			RegexAutomaton toReplace,
+			RegexAutomaton str)
+			throws CyclicAutomatonException {
 		Collection<RegexAutomaton> automata = new ArrayList<>();
 		boolean isSingleString = toReplace.getLanguage().size() == 1;
 		for (String s : toReplace.getLanguage())
@@ -447,7 +463,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return union(automata.toArray(new RegexAutomaton[automata.size()]));
 	}
 
-	private RegexAutomaton union(RegexAutomaton... automata) {
+	private RegexAutomaton union(
+			RegexAutomaton... automata) {
 		RegexAutomaton result = emptyLanguage();
 
 		for (RegexAutomaton a : automata)
@@ -465,7 +482,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * @return an automaton that corresponds to the {@code n}-time concatenation
 	 *             of {@code this}
 	 */
-	public RegexAutomaton repeat(long n) {
+	public RegexAutomaton repeat(
+			long n) {
 		if (n == 0)
 			return emptyString();
 		return toRegex().simplify().repeat(n).toAutomaton(this).minimize();

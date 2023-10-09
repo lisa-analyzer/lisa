@@ -4,11 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.TestAbstractState;
-import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestLanguageFeatures;
-import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestTypeSystem;
-import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -70,31 +67,40 @@ public class CheckToolWithAnalysisResultsTest {
 	private static final CallGraph fakeCallGraph = new CallGraph() {
 
 		@Override
-		public void registerCall(CFGCall call) {
+		public void registerCall(
+				CFGCall call) {
 		}
 
 		@Override
-		public void init(Application app) throws CallGraphConstructionException {
+		public void init(
+				Application app)
+				throws CallGraphConstructionException {
 			super.init(app);
 		}
 
 		@Override
-		public Collection<CodeMember> getCallers(CodeMember cm) {
+		public Collection<CodeMember> getCallers(
+				CodeMember cm) {
 			return null;
 		}
 
 		@Override
-		public Collection<CodeMember> getCallees(CodeMember cm) {
+		public Collection<CodeMember> getCallees(
+				CodeMember cm) {
 			return null;
 		}
 
 		@Override
-		public Collection<Call> getCallSites(CodeMember cm) {
+		public Collection<Call> getCallSites(
+				CodeMember cm) {
 			return null;
 		}
 
 		@Override
-		public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
+		public Call resolve(
+				UnresolvedCall call,
+				Set<Type>[] types,
+				SymbolAliasing aliasing)
 				throws CallResolutionException {
 			return null;
 		}
@@ -105,12 +111,16 @@ public class CheckToolWithAnalysisResultsTest {
 		}
 
 		@Override
-		public Collection<Collection<CodeMember>> getRecursionsContaining(CodeMember cm) {
+		public Collection<Collection<CodeMember>> getRecursionsContaining(
+				CodeMember cm) {
 			return null;
 		}
 	};
 
-	private static Warning build(CheckTool tool, Object target, String message) {
+	private static Warning build(
+			CheckTool tool,
+			Object target,
+			String message) {
 		if (target == null) {
 			tool.warn(message);
 			return new Warning(message);
@@ -138,9 +148,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testCopy() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"), Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -169,9 +178,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testSimpleFill() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"), Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -187,9 +195,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDisjointWarnings() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"), Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -203,9 +210,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDuplicateWarnings() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"), Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -222,25 +228,19 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testResultRetrieval() {
-		AnalysisState<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain, TestTypeDomain> singleton = new AnalysisState<>(
-						new TestAbstractState(),
-						new ExpressionSet<>(), new SymbolAliasing());
+		AnalysisState<TestAbstractState> singleton = new AnalysisState<>(
+				new TestAbstractState(),
+				new ExpressionSet());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
-		AnalyzedCFG<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res1 = new AnalyzedCFG<>(cfg, new UniqueScope(), singleton,
-						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
+		AnalyzedCFG<TestAbstractState> res1 = new AnalyzedCFG<>(cfg, new UniqueScope(), singleton,
+				Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
-		AnalyzedCFG<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res2 = new AnalyzedCFG<>(cfg2, new UniqueScope(), singleton,
-						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
+		AnalyzedCFG<TestAbstractState> res2 = new AnalyzedCFG<>(cfg2, new UniqueScope(), singleton,
+				Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestHeapDomain,
-				TestValueDomain,
-				TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
+		CheckToolWithAnalysisResults<
+				TestAbstractState> tool = new CheckToolWithAnalysisResults<>(new LiSAConfiguration(),
 						new FileManager("foo"),
 						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)), fakeCallGraph);
 

@@ -21,7 +21,8 @@ public class AbstractCodeMember implements CodeMember {
 	 * 
 	 * @param descriptor the descriptor of this signature cfg
 	 */
-	public AbstractCodeMember(CodeMemberDescriptor descriptor) {
+	public AbstractCodeMember(
+			CodeMemberDescriptor descriptor) {
 		this.descriptor = descriptor;
 	}
 

@@ -38,7 +38,10 @@ public class UnaryExpression extends ValueExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public UnaryExpression(Type staticType, SymbolicExpression expression, UnaryOperator operator,
+	public UnaryExpression(
+			Type staticType,
+			SymbolicExpression expression,
+			UnaryOperator operator,
 			CodeLocation location) {
 		super(staticType, location);
 		this.expression = expression;
@@ -77,8 +80,6 @@ public class UnaryExpression extends ValueExpression {
 			BinaryExpression expr = new BinaryExpression(binary.getStaticType(), left.removeNegations(),
 					right.removeNegations(),
 					oppositeOp, getCodeLocation());
-			if (hasRuntimeTypes())
-				expr.setRuntimeTypes(getRuntimeTypes(null));
 			return expr;
 		}
 
@@ -86,18 +87,20 @@ public class UnaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		UnaryExpression expr = new UnaryExpression(getStaticType(), expression.pushScope(token), operator,
 				getCodeLocation());
 		return expr;
 	}
 
 	@Override
-	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(
+			ScopeToken token)
+			throws SemanticException {
 		UnaryExpression expr = new UnaryExpression(getStaticType(), expression.popScope(token), operator,
 				getCodeLocation());
-		if (hasRuntimeTypes())
-			expr.setRuntimeTypes(getRuntimeTypes(null));
 		return expr;
 	}
 
@@ -111,7 +114,8 @@ public class UnaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -135,8 +139,16 @@ public class UnaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
 		T arg = expression.accept(visitor, params);
 		return visitor.visit(this, arg, params);
+	}
+
+	@Override
+	public boolean mightNeedRewriting() {
+		return expression.mightNeedRewriting();
 	}
 }

@@ -39,7 +39,10 @@ public class CheckToolTest {
 			"foo");
 	private static final CFG cfg = new CFG(descriptor);
 
-	private static Warning build(CheckTool tool, Object target, String message) {
+	private static Warning build(
+			CheckTool tool,
+			Object target,
+			String message) {
 		if (target == null) {
 			tool.warn(message);
 			return new Warning(message);

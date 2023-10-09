@@ -4,9 +4,6 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -21,7 +18,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string endsWith operation. The type of both
@@ -29,13 +25,12 @@ import it.unive.lisa.type.TypeSystem;
  * {@link BooleanType}. <br>
  * <br>
  * Since in most languages string operations are provided through calls to
- * library functions, this class contains a field {@link #originating} whose
- * purpose is to optionally store a {@link Statement} that is rewritten to an
- * instance of this class (i.e., a call to a {@link NativeCFG} modeling the
- * library function). If present, such statement will be used as
- * {@link ProgramPoint} for semantics computations. This allows subclasses to
- * implement {@link PluggableStatement} easily without redefining the semantics
- * provided by this class.
+ * library functions, this class contains a field whose purpose is to optionally
+ * store a {@link Statement} that is rewritten to an instance of this class
+ * (i.e., a call to a {@link NativeCFG} modeling the library function). If
+ * present, such statement will be used as {@link ProgramPoint} for semantics
+ * computations. This allows subclasses to implement {@link PluggableStatement}
+ * easily without redefining the semantics provided by this class.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -58,26 +53,26 @@ public class EndsWith extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public EndsWith(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public EndsWith(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
 		super(cfg, location, "endsWith", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left,
 				right);
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					AnalysisState<A, H, V, T> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
-		TypeSystem types = getProgram().getTypes();
-		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+	public <A extends AbstractState<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
+		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
