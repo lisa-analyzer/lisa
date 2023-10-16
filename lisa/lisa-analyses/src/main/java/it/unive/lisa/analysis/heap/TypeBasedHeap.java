@@ -146,7 +146,14 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	public TypeBasedHeap mk(
 			TypeBasedHeap reference) {
-		return this;
+		return new TypeBasedHeap(reference.names);
+	}
+
+	@Override
+	public TypeBasedHeap mk(
+			TypeBasedHeap reference,
+			List<HeapReplacement> replacements) {
+		return new TypeBasedHeap(reference.names);
 	}
 
 	@Override

@@ -52,10 +52,23 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 	}
 
 	@Override
-	protected PointBasedHeap mk(
-			HeapEnvironment<AllocationSites> heapEnv,
+	public PointBasedHeap mk(
+			PointBasedHeap reference) {
+		return new PointBasedHeap(reference.heapEnv, reference.replacements);
+	}
+
+	@Override
+	public PointBasedHeap mk(
+			PointBasedHeap reference,
 			List<HeapReplacement> replacements) {
-		return new PointBasedHeap(heapEnv, replacements);
+		return new PointBasedHeap(reference.heapEnv, replacements);
+	}
+
+	@Override
+	protected PointBasedHeap mk(
+			PointBasedHeap reference,
+			HeapEnvironment<AllocationSites> heapEnv) {
+		return new PointBasedHeap(heapEnv, reference.replacements);
 	}
 
 	@Override

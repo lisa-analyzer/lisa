@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -84,8 +85,24 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	 * 
 	 * @return a new instance of this domain
 	 */
-	public abstract H mk(
+	H mk(
 			H reference);
+
+	/**
+	 * Creates a new instance of this domain containing the same abstract
+	 * information of reference. The returned object is effectively a new
+	 * instance, but with the given substitution. If this domain does not apply
+	 * substitutions, it is fine to return {@code this}.
+	 * 
+	 * @param reference    the domain whose abstract information needs to be
+	 *                         copied
+	 * @param replacements the heap replacements of this instance
+	 * 
+	 * @return the new instance
+	 */
+	H mk(
+			H reference,
+			List<HeapReplacement> replacements);
 
 	@Override
 	@SuppressWarnings("unchecked")

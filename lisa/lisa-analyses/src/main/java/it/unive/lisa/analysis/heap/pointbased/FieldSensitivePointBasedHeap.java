@@ -93,10 +93,23 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	}
 
 	@Override
-	protected FieldSensitivePointBasedHeap mk(
-			HeapEnvironment<AllocationSites> heapEnv,
+	public FieldSensitivePointBasedHeap mk(
+			FieldSensitivePointBasedHeap reference) {
+		return new FieldSensitivePointBasedHeap(reference.heapEnv, reference.replacements, reference.fields);
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap mk(
+			FieldSensitivePointBasedHeap reference,
 			List<HeapReplacement> replacements) {
-		return new FieldSensitivePointBasedHeap(heapEnv, replacements, fields);
+		return new FieldSensitivePointBasedHeap(reference.heapEnv, replacements, reference.fields);
+	}
+
+	@Override
+	protected FieldSensitivePointBasedHeap mk(
+			FieldSensitivePointBasedHeap reference,
+			HeapEnvironment<AllocationSites> heapEnv) {
+		return new FieldSensitivePointBasedHeap(heapEnv, reference.replacements, reference.fields);
 	}
 
 	@Override
