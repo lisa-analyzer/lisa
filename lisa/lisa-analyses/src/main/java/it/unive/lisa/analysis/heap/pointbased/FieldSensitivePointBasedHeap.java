@@ -39,7 +39,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	/**
 	 * Tracks the fields of each allocation site.
 	 */
-	private final GenericMapLattice<AllocationSite, ExpressionSet> fields;
+	public final GenericMapLattice<AllocationSite, ExpressionSet> fields;
 
 	/**
 	 * Builds a new instance of field-sensitive point-based heap.
