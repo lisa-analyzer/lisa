@@ -95,7 +95,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	@Override
 	public FieldSensitivePointBasedHeap mk(
 			FieldSensitivePointBasedHeap reference) {
-		return new FieldSensitivePointBasedHeap(reference.heapEnv, reference.replacements, reference.fields);
+		return reference;
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 		replacement.addTarget(site);
 		replacements.add(replacement);
 
-		return new FieldSensitivePointBasedHeap(heap, new GenericMapLattice<>(fields.lattice, newFields));
+		return mk(new FieldSensitivePointBasedHeap(heap, new GenericMapLattice<>(fields.lattice, newFields)));
 	}
 
 	@Override
@@ -197,8 +197,8 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 						addField(site, child, mapping);
 				}
 
-			return new FieldSensitivePointBasedHeap(heapEnv, heapEnv.getSubstitution(),
-					new GenericMapLattice<>(fields.lattice, mapping));
+			return mk(new FieldSensitivePointBasedHeap(heapEnv, heapEnv.getSubstitution(),
+					new GenericMapLattice<>(fields.lattice, mapping)));
 		} else if (expression instanceof MemoryAllocation) {
 			String loc = expression.getCodeLocation().getCodeLocation();
 			Set<AllocationSite> alreadyAllocated = getAllocatedAt(loc);
@@ -245,12 +245,12 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 					env = new HeapEnvironment<>(env.lattice, map);
 				}
 
-				return new FieldSensitivePointBasedHeap(env, replacements, fields);
+				return mk(new FieldSensitivePointBasedHeap(env, replacements, fields));
 			}
 		}
 
 		FieldSensitivePointBasedHeap sss = super.smallStepSemantics(expression, pp, oracle);
-		return new FieldSensitivePointBasedHeap(sss.heapEnv, fields);
+		return mk(new FieldSensitivePointBasedHeap(sss.heapEnv, fields));
 	}
 
 	private void addField(
@@ -386,19 +386,19 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	public FieldSensitivePointBasedHeap popScope(
 			ScopeToken scope)
 			throws SemanticException {
-		return new FieldSensitivePointBasedHeap(heapEnv.popScope(scope), fields);
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.popScope(scope), fields));
 	}
 
 	@Override
 	public FieldSensitivePointBasedHeap pushScope(
 			ScopeToken scope)
 			throws SemanticException {
-		return new FieldSensitivePointBasedHeap(heapEnv.pushScope(scope), fields);
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.pushScope(scope), fields));
 	}
 
 	@Override
 	public FieldSensitivePointBasedHeap top() {
-		return new FieldSensitivePointBasedHeap(heapEnv.top(), Collections.emptyList(), fields.top());
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.top(), Collections.emptyList(), fields.top()));
 	}
 
 	@Override
@@ -408,7 +408,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 
 	@Override
 	public FieldSensitivePointBasedHeap bottom() {
-		return new FieldSensitivePointBasedHeap(heapEnv.bottom(), Collections.emptyList(), fields.bottom());
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.bottom(), Collections.emptyList(), fields.bottom()));
 	}
 
 	@Override
@@ -420,18 +420,18 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	public FieldSensitivePointBasedHeap lubAux(
 			FieldSensitivePointBasedHeap other)
 			throws SemanticException {
-		return new FieldSensitivePointBasedHeap(heapEnv.lub(other.heapEnv),
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.lub(other.heapEnv),
 				Collections.emptyList(),
-				fields.lub(other.fields));
+				fields.lub(other.fields)));
 	}
 
 	@Override
 	public FieldSensitivePointBasedHeap glbAux(
 			FieldSensitivePointBasedHeap other)
 			throws SemanticException {
-		return new FieldSensitivePointBasedHeap(heapEnv.glb(other.heapEnv),
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.glb(other.heapEnv),
 				Collections.emptyList(),
-				fields.glb(other.fields));
+				fields.glb(other.fields)));
 	}
 
 	@Override
@@ -445,13 +445,13 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	public FieldSensitivePointBasedHeap forgetIdentifier(
 			Identifier id)
 			throws SemanticException {
-		return new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifier(id), fields);
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifier(id), fields));
 	}
 
 	@Override
 	public FieldSensitivePointBasedHeap forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {
-		return new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiersIf(test), fields);
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiersIf(test), fields));
 	}
 }
