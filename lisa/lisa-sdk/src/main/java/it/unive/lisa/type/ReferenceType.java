@@ -1,6 +1,6 @@
 package it.unive.lisa.type;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -42,7 +42,11 @@ public class ReferenceType implements PointerType {
 	@Override
 	public Set<Type> allInstances(
 			TypeSystem types) {
-		return Collections.singleton(this);
+		Set<Type> instances = new HashSet<>();
+		for (Type inner : getInnerType().allInstances(types))
+			instances.add(new ReferenceType(inner));	
+		instances.add(this);
+		return  instances;
 	}
 
 	@Override
