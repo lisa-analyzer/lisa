@@ -30,7 +30,8 @@ public class ReferenceType implements PointerType {
 	@Override
 	public boolean canBeAssignedTo(
 			Type other) {
-		return other instanceof ReferenceType && getInnerType().canBeAssignedTo(other.asReferenceType().getInnerType()) || other.isUntyped();
+		return other instanceof ReferenceType && getInnerType().canBeAssignedTo(other.asReferenceType().getInnerType())
+				|| other.isUntyped();
 	}
 
 	@Override
@@ -40,7 +41,7 @@ public class ReferenceType implements PointerType {
 			return this;
 		else if (other instanceof ReferenceType)
 			return new ReferenceType(getInnerType().commonSupertype(other.asReferenceType().getInnerType()));
-		
+
 		return Untyped.INSTANCE;
 	}
 
@@ -49,9 +50,9 @@ public class ReferenceType implements PointerType {
 			TypeSystem types) {
 		Set<Type> instances = new HashSet<>();
 		for (Type inner : getInnerType().allInstances(types))
-			instances.add(new ReferenceType(inner));	
+			instances.add(new ReferenceType(inner));
 		instances.add(this);
-		return  instances;
+		return instances;
 	}
 
 	@Override
