@@ -1,6 +1,6 @@
 package it.unive.lisa.type;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -30,19 +30,29 @@ public class ReferenceType implements PointerType {
 	@Override
 	public boolean canBeAssignedTo(
 			Type other) {
-		return other instanceof PointerType || other.isUntyped();
+		return other instanceof ReferenceType && getInnerType().canBeAssignedTo(other.asReferenceType().getInnerType())
+				|| other.isUntyped();
 	}
 
 	@Override
 	public Type commonSupertype(
 			Type other) {
-		return equals(other) ? this : Untyped.INSTANCE;
+		if (equals(other))
+			return this;
+		else if (other instanceof ReferenceType)
+			return new ReferenceType(getInnerType().commonSupertype(other.asReferenceType().getInnerType()));
+
+		return Untyped.INSTANCE;
 	}
 
 	@Override
 	public Set<Type> allInstances(
 			TypeSystem types) {
-		return Collections.singleton(this);
+		Set<Type> instances = new HashSet<>();
+		for (Type inner : getInnerType().allInstances(types))
+			instances.add(new ReferenceType(inner));
+		instances.add(this);
+		return instances;
 	}
 
 	@Override

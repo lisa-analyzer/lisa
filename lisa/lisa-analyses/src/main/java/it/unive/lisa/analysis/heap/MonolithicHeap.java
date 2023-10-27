@@ -73,6 +73,13 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
+	public MonolithicHeap mk(
+			MonolithicHeap reference,
+			List<HeapReplacement> replacements) {
+		return TOP;
+	}
+
+	@Override
 	public MonolithicHeap semanticsOf(
 			HeapExpression expression,
 			ProgramPoint pp,

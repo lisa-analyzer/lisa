@@ -92,35 +92,19 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		this.replacements = replacements.isEmpty() ? Collections.emptyList() : replacements;
 	}
 
-	@Override
-	public A mk(
-			A reference) {
-		return mk(reference.heapEnv, Collections.emptyList());
-	}
-
 	/**
-	 * Builds a new instance of this class given its components.
+	 * Builds a new instance of this class by copying abstract information from
+	 * {@code reference} and using the given environment for storing points-to
+	 * information.
 	 * 
-	 * @param heapEnv the heap environment that this instance tracks
-	 * 
-	 * @return the new instance
-	 */
-	protected A mk(
-			HeapEnvironment<AllocationSites> heapEnv) {
-		return mk(heapEnv, Collections.emptyList());
-	}
-
-	/**
-	 * Builds a new instance of this class given its components.
-	 * 
-	 * @param heapEnv      the heap environment that this instance tracks
-	 * @param replacements the heap replacements of this instance
+	 * @param reference the domain whose abstract information needs to be copied
+	 * @param heapEnv   the heap environment that this instance tracks
 	 * 
 	 * @return the new instance
 	 */
 	protected abstract A mk(
-			HeapEnvironment<AllocationSites> heapEnv,
-			List<HeapReplacement> replacements);
+			A reference,
+			HeapEnvironment<AllocationSites> heapEnv);
 
 	@Override
 	public A assign(
@@ -146,7 +130,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 					// so that x and y become aliases
 					Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
 					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(lhs_ref, rhs_ref, pp, oracle);
-					result = result.lub(mk(heap));
+					result = result.lub(mk(sss, heap));
 				} else if (rhs_ref instanceof StackAllocationSite
 						&& !getAllocatedAt(((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
 					// for stack elements, assignment works as a shallow copy
@@ -155,12 +139,12 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				else {
 					// aliasing: id and star_y points to the same object
 					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, rhs_ref, pp, oracle);
-					result = result.lub(mk(heap));
+					result = result.lub(mk(sss, heap));
 				}
 			} else
 				result = result.lub(sss);
 
-		return mk(result.heapEnv, replacements);
+		return mk(result, replacements);
 	}
 
 	/**
@@ -199,6 +183,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * 
 	 * @throws SemanticException if something goes wrong during the analysis
 	 */
+	@SuppressWarnings("unchecked")
 	public A shallowCopy(
 			Identifier id,
 			StackAllocationSite site,
@@ -218,7 +203,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		replacement.addTarget(site);
 		replacements.add(replacement);
 
-		return mk(tmp);
+		return mk((A) this, tmp);
 	}
 
 	@Override
