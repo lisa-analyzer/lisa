@@ -72,14 +72,14 @@ public class CodeMemberDescriptor implements CodeElement {
 	/**
 	 * Builds the descriptor with {@link Untyped} return type.
 	 * 
-	 * @param location the location where the cfg associated is define within
+	 * @param location the location where the cfg associated is defined within
 	 *                     the program
 	 * @param unit     the {@link Unit} containing the cfg associated to this
 	 *                     descriptor
 	 * @param instance whether or not the cfg associated to this descriptor is
 	 *                     an instance cfg
 	 * @param name     the name of the CFG associated with this descriptor
-	 * @param formals  the formal parametersof the CFG associated with this
+	 * @param formals  the formal parameters of the CFG associated with this
 	 *                     descriptor
 	 */
 	public CodeMemberDescriptor(
@@ -94,7 +94,7 @@ public class CodeMemberDescriptor implements CodeElement {
 	/**
 	 * Builds the descriptor.
 	 * 
-	 * @param location   the location where the cfg associated is define within
+	 * @param location   the location where the cfg associated is defined within
 	 *                       the program
 	 * @param unit       the {@link Unit} containing the cfg associated to this
 	 *                       descriptor
@@ -119,8 +119,8 @@ public class CodeMemberDescriptor implements CodeElement {
 	/**
 	 * Builds the descriptor.
 	 * 
-	 * @param location    the location where the cfg associated is define within
-	 *                        the program
+	 * @param location    the location where the cfg associated is defined
+	 *                        within the program
 	 * @param unit        the {@link Unit} containing the cfg associated to this
 	 *                        descriptor
 	 * @param instance    whether or not the cfg associated to this descriptor
