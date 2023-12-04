@@ -190,7 +190,6 @@ public abstract class BaseCallGraph extends CallGraph {
 		else
 			resolved = new MultiCall(call, cfgcall, cfgcallnorec, nativecall, nativecallnorec);
 
-		resolved.setOffset(call.getOffset());
 		resolved.setSource(call);
 		resolvedCache.computeIfAbsent(call, c -> new HashMap<>()).put(typeList, resolved);
 

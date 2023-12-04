@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -11,7 +13,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.util.datastructures.graph.code.CodeNode;
-import java.util.Objects;
 
 /**
  * A statement of the program to analyze.
@@ -24,11 +25,6 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * The cfg containing this statement.
 	 */
 	private final CFG cfg;
-
-	/**
-	 * The offset of the statement within the cfg.
-	 */
-	protected int offset;
 
 	/**
 	 * The location where this statement happens.
@@ -49,17 +45,11 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 		Objects.requireNonNull(location, "The location of a statement cannot be null");
 		this.cfg = cfg;
 		this.location = location;
-		this.offset = -1;
 	}
 
 	@Override
 	public final CFG getCFG() {
 		return cfg;
-	}
-
-	@Override
-	public final int getOffset() {
-		return offset;
 	}
 
 	/**
@@ -183,10 +173,7 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	@Override
 	public int compareTo(
 			Statement o) {
-		int cmp;
-		if ((cmp = location.compareTo(o.location)) != 0)
-			return cmp;
-		return Integer.compare(offset, o.offset);
+		return location.compareTo(o.location);
 	}
 
 	/**

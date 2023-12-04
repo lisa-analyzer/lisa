@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -8,7 +10,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
-import java.util.Collection;
 
 /**
  * A call that wraps another one that has been created through
@@ -34,14 +35,6 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 		if (!(call instanceof ResolvedCall))
 			throw new IllegalArgumentException("The given call has not been resolved yet");
 		this.call = call;
-	}
-
-	@Override
-	public int setOffset(
-			int offset) {
-		// we do not reset the offsets here
-		Expression[] params = getParameters();
-		return params[params.length - 1].getOffset();
 	}
 
 	@Override

@@ -33,12 +33,6 @@ public class NoOp extends Statement {
 	}
 
 	@Override
-	public int setOffset(
-			int offset) {
-		return this.offset = offset;
-	}
-
-	@Override
 	public int hashCode() {
 		return super.hashCode() ^ getClass().getName().hashCode();
 	}

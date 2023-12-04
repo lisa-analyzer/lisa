@@ -42,12 +42,6 @@ public class DefaultParamInitialization extends Expression {
 	}
 
 	@Override
-	public int setOffset(
-			int offset) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public <V> boolean accept(
 			GraphVisitor<CFG, Statement, Edge, V> visitor,
 			V tool) {

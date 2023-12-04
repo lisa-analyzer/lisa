@@ -314,7 +314,7 @@ public class EqualityContractVerificationTest {
 		verify(AdjacencyMatrix.class);
 		verify(NodeEdges.class);
 		verify(NodeList.class,
-				verifier -> verifier.withIgnoredFields("nextOffset", "sequentialSingleton", "computeOffsets"));
+				verifier -> verifier.withIgnoredFields("sequentialSingleton"));
 		verify(it.unive.lisa.util.datastructures.graph.code.NodeList.NodeEdges.class);
 
 		verify(ConcurrentFIFOWorkingSet.class);
@@ -386,7 +386,7 @@ public class EqualityContractVerificationTest {
 		// suppress nullity: the verifier will try to pass in a code location
 		// with null fields (not possible) and this would cause warnings
 
-		List<String> statementFields = List.of("cfg", "offset");
+		List<String> statementFields = List.of("cfg");
 		List<String> expressionFields = ListUtils.union(statementFields,
 				List.of("parent", "metaVariables"));
 

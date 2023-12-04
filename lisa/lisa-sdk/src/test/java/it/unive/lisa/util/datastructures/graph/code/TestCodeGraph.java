@@ -25,12 +25,6 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 		}
 
 		@Override
-		public int setOffset(
-				int offset) {
-			return offset;
-		}
-
-		@Override
 		public String toString() {
 			return String.valueOf(id);
 		}
@@ -62,11 +56,6 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 		public int compareTo(
 				TestCodeNode o) {
 			return id - o.id;
-		}
-
-		@Override
-		public int getOffset() {
-			return 0;
 		}
 	}
 

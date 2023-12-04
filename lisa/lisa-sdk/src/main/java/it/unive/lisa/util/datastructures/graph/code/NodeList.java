@@ -1,9 +1,6 @@
 package it.unive.lisa.util.datastructures.graph.code;
 
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.util.collections.CollectionUtilities.SortedSetCollector;
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Node;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,14 +13,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.util.collections.CollectionUtilities.SortedSetCollector;
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.Node;
 
 /**
  * A list of nodes of a {@link CodeGraph}, together with the edges connecting
@@ -57,24 +56,12 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * Mapping from each node to all the edges that cannot be represented as
 	 * sequential exection through {@link #nodes}.
 	 */
-	private final SortedMap<N, NodeEdges<G, N, E>> extraEdges;
+	private final Map<N, NodeEdges<G, N, E>> extraEdges;
 
 	/**
 	 * A singleton to be used for creating sequential edges.
 	 */
 	private final E sequentialSingleton;
-
-	/**
-	 * The next available offset to be assigned to the next node
-	 */
-	private int nextOffset;
-
-	/**
-	 * If true, this list will compute offsets of its nodes. This can be turned
-	 * off for lists that serve as views of other lists, thus not representing
-	 * the whole code of a graph.
-	 */
-	private final boolean computeOffsets;
 
 	/**
 	 * Builds a new list. Offsets of nodes added to this list will be set
@@ -106,9 +93,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		this.sequentialSingleton = sequentialSingleton;
 		nodes = new LinkedList<>();
 		cutoff = new HashSet<>();
-		extraEdges = new TreeMap<>();
-		nextOffset = 0;
-		this.computeOffsets = computeOffsets;
+		extraEdges = new HashMap<>();
 	}
 
 	/**
@@ -121,11 +106,9 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		sequentialSingleton = other.sequentialSingleton;
 		nodes = new LinkedList<>(other.nodes);
 		cutoff = new HashSet<>(other.cutoff);
-		extraEdges = new TreeMap<>();
+		extraEdges = new HashMap<>();
 		for (Entry<N, NodeEdges<G, N, E>> entry : other.extraEdges.entrySet())
 			extraEdges.put(entry.getKey(), new NodeEdges<>(entry.getValue()));
-		nextOffset = other.nextOffset;
-		computeOffsets = other.computeOffsets;
 	}
 
 	/**
@@ -149,8 +132,6 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (size != 0)
 			cutoff.add(size - 1);
 		nodes.add(node);
-		if (computeOffsets)
-			nextOffset = node.setOffset(nextOffset) + 1;
 	}
 
 	/**
@@ -198,17 +179,6 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 				} else
 					cutoff.add(target - 1);
 			}
-
-		recomputeOffsets();
-	}
-
-	private void recomputeOffsets() {
-		if (!computeOffsets)
-			return;
-		int of = 0;
-		for (N node : nodes)
-			of = node.setOffset(of) + 1;
-		nextOffset = of;
 	}
 
 	/**
@@ -217,7 +187,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the collection of nodes
 	 */
 	public final Collection<N> getNodes() {
-		return new TreeSet<>(nodes);
+		return new ArrayList<>(nodes);
 	}
 
 	/**
@@ -330,7 +300,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1 || dest == -1)
 			return Collections.emptySet();
 
-		SortedSet<E> result = new TreeSet<>();
+		Set<E> result = new HashSet<>();
 		if (src == dest - 1 && !cutoff.contains(src))
 			result.add(sequentialSingleton.newInstance(source, destination));
 
@@ -356,7 +326,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1)
 			return Collections.emptySet();
 
-		SortedSet<E> result = new TreeSet<>();
+		Set<E> result = new HashSet<>();
 		if (src != 0 && !cutoff.contains(src - 1))
 			result.add(sequentialSingleton.newInstance(nodes.get(src - 1), node));
 
@@ -380,7 +350,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1)
 			return Collections.emptySet();
 
-		SortedSet<E> result = new TreeSet<>();
+		Set<E> result = new HashSet<>();
 		if (src != nodes.size() - 1 && !cutoff.contains(src))
 			result.add(sequentialSingleton.newInstance(node, nodes.get(src + 1)));
 
@@ -397,10 +367,10 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the collection of edges
 	 */
 	public final Collection<E> getEdges() {
-		SortedSet<E> result = extraEdges.values().stream()
+		Set<E> result = extraEdges.values().stream()
 				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
 				.distinct()
-				.collect(new SortedSetCollector<>());
+				.collect(Collectors.toSet());
 		for (int i = 0; i < nodes.size() - 1; i++)
 			if (!cutoff.contains(i))
 				result.add(sequentialSingleton.newInstance(nodes.get(i), nodes.get(i + 1)));
@@ -424,7 +394,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1)
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
-		SortedSet<N> result = new TreeSet<>();
+		Set<N> result = new HashSet<>();
 		if (src != nodes.size() - 1 && !cutoff.contains(src))
 			result.add(nodes.get(src + 1));
 
@@ -452,7 +422,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1)
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
-		SortedSet<N> result = new TreeSet<>();
+		Set<N> result = new HashSet<>();
 		if (src != 0 && !cutoff.contains(src - 1))
 			result.add(nodes.get(src - 1));
 
@@ -545,9 +515,6 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 
 			removeNode(t);
 		}
-
-		if (!removedEdges.isEmpty() || !replacedEdges.isEmpty())
-			recomputeOffsets();
 	}
 
 	/**
@@ -637,7 +604,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		for (int i = 0; i < nodes.size(); i++) {
 
 			N node = nodes.get(i);
-			res.append(node.getOffset()).append(": ").append(node);
+			res.append(node);
 
 			NodeEdges<G, N, E> edges = extraEdges.get(node);
 			if (edges != null) {
@@ -851,18 +818,18 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	public static class NodeEdges<G extends CodeGraph<G, N, E>,
 			N extends CodeNode<G, N, E>,
 			E extends CodeEdge<G, N, E>> {
-		private final SortedSet<E> ingoing;
-		private final SortedSet<E> outgoing;
+		private final Set<E> ingoing;
+		private final Set<E> outgoing;
 
 		private NodeEdges() {
-			ingoing = new TreeSet<>();
-			outgoing = new TreeSet<>();
+			ingoing = new HashSet<>();
+			outgoing = new HashSet<>();
 		}
 
 		private NodeEdges(
 				NodeEdges<G, N, E> other) {
-			ingoing = new TreeSet<>(other.ingoing);
-			outgoing = new TreeSet<>(other.outgoing);
+			ingoing = new HashSet<>(other.ingoing);
+			outgoing = new HashSet<>(other.outgoing);
 		}
 
 		/**
