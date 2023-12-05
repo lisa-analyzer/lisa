@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_strings.branching(strings__this,_untyped_x).json", "untyped_strings.constants(strings__this).json", "untyped_strings.loops(strings__this,_untyped_x).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "27ms",
+    "end" : "2023-12-05T13:07:31.253+01:00",
+    "expressions" : "20",
+    "files" : "3",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2023-12-05T13:07:31.226+01:00",
+    "statements" : "12",
+    "units" : "1",
+    "version" : "0.1b8",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/string/char-inclusion"
+  }
+}

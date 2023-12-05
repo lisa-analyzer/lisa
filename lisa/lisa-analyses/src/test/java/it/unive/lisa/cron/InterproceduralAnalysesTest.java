@@ -17,7 +17,7 @@ import org.junit.Test;
 public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testWorstCaseCHACallGraph() {
+	public void testWorstCaseCHA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -27,13 +27,13 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
 		conf.callGraph = new CHACallGraph();
 		conf.testDir = "interprocedural";
-		conf.testSubDir = "CHA";
-		conf.programFile = "program.imp";
+		conf.testSubDir = "modular-cha";
+		conf.programFile = "modular.imp";
 		perform(conf);
 	}
 
 	@Test
-	public void testWorstCaseRTACallGraph() {
+	public void testWorstCaseRTA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -43,13 +43,13 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
-		conf.testSubDir = "RTA";
-		conf.programFile = "program.imp";
+		conf.testSubDir = "modular-rta";
+		conf.programFile = "modular.imp";
 		perform(conf);
 	}
 
 	@Test
-	public void testRTAContextSensitive1() {
+	public void testContextSensitiveRTA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -59,13 +59,13 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
-		conf.testSubDir = "RTAContextSensitive1";
-		conf.programFile = "programContextSensitive1.imp";
+		conf.testSubDir = "context";
+		conf.programFile = "context.imp";
 		perform(conf);
 	}
 
 	@Test
-	public void testRTAContextSensitive2() {
+	public void testContextSensitiveRTAHelper() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -75,29 +75,13 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
-		conf.testSubDir = "RTAContextSensitive2";
-		conf.programFile = "programContextSensitive2.imp";
+		conf.testSubDir = "context-helper-last";
+		conf.programFile = "context-helper.imp";
 		perform(conf);
 	}
 
 	@Test
-	public void testRTAContextSensitive3() {
-		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Sign()),
-				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
-		conf.callGraph = new RTACallGraph();
-		conf.testDir = "interprocedural";
-		conf.testSubDir = "RTAContextSensitive3";
-		conf.programFile = "programContextSensitive3.imp";
-		perform(conf);
-	}
-
-	@Test
-	public void testRTAContextSensitive4() {
+	public void testContextSensitiveRTAHelperFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -107,13 +91,13 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
-		conf.testSubDir = "RTAContextSensitive4";
-		conf.programFile = "programContextSensitive3.imp";
+		conf.testSubDir = "context-helper-full";
+		conf.programFile = "context-helper.imp";
 		perform(conf);
 	}
 
 	@Test
-	public void testRTAContextSensitive5() {
+	public void testContextSensitiveRTAArrayOpPP() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -123,13 +107,13 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
-		conf.testSubDir = "RTAContextSensitive5";
-		conf.programFile = "programContextSensitive4.imp";
+		conf.testSubDir = "context-pp-arrayop";
+		conf.programFile = "array-op.imp";
 		perform(conf);
 	}
 
 	@Test
-	public void testRTAContextSensitive6() {
+	public void testContextSensitiveRTATwoArraysPP() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -139,8 +123,8 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
-		conf.testSubDir = "RTAContextSensitive6";
-		conf.programFile = "programContextSensitive5.imp";
+		conf.testSubDir = "context-pp-twoarrays";
+		conf.programFile = "two-arrays.imp";
 		perform(conf);
 	}
 }

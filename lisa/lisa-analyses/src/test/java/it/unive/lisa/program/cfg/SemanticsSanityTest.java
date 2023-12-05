@@ -177,12 +177,6 @@ public class SemanticsSanityTest {
 		fake = new Expression(cfg, unknownLocation) {
 
 			@Override
-			public int setOffset(
-					int offset) {
-				return 0;
-			}
-
-			@Override
 			public <V> boolean accept(
 					GraphVisitor<CFG, Statement, Edge, V> visitor,
 					V tool) {

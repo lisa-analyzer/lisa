@@ -26,11 +26,6 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	private final CFG cfg;
 
 	/**
-	 * The offset of the statement within the cfg.
-	 */
-	protected int offset;
-
-	/**
 	 * The location where this statement happens.
 	 */
 	private final CodeLocation location;
@@ -49,17 +44,11 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 		Objects.requireNonNull(location, "The location of a statement cannot be null");
 		this.cfg = cfg;
 		this.location = location;
-		this.offset = -1;
 	}
 
 	@Override
 	public final CFG getCFG() {
 		return cfg;
-	}
-
-	@Override
-	public final int getOffset() {
-		return offset;
 	}
 
 	/**
@@ -183,10 +172,7 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	@Override
 	public int compareTo(
 			Statement o) {
-		int cmp;
-		if ((cmp = location.compareTo(o.location)) != 0)
-			return cmp;
-		return Integer.compare(offset, o.offset);
+		return location.compareTo(o.location);
 	}
 
 	/**

@@ -73,12 +73,6 @@ public class AccessGlobal extends Expression {
 	}
 
 	@Override
-	public int setOffset(
-			int offset) {
-		return this.offset = offset;
-	}
-
-	@Override
 	public <V> boolean accept(
 			GraphVisitor<CFG, Statement, Edge, V> visitor,
 			V tool) {

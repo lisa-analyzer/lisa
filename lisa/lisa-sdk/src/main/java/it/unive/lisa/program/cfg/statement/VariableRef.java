@@ -65,12 +65,6 @@ public class VariableRef extends Expression {
 		this.name = name;
 	}
 
-	@Override
-	public int setOffset(
-			int offset) {
-		return this.offset = offset;
-	}
-
 	/**
 	 * Yields the name of this variable.
 	 * 

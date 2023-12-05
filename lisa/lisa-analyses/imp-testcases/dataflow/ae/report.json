@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_ae.f0(ae__this).json", "untyped_ae.f1(ae__this).json", "untyped_ae.f2(ae__this).json", "untyped_ae.f3(ae__this).json", "untyped_ae.f4(ae__this).json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "476ms",
+    "end" : "2023-12-05T13:13:09.395+01:00",
+    "expressions" : "151",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "5",
+    "programs" : "1",
+    "start" : "2023-12-05T13:13:08.919+01:00",
+    "statements" : "54",
+    "units" : "1",
+    "version" : "0.1b8",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/dataflow/ae"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.f1(A__this).json", "untyped_A.f2(A__this).json", "untyped_A.f3(A__this).json", "untyped_A.f4(A__this).json", "untyped_A.f5(A__this).json", "untyped_A.f6(A__this).json", "untyped_A.f7(A__this).json", "untyped_A.f8(A__this).json", "untyped_A.f9(A__this).json" ],
+  "info" : {
+    "cfgs" : "9",
+    "duration" : "641ms",
+    "end" : "2023-12-05T12:52:21.270+01:00",
+    "expressions" : "143",
+    "files" : "9",
+    "globals" : "2",
+    "members" : "9",
+    "programs" : "1",
+    "start" : "2023-12-05T12:52:20.629+01:00",
+    "statements" : "55",
+    "units" : "1",
+    "version" : "0.1b8",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/heap/pp-field"
+  }
+}

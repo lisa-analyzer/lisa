@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_tutorial.constants(tutorial__this).json", "untyped_tutorial.div(tutorial__this,_untyped_i,_untyped_j).json", "untyped_tutorial.doublewhile(tutorial__this,_untyped_t).json", "untyped_tutorial.gcd(tutorial__this,_untyped_a,_untyped_b).json", "untyped_tutorial.glb(tutorial__this,_untyped_x,_untyped_y).json", "untyped_tutorial.intv_dec(tutorial__this).json", "untyped_tutorial.sat(tutorial__this).json", "untyped_tutorial.sat(tutorial__this,_untyped_x,_untyped_y).json", "untyped_tutorial.sat2(tutorial__this).json", "untyped_tutorial.sign_parity_example(tutorial__this).json", "untyped_tutorial.ub_example(tutorial__this,_untyped_y,_untyped_z).json" ],
+  "info" : {
+    "cfgs" : "11",
+    "duration" : "66ms",
+    "end" : "2023-12-05T12:59:54.772+01:00",
+    "expressions" : "153",
+    "files" : "11",
+    "globals" : "0",
+    "members" : "11",
+    "programs" : "1",
+    "start" : "2023-12-05T12:59:54.706+01:00",
+    "statements" : "62",
+    "units" : "1",
+    "version" : "0.1b8",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/numeric/interval"
+  }
+}

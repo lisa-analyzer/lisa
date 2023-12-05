@@ -1,0 +1,328 @@
+<html>
+	<head>
+		<title>untyped tests::helper(tests* this, untyped i, untyped dispatcher)</title>
+		
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
+		
+		<script src="js/cytoscape-3.21.1.min.js"></script>
+		<script src="js/jquery-3.0.0.min.js"></script>
+		<script src="js/cytoscape-graphml-1.0.6-hier.js"></script>
+		
+		<style>
+		body {
+			font-family: helvetica neue, helvetica, liberation sans, arial,
+				sans-serif;
+			font-size: 14px;
+			background-color: white;
+		}
+		
+		html, body, #full {
+			height: 100%;
+		}
+		
+		#full {
+			display: flex;
+			flex-direction: row;
+		}
+		
+		#cy {
+			flex-grow: 0.5;
+			z-index: 10;
+			max-width: 70%;
+		}
+		
+		#header {
+			position: fixed;
+			z-index: 11;
+			overflow-x: hidden;
+		}
+		
+		#header div {
+			background-color: #e2e2e2;
+			padding: 20px 15px;
+			margin-bottom: 10px;
+		}
+		
+		#header div b {
+			padding: 6px 0;
+			color: #333333;
+			display: block;
+			cursor: pointer;
+		}
+		
+		#header div span {
+			padding: 6px 0;
+			display: block;
+		}
+		
+		#header div span label b {
+			padding: 0;
+			display: inline;
+		}
+		
+		#header div span input {
+			margin: 0;
+		}
+		#descriptions {
+			flex-grow: 0.5;
+			z-index: 11;
+			overflow: auto;
+			font-size: 18px;
+			border-left: 2px solid #e2e2e2;
+    		padding-left: 20px;
+		}
+		.description-header {
+    		font-weight: bold;
+		}
+		#descriptions ul {
+		    padding-left: inherit;
+		    margin: 5px 0;
+		}
+		.description-nest {
+			padding-left: 15px;
+		}
+		.header-hidden {
+			display: none;
+		}
+		.description-title-wrapper {
+    		margin-top: 0.83em;
+    		margin-bottom: 0.83em;
+		}
+		.description-title {
+		    font-size: 1.5em;
+		    font-weight: bold;
+		}
+		.description-title-text {
+		    font-size: 1.5em;
+		    font-family: monospace;
+		}
+		#header-none {
+    		margin-top: 0.83em;
+    		margin-bottom: 0.83em;
+		}
+		.no-results {
+   			border: solid 2px #FF0000;  
+   			background-color: #FF000040;
+		}
+		</style>
+	</head>
+
+	<body>
+		<h1>untyped tests::helper(tests* this, untyped i, untyped dispatcher)</h1>
+		<h3>['imp-testcases/visualization/visualization.imp':34:36]</h3>
+		<hr />
+		<div id="full">
+			<div id="header">
+				<div>
+					<b>Node border: <font color="darkgray">gray</font>, single</b> 
+					<b>Entrypoint border: black, single</b> 
+					<b>Exitpoint border: black, double</b> 
+					<b>Sequential edge: black, solid</b> 
+					<b>False edge: <font color="red">red</font>, solid</b> 
+					<b>True edge: <font color="blue">blue</font>, solid</b>
+				</div>
+				<div>
+					<input id="search" type="text" placeholder="Search node.."/>
+					<input id="next" type="button" value="Next" disabled/>
+					<input id="prev" type="button" value="Previous" disabled/>
+					<b id="relayout">Run layout</b> 
+					<b id="fit">Fit to viewport</b>
+				</div>
+			</div>
+			<div id="cy"></div>
+			<div id="descriptions">
+				<div id="header-none">
+				No node selected. Select a node to show its results.
+				</div>
+				<div id="header-node0" class="header-hidden">
+					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">return identity(dispatcher, i)</span></div>
+					<span class="description-header">expressions: </span>[ret_value@helper]<br/>
+					<span class="description-header">state: </span><br/>
+					<div class="description-nest">
+						<span class="description-header">heap: </span>monolith<br/>
+						<span class="description-header">type: </span><br/>
+						<div class="description-nest">
+							<span class="description-header">['imp-testcases/visualization/visualization.imp':34:36]:minusone: </span>[int32]<br/>
+							<span class="description-header">['imp-testcases/visualization/visualization.imp':34:36]:negative: </span>[int32]<br/>
+							<span class="description-header">['imp-testcases/visualization/visualization.imp':34:36]:one: </span>[int32]<br/>
+							<span class="description-header">['imp-testcases/visualization/visualization.imp':34:36]:positive: </span>[int32]<br/>
+							<span class="description-header">dispatcher: </span>#TOP#<br/>
+							<span class="description-header">i: </span>[int32]<br/>
+							<span class="description-header">ret_value@helper: </span>[int32]<br/>
+							<span class="description-header">this: </span>#TOP#<br/>
+						</div>
+						<span class="description-header">value: </span><br/>
+						<div class="description-nest">
+							<span class="description-header">['imp-testcases/visualization/visualization.imp':34:36]:minusone: </span>[-1, -1]<br/>
+							<span class="description-header">['imp-testcases/visualization/visualization.imp':34:36]:negative: </span>[-1, -1]<br/>
+							<span class="description-header">['imp-testcases/visualization/visualization.imp':34:36]:one: </span>[10, 10]<br/>
+							<span class="description-header">['imp-testcases/visualization/visualization.imp':34:36]:positive: </span>[10, 10]<br/>
+							<span class="description-header">dispatcher: </span>[-Inf, +Inf]<br/>
+							<span class="description-header">i: </span>[10, 10]<br/>
+							<span class="description-header">ret_value@helper: </span>[10, 10]<br/>
+							<span class="description-header">this: </span>[-Inf, +Inf]<br/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>			
+			var api;
+			var layoutOptions;
+			var cy = window.cy = cytoscape({
+				container: $('#cy'),
+				maxZoom: 100,
+				zoomingEnabled: true,
+				userZoomingEnabled: true,
+				style: [
+					{
+						selector: 'node',
+						css: {
+							'background-color': 'white',
+							'color': 'black',
+							'shape': 'rectangle',
+							'border-width': '1px',
+							'border-style': 'solid',
+							'border-color': 'darkgray',
+							'content': 'data(NODE_TEXT)',
+							'font-family': 'monospace',
+							'font-size': '18px',
+							'font-weight': 'bold',
+							'text-wrap': 'wrap',
+						}
+					},
+					{
+						selector: 'node[NODE_IS_ENTRY = "yes"]',
+						css: {
+							'border-width': '3px',
+							'border-style': 'solid',
+							'border-color': 'black',
+						}
+					},	
+					{
+						selector: 'node[NODE_IS_EXIT = "yes"]',
+						css: {
+							'border-width': '5px',
+							'border-style': 'double',
+							'border-color': 'black',
+						}
+					},
+				    {
+					    selector: 'node:selected',
+					    css: {
+							'border-color': 'orange',
+							'border-width': '2px',
+					    }
+					},
+					{
+						selector: 'edge',
+						css: {
+							'curve-style': 'bezier',
+							'width': 4,
+							'line-color': 'black',
+							'target-arrow-shape': 'triangle',
+							'target-arrow-color': 'black',
+							'arrow-scale': '2'
+						}
+					},
+					{
+						selector: 'edge[EDGE_KIND = "TrueEdge"]',
+						css: {
+							'line-color': 'blue',
+							'target-arrow-color': 'blue',
+						}
+					},
+					{
+						selector: 'edge[EDGE_KIND = "FalseEdge"]',
+						css: {
+							'line-color': 'red',
+							'target-arrow-color': 'red',
+						}
+					},			
+				],
+				
+				ready: function () {
+					var data = '<?xml version="1.0" encoding="UTF-8"?><graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns   http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="NODE_IS_ENTRY" for="node" attr.name="NODE_IS_ENTRY" attr.type="string"/><key id="NODE_IS_EXIT" for="node" attr.name="NODE_IS_EXIT" attr.type="string"/><key id="NODE_TEXT" for="node" attr.name="NODE_TEXT" attr.type="string"/><graph id="graph" edgedefault="directed"><node id="node0"><data key="NODE_IS_ENTRY">yes</data><data key="NODE_TEXT">return identity(dispatcher, i)</data><data key="NODE_IS_EXIT">yes</data></node></graph></graphml>'
+					this.graphml({layoutBy: null});
+					this.graphml(data);
+					
+					layoutOptions = {
+							name: 'breadthfirst',
+							fit: false,
+							directed: true,
+							spacingFactor: 2.5,
+					};
+					var layout = this.layout(layoutOptions);
+					if (layout && layout.run) {
+						layout.run();
+					}
+					this.fit();
+				}
+			});
+			
+			function relayout() {
+				var layout = cy.layout(layoutOptions);
+				if (layout && layout.run) {
+					layout.run();
+				}
+			}
+			$('#relayout').on('click', function () {
+				relayout();
+			});
+			$('#fit').on('click', function () {
+				cy.fit(cy.nodes(), 50);
+			});
+			
+			var lastsearchresult = [];
+			var lastshownelement = -1;
+			function centerToSearch() {
+				var target = lastsearchresult[lastshownelement];
+				cy.$('node:selected').unselect();
+				target.select();
+				cy.animate({ center: { eles: target } }, { duration: 0 });
+			}
+
+			$('#search').on('input', function (e) {
+				var query = e.target.value;
+				lastsearchresult = cy.nodes('[NODE_TEXT @*= "' + query + '"]');
+				var hasresults = lastsearchresult.size() != 0;
+				if (hasresults) {
+					lastshownelement = 0;
+					centerToSearch();
+					e.target.classList.remove('no-results');
+				} else {
+					lastshownelement = -1;
+					cy.$('node:selected').unselect();
+					e.target.classList.add('no-results');  
+				}
+				
+				if (query === "" || !hasresults) {
+					$('#next').prop('disabled', true);
+					$('#prev').prop('disabled', true);
+				} else {
+					$('#next').prop('disabled', false);
+					$('#prev').prop('disabled', false);
+				}
+			});
+			$('#next').on('click', function (e) {
+				if (lastshownelement != -1) {
+					lastshownelement = (lastshownelement + 1) % lastsearchresult.size();
+					centerToSearch();
+				}
+			});
+			$('#prev').on('click', function (e) {
+				if (lastshownelement != -1) {
+					lastshownelement = ((lastshownelement - 1) + lastsearchresult.size()) % lastsearchresult.size();
+					centerToSearch();
+				}
+			});
+			
+			cy.on('select', 'node', function(event) {
+		    	var id = event.target.id();
+				$('[id^=header-]').addClass('header-hidden');
+				$('#header-' + id).removeClass('header-hidden');
+			});
+			</script>
+	</body>
+</html>

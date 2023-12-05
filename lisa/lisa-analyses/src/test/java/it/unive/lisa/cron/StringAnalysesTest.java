@@ -22,8 +22,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new ValueEnvironment<>(new Prefix()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "prefix";
-		conf.programFile = "program.imp";
+		conf.testDir = "string";
+		conf.testSubDir = "prefix";
+		conf.programFile = "strings.imp";
 		perform(conf);
 	}
 
@@ -35,8 +36,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new ValueEnvironment<>(new Suffix()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "suffix";
-		conf.programFile = "program.imp";
+		conf.testDir = "string";
+		conf.testSubDir = "suffix";
+		conf.programFile = "strings.imp";
 		perform(conf);
 	}
 
@@ -48,8 +50,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new ValueEnvironment<>(new CharInclusion()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "char-inclusion";
-		conf.programFile = "program.imp";
+		conf.testDir = "string";
+		conf.testSubDir = "char-inclusion";
+		conf.programFile = "strings.imp";
 		perform(conf);
 	}
 
@@ -61,8 +64,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new ValueEnvironment<>(new Bricks()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "bricks";
-		conf.programFile = "program.imp";
+		conf.testDir = "string";
+		conf.testSubDir = "bricks";
+		conf.programFile = "strings.imp";
 		// we disable optimized test because of bricks normalization: without
 		// optimization, loops that get iterated more than once will have
 		// poststates of instructions within them built with at least one lub
@@ -83,8 +87,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new ValueEnvironment<>(new FSA()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "fsa";
-		conf.programFile = "program.imp";
+		conf.testDir = "string";
+		conf.testSubDir = "fsa";
+		conf.programFile = "strings.imp";
 		perform(conf);
 	}
 
@@ -96,8 +101,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new ValueEnvironment<>(new Tarsis()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "tarsis";
-		conf.programFile = "program.imp";
+		conf.testDir = "string";
+		conf.testSubDir = "tarsis";
+		conf.programFile = "strings.imp";
 		perform(conf);
 	}
 }

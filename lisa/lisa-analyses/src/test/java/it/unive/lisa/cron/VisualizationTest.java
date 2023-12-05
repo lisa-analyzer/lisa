@@ -47,7 +47,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		conf.serializeInputs = true;
 		conf.testDir = "visualization";
 		conf.testSubDir = "inputs";
-		conf.programFile = "program.imp";
+		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
 
@@ -57,7 +57,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		conf.analysisGraphs = GraphType.DOT;
 		conf.testDir = "visualization";
 		conf.testSubDir = "dot";
-		conf.programFile = "program.imp";
+		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
 
@@ -67,7 +67,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		conf.analysisGraphs = GraphType.GRAPHML;
 		conf.testDir = "visualization";
 		conf.testSubDir = "graphml";
-		conf.programFile = "program.imp";
+		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
 
@@ -77,7 +77,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		conf.analysisGraphs = GraphType.GRAPHML_WITH_SUBNODES;
 		conf.testDir = "visualization";
 		conf.testSubDir = "graphml-sub";
-		conf.programFile = "program.imp";
+		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
 
@@ -87,7 +87,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		conf.analysisGraphs = GraphType.HTML;
 		conf.testDir = "visualization";
 		conf.testSubDir = "html";
-		conf.programFile = "program.imp";
+		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
 
@@ -97,7 +97,7 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		conf.testDir = "visualization";
 		conf.testSubDir = "html-sub";
-		conf.programFile = "program.imp";
+		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
 }

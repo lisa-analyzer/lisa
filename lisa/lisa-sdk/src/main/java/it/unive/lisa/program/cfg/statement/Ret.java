@@ -34,12 +34,6 @@ public class Ret extends Statement {
 	}
 
 	@Override
-	public int setOffset(
-			int offset) {
-		return this.offset = offset;
-	}
-
-	@Override
 	public boolean stopsExecution() {
 		return true;
 	}

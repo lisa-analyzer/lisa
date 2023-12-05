@@ -8,7 +8,6 @@ import it.unive.lisa.program.cfg.statement.NaryStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Utility class to build {@link SerializableGraph}s from {@link CFG}s.
@@ -66,22 +66,33 @@ public class SerializableCFG {
 		SortedSet<SerializableNodeDescription> descrs = new TreeSet<>();
 		SortedSet<SerializableEdge> edges = new TreeSet<>();
 
-		for (Statement node : source.getNodes()) {
-			Map<Statement, List<Statement>> inners = new IdentityHashMap<>();
-			node.accept(new InnerNodeExtractor(), inners);
-			for (Statement inner : inners.keySet())
-				addNode(source, nodes, descrs, inner, inners.getOrDefault(inner, Collections.emptyList()),
-						descriptionGenerator);
-			addNode(source, nodes, descrs, node, inners.getOrDefault(node, Collections.emptyList()),
-					descriptionGenerator);
-		}
+		OffsetGenerator gen = new OffsetGenerator();
+		source.accept(gen, null);
 
-		for (Statement src : source.getNodes())
-			for (Statement dest : source.followersOf(src))
-				for (Edge edge : source.getEdgesConnecting(src, dest))
-					edges.add(new SerializableEdge(src.getOffset(), dest.getOffset(), edge.getClass().getSimpleName()));
+		for (Statement node : source.getNodes())
+			process(source, nodes, descrs, node, descriptionGenerator, gen.result);
+
+		for (Edge edge : source.getEdges())
+			edges.add(new SerializableEdge(
+					gen.result.get(edge.getSource()).getLeft(),
+					gen.result.get(edge.getDestination()).getLeft(),
+					edge.getClass().getSimpleName()));
 
 		return new SerializableGraph(name, desc, nodes, edges, descrs);
+	}
+
+	private static void process(
+			CFG source,
+			SortedSet<SerializableNode> nodes,
+			SortedSet<SerializableNodeDescription> descrs,
+			Statement node,
+			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator,
+			Map<Statement, Pair<Integer, List<Statement>>> mapping) {
+		Pair<Integer, List<Statement>> p = mapping.get(node);
+		for (Statement inner : p.getRight())
+			process(source, nodes, descrs, inner, descriptionGenerator, mapping);
+		List<Integer> innerIds = p.getValue().stream().map(st -> mapping.get(st).getKey()).collect(Collectors.toList());
+		addNode(source, nodes, descrs, node, p.getKey(), innerIds, descriptionGenerator);
 	}
 
 	private static void addNode(
@@ -89,32 +100,41 @@ public class SerializableCFG {
 			SortedSet<SerializableNode> nodes,
 			SortedSet<SerializableNodeDescription> descrs,
 			Statement node,
-			List<Statement> inners,
+			Integer offset,
+			List<Integer> inners,
 			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
-		List<Integer> innerIds = inners.stream().map(st -> st.getOffset()).collect(Collectors.toList());
-		SerializableNode n = new SerializableNode(node.getOffset(), innerIds, node.toString());
+		SerializableNode n = new SerializableNode(offset, inners, node.toString());
 		nodes.add(n);
 		if (descriptionGenerator != null) {
 			SerializableValue value = descriptionGenerator.apply(source, node);
 			if (value != null)
-				descrs.add(new SerializableNodeDescription(node.getOffset(), value));
+				descrs.add(new SerializableNodeDescription(offset, value));
 		}
 	}
 
-	private static class InnerNodeExtractor
+	private static class OffsetGenerator
 			implements
-			GraphVisitor<CFG, Statement, Edge, Map<Statement, List<Statement>>> {
+			GraphVisitor<CFG, Statement, Edge, Void> {
+
+		private int offset = 0;
+		private Map<Statement, Pair<Integer, List<Statement>>> result = new IdentityHashMap<>();
+
+		@Override
+		public boolean visitSubNodesFirst() {
+			return false;
+		}
 
 		@Override
 		public boolean visit(
-				Map<Statement, List<Statement>> tool,
+				Void tool,
 				CFG graph,
 				Statement node) {
-			List<Statement> inners = tool.computeIfAbsent(node, st -> new LinkedList<>());
+			List<Statement> inners = new LinkedList<>();
 			if (node instanceof NaryStatement)
 				inners.addAll(Arrays.asList(((NaryStatement) node).getSubExpressions()));
 			else if (node instanceof NaryExpression)
 				inners.addAll(Arrays.asList(((NaryExpression) node).getSubExpressions()));
+			result.put(node, Pair.of(offset++, inners));
 			return true;
 		}
 	}

@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_1934988638.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_1934989630.json", "untyped_A.identity(A__this,_untyped_x)_1934979710.json", "untyped_A.main(A__this).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "41ms",
+    "end" : "2023-12-05T12:45:50.895+01:00",
+    "expressions" : "33",
+    "files" : "4",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2023-12-05T12:45:50.854+01:00",
+    "statements" : "10",
+    "units" : "1",
+    "version" : "0.1b8",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/context-pp-twoarrays"
+  }
+}

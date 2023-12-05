@@ -18,8 +18,9 @@ public class MemoryAbstractionsTest extends AnalysisTestExecutor {
 				new TypeBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "heap/type-based-heap";
-		conf.programFile = "program.imp";
+		conf.testDir = "heap";
+		conf.testSubDir = "types";
+		conf.programFile = "heap-type.imp";
 		perform(conf);
 	}
 
@@ -31,8 +32,9 @@ public class MemoryAbstractionsTest extends AnalysisTestExecutor {
 				new PointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "heap/point-based-heap/field-insensitive";
-		conf.programFile = "program.imp";
+		conf.testDir = "heap";
+		conf.testSubDir = "pp";
+		conf.programFile = "heap-pp.imp";
 		perform(conf);
 	}
 
@@ -44,8 +46,9 @@ public class MemoryAbstractionsTest extends AnalysisTestExecutor {
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "heap/point-based-heap/field-sensitive";
-		conf.programFile = "program.imp";
+		conf.testDir = "heap";
+		conf.testSubDir = "pp-field";
+		conf.programFile = "heap-pp-field.imp";
 		perform(conf);
 	}
 }
