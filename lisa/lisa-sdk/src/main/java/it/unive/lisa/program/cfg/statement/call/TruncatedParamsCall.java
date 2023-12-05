@@ -1,7 +1,5 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -10,6 +8,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
+import java.util.Collection;
 
 /**
  * A call that wraps another one that has been created through

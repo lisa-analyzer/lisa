@@ -1,10 +1,5 @@
 package it.unive.lisa.program.cfg.statement;
 
-import java.util.Arrays;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -17,6 +12,9 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import java.util.Arrays;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A generic statement with {@code n} sub-expressions.

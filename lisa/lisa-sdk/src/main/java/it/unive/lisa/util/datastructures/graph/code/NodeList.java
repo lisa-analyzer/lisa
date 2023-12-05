@@ -1,5 +1,9 @@
 package it.unive.lisa.util.datastructures.graph.code;
 
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.util.collections.CollectionUtilities.SortedSetCollector;
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.Node;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,14 +19,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.util.collections.CollectionUtilities.SortedSetCollector;
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Node;
 
 /**
  * A list of nodes of a {@link CodeGraph}, together with the edges connecting

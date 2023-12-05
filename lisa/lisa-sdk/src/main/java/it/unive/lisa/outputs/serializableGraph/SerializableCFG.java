@@ -1,5 +1,12 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.NaryStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
@@ -9,16 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.tuple.Pair;
-
-import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.NaryExpression;
-import it.unive.lisa.program.cfg.statement.NaryStatement;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 /**
  * Utility class to build {@link SerializableGraph}s from {@link CFG}s.
