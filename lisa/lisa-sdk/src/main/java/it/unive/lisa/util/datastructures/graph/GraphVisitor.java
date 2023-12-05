@@ -75,4 +75,15 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 			E edge) {
 		return true;
 	}
+
+	/**
+	 * Yields whether or not, when visiting a compound node through
+	 * {@link #visit(Object, Graph, Node)}, its sub-nodes should be visited
+	 * before the node itself.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean visitSubNodesFirst() {
+		return true;
+	}
 }

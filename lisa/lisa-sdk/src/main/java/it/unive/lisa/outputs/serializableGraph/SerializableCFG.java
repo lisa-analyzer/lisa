@@ -120,6 +120,11 @@ public class SerializableCFG {
 		private Map<Statement, Pair<Integer, List<Statement>>> result = new IdentityHashMap<>();
 
 		@Override
+		public boolean visitSubNodesFirst() {
+			return false;
+		}
+
+		@Override
 		public boolean visit(
 				Void tool,
 				CFG graph,

@@ -87,22 +87,22 @@ public class SerializableGraphTest {
 		SortedSet<SerializableNode> nodes = new TreeSet<>();
 		SortedSet<SerializableEdge> edges = new TreeSet<>();
 
-		addNode(nodes, c1, 0);
-		addNode(nodes, c2, 1);
-		addNode(nodes, condition, 2, 0, 1);
-		addNode(nodes, lvar, 3);
-		addNode(nodes, c3, 4);
-		addNode(nodes, a1, 5, 3, 4);
-		addNode(nodes, rvar, 6);
-		addNode(nodes, c4, 7);
-		addNode(nodes, a2, 8, 6, 7);
-		addNode(nodes, xvar, 9);
-		addNode(nodes, ret, 10, 9);
+		addNode(nodes, c1, 1);
+		addNode(nodes, c2, 2);
+		addNode(nodes, condition, 0, 1, 2);
+		addNode(nodes, lvar, 4);
+		addNode(nodes, c3, 5);
+		addNode(nodes, a1, 3, 4, 5);
+		addNode(nodes, rvar, 7);
+		addNode(nodes, c4, 8);
+		addNode(nodes, a2, 6, 7, 8);
+		addNode(nodes, xvar, 10);
+		addNode(nodes, ret, 9, 10);
 
-		addEdge(edges, e1, 2, 5);
-		addEdge(edges, e2, 2, 8);
-		addEdge(edges, e3, 5, 10);
-		addEdge(edges, e4, 8, 10);
+		addEdge(edges, e1, 0, 3);
+		addEdge(edges, e2, 0, 6);
+		addEdge(edges, e3, 3, 9);
+		addEdge(edges, e4, 6, 9);
 
 		SerializableGraph expected = new SerializableGraph(
 				cfg.getDescriptor().getFullSignatureWithParNames(),
@@ -130,13 +130,13 @@ public class SerializableGraphTest {
 		SerializableGraph graph = SerializableCFG.fromCFG(cfg);
 		SortedSet<SerializableNode> nodes = new TreeSet<>();
 		SortedSet<SerializableEdge> edges = new TreeSet<>();
-		addNode(nodes, c1, 0);
-		addNode(nodes, c2, 1);
-		addNode(nodes, condition, 2, 0, 1);
-		addNode(nodes, xvar, 3);
-		addNode(nodes, ret, 4, 3);
-		addEdge(edges, e1, 2, 4);
-		addEdge(edges, e2, 2, 4);
+		addNode(nodes, c1, 1);
+		addNode(nodes, c2, 2);
+		addNode(nodes, condition, 0, 1, 2);
+		addNode(nodes, xvar, 4);
+		addNode(nodes, ret, 3, 4);
+		addEdge(edges, e1, 0, 3);
+		addEdge(edges, e2, 0, 3);
 		SerializableGraph expected = new SerializableGraph(
 				cfg.getDescriptor().getFullSignatureWithParNames(),
 				null,
@@ -175,21 +175,21 @@ public class SerializableGraphTest {
 		SerializableGraph graph = SerializableCFG.fromCFG(cfg);
 		SortedSet<SerializableNode> nodes = new TreeSet<>();
 		SortedSet<SerializableEdge> edges = new TreeSet<>();
-		addNode(nodes, c1, 0);
-		addNode(nodes, c2, 1);
-		addNode(nodes, condition, 2, 0, 1);
-		addNode(nodes, lvar, 3);
-		addNode(nodes, c3, 4);
-		addNode(nodes, a1, 5, 3, 4);
-		addNode(nodes, rvar, 6);
-		addNode(nodes, c4, 7);
-		addNode(nodes, a2, 8, 6, 7);
-		addNode(nodes, xvar, 9);
-		addNode(nodes, ret, 10, 9);
-		addEdge(edges, e1, 2, 5);
-		addEdge(edges, e2, 2, 10);
-		addEdge(edges, e3, 5, 8);
-		addEdge(edges, e4, 8, 10);
+		addNode(nodes, c1, 1);
+		addNode(nodes, c2, 2);
+		addNode(nodes, condition, 0, 1, 2);
+		addNode(nodes, lvar, 4);
+		addNode(nodes, c3, 5);
+		addNode(nodes, a1, 3, 4, 5);
+		addNode(nodes, rvar, 7);
+		addNode(nodes, c4, 8);
+		addNode(nodes, a2, 6, 7, 8);
+		addNode(nodes, xvar, 10);
+		addNode(nodes, ret, 9, 10);
+		addEdge(edges, e1, 0, 3);
+		addEdge(edges, e2, 0, 9);
+		addEdge(edges, e3, 3, 6);
+		addEdge(edges, e4, 6, 9);
 		SerializableGraph expected = new SerializableGraph(
 				cfg.getDescriptor().getFullSignatureWithParNames(),
 				null,
@@ -234,25 +234,25 @@ public class SerializableGraphTest {
 		SerializableGraph graph = SerializableCFG.fromCFG(cfg);
 		SortedSet<SerializableNode> nodes = new TreeSet<>();
 		SortedSet<SerializableEdge> edges = new TreeSet<>();
-		addNode(nodes, c1, 0);
-		addNode(nodes, c2, 1);
-		addNode(nodes, condition, 2, 0, 1);
-		addNode(nodes, lvar, 3);
-		addNode(nodes, c3, 4);
-		addNode(nodes, a1, 5, 3, 4);
-		addNode(nodes, rvar, 6);
-		addNode(nodes, c4, 7);
-		addNode(nodes, a2, 8, 6, 7);
-		addNode(nodes, xvar, 9);
-		addNode(nodes, c5, 10);
-		addNode(nodes, a3, 11, 9, 10);
-		addNode(nodes, yvar, 12);
-		addNode(nodes, ret, 13, 12);
-		addEdge(edges, e1, 2, 5);
-		addEdge(edges, e2, 2, 8);
-		addEdge(edges, e3, 5, 11);
-		addEdge(edges, e4, 8, 13);
-		addEdge(edges, e5, 11, 13);
+		addNode(nodes, c1, 1);
+		addNode(nodes, c2, 2);
+		addNode(nodes, condition, 0, 1, 2);
+		addNode(nodes, lvar, 4);
+		addNode(nodes, c3, 5);
+		addNode(nodes, a1, 3, 4, 5);
+		addNode(nodes, rvar, 7);
+		addNode(nodes, c4, 8);
+		addNode(nodes, a2, 6, 7, 8);
+		addNode(nodes, xvar, 10);
+		addNode(nodes, c5, 11);
+		addNode(nodes, a3, 9, 10, 11);
+		addNode(nodes, yvar, 13);
+		addNode(nodes, ret, 12, 13);
+		addEdge(edges, e1, 0, 3);
+		addEdge(edges, e2, 0, 6);
+		addEdge(edges, e3, 3, 9);
+		addEdge(edges, e4, 6, 12);
+		addEdge(edges, e5, 9, 12);
 		SerializableGraph expected = new SerializableGraph(
 				cfg.getDescriptor().getFullSignatureWithParNames(),
 				null,
@@ -291,21 +291,21 @@ public class SerializableGraphTest {
 		SerializableGraph graph = SerializableCFG.fromCFG(cfg);
 		SortedSet<SerializableNode> nodes = new TreeSet<>();
 		SortedSet<SerializableEdge> edges = new TreeSet<>();
-		addNode(nodes, c1, 0);
-		addNode(nodes, c2, 1);
-		addNode(nodes, condition, 2, 0, 1);
-		addNode(nodes, lvar, 3);
-		addNode(nodes, c3, 4);
-		addNode(nodes, a1, 5, 3, 4);
-		addNode(nodes, rvar, 6);
-		addNode(nodes, c4, 7);
-		addNode(nodes, a2, 8, 6, 7);
-		addNode(nodes, xvar, 9);
-		addNode(nodes, ret, 10, 9);
-		addEdge(edges, e1, 2, 5);
-		addEdge(edges, e2, 2, 8);
-		addEdge(edges, e3, 5, 2);
-		addEdge(edges, e4, 8, 10);
+		addNode(nodes, c1, 1);
+		addNode(nodes, c2, 2);
+		addNode(nodes, condition, 0, 1, 2);
+		addNode(nodes, lvar, 4);
+		addNode(nodes, c3, 5);
+		addNode(nodes, a1, 3, 4, 5);
+		addNode(nodes, rvar, 7);
+		addNode(nodes, c4, 8);
+		addNode(nodes, a2, 6, 7, 8);
+		addNode(nodes, xvar, 10);
+		addNode(nodes, ret, 9, 10);
+		addEdge(edges, e1, 0, 3);
+		addEdge(edges, e2, 0, 6);
+		addEdge(edges, e3, 3, 0);
+		addEdge(edges, e4, 6, 9);
 		SerializableGraph expected = new SerializableGraph(
 				cfg.getDescriptor().getFullSignatureWithParNames(),
 				null,
@@ -338,17 +338,17 @@ public class SerializableGraphTest {
 		SerializableGraph graph = SerializableCFG.fromCFG(cfg);
 		SortedSet<SerializableNode> nodes = new TreeSet<>();
 		SortedSet<SerializableEdge> edges = new TreeSet<>();
-		addNode(nodes, c1, 0);
-		addNode(nodes, c2, 1);
-		addNode(nodes, condition, 2, 0, 1);
-		addNode(nodes, rvar, 3);
-		addNode(nodes, c4, 4);
-		addNode(nodes, a2, 5, 3, 4);
-		addNode(nodes, xvar, 6);
-		addNode(nodes, ret, 7, 6);
-		addEdge(edges, e1, 2, 2);
-		addEdge(edges, e2, 2, 5);
-		addEdge(edges, e4, 5, 7);
+		addNode(nodes, c1, 1);
+		addNode(nodes, c2, 2);
+		addNode(nodes, condition, 0, 1, 2);
+		addNode(nodes, rvar, 4);
+		addNode(nodes, c4, 5);
+		addNode(nodes, a2, 3, 4, 5);
+		addNode(nodes, xvar, 7);
+		addNode(nodes, ret, 6, 7);
+		addEdge(edges, e1, 0, 0);
+		addEdge(edges, e2, 0, 3);
+		addEdge(edges, e4, 3, 6);
 		SerializableGraph expected = new SerializableGraph(
 				cfg.getDescriptor().getFullSignatureWithParNames(),
 				null,
@@ -413,38 +413,38 @@ public class SerializableGraphTest {
 		SerializableGraph graph = SerializableCFG.fromCFG(cfg);
 		SortedSet<SerializableNode> nodes = new TreeSet<>();
 		SortedSet<SerializableEdge> edges = new TreeSet<>();
-		addNode(nodes, c1, 0);
-		addNode(nodes, c2, 1);
-		addNode(nodes, loop_condition, 2, 0, 1);
-		addNode(nodes, loop_a1var, 3);
-		addNode(nodes, c3, 4);
-		addNode(nodes, loop_a1, 5, 3, 4);
-		addNode(nodes, loop_a2var, 6);
-		addNode(nodes, c4, 7);
-		addNode(nodes, loop_a2, 8, 6, 7);
-		addNode(nodes, c5, 9);
-		addNode(nodes, c6, 10);
-		addNode(nodes, if_condition, 11, 9, 10);
-		addNode(nodes, if_a1var, 12);
-		addNode(nodes, c7, 13);
-		addNode(nodes, if_a1, 14, 12, 13);
-		addNode(nodes, if_a2var, 15);
-		addNode(nodes, c8, 16);
-		addNode(nodes, if_a2, 17, 15, 16);
-		addNode(nodes, if_a3var, 18);
-		addNode(nodes, c9, 19);
-		addNode(nodes, if_a3, 20, 18, 19);
-		addNode(nodes, xvar, 21);
-		addNode(nodes, ret, 22, 21);
-		addEdge(edges, e1, 2, 5);
-		addEdge(edges, e2, 5, 11);
-		addEdge(edges, e3, 11, 14);
-		addEdge(edges, e4, 14, 20);
-		addEdge(edges, e5, 20, 8);
-		addEdge(edges, e6, 11, 17);
-		addEdge(edges, e7, 17, 8);
-		addEdge(edges, e8, 8, 2);
-		addEdge(edges, e9, 2, 22);
+		addNode(nodes, c1, 1);
+		addNode(nodes, c2, 2);
+		addNode(nodes, loop_condition, 0, 1, 2);
+		addNode(nodes, loop_a1var, 4);
+		addNode(nodes, c3, 5);
+		addNode(nodes, loop_a1, 3, 4, 5);
+		addNode(nodes, loop_a2var, 7);
+		addNode(nodes, c4, 8);
+		addNode(nodes, loop_a2, 6, 7, 8);
+		addNode(nodes, c5, 10);
+		addNode(nodes, c6, 11);
+		addNode(nodes, if_condition, 9, 10, 11);
+		addNode(nodes, if_a1var, 13);
+		addNode(nodes, c7, 14);
+		addNode(nodes, if_a1, 12, 13, 14);
+		addNode(nodes, if_a2var, 16);
+		addNode(nodes, c8, 17);
+		addNode(nodes, if_a2, 15, 16, 17);
+		addNode(nodes, if_a3var, 19);
+		addNode(nodes, c9, 20);
+		addNode(nodes, if_a3, 18, 19, 20);
+		addNode(nodes, xvar, 22);
+		addNode(nodes, ret, 21, 22);
+		addEdge(edges, e1, 0, 3);
+		addEdge(edges, e2, 3, 9);
+		addEdge(edges, e3, 9, 12);
+		addEdge(edges, e4, 12, 18);
+		addEdge(edges, e5, 18, 6);
+		addEdge(edges, e6, 9, 15);
+		addEdge(edges, e7, 15, 6);
+		addEdge(edges, e8, 6, 0);
+		addEdge(edges, e9, 0, 21);
 		SerializableGraph expected = new SerializableGraph(
 				cfg.getDescriptor().getFullSignatureWithParNames(),
 				null,

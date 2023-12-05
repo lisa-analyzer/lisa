@@ -119,10 +119,21 @@ public abstract class NaryStatement extends Statement {
 	public final <V> boolean accept(
 			GraphVisitor<CFG, Statement, Edge, V> visitor,
 			V tool) {
-		for (Expression sub : subExpressions)
-			if (!sub.accept(visitor, tool))
+		if (visitor.visitSubNodesFirst()) {
+			for (Expression sub : subExpressions)
+				if (!sub.accept(visitor, tool))
+					return false;
+			return visitor.visit(tool, getCFG(), this);
+		} else {
+			if (!visitor.visit(tool, getCFG(), this))
 				return false;
-		return visitor.visit(tool, getCFG(), this);
+
+			for (Expression sub : subExpressions)
+				if (!sub.accept(visitor, tool))
+					return false;
+
+			return true;
+		}
 	}
 
 	@Override
