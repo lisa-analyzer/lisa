@@ -1,0 +1,22 @@
+class strings {
+
+	constants() {
+		def a = "abc";
+		def b = "def";
+    }
+    
+    branching(x) {
+    	def a = "abc";
+    	if (x == 2)
+    		a = "hello";
+    	else
+    		a = "world";
+    }	
+    
+    loops(x) {
+    	def str = "a";
+    	while (x < 100) {
+    		str = str + "a";
+   		 }
+    }    
+}

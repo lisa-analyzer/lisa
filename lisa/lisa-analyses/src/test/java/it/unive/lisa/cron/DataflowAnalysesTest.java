@@ -22,8 +22,8 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new DefiniteDataflowDomain<>(new AvailableExpressions()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "available-expressions";
-		conf.programFile = "available-expressions.imp";
+		conf.testDir = "dataflow/ae";
+		conf.programFile = "ae.imp";
 		perform(conf);
 	}
 
@@ -35,8 +35,8 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new DefiniteDataflowDomain<>(new ConstantPropagation()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "constant-propagation-df";
-		conf.programFile = "constant-propagation.imp";
+		conf.testDir = "dataflow/cp";
+		conf.programFile = "cp.imp";
 		perform(conf);
 	}
 
@@ -48,8 +48,8 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new PossibleDataflowDomain<>(new ReachingDefinitions()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "reaching-definitions";
-		conf.programFile = "reaching-definitions.imp";
+		conf.testDir = "dataflow/rd";
+		conf.programFile = "rd.imp";
 		perform(conf);
 	}
 
@@ -62,7 +62,7 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new PossibleDataflowDomain<>(new Liveness()),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "liveness";
+		conf.testDir = "dataflow/liveness";
 		conf.programFile = "liveness.imp";
 		conf.compareWithOptimization = false;
 		perform(conf);

@@ -17,8 +17,9 @@ public class DescendingTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.descendingPhaseType = DescendingPhaseType.NARROWING;
-		conf.testDir = "descending-widening";
-		conf.programFile = "program.imp";
+		conf.testDir = "descending";
+		conf.testSubDir = "widening";
+		conf.programFile = "descending.imp";
 		perform(conf);
 	}
 
@@ -32,8 +33,9 @@ public class DescendingTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultTypeDomain());
 		conf.descendingPhaseType = DescendingPhaseType.GLB;
 		conf.glbThreshold = 5;
-		conf.testDir = "descending-maxglb";
-		conf.programFile = "program.imp";
+		conf.testDir = "descending";
+		conf.testSubDir = "maxglb";
+		conf.programFile = "descending.imp";
 		perform(conf);
 	}
 }

@@ -17,7 +17,7 @@ public class TypesCollectionTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultValueDomain(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.testDir = "type-inference";
-		conf.programFile = "program.imp";
+		conf.programFile = "inference.imp";
 		perform(conf);
 	}
 }
