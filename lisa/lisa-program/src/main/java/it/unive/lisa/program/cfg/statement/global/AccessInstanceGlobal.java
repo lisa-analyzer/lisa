@@ -12,6 +12,7 @@ import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -98,6 +99,13 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		} else if (!target.equals(other.target))
 			return false;
 		return true;
+	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		AccessInstanceGlobal other = (AccessInstanceGlobal) o;
+		return target.compareTo(other.target);
 	}
 
 	@Override

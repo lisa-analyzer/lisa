@@ -83,6 +83,14 @@ public abstract class Literal<E> extends Expression {
 	}
 
 	@Override
+	protected int compareSameClass(
+			Statement o) {
+		// no other way of comparing without imposing that the
+		// constants must be comparable
+		return toString().compareTo(o.toString());
+	}
+
+	@Override
 	public String toString() {
 		return String.valueOf(value);
 	}

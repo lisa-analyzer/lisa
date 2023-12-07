@@ -112,6 +112,16 @@ public class AccessGlobal extends Expression {
 	}
 
 	@Override
+	protected int compareSameClass(
+			Statement o) {
+		AccessGlobal other = (AccessGlobal) o;
+		int cmp;
+		if ((cmp = container.getName().compareTo(other.container.getName())) != 0)
+			return cmp;
+		return target.getName().compareTo(other.target.getName());
+	}
+
+	@Override
 	public String toString() {
 		return container.getName() + "::" + target.getName();
 	}

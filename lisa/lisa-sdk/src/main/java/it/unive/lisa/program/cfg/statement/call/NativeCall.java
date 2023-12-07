@@ -179,6 +179,12 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	}
 
 	@Override
+	protected int compareCallAux(
+			Call o) {
+		return 0; // we do not compare the targets
+	}
+
+	@Override
 	public String toString() {
 		return "[" + targets.size() + " targets] " + super.toString();
 	}

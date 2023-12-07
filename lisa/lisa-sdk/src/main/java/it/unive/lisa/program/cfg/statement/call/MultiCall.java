@@ -6,16 +6,11 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
-import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,75 +29,37 @@ public class MultiCall extends Call implements ResolvedCall {
 	private final Collection<Call> calls;
 
 	/**
-	 * Builds the multi-call, happening at the given location in the program.
-	 * The {@link EvaluationOrder} of the parameter is
-	 * {@link LeftToRightEvaluation}. The static type of this call is the common
-	 * supertype of the return types of all targets.
+	 * Creates a multi call as the resolved version of the given {@code source}
+	 * call, copying all its data.
 	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param location   the location where this expression is defined within
-	 *                       the program
-	 * @param callType   the call type of this call
-	 * @param qualifier  the optional qualifier of the call (can be null or
-	 *                       empty - see {@link #getFullTargetName()} for more
-	 *                       info)
-	 * @param targetName the qualified name of the static target of this call
-	 * @param calls      the Calls underlying this one
-	 * @param parameters the parameters of this call
+	 * @param source the unresolved call to copy
+	 * @param calls  the calls underlying this one
 	 */
 	public MultiCall(
-			CFG cfg,
-			CodeLocation location,
-			CallType callType,
-			String qualifier,
-			String targetName,
-			Collection<Call> calls,
-			Expression... parameters) {
-		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, calls, parameters);
-	}
-
-	/**
-	 * Builds the multi call, happening at the given location in the program.
-	 * The static type of this call is the common supertype of the return types
-	 * of all targets.
-	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param location   the location where this expression is defined within
-	 *                       the program
-	 * @param callType   the call type of this call
-	 * @param qualifier  the optional qualifier of the call (can be null or
-	 *                       empty - see {@link #getFullTargetName()} for more
-	 *                       info)
-	 * @param targetName the qualified name of the static target of this call
-	 * @param order      the evaluation order of the sub-expressions
-	 * @param calls      the Calls underlying this one
-	 * @param parameters the parameters of this call
-	 */
-	public MultiCall(
-			CFG cfg,
-			CodeLocation location,
-			CallType callType,
-			String qualifier,
-			String targetName,
-			EvaluationOrder order,
-			Collection<Call> calls,
-			Expression... parameters) {
-		super(cfg, location, callType, qualifier, targetName, order, getCommonReturnType(calls), parameters);
+			UnresolvedCall source,
+			Call... calls) {
+		super(source.getCFG(),
+				source.getLocation(),
+				source.getCallType(),
+				source.getQualifier(),
+				source.getTargetName(),
+				source.getOrder(),
+				getCommonReturnType(calls),
+				source.getParameters());
 		Objects.requireNonNull(calls, "The calls underlying a multi call cannot be null");
 		for (Call target : calls) {
 			Objects.requireNonNull(target, "A call underlying a multi call cannot be null");
 			if (!(target instanceof ResolvedCall))
 				throw new IllegalArgumentException(target + " has not been resolved yet");
 		}
-		this.calls = calls;
+		this.calls = List.of(calls);
 	}
 
 	private static Type getCommonReturnType(
-			Collection<Call> targets) {
-		Iterator<Call> it = targets.iterator();
+			Call... targets) {
 		Type result = null;
-		while (it.hasNext()) {
-			Type current = it.next().getStaticType();
+		for (Call c : targets) {
+			Type current = c.getStaticType();
 			if (result == null)
 				result = current;
 			else if (current.canBeAssignedTo(result))
@@ -117,23 +74,6 @@ public class MultiCall extends Call implements ResolvedCall {
 		}
 
 		return result == null ? Untyped.INSTANCE : result;
-	}
-
-	/**
-	 * Creates a multi call as the resolved version of the given {@code source}
-	 * call, copying all its data.
-	 * 
-	 * @param source the unresolved call to copy
-	 * @param calls  the calls underlying this one
-	 */
-	public MultiCall(
-			UnresolvedCall source,
-			Call... calls) {
-		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
-				List.of(calls), source.getParameters());
-		for (Expression param : source.getParameters())
-			// make sure they stay linked to the original call
-			param.setParentStatement(source);
 	}
 
 	/**
@@ -169,6 +109,21 @@ public class MultiCall extends Call implements ResolvedCall {
 		} else if (!calls.equals(other.calls))
 			return false;
 		return true;
+	}
+
+	@Override
+	protected int compareCallAux(
+			Call o) {
+		MultiCall other = (MultiCall) o;
+		int cmp;
+		if ((cmp = Integer.compare(calls.size(), other.calls.size())) != 0)
+			return cmp;
+		List<Call> l1 = new LinkedList<>(calls);
+		List<Call> l2 = new LinkedList<>(other.calls);
+		for (int i = 0; i < l1.size(); i++)
+			if ((cmp = l1.get(i).compareTo(l2.get(i))) != 0)
+				return cmp;
+		return 0;
 	}
 
 	@Override

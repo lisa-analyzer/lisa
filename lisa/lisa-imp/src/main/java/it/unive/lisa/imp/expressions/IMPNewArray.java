@@ -11,6 +11,7 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -60,6 +61,12 @@ public class IMPNewArray extends NaryExpression {
 		if (dimensions.length != 1)
 			throw new UnsupportedOperationException("Multidimensional arrays are not yet supported");
 		this.staticallyAllocated = staticallyAllocated;
+	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return Boolean.compare(staticallyAllocated, ((IMPNewArray) o).staticallyAllocated);
 	}
 
 	@Override

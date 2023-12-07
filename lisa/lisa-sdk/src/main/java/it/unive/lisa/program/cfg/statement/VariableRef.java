@@ -45,6 +45,12 @@ public class VariableRef extends Expression {
 		this(cfg, location, name, Untyped.INSTANCE);
 	}
 
+	@Override
+	protected int compareSameClass(
+			Statement o) {
+		return 0; // no extra fields to compare
+	}
+
 	/**
 	 * Builds the variable reference, identified by its name, happening at the
 	 * given location in the program.

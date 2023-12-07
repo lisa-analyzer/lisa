@@ -56,6 +56,12 @@ public class Ret extends Statement {
 	}
 
 	@Override
+	protected int compareSameClass(
+			Statement o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public final String toString() {
 		return "ret";
 	}

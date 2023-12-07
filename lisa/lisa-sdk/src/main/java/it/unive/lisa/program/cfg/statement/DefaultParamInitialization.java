@@ -42,6 +42,12 @@ public class DefaultParamInitialization extends Expression {
 	}
 
 	@Override
+	protected int compareSameClass(
+			Statement o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public <V> boolean accept(
 			GraphVisitor<CFG, Statement, Edge, V> visitor,
 			V tool) {
