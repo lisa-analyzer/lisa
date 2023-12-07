@@ -8,6 +8,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
@@ -35,6 +36,12 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 			CodeLocation location,
 			Expression expression) {
 		super(cfg, location, "-", expression);
+	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return 0; // no extra fields to compare
 	}
 
 	@Override

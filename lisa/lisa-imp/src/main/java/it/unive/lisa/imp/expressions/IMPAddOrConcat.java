@@ -9,6 +9,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -54,6 +55,12 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 			Expression left,
 			Expression right) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "+", left, right);
+	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return 0; // no extra fields to compare
 	}
 
 	@Override

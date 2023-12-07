@@ -70,6 +70,12 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	}
 
 	@Override
+	protected int compareCallAux(
+			Call o) {
+		return call.compareCallAux(((TruncatedParamsCall) o).call);
+	}
+
+	@Override
 	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,

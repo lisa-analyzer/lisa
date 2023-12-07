@@ -135,6 +135,12 @@ public class UnresolvedCall extends Call {
 	}
 
 	@Override
+	protected int compareCallAux(
+			Call o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,

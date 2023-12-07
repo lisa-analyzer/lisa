@@ -8,6 +8,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -35,6 +36,12 @@ public class Equal extends it.unive.lisa.program.cfg.statement.BinaryExpression 
 			Expression left,
 			Expression right) {
 		super(cfg, location, "==", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
+	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return 0; // no extra fields to compare
 	}
 
 	@Override

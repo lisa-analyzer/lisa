@@ -8,6 +8,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -79,6 +80,12 @@ public class NamedParameterExpression extends UnaryExpression {
 		} else if (!parameterName.equals(other.parameterName))
 			return false;
 		return true;
+	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return parameterName.compareTo(((NamedParameterExpression) o).parameterName);
 	}
 
 	@Override

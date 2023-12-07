@@ -60,6 +60,12 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 	}
 
 	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,

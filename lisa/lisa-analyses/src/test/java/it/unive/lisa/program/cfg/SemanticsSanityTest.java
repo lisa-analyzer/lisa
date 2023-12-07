@@ -189,6 +189,12 @@ public class SemanticsSanityTest {
 			}
 
 			@Override
+			protected int compareSameClass(
+					Statement o) {
+				return 0;
+			}
+
+			@Override
 			public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
 					AnalysisState<A> entryState,
 					InterproceduralAnalysis<A> interprocedural,

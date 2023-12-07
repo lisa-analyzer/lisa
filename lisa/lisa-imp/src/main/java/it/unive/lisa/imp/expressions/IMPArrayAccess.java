@@ -9,6 +9,7 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
@@ -45,6 +46,12 @@ public class IMPArrayAccess extends BinaryExpression {
 			Expression container,
 			Expression location) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "[]", container, location);
+	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return 0; // no extra fields to compare
 	}
 
 	@Override

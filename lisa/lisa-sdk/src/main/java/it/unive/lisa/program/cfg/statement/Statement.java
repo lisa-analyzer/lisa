@@ -170,10 +170,28 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	}
 
 	@Override
-	public int compareTo(
+	public final int compareTo(
 			Statement o) {
-		return location.compareTo(o.location);
+		int cmp;
+		if ((cmp = location.compareTo(o.location)) != 0)
+			return cmp;
+		if ((cmp = getClass().getName().compareTo(o.getClass().getName())) != 0)
+			return cmp;
+		return compareSameClass(o);
 	}
+
+	/**
+	 * Auxiliary method for {@link #compareTo(Statement)} that can safely assume
+	 * that the two statements happen at the same {@link CodeLocation} and are
+	 * instances of the same class.
+	 * 
+	 * @param o the other statement
+	 * 
+	 * @return a negative integer, zero, or a positive integer as this object is
+	 *             less than, equal to, or greater than the specified object
+	 */
+	protected abstract int compareSameClass(
+			Statement o);
 
 	/**
 	 * Yields the {@link Statement} that is evaluated right before this one,

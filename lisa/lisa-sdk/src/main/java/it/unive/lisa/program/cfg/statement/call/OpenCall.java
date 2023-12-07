@@ -148,6 +148,12 @@ public class OpenCall extends CallWithResult {
 	}
 
 	@Override
+	protected int compareCallAux(
+			Call o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public String toString() {
 		return "[open] " + super.toString();
 	}

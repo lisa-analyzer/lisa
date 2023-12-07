@@ -50,6 +50,12 @@ public class NoOp extends Statement {
 	}
 
 	@Override
+	protected int compareSameClass(
+			Statement o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public final String toString() {
 		return "no-op";
 	}

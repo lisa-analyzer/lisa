@@ -106,6 +106,12 @@ public class Assignment extends BinaryExpression {
 	}
 
 	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public final String toString() {
 		return getLeft() + " = " + getRight();
 	}

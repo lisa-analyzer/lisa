@@ -10,6 +10,7 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
@@ -62,6 +63,12 @@ public class IMPNewObj extends NaryExpression {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type, type,
 				parameters);
 		this.staticallyAllocated = staticallyAllocated;
+	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return Boolean.compare(staticallyAllocated, ((IMPNewObj) o).staticallyAllocated);
 	}
 
 	@Override

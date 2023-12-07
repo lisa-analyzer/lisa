@@ -9,9 +9,11 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -241,6 +243,37 @@ public abstract class Call extends NaryExpression {
 			return false;
 		return true;
 	}
+
+	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		Call other = (Call) o;
+		int cmp;
+		if ((cmp = targetName.compareTo(other.targetName)) != 0)
+			return cmp;
+		if ((cmp = CollectionUtilities.nullSafeCompare(true, qualifier, other.qualifier, String::compareTo)) != 0)
+			return cmp;
+		if ((cmp = callType.compareTo(other.callType)) != 0)
+			return cmp;
+		return compareCallAux(other);
+	}
+
+	/**
+	 * Auxiliary method for {@link #compareTo(Statement)} that can safely assume
+	 * that the two calls happen at the same {@link CodeLocation}, are instances
+	 * of the same class, have the same parameters according to their
+	 * implementation of {@link #compareTo(Statement)}, and have all fields
+	 * defined in the {@link Call} class equal according to their
+	 * {@link Comparable#compareTo(Object)}. This method is thus responsible for
+	 * only comparing the implementation-specific fields.
+	 * 
+	 * @param o the other call
+	 * 
+	 * @return a negative integer, zero, or a positive integer as this object is
+	 *             less than, equal to, or greater than the specified object
+	 */
+	protected abstract int compareCallAux(
+			Call o);
 
 	/**
 	 * Yields an array containing the runtime types of the parameters of this

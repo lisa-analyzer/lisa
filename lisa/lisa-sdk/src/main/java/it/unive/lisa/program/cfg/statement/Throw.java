@@ -35,6 +35,12 @@ public class Throw extends UnaryStatement {
 	}
 
 	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public boolean stopsExecution() {
 		return true;
 	}

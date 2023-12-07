@@ -202,6 +202,33 @@ public abstract class NaryStatement extends Statement {
 		return true;
 	}
 
+	@Override
+	protected int compareSameClass(
+			Statement o) {
+		NaryStatement other = (NaryStatement) o;
+		int cmp;
+		if ((cmp = Integer.compare(subExpressions.length, other.subExpressions.length)) != 0)
+			return cmp;
+		for (int i = 0; i < subExpressions.length; i++)
+			if ((cmp = subExpressions[i].compareTo(other.subExpressions[i])) != 0)
+				return cmp;
+		return compareSameClassAndParams(o);
+	}
+
+	/**
+	 * Auxiliary method for {@link #compareTo(Statement)} that can safely assume
+	 * that the two statements happen at the same {@link CodeLocation}, are
+	 * instances of the same class, and have the same parameters according to
+	 * their implementation of {@link #compareTo(Statement)}.
+	 * 
+	 * @param o the other statement
+	 * 
+	 * @return a negative integer, zero, or a positive integer as this object is
+	 *             less than, equal to, or greater than the specified object
+	 */
+	protected abstract int compareSameClassAndParams(
+			Statement o);
+
 	/**
 	 * Semantics of an n-ary statements is evaluated by computing the semantics
 	 * of its sub-expressions, in the specified order, using the analysis state

@@ -64,6 +64,12 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 	}
 
 	@Override
+	protected int compareSameClassAndParams(
+			Statement o) {
+		return 0; // no extra fields to compare
+	}
+
+	@Override
 	public <A extends AbstractState<A>> AnalysisState<A> fwdTernarySemantics(
 			InterproceduralAnalysis<A> interprocedural,
 			AnalysisState<A> state,
