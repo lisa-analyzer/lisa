@@ -84,7 +84,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 				defaults[pos] = callState.getComputedExpressions();
 				Set<Type> types = new HashSet<>();
 				for (SymbolicExpression e : defaults[pos])
-					defaultTypes[pos].addAll(callState.getState().getRuntimeTypesOf(e, call, callState.getState()));
+					types.addAll(callState.getState().getRuntimeTypesOf(e, call, callState.getState()));
 				defaultTypes[pos] = types;
 			}
 		}

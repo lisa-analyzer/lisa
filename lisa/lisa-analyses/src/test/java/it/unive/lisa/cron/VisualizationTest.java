@@ -100,4 +100,15 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
+
+	@Test
+	public void testHTMLInputs() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeInputs = true;
+		conf.analysisGraphs = GraphType.HTML;
+		conf.testDir = "visualization";
+		conf.testSubDir = "html-inputs";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
 }
