@@ -69,12 +69,17 @@ public class LiSA {
 		LOG.info(conf.toString());
 
 		DateTime start = new DateTime();
-		LiSARunner runner = new LiSARunner(conf, conf.interproceduralAnalysis, conf.callGraph, conf.abstractState);
+		LiSARunner runner = new LiSARunner(
+				conf,
+				fileManager,
+				conf.interproceduralAnalysis,
+				conf.callGraph,
+				conf.abstractState);
 		Application app = new Application(programs);
 		Collection<Warning> warnings;
 
 		try {
-			warnings = TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app, fileManager));
+			warnings = TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app));
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}

@@ -29,6 +29,10 @@ public class FileManager {
 
 	private final Collection<String> createdFiles = new TreeSet<>();
 
+	private boolean usedPlainCytoscape = false;
+
+	private boolean usedCompoundCytoscape = false;
+
 	/**
 	 * Builds a new manager that will produce files in the given
 	 * {@code workdir}.
@@ -49,6 +53,24 @@ public class FileManager {
 	 */
 	public Collection<String> createdFiles() {
 		return createdFiles;
+	}
+
+	/**
+	 * Takes note that the at least one of the dumped files needs cytoscape
+	 * support for compund graphs to be correctly visualized. This will have an
+	 * effect on the files produced by {@link #generateSupportFiles()}.
+	 */
+	public void usedCompoundCytoscape() {
+		usedCompoundCytoscape = true;
+	}
+
+	/**
+	 * Takes note that the at least one of the dumped files needs cytoscape
+	 * support for non-compund graphs to be correctly visualized. This will have
+	 * an effect on the files produced by {@link #generateSupportFiles()}.
+	 */
+	public void usedPlainCytoscape() {
+		usedPlainCytoscape = true;
 	}
 
 	/**
@@ -301,27 +323,26 @@ public class FileManager {
 	}
 
 	/**
-	 * Generates, inside the working directory, all supporting files (mostly
-	 * cytoscape.js) needed for correct visualization of graphs dumped in html
-	 * format.
-	 * 
-	 * @param compound whether the support files need to include
-	 *                     compound-related cytoscape layouts
+	 * Generates, inside the working directory, all supporting files needed for
+	 * correct visualization of dumped files. The generated files depend on the
+	 * which of the <code>usedX</code> methods exposed by this class have been
+	 * invoked.
 	 * 
 	 * @throws IOException if an error happens during the generation
 	 */
-	public void generateHtmlViewerSupportFiles(
-			boolean compound)
+	public void generateSupportFiles()
 			throws IOException {
 		List<String> files = new ArrayList<>();
-		files.add("js/cytoscape-3.21.1.min.js");
-		files.add("js/cytoscape-graphml-1.0.6-hier.js");
-		files.add("js/jquery-3.0.0.min.js");
-		if (compound) {
-			files.add("js/layout-base.js");
-			files.add("js/cose-base.js");
-			files.add("js/cytoscape-fcose.js");
-			files.add("js/cytoscape-expand-collapse.js");
+		if (usedPlainCytoscape || usedCompoundCytoscape) {
+			files.add("js/cytoscape-3.21.1.min.js");
+			files.add("js/cytoscape-graphml-1.0.6-hier.js");
+			files.add("js/jquery-3.0.0.min.js");
+			if (usedCompoundCytoscape) {
+				files.add("js/layout-base.js");
+				files.add("js/cose-base.js");
+				files.add("js/cytoscape-fcose.js");
+				files.add("js/cytoscape-expand-collapse.js");
+			}
 		}
 
 		for (String file : files)
