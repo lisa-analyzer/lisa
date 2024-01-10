@@ -1,3 +1,26 @@
-class ptng {
+class petagons_tests {
+
+	/*
+	Reference: https://doi.org/10.1016/j.scico.2009.04.004
+	*/
+	non_strict_abstraction(b, x, y) {
+		if(b) {
+			x = 0; y = 3;
+		} else {
+			x = -2; y = 1;
+		}
+    }
+    
+    /*
+	Reference: https://doi.org/10.1016/j.scico.2009.04.004
+	*/
+	strict_abstraction(b, x, y) {
+		if(b) {
+			x = 0; y = 3;
+		} else {
+			x = -2; y = 0;
+		}
+    }
+	
 
 }

@@ -86,7 +86,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 
 		return new Pentagons(
 				intervals.assign(id, expression, pp, oracle),
-				newBounds);
+				newBounds).closure();
 	}
 
 	@Override
@@ -167,9 +167,29 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 
 	@Override
 	public boolean isBottom() {
-		return intervals.isBottom() || upperBounds.isBottom();
+		return intervals.isBottom() && upperBounds.isBottom();
 	}
 
+	private Pentagons closure() throws SemanticException {
+		ValueEnvironment<UpperBounds> newBounds = new ValueEnvironment<UpperBounds>(upperBounds.lattice, upperBounds.getMap());
+
+		for (Identifier id1 : intervals.getKeys()) {
+			Set<Identifier> closure = new HashSet<>();
+			for (Identifier id2 : intervals.getKeys())
+				if (!id1.equals(id2))
+					if (intervals.getState(id1).interval.getHigh()
+							.compareTo(intervals.getState(id2).interval.getLow()) < 0)
+						closure.add(id2);
+			if (!closure.isEmpty())
+				// glb is the union
+				newBounds = newBounds.putState(id1,
+						newBounds.getState(id1).glb(new UpperBounds(closure)));
+			
+		}
+		
+		return new Pentagons(intervals, newBounds);
+	}
+	
 	@Override
 	public Pentagons lubAux(Pentagons other) throws SemanticException {
 		ValueEnvironment<UpperBounds> newBounds = upperBounds.lub(other.upperBounds);
@@ -181,7 +201,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 					closure.add(bound);
 			if (!closure.isEmpty())
 				// glb is the union
-				newBounds.putState(entry.getKey(),
+				newBounds = newBounds.putState(entry.getKey(),
 						newBounds.getState(entry.getKey()).glb(new UpperBounds(closure)));
 		}
 
@@ -193,7 +213,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 					closure.add(bound);
 			if (!closure.isEmpty())
 				// glb is the union
-				newBounds.putState(entry.getKey(),
+				newBounds = newBounds.putState(entry.getKey(),
 						newBounds.getState(entry.getKey()).glb(new UpperBounds(closure)));
 		}
 
