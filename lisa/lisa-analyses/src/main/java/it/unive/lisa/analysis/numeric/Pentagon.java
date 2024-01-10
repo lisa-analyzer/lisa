@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.numeric;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,6 +24,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.RemainderOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.util.numeric.MathNumber;
@@ -78,13 +80,12 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 
 		// we add the semantics for assignments here as we have access to the whole assignment
 		if (expression instanceof BinaryExpression) {
-
 			BinaryExpression be = (BinaryExpression) expression;
 			BinaryOperator op = be.getOperator();
-			if (op instanceof SubtractionOperator)
+			if (op instanceof SubtractionOperator) {
 				if (be.getLeft() instanceof Identifier) {
 					Identifier x = (Identifier) be.getLeft();
-					
+
 					if (be.getRight() instanceof Constant) 
 						// r = x - c
 						newBounds = newBounds.putState(id, upperBounds.getState(x).add(x));
@@ -96,6 +97,15 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 							newIntervals = newIntervals.putState(id, newIntervals.getState(id).glb(new Interval(MathNumber.ONE, MathNumber.PLUS_INFINITY)));
 					}
 				}
+			} else if (op instanceof RemainderOperator && be.getRight() instanceof Identifier) {
+				// r = u % d
+				Identifier d = (Identifier) be.getRight();
+				MathNumber low = intervals.getState(d).interval.getLow();
+				if (low.isPositive()  || low.isZero())
+					newBounds = newBounds.putState(id, new UpperBounds(Collections.singleton(d)));
+				else
+					newBounds = newBounds.putState(id, new UpperBounds().top());
+			}
 		}
 
 
