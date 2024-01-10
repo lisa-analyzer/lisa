@@ -1,7 +1,5 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -13,6 +11,7 @@ import it.unive.lisa.analysis.numeric.Parity;
 import it.unive.lisa.analysis.numeric.Pentagon;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+import org.junit.Test;
 
 public class NumericAnalysesTest extends AnalysisTestExecutor {
 
@@ -92,7 +91,7 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 		conf.compareWithOptimization = false;
 		perform(conf);
 	}
-	
+
 	@Test
 	public void testPentagons() {
 		CronConfiguration conf = new CronConfiguration();

@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -24,10 +17,16 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
- * The upper bounds abstract domain. It is implemented as
- * a {@link BaseNonRelationalValueDomain}.
+ * The upper bounds abstract domain. It is implemented as a
+ * {@link BaseNonRelationalValueDomain}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
@@ -38,7 +37,7 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 	 * The abstract top element.
 	 */
 	private static final UpperBounds TOP = new UpperBounds(true);
-	
+
 	/**
 	 * The abstract bottom element.
 	 */
@@ -48,7 +47,7 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 	 * The flag to set abstract top state.
 	 */
 	private final boolean isTop;
-	
+
 	/**
 	 * The set containing the bounds.
 	 */
@@ -60,13 +59,15 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 	public UpperBounds() {
 		this(true);
 	}
-	
+
 	/**
 	 * Builds the upper bounds.
 	 * 
-	 * @param isTop {@code true} if the abstract domain is top; otherwise {@code false}.
+	 * @param isTop {@code true} if the abstract domain is top; otherwise
+	 *                  {@code false}.
 	 */
-	public UpperBounds(boolean isTop) {
+	public UpperBounds(
+			boolean isTop) {
 		this.bounds = null;
 		this.isTop = isTop;
 	}
@@ -76,11 +77,11 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 	 * 
 	 * @param bounds the bounds to set
 	 */
-	public UpperBounds(Set<Identifier> bounds) {
+	public UpperBounds(
+			Set<Identifier> bounds) {
 		this.bounds = bounds;
 		this.isTop = false;
 	}
-
 
 	@Override
 	public StructuredRepresentation representation() {
@@ -105,33 +106,42 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 	public boolean isBottom() {
 		return !isTop && bounds.isEmpty();
 	}
-	
+
 	@Override
-	public UpperBounds lubAux(UpperBounds other) throws SemanticException {
+	public UpperBounds lubAux(
+			UpperBounds other)
+			throws SemanticException {
 		Set<Identifier> lub = new HashSet<>(bounds);
 		lub.retainAll(other.bounds);
 		return new UpperBounds(lub);
 	}
 
 	@Override
-	public UpperBounds glbAux(UpperBounds other) throws SemanticException {
+	public UpperBounds glbAux(
+			UpperBounds other)
+			throws SemanticException {
 		Set<Identifier> lub = new HashSet<>(bounds);
 		lub.addAll(other.bounds);
 		return new UpperBounds(lub);
 	}
 
 	@Override
-	public boolean lessOrEqualAux(UpperBounds other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			UpperBounds other)
+			throws SemanticException {
 		return bounds.containsAll(other.bounds);
 	}
 
 	@Override
-	public UpperBounds wideningAux(UpperBounds other) throws SemanticException {
+	public UpperBounds wideningAux(
+			UpperBounds other)
+			throws SemanticException {
 		return other.bounds.containsAll(bounds) ? other : TOP;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -148,12 +158,17 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 	}
 
 	@Override
-	public ValueEnvironment<UpperBounds> assumeBinaryExpression(ValueEnvironment<UpperBounds> environment,
-			BinaryOperator operator, ValueExpression left, ValueExpression right, ProgramPoint src, ProgramPoint dest,
-			SemanticOracle oracle) throws SemanticException {
+	public ValueEnvironment<UpperBounds> assumeBinaryExpression(
+			ValueEnvironment<UpperBounds> environment,
+			BinaryOperator operator,
+			ValueExpression left,
+			ValueExpression right,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		if (!(left instanceof Identifier && right instanceof Identifier))
 			return environment;
-
 
 		Identifier x = (Identifier) left;
 		Identifier y = (Identifier) right;
@@ -203,12 +218,16 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 	}
 
 	/**
-	 * Checks if this bounds contains a specified identifier of a program variable.
+	 * Checks if this bounds contains a specified identifier of a program
+	 * variable.
 	 * 
 	 * @param id the identifier to check
-	 * @return {@code true} if this bounds contains the specified identifier; otherwise, {@code false}. 
+	 * 
+	 * @return {@code true} if this bounds contains the specified identifier;
+	 *             otherwise, {@code false}.
 	 */
-	public boolean contains(Identifier id) {
+	public boolean contains(
+			Identifier id) {
 		return bounds != null && bounds.contains(id);
 	}
 
@@ -216,9 +235,11 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 	 * Adds the specified identifier of a program variable in the bounds.
 	 * 
 	 * @param id the identifier to add in the bounds.
+	 * 
 	 * @return the updated bounds.
 	 */
-	public UpperBounds add(Identifier id) {
+	public UpperBounds add(
+			Identifier id) {
 		Set<Identifier> res = new HashSet<>();
 		if (!isTop() && !isBottom())
 			res.addAll(bounds);

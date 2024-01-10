@@ -1,16 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import org.apache.commons.collections4.CollectionUtils;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -31,12 +20,27 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
- * The pentagons abstract domain, a weakly relational numerical abstract domain. This abstract
- * domain captures properties of the form of x &disin; [a, b] &and; x &lt; y. It is more precise than the
- * well known interval domain, but it is less precise than the octagon domain.
- * It is implemented as a {@link ValueDomain}.
+ * The pentagons abstract domain, a weakly relational numeric abstract domain.
+ * This abstract domain captures properties of the form of x \in [a, b]
+ * &and; x &lt; y. It is more precise than the well known interval domain, but
+ * it is less precise than the octagon domain. It is implemented as a
+ * {@link ValueDomain}.
+ * 
+ * @see <a href=
+ *          "https://www.sciencedirect.com/science/article/pii/S0167642309000719?ref=cra_js_challenge&fr=RR-1">Pentagons:
+ *          A weakly relational abstract domain for the efficient validation of
+ *          array accesses</a>
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
@@ -64,21 +68,28 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	/**
 	 * Builds the pentagons.
 	 * 
-	 * @param intervals the interval environment
+	 * @param intervals   the interval environment
 	 * @param upperBounds the upper bounds environment
 	 */
-	public Pentagon(ValueEnvironment<Interval> intervals, ValueEnvironment<UpperBounds> upperBounds) {
+	public Pentagon(
+			ValueEnvironment<Interval> intervals,
+			ValueEnvironment<UpperBounds> upperBounds) {
 		this.intervals = intervals;
 		this.upperBounds = upperBounds;
 	}
 
 	@Override
-	public Pentagon assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
+	public Pentagon assign(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		ValueEnvironment<UpperBounds> newBounds = upperBounds.assign(id, expression, pp, oracle);
 		ValueEnvironment<Interval> newIntervals = intervals.assign(id, expression, pp, oracle);
 
-		// we add the semantics for assignments here as we have access to the whole assignment
+		// we add the semantics for assignments here as we have access to the
+		// whole assignment
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression be = (BinaryExpression) expression;
 			BinaryOperator op = be.getOperator();
@@ -86,7 +97,7 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 				if (be.getLeft() instanceof Identifier) {
 					Identifier x = (Identifier) be.getLeft();
 
-					if (be.getRight() instanceof Constant) 
+					if (be.getRight() instanceof Constant)
 						// r = x - c
 						newBounds = newBounds.putState(id, upperBounds.getState(x).add(x));
 					else if (be.getRight() instanceof Identifier) {
@@ -94,20 +105,20 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 						Identifier y = (Identifier) be.getRight();
 
 						if (newBounds.getState(y).contains(x))
-							newIntervals = newIntervals.putState(id, newIntervals.getState(id).glb(new Interval(MathNumber.ONE, MathNumber.PLUS_INFINITY)));
+							newIntervals = newIntervals.putState(id, newIntervals.getState(id)
+									.glb(new Interval(MathNumber.ONE, MathNumber.PLUS_INFINITY)));
 					}
 				}
 			} else if (op instanceof RemainderOperator && be.getRight() instanceof Identifier) {
 				// r = u % d
 				Identifier d = (Identifier) be.getRight();
 				MathNumber low = intervals.getState(d).interval.getLow();
-				if (low.isPositive()  || low.isZero())
+				if (low.isPositive() || low.isZero())
 					newBounds = newBounds.putState(id, new UpperBounds(Collections.singleton(d)));
 				else
 					newBounds = newBounds.putState(id, new UpperBounds().top());
 			}
 		}
-
 
 		return new Pentagon(
 				newIntervals,
@@ -115,7 +126,10 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	}
 
 	@Override
-	public Pentagon smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
+	public Pentagon smallStepSemantics(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return new Pentagon(
 				intervals.smallStepSemantics(expression, pp, oracle),
@@ -123,7 +137,11 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	}
 
 	@Override
-	public Pentagon assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle)
+	public Pentagon assume(
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return new Pentagon(
 				intervals.assume(expression, src, dest, oracle),
@@ -131,33 +149,43 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	}
 
 	@Override
-	public Pentagon forgetIdentifier(Identifier id) throws SemanticException {
+	public Pentagon forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		return new Pentagon(
 				intervals.forgetIdentifier(id),
 				upperBounds.forgetIdentifier(id));
 	}
 
 	@Override
-	public Pentagon forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public Pentagon forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		return new Pentagon(
 				intervals.forgetIdentifiersIf(test),
 				upperBounds.forgetIdentifiersIf(test));
 	}
 
-
 	@Override
-	public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
+	public Satisfiability satisfies(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		return intervals.satisfies(expression, pp, oracle).glb(upperBounds.satisfies(expression, pp, oracle));
 	}
 
 	@Override
-	public Pentagon pushScope(ScopeToken token) throws SemanticException {
+	public Pentagon pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		return new Pentagon(intervals.pushScope(token), upperBounds.pushScope(token));
 	}
 
 	@Override
-	public Pentagon popScope(ScopeToken token) throws SemanticException {
+	public Pentagon popScope(
+			ScopeToken token)
+			throws SemanticException {
 		return new Pentagon(intervals.popScope(token), upperBounds.popScope(token));
 	}
 
@@ -196,7 +224,8 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	}
 
 	private Pentagon closure() throws SemanticException {
-		ValueEnvironment<UpperBounds> newBounds = new ValueEnvironment<UpperBounds>(upperBounds.lattice, upperBounds.getMap());
+		ValueEnvironment<
+				UpperBounds> newBounds = new ValueEnvironment<UpperBounds>(upperBounds.lattice, upperBounds.getMap());
 
 		for (Identifier id1 : intervals.getKeys()) {
 			Set<Identifier> closure = new HashSet<>();
@@ -216,7 +245,9 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	}
 
 	@Override
-	public Pentagon lubAux(Pentagon other) throws SemanticException {
+	public Pentagon lubAux(
+			Pentagon other)
+			throws SemanticException {
 		ValueEnvironment<UpperBounds> newBounds = upperBounds.lub(other.upperBounds);
 		for (Entry<Identifier, UpperBounds> entry : upperBounds) {
 			Set<Identifier> closure = new HashSet<>();
@@ -246,19 +277,23 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	}
 
 	@Override
-	public Pentagon wideningAux(Pentagon other) throws SemanticException {
+	public Pentagon wideningAux(
+			Pentagon other)
+			throws SemanticException {
 		return new Pentagon(intervals.widening(other.intervals), upperBounds.widening(other.upperBounds));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Pentagon other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Pentagon other)
+			throws SemanticException {
 		if (!intervals.lessOrEqual(other.intervals))
 			return false;
 		for (Entry<Identifier, UpperBounds> entry : other.upperBounds)
 			for (Identifier bound : entry.getValue())
 				if (!(upperBounds.getState(entry.getKey()).contains(bound)
 						|| intervals.getState(entry.getKey()).interval.getHigh()
-						.compareTo(intervals.getState(bound).interval.getLow()) < 0))
+								.compareTo(intervals.getState(bound).interval.getLow()) < 0))
 					return false;
 
 		return true;
@@ -270,7 +305,8 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -287,7 +323,8 @@ public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 	}
 
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		return intervals.knowsIdentifier(id) || upperBounds.knowsIdentifier(id);
 	}
 }
