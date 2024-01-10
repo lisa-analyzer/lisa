@@ -25,6 +25,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -44,7 +45,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	 * The interval environment.
 	 */
 	private final ValueEnvironment<Interval> intervals;
-	
+
 	/**
 	 * The upper bounds environment.
 	 */
@@ -73,19 +74,30 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	public Pentagons assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
 			throws SemanticException {
 		ValueEnvironment<UpperBounds> newBounds = upperBounds.assign(id, expression, pp, oracle);
+		ValueEnvironment<Interval> newIntervals = intervals.assign(id, expression, pp, oracle);
 
-		// we add the semantics for assignments here as we have access to the whole assigment
+		// we add the semantics for assignments here as we have access to the whole assignment
 		if (expression instanceof BinaryExpression) {
+
 			BinaryExpression be = (BinaryExpression) expression;
 			BinaryOperator op = be.getOperator();
-			if (op instanceof SubtractionOperator && be.getLeft() instanceof Identifier && be.getRight() instanceof Constant) {
-				Identifier y = (Identifier) be.getLeft();
-				newBounds = newBounds.putState(id, upperBounds.getState(y).add(y));
-			}
+			if (op instanceof SubtractionOperator)
+				if (be.getLeft() instanceof Identifier && be.getRight() instanceof Constant) {
+					Identifier x = (Identifier) be.getLeft();
+					newBounds = newBounds.putState(id, upperBounds.getState(x).add(x));
+				} else if (be.getLeft() instanceof Identifier && be.getRight() instanceof Identifier) {
+					Identifier x = (Identifier) be.getLeft();
+					Identifier y = (Identifier) be.getRight();
+
+					if (newBounds.getState(y).contains(x))
+						newIntervals = newIntervals.putState(id, newIntervals.getState(id).glb(new Interval(MathNumber.ONE, MathNumber.PLUS_INFINITY)));
+				
+				}
 		}
 
+
 		return new Pentagons(
-				intervals.assign(id, expression, pp, oracle),
+				newIntervals,
 				newBounds).closure();
 	}
 
@@ -119,13 +131,13 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 				upperBounds.forgetIdentifiersIf(test));
 	}
 
-	
+
 	@Override
 	public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
 			throws SemanticException {
 		return intervals.satisfies(expression, pp, oracle).glb(upperBounds.satisfies(expression, pp, oracle));
 	}
-	
+
 	@Override
 	public Pentagons pushScope(ScopeToken token) throws SemanticException {
 		return this; // we do not care about this for the project
@@ -184,12 +196,12 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 				// glb is the union
 				newBounds = newBounds.putState(id1,
 						newBounds.getState(id1).glb(new UpperBounds(closure)));
-			
+
 		}
-		
+
 		return new Pentagons(intervals, newBounds);
 	}
-	
+
 	@Override
 	public Pentagons lubAux(Pentagons other) throws SemanticException {
 		ValueEnvironment<UpperBounds> newBounds = upperBounds.lub(other.upperBounds);
@@ -219,7 +231,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 
 		return new Pentagons(intervals.lub(other.intervals), newBounds);
 	}
-	
+
 	@Override
 	public Pentagons wideningAux(Pentagons other) throws SemanticException {
 		return new Pentagons(intervals.widening(other.intervals), upperBounds.widening(other.upperBounds));
@@ -238,7 +250,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(intervals, upperBounds);
@@ -260,7 +272,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	public String toString() {
 		return representation().toString();
 	}
-	
+
 	@Override
 	public boolean knowsIdentifier(Identifier id) {
 		return intervals.knowsIdentifier(id) || upperBounds.knowsIdentifier(id);

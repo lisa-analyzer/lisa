@@ -21,6 +21,17 @@ class petagons_tests {
 			x = -2; y = 0;
 		}
     }
+    
+    /*
+	Reference: https://doi.org/10.1016/j.scico.2009.04.004
+	*/
+	common_code_pattern_01(x, y, r) {
+		if(x >= 0 && y >= 0)
+			if (x > y) {
+				r = x - y;
+				assert r >= 0;
+			}
+    }
 	
 
 }
