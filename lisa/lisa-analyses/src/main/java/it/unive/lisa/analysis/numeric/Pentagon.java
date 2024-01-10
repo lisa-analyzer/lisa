@@ -32,9 +32,9 @@ import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * The pentagons abstract domain, a weakly relational numeric abstract domain.
- * This abstract domain captures properties of the form of x \in [a, b]
- * &and; x &lt; y. It is more precise than the well known interval domain, but
- * it is less precise than the octagon domain. It is implemented as a
+ * This abstract domain captures properties of the form of x \in [a, b] &and; x
+ * &lt; y. It is more precise than the well known interval domain, but it is
+ * less precise than the octagon domain. It is implemented as a
  * {@link ValueDomain}.
  * 
  * @see <a href=
