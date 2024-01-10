@@ -62,8 +62,8 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	/**
 	 * Builds the pentagons.
 	 * 
-	 * @param intervals the underlying {@link ValueEnvironment<Interval>}
-	 * @param upperBounds the underlying {@link ValueEnvironment<UpperBounds>}
+	 * @param intervals the interval environment
+	 * @param upperBounds the upper bounds environment
 	 */
 	public Pentagons(ValueEnvironment<Interval> intervals, ValueEnvironment<UpperBounds> upperBounds) {
 		this.intervals = intervals;
@@ -82,16 +82,19 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 			BinaryExpression be = (BinaryExpression) expression;
 			BinaryOperator op = be.getOperator();
 			if (op instanceof SubtractionOperator)
-				if (be.getLeft() instanceof Identifier && be.getRight() instanceof Constant) {
+				if (be.getLeft() instanceof Identifier) {
 					Identifier x = (Identifier) be.getLeft();
-					newBounds = newBounds.putState(id, upperBounds.getState(x).add(x));
-				} else if (be.getLeft() instanceof Identifier && be.getRight() instanceof Identifier) {
-					Identifier x = (Identifier) be.getLeft();
-					Identifier y = (Identifier) be.getRight();
+					
+					if (be.getRight() instanceof Constant) 
+						// r = x - c
+						newBounds = newBounds.putState(id, upperBounds.getState(x).add(x));
+					else if (be.getRight() instanceof Identifier) {
+						// r = x - y
+						Identifier y = (Identifier) be.getRight();
 
-					if (newBounds.getState(y).contains(x))
-						newIntervals = newIntervals.putState(id, newIntervals.getState(id).glb(new Interval(MathNumber.ONE, MathNumber.PLUS_INFINITY)));
-				
+						if (newBounds.getState(y).contains(x))
+							newIntervals = newIntervals.putState(id, newIntervals.getState(id).glb(new Interval(MathNumber.ONE, MathNumber.PLUS_INFINITY)));
+					}
 				}
 		}
 
@@ -140,12 +143,12 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 
 	@Override
 	public Pentagons pushScope(ScopeToken token) throws SemanticException {
-		return this; // we do not care about this for the project
+		return new Pentagons(intervals.pushScope(token), upperBounds.pushScope(token));
 	}
 
 	@Override
 	public Pentagons popScope(ScopeToken token) throws SemanticException {
-		return this; // we do not care about this for the project
+		return new Pentagons(intervals.popScope(token), upperBounds.popScope(token));
 	}
 
 	@Override
