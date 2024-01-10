@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_petagons_tests.common_code_pattern_01(petagons_tests__this,_untyped_x,_untyped_y,_untyped_r).json", "untyped_petagons_tests.common_code_pattern_02(petagons_tests__this,_untyped_x,_untyped_len).json", "untyped_petagons_tests.non_strict_abstraction(petagons_tests__this,_untyped_b,_untyped_x,_untyped_y).json", "untyped_petagons_tests.strict_abstraction(petagons_tests__this,_untyped_b,_untyped_x,_untyped_y).json" ],
+  "info" : {
+    "cfgs" : "4",
+    "duration" : "418ms",
+    "end" : "2024-01-10T15:05:51.619+01:00",
+    "expressions" : "40",
+    "files" : "4",
+    "globals" : "0",
+    "members" : "4",
+    "programs" : "1",
+    "start" : "2024-01-10T15:05:51.201+01:00",
+    "statements" : "21",
+    "units" : "1",
+    "version" : "0.1b8",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/numeric/pentagons"
+  }
+}
