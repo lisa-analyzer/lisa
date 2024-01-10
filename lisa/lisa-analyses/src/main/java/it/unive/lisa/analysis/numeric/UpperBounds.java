@@ -25,23 +25,57 @@ import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
+/**
+ * The upper bounds abstract domain. It is implemented as
+ * a {@link BaseNonRelationalValueDomain}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ */
 public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, Iterable<Identifier> {
 
+	/**
+	 * The abstract top element.
+	 */
 	private static final UpperBounds TOP = new UpperBounds(true);
+	
+	/**
+	 * The abstract bottom element.
+	 */
 	private static final UpperBounds BOTTOM = new UpperBounds(new TreeSet<>());
 
+	/**
+	 * The flag to set abstract top state.
+	 */
 	private final boolean isTop;
+	
+	/**
+	 * The set containing the bounds.
+	 */
 	private final Set<Identifier> bounds;
 
+	/**
+	 * Builds the upper bounds.
+	 */
 	public UpperBounds() {
 		this(true);
 	}
 	
+	/**
+	 * Builds the upper bounds.
+	 * 
+	 * @param isTop {@code true} if the abstract domain is top; otherwise {@code false}.
+	 */
 	public UpperBounds(boolean isTop) {
 		this.bounds = null;
 		this.isTop = isTop;
 	}
 
+	/**
+	 * Builds the upper bounds.
+	 * 
+	 * @param bounds the bounds to set
+	 */
 	public UpperBounds(Set<Identifier> bounds) {
 		this.bounds = bounds;
 		this.isTop = false;
@@ -168,10 +202,22 @@ public class UpperBounds implements BaseNonRelationalValueDomain<UpperBounds>, I
 		return bounds.iterator();
 	}
 
+	/**
+	 * Checks if this bounds contains a specified identifier of a program variable.
+	 * 
+	 * @param id the identifier to check
+	 * @return {@code true} if this bounds contains the specified identifier; otherwise, {@code false}. 
+	 */
 	public boolean contains(Identifier id) {
 		return bounds != null && bounds.contains(id);
 	}
 
+	/**
+	 * Adds the specified identifier of a program variable in the bounds.
+	 * 
+	 * @param id the identifier to add in the bounds.
+	 * @return the updated bounds.
+	 */
 	public UpperBounds add(Identifier id) {
 		Set<Identifier> res = new HashSet<>();
 		if (!isTop() && !isBottom())

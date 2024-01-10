@@ -29,16 +29,41 @@ import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
+/**
+ * The pentagons abstract domain, a weakly relational numerical abstract domain. This abstract
+ * domain captures properties of the form of x &disin; [a, b] &and; x &lt; y. It is more precise than the
+ * well known interval domain, but it is less precise than the octagon domain.
+ * It is implemented as a {@link ValueDomain}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ */
 public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons> {
 
+	/**
+	 * The interval environment.
+	 */
 	private final ValueEnvironment<Interval> intervals;
+	
+	/**
+	 * The upper bounds environment.
+	 */
 	private final ValueEnvironment<UpperBounds> upperBounds;
 
+	/**
+	 * Builds the pentagons.
+	 */
 	public Pentagons() {
 		this.intervals = new ValueEnvironment<>(new Interval()).top();
 		this.upperBounds = new ValueEnvironment<>(new UpperBounds(true)).top();
 	}
 
+	/**
+	 * Builds the pentagons.
+	 * 
+	 * @param intervals the underlying {@link ValueEnvironment<Interval>}
+	 * @param upperBounds the underlying {@link ValueEnvironment<UpperBounds>}
+	 */
 	public Pentagons(ValueEnvironment<Interval> intervals, ValueEnvironment<UpperBounds> upperBounds) {
 		this.intervals = intervals;
 		this.upperBounds = upperBounds;
