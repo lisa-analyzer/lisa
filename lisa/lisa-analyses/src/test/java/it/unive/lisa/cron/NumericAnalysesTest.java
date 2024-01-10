@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.numeric.Parity;
 import it.unive.lisa.analysis.numeric.Pentagons;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+
 import org.junit.Test;
 
 public class NumericAnalysesTest extends AnalysisTestExecutor {
@@ -102,7 +103,7 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "pentagons";
-		conf.programFile = "numeric.imp";
+		conf.programFile = "pentagons.imp";
 		perform(conf);
 	}
 }
