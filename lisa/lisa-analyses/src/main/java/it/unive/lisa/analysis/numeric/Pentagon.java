@@ -39,7 +39,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons> {
+public class Pentagon implements ValueDomain<Pentagon>, BaseLattice<Pentagon> {
 
 	/**
 	 * The interval environment.
@@ -54,7 +54,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	/**
 	 * Builds the pentagons.
 	 */
-	public Pentagons() {
+	public Pentagon() {
 		this.intervals = new ValueEnvironment<>(new Interval()).top();
 		this.upperBounds = new ValueEnvironment<>(new UpperBounds(true)).top();
 	}
@@ -65,13 +65,13 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	 * @param intervals the interval environment
 	 * @param upperBounds the upper bounds environment
 	 */
-	public Pentagons(ValueEnvironment<Interval> intervals, ValueEnvironment<UpperBounds> upperBounds) {
+	public Pentagon(ValueEnvironment<Interval> intervals, ValueEnvironment<UpperBounds> upperBounds) {
 		this.intervals = intervals;
 		this.upperBounds = upperBounds;
 	}
 
 	@Override
-	public Pentagons assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
+	public Pentagon assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
 			throws SemanticException {
 		ValueEnvironment<UpperBounds> newBounds = upperBounds.assign(id, expression, pp, oracle);
 		ValueEnvironment<Interval> newIntervals = intervals.assign(id, expression, pp, oracle);
@@ -99,37 +99,37 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 		}
 
 
-		return new Pentagons(
+		return new Pentagon(
 				newIntervals,
 				newBounds).closure();
 	}
 
 	@Override
-	public Pentagons smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
+	public Pentagon smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
 			throws SemanticException {
-		return new Pentagons(
+		return new Pentagon(
 				intervals.smallStepSemantics(expression, pp, oracle),
 				upperBounds.smallStepSemantics(expression, pp, oracle));
 	}
 
 	@Override
-	public Pentagons assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle)
+	public Pentagon assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle)
 			throws SemanticException {
-		return new Pentagons(
+		return new Pentagon(
 				intervals.assume(expression, src, dest, oracle),
 				upperBounds.assume(expression, src, dest, oracle));
 	}
 
 	@Override
-	public Pentagons forgetIdentifier(Identifier id) throws SemanticException {
-		return new Pentagons(
+	public Pentagon forgetIdentifier(Identifier id) throws SemanticException {
+		return new Pentagon(
 				intervals.forgetIdentifier(id),
 				upperBounds.forgetIdentifier(id));
 	}
 
 	@Override
-	public Pentagons forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
-		return new Pentagons(
+	public Pentagon forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+		return new Pentagon(
 				intervals.forgetIdentifiersIf(test),
 				upperBounds.forgetIdentifiersIf(test));
 	}
@@ -142,13 +142,13 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	}
 
 	@Override
-	public Pentagons pushScope(ScopeToken token) throws SemanticException {
-		return new Pentagons(intervals.pushScope(token), upperBounds.pushScope(token));
+	public Pentagon pushScope(ScopeToken token) throws SemanticException {
+		return new Pentagon(intervals.pushScope(token), upperBounds.pushScope(token));
 	}
 
 	@Override
-	public Pentagons popScope(ScopeToken token) throws SemanticException {
-		return new Pentagons(intervals.popScope(token), upperBounds.popScope(token));
+	public Pentagon popScope(ScopeToken token) throws SemanticException {
+		return new Pentagon(intervals.popScope(token), upperBounds.popScope(token));
 	}
 
 	@Override
@@ -166,8 +166,8 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	}
 
 	@Override
-	public Pentagons top() {
-		return new Pentagons(intervals.top(), upperBounds.top());
+	public Pentagon top() {
+		return new Pentagon(intervals.top(), upperBounds.top());
 	}
 
 	@Override
@@ -176,8 +176,8 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 	}
 
 	@Override
-	public Pentagons bottom() {
-		return new Pentagons(intervals.bottom(), upperBounds.bottom());
+	public Pentagon bottom() {
+		return new Pentagon(intervals.bottom(), upperBounds.bottom());
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 		return intervals.isBottom() && upperBounds.isBottom();
 	}
 
-	private Pentagons closure() throws SemanticException {
+	private Pentagon closure() throws SemanticException {
 		ValueEnvironment<UpperBounds> newBounds = new ValueEnvironment<UpperBounds>(upperBounds.lattice, upperBounds.getMap());
 
 		for (Identifier id1 : intervals.getKeys()) {
@@ -202,11 +202,11 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 
 		}
 
-		return new Pentagons(intervals, newBounds);
+		return new Pentagon(intervals, newBounds);
 	}
 
 	@Override
-	public Pentagons lubAux(Pentagons other) throws SemanticException {
+	public Pentagon lubAux(Pentagon other) throws SemanticException {
 		ValueEnvironment<UpperBounds> newBounds = upperBounds.lub(other.upperBounds);
 		for (Entry<Identifier, UpperBounds> entry : upperBounds) {
 			Set<Identifier> closure = new HashSet<>();
@@ -232,16 +232,16 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 						newBounds.getState(entry.getKey()).glb(new UpperBounds(closure)));
 		}
 
-		return new Pentagons(intervals.lub(other.intervals), newBounds);
+		return new Pentagon(intervals.lub(other.intervals), newBounds);
 	}
 
 	@Override
-	public Pentagons wideningAux(Pentagons other) throws SemanticException {
-		return new Pentagons(intervals.widening(other.intervals), upperBounds.widening(other.upperBounds));
+	public Pentagon wideningAux(Pentagon other) throws SemanticException {
+		return new Pentagon(intervals.widening(other.intervals), upperBounds.widening(other.upperBounds));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Pentagons other) throws SemanticException {
+	public boolean lessOrEqualAux(Pentagon other) throws SemanticException {
 		if (!intervals.lessOrEqual(other.intervals))
 			return false;
 		for (Entry<Identifier, UpperBounds> entry : other.upperBounds)
@@ -267,7 +267,7 @@ public class Pentagons implements ValueDomain<Pentagons>, BaseLattice<Pentagons>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Pentagons other = (Pentagons) obj;
+		Pentagon other = (Pentagon) obj;
 		return Objects.equals(intervals, other.intervals) && Objects.equals(upperBounds, other.upperBounds);
 	}
 
