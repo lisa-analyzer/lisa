@@ -13,7 +13,7 @@ import java.util.Set;
  * <br>
  * Instances of this class are equal to all other classes that implement the
  * {@link NumericType} interface, and for which {@link #isIntegral()} and
- * {@link #is32Bits()} yield {@code true}. An instance of Int32 is assumed to be
+ * {@link #getNbits()} yields {@code 32}. An instance of Int32 is assumed to be
  * assignable to any {@link NumericType}, with possible loss of information.
  * <br>
  * <br>
@@ -43,23 +43,8 @@ public class UInt32Type implements NumericType {
 	}
 
 	@Override
-	public boolean is8Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is16Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is32Bits() {
-		return true;
-	}
-
-	@Override
-	public boolean is64Bits() {
-		return false;
+	public int getNbits() {
+		return 32;
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import java.util.Set;
  * <br>
  * Instances of this class are equal to all other classes that implement the
  * {@link NumericType} interface, and for which {@link #isIntegral()} yields
- * {@code false} and {@link #is32Bits()} yields {@code true}. An instance of
+ * {@code false} and {@link #getNbits()} yields {@code 32}. An instance of
  * Float32 is assumed to be assignable to any {@link NumericType}, with possible
  * loss of information. <br>
  * <br>
@@ -24,7 +24,7 @@ import java.util.Set;
  * <br>
  * Equality with other types is determined through
  * {@link NumericType#sameNumericTypes(NumericType)}.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Float32Type implements NumericType {
@@ -43,23 +43,8 @@ public class Float32Type implements NumericType {
 	}
 
 	@Override
-	public boolean is8Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is16Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is32Bits() {
-		return true;
-	}
-
-	@Override
-	public boolean is64Bits() {
-		return false;
+	public int getNbits() {
+		return 32;
 	}
 
 	@Override

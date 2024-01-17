@@ -14,40 +14,11 @@ import java.util.stream.Collectors;
 public interface NumericType extends Type {
 
 	/**
-	 * Returns {@code true} if this numeric type follows a 8-bits format
-	 * representation.
-	 * 
-	 * @return {@code true} if this numeric type follows a 8-bits format
-	 *             representation; {@code false} otherwise
+	 * Returns the number of bits for this numeric type.
+	 *
+	 * @return The number of bits for this numeric type.
 	 */
-	boolean is8Bits();
-
-	/**
-	 * Returns {@code true} if this numeric type follows a 16-bits format
-	 * representation.
-	 * 
-	 * @return {@code true} if this numeric type follows a 16-bits format
-	 *             representation; {@code false} otherwise
-	 */
-	boolean is16Bits();
-
-	/**
-	 * Returns {@code true} if this numeric type follows a 32-bits format
-	 * representation.
-	 * 
-	 * @return {@code true} if this numeric type follows a 32-bits format
-	 *             representation; {@code false} otherwise
-	 */
-	boolean is32Bits();
-
-	/**
-	 * Returns {@code true} if this numeric type follows a 64-bits format
-	 * representation.
-	 * 
-	 * @return {@code true} if this numeric type follows a 64-bits format
-	 *             representation; {@code false} otherwise
-	 */
-	boolean is64Bits();
+	int getNbits();
 
 	/**
 	 * Returns {@code true} if this numeric type is unsigned.
@@ -89,13 +60,7 @@ public interface NumericType extends Type {
 	 */
 	default boolean sameNumericTypes(
 			NumericType other) {
-		if (is8Bits() != other.is8Bits())
-			return false;
-		if (is16Bits() != other.is16Bits())
-			return false;
-		if (is32Bits() != other.is32Bits())
-			return false;
-		if (is64Bits() != other.is64Bits())
+		if (getNbits() != other.getNbits())
 			return false;
 		if (isIntegral() != other.isIntegral())
 			return false;
@@ -116,22 +81,12 @@ public interface NumericType extends Type {
 	 */
 	default NumericType supertype(
 			NumericType other) {
-		if (is8Bits() && (other.is16Bits() || other.is32Bits() || other.is64Bits()))
-			return other;
-		if (other.is8Bits() && (is16Bits() || is32Bits() || is64Bits()))
+		if (getNbits() > other.getNbits())
 			return this;
-
-		if (is16Bits() && (other.is32Bits() || other.is64Bits()))
+		if (getNbits() < other.getNbits())
 			return other;
-		if (other.is16Bits() && (is32Bits() || is64Bits()))
-			return this;
 
-		if (is32Bits() && other.is64Bits())
-			return other;
-		if (other.is32Bits() && is64Bits())
-			return this;
-
-		// both 64 bits
+		// same size
 
 		if (isIntegral() && !other.isIntegral())
 			return other;
@@ -143,7 +98,7 @@ public interface NumericType extends Type {
 		if (isSigned() && other.isUnsigned())
 			return this;
 
-		return this; // they are both 64-bit signed non-integral types
+		return this; // they are same-bit signed non-integral types
 	}
 
 	/**
