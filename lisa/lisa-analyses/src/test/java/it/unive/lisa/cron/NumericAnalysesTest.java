@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Parity;
+import it.unive.lisa.analysis.numeric.Pentagon;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import org.junit.Test;
@@ -88,6 +89,20 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 		// optimized analysis. the result is still sound and more precice
 		// however.
 		conf.compareWithOptimization = false;
+		perform(conf);
+	}
+
+	@Test
+	public void testPentagons() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Pentagon(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.testDir = "numeric";
+		conf.testSubDir = "pentagons";
+		conf.programFile = "pentagons.imp";
 		perform(conf);
 	}
 }
