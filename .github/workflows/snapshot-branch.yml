@@ -1,0 +1,55 @@
+name: 'Snapshot custom branch'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-cron:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v2
+    - name: 'Set up JDK 11'
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: 'Grant execute permission for gradlew'
+      run: chmod +x lisa/gradlew
+    - name: 'Gradle: normal build'
+      run: cd lisa && ./gradlew build
+    - name: 'Delete pre-releases of lisa-sdk from packages'
+      uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'io.github.lisa-analyzer.lisa-sdk'
+        min-versions-to-keep: 0 
+        ignore-versions: ^[0-9.b]+(-(?!${{ github.ref_name }}-SNAPSHOT)[a-zA-Z0-9_-]*)*$ # this ignores everything that is not version-branch-SNAPSHOT
+        delete-only-pre-release-versions: "true"
+    - name: 'Delete pre-releases of lisa-program from packages'
+      uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'io.github.lisa-analyzer.lisa-program'
+        min-versions-to-keep: 0
+        ignore-versions: ^[0-9.b]+(-(?!${{ github.ref_name }}-SNAPSHOT)[a-zA-Z0-9_-]*)*$ # this ignores everything that is not version-branch-SNAPSHOT
+        delete-only-pre-release-versions: "true"
+    - name: 'Delete pre-releases of lisa-analyses from packages'
+      uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'io.github.lisa-analyzer.lisa-analyses'
+        min-versions-to-keep: 0
+        ignore-versions: ^[0-9.b]+(-(?!${{ github.ref_name }}-SNAPSHOT)[a-zA-Z0-9_-]*)*$ # this ignores everything that is not version-branch-SNAPSHOT
+        delete-only-pre-release-versions: "true"
+    - name: 'Delete pre-releases of lisa-imp from packages'
+      uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'io.github.lisa-analyzer.lisa-imp'
+        min-versions-to-keep: 0
+        ignore-versions: ^[0-9.b]+(-(?!${{ github.ref_name }}-SNAPSHOT)[a-zA-Z0-9_-]*)*$ # this ignores everything that is not version-branch-SNAPSHOT
+        delete-only-pre-release-versions: "true"
+    - name: 'Gradle: publish to GitHub Packages'
+      env:
+        SIGN_PW: ${{ secrets.SIGN_PASSPHRASE }}
+        SIGN_KEY: ${{ secrets.SIGN_PRIVATE_KEY }}
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: cd lisa && ./gradlew -Pversion=${{ steps.gitinfo.outputs.nextver }}-${{ github.ref_name }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository        
