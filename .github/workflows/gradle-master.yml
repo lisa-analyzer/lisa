@@ -28,29 +28,29 @@ jobs:
       with: 
         package-name: 'io.github.lisa-analyzer.lisa-sdk'
         min-versions-to-keep: 0
-        ignore-versions: ^[0-9.b]+(-(?!SNAPSHOT)[a-zA-Z0-9_-]*)*$ # this ignores everything that is not version-SNAPSHOT
-        delete-only-pre-release-versions: "true"
+        # this ignores everything that is not version-SNAPSHOT
+        ignore-versions: ^[0-9.b]+(-(?!SNAPSHOT)[a-zA-Z0-9_-]*)?$
     - name: 'Delete pre-releases of lisa-program from packages'
       uses: actions/delete-package-versions@v2
       with: 
         package-name: 'io.github.lisa-analyzer.lisa-program'
         min-versions-to-keep: 0
-        ignore-versions: ^[0-9.b]+(-(?!SNAPSHOT)[a-zA-Z0-9_-]*)*$ # this ignores everything that is not version-SNAPSHOT
-        delete-only-pre-release-versions: "true"
+        # this ignores everything that is not version-SNAPSHOT
+        ignore-versions: ^[0-9.b]+(-(?!SNAPSHOT)[a-zA-Z0-9_-]*)?$
     - name: 'Delete pre-releases of lisa-analyses from packages'
       uses: actions/delete-package-versions@v2
       with: 
         package-name: 'io.github.lisa-analyzer.lisa-analyses'
         min-versions-to-keep: 0
-        ignore-versions: ^[0-9.b]+(-(?!SNAPSHOT)[a-zA-Z0-9_-]*)*$ # this ignores everything that is not version-SNAPSHOT
-        delete-only-pre-release-versions: "true"
+        # this ignores everything that is not version-SNAPSHOT
+        ignore-versions: ^[0-9.b]+(-(?!SNAPSHOT)[a-zA-Z0-9_-]*)*$
     - name: 'Delete pre-releases of lisa-imp from packages'
       uses: actions/delete-package-versions@v2
       with: 
         package-name: 'io.github.lisa-analyzer.lisa-imp'
         min-versions-to-keep: 0
-        ignore-versions: ^[0-9.b]+(-(?!SNAPSHOT)[a-zA-Z0-9_-]*)*$ # this ignores everything that is not version-SNAPSHOT
-        delete-only-pre-release-versions: "true"
+        # this ignores everything that is not version-SNAPSHOT
+        ignore-versions: ^[0-9.b]+(-(?!SNAPSHOT)[a-zA-Z0-9_-]*)*$
     - name: 'Retrieve commit list'
       id: gitinfo
       run: |
