@@ -55,7 +55,7 @@ public class Addition extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isNumericType))
+		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
 		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
