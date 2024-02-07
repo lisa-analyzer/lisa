@@ -9,6 +9,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
@@ -39,6 +40,62 @@ public class Addition extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 			Expression left,
 			Expression right) {
 		super(cfg, location, "+", left, right);
+	}
+
+	/**
+	 * Builds the addition.
+	 * 
+	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param location   the location where this literal is defined
+	 * @param staticType the static type of this operation
+	 * @param left       the left-hand side of this operation
+	 * @param right      the right-hand side of this operation
+	 */
+	public Addition(
+			CFG cfg,
+			CodeLocation location,
+			Type staticType,
+			Expression left,
+			Expression right) {
+		super(cfg, location, "+", staticType, left, right);
+	}
+
+	/**
+	 * Builds the addition.
+	 * 
+	 * @param cfg      the {@link CFG} where this operation lies
+	 * @param location the location where this literal is defined
+	 * @param order    the evaluation order of the sub-expressions
+	 * @param left     the left-hand side of this operation
+	 * @param right    the right-hand side of this operation
+	 */
+	public Addition(
+			CFG cfg,
+			CodeLocation location,
+			EvaluationOrder order,
+			Expression left,
+			Expression right) {
+		super(cfg, location, "+", order, left, right);
+	}
+
+	/**
+	 * Builds the addition.
+	 * 
+	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param location   the location where this literal is defined
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param staticType the static type of this operation
+	 * @param left       the left-hand side of this operation
+	 * @param right      the right-hand side of this operation
+	 */
+	public Addition(
+			CFG cfg,
+			CodeLocation location,
+			EvaluationOrder order,
+			Type staticType,
+			Expression left,
+			Expression right) {
+		super(cfg, location, "+", order, staticType, left, right);
 	}
 
 	@Override

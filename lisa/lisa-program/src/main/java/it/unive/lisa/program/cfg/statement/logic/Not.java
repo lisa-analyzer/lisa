@@ -9,6 +9,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
@@ -36,6 +37,23 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 			CodeLocation location,
 			Expression expression) {
 		super(cfg, location, "!", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), expression);
+	}
+
+	/**
+	 * Builds the logical negation.
+	 * 
+	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param location   the location where this literal is defined
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param expression the operand of this operation
+	 */
+	public Not(
+			CFG cfg,
+			CodeLocation location,
+			EvaluationOrder order,
+			Expression expression) {
+		super(cfg, location, "!", order, cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(),
+				expression);
 	}
 
 	@Override

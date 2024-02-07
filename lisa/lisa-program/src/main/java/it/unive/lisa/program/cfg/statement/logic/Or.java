@@ -9,6 +9,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
@@ -38,6 +39,25 @@ public class Or extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 			Expression left,
 			Expression right) {
 		super(cfg, location, "||", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
+	}
+
+	/**
+	 * Builds the logical disjunction.
+	 * 
+	 * @param cfg      the {@link CFG} where this operation lies
+	 * @param location the location where this literal is defined
+	 * @param order    the evaluation order of the sub-expressions
+	 * @param left     the left-hand side of this operation
+	 * @param right    the right-hand side of this operation
+	 */
+	public Or(
+			CFG cfg,
+			CodeLocation location,
+			EvaluationOrder order,
+			Expression left,
+			Expression right) {
+		super(cfg, location, "||", order, cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left,
+				right);
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
@@ -36,6 +37,56 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 			CodeLocation location,
 			Expression expression) {
 		super(cfg, location, "-", expression);
+	}
+
+	/**
+	 * Builds the numerical negation.
+	 * 
+	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param location   the location where this literal is defined
+	 * @param staticType the static type of this operation
+	 * @param expression the operand of this operation
+	 */
+	public Negation(
+			CFG cfg,
+			CodeLocation location,
+			Type staticType,
+			Expression expression) {
+		super(cfg, location, "-", staticType, expression);
+	}
+
+	/**
+	 * Builds the numerical negation.
+	 * 
+	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param location   the location where this literal is defined
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param expression the operand of this operation
+	 */
+	public Negation(
+			CFG cfg,
+			CodeLocation location,
+			EvaluationOrder order,
+			Expression expression) {
+		super(cfg, location, "-", order, expression);
+	}
+
+	/**
+	 * Builds the numerical negation.
+	 * 
+	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param location   the location where this literal is defined
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param staticType the static type of this operation
+	 * @param expression the operand of this operation
+	 */
+	public Negation(
+			CFG cfg,
+			CodeLocation location,
+			EvaluationOrder order,
+			Type staticType,
+			Expression expression) {
+		super(cfg, location, "-", order, staticType, expression);
 	}
 
 	@Override
