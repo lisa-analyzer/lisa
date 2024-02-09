@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.*;
@@ -11,12 +12,9 @@ import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
 import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
+import it.unive.lisa.symbolic.value.operator.binary.*;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import javassist.compiler.ast.Symbol;
-import org.graphstream.ui.graphicGraph.stylesheet.Value;
 
 import java.util.function.Predicate;
 
@@ -106,88 +104,116 @@ public class Stability implements ValueDomain<Stability> {
         return null;
     }
 
-    private boolean queryToAux(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        return intervals.satisfies(expression, pp, oracle) == Satisfiability.SATISFIED;
-
+    private boolean queryToAux(BinaryExpression query, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+        return intervals.satisfies(query, pp, oracle) == Satisfiability.SATISFIED;
     }
 
     /**
-     * Compares values of id and the result of expression in the auxiliary abstract domain
-     * @param id
-     * @param expression
+     * Builds a BinaryExpression representing "x operator y"
+     * @param operator
+     * @param x
+     * @param y
      * @param pp
-     * @param oracle
-     * @return  STABLE iff id == expression
-     *          [...]
+     * @return BinaryExpression
      */
-    private Stability auxCompareAfterAssignment(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        if (queryToAux("x > expr", pp, oracle)) return DEC;
-        else if (queryToAux("x == expr", pp, oracle)) return STABLE;
-        else if (queryToAux("x < expr", pp, oracle)) return INC;
-        else if (queryToAux("x >= expr", pp, oracle)) return NON_INC;
-        else if (queryToAux("x <= expr", pp, oracle)) return NON_DEC;
-        else if (queryToAux("x != expr", pp, oracle)) return NON_STABLE;
-        else return TOP;
+    private BinaryExpression binary(BinaryOperator operator, SymbolicExpression x, SymbolicExpression y, ProgramPoint pp){
+        return new BinaryExpression(
+                pp.getProgram().getTypes().getBooleanType(),
+                x,
+                y,
+                operator,
+                SyntheticLocation.INSTANCE);
     }
 
     /**
-     * Auxiliary function for comparing two ValueExpressions in the auxiliary abstract domain
+     * Builds Constant with value c
+     * @param c
+     * @param pp
+     * @return
+     */
+    private Constant constantInt(int c, ProgramPoint pp){
+        return new Constant(
+                pp.getProgram().getTypes().getIntegerType(),
+                c,
+                SyntheticLocation.INSTANCE
+        );
+    }
+
+    /**
+     *
      * @param a
      * @param b
      * @param pp
      * @param oracle
-     * @return
+     * @return Stability representing the relation between a and b
      * @throws SemanticException
      */
-    private Stability increasingIfGreater(ValueExpression a, ValueExpression b, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        if ( queryToAux(new BinaryExpression(a.getStaticType(), a, b, new ComparisonGt()), pp, oracle) ) return INC;
-        else if (queryToAux("a == b", pp, oracle)) return STABLE;
-        else if (queryToAux("a < b", pp, oracle)) return DEC;
-        else if (queryToAux("a >= b", pp, oracle)) return NON_DEC;
-        else if (queryToAux("a <= b", pp, oracle)) return NON_INC;
-        else if (queryToAux("a != b", pp, oracle)) return NON_STABLE;
+    private Stability increasingIfGreater(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+        if (queryToAux(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle)) return INC;
+        else if (queryToAux(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle)) return STABLE;
+        else if (queryToAux(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle)) return DEC;
+        else if (queryToAux(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle)) return NON_DEC;
+        else if (queryToAux(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle)) return NON_INC;
+        else if (queryToAux(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle)) return NON_STABLE;
         else return TOP;
     }
 
-    private Stability increasingIfLess(ValueExpression a, ValueExpression b, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+    /**
+     *
+     * @param a
+     * @param b
+     * @param pp
+     * @param oracle
+     * @return Stability representing the relation between a and b
+     * @throws SemanticException
+     */
+    private Stability increasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
         return increasingIfGreater(b, a, pp, oracle);
     }
 
-    private Stability nonDecreasingIfGreaterOrEqual(ValueExpression a, ValueExpression b, ProgramPoint pp, SemanticOracle oracle){
+    private Stability nonDecreasingIfGreaterOrEqual(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 
-        if (queryToAux("a == b", pp, oracle)) return STABLE;
+        if (queryToAux(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle)) return STABLE;
 
-        if (queryToAux("a > b", pp, oracle)
-                || queryToAux("a >= b", pp, oracle))
+        if (queryToAux(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle)
+                || queryToAux(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
             return NON_DEC;
 
-        else if (queryToAux("a < b", pp, oracle)
-                || queryToAux("a <= b", pp, oracle))
+        else if (queryToAux(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle)
+                || queryToAux(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
             return NON_INC;
+
+        else if (queryToAux(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle))
+            return NON_STABLE;
 
         else return TOP;
     }
 
-    private Stability nonDecreasingIfLessOrEqual(ValueExpression a, ValueExpression b, ProgramPoint pp, SemanticOracle oracle){
+    private Stability nonDecreasingIfLessOrEqual(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
         return nonDecreasingIfGreaterOrEqual(b, a, pp, oracle);
     }
 
-    private Stability increasingIfBetween(ValueExpression a, ValueExpression b1, ValueExpression b2, ProgramPoint pp, SemanticOracle oracle){
-        if (queryToAux("a > b1", pp, oracle) && queryToAux("a < b2", pp, oracle))
+    /*
+    private Stability increasingIfBetween(SymbolicExpression a, SymbolicExpression b1, SymbolicExpression b2, ProgramPoint pp, SemanticOracle oracle){
+        if (queryToAux("a > b1", pp, oracle)
+                && queryToAux("a < b2", pp, oracle))
             return INC;
-        else if (queryToAux("a > b1", pp, oracle) && queryToAux("a < b2", pp, oracle))
+        else if (queryToAux("a > b1", pp, oracle)
+                && queryToAux("a < b2", pp, oracle))
 
     }
 
+     */
 
 
-    // TO DO: fix the queries
+
+    // TO DO: rubber-duck the logic + maybe move last return out of the ifs
     @Override
     public Stability assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 
         if (expression instanceof UnaryExpression &&
                 ((UnaryExpression) expression).getOperator() instanceof NumericNegation)
-            return auxCompareAfterAssignment(id, expression, pp, oracle);
+            return increasingIfLess(id, expression, pp, oracle);
 
         else if (expression instanceof BinaryExpression) {
             BinaryExpression be = (BinaryExpression) expression;
@@ -195,71 +221,68 @@ public class Stability implements ValueDomain<Stability> {
             SymbolicExpression left = be.getLeft();
             SymbolicExpression right = be.getRight();
 
-            boolean isLeft = id.equals(be.getLeft());
-            boolean isRight = id.equals(be.getRight());
+            boolean isLeft = id.equals(left);
+            boolean isRight = id.equals(right);
 
-            // x = a + b
-            if (op instanceof AdditionOperator) {
-                if (isLeft) return increasingIfGreater(right, 0, pp, oracle);
-                else if (isRight) return increasingIfGreater(left, 0, pp, oracle);
-                else return auxCompareAfterAssignment(id, expression, pp, oracle);
-            }
+            if (isLeft || isRight){
+                SymbolicExpression other = isLeft ? right : left;
 
-            // x = a - b
-            if (op instanceof SubtractionOperator){
-                if (isLeft) return increasingIfLess(right, 0, pp, oracle);
-                else return auxCompareAfterAssignment(id, expression, pp, oracle);
-            }
+                // x = x + other || x = other + x
+                if (op instanceof AdditionOperator)
+                    return increasingIfGreater(other, constantInt(0, pp), pp, oracle);
 
-            // x = a * b
-            if (op instanceof MultiplicationOperator) {
+                // x = x - other
+                if (op instanceof SubtractionOperator && isLeft) return increasingIfLess(right, constantInt(0, pp), pp, oracle);
 
-                if (isLeft || isRight) {
-                    SymbolicExpression other = isLeft ? right : left;
+                // x = x * other || x = other * x
+                if (op instanceof MultiplicationOperator) {
 
-                    if (queryToAux("x == 0", pp, oracle)
-                            || queryToAux("other == 1", pp, oracle))
+                    // id == 0 || other == 1
+                    if (queryToAux(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
+                            || queryToAux(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
                         return STABLE;
 
-                    else if (queryToAux("x > 0", pp, oracle))
-                        return increasingIfGreater(other, 1, pp, oracle);
+                    // id > 0
+                    else if (queryToAux(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                        return increasingIfGreater(other, constantInt(1, pp), pp, oracle);
 
-                    else if (queryToAux("x < 0", pp, oracle))
-                        return increasingIfLess(other, 1, pp, oracle);
+                    // id < 0
+                    else if (queryToAux(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                        return increasingIfLess(other, constantInt(1, pp), pp, oracle);
 
-                    else if (queryToAux("x >= 0", pp, oracle)) {
-                        if (queryToAux("other != 1", pp, oracle))
+                    // id >= 0
+                    else if (queryToAux(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                        return nonDecreasingIfGreaterOrEqual(other, constantInt(1, pp), pp, oracle);
+
+                    // id <= 0
+                    else if (queryToAux(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                        return nonDecreasingIfLessOrEqual(other, constantInt(1, pp), pp, oracle);
+
+                    // id != 0 && !(other == 1)
+                    else if (queryToAux(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)) {
+                        // id != 0 && other != 1
+                        if (queryToAux(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
                             return NON_STABLE;
-                        else return nonDecreasingIfGreaterOrEqual(other, 1, pp, oracle);
+                    }
 
-                        /*
-                        if (queryToAux("other > 1", pp, oracle)
-                                || queryToAux("other >= 1", pp, oracle))
-                            return NON_DEC;
-                        else if (queryToAux("other < 1", pp, oracle)
-                                || queryToAux("other <= 1", pp, oracle)
-                                || queryToAux("other == 0", pp, oracle))
-                            return NON_INC;
-                        */
-
-
-                    } else if (queryToAux("x <= 0", pp, oracle)) {
-                        if (queryToAux("other != 1", pp, oracle))
-                            return NON_STABLE;
-                        else return nonDecreasingIfLessOrEqual(other, 1, pp, oracle);
-
-                    } else if (queryToAux("x != 0", pp, oracle))
-                        return NON_STABLE;
                 }
 
-                else return auxCompareAfterAssignment(id, expression, pp, oracle);
+                // x = a / b
+                else if (op instanceof DivisionOperator && isLeft) {
+
+
+
+                }
             }
 
-            else if (op instanceof DivisionOperator)
-                return auxCompareAfterAssignment(id, expression, pp, oracle);
+            return increasingIfLess(id, expression, pp, oracle);
         }
-        return TOP;
+
+        // not UnaryExpression && not BinaryExpression
+        return TOP;     // r we sure ?
     }
+
+
                 /*
         if (expression instanceof UnaryExpression){
             UnaryExpression ue = (UnaryExpression) expression;
