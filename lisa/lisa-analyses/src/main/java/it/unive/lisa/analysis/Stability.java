@@ -14,97 +14,64 @@ import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.*;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.util.representation.ListRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 import java.util.function.Predicate;
 
 public class Stability implements ValueDomain<Stability> {
 
-    /**
-     * The abstract top element.
-     */
-    public static final Stability TOP = new Stability((byte) 0);
-
-    /**
-     * The abstract bottom element.
-     */
-    public static final Stability BOTTOM = new Stability((byte) 1);
-
-    /**
-     * The abstract stable element.
-     */
-    public static final Stability STABLE = new Stability((byte) 2);
-
-    /**
-     * The abstract increasing element.
-     */
-    public static final Stability INC = new Stability((byte) 3);
-
-    /**
-     * The abstract decreasing element.
-     */
-    public static final Stability DEC = new Stability((byte) 4);
-
-    /**
-     * The abstract not stable element.
-     */
-    public static final Stability NON_STABLE = new Stability((byte) 5);
-
-    /**
-     * The abstract non-increasing element.
-     */
-    public static final Stability NON_INC = new Stability((byte) 6);
-
-    /**
-     * The abstract non-decreasing element.
-     */
-    public static final Stability NON_DEC = new Stability((byte) 7);
-
-    private final byte stability;
 
     private final ValueEnvironment<Interval> intervals;
 
-    public Stability(byte stability){
-        this.stability = stability;
+    private final ValueEnvironment<Trend> trend;
+
+    public Stability() {
         this.intervals = new ValueEnvironment<>(new Interval()).top();
+        this.trend = new ValueEnvironment<>(new Trend((byte)0));
     }
 
-    public Stability(byte stability, ValueEnvironment<Interval> intervals) {
-        this.stability = stability;
+    public Stability(ValueEnvironment<Interval> intervals, ValueEnvironment<Trend> trend) {
         this.intervals = intervals;
+        this.trend = trend;
     }
 
     @Override
     public boolean lessOrEqual(Stability other) throws SemanticException {
-        return false;
+        return (intervals.lessOrEqual(other.intervals)
+                && trend.lessOrEqual(other.trend));
     }
 
     @Override
     public Stability lub(Stability other) throws SemanticException {
-        return null;
+        return new Stability(intervals.lub(other.intervals), trend.lub(other.trend));
     }
 
     @Override
     public Stability top() {
-        return TOP;
+        return new Stability(intervals.top(), trend.top());
     }
 
     @Override
     public Stability bottom() {
-        return BOTTOM;
+        return new Stability(intervals.bottom(), trend.bottom());
     }
 
     @Override
     public Stability pushScope(ScopeToken token) throws SemanticException {
-        return null;
+        return new Stability(intervals.pushScope(token), trend.pushScope(token));
     }
 
     @Override
     public Stability popScope(ScopeToken token) throws SemanticException {
-        return null;
+        return new Stability(intervals.popScope(token), trend.popScope(token));
     }
 
-    private boolean queryToAux(
+    /**
+     * Verifies weather a query expression is satisfied in the Intervals domain
+      * @return {@code true} if the expression is satisfied
+     */
+    private boolean query(
             BinaryExpression query,
             ProgramPoint pp,
             SemanticOracle oracle)
@@ -145,141 +112,146 @@ public class Stability implements ValueDomain<Stability> {
         );
     }
 
-    private Stability opposite(){
-        if (this == TOP || this == BOTTOM || this == STABLE || this == NON_STABLE) return this;
-        else if (this == INC) return DEC;
-        else if (this == DEC) return INC;
-        else if (this == NON_INC) return NON_DEC;
-        else if (this == NON_DEC) return NON_INC;
+    /**
+     * Generates a Trend based on the relationship between a and b in the {@code intervals} domain
+     * @return {@code INC} if a > b
+     */
+    private Trend increasingIfGreater(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
+            throws SemanticException {
 
-        else return TOP;
+        return Trend.generateTrendIncIfGt(
+                query(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle)
+        );
     }
 
     /**
-     * Returns a Stability based on query "a > b ?" to auxiliary domain
-     *
-     * @return INC if a > b, DEC if a < b, STABLE if a == b ...
+     * Generates a Trend based on the relationship between a and b in the {@code intervals} domain
+     * @return {@code INC} if a < b
      */
-    private Stability increasingIfGreater(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
+    private Trend increasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException {
-        if (queryToAux(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle)) return INC;
-        else if (queryToAux(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle)) return STABLE;
-        else if (queryToAux(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle)) return DEC;
-        else if (queryToAux(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle)) return NON_DEC;
-        else if (queryToAux(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle)) return NON_INC;
-        else if (queryToAux(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle)) return NON_STABLE;
-        else return TOP;
-    }
-
-    private Stability increasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
-            throws SemanticException {
-        //return increasingIfGreater(b, a, pp, oracle);
         return increasingIfGreater(a, b, pp, oracle).opposite();
     }
 
-    private Stability nonDecreasingIfGreater(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
+    /**
+     * Generates a Trend based on the relationship between a and b in the {@code intervals} domain
+     * @return {@code NON_DEC} if a > b
+     */
+    private Trend nonDecreasingIfGreater(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException {
 
-        if (queryToAux(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle)) return STABLE;
-
-        else if (queryToAux(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle)
-                || queryToAux(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
-            return NON_DEC;
-
-        else if (queryToAux(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle)
-                || queryToAux(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
-            return NON_INC;
-
-        else return TOP;
+        return Trend.generateTrendNonDecIfGt(
+                query(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle),
+                query(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle)
+        );
     }
 
-    private Stability nonDecreasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
+    /**
+     * Generates a Trend based on the relationship between a and b in the {@code intervals} domain
+     * @return {@code NON_DEC} if a < b
+     */
+    private Trend nonDecreasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException {
-        //return nonDecreasingIfGreaterOrEqual(b, a, pp, oracle);
         return nonDecreasingIfGreater(a, b, pp, oracle).opposite();
     }
 
-    // assume !(a == 0 || a >= 0 || a <= 0)
-    private Stability increasingIfBetweenZeroAnd(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
+    /**
+     * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
+     * @return {@code INC} if 0 < a < 1
+     */
+    private Trend increasingIfBetweenZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException {
 
         Constant zero = constantInt(0, pp);
+        Constant one = constantInt(1, pp);
 
-        // a == b
-        if (queryToAux(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle)) return STABLE;
+        if (!query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle))
+            return Trend.BOTTOM;
 
-        // 0 < a
-        else if (queryToAux(binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle)) {
-            // a < b
-            if (queryToAux(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle))
-                return INC;
-            // a <= b
-            else if (queryToAux(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
-                return NON_DEC;
-        }
-
-        // a < 0 || a > b
-        else if (queryToAux(binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle)
-                || queryToAux(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle))
-            return DEC;
-
-        // a >= b
-        else if (queryToAux(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
-            return NON_INC;
-
-        // a != b
-        else if (queryToAux(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle))
-            return NON_STABLE;
-
-        return TOP;
-
+        else return Trend.generateTrendIncIfBetween(
+                false,
+                query(binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle),
+                false,
+                query(binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle),
+                false,
+                true,
+                query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonLt.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonNe.INSTANCE, a, one, pp), pp, oracle)
+        );
     }
 
-    // assume !(a == 0 || a >= 0 || a <= 0)
-    private Stability increasingIfOutsideZeroAnd(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
-            throws SemanticException {
-        return increasingIfBetweenZeroAnd(a, b, pp, oracle).opposite();
+    /**
+     * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
+     * @return {@code INC} if {@code (a < 0 || a > 1)}
+     */
+    private Trend increasingIfOutsideZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
+            throws SemanticException{
+        return increasingIfBetweenZeroAndOne(a, pp, oracle).opposite();
     }
 
-    // assume !(a == 0 || a >= 0 || a <= 0)
-    private Stability nonDecreasingIfBetweenZeroAnd(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
-            throws SemanticException {
+    /**
+     * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
+     * @return {@code NON_DEC} if 0 < a < 1
+     */
+    private Trend nonDecreasingIfBetweenZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
+            throws SemanticException{
 
         Constant zero = constantInt(0, pp);
+        Constant one = constantInt(1, pp);
 
-        // a == b
-        if (queryToAux(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle)) return STABLE;
+        if (!query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle))
+            return Trend.BOTTOM;
 
-        // 0 < a < b || 0 < a <= b
-        // a > 0 && (a < b || a <= b)
-        if ( queryToAux(binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle)
-                && (queryToAux(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle)
-                || queryToAux(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle)) )
-            return NON_DEC;
+        else return Trend.generateTrendNonDecIfBetween(
+                false,
+                query(binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle),
+                false,
+                query(binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle),
+                false,
+                true,
 
-        // a < 0 || a > b || a >= b
-        else if (queryToAux(binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle)
-                || queryToAux(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle)
-                || queryToAux(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
-            return NON_INC;
+                query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonLt.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle),
+                query(binary(ComparisonNe.INSTANCE, a, one, pp), pp, oracle)
+        );
 
-        return TOP;
     }
 
-    // assume !(a == 0 || a >= 0 || a <= 0)
-    private Stability nonDecreasingIfOutsideZeroAnd(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
-            throws SemanticException {
-        return nonDecreasingIfBetweenZeroAnd(a, b, pp, oracle).opposite();
+    /**
+     * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
+     * @return {@code NON_DEC} if {@code (a < 0 || a > 1)}
+     */
+    private Trend nonDecreasingIfOutsideZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
+            throws SemanticException{
+        return nonDecreasingIfBetweenZeroAndOne(a, pp, oracle).opposite();
     }
 
 
-    // TO DO: maybe move last return out of the ifs
+
     @Override
     public Stability assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 
+        Trend returnTrend = Trend.TOP;
+
         if (expression instanceof UnaryExpression &&
                 ((UnaryExpression) expression).getOperator() instanceof NumericNegation)
-            return increasingIfLess(id, expression, pp, oracle);
+            returnTrend = increasingIfLess(id, expression, pp, oracle);
 
         else if (expression instanceof BinaryExpression) {
             BinaryExpression be = (BinaryExpression) expression;
@@ -295,45 +267,44 @@ public class Stability implements ValueDomain<Stability> {
 
                 // x = x + other || x = other + x
                 if (op instanceof AdditionOperator)
-                    return increasingIfGreater(other, constantInt(0, pp), pp, oracle);
+                    returnTrend = increasingIfGreater(other, constantInt(0, pp), pp, oracle);
 
                 // x = x - other
                 else if (op instanceof SubtractionOperator) {
-                    if (isLeft) return increasingIfLess(right, constantInt(0, pp), pp, oracle);
-                    else return increasingIfLess(id, expression, pp, oracle);
+                    if (isLeft) returnTrend = increasingIfLess(other, constantInt(0, pp), pp, oracle);
+                    else returnTrend = increasingIfLess(id, expression, pp, oracle);
                 }
 
                 // x = x * other || x = other * x
                 else if (op instanceof MultiplicationOperator) {
 
                     // id == 0 || other == 1
-                    if (queryToAux(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
-                            || queryToAux(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
-                        return STABLE;
+                    if (query(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
+                            || query(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
+                        returnTrend = Trend.STABLE;
 
                     // id > 0
-                    else if (queryToAux(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-                        return increasingIfGreater(other, constantInt(1, pp), pp, oracle);
+                    else if (query(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                        returnTrend = increasingIfGreater(other, constantInt(1, pp), pp, oracle);
 
                     // id < 0
-                    else if (queryToAux(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-                        return increasingIfLess(other, constantInt(1, pp), pp, oracle);
+                    else if (query(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                        returnTrend = increasingIfLess(other, constantInt(1, pp), pp, oracle);
 
                     // id >= 0
-                    else if (queryToAux(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-                        return nonDecreasingIfGreater(other, constantInt(1, pp), pp, oracle);
+                    else if (query(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                        returnTrend = nonDecreasingIfGreater(other, constantInt(1, pp), pp, oracle);
 
                     // id <= 0
-                    else if (queryToAux(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-                        return nonDecreasingIfLess(other, constantInt(1, pp), pp, oracle);
+                    else if (query(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                        returnTrend = nonDecreasingIfLess(other, constantInt(1, pp), pp, oracle);
 
                     // id != 0 && other != 1
-                    else if (queryToAux(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
-                            && queryToAux(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
-                        return NON_STABLE;
+                    else if (query(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
+                            && query(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
+                        returnTrend = Trend.NON_STABLE;
 
-                    else return TOP;    // Q
-
+                    //else returnTrend = Trend.TOP;
                 }
 
                 // x = x / other
@@ -341,82 +312,91 @@ public class Stability implements ValueDomain<Stability> {
                     if (isLeft) {
 
                         // id == 0 || other == 1
-                        if (queryToAux(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
-                                || queryToAux(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
-                            return STABLE;
+                        if (query(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
+                                || query(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
+                            returnTrend = Trend.STABLE;
 
                         // id > 0
-                        else if (queryToAux(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-                            return increasingIfBetweenZeroAnd(other, constantInt(1, pp), pp, oracle);
+                        else if (query(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                            returnTrend = increasingIfBetweenZeroAndOne(other, pp, oracle);
 
                         // id < 0
-                        else if (queryToAux(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-                            return increasingIfOutsideZeroAnd(other, constantInt(1, pp), pp, oracle);
+                        else if (query(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                            returnTrend = increasingIfOutsideZeroAndOne(other, pp, oracle);
 
                         // id >= 0
-                        else if (queryToAux(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-                            return nonDecreasingIfBetweenZeroAnd(other, constantInt(1, pp), pp, oracle);
+                        else if (query(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                            returnTrend = nonDecreasingIfBetweenZeroAndOne(other, pp, oracle);
 
                         // id <= 0
-                        else if (queryToAux(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-                            return nonDecreasingIfOutsideZeroAnd(other, constantInt(1, pp), pp, oracle);
+                        else if (query(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+                            returnTrend = nonDecreasingIfOutsideZeroAndOne(other, pp, oracle);
 
                         // id != 0 && other != 1
-                        else if (queryToAux(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
-                                && queryToAux(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
-                            return NON_STABLE;
+                        else if (query(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
+                                && query(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
+                            returnTrend = Trend.NON_STABLE;
 
-                        else return TOP;
+                        //else returnTrend = Trend.TOP;
                     }
 
-                    else return increasingIfLess(id, expression, pp, oracle);
+                    else returnTrend = increasingIfLess(id, expression, pp, oracle);
 
                 }
 
-                // op is not +, -, * or /
-                else return TOP;    // Q
+                // else returnTrend = Trend.TOP;
             }
-
-            // x = a OP b
-            else return increasingIfLess(id, expression, pp, oracle);
+            else returnTrend = increasingIfLess(id, expression, pp, oracle);
         }
 
-        // not UnaryExpression && not BinaryExpression
-        return TOP;
+        //else returnTrend = Trend.TOP;
+
+        return new Stability(
+                intervals.assign(id, expression, pp, oracle),
+                new ValueEnvironment<>(new Trend(returnTrend.getTrend()))); // Q
     }
 
     @Override
     public Stability smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        return null;
+        return new Stability(
+                intervals.smallStepSemantics(expression, pp, oracle),
+                trend.smallStepSemantics(expression, pp, oracle));
     }
 
     @Override
     public Stability assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
-        return null;
+        return new Stability(
+                intervals.assume(expression, src, dest, oracle),
+                trend.assume(expression, src, dest, oracle));
     }
 
     @Override
     public boolean knowsIdentifier(Identifier id) {
-        return false;
+        return (intervals.knowsIdentifier(id)
+                || trend.knowsIdentifier(id));
     }
 
     @Override
     public Stability forgetIdentifier(Identifier id) throws SemanticException {
-        return null;
+        return new Stability(
+                intervals.forgetIdentifier(id),
+                trend.forgetIdentifier(id));
     }
 
     @Override
     public Stability forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
-        return null;
+        return new Stability(
+                intervals.forgetIdentifiersIf(test),
+                trend.forgetIdentifiersIf(test));
     }
 
     @Override
     public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        return null;
+        return intervals.satisfies(expression, pp, oracle).glb(trend.satisfies(expression, pp, oracle));
     }
 
     @Override
     public StructuredRepresentation representation() {
-        return null;
+        return new ListRepresentation(intervals.representation(), trend.representation());
     }
 }
