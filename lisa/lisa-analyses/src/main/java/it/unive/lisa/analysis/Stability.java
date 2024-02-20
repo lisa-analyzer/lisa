@@ -247,6 +247,8 @@ public class Stability implements ValueDomain<Stability> {
     @Override
     public Stability assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 
+        if (this.isBottom() || intervals.isBottom() || trend.isBottom()) return bottom();
+
         Trend returnTrend = Trend.TOP;
 
         if (expression instanceof UnaryExpression &&
@@ -261,6 +263,11 @@ public class Stability implements ValueDomain<Stability> {
 
             boolean isLeft = id.equals(left);
             boolean isRight = id.equals(right);
+
+            // x = a / 0
+            if (op instanceof DivisionOperator
+                    && query(binary(ComparisonNe.INSTANCE, right, constantInt(0, pp), pp), pp, oracle))
+                return bottom();
 
             if (isLeft || isRight) {
                 SymbolicExpression other = isLeft ? right : left;
@@ -353,7 +360,8 @@ public class Stability implements ValueDomain<Stability> {
 
         return new Stability(
                 intervals.assign(id, expression, pp, oracle),
-                new ValueEnvironment<>(new Trend(returnTrend.getTrend()))); // Q
+                trend.putState(id, returnTrend));
+                //new ValueEnvironment<>(new Trend(returnTrend.getTrend()))); // Q
     }
 
     @Override
@@ -392,7 +400,8 @@ public class Stability implements ValueDomain<Stability> {
 
     @Override
     public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        return intervals.satisfies(expression, pp, oracle).glb(trend.satisfies(expression, pp, oracle));
+        return Satisfiability.UNKNOWN;
+        //return intervals.satisfies(expression, pp, oracle).glb(trend.satisfies(expression, pp, oracle));
     }
 
     @Override

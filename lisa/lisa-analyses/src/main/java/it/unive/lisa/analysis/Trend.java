@@ -1,15 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.*;
-import it.unive.lisa.symbolic.value.operator.AdditionOperator;
-import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
-import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
-import it.unive.lisa.symbolic.value.operator.binary.*;
-import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 public class Trend implements BaseNonRelationalValueDomain<Trend> {
@@ -191,7 +183,7 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
 
     /**
      * Generates a Trend based on a comparison
-     * @return INC if a < x < b
+     * @return NON_DEC if a < x < b
      */
     public static Trend generateTrendNonDecIfBetween(
             boolean isEqualA,
@@ -217,6 +209,25 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
 
     @Override
     public StructuredRepresentation representation() {
-        return null;
+        if (isBottom())
+            return Lattice.bottomRepresentation();
+        if (isTop())
+            return Lattice.topRepresentation();
+
+        String repr;
+        if (this == STABLE)
+            repr = "=";
+        else if (this == INC)
+            repr = "\u2119";
+        else if (this == DEC)
+            repr = "\u2193";
+        else if (this == NON_DEC)
+            repr = "\u2119=";
+        else if (this == NON_INC)
+            repr = "\u2193=";
+        else
+            repr = "\u2260";
+
+        return new StringRepresentation(repr);
     }
 }
