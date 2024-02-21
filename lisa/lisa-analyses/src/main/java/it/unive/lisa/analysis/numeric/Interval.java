@@ -145,10 +145,25 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (constant.getValue() instanceof Integer) {
+		if (constant.getValue() instanceof Byte) {
+			Byte i = (Byte) constant.getValue();
+			return new Interval(new MathNumber(i), new MathNumber(i));
+		} else if (constant.getValue() instanceof Byte) {
+			Byte i = (Byte) constant.getValue();
+			return new Interval(new MathNumber(i), new MathNumber(i));
+		} else if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return new Interval(new MathNumber(i), new MathNumber(i));
-		}
+		} else if (constant.getValue() instanceof Long) {
+			Long i = (Long) constant.getValue();
+			return new Interval(new MathNumber(i), new MathNumber(i));
+		} else if (constant.getValue() instanceof Float) {
+			Float i = (Float) constant.getValue();
+			return new Interval(new MathNumber(i), new MathNumber(i));
+		} else if (constant.getValue() instanceof Double) {
+			Double i = (Double) constant.getValue();
+			return new Interval(new MathNumber(i), new MathNumber(i));
+		} 
 
 		return top();
 	}
