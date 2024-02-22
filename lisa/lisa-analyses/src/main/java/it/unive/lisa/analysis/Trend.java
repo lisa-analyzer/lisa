@@ -32,9 +32,9 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
     public static final Trend DEC = new Trend((byte) 4);
 
     /**
-     * The abstract not stable element.
+     * The abstract non-decreasing element.
      */
-    public static final Trend NON_STABLE = new Trend((byte) 5);
+    public static final Trend NON_DEC = new Trend((byte) 5);
 
     /**
      * The abstract non-increasing element.
@@ -42,11 +42,12 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
     public static final Trend NON_INC = new Trend((byte) 6);
 
     /**
-     * The abstract non-decreasing element.
+     * The abstract not stable element.
      */
-    public static final Trend NON_DEC = new Trend((byte) 7);
+    public static final Trend NON_STABLE = new Trend((byte) 7);
 
     private final byte trend;
+
 
     public Trend(byte trend){
         this.trend = trend;
@@ -56,6 +57,38 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
         return trend;
     }
 
+    public boolean isTop(){
+        return this.trend == (byte) 0;
+    }
+
+    public boolean isBottom(){
+        return this.trend == (byte) 1;
+    }
+
+    public boolean isStable(){
+        return this.trend == (byte) 2;
+    }
+
+    public boolean isInc(){
+        return this.trend == (byte) 3;
+    }
+
+    public boolean isDec(){
+        return this.trend == (byte) 4;
+    }
+
+    public boolean isNonDec(){
+        return this.trend == (byte) 5;
+    }
+
+    public boolean isNonInc(){
+        return this.trend == (byte) 6;
+    }
+
+    public boolean isNonStable(){
+        return this.trend == (byte) 7;
+    }
+
     @Override
     public Trend lubAux(Trend other) throws SemanticException {
 
@@ -63,31 +96,32 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
         else if (this.lessOrEqual(other)) return other;
         else if (other.lessOrEqual(this)) return this;
 
-        else if ((this == STABLE && other == INC)
-                || (this == INC && other == STABLE))
+        else if ((this.isStable() && other.isInc())
+                || (this.isInc() && other.isStable()))
             return NON_DEC;
-        else if ((this == STABLE && other == DEC)
-                || (this == DEC && other == STABLE))
+        else if ((this.isStable() && other.isDec())
+                || (this.isDec() && other.isStable()))
             return NON_INC;
-        else if ((this == INC && other == DEC)
-                || (this == DEC && other == INC))
+        else if ((this.isInc() && other.isDec())
+                || (this.isDec() && other.isInc()))
             return NON_STABLE;
 
         return TOP;
     }
 
+
     @Override
     public boolean lessOrEqualAux(Trend other) throws SemanticException {
 
-        if (this == other
-                || other == TOP
-                || this == BOTTOM
-                || (this == STABLE && (other == NON_INC || other == NON_DEC))
-                || (this == INC && (other == NON_DEC || other == NON_STABLE))
-                || (this == DEC && (other == NON_INC || other == NON_STABLE)))
+        if (this.trend == other.trend
+                || other.isTop()
+                || this.isBottom()
+                || (this.isStable() && (other.isNonInc() || other.isNonDec()))
+                || (this.isInc() && (other.isNonDec() || other.isNonStable()))
+                || (this.isDec() && (other.isNonInc() || other.isNonStable())))
             return true;
 
-        else return false;
+        return false;
     }
 
     @Override
@@ -229,5 +263,17 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
             repr = "\u2260";
 
         return new StringRepresentation(repr);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Trend other = (Trend) obj;
+        return this.getTrend() == other.getTrend();
     }
 }

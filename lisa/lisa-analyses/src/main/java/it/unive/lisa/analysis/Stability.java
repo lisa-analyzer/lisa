@@ -28,7 +28,7 @@ public class Stability implements ValueDomain<Stability> {
 
     public Stability() {
         this.intervals = new ValueEnvironment<>(new Interval()).top();
-        this.trend = new ValueEnvironment<>(new Trend((byte)0));
+        this.trend = new ValueEnvironment<>(new Trend((byte)2));
     }
 
     public Stability(ValueEnvironment<Interval> intervals, ValueEnvironment<Trend> trend) {
@@ -38,13 +38,16 @@ public class Stability implements ValueDomain<Stability> {
 
     @Override
     public boolean lessOrEqual(Stability other) throws SemanticException {
-        return (intervals.lessOrEqual(other.intervals)
-                && trend.lessOrEqual(other.trend));
+        return (intervals.lattice.lessOrEqual(other.intervals.lattice)
+                && (trend.lattice.lessOrEqual(other.trend.lattice)));
     }
 
     @Override
     public Stability lub(Stability other) throws SemanticException {
-        return new Stability(intervals.lub(other.intervals), trend.lub(other.trend));
+        return new Stability(
+                intervals.lub(other.intervals),
+                trend.lub(other.trend)
+        );
     }
 
     @Override
@@ -407,5 +410,26 @@ public class Stability implements ValueDomain<Stability> {
     @Override
     public StructuredRepresentation representation() {
         return new ListRepresentation(intervals.representation(), trend.representation());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Stability other = (Stability) obj;
+        return (this.intervals.lattice.equals(other.intervals.lattice) && this.trend.lattice.equals(other.trend.lattice));
+
+    }
+
+    public ValueEnvironment<Trend> getTrend() {
+        return trend;
+    }
+
+    public ValueEnvironment<Interval> getIntervals() {
+        return intervals;
     }
 }
