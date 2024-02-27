@@ -174,11 +174,13 @@ public class StabilityTest {
     @Test
     public void test_LessOrEqual() throws SemanticException {
 
-        /*
+
         // Proof we need lattice.lessOrEqual():
+        assertFalse(s1in.getIntervals().lattice.lessOrEqual(s2in.getIntervals().lattice));
+        assertFalse(s2ns.getTrend().lattice.lessOrEqual(s1in.getTrend().lattice));
         assertFalse(s1in.getIntervals().lessOrEqual(s2in.getIntervals()));
         assertFalse(s2ns.getTrend().lessOrEqual(s1in.getTrend()));
-         */
+
 
         /*
         assertTrue(trendNON_STABLE.lessOrEqualAux(trendTOP));

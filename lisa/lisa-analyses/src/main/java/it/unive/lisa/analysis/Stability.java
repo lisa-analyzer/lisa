@@ -19,7 +19,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 
 import java.util.function.Predicate;
 
-public class Stability implements ValueDomain<Stability> {
+public class Stability implements BaseLattice<Stability>, ValueDomain<Stability> {
 
     private final ValueEnvironment<Interval> intervals;
 
@@ -36,19 +36,17 @@ public class Stability implements ValueDomain<Stability> {
     }
 
     @Override
-    public boolean lessOrEqual(Stability other) throws SemanticException {
-        return (intervals.lattice.lessOrEqual(other.getIntervals().lattice)
-                && (trend.lattice.lessOrEqual(other.getTrend().lattice)));
+    public Stability lubAux(Stability other) throws SemanticException {
+        return new Stability(
+                    intervals.lub(other.getIntervals()),
+                    trend.lub(other.getTrend())
+        );
     }
 
     @Override
-    public Stability lub(Stability other) throws SemanticException {
-        if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
-            return this;
-        else return new Stability(
-                intervals.lub(other.getIntervals()),
-                trend.lub(other.getTrend())
-        );
+    public boolean lessOrEqualAux(Stability other) throws SemanticException {
+        return (intervals.lessOrEqual(other.getIntervals())
+                && (trend.lessOrEqual(other.getTrend())));
     }
 
     @Override
@@ -444,6 +442,16 @@ public class Stability implements ValueDomain<Stability> {
         Stability other = (Stability) obj;
         return (this.intervals.lattice.equals(other.intervals.lattice) && this.trend.lattice.equals(other.trend.lattice));
 
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return intervals.representation().toString() + trend.representation().toString();
     }
 
     public ValueEnvironment<Trend> getTrend() {
