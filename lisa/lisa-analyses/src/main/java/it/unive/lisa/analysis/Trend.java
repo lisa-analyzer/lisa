@@ -92,8 +92,7 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
     @Override
     public Trend lubAux(Trend other) throws SemanticException {
 
-        if (this == other) return this;
-        else if (this.lessOrEqual(other)) return other;
+        if (this.lessOrEqual(other)) return other;
         else if (other.lessOrEqual(this)) return this;
 
         else if ((this.isStable() && other.isInc())
@@ -109,14 +108,10 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
         return TOP;
     }
 
-
     @Override
     public boolean lessOrEqualAux(Trend other) throws SemanticException {
 
-        if (this.trend == other.trend
-                || other.isTop()
-                || this.isBottom()
-                || (this.isStable() && (other.isNonInc() || other.isNonDec()))
+        if ((this.isStable() && (other.isNonInc() || other.isNonDec()))
                 || (this.isInc() && (other.isNonDec() || other.isNonStable()))
                 || (this.isDec() && (other.isNonInc() || other.isNonStable())))
             return true;
@@ -135,11 +130,11 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
     }
 
     public Trend opposite(){
-        if (this == TOP || this == BOTTOM || this == STABLE || this == NON_STABLE) return this;
-        else if (this == INC) return DEC;
-        else if (this == DEC) return INC;
-        else if (this == NON_INC) return NON_DEC;
-        else if (this == NON_DEC) return NON_INC;
+        if (this.isTop() || this.isBottom() || this.isStable() || this.isNonStable()) return this;
+        else if (this.isInc()) return DEC;
+        else if (this.isDec()) return INC;
+        else if (this.isNonInc()) return NON_DEC;
+        else if (this.isNonDec()) return NON_INC;
 
         else return TOP;
     }
@@ -249,18 +244,18 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
             return Lattice.topRepresentation();
 
         String repr;
-        if (this == STABLE)
-            repr = "=";
-        else if (this == INC)
-            repr = "\u2119";
-        else if (this == DEC)
-            repr = "\u2193";
-        else if (this == NON_DEC)
-            repr = "\u2119=";
-        else if (this == NON_INC)
-            repr = "\u2193=";
+        if (this.isStable())
+            repr = "stable";
+        else if (this.isInc())
+            repr = "increasing";
+        else if (this.isDec())
+            repr = "decreasing";
+        else if (this.isNonDec())
+            repr = "non-decreasing";
+        else if (this.isNonInc())
+            repr = "non-increasing";
         else
-            repr = "\u2260";
+            repr = "not stable";
 
         return new StringRepresentation(repr);
     }

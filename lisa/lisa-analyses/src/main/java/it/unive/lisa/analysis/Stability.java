@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 
 public class Stability implements ValueDomain<Stability> {
 
-
     private final ValueEnvironment<Interval> intervals;
 
     private final ValueEnvironment<Trend> trend;
@@ -38,16 +37,26 @@ public class Stability implements ValueDomain<Stability> {
 
     @Override
     public boolean lessOrEqual(Stability other) throws SemanticException {
-        return (intervals.lattice.lessOrEqual(other.intervals.lattice)
-                && (trend.lattice.lessOrEqual(other.trend.lattice)));
+        return (intervals.lattice.lessOrEqual(other.getIntervals().lattice)
+                && (trend.lattice.lessOrEqual(other.getTrend().lattice)));
     }
 
     @Override
     public Stability lub(Stability other) throws SemanticException {
         return new Stability(
-                intervals.lub(other.intervals),
-                trend.lub(other.trend)
+                intervals.lub(other.getIntervals()),
+                trend.lub(other.getTrend())
         );
+    }
+
+    @Override
+    public boolean isTop() {
+        return (intervals.lattice.isTop() && trend.lattice.isTop());
+    }
+
+    @Override
+    public boolean isBottom() {
+        return (intervals.lattice.isBottom() && trend.lattice.isBottom());
     }
 
     @Override
@@ -250,9 +259,18 @@ public class Stability implements ValueDomain<Stability> {
     @Override
     public Stability assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 
+        if (!trend.knowsIdentifier(id))
+            return new Stability(
+                    intervals.assign(id, expression, pp, oracle),
+                    trend.putState(id, Trend.STABLE));
+
         if (this.isBottom() || intervals.isBottom() || trend.isBottom()) return bottom();
 
         Trend returnTrend = Trend.TOP;
+        //Trend returnTrend = increasingIfLess(id, expression, pp, oracle);
+
+        if ((expression instanceof Constant))
+            returnTrend = increasingIfLess(id, expression, pp, oracle);
 
         if (expression instanceof UnaryExpression &&
                 ((UnaryExpression) expression).getOperator() instanceof NumericNegation)
@@ -371,7 +389,8 @@ public class Stability implements ValueDomain<Stability> {
     public Stability smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
         return new Stability(
                 intervals.smallStepSemantics(expression, pp, oracle),
-                trend.smallStepSemantics(expression, pp, oracle));
+                trend);
+        //      trend.smallStepSemantics(expression, pp, oracle));  //Q
     }
 
     @Override
