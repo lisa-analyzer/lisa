@@ -38,25 +38,25 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     @Override
     public Stability lubAux(Stability other) throws SemanticException {
         return new Stability(
-                    intervals.lub(other.getIntervals()),
-                    trend.lub(other.getTrend())
+                intervals.lub(other.getIntervals()),
+                trend.lub(other.getTrend())
         );
     }
 
     @Override
     public boolean lessOrEqualAux(Stability other) throws SemanticException {
-        return (intervals.lessOrEqual(other.getIntervals())
-                && (trend.lessOrEqual(other.getTrend())));
+        return (getIntervals().lessOrEqual(other.getIntervals())
+                && getTrend().lessOrEqual(other.getTrend()));
     }
 
     @Override
     public boolean isTop() {
-        return (intervals.lattice.isTop() && trend.lattice.isTop());
+        return (intervals.isTop() && trend.isTop());
     }
 
     @Override
     public boolean isBottom() {
-        return (intervals.lattice.isBottom() && trend.lattice.isBottom());
+        return (intervals.isBottom() && trend.isBottom());
     }
 
     @Override
@@ -440,7 +440,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
         if (getClass() != obj.getClass())
             return false;
         Stability other = (Stability) obj;
-        return (this.intervals.lattice.equals(other.intervals.lattice) && this.trend.lattice.equals(other.trend.lattice));
+        return (this.intervals.equals(other.intervals) && this.trend.equals(other.trend));
 
     }
 

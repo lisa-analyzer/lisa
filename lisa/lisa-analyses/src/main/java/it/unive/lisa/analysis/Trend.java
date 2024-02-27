@@ -53,6 +53,10 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
         this.trend = trend;
     }
 
+    public Trend(){
+        this.trend = 0;
+    }
+
     public byte getTrend() {
         return trend;
     }
