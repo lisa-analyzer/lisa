@@ -133,7 +133,7 @@ public class StabilityTest {
         LiSAConfiguration conf = new DefaultConfiguration();
 
         // we specify where we want files to be generated
-        conf.workdir = "output";
+        conf.workdir = "output/stability";
 
         // we specify the visual format of the analysis results
         conf.analysisGraphs = LiSAConfiguration.GraphType.HTML;
@@ -173,6 +173,12 @@ public class StabilityTest {
 
     @Test
     public void test_LessOrEqual() throws SemanticException {
+
+        /*
+        // Proof we need lattice.lessOrEqual():
+        assertFalse(s1in.getIntervals().lessOrEqual(s2in.getIntervals()));
+        assertFalse(s2ns.getTrend().lessOrEqual(s1in.getTrend()));
+         */
 
         /*
         assertTrue(trendNON_STABLE.lessOrEqualAux(trendTOP));
