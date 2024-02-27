@@ -43,7 +43,9 @@ public class Stability implements ValueDomain<Stability> {
 
     @Override
     public Stability lub(Stability other) throws SemanticException {
-        return new Stability(
+        if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
+            return this;
+        else return new Stability(
                 intervals.lub(other.getIntervals()),
                 trend.lub(other.getTrend())
         );
