@@ -37,10 +37,19 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
     @Override
     public Stability lubAux(Stability other) throws SemanticException {
-        return new Stability(
-                intervals.lub(other.getIntervals()),
-                trend.lub(other.getTrend())
-        );
+        ValueEnvironment<Interval> i = intervals.lub(other.getIntervals());
+        ValueEnvironment<Trend> t = trend.lub(other.getTrend());
+        if (i.isBottom() || t.isBottom()) return bottom();
+        else
+            return new Stability(i, t);
+    }
+
+    @Override
+    public Stability glbAux(Stability other) throws SemanticException {
+        ValueEnvironment<Interval> i = intervals.glb(other.getIntervals());
+        ValueEnvironment<Trend> t = trend.glb(other.getTrend());
+        if (i.isBottom() || t.isBottom()) return bottom();
+        else return new Stability(i, t);
     }
 
     @Override
@@ -287,7 +296,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
             // x = a / 0
             if (op instanceof DivisionOperator
-                    && query(binary(ComparisonNe.INSTANCE, right, constantInt(0, pp), pp), pp, oracle))
+                    && query(binary(ComparisonEq.INSTANCE, right, constantInt(0, pp), pp), pp, oracle))
                 return bottom();
 
             if (isLeft || isRight) {
@@ -379,25 +388,26 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
         //else returnTrend = Trend.TOP;
 
-        return new Stability(
-                intervals.assign(id, expression, pp, oracle),
-                trend.putState(id, returnTrend));
-                //new ValueEnvironment<>(new Trend(returnTrend.getTrend()))); // Q
+        ValueEnvironment<Interval> i = intervals.assign(id, expression, pp, oracle);
+        ValueEnvironment<Trend> t = trend.putState(id, returnTrend);
+        if (i.isBottom() || t.isBottom()) return bottom();
+        else
+            return new Stability(i, t);
     }
 
     @Override
     public Stability smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        return new Stability(
-                intervals.smallStepSemantics(expression, pp, oracle),
-                trend);
-        //      trend.smallStepSemantics(expression, pp, oracle));  //Q
+        ValueEnvironment<Interval> i = intervals.smallStepSemantics(expression, pp, oracle);
+        if (i.isBottom()) return bottom();
+        else return new Stability(i, trend);
     }
 
     @Override
     public Stability assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
-        return new Stability(
-                intervals.assume(expression, src, dest, oracle),
-                trend.assume(expression, src, dest, oracle));
+        ValueEnvironment<Interval> i = intervals.assume(expression, src, dest, oracle);
+        ValueEnvironment<Trend> t = trend.assume(expression, src, dest, oracle);
+        if (i.isBottom() || t.isBottom()) return bottom();
+        else return new Stability(i, t);
     }
 
     @Override

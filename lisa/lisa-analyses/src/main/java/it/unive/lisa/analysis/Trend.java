@@ -113,14 +113,29 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
     }
 
     @Override
+    public Trend glbAux(Trend other) throws SemanticException {
+
+        if (this.lessOrEqual(other)) return this;
+        else if (other.lessOrEqual(this)) return other;
+
+        else if ((this.isNonDec() && other.isNonStable())
+                || (this.isNonStable() && other.isNonDec()))
+            return INC;
+        else if ((this.isNonInc() && other.isNonStable())
+                || (this.isNonStable() && other.isNonInc()))
+            return DEC;
+        else if ((this.isNonDec() && other.isNonInc())
+                || (this.isNonInc() && other.isNonDec()))
+            return STABLE;
+
+        return BOTTOM;
+    }
+
+    @Override
     public boolean lessOrEqualAux(Trend other) throws SemanticException {
-
-        if ((this.isStable() && (other.isNonInc() || other.isNonDec()))
+        return (this.isStable() && (other.isNonInc() || other.isNonDec()))
                 || (this.isInc() && (other.isNonDec() || other.isNonStable()))
-                || (this.isDec() && (other.isNonInc() || other.isNonStable())))
-            return true;
-
-        return false;
+                || (this.isDec() && (other.isNonInc() || other.isNonStable()));
     }
 
     @Override
