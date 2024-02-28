@@ -53,6 +53,14 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     @Override
+    public Stability wideningAux(Stability other) throws SemanticException {
+        ValueEnvironment<Interval> i = intervals.widening(other.getIntervals());
+        ValueEnvironment<Trend> t = trend.widening(other.getTrend());
+        if (i.isBottom() || t.isBottom()) return bottom();
+        else return new Stability(i, t);
+    }
+
+    @Override
     public boolean lessOrEqualAux(Stability other) throws SemanticException {
         return (getIntervals().lessOrEqual(other.getIntervals())
                 && getTrend().lessOrEqual(other.getTrend()));
