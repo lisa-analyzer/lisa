@@ -203,16 +203,13 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
         Constant zero = constantInt(0, pp);
         Constant one = constantInt(1, pp);
 
-        if (!query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle))
-            return Trend.BOTTOM;
-
-        else return Trend.generateTrendIncIfBetween(
+        return Trend.generateTrendIncIfBetween(
                 false,
-                query(binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle),
-                false,
-                query(binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle),
-                false,
-                true,
+                query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),// Gt -> Ge
+                query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle), // Lt -> Le
+                query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle),
                 query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle),
                 query(binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle),
                 query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle),
@@ -241,16 +238,13 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
         Constant zero = constantInt(0, pp);
         Constant one = constantInt(1, pp);
 
-        if (!query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle))
-            return Trend.BOTTOM;
-
-        else return Trend.generateTrendNonDecIfBetween(
+        return Trend.generateTrendNonDecIfBetween(
                 false,
-                query(binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle),
-                false,
-                query(binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle),
-                false,
-                true,
+                query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),
+                query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle),
+                query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle),
 
                 query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle),
                 query(binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle),
