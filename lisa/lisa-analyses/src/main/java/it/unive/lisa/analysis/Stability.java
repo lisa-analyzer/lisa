@@ -195,7 +195,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
     /**
      * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
-     * @return {@code INC} if 0 < a < 1
+     * @return {@code INC} if 0 < a < 1 || 0 <= a < 1
      */
     private Trend increasingIfBetweenZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException {
@@ -230,7 +230,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
     /**
      * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
-     * @return {@code NON_DEC} if 0 < a < 1
+     * @return {@code NON_DEC} if 0 < a < 1 || 0 <= a < 1
      */
     private Trend nonDecreasingIfBetweenZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException{
@@ -240,9 +240,9 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
         return Trend.generateTrendNonDecIfBetween(
                 false,
+                query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),  // Gt -> Ge
                 query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),
-                query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),
-                query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle),
+                query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle),  // Lt -> Le
                 query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle),
                 query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle),
 

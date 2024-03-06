@@ -155,7 +155,7 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
         else if (this.isNonInc()) return NON_DEC;
         else if (this.isNonDec()) return NON_INC;
 
-        else return TOP;
+        else return BOTTOM;
     }
 
     /**
