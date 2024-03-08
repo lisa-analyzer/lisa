@@ -2,7 +2,6 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -19,85 +18,85 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 
 import java.util.function.Predicate;
 
-public class Stability implements BaseLattice<Stability>, ValueDomain<Stability> {
+public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements BaseLattice<Stability<V>>, ValueDomain<Stability<V>> {
 
-    private final ValueEnvironment<Interval> intervals;
+    private final V auxiliaryDomain;
 
     private final ValueEnvironment<Trend> trend;
 
-    public Stability() {
-        this.intervals = new ValueEnvironment<>(new Interval()).top();
+    public Stability(V auxiliaryDomain) {
+        this.auxiliaryDomain = auxiliaryDomain;
         this.trend = new ValueEnvironment<>(new Trend((byte)2));
     }
 
-    public Stability(ValueEnvironment<Interval> intervals, ValueEnvironment<Trend> trend) {
-        this.intervals = intervals;
+    public Stability(V auxiliaryDomain, ValueEnvironment<Trend> trend) {
+        this.auxiliaryDomain = auxiliaryDomain;
         this.trend = trend;
     }
 
     @Override
-    public Stability lubAux(Stability other) throws SemanticException {
-        ValueEnvironment<Interval> i = intervals.lub(other.getIntervals());
+    public Stability<V> lubAux(Stability<V> other) throws SemanticException {
+        V ad = auxiliaryDomain.lub(other.getAuxiliaryDomain());
         ValueEnvironment<Trend> t = trend.lub(other.getTrend());
-        if (i.isBottom() || t.isBottom()) return bottom();
+        if (ad.isBottom() || t.isBottom()) return bottom();
         else
-            return new Stability(i, t);
+            return new Stability<>(ad, t);
     }
 
     @Override
-    public Stability glbAux(Stability other) throws SemanticException {
-        ValueEnvironment<Interval> i = intervals.glb(other.getIntervals());
+    public Stability<V> glbAux(Stability<V> other) throws SemanticException {
+        V ad = auxiliaryDomain.glb(other.getAuxiliaryDomain());
         ValueEnvironment<Trend> t = trend.glb(other.getTrend());
-        if (i.isBottom() || t.isBottom()) return bottom();
-        else return new Stability(i, t);
+        if (ad.isBottom() || t.isBottom()) return bottom();
+        else return new Stability<>(ad, t);
     }
 
     @Override
-    public Stability wideningAux(Stability other) throws SemanticException {
-        ValueEnvironment<Interval> i = intervals.widening(other.getIntervals());
+    public Stability<V> wideningAux(Stability<V> other) throws SemanticException {
+        V ad = auxiliaryDomain.widening(other.getAuxiliaryDomain());
         ValueEnvironment<Trend> t = trend.widening(other.getTrend());
-        if (i.isBottom() || t.isBottom()) return bottom();
-        else return new Stability(i, t);
+        if (ad.isBottom() || t.isBottom()) return bottom();
+        else return new Stability<>(ad, t);
     }
 
     @Override
-    public boolean lessOrEqualAux(Stability other) throws SemanticException {
-        return (getIntervals().lessOrEqual(other.getIntervals())
+    public boolean lessOrEqualAux(Stability<V> other) throws SemanticException {
+        return (getAuxiliaryDomain().lessOrEqual(other.getAuxiliaryDomain())
                 && getTrend().lessOrEqual(other.getTrend()));
     }
 
     @Override
     public boolean isTop() {
-        return (intervals.isTop() && trend.isTop());
+        return (auxiliaryDomain.isTop() && trend.isTop());
     }
 
     @Override
     public boolean isBottom() {
-        return (intervals.isBottom() && trend.isBottom());
+        return (auxiliaryDomain.isBottom() && trend.isBottom());
     }
 
     @Override
-    public Stability top() {
-        return new Stability(intervals.top(), trend.top());
+    public Stability<V> top() {
+        return new Stability<>(auxiliaryDomain.top(), trend.top());
     }
 
     @Override
-    public Stability bottom() {
-        return new Stability(intervals.bottom(), trend.bottom());
+    public Stability<V> bottom() {
+        return new Stability<>(auxiliaryDomain.bottom(), trend.bottom());
     }
 
     @Override
-    public Stability pushScope(ScopeToken token) throws SemanticException {
-        return new Stability(intervals.pushScope(token), trend.pushScope(token));
+    public Stability<V> pushScope(ScopeToken token) throws SemanticException {
+        return new Stability<>(auxiliaryDomain.pushScope(token), trend.pushScope(token));
     }
 
     @Override
-    public Stability popScope(ScopeToken token) throws SemanticException {
-        return new Stability(intervals.popScope(token), trend.popScope(token));
+    public Stability<V> popScope(ScopeToken token) throws SemanticException {
+        return new Stability<>(auxiliaryDomain.popScope(token), trend.popScope(token));
     }
 
     /**
-     * Verifies weather a query expression is satisfied in the Intervals domain
+     * Verifies weather a query expression is satisfied in the V domain
       * @return {@code true} if the expression is satisfied
      */
     private boolean query(
@@ -106,7 +105,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
             SemanticOracle oracle)
             throws SemanticException {
 
-        return intervals.satisfies(query, pp, oracle) == Satisfiability.SATISFIED;
+        return auxiliaryDomain.satisfies(query, pp, oracle) == Satisfiability.SATISFIED;
     }
 
     /**
@@ -142,7 +141,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     /**
-     * Generates a Trend based on the relationship between a and b in the {@code intervals} domain
+     * Generates a Trend based on the relationship between a and b in the {@code auxiliaryDomain} domain
      * @return {@code INC} if a > b
      */
     private Trend increasingIfGreater(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
@@ -159,7 +158,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     /**
-     * Generates a Trend based on the relationship between a and b in the {@code intervals} domain
+     * Generates a Trend based on the relationship between a and b in the {@code auxiliaryDomain} domain
      * @return {@code INC} if a < b
      */
     private Trend increasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
@@ -168,7 +167,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     /**
-     * Generates a Trend based on the relationship between a and b in the {@code intervals} domain
+     * Generates a Trend based on the relationship between a and b in the {@code auxiliaryDomain} domain
      * @return {@code NON_DEC} if a > b
      */
     private Trend nonDecreasingIfGreater(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
@@ -185,7 +184,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     /**
-     * Generates a Trend based on the relationship between a and b in the {@code intervals} domain
+     * Generates a Trend based on the relationship between a and b in the {@code auxiliaryDomain} domain
      * @return {@code NON_DEC} if a < b
      */
     private Trend nonDecreasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
@@ -194,7 +193,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     /**
-     * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
+     * Generates a Trend based on the value of {@code a} in the {@code auxiliaryDomain} domain
      * @return {@code INC} if 0 < a < 1 || 0 <= a < 1
      */
     private Trend increasingIfBetweenZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
@@ -220,7 +219,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     /**
-     * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
+     * Generates a Trend based on the value of {@code a} in the {@code auxiliaryDomain} domain
      * @return {@code INC} if {@code (a < 0 || a > 1)}
      */
     private Trend increasingIfOutsideZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
@@ -229,7 +228,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     /**
-     * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
+     * Generates a Trend based on the value of {@code a} in the {@code auxiliaryDomain} domain
      * @return {@code NON_DEC} if 0 < a < 1 || 0 <= a < 1
      */
     private Trend nonDecreasingIfBetweenZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
@@ -257,7 +256,7 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
     }
 
     /**
-     * Generates a Trend based on the value of {@code a} in the {@code intervals} domain
+     * Generates a Trend based on the value of {@code a} in the {@code auxiliaryDomain} domain
      * @return {@code NON_DEC} if {@code (a < 0 || a > 1)}
      */
     private Trend nonDecreasingIfOutsideZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
@@ -268,14 +267,14 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
 
     @Override
-    public Stability assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+    public Stability<V> assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
 
         if (!trend.knowsIdentifier(id))
-            return new Stability(
-                    intervals.assign(id, expression, pp, oracle),
+            return new Stability<>(
+                    auxiliaryDomain.assign(id, expression, pp, oracle),
                     trend.putState(id, Trend.STABLE));
 
-        if (this.isBottom() || intervals.isBottom() || trend.isBottom()) return bottom();
+        if (this.isBottom() || auxiliaryDomain.isBottom() || trend.isBottom()) return bottom();
 
         Trend returnTrend = Trend.TOP;
         //Trend returnTrend = increasingIfLess(id, expression, pp, oracle);
@@ -390,57 +389,57 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
         //else returnTrend = Trend.TOP;
 
-        ValueEnvironment<Interval> i = intervals.assign(id, expression, pp, oracle);
+        V ad = auxiliaryDomain.assign(id, expression, pp, oracle);
         ValueEnvironment<Trend> t = trend.putState(id, returnTrend);
-        if (i.isBottom() || t.isBottom()) return bottom();
+        if (ad.isBottom() || t.isBottom()) return bottom();
         else
-            return new Stability(i, t);
+            return new Stability<>(ad, t);
     }
 
     @Override
-    public Stability smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        ValueEnvironment<Interval> i = intervals.smallStepSemantics(expression, pp, oracle);
-        if (i.isBottom()) return bottom();
-        else return new Stability(i, trend);
+    public Stability<V> smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
+        V ad = auxiliaryDomain.smallStepSemantics(expression, pp, oracle);
+        if (ad.isBottom()) return bottom();
+        else return new Stability<>(ad, trend);
     }
 
     @Override
-    public Stability assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
-        ValueEnvironment<Interval> i = intervals.assume(expression, src, dest, oracle);
+    public Stability<V> assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
+        V ad = auxiliaryDomain.assume(expression, src, dest, oracle);
         ValueEnvironment<Trend> t = trend.assume(expression, src, dest, oracle);
-        if (i.isBottom() || t.isBottom()) return bottom();
-        else return new Stability(i, t);
+        if (ad.isBottom() || t.isBottom()) return bottom();
+        else return new Stability<>(ad, t);
     }
 
     @Override
     public boolean knowsIdentifier(Identifier id) {
-        return (intervals.knowsIdentifier(id)
+        return (auxiliaryDomain.knowsIdentifier(id)
                 || trend.knowsIdentifier(id));
     }
 
     @Override
-    public Stability forgetIdentifier(Identifier id) throws SemanticException {
-        return new Stability(
-                intervals.forgetIdentifier(id),
+    public Stability<V> forgetIdentifier(Identifier id) throws SemanticException {
+        return new Stability<>(
+                auxiliaryDomain.forgetIdentifier(id),
                 trend.forgetIdentifier(id));
     }
 
     @Override
-    public Stability forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
-        return new Stability(
-                intervals.forgetIdentifiersIf(test),
+    public Stability<V> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+        return new Stability<>(
+                auxiliaryDomain.forgetIdentifiersIf(test),
                 trend.forgetIdentifiersIf(test));
     }
 
     @Override
     public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
         return Satisfiability.UNKNOWN;
-        //return intervals.satisfies(expression, pp, oracle).glb(trend.satisfies(expression, pp, oracle));
+        //return auxiliaryDomain.satisfies(expression, pp, oracle).glb(trend.satisfies(expression, pp, oracle));
     }
 
     @Override
     public StructuredRepresentation representation() {
-        return new ListRepresentation(intervals.representation(), trend.representation());
+        return new ListRepresentation(auxiliaryDomain.representation(), trend.representation());
     }
 
     @Override
@@ -451,8 +450,8 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Stability other = (Stability) obj;
-        return (this.intervals.equals(other.intervals) && this.trend.equals(other.trend));
+        Stability<V> other = (Stability<V>) obj;
+        return (this.auxiliaryDomain.equals(other.auxiliaryDomain) && this.trend.equals(other.trend));
 
     }
 
@@ -463,14 +462,14 @@ public class Stability implements BaseLattice<Stability>, ValueDomain<Stability>
 
     @Override
     public String toString() {
-        return intervals.representation().toString() + trend.representation().toString();
+        return auxiliaryDomain.representation().toString() + trend.representation().toString();
     }
 
     public ValueEnvironment<Trend> getTrend() {
         return trend;
     }
 
-    public ValueEnvironment<Interval> getIntervals() {
-        return intervals;
+    public V getAuxiliaryDomain() {
+        return auxiliaryDomain;
     }
 }

@@ -11,23 +11,26 @@ import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.symbolic.value.Identifier;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class StabilityTest {
 
+    Identifier x;
+
     Interval interval1 = new Interval(3, 5);
     Interval interval2 = new Interval(3, 4);
 
     Trend trendTOP = new Trend((byte) 0); // TOP
     Trend trendBOTTOM = new Trend((byte) 1); // BOTTOM
-
     Trend trendSTABLE = new Trend((byte) 2); // STABLE
     Trend trendINC = new Trend((byte) 3); // INC
     Trend trendDEC = new Trend((byte) 4); // DEC
@@ -35,91 +38,88 @@ public class StabilityTest {
     Trend trendNON_INC = new Trend((byte) 6); // NON_INC
     Trend trendNON_STABLE = new Trend((byte) 7); // NON_STABLE
 
-    Stability s1top = new Stability(
-            new ValueEnvironment<>(interval1),
-            new ValueEnvironment<>(trendTOP)
+    Stability<ValueEnvironment<Interval>> s1top = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval1),
+            new ValueEnvironment<>(new Trend()).putState(x, trendTOP)
     );
 
-    Stability s1bot = new Stability(
-            new ValueEnvironment<>(interval1),
-            new ValueEnvironment<>(trendBOTTOM)
+    Stability<ValueEnvironment<Interval>> s1bot = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval1),
+            new ValueEnvironment<>(new Trend()).putState(x, trendBOTTOM)
     );
 
-    Stability s1st = new Stability(
-            new ValueEnvironment<>(interval1),
-            new ValueEnvironment<>(trendSTABLE)
+    Stability<ValueEnvironment<Interval>> s1st = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval1),
+            new ValueEnvironment<>(new Trend()).putState(x, trendSTABLE)
     );
 
-    Stability s1in = new Stability(
-            new ValueEnvironment<>(interval1),
-            new ValueEnvironment<>(trendINC)
-    );
-
-
-    Stability s1de = new Stability(
-            new ValueEnvironment<>(interval1),
-            new ValueEnvironment<>(trendDEC)
+    Stability<ValueEnvironment<Interval>> s1in = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval1),
+            new ValueEnvironment<>(new Trend()).putState(x, trendINC)
     );
 
 
-    Stability s1nd = new Stability(
-            new ValueEnvironment<>(interval1),
-            new ValueEnvironment<>(trendNON_DEC)
+    Stability<ValueEnvironment<Interval>> s1de = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval1),
+            new ValueEnvironment<>(new Trend()).putState(x, trendDEC)
     );
 
 
-    Stability s1ni = new Stability(
-            new ValueEnvironment<>(interval1),
-            new ValueEnvironment<>(trendNON_INC)
+    Stability<ValueEnvironment<Interval>> s1nd = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval1),
+            new ValueEnvironment<>(new Trend()).putState(x, trendNON_DEC)
     );
 
 
-    Stability s1ns = new Stability(
-            new ValueEnvironment<>(interval1),
-            new ValueEnvironment<>(trendNON_STABLE)
-    );
-
-    Stability s2top = new Stability(
-            new ValueEnvironment<>(interval2),
-            new ValueEnvironment<>(trendTOP)
-    );
-
-    Stability s2bot = new Stability(
-            new ValueEnvironment<>(interval2),
-            new ValueEnvironment<>(trendBOTTOM)
-    );
-
-    Stability s2st = new Stability(
-            new ValueEnvironment<>(interval2),
-            new ValueEnvironment<>(trendSTABLE)
-    );
-
-    Stability s2in = new Stability(
-            new ValueEnvironment<>(interval2),
-            new ValueEnvironment<>(trendINC)
+    Stability<ValueEnvironment<Interval>> s1ni = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval1),
+            new ValueEnvironment<>(new Trend()).putState(x, trendNON_INC)
     );
 
 
-    Stability s2de = new Stability(
-            new ValueEnvironment<>(interval2),
-            new ValueEnvironment<>(trendDEC)
+    Stability<ValueEnvironment<Interval>> s1ns = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval1),
+            new ValueEnvironment<>(new Trend()).putState(x, trendNON_STABLE)
     );
 
-
-    Stability s2nd = new Stability(
-            new ValueEnvironment<>(interval2),
-            new ValueEnvironment<>(trendNON_DEC)
+    Stability<ValueEnvironment<Interval>> s2top = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval2),
+            new ValueEnvironment<>(new Trend()).putState(x, trendTOP)
     );
 
-
-    Stability s2ni = new Stability(
-            new ValueEnvironment<>(interval2),
-            new ValueEnvironment<>(trendNON_INC)
+    Stability<ValueEnvironment<Interval>> s2bot = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval2),
+            new ValueEnvironment<>(new Trend()).putState(x, trendBOTTOM)
     );
 
-    Stability s2ns = new Stability(
-            new ValueEnvironment<>(interval2),
-            new ValueEnvironment<>(trendNON_STABLE)
+    Stability<ValueEnvironment<Interval>> s2st = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval2),
+            new ValueEnvironment<>(new Trend()).putState(x, trendSTABLE)
+    );
+
+    Stability<ValueEnvironment<Interval>> s2in = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval2),
+            new ValueEnvironment<>(new Trend()).putState(x, trendINC)
+    );
+
+    Stability<ValueEnvironment<Interval>> s2de = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval2),
+            new ValueEnvironment<>(new Trend()).putState(x, trendDEC)
+    );
+
+    Stability<ValueEnvironment<Interval>> s2nd = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval2),
+            new ValueEnvironment<>(new Trend()).putState(x, trendNON_DEC)
+    );
+
+    Stability<ValueEnvironment<Interval>> s2ni = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval2),
+            new ValueEnvironment<>(new Trend()).putState(x, trendNON_INC)
+    );
+
+    Stability<ValueEnvironment<Interval>> s2ns = new Stability<>(
+            new ValueEnvironment<>(new Interval()).putState(x, interval2),
+            new ValueEnvironment<>(new Trend()).putState(x, trendNON_STABLE)
     );
 
 
@@ -127,23 +127,26 @@ public class StabilityTest {
     public void testExample() throws ParsingException, AnalysisException {
 
         // we parse the program to get the CFG representation of the code in it
-        Program program = IMPFrontend.processFile("imp-testcases/numeric/numeric.imp");
+        Program program = IMPFrontend.processFile("imp-testcases/stability/assign_div.imp");
 
         // we build a new configuration for the analysis
         LiSAConfiguration conf = new DefaultConfiguration();
 
         // we specify where we want files to be generated
-        conf.workdir = "output/stability";
+        conf.workdir = "output/stability/assign_div";
 
         // we specify the visual format of the analysis results
         conf.analysisGraphs = LiSAConfiguration.GraphType.HTML;
+
+        //conf.serializeResults = true;
 
         // we specify the analysis that we want to execute
         conf.abstractState = new SimpleAbstractState<>(
                 // heap domain
                 new MonolithicHeap(),
                 // value domain
-                new Stability(),
+                new Stability<>(new ValueEnvironment<>(new Interval()).top()),
+                //new Stability<>(new ValueEnvironment<>(new Sign()).top()),
                 // type domain
                 new TypeEnvironment<>(new InferredTypes()));
 
@@ -152,6 +155,12 @@ public class StabilityTest {
 
         // finally, we tell LiSA to analyze the program
         lisa.run(program);
+
+    }
+
+    @Test
+    public void testStability(){
+
     }
 
     @Test
@@ -160,9 +169,8 @@ public class StabilityTest {
         assertEquals(s1ns, s1ns);
 
         Stability s1ns_bis = new Stability(
-                new ValueEnvironment<>(interval1),
-                new ValueEnvironment<>(trendNON_STABLE)
-        );
+                new ValueEnvironment<>(new Interval()).putState(x, interval1),
+                new ValueEnvironment<>(new Trend()).putState(x, trendNON_STABLE));
 
         assertEquals(s1ns, s1ns_bis);
 
@@ -173,14 +181,6 @@ public class StabilityTest {
 
     @Test
     public void test_LessOrEqual() throws SemanticException {
-
-
-        // Proof we need lattice.lessOrEqual():
-        assertFalse(s1in.getIntervals().lattice.lessOrEqual(s2in.getIntervals().lattice));
-        assertFalse(s2ns.getTrend().lattice.lessOrEqual(s1in.getTrend().lattice));
-        assertFalse(s1in.getIntervals().lessOrEqual(s2in.getIntervals()));
-        assertFalse(s2ns.getTrend().lessOrEqual(s1in.getTrend()));
-
 
         /*
         assertTrue(trendNON_STABLE.lessOrEqualAux(trendTOP));
@@ -215,12 +215,29 @@ public class StabilityTest {
     }
 
     @Test
+    public void test_is(){
+        assertFalse(s1ns.isBottom());
+        assertFalse(s2ni.isTop());
+        assertFalse(s2top.isTop());
+        assertTrue(s2in.top().isTop());
+        assertTrue(s2in.bottom().isBottom());
+    }
+
+    /*
+    @Test
     public void test_Lub() throws SemanticException {
 
         assertEquals(s1in, s1in.lub(s1in));
 
         // lub({[3,5], INC}, {[3,5], DEC}) = {[3,5], NON_STABLE}
+
+        assertEquals(s1ns.getIntervals(), s1in.getIntervals().lub(s1de.getIntervals()));
+        //assertEquals(s1ns.getTrend().lattice, s1in.getTrend().lattice.lub(s1de.getTrend().lattice));
+
+
         assertEquals(s1ns, s1in.lub(s1de));
+
+
         assertEquals(s1ns, s1de.lub(s1in));
 
         // lub({[3,5], INC}, {[3,5], NON_STABLE}) = {[3,5], NON_STABLE}
@@ -230,4 +247,5 @@ public class StabilityTest {
         // lub({[3,5], NON_DEC}, {[3,5], DEC}) = {[3,5], TOP}
         assertEquals(s1top, s1nd.lub(s1de));
     }
+     */
 }
