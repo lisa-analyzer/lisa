@@ -97,42 +97,7 @@ public class ExpressionInverseSet extends InverseSetLattice<ExpressionInverseSet
 		ExpressionInverseSet other = (ExpressionInverseSet) obj;
 		if (isTop != other.isTop)
 			return false;
-		return elements.equals(other.elements);
-	}
-	
-	@Override
-	public ExpressionInverseSet glb(ExpressionInverseSet other) throws SemanticException{
-		if (other == null)
-			throw new SemanticException("other == null");
-		
-		if (this == other || this.equals(other))
-			return this;
-		
-		if (isTop() || this.isBottom())
-			return other;
-		
-		if (other.isTop() || other.isBottom())
-			return this;
-
-		return glbAux(other);
-	}
-	
-	@Override
-	public ExpressionInverseSet lub(ExpressionInverseSet other) throws SemanticException{
-		if (other == null)
-			throw new SemanticException("other == null");
-		
-		if (this == other || this.equals(other))
-			return this;
-
-		if (other.isTop() || this.isTop())
-			return top();
-		
-		if (isBottom() || other.isBottom())
-			return bottom();
-		
-		 return lubAux(other);
-
+		return true;
 	}
 
 	@Override
