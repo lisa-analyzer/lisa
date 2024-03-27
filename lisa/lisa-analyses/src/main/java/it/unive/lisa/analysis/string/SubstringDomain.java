@@ -44,67 +44,14 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	}
 	
 	@Override
-	public SubstringDomain lub(SubstringDomain other) throws SemanticException{
-		if (other == null)
-			throw new SemanticException("other == null");
-		
-		if (this == other || this.equals(other))
-			return this;
-
-		if (other.isTop() || this.isTop())
-			return top();
-		
-		if (isBottom() || other.isBottom())
-			return bottom();
-		
-		 return lubAux(other);
-
-	}
-	
-	@Override
 	public SubstringDomain lubAux(SubstringDomain other) throws SemanticException {
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(null, false);
-		
-		for(Map.Entry<Identifier, ExpressionInverseSet> entry : other) {
-			ExpressionInverseSet newSet = getState(entry.getKey());
-			newFunction.put(entry.getKey(), newSet.lub(entry.getValue()));
-		}
-		
-		SubstringDomain result = mk(lattice, newFunction);
-		
-		return result.clear();
-	}
-	
-	@Override
-	public SubstringDomain glb(SubstringDomain other) throws SemanticException{
-		if (other == null)
-			throw new SemanticException("other == null");
-		
-		if (this == other || this.equals(other))
-			return this;
-		
-		if (isTop() || this.isBottom())
-			return other;
-		
-		if (other.isTop() || other.isBottom())
-			return this;
-
-		return glbAux(other);
+		return functionalLift(other, lattice.top(), this::lubKeys, (o1, o2) -> o1.lub(o2));
 	}
 	
 	@Override
 	public SubstringDomain glbAux(SubstringDomain other) throws SemanticException {
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(this.function, false);
-		
-		for(Map.Entry<Identifier, ExpressionInverseSet> entry : other) {
-			ExpressionInverseSet newSet = getState(entry.getKey()).glb(entry.getValue());
-			newFunction.put(entry.getKey(), newSet);
-		}
-		
-		SubstringDomain result = mk(lattice, newFunction);
-		
-		return result.closure();
-		
+		// FIXME: lattice.top should be changed
+		return functionalLift(other, lattice.top(), this::glbKeys, (o1, o2) -> o1.glb(o2)).closure();
 	}
 
 	@Override
