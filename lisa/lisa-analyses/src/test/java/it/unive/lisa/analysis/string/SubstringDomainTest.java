@@ -1,15 +1,15 @@
 package it.unive.lisa.analysis.string;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
@@ -599,7 +599,7 @@ public class SubstringDomainTest {
 	public void testLub3() throws SemanticException {
 		SubstringDomain lub = BOTTOM.lub(domainA);
 		
-		assertTrue(lub.isBottom());
+		assertEquals(lub, domainA);
 	}
 	
 	@Test
@@ -630,7 +630,7 @@ public class SubstringDomainTest {
 	public void testGlb3() throws SemanticException {
 		SubstringDomain glb = BOTTOM.glb(domainA);
 		
-		assertTrue(glb.equals(domainA));
+		assertEquals(glb, BOTTOM);
 	}
 	
 	@Test
