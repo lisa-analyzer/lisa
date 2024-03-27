@@ -1,5 +1,24 @@
 class strings {
 
+	closure() {
+    	def y = "a";
+    	def z = y;
+    }
+    
+    closure2(x) {
+    	def j = "j";
+    	def w = j;
+    	def y = x;
+    	x = w;
+    	
+    }
+    
+    assign() {
+    	def j = "string";
+    	def x = "a" + j;
+    	def y = "a";
+    }
+
 	constants() {
 		def a = "abc";
 		def b = "def";
@@ -13,8 +32,17 @@ class strings {
     		a = "world";
     }	
     
+    assume(x) {
+    	def b = "abc";
+    	if (strcon(x, b))
+    		b = "hello";
+    	else
+    		b = b + "hello";
+    		 
+    }
+    
     loops(x) {
-    	def str = "a";
+    	def str = "b";
     	while (x < 100) {
     		str = str + "a";
    		 }
