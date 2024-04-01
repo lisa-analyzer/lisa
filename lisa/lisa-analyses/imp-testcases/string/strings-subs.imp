@@ -1,5 +1,37 @@
 class strings {
 
+	iftest1() {
+		def str = "a";
+		if (strstarts(str, "a"))
+			str = str + " true";
+		else
+			str = "false";
+	}
+	
+	iftest2() {
+		def str = "hello";
+		if (strends(str, "o"))
+			str = "true";
+		else
+			str = "false";
+	}
+	
+	iftestand(){
+		def str = "string";
+		if ((strends(str, "ng")) && (streq(str, "ong")))
+			def x = "ong";
+		else
+			def y = "no";
+	}
+	
+	iftestor(){
+		def str = "string";
+		if (strends(str, "n") || streq(str, "no"))
+			def x = "n";
+		else
+			def y = "no";
+	}
+
 	closure() {
     	def y = "a";
     	def z = y;
@@ -10,13 +42,31 @@ class strings {
     	def w = j;
     	def y = x;
     	x = w;
-    	
     }
     
-    assign() {
+    closure3() {
+    	def j = "j";
+    	def w = j;
+    	def x = "x";
+    	def y = x;
+    	x = w;
+    }
+    
+    closure4() {
+    	def w = "w";
+    	def z = "z" + w;
+    	def y = "y";
+    	def x = "x" + y;
+    	if (strcon(y, z))
+    		w = "hello";
+    	else
+    		w = "world";
+    }
+    
+    interassign() {
     	def j = "string";
     	def x = "a" + j;
-    	def y = "a";
+    	def y = "string";
     }
 
 	constants() {

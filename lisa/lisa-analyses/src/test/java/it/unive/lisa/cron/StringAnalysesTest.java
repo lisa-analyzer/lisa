@@ -121,7 +121,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 		conf.testDir = "string";
 		conf.testSubDir = "subs-domain";
 		conf.programFile = "strings-subs.imp";
-		conf.analysisGraphs = GraphType.DOT;
+		//conf.analysisGraphs = GraphType.DOT;
 		perform(conf);
 				
 	}

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -45,13 +46,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	
 	@Override
 	public SubstringDomain lubAux(SubstringDomain other) throws SemanticException {
-		return functionalLift(other, lattice.top(), this::lubKeys, (o1, o2) -> o1.lub(o2));
+		return functionalLift(other, lattice.top(), this::glbKeys, (o1, o2) -> o1.lub(o2)).clear();
 	}
 	
 	@Override
 	public SubstringDomain glbAux(SubstringDomain other) throws SemanticException {
-		// FIXME: lattice.top should be changed
-		return functionalLift(other, lattice.top(), this::glbKeys, (o1, o2) -> o1.glb(o2)).closure();
+		return functionalLift(other, lattice.top(), this::lubKeys, (o1, o2) -> o1.glb(o2)).closure();
 	}
 
 	@Override
@@ -66,12 +66,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	@Override
 	public ExpressionInverseSet stateOfUnknown(Identifier key) {
-		return new ExpressionInverseSet();
+		return lattice.top();
 	}
 
 	@Override
 	public SubstringDomain mk(ExpressionInverseSet lattice, Map<Identifier, ExpressionInverseSet> function) {
-		return new SubstringDomain(lattice, function);
+		return new SubstringDomain(lattice.isBottom() ? lattice.bottom() : lattice.top(), function);
 	}
 
 	@Override
@@ -126,21 +126,19 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				
 				result = result.add(extracted, (Identifier) left);
 				
-				//result = result.closure((Identifier) left);
 				result = result.closure();
 				
 			} else if (binaryOperator instanceof StringEquals){
-				//both are identifiers
+				// both are identifiers
 				if ((left instanceof Identifier) && (right instanceof Identifier)) {
 					result = result.add(extrPlus((ValueExpression) left), (Identifier) right);
 					result = result.add(extrPlus((ValueExpression) right), (Identifier)left);
 					
-					result = result.closure((Identifier) left);
-					result = result.closure((Identifier) right);
-				} //one is identifier
+					result = result.closure();
+				} // one is identifier
 				else if((left instanceof Identifier) || (right instanceof Identifier)) {
 					
-					if (right instanceof Identifier) { //left instance of Identifier, right SymbolicExpression
+					if (right instanceof Identifier) { // left instance of Identifier, right SymbolicExpression
 						SymbolicExpression temp = left;
 				        left = right;
 				        right = temp;
@@ -153,7 +151,6 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 					
 					result = result.add(add, (Identifier) left);
 					
-					//result = result.closure((Identifier) left);
 					result = result.closure();
 
 				}			
@@ -169,9 +166,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				SubstringDomain rightDomain =  assume(rightValueExpression, src, dest, oracle);
 				
 				if (binaryOperator instanceof LogicalOr) {
-					result = leftDomain.glb(rightDomain);
-				} else {
 					result = leftDomain.lub(rightDomain);
+				} else {
+					result = leftDomain.glb(rightDomain);
 				}
 			}
 				
@@ -182,7 +179,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	@Override
 	public boolean knowsIdentifier(Identifier id) {
-		if (id == null || function == null || isBottom() || isTop())
+		if (id == null || function == null)
 			return false;
 		
 		if (function.containsKey(id))
@@ -200,12 +197,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		
 		newFunction.remove(id);
 		
-		return new SubstringDomain(lattice, newFunction);
+		return mk(lattice, newFunction);
 	}
 
 	@Override
 	public SubstringDomain forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
-		if (function == null || isTop() || isBottom() || function.keySet().isEmpty())
+		if (function == null || function.keySet().isEmpty())
 			return this;
 		
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false); //function != null
@@ -214,7 +211,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		
 		keys.forEach(newFunction::remove);
 		
-		return new SubstringDomain(lattice, newFunction);
+		return mk(lattice, newFunction);
 	}
 
 	@Override
@@ -247,7 +244,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				throw new SemanticException("!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
 			Satisfiability leftSatisfiability = satisfies((ValueExpression) left, pp, oracle);
 			
-			if (leftSatisfiability == Satisfiability.SATISFIED)
+			if (leftSatisfiability.equals(Satisfiability.SATISFIED))
 				return Satisfiability.SATISFIED;
 			
 			Satisfiability rightSatisfiability = satisfies((ValueExpression) right, pp, oracle);
@@ -260,13 +257,14 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 			Satisfiability leftSatisfiability = satisfies((ValueExpression) left, pp, oracle);
 			Satisfiability rightSatisfiability = satisfies((ValueExpression) right, pp, oracle);
 
-			if (leftSatisfiability == Satisfiability.SATISFIED && rightSatisfiability == Satisfiability.SATISFIED)
+			if (leftSatisfiability.equals(Satisfiability.SATISFIED) && rightSatisfiability.equals(Satisfiability.SATISFIED))
 				return Satisfiability.SATISFIED;
 			else
 				return Satisfiability.UNKNOWN;
 		}
 		
-		throw new SemanticException("Invalid expression");
+		return Satisfiability.UNKNOWN;
+		
 	}
 
 	@Override
@@ -286,7 +284,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 			BinaryExpression binaryExpression = (BinaryExpression) expression;
 			BinaryOperator binaryOperator = binaryExpression.getOperator();
 			if (!(binaryOperator instanceof StringConcat))
-				throw new SemanticException();
+				throw new SemanticException("!(binaryOperator instanceof StringConcat)");
 			
 			ValueExpression left = (ValueExpression) binaryExpression.getLeft();
 			ValueExpression right = (ValueExpression) binaryExpression.getRight();
@@ -312,7 +310,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
 		
 		symbolicExpressions.remove(id);
-		
+		if (symbolicExpressions.isEmpty())
+			return this;
+				
 		ExpressionInverseSet newSet = new ExpressionInverseSet(symbolicExpressions);
 		
 		if (!(newFunction.get(id) == null))
@@ -323,8 +323,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return mk(lattice, newFunction);
 	}
 	
-	private SubstringDomain remove(Set<SymbolicExpression> extracted, Identifier id) throws SemanticException {	
-		
+	private SubstringDomain remove(Set<SymbolicExpression> extracted, Identifier id) throws SemanticException {		
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
 		
 		if(!extracted.contains(id)) { // x = x + ..... --> keep relations for x
@@ -340,11 +339,14 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		expressionsToRemove.add(id);
 		
 		for (Map.Entry<Identifier, ExpressionInverseSet> entry : newFunction.entrySet()) {
-			for(SymbolicExpression se : expressionsToRemove) {
-				Set<SymbolicExpression> set = entry.getValue().elements();
-				
-				set.remove(se);
-			}
+			Set<SymbolicExpression> newSet = entry.getValue().elements.stream()
+				.filter(element -> !expressionsToRemove.contains(element))
+				.collect(Collectors.toSet());
+
+			ExpressionInverseSet value = newSet.isEmpty() ? new ExpressionInverseSet().top() : new ExpressionInverseSet(newSet);
+			
+			entry.setValue(value);
+			
 		}
 		
 		return mk(lattice, newFunction);
@@ -352,6 +354,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	
 	private SubstringDomain interasg(Identifier id) throws SemanticException {	
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
+		
+		if (!knowsIdentifier(id))
+			return this;
 		
 		ExpressionInverseSet compare = function.get(id);
 
@@ -381,7 +386,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		
 		do {
 			toModify = result.getState(id);
-			iterate = toModify.mk(toModify.elements);
+			iterate = result.getState(id);
 		
 			for (SymbolicExpression se : toModify) {
 				if (se instanceof Variable) {
@@ -425,7 +430,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		
 		Map<Identifier, ExpressionInverseSet> iterate = mkNewFunction(result.function, false);
 		for (Map.Entry<Identifier, ExpressionInverseSet> entry : iterate.entrySet() ) {
-			if (entry.getValue().isBottom()) {
+			if (entry.getValue().isTop()) {
 				result = result.forgetIdentifier(entry.getKey());
 			}
 				
