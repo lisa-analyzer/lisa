@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis.string;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -85,9 +84,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		
 		result = result.add(identifiers, id);
 		
-		result = result.interasg(id);
+		result = result.interasg(id, expression);
 		
-		result = result.closure(id);
+		result = result.closure();
 				
 		return result.clear();
 	}
@@ -352,21 +351,19 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return mk(lattice, newFunction);
 	}
 	
-	private SubstringDomain interasg(Identifier id) throws SemanticException {	
+	private SubstringDomain interasg(Identifier assignedId, SymbolicExpression assignedExpression) throws SemanticException {	
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
 		
-		if (!knowsIdentifier(id))
+		if (!knowsIdentifier(assignedId))
 			return this;
 		
-		ExpressionInverseSet compare = function.get(id);
-
 		for (Map.Entry<Identifier, ExpressionInverseSet> entry : function.entrySet()) {
-			if (entry.getKey().equals(id))
+			if (entry.getKey().equals(assignedId))
 				continue;
 			
-			if ((entry.getValue().lub(compare)).equals(compare)) {
+			if (entry.getValue().contains(assignedExpression)) {
 				Set<SymbolicExpression> newRelation = new HashSet<>();
-				newRelation.add(id);
+				newRelation.add(assignedId);
 				
 				ExpressionInverseSet newSet = newFunction.get(entry.getKey()).glb(new ExpressionInverseSet(newRelation));
 				newFunction.put(entry.getKey(), newSet);
@@ -378,6 +375,8 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	}
 	
 	private SubstringDomain closure(Identifier id) throws SemanticException {
+		if (isTop() || isBottom())
+			return this;
 		
 		SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 		
@@ -404,6 +403,8 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	}
 	
 	private SubstringDomain closure() throws SemanticException {
+		if (isTop() || isBottom())
+			return this;
 		
 		SubstringDomain prev;
 		SubstringDomain result =  mk(lattice, mkNewFunction(function, false));

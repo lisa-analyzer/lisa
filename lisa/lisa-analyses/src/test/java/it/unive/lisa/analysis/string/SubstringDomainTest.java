@@ -417,6 +417,16 @@ public class SubstringDomainTest {
 		assertTrue(assigned.getState(x).contains(c));
 		assertFalse(assigned.getState(y).contains(c));
 	}
+	
+	@Test
+	public void testAssignEmptyDomain9() throws SemanticException{
+		SubstringDomain empty = new SubstringDomain();
+		
+		SubstringDomain assigned = empty.assign(x, c, null, null);
+		assigned = assigned.assign(y, x, null, null);
+
+
+	}
 
 	@Test
 	public void testAssign1() throws SemanticException {
@@ -467,7 +477,7 @@ public class SubstringDomainTest {
 		assertTrue(assigned.getState(x).contains(w));
 		assertTrue(assigned.getState(z).contains(w));
 		assertTrue(assigned.getState(z).contains(y));
-		assertTrue(assigned.getState(x).contains(z));
+		assertFalse(assigned.getState(x).contains(z));
 	}
 	
 	@Test

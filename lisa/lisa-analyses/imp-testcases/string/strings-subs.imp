@@ -2,7 +2,7 @@ class strings {
 
 	iftest1() {
 		def str = "a";
-		if (strstarts(str, "a"))
+		if (strstarts(str, "c"))
 			str = str + " true";
 		else
 			str = "false";
@@ -18,10 +18,10 @@ class strings {
 	
 	iftestand(){
 		def str = "string";
-		if ((strends(str, "ng")) && (streq(str, "ong")))
-			def x = "ong";
+		if ((strends(str, "o")) && (streq(str, "ing")))
+			def x = "x";
 		else
-			def y = "no";
+			def y = "y";
 	}
 	
 	iftestor(){
@@ -80,6 +80,8 @@ class strings {
     		a = "hello";
     	else
     		a = "world";
+    		
+    	def b = a;
     }	
     
     assume(x) {
