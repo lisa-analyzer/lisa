@@ -1,5 +1,9 @@
 class strings {
 
+	stringconcat(){
+		def str = "a" + "b" + "c";
+	}
+
 	iftest1() {
 		def str = "a";
 		if (strstarts(str, "c"))
@@ -37,14 +41,7 @@ class strings {
     	def z = y;
     }
     
-   closure2(x) {
-    	def j = "j";
-    	def w = j;
-    	def y = x;
-    	x = w;
-    }
-    
-    closure3() {
+    closure2() {
     	def j = "j";
     	def w = j;
     	def x = "x";
@@ -52,7 +49,7 @@ class strings {
     	x = w;
     }
     
-    closure4() {
+    closure3() {
     	def w = "w";
     	def z = "z" + w;
     	def y = "y";
@@ -84,7 +81,8 @@ class strings {
     	def b = a;
     }	
     
-    assume(x) {
+    assume() {
+    	def x = "";
     	def b = "abc";
     	if (strcon(x, b))
     		b = "hello";
@@ -99,4 +97,41 @@ class strings {
     		str = str + "a";
    		 }
     }
+    
+    paper1(){
+    	def x =  "ab";
+    	def y = "a";
+    	def z = "b";
+    	def w = y + z;
+    }
+    
+    paper2(){
+    	def x = "";
+    	def y = "";
+    	if (streq(x, y))
+    		x = x + "c";
+    	else
+    		x = y + "c";
+    }
+    
+    
+    paper3(x){
+    	def v = "";
+    	if (x % 2)
+    		v = "abc";
+    	else
+    		v = "def";
+    		
+    	def r = "Elem: \n" + v + "\n";
+    	for (def i = 0; i < 20; i = i + 1){
+    		if (x % 2)
+    			v = "abc";
+    		else
+    			v = "def";
+    			
+    		r = r + v + "\n";
+    	}
+    }
+    
+    
 }

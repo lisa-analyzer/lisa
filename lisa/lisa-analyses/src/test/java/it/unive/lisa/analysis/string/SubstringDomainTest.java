@@ -38,7 +38,13 @@ public class SubstringDomainTest {
 	Identifier z = new Variable(StringType.INSTANCE, "z", SyntheticLocation.INSTANCE);
 	Identifier w = new Variable(StringType.INSTANCE, "w", SyntheticLocation.INSTANCE);
 	
+	ValueExpression a = new Constant(StringType.INSTANCE, "a", SyntheticLocation.INSTANCE);
+	ValueExpression b = new Constant(StringType.INSTANCE, "b", SyntheticLocation.INSTANCE);
 	ValueExpression c = new Constant(StringType.INSTANCE, "c", SyntheticLocation.INSTANCE);
+	ValueExpression ab = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
+	ValueExpression bc = new Constant(StringType.INSTANCE, "bc", SyntheticLocation.INSTANCE);
+	ValueExpression abc = new Constant(StringType.INSTANCE, "abc", SyntheticLocation.INSTANCE);
+
 	
 	SubstringDomain domainA;
 	SubstringDomain domainB;
@@ -68,6 +74,13 @@ public class SubstringDomainTest {
 	ValueExpression ZConcatX = new BinaryExpression(StringType.INSTANCE, z, x, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
 	ValueExpression ZConcatXConcatY = new BinaryExpression(StringType.INSTANCE, z, XConcatY, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
 
+	ValueExpression XConcatAB = new BinaryExpression(StringType.INSTANCE, x, ab, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+	ValueExpression XConcatA = new BinaryExpression(StringType.INSTANCE, x, a, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+	ValueExpression XConcatBC = new BinaryExpression(StringType.INSTANCE, x, bc, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+	ValueExpression XConcatABC = new BinaryExpression(StringType.INSTANCE, x, abc, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+	ValueExpression XConcatABCConcatY = new BinaryExpression(StringType.INSTANCE, XConcatABC, y, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+
+	
 	ValueExpression CSubstringOfX = new BinaryExpression(BoolType.INSTANCE, x, c, StringContains.INSTANCE, SyntheticLocation.INSTANCE);
 	ValueExpression XSubstringOfC = new BinaryExpression(BoolType.INSTANCE, c, x, StringContains.INSTANCE, SyntheticLocation.INSTANCE);
 
@@ -542,6 +555,183 @@ public class SubstringDomainTest {
 		SubstringDomain assigned = new SubstringDomain().assign(y, c, null, null).assign(x, c, null, null);
 		
 		assertTrue(assigned.getState(y).contains(x));
+	}
+	
+	@Test
+	public void testEmptyAssignComplex1() throws SemanticException {
+		ValueExpression ZConcatY = new BinaryExpression(StringType.INSTANCE, z, y, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(w, ZConcatXConcatY, null, null);
+		
+		assertTrue(assigned.getState(w).contains(ZConcatX));
+		assertTrue(assigned.getState(w).contains(XConcatY));
+		assertTrue(assigned.getState(w).contains(ZConcatXConcatY));
+		assertTrue(assigned.getState(w).contains(x));
+		assertTrue(assigned.getState(w).contains(z));
+		assertTrue(assigned.getState(w).contains(y));
+		assertFalse(assigned.getState(w).contains(ZConcatY));
+	}
+	
+	@Test
+	public void testEmptyAssignComplex2() throws SemanticException {		
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(w, XConcatABC, null, null);
+		
+		assertTrue(assigned.getState(w).contains(XConcatABC));
+		assertTrue(assigned.getState(w).contains(x));
+		assertTrue(assigned.getState(w).contains(abc));
+		assertTrue(assigned.getState(w).contains(ab));
+		assertTrue(assigned.getState(w).contains(bc));
+		assertTrue(assigned.getState(w).contains(a));
+		assertTrue(assigned.getState(w).contains(b));
+		assertTrue(assigned.getState(w).contains(XConcatA));
+		assertTrue(assigned.getState(w).contains(XConcatAB));
+		assertFalse(assigned.getState(w).contains(XConcatBC));
+
+	}
+	
+	@Test
+	public void testEmptyAssignComplex3() throws SemanticException{
+		ValueExpression abcd = new Constant(StringType.INSTANCE, "abcd", SyntheticLocation.INSTANCE);
+		ValueExpression ab = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
+		ValueExpression cd = new Constant(StringType.INSTANCE, "cd", SyntheticLocation.INSTANCE);
+		ValueExpression ABConcatCD = new BinaryExpression(StringType.INSTANCE, ab, cd, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned1 = empty.assign(x, abcd, null, null);
+		SubstringDomain assigned2 = empty.assign(x, ABConcatCD, null, null);
+		
+		assertEquals(assigned1, assigned2);
+	}
+	
+	@Test
+	public void testEmptyAssignComplex4() throws SemanticException{
+		ValueExpression ab = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
+		ValueExpression cd = new Constant(StringType.INSTANCE, "cd", SyntheticLocation.INSTANCE);
+		ValueExpression ABConcatY = new BinaryExpression(StringType.INSTANCE, ab, y, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		ValueExpression ABConcatYConcatCD = new BinaryExpression(StringType.INSTANCE, ABConcatY, cd, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+
+		
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(x, ABConcatYConcatCD, null, null);
+		
+		assertTrue(assigned.getState(x).size() == 15);
+	}
+	
+	@Test
+	public void testEmptyAssignComplex5() throws SemanticException{
+		ValueExpression YConcatW = new BinaryExpression(StringType.INSTANCE, y, w, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		ValueExpression YConcatWConcatAB = new BinaryExpression(StringType.INSTANCE, YConcatW, ab, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+
+		ValueExpression WConcatA = new BinaryExpression(StringType.INSTANCE, w, a, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+
+		
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(x, YConcatWConcatAB, null, null);
+		
+		assertTrue(assigned.getState(x).contains(y));
+		assertTrue(assigned.getState(x).contains(w));
+		assertTrue(assigned.getState(x).contains(a));
+		assertTrue(assigned.getState(x).contains(b));
+		assertTrue(assigned.getState(x).contains(ab));
+		assertTrue(assigned.getState(x).contains(YConcatW));
+		assertTrue(assigned.getState(x).contains(WConcatA));
+	}
+	
+	@Test
+	public void testEmptyAssignComplex6() throws SemanticException{
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(x, c, null, null);
+		assigned = assigned.assign(x, ZConcatX, null, null);
+		
+		assertTrue(assigned.getState(x).contains(c));
+		
+		assigned = assigned.assign(x, w, null, null);
+		
+		assertTrue(assigned.getState(x).contains(w) && assigned.getState(x).size() == 1);
+	}
+	
+	@Test
+	public void testEmptyAssignComplex7() throws SemanticException{
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(y, ZConcatX, null, null);
+		assigned = assigned.assign(x, c, null, null);
+		
+		assertFalse(assigned.getState(y).contains(x));
+		assertFalse(assigned.getState(y).contains(ZConcatX));
+
+	}
+	
+	@Test
+	public void testEmptyInterAssignComplex() throws SemanticException{
+		ValueExpression YConcatW = new BinaryExpression(StringType.INSTANCE, y, w, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		ValueExpression YConcatWConcatAB = new BinaryExpression(StringType.INSTANCE, YConcatW, ab, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		ValueExpression WConcatA = new BinaryExpression(StringType.INSTANCE, w, a, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+
+		
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(x, YConcatWConcatAB, null, null);
+		assigned = assigned.assign(y, WConcatA, null, null);
+		
+		assertTrue(assigned.getState(x).contains(y));
+	}
+	
+	@Test
+	public void testEmptyInterAssignComplex2() throws SemanticException{
+		SubstringDomain empty = new SubstringDomain();
+		ValueExpression WConcatC = new BinaryExpression(StringType.INSTANCE, w, c, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+
+		SubstringDomain assigned = empty.assign(x, WConcatC, null, null);
+		assigned = assigned.assign(x, ZConcatX, null, null);
+		assigned = assigned.assign(y, ZConcatX, null, null);
+		
+		
+		assertTrue(assigned.getState(y).contains(x));
+		assertTrue(assigned.getState(y).contains(c));
+		assertTrue(assigned.getState(y).contains(WConcatC));
+	}
+	
+	@Test
+	public void testAssumeComplex1() throws SemanticException{
+		ValueExpression YConcatW = new BinaryExpression(StringType.INSTANCE, y, w, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		ValueExpression XSubstringOfY = new BinaryExpression(BoolType.INSTANCE, y, x, StringContains.INSTANCE, SyntheticLocation.INSTANCE);
+
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(x, YConcatW, null, null);
+		assigned = assigned.assume(XSubstringOfY, null, null, null);
+		
+		assertTrue(assigned.getState(y).contains(x));
+		assertTrue(assigned.getState(y).contains(w));
+		assertFalse(assigned.getState(y).contains(YConcatW));
+	}
+	
+	@Test
+	public void testAssumeComplex2() throws SemanticException{
+		ValueExpression YConcatW = new BinaryExpression(StringType.INSTANCE, y, w, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		ValueExpression YConcatWSubstringOfX = new BinaryExpression(BoolType.INSTANCE, x, YConcatW, StringContains.INSTANCE, SyntheticLocation.INSTANCE);
+
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(z, YConcatW, null, null);
+		assigned = assigned.assume(YConcatWSubstringOfX, null, null, null);
+		
+		assertEquals(assigned.getState(x), assigned.getState(z));
+		assertFalse(assigned.getState(z).contains(x));
+	}
+	
+	@Test
+	public void testAssumeComplex3() throws SemanticException{
+		ValueExpression XSubstringOfY = new BinaryExpression(BoolType.INSTANCE, y, x, StringContains.INSTANCE, SyntheticLocation.INSTANCE);
+
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assigned = empty.assign(x, abc, null, null);
+		assigned = assigned.assume(XSubstringOfY, null, null, null);
+		
+		assertTrue(assigned.getState(y).contains(abc));
+		assertTrue(assigned.getState(y).contains(x));
+		assertFalse(assigned.getState(x).contains(y));
+
 	}
 	
 	@Test
