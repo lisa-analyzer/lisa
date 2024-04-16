@@ -113,7 +113,7 @@ public class ExpressionInverseSet extends InverseSetLattice<ExpressionInverseSet
 				id2) -> id1.getName().equals(id2.getName()),
 				ExpressionInverseSet::wrapper);
 		idlub.forEach(lub::add);
-		
+
 		if (lub.isEmpty())
 			return top();
 
