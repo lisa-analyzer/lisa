@@ -102,11 +102,17 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 			SemanticOracle oracle)
 			throws SemanticException {
 
+		/**
+		 * If the assigned expression is not dynamically typed as a string (or untyped) return this.
+		 */
+		if (oracle.getRuntimeTypesOf(expression, pp, oracle).stream().allMatch(t -> !t.isStringType() && !t.isUntyped()))
+			return this;
+		
 		/*
 		 * The string type is unique and can be retrieved from the type system.
 		 */
 		Type strType = pp.getProgram().getTypes().getStringType();
-
+		
 		Set<SymbolicExpression> identifiers = extrPlus(expression, strType);
 
 		SubstringDomain result = mk(lattice, mkNewFunction(function, false));
