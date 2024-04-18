@@ -133,5 +133,14 @@ class strings {
     	}
     }
     
+    integers(){
+    	def a = 1;
+    	a = a + 1;
+    }
+    
+    type(x){
+    	x = "a";
+    }
+    
     
 }

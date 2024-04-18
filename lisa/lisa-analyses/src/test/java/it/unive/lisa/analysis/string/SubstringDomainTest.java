@@ -220,6 +220,14 @@ public class SubstringDomainTest {
 	}
 
 	@Test
+	public void testAssumeEmpty7() throws SemanticException {
+		SubstringDomain empty = new SubstringDomain();
+		SubstringDomain assumed = empty.assume(XEqualsY, null, null, null);
+		assertTrue(assumed.getState(x).contains(y));
+		assertTrue(assumed.getState(y).contains(x));
+	}
+
+	@Test
 	public void testAssume1() throws SemanticException {
 		SubstringDomain assume1 = domainB.assume(YSubstringOfX, null, null, null);
 		SubstringDomain assume2 = domainB.assume(XEndsWithY, null, null, null);
