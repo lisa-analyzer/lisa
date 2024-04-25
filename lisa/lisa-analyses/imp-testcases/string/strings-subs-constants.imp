@@ -8,4 +8,14 @@ class strings {
 		def w = y + z;
 	
 	}
+	
+	replace(s){
+		def x = "aaaaa";
+		def y = "bba";
+		def k = "bb" + "a";
+		def z = strrep(x, "aa", "b");
+		
+		if (streq(s, k))
+			def i = 1 + 1;
+	}
 }
