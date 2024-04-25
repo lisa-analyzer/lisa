@@ -24,7 +24,10 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
@@ -122,9 +125,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 
-		// return top();
-		
-		return this;
+		return top();
 	}
 
 	@Override
@@ -138,8 +139,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 		if (operator instanceof StringConcat)
 			return left.isTop() || right.isTop() ? top() : new StringConstantPropagation(left.value + right.value);
 		
-		// return top();
-		return this;
+		return top();
 	}
 
 	@Override
@@ -150,9 +150,18 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 			StringConstantPropagation right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		// return top();
 		
-		return this;
+		if (operator instanceof StringReplace) {
+			if (left.isTop() || right.isTop() || middle.isTop())
+				return top();
+			
+			String replaced = left.value;
+			replaced = replaced.replace(middle.value, right.value);
+			
+			return new StringConstantPropagation(replaced);
+		}
+		return top();
+		
 	}
 
 	@Override
@@ -229,31 +238,5 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 		else
 			return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	public ValueEnvironment<StringConstantPropagation> assumeBinaryExpression(
-			ValueEnvironment<StringConstantPropagation> environment,
-			BinaryOperator operator,
-			ValueExpression left,
-			ValueExpression right,
-			ProgramPoint src,
-			ProgramPoint dest,
-			SemanticOracle oracle)
-			throws SemanticException {
-		
-		if (operator == ComparisonEq.INSTANCE)
-			if (left instanceof Identifier) {
-				StringConstantPropagation eval = eval(right, environment, src, oracle);
-				if (eval.isBottom())
-					return environment.bottom();
-				return environment.putState((Identifier) left, eval);
-			} else if (right instanceof Identifier) {
-				StringConstantPropagation eval = eval(left, environment, src, oracle);
-				if (eval.isBottom())
-					return environment.bottom();
-				return environment.putState((Identifier) right, eval);
-			}
-		return environment;
 	}
 }

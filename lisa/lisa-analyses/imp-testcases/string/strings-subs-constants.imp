@@ -1,0 +1,11 @@
+class strings {
+
+	constants(){
+	
+		def x = "ab";
+		def y = "a";
+		def z = "b";
+		def w = y + z;
+	
+	}
+}

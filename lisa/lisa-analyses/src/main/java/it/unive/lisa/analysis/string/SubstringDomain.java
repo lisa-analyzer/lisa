@@ -521,7 +521,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 		for (SymbolicExpression expr : extracted) {
 			if (expr instanceof Constant) {
-				// Update the string builder value addinf the value of the
+				// Update the string builder value adding the value of the
 				// constant
 				Constant c = (Constant) expr;
 				recent.append(c.getValue() instanceof String ? (String) c.getValue() : c.getValue().toString());
@@ -651,7 +651,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * 
 	 * @throws SemanticException
 	 */
-	private SubstringDomain add(
+	protected SubstringDomain add(
 			Set<SymbolicExpression> symbolicExpressions,
 			Identifier id)
 			throws SemanticException {
@@ -797,7 +797,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * 
 	 * @throws SemanticException
 	 */
-	private SubstringDomain closure() throws SemanticException {
+	protected SubstringDomain closure() throws SemanticException {
 		if (isTop() || isBottom())
 			return this;
 
