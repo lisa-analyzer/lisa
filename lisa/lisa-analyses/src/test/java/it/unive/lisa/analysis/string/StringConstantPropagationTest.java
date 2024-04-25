@@ -1,13 +1,10 @@
 package it.unive.lisa.analysis.string;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
 
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import org.junit.Test;
 
 public class StringConstantPropagationTest {
 
@@ -20,7 +17,7 @@ public class StringConstantPropagationTest {
 	public void testConstructor1() {
 		new StringConstantPropagation("Hello World!");
 	}
-	
+
 	@Test
 	public void testEvalBinary() {
 		StringConstantPropagation domain = new StringConstantPropagation();
@@ -28,10 +25,10 @@ public class StringConstantPropagationTest {
 		StringConstantPropagation s2 = new StringConstantPropagation("def");
 
 		domain = domain.evalBinaryExpression(StringConcat.INSTANCE, s1, s2, null, null);
-		
+
 		assertEquals(domain, new StringConstantPropagation("abcdef"));
 	}
-	
+
 	@Test
 	public void testEvalTernary() {
 		StringConstantPropagation domain = new StringConstantPropagation();
@@ -40,8 +37,8 @@ public class StringConstantPropagationTest {
 		StringConstantPropagation s3 = new StringConstantPropagation("b");
 
 		domain = domain.evalTernaryExpression(StringReplace.INSTANCE, s1, s2, s3, null, null);
-		
+
 		assertEquals(domain, new StringConstantPropagation("ba"));
 	}
-	
+
 }

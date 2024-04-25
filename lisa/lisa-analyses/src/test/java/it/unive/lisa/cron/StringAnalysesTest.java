@@ -12,8 +12,6 @@ import it.unive.lisa.analysis.string.Suffix;
 import it.unive.lisa.analysis.string.bricks.Bricks;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.tarsis.Tarsis;
-import it.unive.lisa.conf.LiSAConfiguration.GraphType;
-
 import org.junit.Test;
 
 public class StringAnalysesTest extends AnalysisTestExecutor {
@@ -126,7 +124,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 		perform(conf);
 
 	}
-	
+
 	@Test
 	public void testSubstringDomainWithConstants() {
 		CronConfiguration conf = new CronConfiguration();

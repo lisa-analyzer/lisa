@@ -1,22 +1,12 @@
 package it.unive.lisa.analysis.string;
 
-import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.AdditionOperator;
-import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.ModuloOperator;
-import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
-import it.unive.lisa.symbolic.value.operator.RemainderOperator;
-import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
@@ -24,12 +14,9 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
-import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
-import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -114,7 +101,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 			SemanticOracle oracle) {
 		if (constant.getValue() instanceof String)
 			return new StringConstantPropagation((String) constant.getValue());
-		
+
 		return top();
 	}
 
@@ -138,7 +125,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 		if (operator instanceof StringConcat)
 			return left.isTop() || right.isTop() ? top() : new StringConstantPropagation(left.value + right.value);
-		
+
 		return top();
 	}
 
@@ -150,18 +137,18 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 			StringConstantPropagation right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		
+
 		if (operator instanceof StringReplace) {
 			if (left.isTop() || right.isTop() || middle.isTop())
 				return top();
-			
+
 			String replaced = left.value;
 			replaced = replaced.replace(middle.value, right.value);
-			
+
 			return new StringConstantPropagation(replaced);
 		}
 		return top();
-		
+
 	}
 
 	@Override
