@@ -1,5 +1,7 @@
-package it.unive.lisa.analysis;
+package it.unive.lisa.analysis.stability;
 
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -290,4 +292,24 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
         Trend other = (Trend) obj;
         return this.getTrend() == other.getTrend();
     }
+
+    public Trend combine(Trend other){
+        if (other.isBottom()
+                || other.isStable()
+                || this.equals(other)
+                || (this.isInc() && other.isNonDec())
+                || (this.isDec() && other.isNonInc())
+        )
+            return new Trend(this.getTrend());
+
+        if (this.isBottom()
+                || this.isStable()
+                || (other.isInc() && this.isNonDec())
+                || (other.isDec() && this.isNonInc())
+        )
+            return new Trend(other.getTrend());
+
+        return new Trend((byte) 0); //TOP
+    }
+
 }
