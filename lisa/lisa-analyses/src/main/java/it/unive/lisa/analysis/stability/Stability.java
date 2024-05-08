@@ -1,5 +1,9 @@
-package it.unive.lisa.analysis;
+package it.unive.lisa.analysis.stability;
 
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -163,7 +167,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
      */
     private Trend increasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException {
-        return increasingIfGreater(a, b, pp, oracle).opposite();
+        return increasingIfGreater(a, b, pp, oracle).invert();
     }
 
     /**
@@ -189,7 +193,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
      */
     private Trend nonDecreasingIfLess(SymbolicExpression a, SymbolicExpression b, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException {
-        return nonDecreasingIfGreater(a, b, pp, oracle).opposite();
+        return nonDecreasingIfGreater(a, b, pp, oracle).invert();
     }
 
     /**
@@ -224,7 +228,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
      */
     private Trend increasingIfOutsideZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException{
-        return increasingIfBetweenZeroAndOne(a, pp, oracle).opposite();
+        return increasingIfBetweenZeroAndOne(a, pp, oracle).invert();
     }
 
     /**
@@ -261,7 +265,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
      */
     private Trend nonDecreasingIfOutsideZeroAndOne(SymbolicExpression a, ProgramPoint pp, SemanticOracle oracle)
             throws SemanticException{
-        return nonDecreasingIfBetweenZeroAndOne(a, pp, oracle).opposite();
+        return nonDecreasingIfBetweenZeroAndOne(a, pp, oracle).invert();
     }
 
 
@@ -390,6 +394,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
         //else returnTrend = Trend.TOP;
 
         V ad = auxiliaryDomain.assign(id, expression, pp, oracle);
+        //ValueEnvironment<Trend> t = trend.putState(id, returnTrend.combine(this.trend.getState(id)));
         ValueEnvironment<Trend> t = trend.putState(id, returnTrend);
         if (ad.isBottom() || t.isBottom()) return bottom();
         else
@@ -472,4 +477,5 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
     public V getAuxiliaryDomain() {
         return auxiliaryDomain;
     }
+
 }

@@ -150,7 +150,7 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
         return BOTTOM;
     }
 
-    public Trend opposite(){
+    public Trend invert(){
         if (this.isTop() || this.isBottom() || this.isStable() || this.isNonStable()) return this;
         else if (this.isInc()) return DEC;
         else if (this.isDec()) return INC;
