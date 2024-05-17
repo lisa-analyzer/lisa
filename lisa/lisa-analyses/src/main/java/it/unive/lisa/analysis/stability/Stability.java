@@ -478,4 +478,22 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
         return auxiliaryDomain;
     }
 
+    /**
+     * combines two Stability environments in a single cumulative one
+     */
+    public Stability<V> combine(Stability<V> post){
+        Stability<V> returnStability = new Stability<>(post.getAuxiliaryDomain(), post.getTrend());
+
+        for (Identifier id : post.getTrend().getKeys()) {
+            if (this.getTrend().knowsIdentifier(id)) {
+                Trend tmp = this.getTrend().getState(id).combine(post.getTrend().getState(id));
+                returnStability.getTrend().putState(id, tmp);
+            }
+            else
+                returnStability.getTrend().putState(id, post.getTrend().getState(id));
+        }
+
+        return returnStability;
+    }
+
 }
