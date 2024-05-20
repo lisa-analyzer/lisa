@@ -17,9 +17,9 @@ import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.*;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import it.unive.lisa.util.representation.ListRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Predicate;
 
 public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements BaseLattice<Stability<V>>, ValueDomain<Stability<V>> {
@@ -444,7 +444,8 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
 
     @Override
     public StructuredRepresentation representation() {
-        return new ListRepresentation(auxiliaryDomain.representation(), trend.representation());
+        //return new ListRepresentation(auxiliaryDomain.representation(), trend.representation());
+        return trend.representation();
     }
 
     @Override
@@ -482,18 +483,34 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
      * combines two Stability environments in a single cumulative one
      */
     public Stability<V> combine(Stability<V> post){
-        Stability<V> returnStability = new Stability<>(post.getAuxiliaryDomain(), post.getTrend());
+        ValueEnvironment<Trend> returnTrendEnvironment = new ValueEnvironment<>(new Trend((byte) 0));
 
         for (Identifier id : post.getTrend().getKeys()) {
             if (this.getTrend().knowsIdentifier(id)) {
                 Trend tmp = this.getTrend().getState(id).combine(post.getTrend().getState(id));
-                returnStability.getTrend().putState(id, tmp);
+                returnTrendEnvironment = returnTrendEnvironment.putState(id, tmp);
             }
             else
-                returnStability.getTrend().putState(id, post.getTrend().getState(id));
+                returnTrendEnvironment = returnTrendEnvironment.putState(id, post.getTrend().getState(id));
         }
 
-        return returnStability;
+        return new Stability<>(post.getAuxiliaryDomain(), returnTrendEnvironment);
+    }
+
+    /**
+     * returns Map from Trends to ArrayList of Identifiers that have that Trend
+     */
+    public HashMap<Trend, ArrayList<Identifier>> getCovarianceClasses(){
+        HashMap<Trend, ArrayList<Identifier>> map = new HashMap<>();
+
+        for (Identifier id: getTrend().getKeys()) {
+            Trend t = getTrend().getState(id);
+            if (!map.containsKey(t))
+                map.put(t, new ArrayList<>());
+            map.get(t).add(id);
+        }
+
+        return map;
     }
 
 }

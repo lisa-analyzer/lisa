@@ -293,21 +293,21 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
         return this.getTrend() == other.getTrend();
     }
 
-    public Trend combine(Trend other){
-        if (other.isBottom()
-                || other.isStable()
-                || this.equals(other)
-                || (this.isInc() && other.isNonDec())
-                || (this.isDec() && other.isNonInc())
+    public Trend combine(Trend post){
+        if (post.isBottom()
+                || post.isStable()
+                || this.equals(post)
+                || (this.isInc() && post.isNonDec())
+                || (this.isDec() && post.isNonInc())
         )
             return new Trend(this.getTrend());
 
         if (this.isBottom()
                 || this.isStable()
-                || (other.isInc() && this.isNonDec())
-                || (other.isDec() && this.isNonInc())
+                || (post.isInc() && this.isNonDec())
+                || (post.isDec() && this.isNonInc())
         )
-            return new Trend(other.getTrend());
+            return new Trend(post.getTrend());
 
         return new Trend((byte) 0); //TOP
     }
