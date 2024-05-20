@@ -1,0 +1,26 @@
+class scaleBis{
+
+    scale(){
+        def width = 8;
+        def height = 8;
+        def topLeftX = 1;
+        def topLeftY = 9;
+
+        def scaleX = 2;
+        def scaleY = 1;
+
+        def topRightX = 9;
+        def bottomLeftY = 1;
+
+        topLeftX = topLeftX * scaleX;
+        topLeftY = topLeftY * scaleY;
+
+        topRightX = topRightX * scaleX;
+        bottomLeftY = bottomLeftY * scaleY;
+
+        width = topRightX - topLeftX;
+        height = topLeftY - bottomLeftY;
+
+    }
+
+}
