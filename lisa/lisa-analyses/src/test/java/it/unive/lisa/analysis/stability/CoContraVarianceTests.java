@@ -21,9 +21,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import org.junit.Test;
-
 import java.util.*;
-import java.util.stream.Stream;
 
 public class CoContraVarianceTests extends AnalysisTestExecutor {
 
@@ -34,19 +32,15 @@ public class CoContraVarianceTests extends AnalysisTestExecutor {
         LiSAConfiguration conf = new DefaultConfiguration();
         conf.workdir = "output/stability/DCS";
         conf.serializeResults = true;
-        //conf.analysisGraphs = LiSAConfiguration.GraphType.HTML;
         conf.abstractState = new SimpleAbstractState<>(
                 // heap domain
                 new MonolithicHeap(),
                 // value domain
-                //new Stability<>(new DoubleCheeseburger()),
                 new Stability<>(new ValueEnvironment<>(new Interval()).top()),
-                //new Stability<>(new ValueEnvironment<>(new Sign()).top()),
                 // type domain
                 new TypeEnvironment<>(new InferredTypes()));
+        conf.interproceduralAnalysis = new ContextBasedAnalysis<>();        //??
 
-        //??
-        conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
         conf.semanticChecks.add(new CoContraVarianceCheck<Stability<ValueEnvironment<Interval>>>());
 
         LiSA lisa = new LiSA(conf);
@@ -57,15 +51,12 @@ public class CoContraVarianceTests extends AnalysisTestExecutor {
             implements SemanticCheck<SimpleAbstractState<MonolithicHeap, Stability<T>, TypeEnvironment<InferredTypes>>> {
 
         Map<Statement, Stability<T>> stateBeforeMap = new HashMap<>();
-        Map<Statement, Stability<T>> resultsMap = new HashMap<>();
-
-        List<Statement> nodes = new ArrayList<>();
+        Map<Statement, Stability<T>> resultsMap = new LinkedHashMap<>();
 
         @Override
         public boolean visit(CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, Stability<T>, TypeEnvironment<InferredTypes>>> tool,
                              CFG graph,
                              Statement node) {
-            //System.out.println(node);
 
             if (graph.containsNode(node)) {
                 for (AnalyzedCFG<SimpleAbstractState<MonolithicHeap, Stability<T>, TypeEnvironment<InferredTypes>>>
@@ -79,70 +70,44 @@ public class CoContraVarianceTests extends AnalysisTestExecutor {
                         Stability<T> preState = stateBeforeMap.get(node);
                         cumulativeState = preState.combine(postState);
                     }
-
-                    //System.out.println("$ " + node + ": " + cumulativeState);
                     resultsMap.put(node, cumulativeState);
 
-
-                    // computing new entry state for next node
+                    // computing new entry state for next
                     for (Statement next : graph.followersOf(node)) {
-
                         if (stateBeforeMap.containsKey(next)) {
+                            // join converging branches
                             try {
-                                stateBeforeMap.put(next, stateBeforeMap.get(next).lub(cumulativeState)); // join converging branches
+                                System.out.println("IT HAPPENED");
+                                stateBeforeMap.put(next, stateBeforeMap.get(next).lub(cumulativeState));
                             } catch (SemanticException e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            //System.out.println("$ prestate(" + next + "): " + cumulativeState); // NO NODES IN statesBeforeMap!!!
+                        } else
                             stateBeforeMap.put(next, cumulativeState); // the pre of next is the post of this
-                        }
                     }
-
-                    /*else {
-                        Statement next = graph.followersOf() ;
-                        Stability<T> preState = stateBeforeMap.get(node);
-                        resultsMap.put(node, preState); // propagate forward
-                        stateBeforeMap.put(next, preState);
-                    }*/
                 }
             }
             return true;
-
         }
 
-
-
-        // Cute sout of results
         @Override
         public void afterExecution(CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, Stability<T>, TypeEnvironment<InferredTypes>>> tool) {
 
-            // sort results -> make LinkedMap and avoid??
-            Stream<Map.Entry<Statement, Stability<T>>> results =
-            resultsMap.entrySet().stream().sorted(new Comparator<Map.Entry<Statement, Stability<T>>>() {
-                @Override
-                public int compare(Map.Entry<Statement, Stability<T>> o1, Map.Entry<Statement, Stability<T>> o2) {
-                    return o1.getKey().compareTo(o2.getKey());
-                }
-            });
+            // Print resultsMap
+            for (Map.Entry<Statement, Stability<T>> entry: resultsMap.entrySet()){
 
-            for (Object objectEntry: results.toArray() ) {  //resultsMap.entrySet()) { // in case we go back to sanity ??
-                Map.Entry<Statement, Stability<T>> entry = (Map.Entry<Statement, Stability<T>>) objectEntry; // crimes !!
-
-                // get covClasses (and also switch Trend for String representing that trend for printing)
+                // get covClasses and switch Trend for String representing that trend
                 HashMap<String, ArrayList<Identifier>> covClasses = new HashMap<>();
                 for (Map.Entry<Trend, ArrayList<Identifier>> el : entry.getValue().getCovarianceClasses().entrySet()) {
                     covClasses.put(el.getKey().representation().toString(), el.getValue());
                 }
 
-                // get line number for Statement (absolutely not necessary, just for cute prints uwu)
+                // get line number of Statement
                 String locationString = entry.getKey().getLocation().getCodeLocation();
                 locationString = locationString.substring(locationString.indexOf(':') + 1, locationString.lastIndexOf(':'));
 
-                // print
                 System.out.println("[" + locationString + "] " + entry.getKey() + ": " + covClasses);
             }
-
             SemanticCheck.super.afterExecution(tool);
         }
     }
