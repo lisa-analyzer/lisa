@@ -482,7 +482,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
     /**
      * combines two Stability environments in a single cumulative one
      */
-    public Stability<V> combine(Stability<V> post){
+    public Stability<V> environmentCombine(Stability<V> post){
         ValueEnvironment<Trend> returnTrendEnvironment = new ValueEnvironment<>(new Trend((byte) 0));
 
         for (Identifier id : post.getTrend().getKeys()) {

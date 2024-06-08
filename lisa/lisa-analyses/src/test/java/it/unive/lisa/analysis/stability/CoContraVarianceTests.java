@@ -5,9 +5,11 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.*;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
@@ -31,12 +33,14 @@ public class CoContraVarianceTests extends AnalysisTestExecutor {
         Program program = IMPFrontend.processFile("imp-testcases/stability/saneScale.imp");
         LiSAConfiguration conf = new DefaultConfiguration();
         conf.workdir = "output/stability/DCS";
-        conf.serializeResults = true;
+        //conf.serializeResults = true;
         conf.abstractState = new SimpleAbstractState<>(
                 // heap domain
                 new MonolithicHeap(),
+                //new FieldSensitivePointBasedHeap(),
                 // value domain
                 new Stability<>(new ValueEnvironment<>(new Interval()).top()),
+                //new ValueEnvironment<>(new Sign()),
                 // type domain
                 new TypeEnvironment<>(new InferredTypes()));
         conf.interproceduralAnalysis = new ContextBasedAnalysis<>();        //??
@@ -50,7 +54,7 @@ public class CoContraVarianceTests extends AnalysisTestExecutor {
     private static class CoContraVarianceCheck<T extends BaseLattice<T> & ValueDomain<T>>
             implements SemanticCheck<SimpleAbstractState<MonolithicHeap, Stability<T>, TypeEnvironment<InferredTypes>>> {
 
-        Map<Statement, Stability<T>> stateBeforeMap = new HashMap<>();
+        Map<Statement, Stability<T>> preStatesMap = new HashMap<>();
         Map<Statement, Stability<T>> resultsMap = new LinkedHashMap<>();
 
         @Override
@@ -66,24 +70,24 @@ public class CoContraVarianceTests extends AnalysisTestExecutor {
                     Stability<T> cumulativeState = postState;
 
                     // computing cumulative trend for node
-                    if (stateBeforeMap.containsKey(node)) {
-                        Stability<T> preState = stateBeforeMap.get(node);
-                        cumulativeState = preState.combine(postState);
+                    if (preStatesMap.containsKey(node)) {
+                        Stability<T> preState = preStatesMap.get(node);
+                        cumulativeState = preState.environmentCombine(postState);
                     }
                     resultsMap.put(node, cumulativeState);
 
                     // computing new entry state for next
                     for (Statement next : graph.followersOf(node)) {
-                        if (stateBeforeMap.containsKey(next)) {
+                        if (preStatesMap.containsKey(next)) {
                             // join converging branches
                             try {
                                 System.out.println("IT HAPPENED");
-                                stateBeforeMap.put(next, stateBeforeMap.get(next).lub(cumulativeState));
+                                preStatesMap.put(next, preStatesMap.get(next).lub(cumulativeState));
                             } catch (SemanticException e) {
                                 e.printStackTrace();
                             }
                         } else
-                            stateBeforeMap.put(next, cumulativeState); // the pre of next is the post of this
+                            preStatesMap.put(next, cumulativeState); // the pre of next is the post of this
                     }
                 }
             }
