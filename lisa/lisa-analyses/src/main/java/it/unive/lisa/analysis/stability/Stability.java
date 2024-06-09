@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
@@ -22,25 +23,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Predicate;
 
-public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements BaseLattice<Stability<V>>, ValueDomain<Stability<V>> {
+public class Stability<V extends BaseNonRelationalValueDomain<V>> implements BaseLattice<Stability<V>>, ValueDomain<Stability<V>> {
 
-    private final V auxiliaryDomain;
+    private final ValueEnvironment<V> auxiliaryDomain;
 
     private final ValueEnvironment<Trend> trend;
 
-    public Stability(V auxiliaryDomain) {
+    public Stability(ValueEnvironment<V> auxiliaryDomain) {
         this.auxiliaryDomain = auxiliaryDomain;
         this.trend = new ValueEnvironment<>(new Trend((byte)2));
     }
 
-    public Stability(V auxiliaryDomain, ValueEnvironment<Trend> trend) {
+    public Stability(ValueEnvironment<V> auxiliaryDomain, ValueEnvironment<Trend> trend) {
         this.auxiliaryDomain = auxiliaryDomain;
         this.trend = trend;
     }
 
     @Override
     public Stability<V> lubAux(Stability<V> other) throws SemanticException {
-        V ad = auxiliaryDomain.lub(other.getAuxiliaryDomain());
+        ValueEnvironment<V> ad = auxiliaryDomain.lub(other.getAuxiliaryDomain());
         ValueEnvironment<Trend> t = trend.lub(other.getTrend());
         if (ad.isBottom() || t.isBottom()) return bottom();
         else
@@ -49,7 +50,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
 
     @Override
     public Stability<V> glbAux(Stability<V> other) throws SemanticException {
-        V ad = auxiliaryDomain.glb(other.getAuxiliaryDomain());
+        ValueEnvironment<V> ad = auxiliaryDomain.glb(other.getAuxiliaryDomain());
         ValueEnvironment<Trend> t = trend.glb(other.getTrend());
         if (ad.isBottom() || t.isBottom()) return bottom();
         else return new Stability<>(ad, t);
@@ -57,7 +58,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
 
     @Override
     public Stability<V> wideningAux(Stability<V> other) throws SemanticException {
-        V ad = auxiliaryDomain.widening(other.getAuxiliaryDomain());
+        ValueEnvironment<V> ad = auxiliaryDomain.widening(other.getAuxiliaryDomain());
         ValueEnvironment<Trend> t = trend.widening(other.getTrend());
         if (ad.isBottom() || t.isBottom()) return bottom();
         else return new Stability<>(ad, t);
@@ -393,7 +394,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
 
         //else returnTrend = Trend.TOP;
 
-        V ad = auxiliaryDomain.assign(id, expression, pp, oracle);
+        ValueEnvironment<V> ad = auxiliaryDomain.assign(id, expression, pp, oracle);
         //ValueEnvironment<Trend> t = trend.putState(id, returnTrend.combine(this.trend.getState(id)));
         ValueEnvironment<Trend> t = trend.putState(id, returnTrend);
         if (ad.isBottom() || t.isBottom()) return bottom();
@@ -403,14 +404,14 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
 
     @Override
     public Stability<V> smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle) throws SemanticException {
-        V ad = auxiliaryDomain.smallStepSemantics(expression, pp, oracle);
+        ValueEnvironment<V> ad = auxiliaryDomain.smallStepSemantics(expression, pp, oracle);
         if (ad.isBottom()) return bottom();
         else return new Stability<>(ad, trend);
     }
 
     @Override
     public Stability<V> assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
-        V ad = auxiliaryDomain.assume(expression, src, dest, oracle);
+        ValueEnvironment<V> ad = auxiliaryDomain.assume(expression, src, dest, oracle);
         ValueEnvironment<Trend> t = trend.assume(expression, src, dest, oracle);
         if (ad.isBottom() || t.isBottom()) return bottom();
         else return new Stability<>(ad, t);
@@ -475,7 +476,7 @@ public class Stability<V extends ValueDomain<V> & BaseLattice<V>> implements Bas
         return trend;
     }
 
-    public V getAuxiliaryDomain() {
+    public ValueEnvironment<V> getAuxiliaryDomain() {
         return auxiliaryDomain;
     }
 
