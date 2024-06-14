@@ -142,5 +142,18 @@ class strings {
     	x = "a";
     }
     
+    scopetest(x){
+	    def s = "a";
+	    def y = "z";
+	    if (x > 0){
+	    	def k = "x";
+	    	y = k;
+	    } else {
+	    	def k = "x";
+	    	y = k;
+	    }
+	    s = s + "c";
+    }
+    
     
 }

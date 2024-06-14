@@ -127,6 +127,8 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 
 	}
 
+
+
 	@Test
 	public void testSubstringDomainWithConstants() {
 		CronConfiguration conf = new CronConfiguration();

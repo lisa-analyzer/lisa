@@ -266,6 +266,13 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 		if (function.containsKey(id))
 			return true;
+		
+		for (Map.Entry<Identifier, ExpressionInverseSet> entry : function.entrySet()) {
+			for (SymbolicExpression expr : entry.getValue().elements) {
+				if (appears(id, expr))
+					return true;
+			}
+		}
 
 		return false;
 	}
@@ -282,6 +289,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 																							// null
 
 		newFunction.remove(id);
+		
+		newFunction.replaceAll((key, value) -> 
+		 	new ExpressionInverseSet(value.elements.stream()
+		 	.filter(v -> !appears(id, v))
+		 	.collect(Collectors.toSet())
+		));
 
 		return mk(lattice, newFunction);
 	}
@@ -296,10 +309,30 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false); // function
 																							// !=
 																							// null
+		
+		Set<Identifier> ids = new HashSet<>();
+		for (Map.Entry<Identifier, ExpressionInverseSet> entry : newFunction.entrySet()) {
+			ids.add(entry.getKey());
+			for(SymbolicExpression s : entry.getValue().elements()) {
+				if (s instanceof Identifier) {
+					Identifier id = (Identifier) s;
+					ids.add(id);
+				}
+			}
+		}
+		
 
-		Set<Identifier> keys = newFunction.keySet().stream().filter(test::test).collect(Collectors.toSet());
-
-		keys.forEach(newFunction::remove);
+		for (Identifier id : ids) {
+			if (test.test(id)) {
+				newFunction.remove(id);
+				
+				newFunction.replaceAll((key, value) -> 
+					new ExpressionInverseSet(value.elements.stream()
+					.filter(v -> !appears(id, v))
+					.collect(Collectors.toSet())
+				));
+			}
+		}
 
 		return mk(lattice, newFunction);
 	}

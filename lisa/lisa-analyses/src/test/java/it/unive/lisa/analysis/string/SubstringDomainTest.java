@@ -816,6 +816,40 @@ public class SubstringDomainTest {
 
 		assertFalse(domain.forgetIdentifier(x).knowsIdentifier(x));
 	}
+	
+	@Test
+	public void testForgetIdentifier2() throws SemanticException {
+		SubstringDomain s = domainA.assign(y, XConcatA, null, null);
+		s = s.forgetIdentifier(x);
+		assertEquals(s.getState(x), new ExpressionInverseSet().top());
+		assertFalse(s.getState(y).contains(x));
+		assertFalse(s.getState(y).contains(XConcatA));
+		assertFalse(s.knowsIdentifier(x));
+	}
+	
+	@Test
+	public void testForgetIdentifier3() throws SemanticException {
+		SubstringDomain s = domainD.assign(y, XConcatA, null, null);
+		s = s.forgetIdentifier(x);
+		assertEquals(s.getState(x), new ExpressionInverseSet().top());
+		assertFalse(s.getState(y).contains(x));
+		assertFalse(s.getState(y).contains(XConcatA));
+		assertFalse(s.knowsIdentifier(x));
+	}
+	
+	@Test
+	public void testForgetIdentifiersIf() throws SemanticException {
+		SubstringDomain s = domainF.forgetIdentifiersIf((id) -> id.getName().equals("w") || id.getName().equals("y"));
+		assertEquals(s.getState(w), new ExpressionInverseSet().top());
+		assertFalse(s.getState(x).contains(y));
+	}
+	
+	@Test
+	public void testKnowsIdentifier() throws SemanticException {
+		assertTrue(domainA.knowsIdentifier(x));
+		assertTrue(domainA.knowsIdentifier(y));
+		assertFalse(domainA.knowsIdentifier(z));
+	}
 
 	@Test
 	public void testGlb1() throws SemanticException {
