@@ -36,6 +36,9 @@ import java.util.stream.Collectors;
 public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifier, ExpressionInverseSet>
 		implements
 		ValueDomain<SubstringDomain> {
+	
+	private static final SubstringDomain TOP = new SubstringDomain(new ExpressionInverseSet().top());
+	private static final SubstringDomain BOTTOM = new SubstringDomain(new ExpressionInverseSet().bottom());
 
 	public SubstringDomain(
 			ExpressionInverseSet lattice,
@@ -72,12 +75,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	@Override
 	public SubstringDomain top() {
-		return isTop() ? this : new SubstringDomain(lattice.top());
+		return isTop() ? this : TOP;
 	}
 
 	@Override
 	public SubstringDomain bottom() {
-		return isBottom() ? this : new SubstringDomain(lattice.bottom());
+		return isBottom() ? this : BOTTOM;
 	}
 
 	@Override
@@ -101,7 +104,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 			SemanticOracle oracle)
 			throws SemanticException {
 
-		/**
+		/*
 		 * If the assigned expression is not dynamically typed as a string (or
 		 * untyped) return this.
 		 */
@@ -375,7 +378,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return new SubstringDomain(lattice.popScope(token), mkNewFunction(function, true));
 	}
 
-	/**
+	/*
 	 * Extract the ordered expressions of a concatenation. If the expression is
 	 * not a concatenation returns an empty list. Example: {@code x + y + "ab"}
 	 * returns {@code x, y, "ab"} as List
@@ -406,7 +409,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return result;
 	}
 
-	/**
+	/*
 	 * Returns all the possible substring of a given expression.
 	 * 
 	 * @param expression
@@ -503,7 +506,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return new HashSet<>(result);
 	}
 
-	/**
+	/*
 	 * Returns a list with no more than one consecutive constant where if
 	 * {@code extracted} has consecutive constants, the returned value merges
 	 * them
@@ -528,9 +531,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 			} else {
 				/*
-				 * Iterating an Variable
+				 * Iterating a Variable
 				 */
-				if (!recent.isEmpty()) {
+				if (recent.length() > 0) {
 					// The previous value / values are constants; add to the
 					// list the constant with value the built string
 					result.add(new Constant(strType, recent.toString(), SyntheticLocation.INSTANCE));
@@ -543,13 +546,13 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		}
 
 		// If the last element is a constant add the last built string
-		if (!recent.isEmpty())
+		if (recent.length() > 0)
 			result.add(new Constant(strType, recent.toString(), SyntheticLocation.INSTANCE));
 
 		return result;
 	}
 
-	/**
+	/*
 	 * Returns the set containing the substrings of a Constant
 	 * 
 	 * @param c Constant to analyze
@@ -576,7 +579,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return result;
 	}
 
-	/**
+	/*
 	 * Returns the set containing the prefixes of a Constant
 	 * 
 	 * @param c Constant to analyze
@@ -598,7 +601,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return result;
 	}
 
-	/**
+	/*
 	 * Returns the set containing the suffixes of a Constant
 	 * 
 	 * @param c Constant to analyze
@@ -622,7 +625,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return result;
 	}
 
-	/**
+	/*
 	 * Creates am expression given a list. The returned expression is the
 	 * ordered concatenation of the expression in the list.
 	 * 
@@ -641,7 +644,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				SyntheticLocation.INSTANCE);
 	}
 
-	/**
+	/*
 	 * Adds a set of expressions to the domain.
 	 * 
 	 * @param symbolicExpressions
@@ -679,7 +682,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return mk(lattice, newFunction);
 	}
 
-	/**
+	/*
 	 * First step of assignment, removing obsolete relations.
 	 * 
 	 * @param extracted Expression assigned
@@ -717,7 +720,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return mk(lattice, newFunction);
 	}
 
-	/**
+	/*
 	 * Performs the inter-assignment phase
 	 * 
 	 * @param assignedId         Variable getting assigned
@@ -756,7 +759,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return mk(lattice, newFunction);
 	}
 
-	/**
+	/*
 	 * Performs the closure over an identifier. The method adds to {@code id}
 	 * the expressions found in the variables mapped to {@code id}
 	 * 
@@ -790,7 +793,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return result;
 	}
 
-	/**
+	/*
 	 * Performs the closure over the domain.
 	 * 
 	 * @return A copy of the domain with the added relations
@@ -823,7 +826,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	}
 
-	/**
+	/*
 	 * Removes values mapped to empty set (top)
 	 * 
 	 * @return A copy of the domain without variables mapped to empty set
@@ -844,7 +847,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return result;
 	}
 
-	/**
+	/*
 	 * Checks if a variable appears in an expression
 	 * 
 	 * @param id   Variable to check
