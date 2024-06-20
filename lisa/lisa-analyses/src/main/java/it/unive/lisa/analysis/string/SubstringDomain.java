@@ -33,6 +33,19 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * The substring relational abstract domain, tracking relation between string
+ * expressions. The domain is implemented as a {@link FunctionalLattice},
+ * mapping identifiers to string expressions, tracking which string expressions
+ * are <i>definitely</i> substring of an identifier. This domain follows the one
+ * defined
+ * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
+ * this paper</a>.
+ * 
+ * @author <a href="mailto:michele.martelli@studenti.unipr.it">Michele
+ *             Martelli</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ */
 public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifier, ExpressionInverseSet>
 		implements
 		ValueDomain<SubstringDomain> {
@@ -40,19 +53,22 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	private static final SubstringDomain TOP = new SubstringDomain(new ExpressionInverseSet().top());
 	private static final SubstringDomain BOTTOM = new SubstringDomain(new ExpressionInverseSet().bottom());
 
-	public SubstringDomain(
+	/**
+	 * Builds the top abstract value.
+	 */
+	public SubstringDomain() {
+		this(new ExpressionInverseSet());
+	}
+
+	protected SubstringDomain(
 			ExpressionInverseSet lattice,
 			Map<Identifier, ExpressionInverseSet> function) {
 		super(lattice, function);
 	}
 
-	public SubstringDomain(
+	private SubstringDomain(
 			ExpressionInverseSet lattice) {
 		super(lattice);
-	}
-
-	public SubstringDomain() {
-		this(new ExpressionInverseSet());
 	}
 
 	@Override

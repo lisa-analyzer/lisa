@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.string;
 
+import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -21,6 +22,17 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
+/**
+ * The string constant propagation abstract domain, tracking if a certain string
+ * value has constant value or not. Top and bottom cases for least upper bounds,
+ * widening and less or equals operations are handled by {@link BaseLattice} in
+ * {@link BaseLattice#lub}, {@link BaseLattice#widening} and
+ * {@link BaseLattice#lessOrEqual}, respectively.
+ * 
+ * @author <a href="mailto:michele.martelli@studenti.unipr.it">Michele
+ *             Martelli</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ */
 public class StringConstantPropagation implements BaseNonRelationalValueDomain<StringConstantPropagation> {
 
 	private static final StringConstantPropagation TOP = new StringConstantPropagation(true, false);
