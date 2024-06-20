@@ -48,7 +48,6 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 	/*
 	 * Builds the abstract value for the given constant.
-	 * 
 	 * @param value the constant
 	 */
 	public StringConstantPropagation(
@@ -125,7 +124,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 		if (operator instanceof StringConcat)
 			return left.isTop() || right.isTop() ? top() : new StringConstantPropagation(left.value + right.value);
-		
+
 		return top();
 	}
 

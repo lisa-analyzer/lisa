@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifier, ExpressionInverseSet>
 		implements
 		ValueDomain<SubstringDomain> {
-	
+
 	private static final SubstringDomain TOP = new SubstringDomain(new ExpressionInverseSet().top());
 	private static final SubstringDomain BOTTOM = new SubstringDomain(new ExpressionInverseSet().bottom());
 
@@ -266,7 +266,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 		if (function.containsKey(id))
 			return true;
-		
+
 		for (Map.Entry<Identifier, ExpressionInverseSet> entry : function.entrySet()) {
 			for (SymbolicExpression expr : entry.getValue().elements) {
 				if (appears(id, expr))
@@ -289,12 +289,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 																							// null
 
 		newFunction.remove(id);
-		
-		newFunction.replaceAll((key, value) -> 
-		 	new ExpressionInverseSet(value.elements.stream()
-		 	.filter(v -> !appears(id, v))
-		 	.collect(Collectors.toSet())
-		));
+
+		newFunction.replaceAll((
+				key,
+				value) -> new ExpressionInverseSet(value.elements.stream()
+						.filter(v -> !appears(id, v))
+						.collect(Collectors.toSet())));
 
 		return mk(lattice, newFunction);
 	}
@@ -309,28 +309,27 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false); // function
 																							// !=
 																							// null
-		
+
 		Set<Identifier> ids = new HashSet<>();
 		for (Map.Entry<Identifier, ExpressionInverseSet> entry : newFunction.entrySet()) {
 			ids.add(entry.getKey());
-			for(SymbolicExpression s : entry.getValue().elements()) {
+			for (SymbolicExpression s : entry.getValue().elements()) {
 				if (s instanceof Identifier) {
 					Identifier id = (Identifier) s;
 					ids.add(id);
 				}
 			}
 		}
-		
 
 		for (Identifier id : ids) {
 			if (test.test(id)) {
 				newFunction.remove(id);
-				
-				newFunction.replaceAll((key, value) -> 
-					new ExpressionInverseSet(value.elements.stream()
-					.filter(v -> !appears(id, v))
-					.collect(Collectors.toSet())
-				));
+
+				newFunction.replaceAll((
+						key,
+						value) -> new ExpressionInverseSet(value.elements.stream()
+								.filter(v -> !appears(id, v))
+								.collect(Collectors.toSet())));
 			}
 		}
 
@@ -415,9 +414,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * Extract the ordered expressions of a concatenation. If the expression is
 	 * not a concatenation returns an empty list. Example: {@code x + y + "ab"}
 	 * returns {@code x, y, "ab"} as List
-	 * 
 	 * @param expression to extract
-	 * 
 	 * @return List containing the sub-expressions
 	 */
 	private static List<SymbolicExpression> extr(
@@ -444,10 +441,8 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Returns all the possible substring of a given expression.
-	 * 
 	 * @param expression
 	 * @param strType
-	 * 
 	 * @return
 	 */
 	private static Set<SymbolicExpression> extrPlus(
@@ -540,13 +535,10 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	}
 
 	/*
-	 * Returns a list with no more than one consecutive constant where if
-	 * {@code extracted} has consecutive constants, the returned value merges
-	 * them
-	 * 
+	 * Returns a list with no more than one consecutive constant where if {@code
+	 * extracted} has consecutive constants, the returned value merges them
 	 * @param extracted List to analyze
 	 * @param strType
-	 * 
 	 * @return The list without consecutive constants.
 	 */
 	private static List<SymbolicExpression> mergeStringLiterals(
@@ -587,9 +579,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Returns the set containing the substrings of a Constant
-	 * 
 	 * @param c Constant to analyze
-	 * 
 	 * @return The set containing the substrings of a Constant
 	 */
 	private static Set<SymbolicExpression> getSubstrings(
@@ -614,9 +604,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Returns the set containing the prefixes of a Constant
-	 * 
 	 * @param c Constant to analyze
-	 * 
 	 * @return The set containing the prefixes of a Constant
 	 */
 	private static Set<SymbolicExpression> getPrefix(
@@ -636,9 +624,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Returns the set containing the suffixes of a Constant
-	 * 
 	 * @param c Constant to analyze
-	 * 
 	 * @return The set containing the suffixes of a Constant
 	 */
 	private static Set<SymbolicExpression> getSuffix(
@@ -661,11 +647,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	/*
 	 * Creates am expression given a list. The returned expression is the
 	 * ordered concatenation of the expression in the list.
-	 * 
 	 * @param expressions
-	 * 
 	 * @return The expression representing concatenation of the expressions in
-	 *             the list.
+	 * the list.
 	 */
 	private static SymbolicExpression composeExpression(
 			List<SymbolicExpression> expressions) {
@@ -679,12 +663,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Adds a set of expressions to the domain.
-	 * 
 	 * @param symbolicExpressions
 	 * @param id
-	 * 
 	 * @return A new domain with the added expressions
-	 * 
 	 * @throws SemanticException
 	 */
 	protected SubstringDomain add(
@@ -717,13 +698,10 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * First step of assignment, removing obsolete relations.
-	 * 
 	 * @param extracted Expression assigned
-	 * @param id        Expression getting assigned
-	 * 
+	 * @param id Expression getting assigned
 	 * @return Copy of the domain, with the holding relations after the
-	 *             assignment.
-	 * 
+	 * assignment.
 	 * @throws SemanticException
 	 */
 	private SubstringDomain remove(
@@ -755,13 +733,10 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Performs the inter-assignment phase
-	 * 
-	 * @param assignedId         Variable getting assigned
+	 * @param assignedId Variable getting assigned
 	 * @param assignedExpression Expression assigned
-	 * 
 	 * @return Copy of the domain with new relations following the
-	 *             inter-assignment phase
-	 * 
+	 * inter-assignment phase
 	 * @throws SemanticException
 	 */
 	private SubstringDomain interasg(
@@ -795,9 +770,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	/*
 	 * Performs the closure over an identifier. The method adds to {@code id}
 	 * the expressions found in the variables mapped to {@code id}
-	 * 
 	 * @return A copy of the domain with the added relations
-	 * 
 	 * @throws SemanticException
 	 */
 	private SubstringDomain closure(
@@ -828,9 +801,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Performs the closure over the domain.
-	 * 
 	 * @return A copy of the domain with the added relations
-	 * 
 	 * @throws SemanticException
 	 */
 	protected SubstringDomain closure() throws SemanticException {
@@ -861,9 +832,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Removes values mapped to empty set (top)
-	 * 
 	 * @return A copy of the domain without variables mapped to empty set
-	 * 
 	 * @throws SemanticException
 	 */
 	private SubstringDomain clear() throws SemanticException {
@@ -882,10 +851,8 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/*
 	 * Checks if a variable appears in an expression
-	 * 
-	 * @param id   Variable to check
+	 * @param id Variable to check
 	 * @param expr expression to analyze
-	 * 
 	 * @return {@code true} if {@code id} appears, {@code false} otherwise
 	 */
 	private static boolean appears(
