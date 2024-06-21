@@ -12,15 +12,37 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
+/**
+ * The substring relational abstract domain (see {@link SubstringDomain})
+ * enriched with string constant propagation. This domain is defined as the
+ * Cartesian product between {@link SubstringDomain} and
+ * {@link StringConstantPropagation}. This domain follows the one defined
+ * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
+ * this paper</a>.
+ * 
+ * @author <a href="mailto:michele.martelli@studenti.unipr.it">Michele
+ *             Martelli</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ */
 public class SubstringDomainWithConstants
 		extends
 		ValueCartesianProduct<ValueEnvironment<StringConstantPropagation>, SubstringDomain> {
+
+	/**
+	 * Builds the abstract value starting from components.
+	 * 
+	 * @param left  the string constant propagation environment
+	 * @param right the substring domain abstract value
+	 */
 	public SubstringDomainWithConstants(
 			ValueEnvironment<StringConstantPropagation> left,
 			SubstringDomain right) {
 		super(left, right);
 	}
 
+	/**
+	 * Builds the top abstract value.
+	 */
 	public SubstringDomainWithConstants() {
 		this(new ValueEnvironment<StringConstantPropagation>(new StringConstantPropagation()), new SubstringDomain());
 	}

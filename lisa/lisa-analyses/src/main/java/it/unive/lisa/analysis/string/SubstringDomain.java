@@ -685,7 +685,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	/**
 	 * Adds a set of expressions ({@code exprs}) for {@code id} to the this
-	 * abstract value .
+	 * abstract value.
 	 * 
 	 * @param exprs the set of symbolic expressions
 	 * @param id    the identifier
