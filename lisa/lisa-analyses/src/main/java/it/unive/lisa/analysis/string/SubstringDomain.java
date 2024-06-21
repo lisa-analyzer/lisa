@@ -683,15 +683,19 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				SyntheticLocation.INSTANCE);
 	}
 
-	/*
-	 * Adds a set of expressions to the domain.
-	 * @param symbolicExpressions
-	 * @param id
-	 * @return A new domain with the added expressions
-	 * @throws SemanticException
+	/**
+	 * Adds a set of expressions ({@code exprs}) for {@code id} to the this
+	 * abstract value .
+	 * 
+	 * @param exprs the set of symbolic expressions
+	 * @param id    the identifier
+	 * 
+	 * @return a new abstract value with the added expressions
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected SubstringDomain add(
-			Set<SymbolicExpression> symbolicExpressions,
+			Set<SymbolicExpression> exprs,
 			Identifier id)
 			throws SemanticException {
 
@@ -700,7 +704,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		// Don't add the expressions that contain the key variable (ex: x -> x,
 		// x -> x + y will not be added)
 		Set<SymbolicExpression> expressionsToRemove = new HashSet<>();
-		for (SymbolicExpression se : symbolicExpressions) {
+		for (SymbolicExpression se : exprs) {
 			if (!appears(id, se))
 				expressionsToRemove.add(se);
 		}
@@ -724,7 +728,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * @param id Expression getting assigned
 	 * @return Copy of the domain, with the holding relations after the
 	 * assignment.
-	 * @throws SemanticException
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	private SubstringDomain remove(
 			Set<SymbolicExpression> extracted,
@@ -753,13 +757,16 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return mk(lattice, newFunction);
 	}
 
-	/*
+	/**
 	 * Performs the inter-assignment phase
-	 * @param assignedId Variable getting assigned
+	 * 
+	 * @param assignedId         Variable getting assigned
 	 * @param assignedExpression Expression assigned
+	 * 
 	 * @return Copy of the domain with new relations following the
-	 * inter-assignment phase
-	 * @throws SemanticException
+	 *             inter-assignment phase
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	private SubstringDomain interasg(
 			Identifier assignedId,
@@ -789,11 +796,13 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return mk(lattice, newFunction);
 	}
 
-	/*
+	/**
 	 * Performs the closure over an identifier. The method adds to {@code id}
 	 * the expressions found in the variables mapped to {@code id}
+	 * 
 	 * @return A copy of the domain with the added relations
-	 * @throws SemanticException
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	private SubstringDomain closure(
 			Identifier id)
@@ -821,10 +830,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return result;
 	}
 
-	/*
+	/**
 	 * Performs the closure over the domain.
+	 * 
 	 * @return A copy of the domain with the added relations
-	 * @throws SemanticException
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected SubstringDomain closure() throws SemanticException {
 		if (isTop() || isBottom())

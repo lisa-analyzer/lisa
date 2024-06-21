@@ -42,7 +42,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 	private final String value;
 
-	/*
+	/**
 	 * Builds the top abstract value.
 	 */
 	public StringConstantPropagation() {
@@ -58,8 +58,9 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 		this.isBottom = isBottom;
 	}
 
-	/*
+	/**
 	 * Builds the abstract value for the given constant.
+	 * 
 	 * @param value the constant
 	 */
 	public StringConstantPropagation(
