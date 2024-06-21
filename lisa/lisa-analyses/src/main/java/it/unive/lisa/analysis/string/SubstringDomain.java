@@ -60,6 +60,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		this(new ExpressionInverseSet());
 	}
 
+	/**
+	 * Builds the abstract value by cloning the given function.
+	 * 
+	 * @param lattice  the underlying lattice
+	 * @param function the function to clone
+	 */
 	protected SubstringDomain(
 			ExpressionInverseSet lattice,
 			Map<Identifier, ExpressionInverseSet> function) {
