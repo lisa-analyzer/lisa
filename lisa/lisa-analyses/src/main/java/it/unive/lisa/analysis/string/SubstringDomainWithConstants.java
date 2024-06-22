@@ -5,12 +5,9 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.ValueCartesianProduct;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashSet;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * The substring relational abstract domain (see {@link SubstringDomain})
