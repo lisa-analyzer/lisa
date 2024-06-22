@@ -20,7 +20,7 @@ import java.util.Set;
  * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
  * this paper</a>.
  * 
- * @author <a href="mailto:michele.martelli@studenti.unipr.it">Michele
+ * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
@@ -66,11 +66,7 @@ public class SubstringDomainWithConstants
 					continue;
 
 				if (elem.getValue().equals(compare)) {
-					Set<SymbolicExpression> add = new HashSet<>();
-					add.add(elem.getKey());
-					add.add(id);
-
-					b = b.add(add, id).add(add, elem.getKey()).closure();
+					b = b.add(elem.getKey(), id).add(id, elem.getKey()).closure();
 				}
 			}
 		}

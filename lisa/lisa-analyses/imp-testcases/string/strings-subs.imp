@@ -104,7 +104,8 @@ class strings {
     	def z = "b";
     	def w = y + z;
     }
-    
+
+        
     paper2(){
     	def x = "";
     	def y = "";
@@ -113,7 +114,6 @@ class strings {
     	else
     		x = y + "c";
     }
-    
     
     paper3(x){
     	def v = "";
@@ -153,6 +153,28 @@ class strings {
 	    	y = k;
 	    }
 	    s = s + "c";
+    }
+    
+    replace(){
+    	def y = "c";
+    	def x = strrep("ab", "ab", "a") + "b" + y;
+    	def z = "b" + y;
+    }
+    
+    replace2(){
+    	def y = "xyz";
+    	def x = "ab" + strrep(y, "x", "yz") + "c";
+    }
+    
+    substring(){
+    	def y = "c";
+    	def x = strsub("ab", 0, 1) + "b" + y;
+    	def z = "b" + y;
+    }
+    
+    substring2(){
+    	def y = "xyz";
+    	def x = "ab" + strsub(y, 0, 1) + "c";
     }
     
     

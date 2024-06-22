@@ -17,6 +17,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
@@ -29,7 +30,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * {@link BaseLattice#lub}, {@link BaseLattice#widening} and
  * {@link BaseLattice#lessOrEqual}, respectively.
  * 
- * @author <a href="mailto:michele.martelli@studenti.unipr.it">Michele
+ * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
@@ -159,6 +160,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 			return new StringConstantPropagation(replaced);
 		}
+		
 		return top();
 
 	}

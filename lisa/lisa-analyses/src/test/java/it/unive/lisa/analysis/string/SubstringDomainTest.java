@@ -9,11 +9,13 @@ import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.Int16Type;
 import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
@@ -23,6 +25,9 @@ import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -921,5 +926,73 @@ public class SubstringDomainTest {
 		SubstringDomain lub = domainA.lub(domainC);
 
 		assertEquals(lub, BOTTOM);
+	}
+	
+	@Test
+	public void testExtr1() throws SemanticException {
+		ValueExpression replaceYAC = new TernaryExpression(StringType.INSTANCE, y, a, c, StringReplace.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		ValueExpression ABConcatX = new BinaryExpression(StringType.INSTANCE, ab, x, StringConcat.INSTANCE,
+				SyntheticLocation.INSTANCE);
+		ValueExpression BConcatX = new BinaryExpression(StringType.INSTANCE, b, x, StringConcat.INSTANCE,
+				SyntheticLocation.INSTANCE);
+		
+		ValueExpression assignExpr = new BinaryExpression(StringType.INSTANCE, replaceYAC, ABConcatX, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		SubstringDomain result = domainE.assign(z, assignExpr, null, null);
+		
+		assertTrue(result.getState(z).contains(ABConcatX));
+		assertTrue(result.getState(z).contains(BConcatX));
+		
+	}
+	
+	@Test
+	public void testExtr2() throws SemanticException {
+		ValueExpression cb = new Constant(StringType.INSTANCE, "cb", SyntheticLocation.INSTANCE);
+
+		ValueExpression replaceCbCA = new TernaryExpression(StringType.INSTANCE, cb, c, a, StringReplace.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		ValueExpression assignExpr = new BinaryExpression(StringType.INSTANCE, replaceCbCA, c, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		SubstringDomain result = new SubstringDomain().assign(x, assignExpr, null, null);
+
+		assertTrue(result.getState(x).contains(abc));
+	}
+	
+	@Test
+	public void testExtr3() throws SemanticException {
+		ValueExpression zero = new Constant(Int16Type.INSTANCE, 0, SyntheticLocation.INSTANCE);
+		ValueExpression two = new Constant(Int16Type.INSTANCE, 2, SyntheticLocation.INSTANCE);
+		ValueExpression substringAbc02 = new TernaryExpression(StringType.INSTANCE, abc, zero, two, StringSubstring.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		ValueExpression assignExpr = new BinaryExpression(StringType.INSTANCE, substringAbc02, c, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		SubstringDomain result = new SubstringDomain().assign(x, assignExpr, null, null);
+
+		assertTrue(result.getState(x).contains(abc));	
+	}
+	
+	@Test
+	public void testExtr4() throws SemanticException {
+		ValueExpression replaceXCA = new TernaryExpression(StringType.INSTANCE, x, c, a, StringReplace.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		ValueExpression assignExpr = new BinaryExpression(StringType.INSTANCE, replaceXCA, c, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		SubstringDomain result = new SubstringDomain().assign(x, assignExpr, null, null);
+
+		assertTrue(result.getState(x).contains(c));
+	}
+	
+	@Test
+	public void testExtr5() throws SemanticException {
+		ValueExpression zero = new Constant(Int16Type.INSTANCE, 0, SyntheticLocation.INSTANCE);
+		ValueExpression two = new Constant(Int16Type.INSTANCE, 2, SyntheticLocation.INSTANCE);
+		ValueExpression substringY02 = new TernaryExpression(StringType.INSTANCE, y, zero, two, StringSubstring.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		ValueExpression assignExpr = new BinaryExpression(StringType.INSTANCE, substringY02, c, StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+		
+		SubstringDomain result = new SubstringDomain().assign(x, assignExpr, null, null);
+
+		assertTrue(result.getState(x).contains(c));	
 	}
 }

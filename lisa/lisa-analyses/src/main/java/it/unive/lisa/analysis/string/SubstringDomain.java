@@ -13,6 +13,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -23,6 +24,9 @@ import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
+import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +46,7 @@ import java.util.stream.Collectors;
  * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
  * this paper</a>.
  * 
- * @author <a href="mailto:michele.martelli@studenti.unipr.it">Michele
+ * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
@@ -144,13 +148,13 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				// expression
 			strType = expression.getStaticType();
 
-		Set<SymbolicExpression> identifiers = extrPlus(expression, strType);
+		Set<SymbolicExpression> expressions = extrPlus(expression, pp, oracle, strType);
 
 		SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 
-		result = result.remove(identifiers, id);
+		result = result.remove(expressions, id);
 
-		result = result.add(identifiers, id);
+		result = result.add(expressions, id);
 
 		result = result.interasg(id, expression);
 
@@ -164,7 +168,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
-			throws SemanticException {
+			throws SemanticException {	
 		return this;
 	}
 
@@ -175,8 +179,6 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-
-		SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 
 		/*
 		 * Assume only binary expressions
@@ -215,21 +217,30 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				if (!(right instanceof ValueExpression))
 					throw new SemanticException("instanceof right");
 
-				Set<SymbolicExpression> extracted = extrPlus((ValueExpression) right, strType);
+				Set<SymbolicExpression> extracted = extrPlus((ValueExpression) right, src, oracle, strType);
+				
+				SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 
 				result = result.add(extracted, (Identifier) left);
 
 				result = result.closure();
+				
+				return result.clear();
 
 			} else if (binaryOperator instanceof StringEquals) {
 				/*
 				 * Case both operands are identifiers
 				 */
 				if ((left instanceof Identifier) && (right instanceof Identifier)) {
-					result = result.add(extrPlus((ValueExpression) left, strType), (Identifier) right);
-					result = result.add(extrPlus((ValueExpression) right, strType), (Identifier) left);
+					
+					SubstringDomain result = mk(lattice, mkNewFunction(function, false));
+
+					result = result.add(left, (Identifier) right);
+					result = result.add(right, (Identifier) left);
 
 					result = result.closure();
+					
+					return result.clear();
 				}
 
 				/*
@@ -249,11 +260,15 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 					if (!(right instanceof ValueExpression))
 						throw new SemanticException("instanceof right != ValueExpression.class");
 
-					Set<SymbolicExpression> add = extrPlus((ValueExpression) right, strType);
+					Set<SymbolicExpression> add = extrPlus((ValueExpression) right, src, oracle, strType);
+					
+					SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 
 					result = result.add(add, (Identifier) left);
 
 					result = result.closure();
+					
+					return result.clear();
 
 				}
 			} else if (binaryOperator instanceof LogicalOr || binaryOperator instanceof LogicalAnd) {
@@ -269,15 +284,15 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				SubstringDomain rightDomain = assume(rightValueExpression, src, dest, oracle);
 
 				if (binaryOperator instanceof LogicalOr) {
-					result = leftDomain.lub(rightDomain);
+					return leftDomain.lub(rightDomain).clear();
 				} else {
-					result = leftDomain.glb(rightDomain);
+					return leftDomain.glb(rightDomain).clear();
 				}
 			}
 
 		}
 
-		return result.clear();
+		return this;
 	}
 
 	@Override
@@ -309,14 +324,11 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false); // function
 																							// !=
 																							// null
-
 		newFunction.remove(id);
 
 		newFunction.replaceAll((
 				key,
-				value) -> new ExpressionInverseSet(value.elements.stream()
-						.filter(v -> !appears(id, v))
-						.collect(Collectors.toSet())));
+				value) -> removeFromSet(value, id));
 
 		return mk(lattice, newFunction);
 	}
@@ -328,12 +340,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		if (function == null || function.keySet().isEmpty())
 			return this;
 
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false); // function
-																							// !=
-																							// null
-
+		// Get all identifiers
 		Set<Identifier> ids = new HashSet<>();
-		for (Map.Entry<Identifier, ExpressionInverseSet> entry : newFunction.entrySet()) {
+		for (Map.Entry<Identifier, ExpressionInverseSet> entry : function.entrySet()) {
 			ids.add(entry.getKey());
 			for (SymbolicExpression s : entry.getValue().elements()) {
 				if (s instanceof Identifier) {
@@ -342,20 +351,17 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 				}
 			}
 		}
+		
+		SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 
 		for (Identifier id : ids) {
+			// Test each identifier
 			if (test.test(id)) {
-				newFunction.remove(id);
-
-				newFunction.replaceAll((
-						key,
-						value) -> new ExpressionInverseSet(value.elements.stream()
-								.filter(v -> !appears(id, v))
-								.collect(Collectors.toSet())));
+				result = result.forgetIdentifier(id);
 			}
 		}
 
-		return mk(lattice, newFunction);
+		return result;
 	}
 
 	@Override
@@ -439,24 +445,21 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * @param expression to extract
 	 * @return List containing the sub-expressions
 	 */
-	private static List<SymbolicExpression> extr(
+	private static List<ValueExpression> extr(
 			ValueExpression expression) {
 
-		List<SymbolicExpression> result = new ArrayList<>();
-		if (expression instanceof BinaryExpression) {
+		List<ValueExpression> result = new ArrayList<>();
+		if (expression instanceof BinaryExpression && ((BinaryExpression)expression).getOperator() instanceof StringConcat) {
 			BinaryExpression binaryExpression = (BinaryExpression) expression;
-			BinaryOperator binaryOperator = binaryExpression.getOperator();
-			if (!(binaryOperator instanceof StringConcat))
-				return Collections.emptyList();
 
 			ValueExpression left = (ValueExpression) binaryExpression.getLeft();
 			ValueExpression right = (ValueExpression) binaryExpression.getRight();
 
 			result.addAll(extr(left));
 			result.addAll(extr(right));
-		} else if (expression instanceof Variable || expression instanceof Constant) {
+		} else
 			result.add(expression);
-		}
+
 
 		return result;
 	}
@@ -467,93 +470,154 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * @param strType
 	 * @return
 	 */
-	private static Set<SymbolicExpression> extrPlus(
+	private Set<SymbolicExpression> extrPlus(
 			ValueExpression expression,
-			Type strType) {
-		List<SymbolicExpression> extracted = extr(expression);
-
+			ProgramPoint pp,
+			SemanticOracle oracle,
+			Type strType) throws SemanticException {
+		List<ValueExpression> extracted = extr(expression);
+		
 		/*
 		 * If there are more than 2 consecutive constants, merge them into a
 		 * single constant
 		 */
-		extracted = mergeStringLiterals(extracted, strType);
+		List<List<ValueExpression>> sub_expressions = split(extracted, pp, oracle, strType);
 
-		Set<SymbolicExpression> result = new HashSet<>();
-
-		// Iterate over the length of the expression
-		for (int l = 1; l <= extracted.size(); l++) {
-			// Iterate from the start to the end according to the size of the
-			// expression to create
-			for (int i = 0; i <= (extracted.size() - l); i++) {
-				List<SymbolicExpression> subList = extracted.subList(i, i + l);
-				result.add(composeExpression(subList));
-
-				if (subList.size() == 1 && subList.get(0) instanceof Constant) {
-					/*
-					 * Case the expression to ass is a single constant -> add
-					 * its substrings
-					 */
-					Set<SymbolicExpression> substrings = getSubstrings((Constant) subList.get(0));
-
-					for (SymbolicExpression substring : substrings) {
-						List<SymbolicExpression> newList = new ArrayList<>();
-						newList.add(substring);
-
-						result.add(composeExpression(newList));
-
-					}
-				} else if (subList.get(0) instanceof Constant) {
-					/*
-					 * Case the first expression of the expression to add is a
-					 * constant -> add an expression for each suffix of the
-					 * constant
-					 */
-					Set<SymbolicExpression> suffixes = getSuffix((Constant) subList.get(0));
-
-					for (SymbolicExpression suffix : suffixes) {
-						List<SymbolicExpression> newList = new ArrayList<>(subList);
-						newList.set(0, suffix);
-
-						if (subList.get(subList.size() - 1) instanceof Constant) {
-
-							/*
-							 * Case the last expression of the expression to add
-							 * is a constant -> add an expression for each
-							 * prefix of the constant
-							 */
-							Set<SymbolicExpression> prefixes = getPrefix((Constant) subList.get(subList.size() - 1));
-
-							for (SymbolicExpression prefix : prefixes) {
-								newList.set(newList.size() - 1, prefix);
-
-								result.add(composeExpression(newList));
-							}
-						} else
-							result.add(composeExpression(newList));
-
-					}
-				} else if (subList.get(subList.size() - 1) instanceof Constant) {
-
-					/*
-					 * Case the last expression of the expression to add is a
-					 * constant -> add an expression for each prefix of the
-					 * constant
-					 */
-
-					Set<SymbolicExpression> prefixes = getPrefix((Constant) subList.get(subList.size() - 1));
-
-					for (SymbolicExpression prefix : prefixes) {
-						List<SymbolicExpression> newList = new ArrayList<>(subList);
-						newList.set(newList.size() - 1, prefix);
-
-						result.add(composeExpression(newList));
-					}
-				}
-
-			}
+		for (int i = 0; i < sub_expressions.size(); i++) {
+		    List<ValueExpression> list = sub_expressions.get(i);
+		    sub_expressions.set(i, mergeStringLiterals(list, strType));
 		}
 
+		Set<SymbolicExpression> result = new HashSet<>();
+		
+		// Iterate sublists splitted from StringReplace expressions
+		for (List<ValueExpression> list : sub_expressions) {
+			// Iterate over the length of the expression
+			for (int l = 1; l <= list.size(); l++) {
+				// Iterate from the start to the end according to the size of the
+				// expression to create
+				for (int i = 0; i <= (list.size() - l); i++) {
+					List<ValueExpression> subList = list.subList(i, i + l);
+					result.add(composeExpression(subList));
+
+					if (subList.size() == 1 && subList.get(0) instanceof Constant) {
+						/*
+						 * Case the expression to ass is a single constant -> add
+						 * its substrings
+						 */
+						Set<Constant> substrings = getSubstrings((Constant) subList.get(0));
+
+						for (Constant substring : substrings) {
+							List<ValueExpression> newList = new ArrayList<>();
+							newList.add(substring);
+
+							result.add(composeExpression(newList));
+
+						}
+					} else if (subList.get(0) instanceof Constant) {
+						/*
+						 * Case the first expression of the expression to add is a
+						 * constant -> add an expression for each suffix of the
+						 * constant
+						 */
+						Set<Constant> suffixes = getSuffix((Constant) subList.get(0));
+
+						for (Constant suffix : suffixes) {
+							List<ValueExpression> newList = new ArrayList<>(subList);
+							newList.set(0, suffix);
+
+							if (subList.get(subList.size() - 1) instanceof Constant) {
+
+								/*
+								 * Case the last expression of the expression to add
+								 * is a constant -> add an expression for each
+								 * prefix of the constant
+								 */
+								Set<Constant> prefixes = getPrefix((Constant) subList.get(subList.size() - 1));
+
+								for (Constant prefix : prefixes) {
+									newList.set(newList.size() - 1, prefix);
+
+									result.add(composeExpression(newList));
+								}
+							} else
+								result.add(composeExpression(newList));
+
+						}
+					} else if (subList.get(subList.size() - 1) instanceof Constant) {
+
+						/*
+						 * Case the last expression of the expression to add is a
+						 * constant -> add an expression for each prefix of the
+						 * constant
+						 */
+
+						Set<Constant> prefixes = getPrefix((Constant) subList.get(subList.size() - 1));
+
+						for (Constant prefix : prefixes) {
+							List<ValueExpression> newList = new ArrayList<>(subList);
+							newList.set(newList.size() - 1, prefix);
+
+							result.add(composeExpression(newList));
+						}
+					}
+
+				}
+			}
+		}
 		return new HashSet<>(result);
+	}
+	
+	private List<List<ValueExpression>> split(List<ValueExpression> extracted, ProgramPoint pp, SemanticOracle oracle, Type strType) throws SemanticException{
+		List<List<ValueExpression>> result = new ArrayList<>();
+		
+		List<ValueExpression> temp = new ArrayList<>();
+		
+		for(ValueExpression s : extracted) {
+			if (!(s instanceof Identifier || s instanceof Constant)) {
+				// s in not Identifier or Constant -> eval s semantics
+								
+				if (s instanceof TernaryExpression) {
+					TernaryExpression ternaryExpression = (TernaryExpression) s;
+					if (ternaryExpression.getLeft() instanceof Constant && ternaryExpression.getMiddle() instanceof Constant && ternaryExpression.getRight() instanceof Constant) {
+						Constant c1 = (Constant) ternaryExpression.getLeft();
+						Constant c2 = (Constant) ternaryExpression.getMiddle();
+						Constant c3 = (Constant) ternaryExpression.getRight();
+						
+						if (ternaryExpression.getOperator() instanceof StringReplace) {
+							String s1 = c1.getValue() instanceof String ? (String) c1.getValue() : c1.getValue().toString();
+							String s2 = c2.getValue() instanceof String ? (String) c2.getValue() : c2.getValue().toString();
+							String s3 = c3.getValue() instanceof String ? (String) c3.getValue() : c3.getValue().toString();
+							
+							// Special case: add the constant and do not split list
+							temp.add(new Constant(strType, s1.replace(s2, s3), SyntheticLocation.INSTANCE));
+							continue;
+						}
+						if (ternaryExpression.getOperator() instanceof StringSubstring && c2.getValue() instanceof Integer && c3.getValue() instanceof Integer) {
+							String s1 = c1.getValue() instanceof String ? (String) c1.getValue() : c1.getValue().toString();
+							Integer i1 = (Integer) c2.getValue();
+							Integer i2 = (Integer) c3.getValue();
+							
+							// Special case: add the constant and do not split list
+							temp.add(new Constant(strType, s1.substring(i1, i2), SyntheticLocation.INSTANCE));
+							continue;
+						}
+					}
+				}
+				
+				// Split list
+				result.add(new ArrayList<>(temp));
+				temp.clear();
+					
+			} else {
+				// s instance of Identifier || s instance of Constant
+				temp.add(s);
+			}
+		}
+		
+		result.add(temp);
+		
+		return result;
 	}
 
 	/*
@@ -563,13 +627,13 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * @param strType
 	 * @return The list without consecutive constants.
 	 */
-	private static List<SymbolicExpression> mergeStringLiterals(
-			List<SymbolicExpression> extracted,
+	private static List<ValueExpression> mergeStringLiterals(
+			List<ValueExpression> extracted,
 			Type strType) {
-		List<SymbolicExpression> result = new ArrayList<>();
+		List<ValueExpression> result = new ArrayList<>();
 		StringBuilder recent = new StringBuilder();
 
-		for (SymbolicExpression expr : extracted) {
+		for (ValueExpression expr : extracted) {
 			if (expr instanceof Constant) {
 				// Update the string builder value adding the value of the
 				// constant
@@ -604,9 +668,9 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * @param c Constant to analyze
 	 * @return The set containing the substrings of a Constant
 	 */
-	private static Set<SymbolicExpression> getSubstrings(
+	private static Set<Constant> getSubstrings(
 			Constant c) {
-		Set<SymbolicExpression> result = new HashSet<>();
+		Set<Constant> result = new HashSet<>();
 
 		String str = c.getValue() instanceof String ? (String) c.getValue() : c.getValue().toString();
 
@@ -614,7 +678,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		for (int l = 1; l < str.length(); l++) {
 			// Iterate over the starting char
 			for (int i = 0; i <= str.length() - l; i++) {
-				ValueExpression substring = new Constant(c.getStaticType(), str.substring(i, i + l),
+				Constant substring = new Constant(c.getStaticType(), str.substring(i, i + l),
 						SyntheticLocation.INSTANCE);
 
 				result.add(substring);
@@ -629,14 +693,14 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * @param c Constant to analyze
 	 * @return The set containing the prefixes of a Constant
 	 */
-	private static Set<SymbolicExpression> getPrefix(
+	private static Set<Constant> getPrefix(
 			Constant c) {
-		Set<SymbolicExpression> result = new HashSet<>();
+		Set<Constant> result = new HashSet<>();
 
 		String str = c.getValue() instanceof String ? (String) c.getValue() : c.getValue().toString();
 		// Iterate over the length
 		for (int i = 1; i <= str.length(); i++) {
-			ValueExpression prefix = new Constant(c.getStaticType(), str.substring(0, i), SyntheticLocation.INSTANCE);
+			Constant prefix = new Constant(c.getStaticType(), str.substring(0, i), SyntheticLocation.INSTANCE);
 
 			result.add(prefix);
 		}
@@ -649,15 +713,15 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * @param c Constant to analyze
 	 * @return The set containing the suffixes of a Constant
 	 */
-	private static Set<SymbolicExpression> getSuffix(
+	private static Set<Constant> getSuffix(
 			Constant c) {
-		Set<SymbolicExpression> result = new HashSet<>();
+		Set<Constant> result = new HashSet<>();
 
 		String str = c.getValue() instanceof String ? (String) c.getValue() : c.getValue().toString();
 		int length = str.length();
 		// Iterate over the length
 		for (int i = 1; i <= length; i++) {
-			ValueExpression suffix = new Constant(c.getStaticType(), str.substring(length - i, length),
+			Constant suffix = new Constant(c.getStaticType(), str.substring(length - i, length),
 					SyntheticLocation.INSTANCE);
 
 			result.add(suffix);
@@ -674,7 +738,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 	 * the list.
 	 */
 	private static SymbolicExpression composeExpression(
-			List<SymbolicExpression> expressions) {
+			List<ValueExpression> expressions) {
 		if (expressions.size() == 1)
 			return expressions.get(0);
 
@@ -703,16 +767,16 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 		// Don't add the expressions that contain the key variable (ex: x -> x,
 		// x -> x + y will not be added)
-		Set<SymbolicExpression> expressionsToRemove = new HashSet<>();
+		Set<SymbolicExpression> expressionsToAdd = new HashSet<>();
 		for (SymbolicExpression se : exprs) {
 			if (!appears(id, se))
-				expressionsToRemove.add(se);
+				expressionsToAdd.add(se);
 		}
 
-		if (expressionsToRemove.isEmpty())
+		if (expressionsToAdd.isEmpty())
 			return this;
 
-		ExpressionInverseSet newSet = new ExpressionInverseSet(expressionsToRemove);
+		ExpressionInverseSet newSet = new ExpressionInverseSet(expressionsToAdd);
 
 		if (!(newFunction.get(id) == null))
 			newSet = newSet.glb(newFunction.get(id));
@@ -720,6 +784,16 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		newFunction.put(id, newSet);
 
 		return mk(lattice, newFunction);
+	}
+	
+	protected SubstringDomain add(
+			SymbolicExpression expr,
+			Identifier id)
+			throws SemanticException {
+		Set<SymbolicExpression> expression = new HashSet<>();
+		expression.add(expr);
+		
+		return add(expression, id);
 	}
 
 	/*
@@ -743,18 +817,23 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 		// Remove relations containing id from the other entries
 		for (Map.Entry<Identifier, ExpressionInverseSet> entry : newFunction.entrySet()) {
-			Set<SymbolicExpression> newSet = entry.getValue().elements.stream()
-					.filter(element -> !appears(id, element))
-					.collect(Collectors.toSet());
+			ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
 
-			ExpressionInverseSet value = newSet.isEmpty() ? new ExpressionInverseSet().top()
-					: new ExpressionInverseSet(newSet);
-
-			entry.setValue(value);
-
+			entry.setValue(newSet);
 		}
 
 		return mk(lattice, newFunction);
+	}
+	
+	/*
+	 * Returns a set without expressions containing id starting from source
+	 */
+	private static ExpressionInverseSet removeFromSet(ExpressionInverseSet source, Identifier id){
+		Set<SymbolicExpression> newSet = source.elements.stream()
+				.filter(element -> !appears(id, element))
+				.collect(Collectors.toSet());
+		
+		return newSet.isEmpty() ? new ExpressionInverseSet().top() : new ExpressionInverseSet(newSet);
 	}
 
 	/**
@@ -863,31 +942,14 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	}
 
-	/*
-	 * Removes values mapped to empty set (top)
-	 * @return A copy of the domain without variables mapped to empty set
-	 * @throws SemanticException
-	 */
 	private SubstringDomain clear() throws SemanticException {
-		SubstringDomain result = mk(lattice, mkNewFunction(function, false));
+		Map<Identifier, ExpressionInverseSet> newMap = mkNewFunction(function, false);
 
-		Map<Identifier, ExpressionInverseSet> iterate = mkNewFunction(result.function, false);
-		for (Map.Entry<Identifier, ExpressionInverseSet> entry : iterate.entrySet()) {
-			if (entry.getValue().isTop()) {
-				result = result.forgetIdentifier(entry.getKey());
-			}
+		newMap.entrySet().removeIf(entry -> entry.getValue().isTop());
 
-		}
-
-		return result;
+		return new SubstringDomain(lattice, newMap);
 	}
 
-	/*
-	 * Checks if a variable appears in an expression
-	 * @param id Variable to check
-	 * @param expr expression to analyze
-	 * @return {@code true} if {@code id} appears, {@code false} otherwise
-	 */
 	private static boolean appears(
 			Identifier id,
 			SymbolicExpression expr) {
@@ -906,7 +968,6 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		}
 
 		return false;
-
 	}
 
 }
