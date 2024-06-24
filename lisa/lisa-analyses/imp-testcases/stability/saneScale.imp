@@ -3,23 +3,23 @@ class scaleBis{
     scale(){
         def width = 8;
         def height = 8;
-        def topLeftX = 1;
-        def topLeftY = 9;
+        def botLeftX = 1;
+        def botLeftY = 9;
 
         def scaleX = 2;
         def scaleY = 1;
 
-        def topRightX = 9;
-        def bottomLeftY = 1;
+        def botRightX = botLeftX + width;
+        def topLeftY = botLeftY + height;
 
-        topLeftX = topLeftX * scaleX;
+        botLeftX = botLeftX * scaleX;
+        botLeftY = botLeftY * scaleY;
+
+        botRightX = botRightX * scaleX;
         topLeftY = topLeftY * scaleY;
 
-        topRightX = topRightX * scaleX;
-        bottomLeftY = bottomLeftY * scaleY;
-
-        width = topRightX - topLeftX;
-        height = topLeftY - bottomLeftY;
+        width = botRightX - botLeftX;
+        height = topLeftY - botLeftY;
 
     }
 
