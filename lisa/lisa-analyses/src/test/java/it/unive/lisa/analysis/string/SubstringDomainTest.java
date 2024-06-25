@@ -944,7 +944,6 @@ public class SubstringDomainTest {
 
 		assertTrue(result.getState(z).contains(ABConcatX));
 		assertTrue(result.getState(z).contains(BConcatX));
-
 	}
 
 	@Test
@@ -1003,5 +1002,62 @@ public class SubstringDomainTest {
 		SubstringDomain result = new SubstringDomain().assign(x, assignExpr, null, null);
 
 		assertTrue(result.getState(x).contains(c));
+	}
+	
+	@Test
+	public void testExtr6() throws SemanticException {
+		Constant AB = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
+		Constant CD = new Constant(StringType.INSTANCE, "cd", SyntheticLocation.INSTANCE);
+		ValueExpression ABConcatCD = new BinaryExpression(StringType.INSTANCE, AB, CD, StringConcat.INSTANCE,
+				SyntheticLocation.INSTANCE);
+		
+		ValueExpression one = new Constant(Int16Type.INSTANCE, 1, SyntheticLocation.INSTANCE);
+		ValueExpression three = new Constant(Int16Type.INSTANCE, 3, SyntheticLocation.INSTANCE);
+		ValueExpression substringABCD13 = new TernaryExpression(StringType.INSTANCE, ABConcatCD, one, three,
+				StringSubstring.INSTANCE, SyntheticLocation.INSTANCE);
+
+		ValueExpression assignExpr = new BinaryExpression(StringType.INSTANCE, substringABCD13, c, StringConcat.INSTANCE,
+				SyntheticLocation.INSTANCE);
+
+		SubstringDomain result = new SubstringDomain().assign(x, assignExpr, null, null);
+
+		
+		Constant BCC = new Constant(StringType.INSTANCE, "bcc", SyntheticLocation.INSTANCE);
+
+		assertTrue(result.getState(x).contains(BCC));
+	}
+	
+	@Test
+	public void testExtr7() throws SemanticException {
+		Constant AB = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
+		ValueExpression ABConcatY = new BinaryExpression(StringType.INSTANCE, AB, y, StringConcat.INSTANCE,
+				SyntheticLocation.INSTANCE);
+		
+		ValueExpression one = new Constant(Int16Type.INSTANCE, 1, SyntheticLocation.INSTANCE);
+		ValueExpression three = new Constant(Int16Type.INSTANCE, 3, SyntheticLocation.INSTANCE);
+		ValueExpression assignExpr = new TernaryExpression(StringType.INSTANCE, ABConcatY, one, three,
+				StringSubstring.INSTANCE, SyntheticLocation.INSTANCE);
+
+		SubstringDomain result = new SubstringDomain().assign(x, assignExpr, null, null);
+
+		assertTrue(result.isBottom());
+	}
+	
+	@Test
+	public void testExtr8() throws SemanticException {
+		ValueExpression replaceABAC = new TernaryExpression(StringType.INSTANCE, ab, a, c, StringReplace.INSTANCE,
+				SyntheticLocation.INSTANCE);
+
+		ValueExpression ABConcatX = new BinaryExpression(StringType.INSTANCE, ab, x, StringConcat.INSTANCE,
+				SyntheticLocation.INSTANCE);
+
+
+		ValueExpression assignExpr = new BinaryExpression(StringType.INSTANCE, replaceABAC, ABConcatX,
+				StringConcat.INSTANCE, SyntheticLocation.INSTANCE);
+
+		SubstringDomain result = domainE.assign(z, assignExpr, null, null);
+
+		Constant CBAB = new Constant(StringType.INSTANCE, "cbab", SyntheticLocation.INSTANCE);
+		assertTrue(result.getState(z).contains(CBAB));
 	}
 }

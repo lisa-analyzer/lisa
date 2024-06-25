@@ -580,43 +580,63 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 		for (ValueExpression s : extracted) {
 			if (!(s instanceof Identifier || s instanceof Constant)) {
-				// s in not Identifier or Constant -> eval s semantics
-
 				if (s instanceof TernaryExpression) {
 					TernaryExpression ternaryExpression = (TernaryExpression) s;
-					if (ternaryExpression.getLeft() instanceof Constant
-							&& ternaryExpression.getMiddle() instanceof Constant
-							&& ternaryExpression.getRight() instanceof Constant) {
-						Constant c1 = (Constant) ternaryExpression.getLeft();
-						Constant c2 = (Constant) ternaryExpression.getMiddle();
-						Constant c3 = (Constant) ternaryExpression.getRight();
-
-						if (ternaryExpression.getOperator() instanceof StringReplace) {
-							String s1 = c1.getValue() instanceof String ? (String) c1.getValue()
-									: c1.getValue().toString();
-							String s2 = c2.getValue() instanceof String ? (String) c2.getValue()
-									: c2.getValue().toString();
-							String s3 = c3.getValue() instanceof String ? (String) c3.getValue()
-									: c3.getValue().toString();
-
-							// Special case: add the constant and do not split
-							// list
-							temp.add(new Constant(strType, s1.replace(s2, s3), SyntheticLocation.INSTANCE));
-							continue;
-						}
-						if (ternaryExpression.getOperator() instanceof StringSubstring
-								&& c2.getValue() instanceof Integer && c3.getValue() instanceof Integer) {
-							String s1 = c1.getValue() instanceof String ? (String) c1.getValue()
-									: c1.getValue().toString();
-							Integer i1 = (Integer) c2.getValue();
-							Integer i2 = (Integer) c3.getValue();
-
-							// Special case: add the constant and do not split
-							// list
-							temp.add(new Constant(strType, s1.substring(i1, i2), SyntheticLocation.INSTANCE));
-							continue;
-						}
+					
+					// strrep(c1, c2, c3) where c1 or c2 or c3 can be a concatenation of constants
+					if (ternaryExpression.getOperator() instanceof StringReplace && ternaryExpression.getLeft() instanceof ValueExpression && ternaryExpression.getMiddle() instanceof ValueExpression && ternaryExpression.getRight() instanceof ValueExpression && hasOnlyConstants((ValueExpression)ternaryExpression.getLeft()) && hasOnlyConstants((ValueExpression)ternaryExpression.getMiddle()) && hasOnlyConstants((ValueExpression)ternaryExpression.getRight())) {
+						// left, middle, right are only constants or concatenation of constants
+					
+						List<ValueExpression> left = extr((ValueExpression) ternaryExpression.getLeft());
+						left = mergeStringLiterals(left, strType);
+						if(left.size() != 1 && !(left.get(0) instanceof Constant))
+							throw new SemanticException("unexpected");
+						
+						Constant leftConstant = (Constant) left.get(0);
+						
+						List<ValueExpression> middle = extr((ValueExpression) ternaryExpression.getMiddle());
+						middle = mergeStringLiterals(middle, strType);
+						if(middle.size() != 1 && !(middle.get(0) instanceof Constant))
+							throw new SemanticException("unexpected");
+						
+						Constant middleConstant = (Constant) middle.get(0);
+						
+						List<ValueExpression> right = extr((ValueExpression) ternaryExpression.getRight());
+						right = mergeStringLiterals(right, strType);
+						if(right.size() != 1 && !(right.get(0) instanceof Constant))
+							throw new SemanticException("unexpected");
+						
+						Constant rightConstant = (Constant) right.get(0);
+						
+						String s1 = leftConstant.getValue() instanceof String ? (String) leftConstant.getValue()
+								: leftConstant.getValue().toString();
+						String s2 = middleConstant.getValue() instanceof String ? (String) middleConstant.getValue()
+								: middleConstant.getValue().toString();
+						String s3 = rightConstant.getValue() instanceof String ? (String) rightConstant.getValue()
+								: rightConstant.getValue().toString();
+						
+						temp.add(new Constant(strType, s1.replace(s2, s3), SyntheticLocation.INSTANCE));
+						continue;
 					}
+
+					// strsub(s1, i1, i2) where s1 can be a concatenation of constants
+					if (ternaryExpression.getOperator() instanceof StringSubstring && ternaryExpression.getLeft() instanceof ValueExpression && ternaryExpression.getMiddle() instanceof Constant && ternaryExpression.getRight() instanceof Constant && hasOnlyConstants((ValueExpression)ternaryExpression.getLeft()) ) {
+						List<ValueExpression> left = extr((ValueExpression) ternaryExpression.getLeft());
+						left = mergeStringLiterals(left, strType);
+						if(left.size() != 1 && !(left.get(0) instanceof Constant))
+							throw new SemanticException("unexpected");
+						
+						Constant leftConstant = (Constant) left.get(0);
+						
+						String s1 = leftConstant.getValue() instanceof String ? (String) leftConstant.getValue()
+								: leftConstant.getValue().toString();
+						Integer i1 = (Integer) ((Constant)ternaryExpression.getMiddle()).getValue();
+						Integer i2 = (Integer) ((Constant)ternaryExpression.getRight()).getValue();
+						
+						temp.add(new Constant(strType, s1.substring(i1, i2), SyntheticLocation.INSTANCE));
+						continue;
+					}
+					
 				}
 
 				// Split list
@@ -632,6 +652,25 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		result.add(temp);
 
 		return result;
+	}
+	
+	/*
+	 * 
+	 * Returns true iff the parameter is a Constant or a concatenation of Constant values
+	 */
+	private boolean hasOnlyConstants(ValueExpression expr) {
+		if (expr instanceof Constant)
+			return true;
+		
+		if (expr instanceof BinaryExpression && ((BinaryExpression)expr).getOperator() instanceof StringConcat) {
+			BinaryExpression be = (BinaryExpression) expr;
+			if(!(be.getLeft() instanceof ValueExpression && be.getRight() instanceof ValueExpression))
+				return false;
+			
+			return hasOnlyConstants((ValueExpression) be.getLeft()) && hasOnlyConstants((ValueExpression) be.getRight());
+		}
+		
+		return false;
 	}
 
 	/*
