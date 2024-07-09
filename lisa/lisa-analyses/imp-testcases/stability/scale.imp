@@ -1,0 +1,69 @@
+
+// assume only positive values (negative values are for reflection)
+class scale{
+
+     main(b) {
+        def x = 10;
+        def y = 30;
+        def width = 3;
+        def height = 7;
+
+        while(b) {
+            x = x + 1;
+            y = y + 1;
+            width = width + 1;
+            height = height + 1;
+        }
+        while(b) {
+            x = x - 1;
+            y = y - 1;
+            width = width - 1;
+            height = height - 1;
+        }
+
+        this.scale(x, y, width, height);
+    }
+
+    //x, upperRightPointX and width should be covariant
+    //y, lowerLeftPointY and height should be covariant
+    //the two groups should be contravariant
+    scale(x, y, width, height){
+        if (x >= 0)
+         if (y >= 0)
+          if(width >= 0)
+           if (height >= 0){
+        //if (x >= 0 && y >= 0 && width > 0 && height > 0){
+            def scale1 = 2;
+            def scale2 = 3;
+
+            def upperRightPointX = x + width;
+
+            def lowerLeftPointY = y - height;
+
+            x = x * scale1;
+            y = y * scale2;
+            upperRightPointX = upperRightPointX * scale1;
+            lowerLeftPointY = lowerLeftPointY * scale2;
+
+            width = x - upperRightPointX;
+            height = y - lowerLeftPointY;
+        }
+    }
+/*
+    // all variables should be covariant
+    uniformScale(x, y, width, height, scale){
+            def upperRightPointX = x + width;
+
+            def lowerLeftPointY = y - height;
+
+            x = x * scale;
+            y = y * scale;
+            upperRightPointX = upperRightPointX * scale;
+            lowerLeftPointY = lowerLeftPointY * scale;
+
+            width = x - upperRightPointX;
+            height = y - lowerLeftPointY;
+    }
+    */
+
+}
