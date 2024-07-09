@@ -241,9 +241,12 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 	}
 
 	/**
-	 * Returns the abstract value of the domain
+	 * Returns the abstract value of the domain.
 	 * 
-	 * @return The string representing the constant value
+	 * @return the string representing the constant value
+	 * 
+	 * @throws SemanticException if the method is called on a top or bottom
+	 *                               element
 	 */
 	protected String getValue() throws SemanticException {
 		if (isTop() || isBottom())
