@@ -854,6 +854,17 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		return mk(lattice, newFunction);
 	}
 
+	/**
+	 * Adds a single expression ({@code expr}) for {@code id} to the this
+	 * abstract value.
+	 * 
+	 * @param expr the symbolic expression
+	 * @param id   the identifier
+	 * 
+	 * @return a new abstract value with the added expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	protected SubstringDomain add(
 			SymbolicExpression expr,
 			Identifier id)

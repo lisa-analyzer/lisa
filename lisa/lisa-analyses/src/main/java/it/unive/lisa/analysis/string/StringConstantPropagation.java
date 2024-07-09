@@ -240,7 +240,15 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 			return Satisfiability.UNKNOWN;
 	}
 
-	protected String getValue() {
+	/**
+	 * Returns the abstract value of the domain
+	 * 
+	 * @return The string representing the constant value
+	 */
+	protected String getValue() throws SemanticException {
+		if (isTop() || isBottom())
+			throw new SemanticException("The abstract domain is top or bottom; can't get the constant value");
+
 		return value;
 	}
 }
