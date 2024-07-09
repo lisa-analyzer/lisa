@@ -239,7 +239,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 		else
 			return Satisfiability.UNKNOWN;
 	}
-	
+
 	protected String getValue() {
 		return value;
 	}

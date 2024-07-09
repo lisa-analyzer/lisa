@@ -12,7 +12,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.type.Type;
-
 import java.util.Map.Entry;
 
 /**
@@ -57,7 +56,7 @@ public class SubstringDomainWithConstants
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		
+
 		// expresson must be a string expression
 		if (oracle != null && pp != null && oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
 				.allMatch(t -> !t.isStringType() && !t.isUntyped()))
@@ -81,7 +80,6 @@ public class SubstringDomainWithConstants
 			Type strType = pp.getProgram().getTypes().getStringType();
 			Type boolType = pp.getProgram().getTypes().getBooleanType();
 
-			
 			String stringConstantValue = constantValue.getValue();
 			Constant constant = new Constant(strType, stringConstantValue, SyntheticLocation.INSTANCE);
 			ValueExpression newExpression = new BinaryExpression(boolType, id, constant, StringEquals.INSTANCE,
