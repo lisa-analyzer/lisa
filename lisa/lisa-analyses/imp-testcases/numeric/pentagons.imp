@@ -1,0 +1,45 @@
+class petagons_tests {
+
+	/*
+	Reference: https://doi.org/10.1016/j.scico.2009.04.004
+	*/
+	non_strict_abstraction(b, x, y) {
+		if(b) {
+			x = 0; y = 3;
+		} else {
+			x = -2; y = 1;
+		}
+    }
+    
+    /*
+	Reference: https://doi.org/10.1016/j.scico.2009.04.004
+	*/
+	strict_abstraction(b, x, y) {
+		if(b) {
+			x = 0; y = 3;
+		} else {
+			x = -2; y = 0;
+		}
+    }
+    
+    /*
+	Reference: https://doi.org/10.1016/j.scico.2009.04.004
+	*/
+	common_code_pattern_01(x, y, r) {
+		if(x >= 0 && y >= 0)
+			if (x > y) {
+				r = x - y;
+				assert r >= 0;
+			}
+    }
+    
+   	/*
+	Reference: https://doi.org/10.1016/j.scico.2009.04.004
+	*/
+	common_code_pattern_02(x, len) {
+		if(len >= 0) {
+			def r = x % len;
+			assert r < len;
+		}
+    }
+}
