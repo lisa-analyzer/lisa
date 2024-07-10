@@ -117,7 +117,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new SubstringDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "string";
+		conf.testDir = "string/subs-domain";
 		conf.testSubDir = "subs-domain";
 		conf.programFile = "strings-subs.imp";
 		// conf.analysisGraphs = GraphType.DOT;
@@ -133,7 +133,7 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 				DefaultConfiguration.defaultHeapDomain(),
 				new SubstringDomainWithConstants(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.testDir = "string";
+		conf.testDir = "string/subs-domain-constants";
 		conf.testSubDir = "subs-domain-constants";
 		conf.programFile = "strings-subs-constants.imp";
 		// conf.analysisGraphs = GraphType.DOT;
