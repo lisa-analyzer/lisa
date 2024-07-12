@@ -147,17 +147,12 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 			strType = expression.getStaticType();
 
 		Set<SymbolicExpression> expressions = extrPlus(expression, pp, oracle, strType);
-
 		SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 
 		result = result.remove(expressions, id);
-
 		result = result.add(expressions, id);
-
 		result = result.interasg(id, expression);
-
 		result = result.closure(id);
-
 		return result.clear();
 	}
 
@@ -216,40 +211,26 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 					throw new SemanticException("instanceof right");
 
 				Set<SymbolicExpression> extracted = extrPlus((ValueExpression) right, src, oracle, strType);
-
 				SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 
 				result = result.add(extracted, (Identifier) left);
-
 				result = result.closure();
-
 				return result.clear();
 
 			} else if (binaryOperator instanceof StringEquals) {
-				/*
-				 * Case both operands are identifiers
-				 */
+
+				// case both operands are identifiers
 				if ((left instanceof Identifier) && (right instanceof Identifier)) {
-
 					SubstringDomain result = mk(lattice, mkNewFunction(function, false));
-
 					result = result.add(left, (Identifier) right);
 					result = result.add(right, (Identifier) left);
-
 					result = result.closure();
-
 					return result.clear();
 				}
-
-				/*
-				 * Case where only one is an identifier
-				 */
+				// case where only one is an identifier
 				else if ((left instanceof Identifier) || (right instanceof Identifier)) {
-
 					if (right instanceof Identifier) {
-						/*
-						 * Make left the identifier
-						 */
+						// make left the identifier
 						SymbolicExpression temp = left;
 						left = right;
 						right = temp;
@@ -263,9 +244,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 					SubstringDomain result = mk(lattice, mkNewFunction(function, false));
 
 					result = result.add(add, (Identifier) left);
-
 					result = result.closure();
-
 					return result.clear();
 
 				}
@@ -277,7 +256,6 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 				ValueExpression rightValueExpression = (ValueExpression) right;
 				ValueExpression leftValueExpression = (ValueExpression) left;
-
 				SubstringDomain leftDomain = assume(leftValueExpression, src, dest, oracle);
 				SubstringDomain rightDomain = assume(rightValueExpression, src, dest, oracle);
 
@@ -323,7 +301,6 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 																							// !=
 																							// null
 		newFunction.remove(id);
-
 		newFunction.replaceAll((
 				key,
 				value) -> removeFromSet(value, id));
