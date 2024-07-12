@@ -1,0 +1,37 @@
+class strings {
+
+	constants(){
+		def x = "ab";
+		def y = "a";
+		def z = "b";
+		def w = y + z;
+	}
+	
+	replace(s){
+		def x = "aaaaa";
+		def y = "bba";
+		def k = "bb" + "a";
+		def z = strrep(x, "aa", "b");
+		
+		if (streq(s, k))
+			def i = 1 + 1;
+	}
+	
+	replace2(){
+		def y = "xyz";
+		def x = "a" + strrep(y, "x", "z") + "c";
+	}
+	
+	replace3(){
+		def y = "xyz";
+		def z = "w";
+    	def x = "ab" + strrep(z + y, "x", "yz") + "c";
+	}
+	
+	replace4(){
+		def k = "z";
+		def x = "abc" + k;
+		def y = "abc";
+		def z = "a" + strrep(y, "abc", "b") + "c";
+	}
+}

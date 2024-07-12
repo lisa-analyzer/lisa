@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_strings.constants(strings__this).json", "untyped_strings.replace(strings__this,_untyped_s).json", "untyped_strings.replace2(strings__this).json", "untyped_strings.replace3(strings__this).json", "untyped_strings.replace4(strings__this).json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "16ms",
+    "end" : "2024-06-25T19:08:32.428+02:00",
+    "expressions" : "72",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "5",
+    "programs" : "1",
+    "start" : "2024-06-25T19:08:32.412+02:00",
+    "statements" : "24",
+    "units" : "1",
+    "version" : "0.1b9",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/string/subs-domain-constants"
+  }
+}
