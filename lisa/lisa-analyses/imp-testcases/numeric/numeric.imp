@@ -1,17 +1,5 @@
 class tutorial {
 
-	constants(d) {
-		def c = 0;
-		def b = 1;
-		if (d > 10)
-	        c = -2;
-	    else
-		    c = 2;
-        b = b + c;
-        return b;
-    }
-
-/*
 	constants() {
 		def c = 1;
 		def b = 0;
@@ -121,6 +109,4 @@ class tutorial {
 		}
 		return x;
 	}
-	*/
-
 }

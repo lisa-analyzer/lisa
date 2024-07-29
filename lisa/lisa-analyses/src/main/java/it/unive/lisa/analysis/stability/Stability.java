@@ -1,11 +1,17 @@
 package it.unive.lisa.analysis.stability;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
@@ -28,127 +34,164 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.function.Predicate;
 
-public class Stability<V extends NonRelationalValueDomain<V>>
+/**
+ * Implementation of the stability abstract domain (yet to appear publicly).
+ * This domain computes per-variable numerical trends to infer stability,
+ * covariance and contravariance relations on program variables, exploiting an
+ * auxiliary domain of choice. This is implemented as an open product where the
+ * stability domain gathers information from the auxiliary one through boolean
+ * queries.<br>
+ * <br>
+ * Implementation-wise, this class is built as a product between a given
+ * {@link ValueDomain} {@code aux} and a {@link ValueEnvironment} {@code trends}
+ * of {@link Trend} instances, representing per-variable trends. Queries are
+ * carried over by the
+ * {@link SemanticDomain#satisfies(SymbolicExpression, ProgramPoint, SemanticOracle)}
+ * operator invoked on {@code aux}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <V> the kind of auxiliary domain
+ */
+public class Stability<V extends ValueDomain<V>>
 		implements
 		BaseLattice<Stability<V>>,
 		ValueDomain<Stability<V>> {
 
-	private final ValueEnvironment<V> auxiliaryDomain;
+	private final V aux;
 
-	private final ValueEnvironment<Trend> trend;
+	private final ValueEnvironment<Trend> trends;
 
+	/**
+	 * Builds the top stability domain, using {@code aux} as auxiliary domain.
+	 * 
+	 * @param aux the auxiliary domain
+	 */
 	public Stability(
-			ValueEnvironment<V> auxiliaryDomain) {
-		this.auxiliaryDomain = auxiliaryDomain;
-		this.trend = new ValueEnvironment<>(new Trend((byte) 2));
+			V aux) {
+		this.aux = aux.top();
+		this.trends = new ValueEnvironment<>(Trend.TOP);
 	}
 
+	/**
+	 * Builds a stability domain instance, using {@code aux} as auxiliary
+	 * domain.
+	 * 
+	 * @param aux    the auxiliary domain
+	 * @param trends the existing per-variable trend information
+	 */
 	public Stability(
-			ValueEnvironment<V> auxiliaryDomain,
-			ValueEnvironment<Trend> trend) {
-		this.auxiliaryDomain = auxiliaryDomain;
-		this.trend = trend;
+			V aux,
+			ValueEnvironment<Trend> trends) {
+		this.aux = trends.isBottom() ? aux.bottom() : aux;
+		this.trends = aux.isBottom() ? trends.bottom() : trends;
 	}
 
 	@Override
 	public Stability<V> lubAux(
 			Stability<V> other)
 			throws SemanticException {
-		ValueEnvironment<V> ad = auxiliaryDomain.lub(other.getAuxiliaryDomain());
-		ValueEnvironment<Trend> t = trend.lub(other.getTrend());
+		V ad = aux.lub(other.aux);
+		ValueEnvironment<Trend> t = trends.lub(other.trends);
 		if (ad.isBottom() || t.isBottom())
 			return bottom();
-		else
-			return new Stability<>(ad, t);
+		return new Stability<>(ad, t);
 	}
 
 	@Override
 	public Stability<V> glbAux(
 			Stability<V> other)
 			throws SemanticException {
-		ValueEnvironment<V> ad = auxiliaryDomain.glb(other.getAuxiliaryDomain());
-		ValueEnvironment<Trend> t = trend.glb(other.getTrend());
+		V ad = aux.glb(other.aux);
+		ValueEnvironment<Trend> t = trends.glb(other.trends);
 		if (ad.isBottom() || t.isBottom())
 			return bottom();
-		else
-			return new Stability<>(ad, t);
+		return new Stability<>(ad, t);
 	}
 
 	@Override
 	public Stability<V> wideningAux(
 			Stability<V> other)
 			throws SemanticException {
-		ValueEnvironment<V> ad = auxiliaryDomain.widening(other.getAuxiliaryDomain());
-		ValueEnvironment<Trend> t = trend.widening(other.getTrend());
+		V ad = aux.widening(other.aux);
+		ValueEnvironment<Trend> t = trends.widening(other.trends);
 		if (ad.isBottom() || t.isBottom())
 			return bottom();
-		else
-			return new Stability<>(ad, t);
+		return new Stability<>(ad, t);
 	}
 
 	@Override
 	public boolean lessOrEqualAux(
 			Stability<V> other)
 			throws SemanticException {
-		return (getAuxiliaryDomain().lessOrEqual(other.getAuxiliaryDomain())
-				&& getTrend().lessOrEqual(other.getTrend()));
+		return aux.lessOrEqual(other.aux) && trends.lessOrEqual(other.trends);
 	}
 
 	@Override
 	public boolean isTop() {
-		return (auxiliaryDomain.isTop() && trend.isTop());
+		return aux.isTop() && trends.isTop();
 	}
 
 	@Override
 	public boolean isBottom() {
-		return (auxiliaryDomain.isBottom() && trend.isBottom());
+		return aux.isBottom() || trends.isBottom();
 	}
 
 	@Override
 	public Stability<V> top() {
-		return new Stability<>(auxiliaryDomain.top(), trend.top());
+		return new Stability<>(aux.top(), trends.top());
 	}
 
 	@Override
 	public Stability<V> bottom() {
-		return new Stability<>(auxiliaryDomain.bottom(), trend.bottom());
+		return new Stability<>(aux.bottom(), trends.bottom());
 	}
 
 	@Override
 	public Stability<V> pushScope(
 			ScopeToken token)
 			throws SemanticException {
-		return new Stability<>(auxiliaryDomain.pushScope(token), trend.pushScope(token));
+		return new Stability<>(aux.pushScope(token), trends.pushScope(token));
 	}
 
 	@Override
 	public Stability<V> popScope(
 			ScopeToken token)
 			throws SemanticException {
-		return new Stability<>(auxiliaryDomain.popScope(token), trend.popScope(token));
+		return new Stability<>(aux.popScope(token), trends.popScope(token));
 	}
 
 	/**
-	 * Verifies weather a query expression is satisfied in the V domain
+	 * Yields {@code true} if the {@code aux.satisfies(query, pp, oracle)}
+	 * returns {@link Satisfiability#SATISFIED}.
 	 * 
-	 * @return {@code true} if the expression is satisfied
+	 * @param query  the query to execute
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@code true} if the query is always satisfied
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private boolean query(
 			BinaryExpression query,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
-		return auxiliaryDomain.satisfies(query, pp, oracle) == Satisfiability.SATISFIED;
+		return aux.satisfies(query, pp, oracle) == Satisfiability.SATISFIED;
 	}
 
 	/**
-	 * Builds BinaryExpression "l operator r"
+	 * Builds a {@link BinaryExpression} in the form of "l operator r".
+	 * 
+	 * @param operator the {@link BinaryOperator} to apply
+	 * @param l        the left operand
+	 * @param r        the right operand
+	 * @param pp       the {@link ProgramPoint} where the expression is being
+	 *                     built
 	 *
 	 * @return the new BinaryExpression
 	 */
@@ -157,7 +200,6 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 			SymbolicExpression l,
 			SymbolicExpression r,
 			ProgramPoint pp) {
-
 		return new BinaryExpression(
 				pp.getProgram().getTypes().getBooleanType(),
 				l,
@@ -167,8 +209,11 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 	}
 
 	/**
-	 * Builds Constant with value c
+	 * Builds a {@link Constant} with value {@code c}.
 	 *
+	 * @param c  the integer constant
+	 * @param pp the {@link ProgramPoint} where the expression is being built
+	 * 
 	 * @return the new Constant
 	 */
 	private Constant constantInt(
@@ -181,10 +226,17 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 	}
 
 	/**
-	 * Generates a Trend based on the relationship between a and b in the
-	 * {@code auxiliaryDomain} domain
+	 * Generates a {@link Trend} based on the relationship between {@code a} and
+	 * {@code b} in {@link #aux}.
 	 * 
-	 * @return {@code INC} if a > b
+	 * @param a      the first expression
+	 * @param b      the second expression
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@link Trend#INC} if {@code a > b}
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend increasingIfGreater(
 			SymbolicExpression a,
@@ -192,21 +244,34 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
-		return Trend.generateTrendIncIfGt(
-				query(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle));
+		if (query(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.STABLE;
+		else if (query(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.INC;
+		else if (query(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.NON_DEC;
+		else if (query(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.DEC;
+		else if (query(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.NON_INC;
+		else if (query(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.NON_STABLE;
+		else
+			return Trend.TOP;
 	}
 
 	/**
-	 * Generates a Trend based on the relationship between a and b in the
-	 * {@code auxiliaryDomain} domain
+	 * Generates a {@link Trend} based on the relationship between {@code a} and
+	 * {@code b} in {@link #aux}.
 	 * 
-	 * @return {@code INC} if a < b
+	 * @param a      the first expression
+	 * @param b      the second expression
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@link Trend#INC} if {@code a < b}
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend increasingIfLess(
 			SymbolicExpression a,
@@ -218,10 +283,17 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 	}
 
 	/**
-	 * Generates a Trend based on the relationship between a and b in the
-	 * {@code auxiliaryDomain} domain
+	 * Generates a {@link Trend} based on the relationship between {@code a} and
+	 * {@code b} in {@link #aux}.
 	 * 
-	 * @return {@code NON_DEC} if a > b
+	 * @param a      the first expression
+	 * @param b      the second expression
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@link Trend#NON_DEC} if {@code a > b}
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend nonDecreasingIfGreater(
 			SymbolicExpression a,
@@ -229,21 +301,30 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
-		return Trend.generateTrendNonDecIfGt(
-				query(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle),
-				query(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle));
+		if (query(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.STABLE;
+		else if (query(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle)
+				|| query(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.NON_DEC;
+		else if (query(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle)
+				|| query(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
+			return Trend.NON_INC;
+		else
+			return Trend.TOP;
 	}
 
 	/**
-	 * Generates a Trend based on the relationship between a and b in the
-	 * {@code auxiliaryDomain} domain
+	 * Generates a {@link Trend} based on the relationship between {@code a} and
+	 * {@code b} in {@link #aux}.
 	 * 
-	 * @return {@code NON_DEC} if a < b
+	 * @param a      the first expression
+	 * @param b      the second expression
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@link Trend#NON_DEC} if {@code a < b}
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend nonDecreasingIfLess(
 			SymbolicExpression a,
@@ -255,44 +336,58 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 	}
 
 	/**
-	 * Generates a Trend based on the value of {@code a} in the
-	 * {@code auxiliaryDomain} domain
+	 * Generates a {@link Trend} based on the relationship between {@code a} and
+	 * {@code b} in {@link #aux}.
 	 * 
-	 * @return {@code INC} if 0 < a < 1 || 0 <= a < 1
+	 * @param a      the expression
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@link Trend#INC} if {@code 0 < a < 1 || 0 <= a < 1}
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend increasingIfBetweenZeroAndOne(
 			SymbolicExpression a,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
 		Constant zero = constantInt(0, pp);
 		Constant one = constantInt(1, pp);
 
-		return Trend.generateTrendIncIfBetween(
-				false,
-				query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle), // Gt
-																				// ->
-																				// Ge
-				query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),
-				query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle),
-				query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle), // Lt
-																				// ->
-																				// Le
-				query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle),
-				query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonLt.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonNe.INSTANCE, a, one, pp), pp, oracle));
+		if (query(binary(ComparisonEq.INSTANCE, a, zero, pp), pp, oracle)
+				|| query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.STABLE;
+		else if (query(binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(binary(ComparisonLt.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.INC;
+		else if (query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.NON_DEC;
+		else if (query(binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.DEC;
+		else if (query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.NON_INC;
+		else if (query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(binary(ComparisonNe.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.NON_STABLE;
+		else
+			return Trend.TOP;
 	}
 
 	/**
-	 * Generates a Trend based on the value of {@code a} in the
-	 * {@code auxiliaryDomain} domain
+	 * Generates a {@link Trend} based on the value of {@code a} in
+	 * {@link #aux}.
 	 * 
-	 * @return {@code INC} if {@code (a < 0 || a > 1)}
+	 * @param a      the expression
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@link Trend#INC} if {@code a < 0 || a > 1}
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend increasingIfOutsideZeroAndOne(
 			SymbolicExpression a,
@@ -303,46 +398,49 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 	}
 
 	/**
-	 * Generates a Trend based on the value of {@code a} in the
-	 * {@code auxiliaryDomain} domain
+	 * Generates a {@link Trend} based on the value of {@code a} in
+	 * {@link #aux}.
 	 * 
-	 * @return {@code NON_DEC} if 0 < a < 1 || 0 <= a < 1
+	 * @param a      the expression
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@link Trend#NON_DEC} if {@code 0 < a < 1 || 0 <= a < 1}
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend nonDecreasingIfBetweenZeroAndOne(
 			SymbolicExpression a,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
 		Constant zero = constantInt(0, pp);
 		Constant one = constantInt(1, pp);
 
-		return Trend.generateTrendNonDecIfBetween(
-				false,
-				query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle), // Gt
-																				// ->
-																				// Ge
-				query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle),
-				query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle), // Lt
-																				// ->
-																				// Le
-				query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle),
-				query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle),
-
-				query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonLt.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle),
-				query(binary(ComparisonNe.INSTANCE, a, one, pp), pp, oracle));
-
+		if (query(binary(ComparisonEq.INSTANCE, a, zero, pp), pp, oracle)
+				|| query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.STABLE;
+		else if (query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.NON_DEC;
+		else if (query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle)
+				|| query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle))
+			return Trend.NON_INC;
+		else
+			return Trend.TOP;
 	}
 
 	/**
-	 * Generates a Trend based on the value of {@code a} in the
-	 * {@code auxiliaryDomain} domain
+	 * Generates a {@link Trend} based on the value of {@code a} in
+	 * {@link #aux}.
 	 * 
-	 * @return {@code NON_DEC} if {@code (a < 0 || a > 1)}
+	 * @param a      the expression
+	 * @param pp     the {@link ProgramPoint} where the evaluation happens
+	 * @param oracle the oracle for inter-domain communication
+	 * 
+	 * @return {@link Trend#NON_DEC} if {@code a < 0 || a > 1}
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend nonDecreasingIfOutsideZeroAndOne(
 			SymbolicExpression a,
@@ -359,25 +457,27 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
-		if (!trend.knowsIdentifier(id))
-			return new Stability<>(
-					auxiliaryDomain.assign(id, expression, pp, oracle),
-					trend.putState(id, Trend.STABLE));
-
-		if (this.isBottom() || auxiliaryDomain.isBottom() || trend.isBottom())
+		if (isBottom())
 			return bottom();
 
+		V post = aux.assign(id, expression, pp, oracle);
+		if (post.isBottom())
+			return bottom();
+
+		if (!trends.lattice.canProcess(id, pp, oracle)
+				|| !trends.lattice.canProcess(expression, pp, oracle))
+			return new Stability<>(post, trends);
+
+		if (!trends.knowsIdentifier(id))
+			return new Stability<>(post, trends.putState(id, Trend.STABLE));
+
 		Trend returnTrend = Trend.TOP;
-		// Trend returnTrend = increasingIfLess(id, expression, pp, oracle);
 
 		if ((expression instanceof Constant))
 			returnTrend = increasingIfLess(id, expression, pp, oracle);
-
-		if (expression instanceof UnaryExpression &&
+		else if (expression instanceof UnaryExpression &&
 				((UnaryExpression) expression).getOperator() instanceof NumericNegation)
 			returnTrend = increasingIfLess(id, expression, pp, oracle);
-
 		else if (expression instanceof BinaryExpression) {
 			BinaryExpression be = (BinaryExpression) expression;
 			BinaryOperator op = be.getOperator();
@@ -484,14 +584,12 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 
 		// else returnTrend = Trend.TOP;
 
-		ValueEnvironment<V> ad = auxiliaryDomain.assign(id, expression, pp, oracle);
 		// ValueEnvironment<Trend> t = trend.putState(id,
 		// returnTrend.combine(this.trend.getState(id)));
-		ValueEnvironment<Trend> t = trend.putState(id, returnTrend);
-		if (ad.isBottom() || t.isBottom())
+		ValueEnvironment<Trend> t = trends.putState(id, returnTrend);
+		if (t.isBottom())
 			return bottom();
-		else
-			return new Stability<>(ad, t);
+		return new Stability<>(post, t);
 	}
 
 	@Override
@@ -500,11 +598,11 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		ValueEnvironment<V> ad = auxiliaryDomain.smallStepSemantics(expression, pp, oracle);
-		if (ad.isBottom())
+		V post = aux.smallStepSemantics(expression, pp, oracle);
+		ValueEnvironment<Trend> sss = trends.smallStepSemantics(expression, pp, oracle);
+		if (post.isBottom() || sss.isBottom())
 			return bottom();
-		else
-			return new Stability<>(ad, trend);
+		return new Stability<>(post, sss);
 	}
 
 	@Override
@@ -514,37 +612,31 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		ValueEnvironment<V> ad = auxiliaryDomain.assume(expression, src, dest, oracle);
-		ValueEnvironment<Trend> t = trend.assume(expression, src, dest, oracle);
-		if (ad.isBottom() || t.isBottom())
+		V post = aux.assume(expression, src, dest, oracle);
+		ValueEnvironment<Trend> assume = trends.assume(expression, src, dest, oracle);
+		if (post.isBottom() || assume.isBottom())
 			return bottom();
-		else
-			return new Stability<>(ad, t);
+		return new Stability<>(post, assume);
 	}
 
 	@Override
 	public boolean knowsIdentifier(
 			Identifier id) {
-		return (auxiliaryDomain.knowsIdentifier(id)
-				|| trend.knowsIdentifier(id));
+		return aux.knowsIdentifier(id) || trends.knowsIdentifier(id);
 	}
 
 	@Override
 	public Stability<V> forgetIdentifier(
 			Identifier id)
 			throws SemanticException {
-		return new Stability<>(
-				auxiliaryDomain.forgetIdentifier(id),
-				trend.forgetIdentifier(id));
+		return new Stability<>(aux.forgetIdentifier(id), trends.forgetIdentifier(id));
 	}
 
 	@Override
 	public Stability<V> forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {
-		return new Stability<>(
-				auxiliaryDomain.forgetIdentifiersIf(test),
-				trend.forgetIdentifiersIf(test));
+		return new Stability<>(aux.forgetIdentifiersIf(test), trends.forgetIdentifiersIf(test));
 	}
 
 	@Override
@@ -553,20 +645,17 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return Satisfiability.UNKNOWN;
-		// return auxiliaryDomain.satisfies(expression, pp,
-		// oracle).glb(trend.satisfies(expression, pp, oracle));
+		return aux.satisfies(expression, pp, oracle);
 	}
 
 	@Override
 	public StructuredRepresentation representation() {
-		// return new ListRepresentation(auxiliaryDomain.representation(),
-		// trend.representation());
-		return trend.representation();
+		return new ObjectRepresentation(Map.of(
+				"aux", aux.representation(),
+				"trends", trends.representation()));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public boolean equals(
 			Object obj) {
 		if (this == obj)
@@ -575,55 +664,80 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Stability<V> other = (Stability<V>) obj;
-		return (this.auxiliaryDomain.equals(other.auxiliaryDomain) && this.trend.equals(other.trend));
-
+		Stability<?> other = (Stability<?>) obj;
+		return Objects.equals(aux, other.aux) && Objects.equals(trends, other.trends);
 	}
 
 	@Override
 	public int hashCode() {
-		return 0;
+		return Objects.hash(aux, trends);
 	}
 
 	@Override
 	public String toString() {
-		return auxiliaryDomain.representation().toString() + trend.representation().toString();
-	}
-
-	public ValueEnvironment<Trend> getTrend() {
-		return trend;
-	}
-
-	public ValueEnvironment<V> getAuxiliaryDomain() {
-		return auxiliaryDomain;
+		return representation().toString();
 	}
 
 	/**
-	 * combines two Stability environments in a single cumulative one
+	 * Yields the per-variable trends contained in this domain instance.
+	 * 
+	 * @return the trends
 	 */
-	public Stability<V> environmentCombine(
-			Stability<V> post) {
-		ValueEnvironment<Trend> returnTrendEnvironment = new ValueEnvironment<>(new Trend((byte) 0));
-
-		for (Identifier id : post.getTrend().getKeys()) {
-			if (this.getTrend().knowsIdentifier(id)) {
-				Trend tmp = this.getTrend().getState(id).combine(post.getTrend().getState(id));
-				returnTrendEnvironment = returnTrendEnvironment.putState(id, tmp);
-			} else
-				returnTrendEnvironment = returnTrendEnvironment.putState(id, post.getTrend().getState(id));
-		}
-
-		return new Stability<>(post.getAuxiliaryDomain(), returnTrendEnvironment);
+	public ValueEnvironment<Trend> getTrends() {
+		return trends;
 	}
 
 	/**
-	 * returns Map from Trends to ArrayList of Identifiers that have that Trend
+	 * Yields the auxiliary domain contained in this domain instance.
+	 * 
+	 * @return the auxiliary domain
+	 */
+	public V getAuxiliaryDomain() {
+		return aux;
+	}
+
+	/**
+	 * Yields the combination of the trends in this stability instance with the
+	 * ones contained in the given one. This operation is to be interpreted as
+	 * the sequential concatenation of the two: if two (blocks of) instructions
+	 * are executed sequentially, a variable having {@code t1} trend in the
+	 * former and {@code t2} trend in the latter would have
+	 * {@code t1.combine(t2)} as an overall trend. This delegates to
+	 * {@link Trend#combine(Trend)} for single-trend combination.
+	 * 
+	 * @param other the other trends
+	 * 
+	 * @return the combination of the two trends
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public Stability<V> combine(
+			Stability<V> other)
+			throws SemanticException {
+		ValueEnvironment<Trend> result = new ValueEnvironment<>(other.trends.lattice, other.trends.function);
+
+		for (Identifier id : other.trends.getKeys())
+			// we iterate only on the keys of post to remove the ones that went
+			// out of scope
+			if (trends.knowsIdentifier(id)) {
+				Trend tmp = trends.getState(id).combine(other.trends.getState(id));
+				result = result.putState(id, tmp);
+			}
+
+		return new Stability<>(other.aux, result);
+	}
+
+	/**
+	 * Yields a mapping from {@link Trend}s to the {@link Identifier}s having
+	 * that trend.
+	 * 
+	 * @return the mapping
 	 */
 	public HashMap<Trend, ArrayList<Identifier>> getCovarianceClasses() {
 		HashMap<Trend, ArrayList<Identifier>> map = new HashMap<>();
 
-		for (Identifier id : getTrend().getKeys()) {
-			Trend t = getTrend().getState(id);
+		for (Identifier id : trends.getKeys()) {
+			Trend t = trends.getState(id);
 			if (!map.containsKey(t))
 				map.put(t, new ArrayList<>());
 			map.get(t).add(id);
@@ -631,5 +745,4 @@ public class Stability<V extends NonRelationalValueDomain<V>>
 
 		return map;
 	}
-
 }

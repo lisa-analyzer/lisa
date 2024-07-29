@@ -10,11 +10,8 @@ class Rectangle{
         this.botLeftX = 1;
         this.botLeftY = 1;
     }
-}
-
-class scaleBis{
-
-    scale(){
+    
+ 	main(){
         def r = new Rectangle();
         def scaleX = 2;
         def scaleY = -1;
@@ -31,6 +28,5 @@ class scaleBis{
         r.width = botRightX - r.botLeftX;
         r.height = topLeftY - r.botLeftY;
 
-    }
-
+    }   
 }
