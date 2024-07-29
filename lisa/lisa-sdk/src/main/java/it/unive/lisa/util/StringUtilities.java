@@ -50,4 +50,17 @@ public class StringUtilities {
 		String offset = indent.repeat(amount);
 		return offset + target.replace("\n", "\n" + offset);
 	}
+
+	/**
+	 * Flattens the given string, removing all newlines and tabulation
+	 * characters.
+	 * 
+	 * @param s the string to flatten
+	 * 
+	 * @return the flattened string
+	 */
+	public static String flatten(
+			String s) {
+		return s.replaceAll("\n|\t", "");
+	}
 }

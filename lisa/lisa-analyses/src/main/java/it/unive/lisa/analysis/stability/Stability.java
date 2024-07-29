@@ -30,10 +30,11 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -470,13 +471,13 @@ public class Stability<V extends ValueDomain<V>>
 		if (!trends.knowsIdentifier(id))
 			return new Stability<>(post, trends.putState(id, Trend.STABLE));
 
-		Trend returnTrend = Trend.TOP;
+		Trend t = Trend.TOP;
 
 		if ((expression instanceof Constant))
-			returnTrend = increasingIfLess(id, expression, pp, oracle);
+			t = increasingIfLess(id, expression, pp, oracle);
 		else if (expression instanceof UnaryExpression &&
 				((UnaryExpression) expression).getOperator() instanceof NumericNegation)
-			returnTrend = increasingIfLess(id, expression, pp, oracle);
+			t = increasingIfLess(id, expression, pp, oracle);
 		else if (expression instanceof BinaryExpression) {
 			BinaryExpression be = (BinaryExpression) expression;
 			BinaryOperator op = be.getOperator();
@@ -493,102 +494,71 @@ public class Stability<V extends ValueDomain<V>>
 
 			if (isLeft || isRight) {
 				SymbolicExpression other = isLeft ? right : left;
-
-				// x = x + other || x = other + x
 				if (op instanceof AdditionOperator)
-					returnTrend = increasingIfGreater(other, constantInt(0, pp), pp, oracle);
-
-				// x = x - other
+					// x = x + other || x = other + x
+					t = increasingIfGreater(other, constantInt(0, pp), pp, oracle);
 				else if (op instanceof SubtractionOperator) {
+					// x = x - other
 					if (isLeft)
-						returnTrend = increasingIfLess(other, constantInt(0, pp), pp, oracle);
+						t = increasingIfLess(other, constantInt(0, pp), pp, oracle);
 					else
-						returnTrend = increasingIfLess(id, expression, pp, oracle);
-				}
-
-				// x = x * other || x = other * x
-				else if (op instanceof MultiplicationOperator) {
-
-					// id == 0 || other == 1
+						t = increasingIfLess(id, expression, pp, oracle);
+				} else if (op instanceof MultiplicationOperator) {
+					// x = x * other || x = other * x
 					if (query(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
 							|| query(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
-						returnTrend = Trend.STABLE;
-
-					// id > 0
+						// id == 0 || other == 1
+						t = Trend.STABLE;
 					else if (query(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-						returnTrend = increasingIfGreater(other, constantInt(1, pp), pp, oracle);
-
-					// id < 0
+						// id > 0
+						t = increasingIfGreater(other, constantInt(1, pp), pp, oracle);
 					else if (query(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-						returnTrend = increasingIfLess(other, constantInt(1, pp), pp, oracle);
-
-					// id >= 0
+						// id < 0
+						t = increasingIfLess(other, constantInt(1, pp), pp, oracle);
 					else if (query(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-						returnTrend = nonDecreasingIfGreater(other, constantInt(1, pp), pp, oracle);
-
-					// id <= 0
+						// id >= 0
+						t = nonDecreasingIfGreater(other, constantInt(1, pp), pp, oracle);
 					else if (query(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-						returnTrend = nonDecreasingIfLess(other, constantInt(1, pp), pp, oracle);
-
-					// id != 0 && other != 1
+						// id <= 0
+						t = nonDecreasingIfLess(other, constantInt(1, pp), pp, oracle);
 					else if (query(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
 							&& query(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
-						returnTrend = Trend.NON_STABLE;
-
-					// else returnTrend = Trend.TOP;
-				}
-
-				// x = x / other
-				else if (op instanceof DivisionOperator) {
+						// id != 0 && other != 1
+						t = Trend.NON_STABLE;
+				} else if (op instanceof DivisionOperator) {
+					// x = x / other
 					if (isLeft) {
-
-						// id == 0 || other == 1
 						if (query(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
 								|| query(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
-							returnTrend = Trend.STABLE;
-
-						// id > 0
+							// id == 0 || other == 1
+							t = Trend.STABLE;
 						else if (query(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-							returnTrend = increasingIfBetweenZeroAndOne(other, pp, oracle);
-
-						// id < 0
+							// id > 0
+							t = increasingIfBetweenZeroAndOne(other, pp, oracle);
 						else if (query(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-							returnTrend = increasingIfOutsideZeroAndOne(other, pp, oracle);
-
-						// id >= 0
+							// id < 0
+							t = increasingIfOutsideZeroAndOne(other, pp, oracle);
 						else if (query(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-							returnTrend = nonDecreasingIfBetweenZeroAndOne(other, pp, oracle);
-
-						// id <= 0
+							// id >= 0
+							t = nonDecreasingIfBetweenZeroAndOne(other, pp, oracle);
 						else if (query(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
-							returnTrend = nonDecreasingIfOutsideZeroAndOne(other, pp, oracle);
-
-						// id != 0 && other != 1
+							// id <= 0
+							t = nonDecreasingIfOutsideZeroAndOne(other, pp, oracle);
 						else if (query(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
 								&& query(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
-							returnTrend = Trend.NON_STABLE;
-
-						// else returnTrend = Trend.TOP;
-					}
-
-					else
-						returnTrend = increasingIfLess(id, expression, pp, oracle);
-
+							// id != 0 && other != 1
+							t = Trend.NON_STABLE;
+					} else
+						t = increasingIfLess(id, expression, pp, oracle);
 				}
-
-				// else returnTrend = Trend.TOP;
 			} else
-				returnTrend = increasingIfLess(id, expression, pp, oracle);
+				t = increasingIfLess(id, expression, pp, oracle);
 		}
 
-		// else returnTrend = Trend.TOP;
-
-		// ValueEnvironment<Trend> t = trend.putState(id,
-		// returnTrend.combine(this.trend.getState(id)));
-		ValueEnvironment<Trend> t = trends.putState(id, returnTrend);
-		if (t.isBottom())
+		ValueEnvironment<Trend> trnd = stabilize(trends).putState(id, t);
+		if (trnd.isBottom())
 			return bottom();
-		return new Stability<>(post, t);
+		return new Stability<>(post, trnd);
 	}
 
 	@Override
@@ -598,7 +568,7 @@ public class Stability<V extends ValueDomain<V>>
 			SemanticOracle oracle)
 			throws SemanticException {
 		V post = aux.smallStepSemantics(expression, pp, oracle);
-		ValueEnvironment<Trend> sss = trends.smallStepSemantics(expression, pp, oracle);
+		ValueEnvironment<Trend> sss = stabilize(trends).smallStepSemantics(expression, pp, oracle);
 		if (post.isBottom() || sss.isBottom())
 			return bottom();
 		return new Stability<>(post, sss);
@@ -732,16 +702,24 @@ public class Stability<V extends ValueDomain<V>>
 	 * 
 	 * @return the mapping
 	 */
-	public HashMap<Trend, ArrayList<Identifier>> getCovarianceClasses() {
-		HashMap<Trend, ArrayList<Identifier>> map = new HashMap<>();
+	public Map<Trend, Set<Identifier>> getCovarianceClasses() {
+		Map<Trend, Set<Identifier>> map = new HashMap<>();
 
 		for (Identifier id : trends.getKeys()) {
 			Trend t = trends.getState(id);
-			if (!map.containsKey(t))
-				map.put(t, new ArrayList<>());
-			map.get(t).add(id);
+			map.computeIfAbsent(t, k -> new HashSet<>()).add(id);
 		}
 
 		return map;
+	}
+
+	private static ValueEnvironment<Trend> stabilize(
+			ValueEnvironment<Trend> trends) {
+		ValueEnvironment<Trend> result = new ValueEnvironment<>(trends.lattice);
+
+		for (Identifier id : trends.getKeys())
+			result = result.putState(id, Trend.STABLE);
+
+		return result;
 	}
 }

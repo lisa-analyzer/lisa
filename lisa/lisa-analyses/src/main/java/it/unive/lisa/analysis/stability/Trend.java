@@ -2,11 +2,17 @@ package it.unive.lisa.analysis.stability;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.PushInv;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A single-variable numerical trend. Instances of this class (corresponding to
@@ -69,16 +75,6 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
 	private Trend(
 			byte trend) {
 		this.trend = trend;
-	}
-
-	@Override
-	public boolean isTop() {
-		return this.trend == TOP.trend;
-	}
-
-	@Override
-	public boolean isBottom() {
-		return this.trend == BOTTOM.trend;
 	}
 
 	/**
@@ -334,5 +330,38 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
 			repr = "≠";
 
 		return new StringRepresentation(repr);
+	}
+
+	@Override
+	public boolean canProcess(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		if (expression instanceof PushInv)
+			// the type approximation of a pushinv is bottom, so the below check
+			// will always fail regardless of the kind of value we are tracking
+			return expression.getStaticType().isNumericType();
+
+		Set<Type> rts = null;
+		try {
+			rts = oracle.getRuntimeTypesOf(expression, pp, oracle);
+		} catch (SemanticException e) {
+			return false;
+		}
+
+		if (rts == null || rts.isEmpty())
+			// if we have no runtime types, either the type domain has no type
+			// information for the given expression (thus it can be anything,
+			// also something that we can track) or the computation returned
+			// bottom (and the whole state is likely going to go to bottom
+			// anyway).
+			return true;
+
+		return rts.stream().anyMatch(Type::isNumericType);
+	}
+
+	@Override
+	public String toString() {
+		return representation().toString();
 	}
 }
