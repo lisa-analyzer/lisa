@@ -5,8 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
@@ -14,6 +12,7 @@ import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
+import org.junit.Test;
 
 public class StabilityTest {
 

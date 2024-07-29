@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.stability;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -36,6 +30,11 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Implementation of the stability abstract domain (yet to appear publicly).

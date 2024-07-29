@@ -1,13 +1,12 @@
 package it.unive.lisa.analysis.stability;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Objects;
 
 /**
  * A single-variable numerical trend. Instances of this class (corresponding to
