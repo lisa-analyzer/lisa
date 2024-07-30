@@ -446,7 +446,7 @@ public class SemanticsSanityTest {
 			return new ValueEnvironment<>(new Sign());
 		if (param == TypeDomain.class)
 			return new TypeEnvironment<>(new InferredTypes());
-		if (root == ValueCartesianProduct.class)
+		if (root == ValueCartesianProduct.class || param == ValueEnvironment.class)
 			return new ValueEnvironment<>(new Sign());
 		if (root == ValueNonRedundantSet.class)
 			if (param == SortedSet.class)

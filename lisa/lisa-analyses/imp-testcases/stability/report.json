@@ -1,0 +1,44 @@
+{
+  "warnings" : [ {
+    "message" : "['imp-testcases/stability/stability.imp':18:4] on 'untyped stability::scale(stability* this, untyped x, untyped y, untyped width, untyped height, untyped scale1, untyped scale2)': [STATEMENT] Classes computed: {  #TOP#: (height, width),  =: (scale1, scale2),  ↑=: (x, y)}"
+  }, {
+    "message" : "['imp-testcases/stability/stability.imp':2:1] on 'untyped stability::example(stability* this, untyped x, untyped y)': [STATEMENT] Classes computed: {  ↑=: (y),  ↓=: (x)}"
+  }, {
+    "message" : "['imp-testcases/stability/stability.imp':9:1] on 'untyped stability::send(stability* this, untyped dest, untyped amount, untyped sbalance, untyped dbalance)': [STATEMENT] Classes computed: {  =: (amount, dest),  ↑=: (dbalance),  ↓=: (sbalance)}"
+  } ],
+  "files" : [ "report.json", "untyped_stability.example(stability__this,_untyped_x,_untyped_y).json", "untyped_stability.scale(stability__this,_untyped_x,_untyped_y,_untyped_width,_untyped_height,_untyped_scale1,_untyped_scale2).json", "untyped_stability.send(stability__this,_untyped_dest,_untyped_amount,_untyped_sbalance,_untyped_dbalance).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "699ms",
+    "end" : "2024-07-30T11:04:55.372+02:00",
+    "expressions" : "94",
+    "files" : "3",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2024-07-30T11:04:54.673+02:00",
+    "statements" : "21",
+    "units" : "1",
+    "version" : "0.1b8",
+    "warnings" : "3"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "CoContraVarianceCheck",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/stability"
+  }
+}

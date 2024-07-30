@@ -54,6 +54,34 @@ public abstract class AnalysisTestExecutor {
 	 */
 	public void perform(
 			CronConfiguration conf) {
+		perform(conf, false);
+	}
+
+	/**
+	 * Performs a test, running an analysis. The test will fail if:
+	 * <ul>
+	 * <li>The imp file cannot be parsed (i.e. a {@link ParsingException} is
+	 * thrown)</li>
+	 * <li>The previous working directory using for the test execution cannot be
+	 * deleted</li>
+	 * <li>The analysis run terminates with an {@link AnalysisException}</li>
+	 * <li>One of the json reports (either the one generated during the test
+	 * execution or the one used as baseline) cannot be found or cannot be
+	 * opened</li>
+	 * <li>The two json reports are different</li>
+	 * <li>The external files mentioned in the reports are different</li>
+	 * </ul>
+	 * 
+	 * @param conf       the configuration of the test to run (note that the
+	 *                       workdir present into the configuration will be
+	 *                       ignored, as it will be overwritten by the computed
+	 *                       workdir)
+	 * @param allMethods whether or not all IMP methods should be added as
+	 *                       entrypoints
+	 */
+	public void perform(
+			CronConfiguration conf,
+			boolean allMethods) {
 		String testMethod = getCaller();
 		System.out.println("### Testing " + testMethod);
 		Objects.requireNonNull(conf);
@@ -68,7 +96,7 @@ public abstract class AnalysisTestExecutor {
 			actualPath = Paths.get(actualPath.toString(), conf.testSubDir);
 		}
 
-		Program program = readProgram(target);
+		Program program = readProgram(target, allMethods);
 
 		setupWorkdir(conf, actualPath);
 
@@ -100,7 +128,7 @@ public abstract class AnalysisTestExecutor {
 
 			// we parse the program again since the analysis might have
 			// finalized it or modified it, and we want to start from scratch
-			program = readProgram(target);
+			program = readProgram(target, allMethods);
 
 			conf.optimize = true;
 			actualPath = Paths.get(actualPath.toString(), "optimized");
@@ -226,10 +254,11 @@ public abstract class AnalysisTestExecutor {
 	}
 
 	private Program readProgram(
-			Path target) {
+			Path target,
+			boolean allMethods) {
 		Program program = null;
 		try {
-			program = IMPFrontend.processFile(target.toString(), true);
+			program = IMPFrontend.processFile(target.toString(), !allMethods);
 		} catch (ParsingException e) {
 			e.printStackTrace(System.err);
 			fail("Exception while parsing '" + target + "': " + e.getMessage());
