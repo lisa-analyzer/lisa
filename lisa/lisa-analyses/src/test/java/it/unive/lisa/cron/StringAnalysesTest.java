@@ -6,6 +6,8 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.string.CharInclusion;
 import it.unive.lisa.analysis.string.Prefix;
+import it.unive.lisa.analysis.string.SubstringDomain;
+import it.unive.lisa.analysis.string.SubstringDomainWithConstants;
 import it.unive.lisa.analysis.string.Suffix;
 import it.unive.lisa.analysis.string.bricks.Bricks;
 import it.unive.lisa.analysis.string.fsa.FSA;
@@ -104,6 +106,37 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 		conf.testDir = "string";
 		conf.testSubDir = "tarsis";
 		conf.programFile = "strings.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testSubstringDomain() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true; // dump results
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new SubstringDomain(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.testDir = "string/subs-domain";
+		conf.testSubDir = "subs-domain";
+		conf.programFile = "strings-subs.imp";
+		// conf.analysisGraphs = GraphType.DOT;
+		perform(conf);
+
+	}
+
+	@Test
+	public void testSubstringDomainWithConstants() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true; // dump results
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new SubstringDomainWithConstants(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.testDir = "string/subs-domain-constants";
+		conf.testSubDir = "subs-domain-constants";
+		conf.programFile = "strings-subs-constants.imp";
+		// conf.analysisGraphs = GraphType.DOT;
 		perform(conf);
 	}
 }
