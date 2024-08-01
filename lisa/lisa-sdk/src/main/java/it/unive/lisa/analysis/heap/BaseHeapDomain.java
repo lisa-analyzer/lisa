@@ -18,6 +18,8 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.TypeOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -148,6 +150,28 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	 */
 	public abstract static class Rewriter implements ExpressionVisitor<ExpressionSet> {
 
+		/**
+		 * Extracts the inner expressions from casts/conversions. If {@code e}
+		 * is of the form {@code (type) e1}, this method returns
+		 * {@code removeTypingExpressions(e1)}. Otherwise, {@code e} is returned
+		 * with no modifications.
+		 * 
+		 * @param e the expression to strip from type operators
+		 * 
+		 * @return the inner expression, if needed
+		 */
+		protected SymbolicExpression removeTypingExpressions(
+				SymbolicExpression e) {
+			if (e instanceof BinaryExpression) {
+				BinaryExpression be = (BinaryExpression) e;
+				BinaryOperator op = be.getOperator();
+				if (op instanceof TypeOperator)
+					return removeTypingExpressions(be.getRight());
+			}
+
+			return e;
+		}
+
 		@Override
 		public ExpressionSet visit(
 				UnaryExpression expression,
@@ -239,6 +263,26 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 				Object... params)
 				throws SemanticException {
 			return new ExpressionSet(expression);
+		}
+
+		@Override
+		public ExpressionSet visit(
+				HeapExpression expression,
+				ExpressionSet[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			throw new SemanticException(
+					"No rewriting rule for heap expression of type " + expression.getClass().getName());
+		}
+
+		@Override
+		public ExpressionSet visit(
+				ValueExpression expression,
+				ExpressionSet[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			throw new SemanticException(
+					"No rewriting rule for value expression of type " + expression.getClass().getName());
 		}
 	}
 }

@@ -259,7 +259,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			ProgramPoint pp = (ProgramPoint) params[0];
 			SemanticOracle oracle = (SemanticOracle) params[1];
 
-			for (SymbolicExpression rec : receiver)
+			for (SymbolicExpression rec : receiver) {
+				rec = removeTypingExpressions(rec);
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					for (Type t : oracle.getRuntimeTypesOf(pid, pp, oracle))
@@ -270,6 +271,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 							result.add(e);
 						}
 				}
+			}
 			return new ExpressionSet(result);
 		}
 
@@ -298,7 +300,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			ProgramPoint pp = (ProgramPoint) params[0];
 			SemanticOracle oracle = (SemanticOracle) params[1];
 
-			for (SymbolicExpression refExp : ref)
+			for (SymbolicExpression refExp : ref) {
+				refExp = removeTypingExpressions(refExp);
 				if (refExp instanceof HeapLocation) {
 					Set<Type> rt = oracle.getRuntimeTypesOf(refExp, pp, oracle);
 					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
@@ -308,6 +311,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 							refExp.getCodeLocation());
 					result.add(e);
 				}
+			}
 
 			return new ExpressionSet(result);
 		}
@@ -323,6 +327,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			SemanticOracle oracle = (SemanticOracle) params[1];
 
 			for (SymbolicExpression derefExp : deref) {
+				derefExp = removeTypingExpressions(derefExp);
 				if (derefExp instanceof Variable) {
 					Variable var = (Variable) derefExp;
 					for (Type t : oracle.getRuntimeTypesOf(var, pp, oracle))

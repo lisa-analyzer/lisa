@@ -271,16 +271,22 @@ public class TestParameterProvider {
 			return (R) new ValueEnvironment<>(new SampleNRVD());
 		if (param == SampleNRVD.class || param == BaseNonRelationalValueDomain.class)
 			return (R) new SampleNRVD();
+		if (param == BaseNonRelationalValueDomain[].class)
+			return (R) new BaseNonRelationalValueDomain[0];
 
 		if (param == InferenceSystem.class)
 			return (R) new InferenceSystem<>(new SampleIV());
 		if (param == SampleIV.class || param == BaseInferredValue.class)
 			return (R) new SampleIV();
+		if (param == BaseInferredValue[].class)
+			return (R) new BaseInferredValue[0];
 
 		if (param == TypeEnvironment.class)
 			return (R) new TypeEnvironment<>(new SampleNRTD());
 		if (param == SampleNRTD.class || param == BaseNonRelationalTypeDomain.class)
 			return (R) new SampleNRTD();
+		if (param == BaseNonRelationalTypeDomain[].class)
+			return (R) new BaseNonRelationalTypeDomain[0];
 
 		if (param == SemanticOracle.class)
 			return (R) DefaultConfiguration.defaultAbstractState();

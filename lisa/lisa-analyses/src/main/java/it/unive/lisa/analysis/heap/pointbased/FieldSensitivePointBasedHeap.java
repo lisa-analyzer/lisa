@@ -288,7 +288,8 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 
-			for (SymbolicExpression rec : receiver)
+			for (SymbolicExpression rec : receiver) {
+				rec = removeTypingExpressions(rec);
 				if (rec instanceof MemoryPointer) {
 					AllocationSite site = (AllocationSite) ((MemoryPointer) rec).getReferencedLocation();
 					populate(expression, child, result, site);
@@ -296,6 +297,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 					AllocationSite site = (AllocationSite) rec;
 					populate(expression, child, result, site);
 				}
+			}
 
 			return new ExpressionSet(result);
 		}
