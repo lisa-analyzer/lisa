@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -24,6 +20,9 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.TypeOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base

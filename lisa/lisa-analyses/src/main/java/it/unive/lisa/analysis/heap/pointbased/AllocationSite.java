@@ -181,7 +181,7 @@ public abstract class AllocationSite extends HeapLocation {
 			SymbolicExpression field);
 
 	/**
-	 * Yields a modified version of this allocation site with the given type
+	 * Yields a modified version of this allocation site with the given type.
 	 * 
 	 * @param type the new type
 	 * 
