@@ -179,4 +179,14 @@ public abstract class AllocationSite extends HeapLocation {
 	 */
 	public abstract AllocationSite withField(
 			SymbolicExpression field);
+
+	/**
+	 * Yields a modified version of this allocation site with the given type
+	 * 
+	 * @param type the new type
+	 * 
+	 * @return the modified allocation site
+	 */
+	public abstract AllocationSite withType(
+			Type type);
 }

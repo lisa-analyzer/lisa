@@ -88,4 +88,10 @@ public class StackAllocationSite extends AllocationSite {
 			throw new IllegalStateException("Cannot add a field to an allocation site that already has one");
 		return new StackAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());
 	}
+
+	@Override
+	public AllocationSite withType(
+			Type type) {
+		return new StackAllocationSite(type, getLocationName(), getField(), isWeak(), getCodeLocation());
+	}
 }
