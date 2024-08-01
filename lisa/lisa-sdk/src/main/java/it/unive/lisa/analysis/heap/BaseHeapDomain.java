@@ -240,5 +240,25 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 				throws SemanticException {
 			return new ExpressionSet(expression);
 		}
+
+		@Override
+		public ExpressionSet visit(
+				HeapExpression expression,
+				ExpressionSet[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			throw new SemanticException(
+					"No rewriting rule for heap expression of type " + expression.getClass().getName());
+		}
+
+		@Override
+		public ExpressionSet visit(
+				ValueExpression expression,
+				ExpressionSet[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			throw new SemanticException(
+					"No rewriting rule for value expression of type " + expression.getClass().getName());
+		}
 	}
 }

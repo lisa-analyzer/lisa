@@ -10,6 +10,7 @@ import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -69,6 +70,15 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 		public EvaluationVisitor(
 				T singleton) {
 			this.singleton = singleton;
+		}
+
+		@Override
+		public T visit(
+				HeapExpression expression,
+				T[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
@@ -203,6 +213,21 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 				Object... params)
 				throws SemanticException {
 			return singleton.evalIdentifier(expression, (TypeEnvironment<T>) params[0], (ProgramPoint) params[1],
+					(SemanticOracle) params[2]);
+		}
+
+		@Override
+		public T visit(
+				ValueExpression expression,
+				T[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			if (subExpressions != null)
+				for (T sub : subExpressions)
+					if (sub.isBottom())
+						return sub;
+
+			return singleton.evalValueExpression(expression, subExpressions, (ProgramPoint) params[1],
 					(SemanticOracle) params[2]);
 		}
 	}
@@ -551,6 +576,38 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 			T left,
 			T middle,
 			T right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return top();
+	}
+
+	/**
+	 * Yields the evaluation of a generic {@link ValueExpression}, where the
+	 * recursive evaluation of its sub-expressions, if any, has already happened
+	 * and is passed in the {@code subExpressions} parameters. It is guaranteed
+	 * that no element of {@code subExpressions} is {@link #bottom()}.<br>
+	 * <br>
+	 * This method allows evaluating frontend-defined expressions. For all
+	 * standard expressions defined within LiSA, the corresponding evaluation
+	 * method will be invoked instead.
+	 * 
+	 * @param expression     the expression to evaluate
+	 * @param subExpressions the instances of this domain representing the
+	 *                           abstract values of all its sub-expressions, if
+	 *                           any; if there are no sub-expressions, this
+	 *                           parameter can be {@code null} or empty
+	 * @param pp             the program point that where this operation is
+	 *                           being evaluated
+	 * @param oracle         the oracle for inter-domain communication
+	 * 
+	 * @return the evaluation of the expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default T evalValueExpression(
+			ValueExpression expression,
+			T[] subExpressions,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {

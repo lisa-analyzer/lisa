@@ -9,6 +9,7 @@ import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -30,6 +31,7 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
+import java.lang.reflect.Array;
 import java.util.Set;
 
 /**
@@ -66,6 +68,15 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 		public EvaluationVisitor(
 				T singleton) {
 			this.singleton = singleton;
+		}
+
+		@Override
+		public InferredPair<T> visit(
+				HeapExpression expression,
+				InferredPair<T>[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
@@ -210,6 +221,29 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 				Object... params)
 				throws SemanticException {
 			return singleton.evalIdentifier(expression, (InferenceSystem<T>) params[0], (ProgramPoint) params[1],
+					(SemanticOracle) params[2]);
+		}
+
+		@Override
+		public InferredPair<T> visit(
+				ValueExpression expression,
+				InferredPair<T>[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			T[] subs = null;
+			if (subExpressions != null && subExpressions.length > 0) {
+				subs = (T[]) Array.newInstance(subExpressions[0].getInferred().getClass(), subExpressions.length);
+				for (int i = 0; i < subExpressions.length; i++) {
+					if (subExpressions[i].isBottom())
+						return subExpressions[i];
+					subs[i] = subExpressions[i].getInferred();
+				}
+			}
+
+			return singleton.evalValueExpression(expression,
+					subs,
+					((InferenceSystem<T>) params[0]).getExecutionState(),
+					(ProgramPoint) params[1],
 					(SemanticOracle) params[2]);
 		}
 
@@ -592,6 +626,41 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 			T left,
 			T middle,
 			T right,
+			T state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		T top = top();
+		return new InferredPair<>(top, top, top);
+	}
+
+	/**
+	 * Yields the evaluation of a generic {@link ValueExpression}, where the
+	 * recursive evaluation of its sub-expressions, if any, has already happened
+	 * and is passed in the {@code subExpressions} parameters. It is guaranteed
+	 * that no element of {@code subExpressions} is {@link #bottom()}.<br>
+	 * <br>
+	 * This method allows evaluating frontend-defined expressions. For all
+	 * standard expressions defined within LiSA, the corresponding evaluation
+	 * method will be invoked instead.
+	 * 
+	 * @param expression     the expression to evaluate
+	 * @param subExpressions the instances of this domain representing the
+	 *                           abstract values of all its sub-expressions, if
+	 *                           any; if there are no sub-expressions, this
+	 *                           parameter can be {@code null} or empty
+	 * @param state          the current execution state
+	 * @param pp             the program point that where this operation is
+	 *                           being evaluated
+	 * @param oracle         the oracle for inter-domain communication
+	 * 
+	 * @return the evaluation of the expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default InferredPair<T> evalValueExpression(
+			ValueExpression expression,
+			T[] subExpressions,
 			T state,
 			ProgramPoint pp,
 			SemanticOracle oracle)

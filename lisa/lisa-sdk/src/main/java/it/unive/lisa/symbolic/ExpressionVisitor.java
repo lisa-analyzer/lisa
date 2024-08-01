@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -13,6 +14,7 @@ import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * A visitor for {@link SymbolicExpression}s, to be used as parameter to
@@ -25,6 +27,34 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
  * @param <T> the return type of the visiting callbacks
  */
 public interface ExpressionVisitor<T> {
+
+	/**
+	 * Visits a generic {@link HeapExpression}. This callback is invoked after
+	 * the inner expressions have been visited, and their produced value is
+	 * passed as argument. <br>
+	 * <br>
+	 * This overload allows visiting frontend-defined expressions. For all
+	 * standard expressions defined within LiSA, the corresponding overload will
+	 * be invoked instead.
+	 * 
+	 * @param expression     the expression
+	 * @param subExpressions the values produced by visiting the
+	 *                           sub-expressions, if any; if there are no
+	 *                           sub-expressions, this parameter can be
+	 *                           {@code null} or empty
+	 * @param params         the additional parameters provided to
+	 *                           {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
+	 *                           if any
+	 * 
+	 * @return the value produced by visiting the expression
+	 * 
+	 * @throws SemanticException if an error occurs during the visit operation
+	 */
+	T visit(
+			HeapExpression expression,
+			T[] subExpressions,
+			Object... params)
+			throws SemanticException;
 
 	/**
 	 * Visits an {@link AccessChild}. This callback is invoked after the inner
@@ -105,6 +135,34 @@ public interface ExpressionVisitor<T> {
 	T visit(
 			HeapDereference expression,
 			T arg,
+			Object... params)
+			throws SemanticException;
+
+	/**
+	 * Visits a generic {@link ValueExpression}. This callback is invoked after
+	 * the inner expressions have been visited, and their produced value is
+	 * passed as argument. <br>
+	 * <br>
+	 * This overload allows visiting frontend-defined expressions. For all
+	 * standard expressions defined within LiSA, the corresponding overload will
+	 * be invoked instead.
+	 * 
+	 * @param expression     the expression
+	 * @param subExpressions the values produced by visiting the
+	 *                           sub-expressions, if any; if there are no
+	 *                           sub-expressions, this parameter can be
+	 *                           {@code null} or empty
+	 * @param params         the additional parameters provided to
+	 *                           {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
+	 *                           if any
+	 * 
+	 * @return the value produced by visiting the expression
+	 * 
+	 * @throws SemanticException if an error occurs during the visit operation
+	 */
+	T visit(
+			ValueExpression expression,
+			T[] subExpressions,
 			Object... params)
 			throws SemanticException;
 
