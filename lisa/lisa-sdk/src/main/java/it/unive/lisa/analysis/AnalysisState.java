@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * The abstract analysis state at a given program point. An analysis state is
  * composed by an {@link AbstractState} modeling the abstract values of program
@@ -607,5 +609,15 @@ public class AnalysisState<A extends AbstractState<A>>
 	 */
 	public AnalysisState<A> withTopTypes() {
 		return new AnalysisState<>(state.withTopTypes(), computedExpressions, info);
+	}
+	
+	public Pair<AnalysisState<A>, AnalysisState<A>> split(SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint des) {
+		Pair<A, A> splitStates = state.split(expression, src, des, state);
+		AnalysisState<A> trueState = new AnalysisState<>(splitStates.getLeft(), computedExpressions, info);
+		AnalysisState<A> falseState = new AnalysisState<A>(splitStates.getRight(), computedExpressions, info);
+		
+		return Pair.of(trueState, falseState);
 	}
 }

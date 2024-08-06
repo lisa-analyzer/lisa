@@ -1,11 +1,14 @@
 package it.unive.lisa.analysis.type;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
 /**
@@ -52,5 +55,9 @@ public interface TypeDomain<T extends TypeDomain<T>> extends TypeOracle, ValueDo
 		}
 		return lub.forgetIdentifiers(r.getIdsToForget());
 
+	}
+	
+	default Pair<TypeDomain<T>, TypeDomain<T>> split(SymbolicExpression expr) {		
+		return Pair.of(this, this);
 	}
 }
