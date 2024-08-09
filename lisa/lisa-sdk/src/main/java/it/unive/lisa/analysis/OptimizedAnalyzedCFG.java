@@ -25,7 +25,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -214,7 +213,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 			try {
 				Map<Statement, CompoundState<A>> res = fix.fixpoint(
 						starting,
-						FIFOWorkingSet.mk(),
+						WorkingSet.of(conf.fixpointWorkingSet),
 						asc,
 						existing);
 				expanded = new StatementStore<>(bottom);
@@ -269,7 +268,6 @@ public class OptimizedAnalyzedCFG<A extends AbstractState<A>> extends AnalyzedCF
 		@Override
 		public void fixpoint(
 				AnalysisState<A> entryState,
-				Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 				FixpointConfiguration conf)
 				throws FixpointException {
 			throw new UnsupportedOperationException();

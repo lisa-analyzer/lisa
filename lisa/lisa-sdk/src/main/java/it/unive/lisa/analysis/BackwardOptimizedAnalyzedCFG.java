@@ -26,7 +26,6 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
@@ -269,7 +268,6 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 		@Override
 		public void fixpoint(
 				AnalysisState<A> exitState,
-				Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 				FixpointConfiguration conf)
 				throws FixpointException {
 			throw new UnsupportedOperationException();

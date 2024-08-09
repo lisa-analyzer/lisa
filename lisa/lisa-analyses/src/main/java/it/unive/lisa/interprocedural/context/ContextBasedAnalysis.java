@@ -146,10 +146,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
-		this.workingSet = fixpointWorkingSet;
+		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
 		// new fixpoint execution: reset
 		this.results = null;

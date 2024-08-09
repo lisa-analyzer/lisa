@@ -2,6 +2,7 @@ package it.unive.lisa.conf;
 
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import java.util.function.Predicate;
 
 /**
@@ -10,6 +11,11 @@ import java.util.function.Predicate;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class FixpointConfiguration extends BaseConfiguration {
+
+	/**
+	 * Holder of {@link LiSAConfiguration#fixpointWorkingSet}.
+	 */
+	public final Class<? extends WorkingSet<Statement>> fixpointWorkingSet;
 
 	/**
 	 * Holder of {@link LiSAConfiguration#wideningThreshold}.
@@ -51,8 +57,10 @@ public class FixpointConfiguration extends BaseConfiguration {
 	 * 
 	 * @param parent the root configuration to draw data from.
 	 */
+	@SuppressWarnings("unchecked")
 	public FixpointConfiguration(
 			LiSAConfiguration parent) {
+		this.fixpointWorkingSet = (Class<? extends WorkingSet<Statement>>) parent.fixpointWorkingSet;
 		this.wideningThreshold = parent.wideningThreshold;
 		this.recursionWideningThreshold = parent.recursionWideningThreshold;
 		this.glbThreshold = parent.glbThreshold;

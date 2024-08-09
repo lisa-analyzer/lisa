@@ -16,7 +16,7 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
-import it.unive.lisa.util.collections.workset.DuplicateFreeFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.OrderBasedWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.file.FileManager;
 import java.lang.reflect.Field;
@@ -246,9 +246,9 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 	/**
 	 * The concrete class of {@link WorkingSet} to be used in fixpoints.
-	 * Defaults to {@link DuplicateFreeFIFOWorkingSet}.
+	 * Defaults to {@link OrderBasedWorkingSet}.
 	 */
-	public Class<?> fixpointWorkingSet = DuplicateFreeFIFOWorkingSet.class;
+	public Class<?> fixpointWorkingSet = OrderBasedWorkingSet.class;
 
 	/**
 	 * The {@link OpenCallPolicy} to be used for computing the result of

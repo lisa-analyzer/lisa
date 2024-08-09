@@ -84,7 +84,7 @@
     "analysisGraphs" : "NONE",
     "descendingPhaseType" : "NONE",
     "dumpForcesUnwinding" : "false",
-    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
     "glbThreshold" : "5",
     "hotspots" : "set",
     "jsonOutput" : "true",

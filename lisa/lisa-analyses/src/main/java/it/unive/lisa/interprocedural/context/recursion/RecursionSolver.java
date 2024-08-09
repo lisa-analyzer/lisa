@@ -17,13 +17,11 @@ import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.util.StringUtilities;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -94,7 +92,6 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
 		// we mark this as unsupported to make sure it never gets used as a root
