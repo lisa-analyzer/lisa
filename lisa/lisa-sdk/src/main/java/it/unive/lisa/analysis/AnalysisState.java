@@ -8,11 +8,12 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -611,13 +612,25 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(state.withTopTypes(), computedExpressions, info);
 	}
 	
+
+
+	// Per ogni Edge (TrueEdge e FalsEdge) cache tiene traccia dello split di ogni possibile state
+	private Map<SymbolicExpression, Pair<AnalysisState<A>, AnalysisState<A>>> cache = new HashMap<>(); 
+
 	public Pair<AnalysisState<A>, AnalysisState<A>> split(SymbolicExpression expression,
 			ProgramPoint src,
 			ProgramPoint des) {
-		Pair<A, A> splitStates = state.split(expression, src, des, state);
-		AnalysisState<A> trueState = new AnalysisState<>(splitStates.getLeft(), computedExpressions, info);
-		AnalysisState<A> falseState = new AnalysisState<A>(splitStates.getRight(), computedExpressions, info);
 		
-		return Pair.of(trueState, falseState);
+		// cache restituisce gli splitStates corrispondenti ad una data espressione (questo evita di ricalcolare split ogni volta sia nel caso true che nel caso false)
+		if(cache.containsKey(expression)) {
+			return cache.get(expression);
+		}
+		Pair<A, A> states = state.split(expression, src, des, state);
+		AnalysisState<A> trueState = new AnalysisState<>(states.getLeft(), computedExpressions, info);
+		AnalysisState<A> falseState = new AnalysisState<A>(states.getRight(), computedExpressions, info);
+		Pair<AnalysisState<A>, AnalysisState<A>> splitStates = Pair.of(trueState, falseState);
+		cache.put(expression, splitStates);
+		
+		return splitStates;
 	}
 }
