@@ -32,15 +32,18 @@ public class TrueEdge extends Edge {
 	public String toString() {
 		return "[ " + getSource() + " ] -T-> [ " + getDestination() + " ]";
 	}
-
+	
+	
 	@Override
 	public <A extends AbstractState<A>> AnalysisState<A> traverseForward(
 			AnalysisState<A> state)
 			throws SemanticException {
 		ExpressionSet exprs = state.getComputedExpressions();
-		AnalysisState<A> result = state.bottom();
-		for (SymbolicExpression expr : exprs)
-			result = result.lub(state.assume(expr, getSource(), getDestination()));
+		AnalysisState<A> result = state.bottom();				
+		for (SymbolicExpression expr : exprs) {
+			AnalysisState<A> trueState = state.split(expr, getSource(), getDestination()).getLeft();
+			result = result.lub(trueState.assume(expr, getSource(), getDestination()));
+		}
 		return result;
 	}
 

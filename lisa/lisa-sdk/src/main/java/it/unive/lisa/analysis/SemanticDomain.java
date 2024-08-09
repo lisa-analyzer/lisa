@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.tuple.Pair;
 /**
  * A domain able to determine how abstract information evolves thanks to the
  * semantics of statements and expressions.
@@ -86,6 +87,13 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D assume(
+			E expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException;
+	
+	Pair<D, D> split(
 			E expression,
 			ProgramPoint src,
 			ProgramPoint dest,
@@ -236,4 +244,5 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 
 		return result;
 	}
+	
 }
