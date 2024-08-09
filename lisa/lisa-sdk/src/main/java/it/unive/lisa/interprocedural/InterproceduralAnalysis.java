@@ -15,7 +15,6 @@ import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.MultiCall;
@@ -84,19 +83,16 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * or one of its overloads. Results of individual cfgs are then available
 	 * through {@link #getAnalysisResultsOf(CFG)}.
 	 * 
-	 * @param entryState         the entry state for the {@link CFG}s that are
-	 *                               the entrypoints of the computation
-	 * @param fixpointWorkingSet the concrete class of {@link WorkingSet} to be
-	 *                               used in fixpoints.
-	 * @param conf               the {@link FixpointConfiguration} containing
-	 *                               the parameters tuning fixpoint behavior
+	 * @param entryState the entry state for the {@link CFG}s that are the
+	 *                       entrypoints of the computation
+	 * @param conf       the {@link FixpointConfiguration} containing the
+	 *                       parameters tuning fixpoint behavior
 	 * 
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
 	void fixpoint(
 			AnalysisState<A> entryState,
-			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException;
 

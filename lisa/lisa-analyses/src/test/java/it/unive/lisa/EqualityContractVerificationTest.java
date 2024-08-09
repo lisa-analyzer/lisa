@@ -96,6 +96,7 @@ import it.unive.lisa.util.collections.workset.DuplicateFreeFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.DuplicateFreeLIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.OrderBasedWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceLIFOWorkingSet;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
@@ -325,6 +326,7 @@ public class EqualityContractVerificationTest {
 		verify(VisitOnceLIFOWorkingSet.class);
 		verify(DuplicateFreeFIFOWorkingSet.class);
 		verify(DuplicateFreeLIFOWorkingSet.class);
+		verify(OrderBasedWorkingSet.class);
 	}
 
 	@Test

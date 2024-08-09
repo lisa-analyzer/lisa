@@ -30,7 +30,6 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
@@ -210,7 +209,6 @@ public class LiSARunner<A extends AbstractState<A>> {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void analyze(
 			FixpointConfiguration fixconf) {
 		A state = this.state.top();
@@ -219,7 +217,6 @@ public class LiSARunner<A extends AbstractState<A>> {
 					try {
 						interproc.fixpoint(
 								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE)),
-								(Class<? extends WorkingSet<Statement>>) conf.fixpointWorkingSet,
 								fixconf);
 					} catch (FixpointException e) {
 						LOG.fatal("Exception during fixpoint computation", e);
