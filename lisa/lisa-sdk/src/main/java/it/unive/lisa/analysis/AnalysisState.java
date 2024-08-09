@@ -614,9 +614,9 @@ public class AnalysisState<A extends AbstractState<A>>
 	
 
 
-	// Per ogni Edge (TrueEdge e FalsEdge) cache tiene traccia dello split di ogni possibile state
+	// Per ogni TrueEdge e FalsEdge, cache tiene traccia dello split di ogni possibile state
 	private Map<SymbolicExpression, Pair<AnalysisState<A>, AnalysisState<A>>> cache = new HashMap<>(); 
-	
+
 	public Pair<AnalysisState<A>, AnalysisState<A>> split(SymbolicExpression expression,
 			ProgramPoint src,
 			ProgramPoint des) {

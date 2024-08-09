@@ -23,10 +23,16 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <D> the concrete type of the {@link HeapDomain}
  */
 public interface HeapDomain<D extends HeapDomain<D>>
-		extends MemoryOracle, SemanticDomain<D, SymbolicExpression, Identifier>, Lattice<D>, HeapSemanticOperation {
-
-	default Pair<D, D> split(SymbolicExpression expr, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle)
-			throws SemanticException {
-		return Pair.of(this.assume(expr, src, dest, oracle), this.assume(expr, src, dest, oracle));
+		extends
+		MemoryOracle,
+		SemanticDomain<D, SymbolicExpression, Identifier>,
+		Lattice<D>,
+		HeapSemanticOperation {
+		
+	default Pair<D, D> split(SymbolicExpression expr, ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle) throws SemanticException {		
+		return Pair.of(this.assume(expr, src, dest, oracle), 
+				this.assume(expr, src, dest, oracle));
 	}
 }
