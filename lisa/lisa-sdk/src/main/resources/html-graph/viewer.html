@@ -29,7 +29,8 @@
 		#cy {
 			flex-grow: 0.5;
 			z-index: 10;
-			max-width: 70%;
+			width: 75%;
+			min-width: 500px;
 		}
 		
 		#header {
@@ -64,47 +65,79 @@
 		#header div span input {
 			margin: 0;
 		}
+		
 		#descriptions {
 			flex-grow: 0.5;
 			z-index: 11;
 			overflow: auto;
 			font-size: 18px;
 			border-left: 2px solid #e2e2e2;
-    		padding-left: 20px;
+			padding-left: 20px;
+			width: 25%;
+			min-width: 200px;
 		}
+		
 		.description-header {
-    		font-weight: bold;
+			font-weight: bold;
 		}
+		
 		#descriptions ul {
-		    padding-left: inherit;
-		    margin: 5px 0;
+			padding-left: inherit;
+			margin: 5px 0;
 		}
+		
 		.description-nest {
 			padding-left: 15px;
 		}
+		
 		.header-hidden {
 			display: none;
 		}
+		
 		.description-title-wrapper {
-    		margin-top: 0.83em;
-    		margin-bottom: 0.83em;
+			margin-top: 0.83em;
+			margin-bottom: 0.83em;
 		}
+		
 		.description-title {
-		    font-size: 1.5em;
-		    font-weight: bold;
+			font-size: 1.5em;
+			font-weight: bold;
 		}
+		
 		.description-title-text {
-		    font-size: 1.5em;
-		    font-family: monospace;
+			font-size: 1.5em;
+			font-family: monospace;
 		}
+		
 		#header-none {
-    		margin-top: 0.83em;
-    		margin-bottom: 0.83em;
+			margin-top: 0.83em;
+			margin-bottom: 0.83em;
 		}
+		
 		.no-results {
-   			border: solid 2px #FF0000;  
-   			background-color: #FF000040;
+			border: solid 2px #FF0000;  
+			background-color: #FF000040;
 		}
+		
+		.splitter {
+			width: 100%;
+			display: flex;
+		}
+
+		#separator {
+			cursor: col-resize;
+			background-color: #aaa;
+			background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='30'><path d='M2 0 v30 M5 0 v30 M8 0 v30' fill='none' stroke='black'/></svg>");
+			background-repeat: no-repeat;
+			background-position: center;
+			width: 10px;
+
+			/* Prevent the browser's built-in drag from interfering */
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		
 		</style>
 	</head>
 
@@ -130,17 +163,20 @@
 					<b id="fit">Fit to viewport</b>
 				</div>
 			</div>
-			<div id="cy"></div>
-			<div id="descriptions">
-				<div id="header-none">
-				No node selected. Select a node to show its <span th:utext="${graphDescriptionLabel}">DESCRIPTION LABEL</span>.
-				</div>
-				<div th:utext="${graphDescriptions}">
-				DESCRIPTIONS
+			<div class="splitter">
+				<div id="cy"></div>
+				<div id="separator" ></div>
+				<div id="descriptions">
+					<div id="header-none">
+					No node selected. Select a node to show its <span th:utext="${graphDescriptionLabel}">DESCRIPTION LABEL</span>.
+					</div>
+					<div th:utext="${graphDescriptions}">
+					DESCRIPTIONS
+					</div>
 				</div>
 			</div>
 		</div>
-		<script th:inline="javascript">			
+		<script th:inline="javascript">	
 			var api;
 			var layoutOptions;
 			var cy = window.cy = cytoscape({
@@ -181,12 +217,12 @@
 							'border-color': 'black',
 						}
 					},
-				    {
-					    selector: 'node:selected',
-					    css: {
+					{
+						selector: 'node:selected',
+						css: {
 							'border-color': 'orange',
 							'border-width': '2px',
-					    }
+						}
 					},
 					{
 						selector: 'edge',
@@ -217,9 +253,9 @@
 				
 				ready: function () {
 					/*<![CDATA[*/
-    				const data = /*[[${graphContent}]]*/ 'default DOT placeholder';
-    				/*]]>*/
-    				
+					const data = /*[[${graphContent}]]*/ 'default DOT placeholder';
+					/*]]>*/
+					
 					this.graphml({layoutBy: null});
 					this.graphml(data);
 					
@@ -295,10 +331,51 @@
 			});
 			
 			cy.on('select', 'node', function(event) {
-		    	var id = event.target.id();
+				var id = event.target.id();
 				$('[id^=header-]').addClass('header-hidden');
 				$('#header-' + id).removeClass('header-hidden');
 			});
+			
+			// A function is used for dragging and moving
+			function dragElement(element, direction) {
+				var md; // remember mouse down info
+				const first  = document.getElementById("cy");
+				const second = document.getElementById("descriptions");
+
+				element.onmousedown = onMouseDown;
+
+				function onMouseDown(e) {
+					md = {e,
+						offsetLeft:  element.offsetLeft,
+						offsetTop:   element.offsetTop,
+						firstWidth:  first.offsetWidth,
+						secondWidth: second.offsetWidth
+					};
+
+					document.onmousemove = onMouseMove;
+					document.onmouseup = () => {
+						document.onmousemove = document.onmouseup = null;
+					}
+				}
+
+				function onMouseMove(e)
+				{
+					var delta = {x: e.clientX - md.e.clientX,
+					y: e.clientY - md.e.clientY};
+
+					if (direction === "H" )  {
+						// Prevent negative-sized elements
+						delta.x = Math.min(Math.max(delta.x, -md.firstWidth),
+						md.secondWidth);
+
+						element.style.left = md.offsetLeft + delta.x + "px";
+						first.style.width = (md.firstWidth + delta.x) + "px";
+						second.style.width = (md.secondWidth - delta.x) + "px";
+					}
+				}
+			}
+			
+			dragElement( document.getElementById("separator"), "H" );
 			</script>
 	</body>
 </html>
