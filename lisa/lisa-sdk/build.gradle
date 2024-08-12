@@ -10,6 +10,9 @@ dependencies {
 
 	// dot file manipulation
 	api 'org.graphstream:gs-core:2.0'
+	
+	// html templating
+    api 'org.thymeleaf:thymeleaf:3.0.15.RELEASE'
     
 	// logging
 	api 'org.apache.logging.log4j:log4j-api:2.17.1'

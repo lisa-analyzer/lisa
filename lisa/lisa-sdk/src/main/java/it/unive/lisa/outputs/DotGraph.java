@@ -1,22 +1,14 @@
 package it.unive.lisa.outputs;
 
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
-import it.unive.lisa.outputs.serializableGraph.SerializableNode;
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.graphstream.graph.Edge;
@@ -24,7 +16,13 @@ import org.graphstream.graph.Element;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
-import org.graphstream.stream.file.FileSourceDOT;
+
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A graph that can be dumped into Dot format.
@@ -249,62 +247,13 @@ public class DotGraph extends GraphStreamWrapper {
 		sink.setDirected(true);
 		sink.writeAll(graph, writer);
 	}
-
-	/**
-	 * Reads a graph through the given {@link Reader}. Any legend (i.e.,
-	 * subgraph) will be stripped from the input.
-	 * 
-	 * @param reader the reader to use for reading the graph
-	 * 
-	 * @return the {@link DotGraph} that has been read
-	 * 
-	 * @throws IOException if an I/O error occurs while reading
-	 */
-	public static DotGraph readDot(
-			Reader reader)
+	
+	public void dumpWithNoLegend(
+			Writer writer)
 			throws IOException {
-		// we have to re-add the quotes wrapping the labels, otherwise the
-		// parser will break
-		String content;
-		String sentinel = LABEL + "=<";
-		String replacement = LABEL + "=\"<";
-		String ending = ">];";
-		String endingReplacement = ">\"];";
-		try (BufferedReader br = new BufferedReader(reader); StringWriter writer = new StringWriter()) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				if (line.trim().startsWith(LABEL))
-					// skip graph title
-					continue;
-
-				int i = line.indexOf(sentinel);
-				if (i != -1) {
-					writer.append(line.substring(0, i));
-					writer.append(replacement);
-					// we can do the following since we know the label will
-					// always be last
-					writer.append(line.substring(i + sentinel.length(), line.length() - ending.length()));
-					writer.append(endingReplacement);
-				} else if (line.startsWith("subgraph")) {
-					// we skip the legend
-					writer.append("}");
-					break;
-				} else
-					writer.append(line);
-				writer.append("\n");
-			}
-			content = writer.toString();
-		}
-		FileSourceDOT source = new FileSourceDOT();
-		DotGraph graph = new DotGraph(null) {
-		};
-		source.addSink(graph.graph);
-		try (StringReader sr = new StringReader(content)) {
-			source.readAll(sr);
-		} catch (Exception e) {
-			System.out.println();
-		}
-		return graph;
+		FileSinkDOT sink = new CustomDotSink();
+		sink.setDirected(true);
+		sink.writeAll(graph, writer);
 	}
 
 	private class CustomDotSink extends FileSinkDOT {

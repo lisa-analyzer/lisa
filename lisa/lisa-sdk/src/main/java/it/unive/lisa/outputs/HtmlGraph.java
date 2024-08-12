@@ -1,20 +1,26 @@
 package it.unive.lisa.outputs;
 
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.SortedMap;
-import org.apache.commons.io.IOUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.StringTemplateResolver;
+
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A graph that can be dumped as an html page using javascript to visualize the
@@ -61,6 +67,14 @@ public class HtmlGraph extends GraphStreamWrapper {
 		this.includeSubnodes = includeSubnodes;
 	}
 
+    private String loadResourceTemplate(String path) throws IOException {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
+            Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
+            scanner.useDelimiter("\\A");
+            return scanner.hasNext() ? scanner.next() : "";
+        }
+    }
+
 	@Override
 	public void dump(
 			Writer writer)
@@ -76,37 +90,42 @@ public class HtmlGraph extends GraphStreamWrapper {
 		if (StringUtils.isNotBlank(description))
 			graphDescription = description;
 
-		String file = includeSubnodes ? "html-graph/viewer-compound.html" : "html-graph/viewer.html";
-		try (InputStream viewer = getClass().getClassLoader().getResourceAsStream(file)) {
-			String viewerCode = IOUtils.toString(viewer, StandardCharsets.UTF_8);
-			viewerCode = viewerCode.replace("$$$GRAPH_TITLE$$$", graphTitle);
-			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION$$$", graphDescription);
-			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION_LABEL$$$", descriptionLabel);
-			viewerCode = viewerCode.replace("$$$GRAPH_CONTENT$$$", graphText);
+		TemplateEngine templateEngine = new TemplateEngine();
+        StringTemplateResolver resolver = new StringTemplateResolver();
+        resolver.setTemplateMode(TemplateMode.HTML);
+        templateEngine.setTemplateResolver(resolver);
 
-			StringBuilder descrs = new StringBuilder();
-			for (Entry<Integer, Pair<String, SerializableNodeDescription>> d : descriptions.entrySet()) {
-				String nodeName = nodeName(d.getKey());
-				if (includeSubnodes || graph.graph.getNode(nodeName) != null) {
-					descrs.append("\t\t\t\t<div id=\"header-")
-							.append(nodeName)
-							.append("\" class=\"header-hidden\">\n");
-					descrs.append(
-							"\t\t\t\t\t<div class=\"description-title-wrapper\"><span class=\"description-title\">")
-							.append(StringUtils.capitalize(descriptionLabel))
-							.append(" for ")
-							.append("</span><span class=\"description-title-text\">")
-							.append(d.getValue().getLeft())
-							.append("</span></div>\n");
-					populate(descrs, 5, d.getValue().getRight().getDescription());
-					descrs.append("\t\t\t\t</div>\n");
-				}
+        String file = includeSubnodes ? "html-graph/viewer-compound.html" : "html-graph/viewer.html";
+        String htmlTemplate = loadResourceTemplate(file);
+
+        Context context = new Context();
+        context.setVariable("graphTitle", graphTitle);
+        context.setVariable("graphDescription", graphDescription);
+        context.setVariable("graphDescriptionLabel", descriptionLabel);
+        context.setVariable("graphContent", graphText);
+        StringBuilder descrs = new StringBuilder();
+		for (Entry<Integer, Pair<String, SerializableNodeDescription>> d : descriptions.entrySet()) {
+			String nodeName = nodeName(d.getKey());
+			if (includeSubnodes || graph.graph.getNode(nodeName) != null) {
+				descrs.append("\t\t\t\t<div id=\"header-")
+						.append(nodeName)
+						.append("\" class=\"header-hidden\">\n");
+				descrs.append(
+						"\t\t\t\t\t<div class=\"description-title-wrapper\"><span class=\"description-title\">")
+						.append(StringUtils.capitalize(descriptionLabel))
+						.append(" for ")
+						.append("</span><span class=\"description-title-text\">")
+						.append(d.getValue().getLeft())
+						.append("</span></div>\n");
+				populate(descrs, 5, d.getValue().getRight().getDescription());
+				descrs.append("\t\t\t\t</div>\n");
 			}
-
-			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTIONS$$$", descrs.toString().trim());
-
-			writer.write(viewerCode);
 		}
+        context.setVariable("graphDescriptions", descrs.toString().trim());
+        
+        
+        String html = templateEngine.process(htmlTemplate, context);
+        writer.write(html);
 	}
 
 	private static void populate(

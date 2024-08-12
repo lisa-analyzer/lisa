@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>$$$GRAPH_TITLE$$$</title>
+		<title th:utext="${graphTitle}">TITLE</title>
 		
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
@@ -109,8 +109,8 @@
 	</head>
 
 	<body>
-		<h1>$$$GRAPH_TITLE$$$</h1>
-		<h3>$$$GRAPH_DESCRIPTION$$$</h3>
+		<h1 th:utext="${graphTitle}">TITLE</h1>
+		<h3 th:utext="${graphDescription}">DESCRIPTION</h3>
 		<hr />
 		<div id="full">
 			<div id="header">
@@ -133,12 +133,14 @@
 			<div id="cy"></div>
 			<div id="descriptions">
 				<div id="header-none">
-				No node selected. Select a node to show its $$$GRAPH_DESCRIPTION_LABEL$$$.
+				No node selected. Select a node to show its <span th:utext="${graphDescriptionLabel}">DESCRIPTION LABEL</span>.
 				</div>
-				$$$GRAPH_DESCRIPTIONS$$$
+				<div th:utext="${graphDescriptions}">
+				DESCRIPTIONS
+				</div>
 			</div>
 		</div>
-		<script>			
+		<script th:inline="javascript">			
 			var api;
 			var layoutOptions;
 			var cy = window.cy = cytoscape({
@@ -214,7 +216,10 @@
 				],
 				
 				ready: function () {
-					var data = '$$$GRAPH_CONTENT$$$'
+					/*<![CDATA[*/
+    				const data = /*[[${graphContent}]]*/ 'default DOT placeholder';
+    				/*]]>*/
+    				
 					this.graphml({layoutBy: null});
 					this.graphml(data);
 					
