@@ -284,6 +284,7 @@ public class JsonReportComparer {
 			String ext = FilenameUtils.getExtension(path);
 			return ext.equals("dot")
 					|| ext.equals("graphml")
+					|| ext.equals("png")
 					|| ext.equals("html")
 					|| ext.equals("js");
 		}

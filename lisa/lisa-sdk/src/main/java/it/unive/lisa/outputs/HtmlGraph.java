@@ -85,10 +85,10 @@ public class HtmlGraph extends GraphStreamWrapper {
 				.replace("&apos;", "'")
 				.replace("'", "\\'")
 				.replace("\n", "\\n");
-		String graphTitle = graph.getTitle();
+		String graphTitle = "Graph: " + graph.getTitle();
 		String graphDescription = "";
 		if (StringUtils.isNotBlank(description))
-			graphDescription = description;
+			graphDescription = "ID: " + description;
 
 		TemplateEngine templateEngine = new TemplateEngine();
         StringTemplateResolver resolver = new StringTemplateResolver();

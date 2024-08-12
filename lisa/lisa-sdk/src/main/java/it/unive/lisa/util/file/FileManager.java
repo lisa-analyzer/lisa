@@ -334,14 +334,15 @@ public class FileManager {
 			throws IOException {
 		List<String> files = new ArrayList<>();
 		if (usedPlainCytoscape || usedCompoundCytoscape) {
-			files.add("js/cytoscape-3.21.1.min.js");
-			files.add("js/cytoscape-graphml-1.0.6-hier.js");
-			files.add("js/jquery-3.0.0.min.js");
+			files.add("assets/lisa.png");
+			files.add("assets/cytoscape-3.21.1.min.js");
+			files.add("assets/cytoscape-graphml-1.0.6-hier.js");
+			files.add("assets/jquery-3.0.0.min.js");
 			if (usedCompoundCytoscape) {
-				files.add("js/layout-base.js");
-				files.add("js/cose-base.js");
-				files.add("js/cytoscape-fcose.js");
-				files.add("js/cytoscape-expand-collapse.js");
+				files.add("assets/layout-base.js");
+				files.add("assets/cose-base.js");
+				files.add("assets/cytoscape-fcose.js");
+				files.add("assets/cytoscape-expand-collapse.js");
 			}
 		}
 

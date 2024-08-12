@@ -5,20 +5,32 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
 		
-		<script src="js/cytoscape-3.21.1.min.js"></script>
-		<script src="js/jquery-3.0.0.min.js"></script>
-		<script src="js/cytoscape-graphml-1.0.6-hier.js"></script>
+		<script src="assets/cytoscape-3.21.1.min.js"></script>
+		<script src="assets/jquery-3.0.0.min.js"></script>
+		<script src="assets/cytoscape-graphml-1.0.6-hier.js"></script>
 		
 		<style>
 		body {
-			font-family: helvetica neue, helvetica, liberation sans, arial,
-				sans-serif;
+			font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
 			font-size: 14px;
 			background-color: white;
 		}
 		
 		html, body, #full {
 			height: 100%;
+		}
+		
+		header {
+			height: 13%;
+			margin-bottom: 20px;
+			padding-bottom: 20px;
+			border-bottom: 2px black solid;
+		}
+		
+		header img {
+			float: right;
+			height: 100%;
+			padding-right: 10px;
 		}
 		
 		#full {
@@ -31,39 +43,6 @@
 			z-index: 10;
 			width: 75%;
 			min-width: 500px;
-		}
-		
-		#header {
-			position: fixed;
-			z-index: 11;
-			overflow-x: hidden;
-		}
-		
-		#header div {
-			background-color: #e2e2e2;
-			padding: 20px 15px;
-			margin-bottom: 10px;
-		}
-		
-		#header div b {
-			padding: 6px 0;
-			color: #333333;
-			display: block;
-			cursor: pointer;
-		}
-		
-		#header div span {
-			padding: 6px 0;
-			display: block;
-		}
-		
-		#header div span label b {
-			padding: 0;
-			display: inline;
-		}
-		
-		#header div span input {
-			margin: 0;
 		}
 		
 		#descriptions {
@@ -138,34 +117,100 @@
 			user-select: none;
 		}
 		
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 12;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+			background-color: rgb(0,0,0);
+			background-color: rgba(0,0,0,0.4);
+		}
+
+		.modal-content {
+			background-color: #fefefe;
+			margin: 15% auto;
+			padding: 20px;
+			border: 1px solid #888;
+			width: 40%;
+			min-width: 350px;
+		}
+		
+		.modal-content b {
+			padding: 6px 0;
+			color: #333333;
+			display: block;
+			cursor: pointer;
+		}
+
+		.close {
+			color: #aaa;
+			float: right;
+			font-size: 28px;
+			font-weight: bold;
+		}
+
+		.close:hover,
+		.close:focus {
+			color: black;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		
+		.button {
+			background-color: #16A15B;
+			color: white;
+			padding: 5px 20px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			border: 1px #16A15B solid;
+			border-radius: 25px;
+		}
+		
+		.button:disabled,
+		.button[disabled]{
+			background-color: #CCCCCC;
+			border: 1px #CCCCCC solid;
+			color: #666666;
+		}
+		
+		.searchbar {
+			padding: 5px 20px;
+			border-radius: 25px;
+			border: 1px #16A15B solid;
+		}
 		</style>
 	</head>
 
 	<body>
-		<h1 th:utext="${graphTitle}">TITLE</h1>
-		<h3 th:utext="${graphDescription}">DESCRIPTION</h3>
-		<hr />
-		<div id="full">
-			<div id="header">
-				<div>
-					<b>Node border: <font color="darkgray">gray</font>, single</b> 
-					<b>Entrypoint border: black, single</b> 
-					<b>Exitpoint border: black, double</b> 
-					<b>Sequential edge: black, solid</b> 
-					<b>False edge: <font color="red">red</font>, solid</b> 
-					<b>True edge: <font color="blue">blue</font>, solid</b>
-				</div>
-				<div>
-					<input id="search" type="text" placeholder="Search node.."/>
-					<input id="next" type="button" value="Next" disabled/>
-					<input id="prev" type="button" value="Previous" disabled/>
-					<b id="relayout">Run layout</b> 
-					<b id="fit">Fit to viewport</b>
-				</div>
+		<header>
+			<img src="https://raw.githubusercontent.com/lisa-analyzer/lisa/master/logo.png" alt="LiSA logo"/>
+			<h1 th:utext="${graphTitle}">TITLE</h1>
+			<h3 th:utext="${graphDescription}">DESCRIPTION</h3>
+			<input id="search" type="text" class="searchbar" placeholder="Search node.."/>
+			<input id="next" type="button" value="Next" class="button" disabled/>
+			<input id="prev" type="button" value="Previous" class="button" disabled/>
+			<button id="legendButton" class="button">Legend</button>
+		</header>
+		<div id="legend" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<b>Node border: <font color="darkgray">gray</font>, single</b>
+				<b>Entrypoint border: black, single</b>
+				<b>Exitpoint border: black, double</b>
+				<b>Sequential edge: black, solid</b>
+				<b>False edge: <font color="red">red</font>, solid</b>
+				<b>True edge: <font color="blue">blue</font>, solid</b>
 			</div>
+		</div>
+		<div id="full">
 			<div class="splitter">
 				<div id="cy"></div>
-				<div id="separator" ></div>
+				<div id="separator"></div>
 				<div id="descriptions">
 					<div id="header-none">
 					No node selected. Select a node to show its <span th:utext="${graphDescriptionLabel}">DESCRIPTION LABEL</span>.
@@ -376,6 +421,24 @@
 			}
 			
 			dragElement( document.getElementById("separator"), "H" );
+			
+			var modal = document.getElementById("legend");
+			var btn = document.getElementById("legendButton");
+			var span = document.getElementsByClassName("close")[0];
+
+			btn.onclick = function() {
+				modal.style.display = "block";
+			}
+
+			span.onclick = function() {
+				modal.style.display = "none";
+			}
+
+			window.onclick = function(event) {
+				if (event.target == modal) {
+					modal.style.display = "none";
+				}
+			} 
 			</script>
 	</body>
 </html>
