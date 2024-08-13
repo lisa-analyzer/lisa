@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<title th:utext="${graphTitle}">TITLE</title>
@@ -5,11 +6,28 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
 		
-		<script src="assets/cytoscape-3.21.1.min.js"></script>
-		<script src="assets/jquery-3.0.0.min.js"></script>
-		<script src="assets/cytoscape-graphml-1.0.6-hier.js"></script>
+		<script src="assets/d3.v7.min.js"></script>
+		<script src="assets/d3-graphviz.min.js"></script>
 		
 		<style>
+		
+		.d-flex{display:flex!important}
+		.flex-column{flex-direction:column!important}
+		.flex-grow-1{flex-grow:1!important}
+		.justify-content-center{justify-content:center!important}
+		.align-items-center{align-items:center!important}
+		
+		.hovered {
+          fill: #ffa500;
+          stroke: #333;
+          stroke-width: 2px;
+          filter: drop-shadow(0 0 5px rgba(255, 153, 0, 0.5));
+        }
+
+        .node ellipse {
+          transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
+        }
+		
 		body {
 			font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
 			font-size: 14px;
@@ -38,7 +56,7 @@
 			flex-direction: row;
 		}
 		
-		#cy {
+		#graph-wrapper {
 			flex-grow: 0.5;
 			z-index: 10;
 			width: 75%;
@@ -209,7 +227,9 @@
 		</div>
 		<div id="full">
 			<div class="splitter">
-				<div id="cy"></div>
+				<div class="d-flex flex-column" id="graph-wrapper">
+					<div class="d-flex flex-grow-1 justify-content-center align-items-center" id="graph"></div>
+				</div>
 				<div id="separator"></div>
 				<div id="descriptions">
 					<div id="header-none">
@@ -222,116 +242,91 @@
 			</div>
 		</div>
 		<script th:inline="javascript">	
-			var api;
-			var layoutOptions;
-			var cy = window.cy = cytoscape({
-				container: $('#cy'),
-				maxZoom: 100,
-				zoomingEnabled: true,
-				userZoomingEnabled: true,
-				style: [
-					{
-						selector: 'node',
-						css: {
-							'background-color': 'white',
-							'color': 'black',
-							'shape': 'rectangle',
-							'border-width': '1px',
-							'border-style': 'solid',
-							'border-color': 'darkgray',
-							'content': 'data(NODE_TEXT)',
-							'font-family': 'monospace',
-							'font-size': '18px',
-							'font-weight': 'bold',
-							'text-wrap': 'wrap',
-						}
-					},
-					{
-						selector: 'node[NODE_IS_ENTRY = "yes"]',
-						css: {
-							'border-width': '3px',
-							'border-style': 'solid',
-							'border-color': 'black',
-						}
-					},	
-					{
-						selector: 'node[NODE_IS_EXIT = "yes"]',
-						css: {
-							'border-width': '5px',
-							'border-style': 'double',
-							'border-color': 'black',
-						}
-					},
-					{
-						selector: 'node:selected',
-						css: {
-							'border-color': 'orange',
-							'border-width': '2px',
-						}
-					},
-					{
-						selector: 'edge',
-						css: {
-							'curve-style': 'bezier',
-							'width': 4,
-							'line-color': 'black',
-							'target-arrow-shape': 'triangle',
-							'target-arrow-color': 'black',
-							'arrow-scale': '2'
-						}
-					},
-					{
-						selector: 'edge[EDGE_KIND = "TrueEdge"]',
-						css: {
-							'line-color': 'blue',
-							'target-arrow-color': 'blue',
-						}
-					},
-					{
-						selector: 'edge[EDGE_KIND = "FalseEdge"]',
-						css: {
-							'line-color': 'red',
-							'target-arrow-color': 'red',
-						}
-					},			
-				],
-				
-				ready: function () {
-					/*<![CDATA[*/
-					const data = /*[[${graphContent}]]*/ 'default DOT placeholder';
-					/*]]>*/
-					
-					this.graphml({layoutBy: null});
-					this.graphml(data);
-					
-					layoutOptions = {
-							name: 'breadthfirst',
-							fit: false,
-							directed: true,
-							spacingFactor: 2.5,
-					};
-					var layout = this.layout(layoutOptions);
-					if (layout && layout.run) {
-						layout.run();
-					}
-					this.fit();
-				}
-			});
+			const scale = 0.5;
 			
-			function relayout() {
-				var layout = cy.layout(layoutOptions);
-				if (layout && layout.run) {
-					layout.run();
+			function attributer(datum, index, nodes) {
+				var selection = d3.select(this);
+				if (datum.tag == "svg") {
+					datum.attributes = {
+						...datum.attributes,
+						width: '100%',
+						height: '100%',
+					};
+					
+					// svg is constructed by hpcc-js/wasm, which uses pt instead of px, so need to convert
+					const px2pt = 3 / 4;
+
+					// get graph dimensions in px. These can be grabbed from the viewBox of the svg
+					// that hpcc-js/wasm generates
+					const graphWidth = datum.attributes.viewBox.split(' ')[2] / px2pt;
+					const graphHeight = datum.attributes.viewBox.split(' ')[3] / px2pt;
+
+					// new viewBox width and height
+					const w = graphWidth / scale;
+					const h = graphHeight / scale;
+
+					// new viewBox origin to keep the graph centered
+					const x = -(w - graphWidth) / 2;
+					const y = -(h - graphHeight) / 2;
+
+					const viewBox = `${x * px2pt} ${y * px2pt} ${w * px2pt} ${h * px2pt}`;
+					selection.attr('viewBox', viewBox);
+					datum.attributes.viewBox = viewBox;
 				}
 			}
-			$('#relayout').on('click', function () {
-				relayout();
-			});
-			$('#fit').on('click', function () {
-				cy.fit(cy.nodes(), 50);
-			});
+		
+			const graphviz = d3.select("#graph").graphviz()
+								.attributer(attributer)
+								.fit(true)
+								.zoom(true);
+				
+			/*<![CDATA[*/
+			const graph = /*[[${graphContent}]]*/ 'default DOT placeholder';
+			/*]]>*/
 			
-			var lastsearchresult = [];
+			function renderGraph(dotString) {
+				graphviz.renderDot(dotString, function () {
+					d3.selectAll(".node")
+						.on("mouseover", function () {
+							d3.select(this)
+								.select("ellipse")
+								.classed("hovered", true);
+							})
+						.on("mouseout", function () {
+							d3.select(this)
+								.select("ellipse")
+								.classed("hovered", false);
+							});
+				}).on("end", function () {
+					d3.selectAll(".node a").each(function () {
+						const node = d3.select(this);
+						var info = d3.select(this).attr("xlink:title");
+
+						const jsonData = JSON.parse(info);
+						console.log(jsonData);
+
+						new bootstrap.Popover(this, {
+							container: 'body',
+							html: true,
+							trigger: 'hover',
+							placement: 'top',
+							title: jsonData.fullPath || "Default Title",
+							content: function () {
+								return `<h6>${jsonData.role}</h6>
+								<strong>Method:</strong> ${jsonData.method}<br>
+								<strong>Endpoint:</strong> ${jsonData.fullPath}<br>
+								<strong>Path variable:</strong> ${jsonData.pathVariableName}<br>
+								<strong>Location:</strong> ${jsonData.codeLocation}<br>
+								${addPathVariableInfo(jsonData.methodPathVariable)}
+								${addIssues(jsonData.issues)}`;
+							}
+						});
+					});
+				});
+			}
+			renderGraph(graph);
+
+			/*var lastsearchresult = [];
 			var lastshownelement = -1;
 			function centerToSearch() {
 				var target = lastsearchresult[lastshownelement];
@@ -379,12 +374,12 @@
 				var id = event.target.id();
 				$('[id^=header-]').addClass('header-hidden');
 				$('#header-' + id).removeClass('header-hidden');
-			});
+			});*/
 			
-			// A function is used for dragging and moving
-			function dragElement(element, direction) {
-				var md; // remember mouse down info
-				const first  = document.getElementById("cy");
+			/* Split pane */
+			function makeDraggable(element, direction) {
+				var md;
+				const first  = document.getElementById("graph-wrapper");
 				const second = document.getElementById("descriptions");
 
 				element.onmousedown = onMouseDown;
@@ -409,7 +404,6 @@
 					y: e.clientY - md.e.clientY};
 
 					if (direction === "H" )  {
-						// Prevent negative-sized elements
 						delta.x = Math.min(Math.max(delta.x, -md.firstWidth),
 						md.secondWidth);
 
@@ -419,9 +413,9 @@
 					}
 				}
 			}
+			makeDraggable(document.getElementById("separator"), "H");
 			
-			dragElement( document.getElementById("separator"), "H" );
-			
+			/* Legend modal */
 			var modal = document.getElementById("legend");
 			var btn = document.getElementById("legendButton");
 			var span = document.getElementsByClassName("close")[0];

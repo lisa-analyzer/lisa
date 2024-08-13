@@ -29,9 +29,7 @@ public class FileManager {
 
 	private final Collection<String> createdFiles = new TreeSet<>();
 
-	private boolean usedPlainCytoscape = false;
-
-	private boolean usedCompoundCytoscape = false;
+	private boolean usedHtmlViewer = false;
 
 	/**
 	 * Builds a new manager that will produce files in the given
@@ -57,20 +55,11 @@ public class FileManager {
 
 	/**
 	 * Takes note that the at least one of the dumped files needs cytoscape
-	 * support for compund graphs to be correctly visualized. This will have an
-	 * effect on the files produced by {@link #generateSupportFiles()}.
-	 */
-	public void usedCompoundCytoscape() {
-		usedCompoundCytoscape = true;
-	}
-
-	/**
-	 * Takes note that the at least one of the dumped files needs cytoscape
 	 * support for non-compund graphs to be correctly visualized. This will have
 	 * an effect on the files produced by {@link #generateSupportFiles()}.
 	 */
-	public void usedPlainCytoscape() {
-		usedPlainCytoscape = true;
+	public void usedHtmlViewer() {
+		usedHtmlViewer = true;
 	}
 
 	/**
@@ -333,17 +322,10 @@ public class FileManager {
 	public void generateSupportFiles()
 			throws IOException {
 		List<String> files = new ArrayList<>();
-		if (usedPlainCytoscape || usedCompoundCytoscape) {
+		if (usedHtmlViewer) {
 			files.add("assets/lisa.png");
-			files.add("assets/cytoscape-3.21.1.min.js");
-			files.add("assets/cytoscape-graphml-1.0.6-hier.js");
-			files.add("assets/jquery-3.0.0.min.js");
-			if (usedCompoundCytoscape) {
-				files.add("assets/layout-base.js");
-				files.add("assets/cose-base.js");
-				files.add("assets/cytoscape-fcose.js");
-				files.add("assets/cytoscape-expand-collapse.js");
-			}
+			files.add("assets/d3.v7.min.js");
+			files.add("assets/d3-graphviz.min.js");
 		}
 
 		for (String file : files)

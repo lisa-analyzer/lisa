@@ -62,26 +62,6 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testGRAPHML() {
-		CronConfiguration conf = config();
-		conf.analysisGraphs = GraphType.GRAPHML;
-		conf.testDir = "visualization";
-		conf.testSubDir = "graphml";
-		conf.programFile = "visualization.imp";
-		perform(conf);
-	}
-
-	@Test
-	public void testGRAPHML_WITH_SUBNODES() {
-		CronConfiguration conf = config();
-		conf.analysisGraphs = GraphType.GRAPHML_WITH_SUBNODES;
-		conf.testDir = "visualization";
-		conf.testSubDir = "graphml-sub";
-		conf.programFile = "visualization.imp";
-		perform(conf);
-	}
-
-	@Test
 	public void testHTML() {
 		CronConfiguration conf = config();
 		conf.analysisGraphs = GraphType.HTML;

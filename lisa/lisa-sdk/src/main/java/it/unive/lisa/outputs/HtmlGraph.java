@@ -24,14 +24,14 @@ import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A graph that can be dumped as an html page using javascript to visualize the
- * graphs. This graph effectively wraps a {@link GraphmlGraph} instance to
+ * graphs. This graph effectively wraps a {@link DotGraph} instance to
  * provide visualization.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HtmlGraph extends GraphStreamWrapper {
+public class HtmlGraph extends VisualGraph {
 
-	private final GraphmlGraph graph;
+	private final DotGraph graph;
 
 	private final String description;
 
@@ -44,7 +44,7 @@ public class HtmlGraph extends GraphStreamWrapper {
 	/**
 	 * Builds the graph.
 	 * 
-	 * @param graph            the wrapped {@link GraphmlGraph}
+	 * @param graph            the wrapped {@link DotGraph}
 	 * @param includeSubnodes  whether or not sub-nodes should be part of the
 	 *                             graph
 	 * @param map              a map from a node id to its text and description
@@ -54,7 +54,7 @@ public class HtmlGraph extends GraphStreamWrapper {
 	 *                             label in the collapse/expand toggles
 	 */
 	public HtmlGraph(
-			GraphmlGraph graph,
+			DotGraph graph,
 			boolean includeSubnodes,
 			SortedMap<Integer, Pair<String, SerializableNodeDescription>> map,
 			String description,
@@ -80,11 +80,8 @@ public class HtmlGraph extends GraphStreamWrapper {
 			Writer writer)
 			throws IOException {
 		StringWriter graphWriter = new StringWriter();
-		graph.dump(graphWriter, false);
-		String graphText = graphWriter.toString()
-				.replace("&apos;", "'")
-				.replace("'", "\\'")
-				.replace("\n", "\\n");
+		graph.dumpStripped(graphWriter);
+		String graphText = graphWriter.toString();
 		String graphTitle = "Graph: " + graph.getTitle();
 		String graphDescription = "";
 		if (StringUtils.isNotBlank(description))
@@ -106,7 +103,7 @@ public class HtmlGraph extends GraphStreamWrapper {
         StringBuilder descrs = new StringBuilder();
 		for (Entry<Integer, Pair<String, SerializableNodeDescription>> d : descriptions.entrySet()) {
 			String nodeName = nodeName(d.getKey());
-			if (includeSubnodes || graph.graph.getNode(nodeName) != null) {
+			if (includeSubnodes || graph.graph.nodes().stream().filter(n -> n.name().toString().equals(nodeName)).findAny().isPresent()) {
 				descrs.append("\t\t\t\t<div id=\"header-")
 						.append(nodeName)
 						.append("\" class=\"header-hidden\">\n");

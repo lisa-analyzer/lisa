@@ -133,12 +133,14 @@ import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.graphstream.graph.implementations.SingleGraph;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
+
+import guru.nidi.graphviz.model.Factory;
+import guru.nidi.graphviz.model.MutableGraph;
 
 //This test must live here since this project has all the others in its classpath, and reflections can detect all classes
 public class EqualityContractVerificationTest {
@@ -171,8 +173,8 @@ public class EqualityContractVerificationTest {
 
 	private static final StructuredRepresentation dr1 = new StringRepresentation("foo");
 	private static final StructuredRepresentation dr2 = new StringRepresentation("bar");
-	private static final SingleGraph g1 = new SingleGraph("a");
-	private static final SingleGraph g2 = new SingleGraph("b");
+	private static final MutableGraph g1 = Factory.mutGraph("a");
+	private static final MutableGraph g2 = Factory.mutGraph("b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
 	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, CallType.STATIC, "bar", "bar");
 	private static final Set<Type> s1 = Collections.singleton(Untyped.INSTANCE);
@@ -183,7 +185,7 @@ public class EqualityContractVerificationTest {
 	@BeforeClass
 	public static void setup() {
 		adj1.addNode(new Ret(cfg1, loc));
-		g1.addNode("a");
+		g1.add(Factory.mutNode("a"));
 	}
 
 	private static Reflections mkReflections() {
@@ -276,7 +278,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(Set.class, s1, s2)
-				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2)
+				.withPrefabValues(MutableGraph.class, g1, g2)
 				.withPrefabValues(BaseNonRelationalValueDomain.class, int1, int2);
 
 		if (getClass)

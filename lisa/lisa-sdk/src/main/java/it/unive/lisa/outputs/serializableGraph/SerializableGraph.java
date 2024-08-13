@@ -1,10 +1,5 @@
 package it.unive.lisa.outputs.serializableGraph;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import it.unive.lisa.outputs.DotGraph;
-import it.unive.lisa.outputs.GraphmlGraph;
-import it.unive.lisa.outputs.HtmlGraph;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -12,14 +7,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.Pair;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.outputs.HtmlGraph;
 
 /**
  * A graph that can be serialized. This graph contains {@link SerializableNode}s
@@ -263,62 +263,6 @@ public class SerializableGraph {
 	}
 
 	/**
-	 * Converts this graph to a {@link GraphmlGraph}.
-	 * 
-	 * @param includeSubnodes whether or not sub-nodes should be part of the
-	 *                            graph
-	 * 
-	 * @return the converted graph
-	 */
-	public GraphmlGraph toGraphml(
-			boolean includeSubnodes) {
-		GraphmlGraph graph = new GraphmlGraph(name);
-
-		Set<Integer> hasFollows = new HashSet<>();
-		Set<Integer> hasPreds = new HashSet<>();
-		Set<Integer> rootnodes = new HashSet<>();
-		Map<SerializableNode, SerializableNode> containers = new HashMap<>();
-		Map<Integer, SerializableNode> nodemap = new HashMap<>();
-		Map<Integer, SerializableValue> labels = new HashMap<>();
-
-		edges.forEach(e -> {
-			hasFollows.add(e.getSourceId());
-			hasPreds.add(e.getDestId());
-		});
-
-		descriptions.forEach(d -> labels.put(d.getNodeId(), d.getDescription()));
-		nodes.forEach(n -> nodemap.put(n.getId(), n));
-		rootnodes.addAll(nodemap.keySet());
-		nodes.forEach(n -> {
-			n.getSubNodes().forEach(sub -> containers.put(nodemap.get(sub), n));
-			rootnodes.removeAll(n.getSubNodes());
-		});
-
-		for (SerializableNode n : nodes)
-			if (includeSubnodes || rootnodes.contains(n.getId()))
-				graph.addNode(n,
-						!hasPreds.contains(n.getId()) && rootnodes.contains(n.getId()),
-						!hasFollows.contains(n.getId()) && rootnodes.contains(n.getId()),
-						labels.get(n.getId()));
-
-		if (includeSubnodes)
-			while (!containers.isEmpty()) {
-				Set<Entry<SerializableNode, SerializableNode>> leaves = containers.entrySet().stream()
-						.filter(entry -> !containers.containsValue(entry.getKey())).collect(Collectors.toSet());
-				leaves.forEach(entry -> {
-					graph.markSubNode(entry.getValue(), entry.getKey());
-					containers.remove(entry.getKey());
-				});
-			}
-
-		for (SerializableEdge e : edges)
-			if (includeSubnodes || (rootnodes.contains(e.getSourceId()) && rootnodes.contains(e.getDestId())))
-				graph.addEdge(e);
-
-		return graph;
-	}
-
-	/**
 	 * Converts this graph to an {@link HtmlGraph}.
 	 * 
 	 * @param includeSubnodes  whether or not sub-nodes should be part of the
@@ -332,7 +276,7 @@ public class SerializableGraph {
 			boolean includeSubnodes,
 			String descriptionLabel) {
 		SerializableGraph g = new SerializableGraph(name, description, nodes, edges, Collections.emptySortedSet());
-		GraphmlGraph graphml = g.toGraphml(includeSubnodes);
+		DotGraph dot = g.toDot();
 
 		SortedMap<Integer, Pair<String, SerializableNodeDescription>> map = new TreeMap<>();
 		for (SerializableNodeDescription d : descriptions)
@@ -341,7 +285,7 @@ public class SerializableGraph {
 					map.put(n.getId(), Pair.of(n.getText(), d));
 					break;
 				}
-		return new HtmlGraph(graphml, includeSubnodes, map, description, descriptionLabel);
+		return new HtmlGraph(dot, includeSubnodes, map, description, descriptionLabel);
 	}
 
 	/**
