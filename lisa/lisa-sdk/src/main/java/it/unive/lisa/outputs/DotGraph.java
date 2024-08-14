@@ -67,9 +67,9 @@ public class DotGraph extends VisualGraph {
 		builder.append(
 				"<tr><td align=\"right\">node border&nbsp;</td><td align=\"left\"><font color=\"gray\">gray</font>, single</td></tr>");
 		builder.append(
-				"<tr><td align=\"right\">entrypoint border&nbsp;</td><td align=\"left\"><font color=\"black\">black</font>, single</td></tr>");
+				"<tr><td align=\"right\">entrypoint border&nbsp;</td><td align=\"left\"><font color=\"black\">black</font>, dashed</td></tr>");
 		builder.append(
-				"<tr><td align=\"right\">exitpoint border&nbsp;</td><td align=\"left\"><font color=\"black\">black</font>, double</td></tr>");
+				"<tr><td align=\"right\">exitpoint border&nbsp;</td><td align=\"left\"><font color=\"black\">black</font>, solid</td></tr>");
 		builder.append(
 				"<tr><td align=\"right\">sequential edge&nbsp;</td><td align=\"left\"><font color=\"black\">black</font>, solid</td></tr>");
 		builder.append(
@@ -127,18 +127,21 @@ public class DotGraph extends VisualGraph {
 		if (label != null)
 			extra = "<br/><br/>" + dotEscape(format(label));
 
-		MutableNode n = Factory.mutNode(nodeName(node.getId()))
-				.setName(nodeName(node.getId()))
+		String nodeName = nodeName(node.getId());
+		MutableNode n = Factory.mutNode(nodeName)
+				.setName(nodeName)
 				.add(Label.html(l + extra))
-				.add(Shape.RECT);
+				.add(Shape.RECT)
+				// we keep trace of what was the original id of the node
+				.add("id", nodeName);
 
 		if (entry || exit)
 			n = n.add(Color.BLACK);
 		else
 			n = n.add(Color.GRAY);
 
-		if (exit)
-			n = n.add("peripheries", 2);
+		if (entry)
+			n = n.add(Style.DASHED);
 
 		graph.add(n);
 	}
@@ -196,7 +199,7 @@ public class DotGraph extends VisualGraph {
 		MutableNode dest = mutNode(nodeName(id1));
 
 		Link link = src.linkTo(dest);
-		
+
 		switch (edge.getKind()) {
 		case "TrueEdge":
 			link = link.with(Style.DASHED);
@@ -211,9 +214,9 @@ public class DotGraph extends VisualGraph {
 			link = link.with(Color.BLACK);
 			break;
 		}
-		
+
 		src.links().add(link);
-		
+
 		// need to re-add the node to have it updated
 		graph.add(src);
 	}
@@ -224,7 +227,7 @@ public class DotGraph extends VisualGraph {
 			throws IOException {
 		MutableGraph copy = graph.copy();
 		copy.graphAttrs().add(Label.of(title))
-			.graphAttrs().add("labelloc", "t");
+				.graphAttrs().add("labelloc", "t");
 		copy.add(buildLegend());
 		String exportedGraph = Graphviz.fromGraph(copy).render(Format.DOT).toString();
 		writer.write(exportedGraph);

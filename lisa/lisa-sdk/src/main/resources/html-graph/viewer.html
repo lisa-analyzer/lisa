@@ -9,34 +9,14 @@
 		<script src="assets/d3.v7.min.js"></script>
 		<script src="assets/d3-graphviz.min.js"></script>
 		
-		<style>
-		
-		.d-flex{display:flex!important}
-		.flex-column{flex-direction:column!important}
-		.flex-grow-1{flex-grow:1!important}
-		.justify-content-center{justify-content:center!important}
-		.align-items-center{align-items:center!important}
-		
-		.hovered {
-          fill: #ffa500;
-          stroke: #333;
-          stroke-width: 2px;
-          filter: drop-shadow(0 0 5px rgba(255, 153, 0, 0.5));
-        }
-
-        .node ellipse {
-          transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
-        }
-		
+		<style>		
 		body {
 			font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
 			font-size: 14px;
 			background-color: white;
 		}
 		
-		html, body, #full {
-			height: 100%;
-		}
+		html, body, #full { height: 100%; }
 		
 		header {
 			height: 13%;
@@ -74,22 +54,16 @@
 			min-width: 200px;
 		}
 		
-		.description-header {
-			font-weight: bold;
-		}
+		.description-header { font-weight: bold; }
 		
 		#descriptions ul {
 			padding-left: inherit;
 			margin: 5px 0;
 		}
 		
-		.description-nest {
-			padding-left: 15px;
-		}
+		.description-nest { padding-left: 15px;	}
 		
-		.header-hidden {
-			display: none;
-		}
+		.header-hidden { display: none; }
 		
 		.description-title-wrapper {
 			margin-top: 0.83em;
@@ -171,8 +145,7 @@
 			font-weight: bold;
 		}
 
-		.close:hover,
-		.close:focus {
+		.close:hover, .close:focus {
 			color: black;
 			text-decoration: none;
 			cursor: pointer;
@@ -189,8 +162,7 @@
 			border-radius: 25px;
 		}
 		
-		.button:disabled,
-		.button[disabled]{
+		.button:disabled, .button[disabled] {
 			background-color: #CCCCCC;
 			border: 1px #CCCCCC solid;
 			color: #666666;
@@ -201,6 +173,29 @@
 			border-radius: 25px;
 			border: 1px #16A15B solid;
 		}
+		
+		#graph-wrapper {
+			display: flex !important;
+			flex-direction: column !important;
+		}
+		
+		#graph {
+			display: flex !important;
+			flex-grow: 1 !important;
+			justify-content: center !important;
+			align-items: center !important;
+		}
+		
+		.hovered {
+			stroke: #333;
+			stroke-width: 1px;
+			fill: rgba(22, 161, 91, 0.8);
+			filter: drop-shadow(0 0 5px rgba(255, 161, 91, 0.5));
+		}
+		
+		.node { cursor: pointer; }
+		
+		.node polygon { fill: white; }
 		</style>
 	</head>
 
@@ -218,8 +213,8 @@
 			<div class="modal-content">
 				<span class="close">&times;</span>
 				<b>Node border: <font color="darkgray">gray</font>, single</b>
-				<b>Entrypoint border: black, single</b>
-				<b>Exitpoint border: black, double</b>
+				<b>Entrypoint border: black, dashed</b>
+				<b>Exitpoint border: black, solid</b>
 				<b>Sequential edge: black, solid</b>
 				<b>False edge: <font color="red">red</font>, solid</b>
 				<b>True edge: <font color="blue">blue</font>, solid</b>
@@ -227,12 +222,12 @@
 		</div>
 		<div id="full">
 			<div class="splitter">
-				<div class="d-flex flex-column" id="graph-wrapper">
-					<div class="d-flex flex-grow-1 justify-content-center align-items-center" id="graph"></div>
+				<div id="graph-wrapper">
+					<div id="graph"></div>
 				</div>
 				<div id="separator"></div>
 				<div id="descriptions">
-					<div id="header-none">
+					<div id="header-info header-none">
 					No node selected. Select a node to show its <span th:utext="${graphDescriptionLabel}">DESCRIPTION LABEL</span>.
 					</div>
 					<div th:utext="${graphDescriptions}">
@@ -286,41 +281,10 @@
 			
 			function renderGraph(dotString) {
 				graphviz.renderDot(dotString, function () {
-					d3.selectAll(".node")
-						.on("mouseover", function () {
-							d3.select(this)
-								.select("ellipse")
-								.classed("hovered", true);
-							})
-						.on("mouseout", function () {
-							d3.select(this)
-								.select("ellipse")
-								.classed("hovered", false);
-							});
-				}).on("end", function () {
-					d3.selectAll(".node a").each(function () {
-						const node = d3.select(this);
-						var info = d3.select(this).attr("xlink:title");
-
-						const jsonData = JSON.parse(info);
-						console.log(jsonData);
-
-						new bootstrap.Popover(this, {
-							container: 'body',
-							html: true,
-							trigger: 'hover',
-							placement: 'top',
-							title: jsonData.fullPath || "Default Title",
-							content: function () {
-								return `<h6>${jsonData.role}</h6>
-								<strong>Method:</strong> ${jsonData.method}<br>
-								<strong>Endpoint:</strong> ${jsonData.fullPath}<br>
-								<strong>Path variable:</strong> ${jsonData.pathVariableName}<br>
-								<strong>Location:</strong> ${jsonData.codeLocation}<br>
-								${addPathVariableInfo(jsonData.methodPathVariable)}
-								${addIssues(jsonData.issues)}`;
-							}
-						});
+					d3.selectAll('.node').on('click', function () {
+						var name = d3.select(this).attr('id');
+						d3.selectAll('.header-info').classed('header-hidden', true);
+						d3.select('#header-' + name).classed('header-hidden', false);
 					});
 				});
 			}

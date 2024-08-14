@@ -106,7 +106,7 @@ public class HtmlGraph extends VisualGraph {
 			if (includeSubnodes || graph.graph.nodes().stream().filter(n -> n.name().toString().equals(nodeName)).findAny().isPresent()) {
 				descrs.append("\t\t\t\t<div id=\"header-")
 						.append(nodeName)
-						.append("\" class=\"header-hidden\">\n");
+						.append("\" class=\"header-info header-hidden\">\n");
 				descrs.append(
 						"\t\t\t\t\t<div class=\"description-title-wrapper\"><span class=\"description-title\">")
 						.append(StringUtils.capitalize(descriptionLabel))
