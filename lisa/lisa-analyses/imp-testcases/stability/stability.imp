@@ -1,0 +1,37 @@
+class stability {
+	example(x, y) {
+		while (x > 0 && y > 0) {
+			y = 2 * y;
+			x = x - 1;
+		}
+	}
+	
+	send(dest, amount, sbalance, dbalance) {
+		// hack: we force the typing to numeric to avoid having + being rewritten as strcat
+		dbalance  = dbalance - 0;
+		if (amount > 0 && amount <= sbalance) {
+			sbalance = sbalance - amount;
+			dbalance = dbalance + amount;
+		}
+	}
+
+    scale(x, y, width, height, scale1, scale2){
+		// hack: we force the typing to numeric to avoid having + being rewritten as strcat
+		x  = x - 0;
+		width  = width - 0;
+		
+    	if (x >= 0 && y >= 0 && width > 0 && height > 0 && scale1 > 0 && scale2 > 0){
+            def upperRightPointX = x + width;
+            def lowerLeftPointY = y - height;
+
+            x = x * scale1;
+            y = y * scale2;
+
+            upperRightPointX = upperRightPointX * scale1;
+            lowerLeftPointY = lowerLeftPointY * scale2;
+
+            width = x - upperRightPointX;
+            height = y - lowerLeftPointY;
+        }
+    }
+}

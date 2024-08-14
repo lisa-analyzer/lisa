@@ -14,7 +14,6 @@ import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
@@ -68,7 +67,6 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
 		if (conf.optimize)
@@ -99,7 +97,7 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 				results.putResult(cfg, ID, cfg.backwardFixpoint(
 						entryState,
 						this,
-						WorkingSet.of(fixpointWorkingSet),
+						WorkingSet.of(conf.fixpointWorkingSet),
 						conf,
 						ID));
 			} catch (SemanticException e) {

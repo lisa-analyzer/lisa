@@ -20,7 +20,7 @@
     "analysisGraphs" : "NONE",
     "descendingPhaseType" : "NARROWING",
     "dumpForcesUnwinding" : "false",
-    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
     "glbThreshold" : "5",
     "hotspots" : "unset",
     "jsonOutput" : "true",

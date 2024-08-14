@@ -17,7 +17,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Assignment;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -72,7 +71,6 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
 		// new fixpoint iteration: restart
@@ -107,7 +105,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 					prepared = a.forwardSemantics(prepared, this, store);
 				}
 
-				results.putResult(cfg, ID, cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), conf, ID));
+				results.putResult(cfg, ID,
+						cfg.fixpoint(prepared, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}

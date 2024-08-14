@@ -320,7 +320,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
-			for (SymbolicExpression rec : receiver)
+			for (SymbolicExpression rec : receiver) {
+				rec = removeTypingExpressions(rec);
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
@@ -347,7 +348,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 
 					result.add(e);
 				} else if (rec instanceof AllocationSite)
-					result.add(rec);
+					result.add(((AllocationSite) rec).withType(expression.getStaticType()));
+			}
 
 			return new ExpressionSet(result);
 		}
@@ -387,7 +389,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 
-			for (SymbolicExpression loc : arg)
+			for (SymbolicExpression loc : arg) {
+				loc = removeTypingExpressions(loc);
 				if (loc instanceof AllocationSite) {
 					AllocationSite allocSite = (AllocationSite) loc;
 					MemoryPointer e = new MemoryPointer(
@@ -403,6 +406,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 					result.add(e);
 				} else
 					result.add(loc);
+			}
 			return new ExpressionSet(result);
 		}
 
@@ -414,7 +418,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 
-			for (SymbolicExpression ref : arg)
+			for (SymbolicExpression ref : arg) {
+				ref = removeTypingExpressions(ref);
 				if (ref instanceof MemoryPointer)
 					result.add(((MemoryPointer) ref).getReferencedLocation());
 				else if (ref instanceof Identifier) {
@@ -444,6 +449,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 					}
 				} else
 					result.add(ref);
+			}
 
 			return new ExpressionSet(result);
 		}

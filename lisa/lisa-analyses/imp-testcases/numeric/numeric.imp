@@ -7,7 +7,7 @@ class tutorial {
         	b = b + c;
    		return b;
     }
-    
+
 	sign_parity_example() {
 		def i = 2;
 		def max = 10;

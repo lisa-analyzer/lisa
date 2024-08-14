@@ -17,6 +17,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
@@ -29,7 +30,9 @@ import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
+import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import java.util.Collections;
 import java.util.HashSet;
@@ -458,5 +461,22 @@ public class PointBasedHeapTest {
 		deref = new HeapDereference(untyped, y, loc1);
 		expectedRewritten = new ExpressionSet(expectedUnknownAlloc);
 		assertEquals(expectedRewritten, xAssign.rewrite(deref, pp1, fakeOracle));
+	}
+
+	@Test
+	public void testIssue300() throws SemanticException {
+		// ((type) x) rewritten in x -> pp1 -> pp1
+		PointBasedHeap xAssign = topHeap.assign(x,
+				new HeapReference(untyped,
+						new MemoryAllocation(untyped, loc1), loc1),
+				pp1, fakeOracle);
+		SymbolicExpression e = new AccessChild(intType,
+				new BinaryExpression(untyped,
+						new Constant(new TypeTokenType(Collections.singleton(intType)), intType, loc1), x,
+						TypeConv.INSTANCE,
+						loc1),
+				new Constant(intType, 1, loc1), loc1);
+		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
+		assertEquals(expectedRewritten, xAssign.rewrite(e, pp1, fakeOracle));
 	}
 }
