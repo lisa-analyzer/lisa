@@ -9,90 +9,48 @@
 		<script src="assets/d3.v7.min.js"></script>
 		<script src="assets/d3-graphviz.min.js"></script>
 		
-		<style>		
+		<style>	
+		html,
+		body {
+			height: 100%;
+			margin: 0;
+		}
+
 		body {
 			font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
 			font-size: 14px;
 			background-color: white;
 		}
 		
-		html, body, #full { height: 100%; }
+		.box {
+			display: flex;
+			flex-flow: column;
+			height: 100%;
+		}
+
+		.box .row.header {
+			flex: 0 1 auto;
+		}
+
+		.box .row.content {
+			flex: 1 1 auto;
+		}
 		
 		header {
-			height: 13%;
-			margin-bottom: 20px;
-			padding-bottom: 20px;
+			padding: 10px;
 			border-bottom: 2px black solid;
 		}
 		
 		header img {
 			float: right;
-			height: 100%;
-			padding-right: 10px;
-		}
-		
-		#full {
-			display: flex;
-			flex-direction: row;
-		}
-		
-		#graph-wrapper {
-			flex-grow: 0.5;
-			z-index: 10;
-			width: 75%;
-			min-width: 500px;
-		}
-		
-		#descriptions {
-			flex-grow: 0.5;
-			z-index: 11;
-			overflow: auto;
-			font-size: 18px;
-			border-left: 2px solid #e2e2e2;
-			padding-left: 20px;
-			width: 25%;
-			min-width: 200px;
-		}
-		
-		.description-header { font-weight: bold; }
-		
-		#descriptions ul {
-			padding-left: inherit;
-			margin: 5px 0;
-		}
-		
-		.description-nest { padding-left: 15px;	}
-		
-		.header-hidden { display: none; }
-		
-		.description-title-wrapper {
-			margin-top: 0.83em;
-			margin-bottom: 0.83em;
-		}
-		
-		.description-title {
-			font-size: 1.5em;
-			font-weight: bold;
-		}
-		
-		.description-title-text {
-			font-size: 1.5em;
-			font-family: monospace;
-		}
-		
-		#header-none {
-			margin-top: 0.83em;
-			margin-bottom: 0.83em;
-		}
-		
-		.no-results {
-			border: solid 2px #FF0000;  
-			background-color: #FF000040;
+			height: 120px;
+			margin-top: 10px;
 		}
 		
 		.splitter {
 			width: 100%;
 			display: flex;
+			flex-direction: row;
 		}
 
 		#separator {
@@ -160,6 +118,7 @@
 			display: inline-block;
 			border: 1px #16A15B solid;
 			border-radius: 25px;
+			cursor: pointer;
 		}
 		
 		.button:disabled, .button[disabled] {
@@ -174,60 +133,99 @@
 			border: 1px #16A15B solid;
 		}
 		
-		#graph-wrapper {
-			display: flex !important;
-			flex-direction: column !important;
+		.no-results {
+			border: solid 2px #FF0000;  
+			background-color: #FF000040;
 		}
 		
 		#graph {
-			display: flex !important;
-			flex-grow: 1 !important;
-			justify-content: center !important;
-			align-items: center !important;
-		}
-		
-		.hovered {
-			stroke: #333;
-			stroke-width: 1px;
-			fill: rgba(22, 161, 91, 0.8);
-			filter: drop-shadow(0 0 5px rgba(255, 161, 91, 0.5));
+			display: flex;
+			flex-grow: 1;
+			justify-content: center;
+			align-items: center;
+			z-index: 10;
+			width: 75%;
+			min-width: 500px;
 		}
 		
 		.node { cursor: pointer; }
 		
 		.node polygon { fill: white; }
+		
+		.node-selected { filter: drop-shadow(0 0 5px #16A15B); }
+		
+		#descriptions {
+			flex-grow: 0.5;
+			z-index: 11;
+			overflow: auto;
+			font-size: 18px;
+			border-left: 2px solid #e2e2e2;
+			padding-left: 20px;
+			width: 25%;
+			min-width: 200px;
+		}
+		
+		.description-header { font-weight: bold; }
+		
+		#descriptions ul {
+			padding-left: inherit;
+			margin: 5px 0;
+		}
+		
+		.description-nest { padding-left: 15px;	}
+		
+		.header-hidden { display: none; }
+		
+		.description-title-wrapper {
+			margin-top: 0.83em;
+			margin-bottom: 0.83em;
+		}
+		
+		.description-title {
+			font-size: 1.5em;
+			font-weight: bold;
+		}
+		
+		.description-title-text {
+			font-size: 1.5em;
+			font-family: monospace;
+		}
+		
+		#header-none {
+			margin-top: 0.83em;
+			margin-bottom: 0.83em;
+		}
 		</style>
 	</head>
 
 	<body>
-		<header>
-			<img src="https://raw.githubusercontent.com/lisa-analyzer/lisa/master/logo.png" alt="LiSA logo"/>
-			<h1 th:utext="${graphTitle}">TITLE</h1>
-			<h3 th:utext="${graphDescription}">DESCRIPTION</h3>
-			<input id="search" type="text" class="searchbar" placeholder="Search node.."/>
-			<input id="next" type="button" value="Next" class="button" disabled/>
-			<input id="prev" type="button" value="Previous" class="button" disabled/>
-			<button id="legendButton" class="button">Legend</button>
-		</header>
-		<div id="legend" class="modal">
-			<div class="modal-content">
-				<span class="close">&times;</span>
-				<b>Node border: <font color="darkgray">gray</font>, single</b>
-				<b>Entrypoint border: black, dashed</b>
-				<b>Exitpoint border: black, solid</b>
-				<b>Sequential edge: black, solid</b>
-				<b>False edge: <font color="red">red</font>, solid</b>
-				<b>True edge: <font color="blue">blue</font>, solid</b>
-			</div>
-		</div>
-		<div id="full">
-			<div class="splitter">
-				<div id="graph-wrapper">
-					<div id="graph"></div>
+		<div class="box">
+			<header class="row header">
+				<img src="https://raw.githubusercontent.com/lisa-analyzer/lisa/master/logo.png" alt="LiSA logo"/>
+				<h1 th:utext="${graphTitle}">TITLE</h1>
+				<h3 th:utext="${graphDescription}">DESCRIPTION</h3>
+				<input id="search" type="text" class="searchbar" placeholder="Search node.."/>
+				<input id="next" type="button" value="Next" class="button" disabled/>
+				<input id="prev" type="button" value="Previous" class="button" disabled/>
+				<button id="centerButton" class="button">Center graph</button>
+				<button id="legendButton" class="button">Legend</button>
+			</header>
+			<div id="legend" class="modal">
+				<div class="modal-content">
+					<span class="close">&times;</span>
+					<b>Node border: <font color="darkgray">gray</font>, single</b>
+					<b>Entrypoint border: black, dashed</b>
+					<b>Exitpoint border: black, solid</b>
+					<b>Sequential edge: black, solid</b>
+					<b>False edge: <font color="red">red</font>, solid</b>
+					<b>True edge: <font color="blue">blue</font>, solid</b>
 				</div>
+			</div>
+			<div id="full" class="row content splitter">
+				<div id="graph"></div>
 				<div id="separator"></div>
 				<div id="descriptions">
-					<div id="header-info header-none">
+					<div class="header-info" id="header-none">
 					No node selected. Select a node to show its <span th:utext="${graphDescriptionLabel}">DESCRIPTION LABEL</span>.
 					</div>
 					<div th:utext="${graphDescriptions}">
@@ -237,7 +235,7 @@
 			</div>
 		</div>
 		<script th:inline="javascript">	
-			const scale = 0.5;
+			const scale = 0.8;
 			
 			function attributer(datum, index, nodes) {
 				var selection = d3.select(this);
@@ -245,7 +243,7 @@
 					datum.attributes = {
 						...datum.attributes,
 						width: '100%',
-						height: '100%',
+						height: document.getElementById('graph').offsetHeight + 'px',
 					};
 					
 					// svg is constructed by hpcc-js/wasm, which uses pt instead of px, so need to convert
@@ -272,131 +270,130 @@
 		
 			const graphviz = d3.select("#graph").graphviz()
 								.attributer(attributer)
-								.fit(true)
 								.zoom(true);
 				
 			/*<![CDATA[*/
 			const graph = /*[[${graphContent}]]*/ 'default DOT placeholder';
 			/*]]>*/
 			
+			function selectNode(target) {
+				d3.select('.node-selected').classed('node-selected', false);
+				d3.select(target).classed('node-selected', true);
+				// Show corresponding header
+				var id = d3.select(target).attr('id');
+				d3.selectAll('.header-info').classed('header-hidden', true);
+				d3.select('#header-' + id).classed('header-hidden', false);
+			}
+			
 			function renderGraph(dotString) {
 				graphviz.renderDot(dotString, function () {
 					d3.selectAll('.node').on('click', function () {
-						var name = d3.select(this).attr('id');
-						d3.selectAll('.header-info').classed('header-hidden', true);
-						d3.select('#header-' + name).classed('header-hidden', false);
+						selectNode(this);
 					});
 				});
 			}
 			renderGraph(graph);
-
-			/*var lastsearchresult = [];
-			var lastshownelement = -1;
-			function centerToSearch() {
-				var target = lastsearchresult[lastshownelement];
-				cy.$('node:selected').unselect();
-				target.select();
-				cy.animate({ center: { eles: target } }, { duration: 0 });
-			}
-
-			$('#search').on('input', function (e) {
-				var query = e.target.value;
-				lastsearchresult = cy.nodes('[NODE_TEXT @*= "' + query + '"]');
-				var hasresults = lastsearchresult.size() != 0;
-				if (hasresults) {
-					lastshownelement = 0;
-					centerToSearch();
-					e.target.classList.remove('no-results');
-				} else {
-					lastshownelement = -1;
-					cy.$('node:selected').unselect();
-					e.target.classList.add('no-results');  
-				}
-				
-				if (query === "" || !hasresults) {
-					$('#next').prop('disabled', true);
-					$('#prev').prop('disabled', true);
-				} else {
-					$('#next').prop('disabled', false);
-					$('#prev').prop('disabled', false);
-				}
-			});
-			$('#next').on('click', function (e) {
-				if (lastshownelement != -1) {
-					lastshownelement = (lastshownelement + 1) % lastsearchresult.size();
-					centerToSearch();
-				}
-			});
-			$('#prev').on('click', function (e) {
-				if (lastshownelement != -1) {
-					lastshownelement = ((lastshownelement - 1) + lastsearchresult.size()) % lastsearchresult.size();
-					centerToSearch();
-				}
+			
+			/* Center button */
+			var btn = d3.select("#centerButton").on('click', function() {
+				var zoomTransition = d3.transition("zooming")
+										.duration(150)
+										.ease(d3.easeLinear);
+				graphviz.resetZoom(zoomTransition);
 			});
 			
-			cy.on('select', 'node', function(event) {
-				var id = event.target.id();
-				$('[id^=header-]').addClass('header-hidden');
-				$('#header-' + id).removeClass('header-hidden');
-			});*/
+			/* Search */
+			var hits = [];
+			var hit = -1;
+			function centerToSearch() {
+				hits.filter(function (d, i) { 
+						return i === hit; 
+					}).each(function (d, i) { 
+						selectNode(this);
+						var offsetX = -this.x;
+						var offsetY = -this.y;
+						d3.select().attr('transform', 'translate(' + offsetX + ',' + offsetY + ')'); 
+					});
+			}
+			d3.select('#search').on('input', function (e) {
+				var query = e.target.value;
+				if (query !== "")
+					hits = d3.selectAll('.node').filter(function (d, i) {
+						return d3.select(this).select('text').text().includes(query);
+					});
+				
+				if (query === "" || hits.size() == 0) {
+					hit = -1;
+					d3.select('#next').attr('disabled', true);
+					d3.select('#prev').attr('disabled', true);
+					d3.select('.node-selected').classed('node-selected', false);
+					d3.select(this).classed('no-results', true);
+				} else {
+					hit = 0;
+					d3.select('#next').attr('disabled', null);
+					d3.select('#prev').attr('disabled', null);
+					d3.select(this).classed('no-results', false);
+					centerToSearch();
+				}
+			});
+			d3.select('#next').on('click', function (e) {
+				if (hit != -1) {
+					hit = (hit + 1) % hits.size();
+					centerToSearch();
+				}
+			});
+			d3.select('#prev').on('click', function (e) {
+				if (hit != -1) {
+					hit = ((hit - 1) + hits.size()) % hits.size();
+					centerToSearch();
+				}
+			});
 			
 			/* Split pane */
-			function makeDraggable(element, direction) {
-				var md;
-				const first  = document.getElementById("graph-wrapper");
-				const second = document.getElementById("descriptions");
+			const separator = document.getElementById("separator");
+			const first  = document.getElementById("graph");
+			const second = document.getElementById("descriptions");
+			var md;
 
-				element.onmousedown = onMouseDown;
+			separator.onmousedown = onMouseDown;
 
-				function onMouseDown(e) {
-					md = {e,
-						offsetLeft:  element.offsetLeft,
-						offsetTop:   element.offsetTop,
-						firstWidth:  first.offsetWidth,
-						secondWidth: second.offsetWidth
-					};
+			function onMouseDown(e) {
+				md = {e,
+					offsetLeft:  separator.offsetLeft,
+					offsetTop:   separator.offsetTop,
+					firstWidth:  first.offsetWidth,
+					secondWidth: second.offsetWidth
+				};
 
-					document.onmousemove = onMouseMove;
-					document.onmouseup = () => {
-						document.onmousemove = document.onmouseup = null;
-					}
-				}
-
-				function onMouseMove(e)
-				{
-					var delta = {x: e.clientX - md.e.clientX,
-					y: e.clientY - md.e.clientY};
-
-					if (direction === "H" )  {
-						delta.x = Math.min(Math.max(delta.x, -md.firstWidth),
-						md.secondWidth);
-
-						element.style.left = md.offsetLeft + delta.x + "px";
-						first.style.width = (md.firstWidth + delta.x) + "px";
-						second.style.width = (md.secondWidth - delta.x) + "px";
-					}
+				document.onmousemove = onMouseMove;
+				document.onmouseup = () => {
+					document.onmousemove = document.onmouseup = null;
 				}
 			}
-			makeDraggable(document.getElementById("separator"), "H");
+
+			function onMouseMove(e)
+			{
+				var delta = {x: e.clientX - md.e.clientX,
+				y: e.clientY - md.e.clientY};
+
+				delta.x = Math.min(Math.max(delta.x, -md.firstWidth),
+				md.secondWidth);
+
+				separator.style.left = md.offsetLeft + delta.x + "px";
+				first.style.width = (md.firstWidth + delta.x) + "px";
+				second.style.width = (md.secondWidth - delta.x) + "px";
+			}
 			
 			/* Legend modal */
-			var modal = document.getElementById("legend");
-			var btn = document.getElementById("legendButton");
-			var span = document.getElementsByClassName("close")[0];
-
-			btn.onclick = function() {
-				modal.style.display = "block";
-			}
-
-			span.onclick = function() {
-				modal.style.display = "none";
-			}
-
-			window.onclick = function(event) {
-				if (event.target == modal) {
-					modal.style.display = "none";
-				}
-			} 
+			var modal = d3.select("#legend").on('click', function() {
+				d3.select(this).style('display', 'none');
+			});
+			var btn = d3.select("#legendButton").on('click', function() {
+				modal.style('display', 'block');
+			});
+			var span = d3.select(".close").on('click', function() {
+				modal.style('display', 'none');
+			});;
 			</script>
 	</body>
 </html>
