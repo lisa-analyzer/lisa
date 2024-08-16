@@ -323,7 +323,6 @@ public class FileManager {
 			throws IOException {
 		List<String> files = new ArrayList<>();
 		if (usedHtmlViewer) {
-			files.add("assets/lisa.png");
 			files.add("assets/d3.v7.min.js");
 			files.add("assets/d3-graphviz.min.js");
 		}

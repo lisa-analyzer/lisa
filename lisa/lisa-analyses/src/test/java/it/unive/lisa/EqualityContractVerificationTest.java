@@ -2,6 +2,8 @@ package it.unive.lisa;
 
 import static org.junit.Assert.assertTrue;
 
+import guru.nidi.graphviz.model.Factory;
+import guru.nidi.graphviz.model.MutableGraph;
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.BackwardAnalyzedCFG;
@@ -138,9 +140,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
-
-import guru.nidi.graphviz.model.Factory;
-import guru.nidi.graphviz.model.MutableGraph;
 
 //This test must live here since this project has all the others in its classpath, and reflections can detect all classes
 public class EqualityContractVerificationTest {

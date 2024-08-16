@@ -2,17 +2,7 @@ package it.unive.lisa.outputs;
 
 import static guru.nidi.graphviz.model.Factory.mutNode;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Map.Entry;
-import java.util.function.Function;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-
-import guru.nidi.graphviz.attribute.Attributes;
 import guru.nidi.graphviz.attribute.Color;
-import guru.nidi.graphviz.attribute.ForGraph;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Shape;
 import guru.nidi.graphviz.attribute.Style;
@@ -28,6 +18,12 @@ import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * A graph that can be dumped into Dot format.
@@ -56,10 +52,9 @@ public class DotGraph extends VisualGraph {
 	}
 
 	private static MutableGraph buildLegend() {
-		@SuppressWarnings("unchecked")
 		MutableGraph legend = Factory.mutGraph("legend")
 				.graphAttrs().add(Label.html("Legend"))
-				.graphAttrs().add((Attributes<? extends ForGraph>) Style.DOTTED)
+				.graphAttrs().add("style", "dotted")
 				.setCluster(true);
 
 		StringBuilder builder = new StringBuilder();
@@ -233,6 +228,13 @@ public class DotGraph extends VisualGraph {
 		writer.write(exportedGraph);
 	}
 
+	/**
+	 * Dumps this graph through the given {@link Writer}, excluding the legend.
+	 * 
+	 * @param writer the writer to use for dumping the graph
+	 * 
+	 * @throws IOException if an I/O error occurs while writing
+	 */
 	public void dumpStripped(
 			Writer writer)
 			throws IOException {

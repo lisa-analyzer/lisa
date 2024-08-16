@@ -1,5 +1,11 @@
 package it.unive.lisa.outputs;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -14,20 +20,12 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
-
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A graph that can be dumped as an html page using javascript to visualize the
@@ -198,7 +196,7 @@ public class HtmlGraph extends VisualGraph {
 					.append("</div>\n");
 		}
 		descrs.append("\t".repeat(tabs))
-			.append("</div>\n");
+				.append("</div>\n");
 	}
 
 	private static void populate(
