@@ -276,7 +276,6 @@ public class SerializableGraph {
 			boolean includeSubnodes,
 			String descriptionLabel) {
 		SerializableGraph g = new SerializableGraph(name, description, nodes, edges, Collections.emptySortedSet());
-		DotGraph dot = g.toDot();
 
 		SortedMap<Integer, Pair<String, SerializableNodeDescription>> map = new TreeMap<>();
 		for (SerializableNodeDescription d : descriptions)
@@ -285,7 +284,7 @@ public class SerializableGraph {
 					map.put(n.getId(), Pair.of(n.getText(), d));
 					break;
 				}
-		return new HtmlGraph(dot, includeSubnodes, map, description, descriptionLabel);
+		return new HtmlGraph(g, includeSubnodes, map, description, descriptionLabel);
 	}
 
 	/**
