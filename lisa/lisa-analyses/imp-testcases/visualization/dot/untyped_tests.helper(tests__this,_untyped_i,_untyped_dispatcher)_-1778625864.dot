@@ -1,12 +1,10 @@
-digraph {
-	labelloc="t";
-	label="untyped tests::helper(tests* this, untyped i, untyped dispatcher)";
-	"node0" [shape="rect",color="black",peripheries="2",label=<return identity(dispatcher, i)<BR/><BR/>{ expressions: [ret_value@helper],<BR/>state: { heap: monolith,<BR/>type: { ['imp-testcases/visualization/visualization.imp':34:36]:minusone: [int32],<BR/>['imp-testcases/visualization/visualization.imp':34:36]:negative: [int32],<BR/>['imp-testcases/visualization/visualization.imp':34:36]:one: [int32],<BR/>['imp-testcases/visualization/visualization.imp':34:36]:positive: [int32],<BR/>dispatcher: #TOP#,<BR/>i: [int32],<BR/>ret_value@helper: [int32],<BR/>this: #TOP# },<BR/>value: { ['imp-testcases/visualization/visualization.imp':34:36]:minusone: [-1, -1],<BR/>['imp-testcases/visualization/visualization.imp':34:36]:negative: [-1, -1],<BR/>['imp-testcases/visualization/visualization.imp':34:36]:one: [10, 10],<BR/>['imp-testcases/visualization/visualization.imp':34:36]:positive: [10, 10],<BR/>dispatcher: [-Inf, +Inf],<BR/>i: [10, 10],<BR/>ret_value@helper: [10, 10],<BR/>this: [-Inf, +Inf] }<BR/> }<BR/> }<BR/>>];
-subgraph cluster_legend {
-	label="Legend";
-	style=dotted;
-	node [shape=plaintext];
-	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+digraph "untyped tests::helper(tests* this, untyped i, untyped dispatcher)" {
+edge ["dir"="forward"]
+graph ["label"="untyped tests::helper(tests* this, untyped i, untyped dispatcher)","labelloc"="t"]
+"node0" ["label"=<return identity(dispatcher, i)<br/><br/>{ expressions: [ret_value@helper],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':34:36]:minusone: [int32],<br/>['imp-testcases/visualization/visualization.imp':34:36]:negative: [int32],<br/>['imp-testcases/visualization/visualization.imp':34:36]:one: [int32],<br/>['imp-testcases/visualization/visualization.imp':34:36]:positive: [int32],<br/>dispatcher: #TOP#,<br/>i: [int32],<br/>ret_value@helper: [int32],<br/>this: #TOP# },<br/>value: { ['imp-testcases/visualization/visualization.imp':34:36]:minusone: [-1, -1],<br/>['imp-testcases/visualization/visualization.imp':34:36]:negative: [-1, -1],<br/>['imp-testcases/visualization/visualization.imp':34:36]:one: [10, 10],<br/>['imp-testcases/visualization/visualization.imp':34:36]:positive: [10, 10],<br/>dispatcher: [-Inf, +Inf],<br/>i: [10, 10],<br/>ret_value@helper: [10, 10],<br/>this: [-Inf, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
+subgraph "cluster_legend" {
+edge ["dir"="none"]
+graph ["label"=<Legend>,"style"="dotted"]
+"legend" ["label"=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, dashed</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>,"shape"="none"]
 }
-
 }
