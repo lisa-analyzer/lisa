@@ -1,6 +1,7 @@
 package it.unive.lisa.outputs;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
@@ -10,22 +11,32 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.SortedMap;
-import org.apache.commons.io.IOUtils;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 /**
  * A graph that can be dumped as an html page using javascript to visualize the
- * graphs. This graph effectively wraps a {@link GraphmlGraph} instance to
- * provide visualization.
+ * graphs. This graph effectively wraps a {@link DotGraph} instance to provide
+ * visualization.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HtmlGraph extends GraphStreamWrapper {
+public class HtmlGraph extends VisualGraph {
 
-	private final GraphmlGraph graph;
+	private final SerializableGraph graph;
 
 	private final String description;
 
@@ -38,7 +49,7 @@ public class HtmlGraph extends GraphStreamWrapper {
 	/**
 	 * Builds the graph.
 	 * 
-	 * @param graph            the wrapped {@link GraphmlGraph}
+	 * @param g                the graph to dump
 	 * @param includeSubnodes  whether or not sub-nodes should be part of the
 	 *                             graph
 	 * @param map              a map from a node id to its text and description
@@ -48,17 +59,27 @@ public class HtmlGraph extends GraphStreamWrapper {
 	 *                             label in the collapse/expand toggles
 	 */
 	public HtmlGraph(
-			GraphmlGraph graph,
+			SerializableGraph g,
 			boolean includeSubnodes,
 			SortedMap<Integer, Pair<String, SerializableNodeDescription>> map,
 			String description,
 			String descriptionLabel) {
 		super();
-		this.graph = graph;
+		this.graph = g;
 		this.descriptions = map;
 		this.description = description;
 		this.descriptionLabel = descriptionLabel;
 		this.includeSubnodes = includeSubnodes;
+	}
+
+	private String loadResourceTemplate(
+			String path)
+			throws IOException {
+		try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
+				Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
+			scanner.useDelimiter("\\A");
+			return scanner.hasNext() ? scanner.next() : "";
+		}
 	}
 
 	@Override
@@ -66,47 +87,116 @@ public class HtmlGraph extends GraphStreamWrapper {
 			Writer writer)
 			throws IOException {
 		StringWriter graphWriter = new StringWriter();
-		graph.dump(graphWriter, false);
-		String graphText = graphWriter.toString()
-				.replace("&apos;", "'")
-				.replace("'", "\\'")
-				.replace("\n", "\\n");
-		String graphTitle = graph.getTitle();
+		DotGraph dot = graph.toDot();
+		dot.dumpStripped(graphWriter);
+		String graphText = graphWriter.toString();
+		String graphTitle = "Graph: " + dot.getTitle();
 		String graphDescription = "";
 		if (StringUtils.isNotBlank(description))
-			graphDescription = description;
+			graphDescription = "ID: " + description;
+
+		TemplateEngine templateEngine = new TemplateEngine();
+		StringTemplateResolver resolver = new StringTemplateResolver();
+		resolver.setTemplateMode(TemplateMode.HTML);
+		templateEngine.setTemplateResolver(resolver);
 
 		String file = includeSubnodes ? "html-graph/viewer-compound.html" : "html-graph/viewer.html";
-		try (InputStream viewer = getClass().getClassLoader().getResourceAsStream(file)) {
-			String viewerCode = IOUtils.toString(viewer, StandardCharsets.UTF_8);
-			viewerCode = viewerCode.replace("$$$GRAPH_TITLE$$$", graphTitle);
-			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION$$$", graphDescription);
-			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION_LABEL$$$", descriptionLabel);
-			viewerCode = viewerCode.replace("$$$GRAPH_CONTENT$$$", graphText);
+		String htmlTemplate = loadResourceTemplate(file);
 
-			StringBuilder descrs = new StringBuilder();
-			for (Entry<Integer, Pair<String, SerializableNodeDescription>> d : descriptions.entrySet()) {
-				String nodeName = nodeName(d.getKey());
-				if (includeSubnodes || graph.graph.getNode(nodeName) != null) {
-					descrs.append("\t\t\t\t<div id=\"header-")
-							.append(nodeName)
-							.append("\" class=\"header-hidden\">\n");
-					descrs.append(
-							"\t\t\t\t\t<div class=\"description-title-wrapper\"><span class=\"description-title\">")
-							.append(StringUtils.capitalize(descriptionLabel))
-							.append(" for ")
-							.append("</span><span class=\"description-title-text\">")
-							.append(d.getValue().getLeft())
-							.append("</span></div>\n");
-					populate(descrs, 5, d.getValue().getRight().getDescription());
-					descrs.append("\t\t\t\t</div>\n");
-				}
-			}
+		Context context = new Context();
+		context.setVariable("graphTitle", graphTitle);
+		context.setVariable("graphDescription", graphDescription);
+		context.setVariable("graphDescriptionLabel", descriptionLabel);
+		context.setVariable("graphContent", graphText);
 
-			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTIONS$$$", descrs.toString().trim());
+		Map<Integer, List<Integer>> inners = new HashMap<>();
+		Set<Integer> topLevel = graph.getNodes().stream().map(n -> n.getId()).collect(Collectors.toSet());
+		graph.getNodes().forEach(n -> {
+			inners.put(n.getId(), n.getSubNodes());
+			topLevel.removeAll(n.getSubNodes());
+		});
 
-			writer.write(viewerCode);
+		StringBuilder descrs = new StringBuilder();
+		for (Entry<Integer, Pair<String, SerializableNodeDescription>> d : descriptions.entrySet()) {
+			String nodeName = nodeName(d.getKey());
+			boolean topLevelNode = topLevel.contains(d.getKey());
+			if (topLevelNode)
+				if (includeSubnodes)
+					nodeDescriptionWithSubnodes(descrs, d, nodeName, inners, 4);
+				else
+					singleNodeDescription(descrs, d, nodeName, 4);
 		}
+		context.setVariable("graphDescriptions", descrs.toString().trim());
+
+		String html = templateEngine.process(htmlTemplate, context);
+		writer.write(html);
+	}
+
+	private void singleNodeDescription(
+			StringBuilder descrs,
+			Entry<Integer, Pair<String, SerializableNodeDescription>> d,
+			String nodeName,
+			int tabs) {
+		descrs.append("\t".repeat(tabs))
+				.append("<div id=\"header-")
+				.append(nodeName)
+				.append("\" class=\"header-info header-hidden\">\n");
+		descrs.append("\t".repeat(tabs + 1))
+				.append("<div class=\"description-title-wrapper\"><span class=\"description-title\">")
+				.append(StringUtils.capitalize(descriptionLabel))
+				.append(" for ")
+				.append("</span><span class=\"description-title-text\">")
+				.append(d.getValue().getLeft())
+				.append("</span></div>\n");
+		populate(descrs, tabs + 1, d.getValue().getRight().getDescription());
+		descrs.append("\t".repeat(tabs))
+				.append("</div>\n");
+	}
+
+	private void nodeDescriptionWithSubnodes(
+			StringBuilder descrs,
+			Entry<Integer, Pair<String, SerializableNodeDescription>> entry,
+			String nodeName,
+			Map<Integer, List<Integer>> inners,
+			int tabs) {
+		descrs.append("\t".repeat(tabs))
+				.append("<div id=\"header-")
+				.append(nodeName)
+				.append("\" class=\"header-info header-hidden\">\n");
+		singleSubNodeAccordion(descrs, true, entry.getKey(), entry.getValue(), inners, tabs + 1);
+		descrs.append("\t".repeat(tabs))
+				.append("</div>\n");
+	}
+
+	private void singleSubNodeAccordion(
+			StringBuilder descrs,
+			boolean active,
+			Integer id,
+			Pair<String, SerializableNodeDescription> d,
+			Map<Integer, List<Integer>> inners,
+			int tabs) {
+		descrs.append("\t".repeat(tabs))
+				.append("<button class=\"accordion")
+				.append(active ? " active" : "")
+				.append("\"><span class=\"description-title-text\">")
+				.append(d.getLeft())
+				.append("</span></button>\n");
+		descrs.append("\t".repeat(tabs))
+				.append("<div class=\"header-panel\"")
+				.append(active ? " style=\"display: block\"" : "")
+				.append(">");
+		populate(descrs, tabs + 1, d.getRight().getDescription());
+		List<Integer> subs = inners.getOrDefault(id, Collections.emptyList());
+		if (!subs.isEmpty()) {
+			descrs.append("\t".repeat(tabs))
+					.append("<div class=\"description-nest\">\n");
+			for (Integer i : subs)
+				singleSubNodeAccordion(descrs, false, i, descriptions.get(i), inners, tabs + 1);
+			descrs.append("\t".repeat(tabs))
+					.append("</div>\n");
+		}
+		descrs.append("\t".repeat(tabs))
+				.append("</div>\n");
 	}
 
 	private static void populate(

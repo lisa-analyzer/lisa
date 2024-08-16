@@ -9,7 +9,10 @@ dependencies {
 	api 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
 
 	// dot file manipulation
-	api 'org.graphstream:gs-core:2.0'
+	api 'guru.nidi:graphviz-java:0.18.1'
+	
+	// html templating
+    api 'org.thymeleaf:thymeleaf:3.0.15.RELEASE'
     
 	// logging
 	api 'org.apache.logging.log4j:log4j-api:2.17.1'

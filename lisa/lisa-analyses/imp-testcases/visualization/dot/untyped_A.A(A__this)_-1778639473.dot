@@ -1,14 +1,12 @@
-digraph {
-	labelloc="t";
-	label="untyped A::A(A* this)";
-	"node0" [shape="rect",color="black",label=<i1 = 0<BR/><BR/>{ expressions: [i1],<BR/>state: { heap: monolith,<BR/>type: { ['imp-testcases/visualization/visualization.imp':29:22]:$lisareceiver: [A*],<BR/>['imp-testcases/visualization/visualization.imp':29:22]:this: [tests*],<BR/>i1: [int32],<BR/>this: [A*] },<BR/>value: { i1: [0, 0] }<BR/> }<BR/> }<BR/>>];
-	"node3" [shape="rect",color="black",peripheries="2",label=<ret<BR/><BR/>{ expressions: [skip],<BR/>state: { heap: monolith,<BR/>type: { ['imp-testcases/visualization/visualization.imp':29:22]:$lisareceiver: [A*],<BR/>['imp-testcases/visualization/visualization.imp':29:22]:this: [tests*],<BR/>i1: [int32],<BR/>this: [A*] },<BR/>value: { i1: [0, 0] }<BR/> }<BR/> }<BR/>>];
-	"node0" -> "node3" [color="black"];
-subgraph cluster_legend {
-	label="Legend";
-	style=dotted;
-	node [shape=plaintext];
-	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+digraph "untyped A::A(A* this)" {
+edge ["dir"="forward"]
+graph ["label"="untyped A::A(A* this)","labelloc"="t"]
+"node0" ["label"=<i1 = 0<br/><br/>{ expressions: [i1],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':29:22]:$lisareceiver: [A*],<br/>['imp-testcases/visualization/visualization.imp':29:22]:this: [tests*],<br/>i1: [int32],<br/>this: [A*] },<br/>value: { i1: [0, 0] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
+"node3" ["label"=<ret<br/><br/>{ expressions: [skip],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':29:22]:$lisareceiver: [A*],<br/>['imp-testcases/visualization/visualization.imp':29:22]:this: [tests*],<br/>i1: [int32],<br/>this: [A*] },<br/>value: { i1: [0, 0] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node3","color"="black"]
+subgraph "cluster_legend" {
+edge ["dir"="none"]
+graph ["label"=<Legend>,"style"="dotted"]
+"legend" ["label"=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, dashed</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>,"shape"="none"]
 }
-
+"node0" -> "node3" ["color"="black"]
 }
