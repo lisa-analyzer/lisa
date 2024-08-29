@@ -496,4 +496,5 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 			return -1;
 		return interval.compareTo(o.interval);
 	}
+	
 }
