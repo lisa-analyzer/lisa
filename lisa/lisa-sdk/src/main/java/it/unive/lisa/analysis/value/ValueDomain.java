@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.value;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -8,8 +10,10 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 
 /**
  * A semantic domain that can evaluate the semantic of statements that operate
@@ -61,5 +65,13 @@ public interface ValueDomain<D extends ValueDomain<D>>
 		}
 		return lub.forgetIdentifiers(r.getIdsToForget());
 
+	}
+	
+	default Pair<D, D> split(ValueExpression expr, 
+			ProgramPoint src, ProgramPoint dest, SemanticOracle oracle) throws SemanticException {
+		// Split operator logic implementation
+		return Pair.of(this.assume(expr, src, dest, oracle), 
+				this.assume(new UnaryExpression(expr.getStaticType(), 
+						expr, LogicalNegation.INSTANCE, expr.getCodeLocation()), src, dest, oracle));
 	}
 }

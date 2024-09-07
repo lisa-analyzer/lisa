@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
  * memory layout, a value state modeling values of program variables and memory
@@ -151,7 +153,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			return bottom();
 
 		applySubstitution(mo, pp);
-
+		
+		// caso di una sola espressione 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
 			if (!(expr instanceof ValueExpression))
@@ -161,7 +164,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			V v = mo.value.assign(id, ve, pp, mo);
 			return new SimpleAbstractState<>(mo.heap, v, t);
 		}
-
+		
+		// caso di più espressioni 
 		T typeRes = mo.type.bottom();
 		V valueRes = mo.value.bottom();
 		for (SymbolicExpression expr : exprs) {
@@ -709,5 +713,37 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			SemanticOracle oracle)
 			throws SemanticException {
 		return heapState.isReachableFrom(x, y, pp, oracle);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Pair<SimpleAbstractState<H, V, T>, SimpleAbstractState<H, V, T>> split(SymbolicExpression expr, ProgramPoint src,
+			ProgramPoint dest, SemanticOracle oracle) {
+			
+		 // split dei vari domini
+			Pair<H, H> heapStateSplit = null;
+			try {
+				heapStateSplit = heapState.split(expr, dest, dest, oracle);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
+			Pair<V, V> valueStateSplit = null;
+			try {
+				valueStateSplit = valueState.split((ValueExpression) expr, src, dest, oracle);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
+			Pair<TypeDomain<T>, TypeDomain<T>> typeStateSplit = typeState.split(expr);
+			SimpleAbstractState<H, V, T> trueSimpleAbstractState = new SimpleAbstractState<>(
+						heapStateSplit.getLeft(), 
+		            	valueStateSplit.getLeft(), 
+		            (T) typeStateSplit.getLeft());
+
+			SimpleAbstractState<H, V, T> falseSimpleAbstractState = new SimpleAbstractState<>(
+						heapStateSplit.getRight(), 
+		            	valueStateSplit.getRight(), 
+                    (T)	typeStateSplit.getRight());
+			
+			return Pair.of(trueSimpleAbstractState, falseSimpleAbstractState);
 	}
 }

@@ -1,7 +1,12 @@
 package it.unive.lisa.analysis.heap;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
@@ -23,4 +28,11 @@ public interface HeapDomain<D extends HeapDomain<D>>
 		SemanticDomain<D, SymbolicExpression, Identifier>,
 		Lattice<D>,
 		HeapSemanticOperation {
+		
+	default Pair<D, D> split(SymbolicExpression expr, ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle) throws SemanticException {		
+		return Pair.of(this.assume(expr, src, dest, oracle), 
+				this.assume(expr, src, dest, oracle));
+	}
 }
