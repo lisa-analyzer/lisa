@@ -1,564 +1,719 @@
+<!DOCTYPE html>
 <html>
 	<head>
-		<title>untyped A::getOne(A* this)</title>
+		<title>Graph: untyped A::getOne(A* this)</title>
 		
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
 		
-		<script src="js/cytoscape-3.21.1.min.js"></script>
-		<script src="js/layout-base.js"></script>
-		<script src="js/cose-base.js"></script>
-		<script src="js/cytoscape-fcose.js"></script>
-		<script src="js/jquery-3.0.0.min.js"></script>
-		<script src="js/cytoscape-graphml-1.0.6-hier.js"></script>
-		<script src="js/cytoscape-expand-collapse.js"></script>
+		<script src="assets/d3.v7.min.js"></script>
+		<script src="assets/d3-graphviz.min.js"></script>
 		
-		<style>
+		<style>	
+		html,
 		body {
-			font-family: helvetica neue, helvetica, liberation sans, arial,
-				sans-serif;
+			height: 100%;
+			margin: 0;
+		}
+
+		body {
+			font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
 			font-size: 14px;
 			background-color: white;
 		}
 		
-		html, body, #full {
+		.box {
+			display: flex;
+			flex-flow: column;
 			height: 100%;
 		}
+
+		.box .row.header {
+			flex: 0 1 auto;
+		}
+
+		.box .row.content {
+			flex: 1 1 auto;
+		}
 		
-		#full {
+		header {
+			padding: 10px;
+			border-bottom: 2px black solid;
+		}
+		
+		header img {
+			float: right;
+			height: 120px;
+			margin-top: 10px;
+		}
+		
+		.splitter {
+			width: 100%;
 			display: flex;
 			flex-direction: row;
 		}
-		
-		#cy {
-			flex-grow: 0.5;
-			z-index: 10;
-			max-width: 70%;
+
+		#separator {
+			cursor: col-resize;
+			background-color: #aaa;
+			background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='30'><path d='M2 0 v30 M5 0 v30 M8 0 v30' fill='none' stroke='black'/></svg>");
+			background-repeat: no-repeat;
+			background-position: center;
+			width: 10px;
+
+			/* Prevent the browser's built-in drag from interfering */
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
 		}
 		
-		#header {
+		.modal {
+			display: none;
 			position: fixed;
-			z-index: 11;
-			overflow-x: hidden;
+			z-index: 12;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+			background-color: rgb(0,0,0);
+			background-color: rgba(0,0,0,0.4);
+		}
+
+		.modal-content {
+			background-color: #fefefe;
+			margin: 15% auto;
+			padding: 20px;
+			border: 1px solid #888;
+			width: 40%;
+			min-width: 350px;
 		}
 		
-		#header div {
-			background-color: #e2e2e2;
-			padding: 20px 15px;
-			margin-bottom: 10px;
-		}
-		
-		#header div b {
+		.modal-content b {
 			padding: 6px 0;
 			color: #333333;
 			display: block;
 			cursor: pointer;
 		}
-		
-		#header div span {
-			padding: 6px 0;
-			display: block;
+
+		.close {
+			color: #aaa;
+			float: right;
+			font-size: 28px;
+			font-weight: bold;
+		}
+
+		.close:hover, .close:focus {
+			color: black;
+			text-decoration: none;
+			cursor: pointer;
 		}
 		
-		#header div span label b {
-			padding: 0;
-			display: inline;
+		.button {
+			background-color: #16A15B;
+			color: white;
+			padding: 5px 20px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			border: 1px #16A15B solid;
+			border-radius: 25px;
+			cursor: pointer;
 		}
 		
-		#header div span input {
-			margin: 0;
+		.button:disabled, .button[disabled] {
+			background-color: #CCCCCC;
+			border: 1px #CCCCCC solid;
+			color: #666666;
 		}
+		
+		.searchbar {
+			padding: 5px 20px;
+			border-radius: 25px;
+			border: 1px #16A15B solid;
+		}
+		
+		.no-results {
+			border: solid 2px #FF0000;  
+			background-color: #FF000040;
+		}
+		
+		#graph {
+			display: flex;
+			flex-grow: 1;
+			justify-content: center;
+			align-items: center;
+			z-index: 10;
+			width: 75%;
+			min-width: 500px;
+		}
+		
+		.node { cursor: pointer; }
+		
+		.node polygon { fill: white; }
+		
+		.node-selected { filter: drop-shadow(0 0 5px #16A15B); }
+		
 		#descriptions {
 			flex-grow: 0.5;
 			z-index: 11;
 			overflow: auto;
 			font-size: 18px;
 			border-left: 2px solid #e2e2e2;
-    		padding-left: 20px;
+			padding-left: 5px;
+			width: 25%;
+			min-width: 200px;
 		}
-		.description-header {
-    		font-weight: bold;
-		}
+		
+		.description-header { font-weight: bold; }
+		
 		#descriptions ul {
-		    padding-left: inherit;
-		    margin: 5px 0;
+			padding-left: inherit;
+			margin: 5px 0;
 		}
-		.description-nest {
-			padding-left: 15px;
-		}
-		.header-hidden {
-			display: none;
-		}
+		
+		.description-nest { padding-left: 15px;	}
+		
+		.header-hidden { display: none; }
+		
 		.description-title-wrapper {
-    		margin-top: 0.83em;
-    		margin-bottom: 0.83em;
+			margin-top: 0.83em;
+			margin-bottom: 0.83em;
 		}
+		
 		.description-title {
-		    font-size: 1.5em;
-		    font-weight: bold;
+			font-size: 1.5em;
+			font-weight: bold;
 		}
+		
 		.description-title-text {
-		    font-size: 1.5em;
-		    font-family: monospace;
+			font-size: 1.5em;
+			font-family: monospace;
 		}
+		
 		#header-none {
-    		margin-top: 0.83em;
-    		margin-bottom: 0.83em;
+			margin-top: 0.83em;
+			margin-bottom: 0.83em;
 		}
-		.no-results {
-   			border: solid 2px #FF0000;  
-   			background-color: #FF000040;
+		
+		.accordion {
+			background-color: #84c2a2;
+			cursor: pointer;
+			padding: 18px;
+			width: 100%;
+			text-align: left;
+			border: none;
+			outline: none;
+			transition: 0.4s;
 		}
+		
+		.accordion::after {
+			content: '\002B';
+			float: right;
+			margin-left: 5px;
+			font-size: 18px;
+		}
+
+		.active, .accordion:hover {	background-color: #16A15B;	}
+
+		.header-panel { display: none; }
 		</style>
 	</head>
 
 	<body>
-		<h1>untyped A::getOne(A* this)</h1>
-		<h3>['imp-testcases/visualization/visualization.imp':30:41]</h3>
-		<hr />
-		<div id="full">
-			<div id="header">
-				<div>
-					<b>Node border: <font color="darkgray">gray</font>, single</b> 
-					<b>Entrypoint border: black, single</b> 
-					<b>Exitpoint border: black, double</b> 
-					<b>Sequential edge: black, solid</b> 
-					<b>False edge: <font color="red">red</font>, solid</b> 
+		<div class="box">
+			<header class="row header">
+				<img src="https://raw.githubusercontent.com/lisa-analyzer/lisa/master/logo.png" alt="LiSA logo"/>
+				<h1>Graph: untyped A::getOne(A* this)</h1>
+				<h3>ID: ['imp-testcases/visualization/visualization.imp':30:41]</h3>
+				<input id="search" type="text" class="searchbar" placeholder="Search node..."/>
+				<input id="next" type="button" value="Next" class="button" disabled/>
+				<input id="prev" type="button" value="Previous" class="button" disabled/>
+				<button id="centerButton" class="button">Center graph</button>
+				<button id="legendButton" class="button">Legend</button>
+			</header>
+			<div id="legend" class="modal">
+				<div class="modal-content">
+					<span class="close">&times;</span>
+					<b>Node border: <font color="darkgray">gray</font>, single</b>
+					<b>Entrypoint border: black, dashed</b>
+					<b>Exitpoint border: black, solid</b>
+					<b>Sequential edge: black, solid</b>
+					<b>False edge: <font color="red">red</font>, solid</b>
 					<b>True edge: <font color="blue">blue</font>, solid</b>
 				</div>
-				<div>
-					<input id="search" type="text" placeholder="Search node.."/>
-					<input id="next" type="button" value="Next" disabled/>
-					<input id="prev" type="button" value="Previous" disabled/>
-					<b id="relayout">Run layout</b> 
-					<b id="fit">Fit to viewport</b>
-					<hr/>
-					<b id="collapseAll">Collapse all</b> 
-					<b id="expandAll">Expand all</b> 
-				</div>
 			</div>
-			<div id="cy"></div>
-			<div id="descriptions">
-				<div id="header-none">
-				No node selected. Select a node to show its results.
-				</div>
-				<div id="header-node0" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">rec = new tests()</span></div>
-					<span class="description-header">expressions: </span>[rec]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">heap[w]:heap: </span>[tests]<br/>
-							<span class="description-header">rec: </span>[tests*]<br/>
-						</div>
-						<span class="description-header">value: </span>#TOP#<br/>
+			<div id="full" class="row content splitter">
+				<div id="graph"></div>
+				<div id="separator"></div>
+				<div id="descriptions">
+					<div class="header-info" id="header-none">
+					No node selected. Select a node to show its <span>results</span>.
 					</div>
-				</div>
-				<div id="header-node1" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">rec</span></div>
-					<span class="description-header">expressions: </span>[rec]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
+					<div><div id="header-node0" class="header-info header-hidden">
+					<button class="accordion active"><span class="description-title-text">rec = new tests()</span></button>
+					<div class="header-panel" style="display: block">						<span class="description-header">expressions: </span>[rec]<br/>
+						<span class="description-header">state: </span><br/>
 						<div class="description-nest">
-							<span class="description-header">heap[w]:heap: </span>[tests]<br/>
+							<span class="description-header">heap: </span>monolith<br/>
+							<span class="description-header">type: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">heap[w]:heap: </span>[tests]<br/>
+								<span class="description-header">rec: </span>[tests*]<br/>
+							</div>
+							<span class="description-header">value: </span>#TOP#<br/>
 						</div>
-						<span class="description-header">value: </span>#TOP#<br/>
-					</div>
-				</div>
-				<div id="header-node2" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">new tests()</span></div>
-					<span class="description-header">expressions: </span>[ref$new tests]<br/>
-					<span class="description-header">state: </span><br/>
 					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">heap[w]:heap: </span>[tests]<br/>
+						<button class="accordion"><span class="description-title-text">rec</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[rec]<br/>
+							<span class="description-header">state: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">heap: </span>monolith<br/>
+								<span class="description-header">type: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">heap[w]:heap: </span>[tests]<br/>
+								</div>
+								<span class="description-header">value: </span>#TOP#<br/>
+							</div>
 						</div>
-						<span class="description-header">value: </span>#TOP#<br/>
-					</div>
-				</div>
-				<div id="header-node3" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">x = open(rec)</span></div>
-					<span class="description-header">expressions: </span>[x]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
-						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, +Inf]<br/>
+						<button class="accordion"><span class="description-title-text">new tests()</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[ref$new tests]<br/>
+							<span class="description-header">state: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">heap: </span>monolith<br/>
+								<span class="description-header">type: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">heap[w]:heap: </span>[tests]<br/>
+								</div>
+								<span class="description-header">value: </span>#TOP#<br/>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div id="header-node4" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">x</span></div>
-					<span class="description-header">expressions: </span>[x]<br/>
-					<span class="description-header">state: </span>#TOP#<br/>
-				</div>
-				<div id="header-node5" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">open(rec)</span></div>
-					<span class="description-header">expressions: </span>[open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22]<br/>
-					<span class="description-header">state: </span>#TOP#<br/>
-				</div>
-				<div id="header-node6" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">rec</span></div>
-					<span class="description-header">expressions: </span>[rec]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">heap[w]:heap: </span>[tests]<br/>
-							<span class="description-header">rec: </span>[tests*]<br/>
-						</div>
-						<span class="description-header">value: </span>#TOP#<br/>
 					</div>
 				</div>
-				<div id="header-node7" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text"><(x, 10)</span></div>
-					<span class="description-header">expressions: </span>[x < 10]<br/>
-					<span class="description-header">state: </span><br/>
+				<div id="header-node3" class="header-info header-hidden">
+					<button class="accordion active"><span class="description-title-text">x = open(rec)</span></button>
+					<div class="header-panel" style="display: block">						<span class="description-header">expressions: </span>[x]<br/>
+						<span class="description-header">state: </span><br/>
+						<div class="description-nest">
+							<span class="description-header">heap: </span>monolith<br/>
+							<span class="description-header">type: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">x: </span>#TOP#<br/>
+							</div>
+							<span class="description-header">value: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">x: </span>[-Inf, +Inf]<br/>
+							</div>
+						</div>
 					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
+						<button class="accordion"><span class="description-title-text">x</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[x]<br/>
+							<span class="description-header">state: </span>#TOP#<br/>
 						</div>
-						<span class="description-header">value: </span><br/>
+						<button class="accordion"><span class="description-title-text">open(rec)</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22]<br/>
+							<span class="description-header">state: </span>#TOP#<br/>
 						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, +Inf]<br/>
+							<button class="accordion"><span class="description-title-text">rec</span></button>
+							<div class="header-panel">								<span class="description-header">expressions: </span>[rec]<br/>
+								<span class="description-header">state: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">heap: </span>monolith<br/>
+									<span class="description-header">type: </span><br/>
+									<div class="description-nest">
+										<span class="description-header">heap[w]:heap: </span>[tests]<br/>
+										<span class="description-header">rec: </span>[tests*]<br/>
+									</div>
+									<span class="description-header">value: </span>#TOP#<br/>
+								</div>
+							</div>
 						</div>
+						</div>
+					</div>
 					</div>
 				</div>
-				<div id="header-node8" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">x</span></div>
-					<span class="description-header">expressions: </span>[x]<br/>
-					<span class="description-header">state: </span><br/>
+				<div id="header-node7" class="header-info header-hidden">
+					<button class="accordion active"><span class="description-title-text"><(x, 10)</span></button>
+					<div class="header-panel" style="display: block">						<span class="description-header">expressions: </span>[x < 10]<br/>
+						<span class="description-header">state: </span><br/>
+						<div class="description-nest">
+							<span class="description-header">heap: </span>monolith<br/>
+							<span class="description-header">type: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">x: </span>#TOP#<br/>
+							</div>
+							<span class="description-header">value: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">x: </span>[-Inf, +Inf]<br/>
+							</div>
+						</div>
 					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
+						<button class="accordion"><span class="description-title-text">x</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[x]<br/>
+							<span class="description-header">state: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">heap: </span>monolith<br/>
+								<span class="description-header">type: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>#TOP#<br/>
+								</div>
+								<span class="description-header">value: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>[-Inf, +Inf]<br/>
+								</div>
+							</div>
 						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, +Inf]<br/>
+						<button class="accordion"><span class="description-title-text">10</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[10]<br/>
+							<span class="description-header">state: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">heap: </span>monolith<br/>
+								<span class="description-header">type: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>#TOP#<br/>
+								</div>
+								<span class="description-header">value: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>[-Inf, +Inf]<br/>
+								</div>
+							</div>
 						</div>
+					</div>
 					</div>
 				</div>
-				<div id="header-node9" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">10</span></div>
-					<span class="description-header">expressions: </span>[10]<br/>
-					<span class="description-header">state: </span><br/>
+				<div id="header-node10" class="header-info header-hidden">
+					<button class="accordion active"><span class="description-title-text">x = +(x, 1)</span></button>
+					<div class="header-panel" style="display: block">						<span class="description-header">expressions: </span>[x]<br/>
+						<span class="description-header">state: </span><br/>
+						<div class="description-nest">
+							<span class="description-header">heap: </span>monolith<br/>
+							<span class="description-header">type: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">x: </span>[float32, int32]<br/>
+							</div>
+							<span class="description-header">value: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">x: </span>[-Inf, 10]<br/>
+							</div>
+						</div>
 					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
+						<button class="accordion"><span class="description-title-text">x</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[x]<br/>
+							<span class="description-header">state: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">heap: </span>monolith<br/>
+								<span class="description-header">type: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>#TOP#<br/>
+								</div>
+								<span class="description-header">value: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>[-Inf, 9]<br/>
+								</div>
+							</div>
 						</div>
-						<span class="description-header">value: </span><br/>
+						<button class="accordion"><span class="description-title-text">+(x, 1)</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[x + 1]<br/>
+							<span class="description-header">state: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">heap: </span>monolith<br/>
+								<span class="description-header">type: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>#TOP#<br/>
+								</div>
+								<span class="description-header">value: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>[-Inf, 9]<br/>
+								</div>
+							</div>
 						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, +Inf]<br/>
+							<button class="accordion"><span class="description-title-text">x</span></button>
+							<div class="header-panel">								<span class="description-header">expressions: </span>[x]<br/>
+								<span class="description-header">state: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">heap: </span>monolith<br/>
+									<span class="description-header">type: </span><br/>
+									<div class="description-nest">
+										<span class="description-header">x: </span>#TOP#<br/>
+									</div>
+									<span class="description-header">value: </span><br/>
+									<div class="description-nest">
+										<span class="description-header">x: </span>[-Inf, 9]<br/>
+									</div>
+								</div>
+							</div>
+							<button class="accordion"><span class="description-title-text">1</span></button>
+							<div class="header-panel">								<span class="description-header">expressions: </span>[1]<br/>
+								<span class="description-header">state: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">heap: </span>monolith<br/>
+									<span class="description-header">type: </span><br/>
+									<div class="description-nest">
+										<span class="description-header">x: </span>#TOP#<br/>
+									</div>
+									<span class="description-header">value: </span><br/>
+									<div class="description-nest">
+										<span class="description-header">x: </span>[-Inf, 9]<br/>
+									</div>
+								</div>
+							</div>
 						</div>
+						</div>
+					</div>
 					</div>
 				</div>
-				<div id="header-node10" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">x = +(x, 1)</span></div>
-					<span class="description-header">expressions: </span>[x]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
+				<div id="header-node15" class="header-info header-hidden">
+					<button class="accordion active"><span class="description-title-text">return 1</span></button>
+					<div class="header-panel" style="display: block">						<span class="description-header">expressions: </span>[ret_value@getOne]<br/>
+						<span class="description-header">state: </span><br/>
 						<div class="description-nest">
-							<span class="description-header">x: </span>[float32, int32]<br/>
+							<span class="description-header">heap: </span>monolith<br/>
+							<span class="description-header">type: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">ret_value@getOne: </span>[int32]<br/>
+								<span class="description-header">x: </span>#TOP#<br/>
+							</div>
+							<span class="description-header">value: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">ret_value@getOne: </span>[1, 1]<br/>
+								<span class="description-header">x: </span>[10, +Inf]<br/>
+							</div>
 						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, 10]<br/>
+					<div class="description-nest">
+						<button class="accordion"><span class="description-title-text">1</span></button>
+						<div class="header-panel">							<span class="description-header">expressions: </span>[1]<br/>
+							<span class="description-header">state: </span><br/>
+							<div class="description-nest">
+								<span class="description-header">heap: </span>monolith<br/>
+								<span class="description-header">type: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>#TOP#<br/>
+								</div>
+								<span class="description-header">value: </span><br/>
+								<div class="description-nest">
+									<span class="description-header">x: </span>[10, +Inf]<br/>
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div id="header-node11" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">x</span></div>
-					<span class="description-header">expressions: </span>[x]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
-						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, 9]<br/>
-						</div>
 					</div>
-				</div>
-				<div id="header-node12" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">+(x, 1)</span></div>
-					<span class="description-header">expressions: </span>[x + 1]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
-						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, 9]<br/>
-						</div>
-					</div>
-				</div>
-				<div id="header-node13" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">x</span></div>
-					<span class="description-header">expressions: </span>[x]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
-						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, 9]<br/>
-						</div>
-					</div>
-				</div>
-				<div id="header-node14" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">1</span></div>
-					<span class="description-header">expressions: </span>[1]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
-						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>[-Inf, 9]<br/>
-						</div>
-					</div>
-				</div>
-				<div id="header-node15" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">return 1</span></div>
-					<span class="description-header">expressions: </span>[ret_value@getOne]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">ret_value@getOne: </span>[int32]<br/>
-							<span class="description-header">x: </span>#TOP#<br/>
-						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">ret_value@getOne: </span>[1, 1]<br/>
-							<span class="description-header">x: </span>[10, +Inf]<br/>
-						</div>
-					</div>
-				</div>
-				<div id="header-node16" class="header-hidden">
-					<div class="description-title-wrapper"><span class="description-title">Results for </span><span class="description-title-text">1</span></div>
-					<span class="description-header">expressions: </span>[1]<br/>
-					<span class="description-header">state: </span><br/>
-					<div class="description-nest">
-						<span class="description-header">heap: </span>monolith<br/>
-						<span class="description-header">type: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>#TOP#<br/>
-						</div>
-						<span class="description-header">value: </span><br/>
-						<div class="description-nest">
-							<span class="description-header">x: </span>[10, +Inf]<br/>
-						</div>
-					</div>
+				</div></div>
 				</div>
 			</div>
 		</div>
-		<script>			
-			var api;
-			var layoutOptions;
-			var cy = window.cy = cytoscape({
-				container: $('#cy'),
-				maxZoom: 100,
-				zoomingEnabled: true,
-				userZoomingEnabled: true,
-				style: [
-					{
-						selector: 'node',
-						css: {
-							'background-color': 'white',
-							'color': 'black',
-							'shape': 'rectangle',
-							'border-width': '1px',
-							'border-style': 'solid',
-							'border-color': 'darkgray',
-							'content': 'data(NODE_TEXT)',
-							'font-family': 'monospace',
-							'font-size': '18px',
-							'font-weight': 'bold',
-							'text-wrap': 'wrap',
-						}
-					},
-					{
-						selector: 'node[NODE_IS_ENTRY = "yes"]',
-						css: {
-							'border-width': '3px',
-							'border-style': 'solid',
-							'border-color': 'black',
-						}
-					},	
-					{
-						selector: 'node[NODE_IS_EXIT = "yes"]',
-						css: {
-							'border-width': '5px',
-							'border-style': 'double',
-							'border-color': 'black',
-						}
-					},
-				    {
-					    selector: 'node:selected',
-					    css: {
-							'border-color': 'orange',
-							'border-width': '2px',
-					    }
-					},
-					{
-						selector: 'edge',
-						css: {
-							'curve-style': 'bezier',
-							'width': 4,
-							'line-color': 'black',
-							'target-arrow-shape': 'triangle',
-							'target-arrow-color': 'black',
-							'arrow-scale': '2'
-						}
-					},
-					{
-						selector: 'edge[EDGE_KIND = "TrueEdge"]',
-						css: {
-							'line-color': 'blue',
-							'target-arrow-color': 'blue',
-						}
-					},
-					{
-						selector: 'edge[EDGE_KIND = "FalseEdge"]',
-						css: {
-							'line-color': 'red',
-							'target-arrow-color': 'red',
-						}
-					},			
-				],
-				
-				ready: function () {
-					var data = '<?xml version="1.0" encoding="UTF-8"?><graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns   http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="NODE_IS_ENTRY" for="node" attr.name="NODE_IS_ENTRY" attr.type="string"/><key id="NODE_IS_EXIT" for="node" attr.name="NODE_IS_EXIT" attr.type="string"/><key id="NODE_KIND" for="node" attr.name="NODE_KIND" attr.type="string"/><key id="NODE_TEXT" for="node" attr.name="NODE_TEXT" attr.type="string"/><key id="EDGE_KIND" for="edge" attr.name="EDGE_KIND" attr.type="string"/><graph id="graph" edgedefault="directed"><node id="node0"><data key="NODE_IS_ENTRY">yes</data><data key="NODE_TEXT">rec = new tests()</data><data key="NODE_IS_EXIT">no</data><graph id="0::1" edgedefault="directed"><node id="node1"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">rec</data><data key="NODE_IS_EXIT">no</data></node></graph><graph id="0::2" edgedefault="directed"><node id="node2"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">new tests()</data><data key="NODE_IS_EXIT">no</data></node></graph></node><node id="node10"><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">x = +(x, 1)</data><data key="NODE_IS_EXIT">no</data><graph id="10::12" edgedefault="directed"><node id="node12"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">+(x, 1)</data><data key="NODE_IS_EXIT">no</data><graph id="12::13" edgedefault="directed"><node id="node13"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">x</data><data key="NODE_IS_EXIT">no</data></node></graph><graph id="12::14" edgedefault="directed"><node id="node14"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">1</data><data key="NODE_IS_EXIT">no</data></node></graph></node></graph><graph id="10::11" edgedefault="directed"><node id="node11"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">x</data><data key="NODE_IS_EXIT">no</data></node></graph></node><node id="node15"><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">return 1</data><data key="NODE_IS_EXIT">yes</data><graph id="15::16" edgedefault="directed"><node id="node16"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">1</data><data key="NODE_IS_EXIT">no</data></node></graph></node><node id="node3"><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">x = open(rec)</data><data key="NODE_IS_EXIT">no</data><graph id="3::5" edgedefault="directed"><node id="node5"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">open(rec)</data><data key="NODE_IS_EXIT">no</data><graph id="5::6" edgedefault="directed"><node id="node6"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">rec</data><data key="NODE_IS_EXIT">no</data></node></graph></node></graph><graph id="3::4" edgedefault="directed"><node id="node4"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">x</data><data key="NODE_IS_EXIT">no</data></node></graph></node><node id="node7"><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">&lt;(x, 10)</data><data key="NODE_IS_EXIT">no</data><graph id="7::9" edgedefault="directed"><node id="node9"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">10</data><data key="NODE_IS_EXIT">no</data></node></graph><graph id="7::8" edgedefault="directed"><node id="node8"><data key="NODE_KIND">SUBNODE</data><data key="NODE_IS_ENTRY">no</data><data key="NODE_TEXT">x</data><data key="NODE_IS_EXIT">no</data></node></graph></node><edge id="edge-0-3" source="node0" target="node3" directed="true"><data key="EDGE_KIND">SequentialEdge</data></edge><edge id="edge-3-7" source="node3" target="node7" directed="true"><data key="EDGE_KIND">SequentialEdge</data></edge><edge id="edge-7-10" source="node7" target="node10" directed="true"><data key="EDGE_KIND">TrueEdge</data></edge><edge id="edge-7-15" source="node7" target="node15" directed="true"><data key="EDGE_KIND">FalseEdge</data></edge><edge id="edge-10-7" source="node10" target="node7" directed="true"><data key="EDGE_KIND">SequentialEdge</data></edge></graph></graphml>'
-					this.graphml({layoutBy: null});
-					this.graphml(data);
-					
-					var expandCollapseOptions = {
-						fisheye: false,
-						animate: false,
-						undoable: false,
-						expandCollapseCuePosition: 'bottom-left',
-						expandCollapseCueSize: 20,
-					};
-					
-					layoutOptions = {
-							name: 'fcose',
-							quality: "proof",
-							randomize: false, 
-							animate: false,  
-							fit: false, 
-							nodeDimensionsIncludeLabels: true,
-							packComponents: false,
-					};
-					
-					api = this.expandCollapse(expandCollapseOptions);
-					api.setOption("layoutBy", layoutOptions);
-					api.collapseAll();
-					this.fit();
-				}
-			});
+		<script>
+			d3.select('#descriptions').style('height', d3.select('#graph').node().offsetHeight + "px");
 			
-			function relayout() {
-				var layout = cy.layout(layoutOptions);
-				if (layout && layout.run) {
-					layout.run();
+			/* Graph visualization setup */
+			const scale = 0.8;
+			function attributer(datum, index, nodes) {
+				// taken from https://stackoverflow.com/questions/67626414/scale-and-center-d3-graphviz-graph
+				var selection = d3.select(this);
+				if (datum.tag == "svg") {
+					datum.attributes = {
+						...datum.attributes,
+						width: '100%',
+						height: d3.select('#graph').node().offsetHeight + 'px',
+					};
+					const px2pt = 3 / 4;
+					const graphWidth = datum.attributes.viewBox.split(' ')[2] / px2pt;
+					const graphHeight = datum.attributes.viewBox.split(' ')[3] / px2pt;
+					const w = graphWidth / scale;
+					const h = graphHeight / scale;
+					const x = -(w - graphWidth) / 2;
+					const y = -(h - graphHeight) / 2;
+					const viewBox = `${x * px2pt} ${y * px2pt} ${w * px2pt} ${h * px2pt}`;
+					selection.attr('viewBox', viewBox);
+					datum.attributes.viewBox = viewBox;
 				}
 			}
-			$('#relayout').on('click', function () {
-				relayout();
-			});
-			$('#collapseAll').on('click', function () {
-				api.collapseAll();
-			});
-			$('#expandAll').on('click', function () {
-				api.expandAll();
-			});
-			$('#fit').on('click', function () {
-				cy.fit(cy.nodes(), 50);
+			const graphviz = d3.select("#graph").graphviz()
+								.attributer(attributer)
+								.zoom(true);
+			/*<![CDATA[*/
+			const graph = "digraph \"untyped A::getOne(A* this)\" {\n\"node0\" [\"label\"=<rec = new tests()>,\"shape\"=\"rect\",\"id\"=\"node0\",\"color\"=\"black\",\"style\"=\"dashed\"]\n\"node3\" [\"label\"=<x = open(rec)>,\"shape\"=\"rect\",\"id\"=\"node3\",\"color\"=\"gray\"]\n\"node7\" [\"label\"=<\u0026lt;(x, 10)>,\"shape\"=\"rect\",\"id\"=\"node7\",\"color\"=\"gray\"]\n\"node10\" [\"label\"=<x = +(x, 1)>,\"shape\"=\"rect\",\"id\"=\"node10\",\"color\"=\"gray\"]\n\"node15\" [\"label\"=<return 1>,\"shape\"=\"rect\",\"id\"=\"node15\",\"color\"=\"black\"]\n\"node0\" -> \"node3\" [\"color\"=\"black\"]\n\"node3\" -> \"node7\" [\"color\"=\"black\"]\n\"node7\" -> \"node15\" [\"style\"=\"dashed\",\"color\"=\"red\"]\n\"node7\" -> \"node10\" [\"style\"=\"dashed\",\"color\"=\"blue\"]\n\"node10\" -> \"node7\" [\"color\"=\"black\"]\n}";
+			/*]]>*/
+			
+			/* Zooming setup */
+			var zoom = d3.zoom().on("zoom", zoomed);
+			function zoomed(e) {
+				g.attr("transform", e.transform);
+			}
+			
+			// initial transformation of the graph
+			var svg = null;
+			var g = null;
+			var itTX = 0;
+			var itTY = 0;
+			function getTransformation(transform) {
+				// taken from: https://stackoverflow.com/questions/38224875/how-can-d3-transform-be-used-in-d3-v4
+				var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+				g.setAttributeNS(null, "transform", transform);
+				var matrix = g.transform.baseVal.consolidate().matrix;
+				var a=matrix.a, b=matrix.b, c=matrix.c, d=matrix.d, e=matrix.e, f=matrix.f;
+				var scaleX, scaleY, skewX;
+				if (scaleX = Math.sqrt(a * a + b * b)) a /= scaleX, b /= scaleX;
+				if (skewX = a * c + b * d) c -= a * skewX, d -= b * skewX;
+				if (scaleY = Math.sqrt(c * c + d * d)) c /= scaleY, d /= scaleY, skewX /= scaleY;
+				if (a * d < b * c) a = -a, b = -b, skewX = -skewX, scaleX = -scaleX;
+				return {
+					translateX: e,
+					translateY: f,
+					rotate: Math.atan2(b, a) * 180 / Math.PI,
+					skewX: Math.atan(skewX) * 180 / Math.PI,
+					scaleX: scaleX,
+					scaleY: scaleY
+				};
+			}
+			function selectNode(target) {
+				d3.select('.node-selected').classed('node-selected', false);
+				d3.select(target).classed('node-selected', true);
+				// Show corresponding header
+				var id = d3.select(target).attr('id');
+				d3.selectAll('.header-info').classed('header-hidden', true);
+				d3.select('#header-' + id).classed('header-hidden', false);
+			}
+			function renderGraph(dotString) {
+				graphviz.renderDot(dotString, function () {
+					d3.selectAll('.node').on('click', function () {
+						selectNode(this);
+					});
+					svg = d3.select('#graph').select('svg');
+					svg.call(zoom);
+					g = svg.select('g');
+					var it = getTransformation(g.attr("transform"));
+					itTX = it.translateX;
+					itTY = it.translateY;
+				});
+			}
+			renderGraph(graph);
+			
+			/* Center button */
+			var btn = d3.select("#centerButton").on('click', function() {
+				var zoomTransition = d3.transition("zooming")
+										.duration(150)
+										.ease(d3.easeLinear);
+				graphviz.resetZoom(zoomTransition);
 			});
 			
-			var lastsearchresult = [];
-			var lastshownelement = -1;
+			/* Search */
+			// Reset searchbar contents on load
+			d3.select('#search').node().value = "";
+			var hits = [];
+			var hit = -1;
 			function centerToSearch() {
-				var target = lastsearchresult[lastshownelement];
-				cy.$('node:selected').unselect();
-				target.select();
-				cy.animate({ center: { eles: target } }, { duration: 0 });
+				hits.filter(function (d, i) { 
+						return i === hit; 
+					}).each(function (d, i) { 
+						selectNode(this);
+						var gbbox = g.node().getBBox();
+						var gX = gbbox.x + (gbbox.width/2);
+						var gY = gbbox.y + (gbbox.height/2);
+						var bbox = this.getBBox();
+						var tX = bbox.x + (bbox.width/2);
+						var tY = bbox.y + (bbox.height/2);
+						var offsetX = gX - tX;
+						var offsetY = gY - tY;
+						var curr = getTransformation(g.attr("transform"));
+						var transform = d3.zoomIdentity
+							// reset to initial position
+							.translate(itTX, itTY)
+							// keep current scale
+							.scale(curr.scaleX)
+							// move to node center
+							.translate(offsetX, offsetY);
+						svg.transition("zooming")
+							.duration(150)
+							.ease(d3.easeLinear)
+							.call(zoom.transform, transform);
+					});
 			}
-
-			$('#search').on('input', function (e) {
+			d3.select('#search').on('input', function (e) {
 				var query = e.target.value;
-				lastsearchresult = cy.nodes('[NODE_TEXT @*= "' + query + '"]');
-				var hasresults = lastsearchresult.size() != 0;
-				if (hasresults) {
-					lastshownelement = 0;
-					centerToSearch();
-					e.target.classList.remove('no-results');
-				} else {
-					lastshownelement = -1;
-					cy.$('node:selected').unselect();
-					e.target.classList.add('no-results');  
-				}
+				if (query !== "")
+					hits = d3.selectAll('.node').filter(function (d, i) {
+						return d3.select(this).select('text').text().includes(query);
+					});
 				
-				if (query === "" || !hasresults) {
-					$('#next').prop('disabled', true);
-					$('#prev').prop('disabled', true);
+				if (query === "" || hits.size() == 0) {
+					hit = -1;
+					d3.select('#next').attr('disabled', true);
+					d3.select('#prev').attr('disabled', true);
+					d3.select('.node-selected').classed('node-selected', false);
+					d3.select(this).classed('no-results', true);
 				} else {
-					$('#next').prop('disabled', false);
-					$('#prev').prop('disabled', false);
-				}
-			});
-			$('#next').on('click', function (e) {
-				if (lastshownelement != -1) {
-					lastshownelement = (lastshownelement + 1) % lastsearchresult.size();
+					hit = 0;
+					d3.select('#next').attr('disabled', null);
+					d3.select('#prev').attr('disabled', null);
+					d3.select(this).classed('no-results', false);
 					centerToSearch();
 				}
 			});
-			$('#prev').on('click', function (e) {
-				if (lastshownelement != -1) {
-					lastshownelement = ((lastshownelement - 1) + lastsearchresult.size()) % lastsearchresult.size();
+			d3.select('#next').on('click', function (e) {
+				if (hit != -1) {
+					hit = (hit + 1) % hits.size();
+					centerToSearch();
+				}
+			});
+			d3.select('#prev').on('click', function (e) {
+				if (hit != -1) {
+					hit = ((hit - 1) + hits.size()) % hits.size();
 					centerToSearch();
 				}
 			});
 			
-			cy.on('select', 'node', function(event) {
-		    	var id = event.target.id();
-				$('[id^=header-]').addClass('header-hidden');
-				$('#header-' + id).removeClass('header-hidden');
+			/* Split pane */
+			// taken from https://stackoverflow.com/questions/12194469/best-way-to-do-a-split-pane-in-html
+			const separator = document.getElementById("separator");
+			const first  = document.getElementById("graph");
+			const second = document.getElementById("descriptions");
+			var md;
+			separator.onmousedown = onMouseDown;
+			function onMouseDown(e) {
+				md = {e,
+					offsetLeft:  separator.offsetLeft,
+					offsetTop:   separator.offsetTop,
+					firstWidth:  first.offsetWidth,
+					secondWidth: second.offsetWidth
+				};
+				document.onmousemove = onMouseMove;
+				document.onmouseup = () => { document.onmousemove = document.onmouseup = null; }
+			}
+			function onMouseMove(e)
+			{
+				var delta = {x: e.clientX - md.e.clientX, y: e.clientY - md.e.clientY};
+				delta.x = Math.min(Math.max(delta.x, -md.firstWidth), md.secondWidth);
+				separator.style.left = md.offsetLeft + delta.x + "px";
+				first.style.width = (md.firstWidth + delta.x) + "px";
+				second.style.width = (md.secondWidth - delta.x) + "px";
+			}
+			
+			/* Legend modal */
+			var modal = d3.select("#legend").on('click', function() {
+				d3.select(this).style('display', 'none');
 			});
+			var btn = d3.select("#legendButton").on('click', function() {
+				modal.style('display', 'block');
+			});
+			var span = d3.select(".close").on('click', function() {
+				modal.style('display', 'none');
+			});
+
+			/* Accordions */
+			var acc = document.getElementsByClassName("accordion");
+			var i;
+			for (i = 0; i < acc.length; i++) {
+				acc[i].addEventListener("click", function() {
+					this.classList.toggle("active");
+					var panel = this.nextElementSibling;
+					if (panel.style.display === "block") {
+						panel.style.display = "none";
+					} else {
+						panel.style.display = "block";
+					}
+				});
+			}
 			</script>
 	</body>
 </html>

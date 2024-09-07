@@ -1,1 +1,22 @@
-This is a placeholder file - contents are not checked during testing.
+digraph "untyped tests::main(tests* this)" {
+edge ["dir"="forward"]
+graph ["label"="untyped tests::main(tests* this)","labelloc"="t"]
+"node0" ["label"=<a = new A()<br/><br/>{ expressions: [a],<br/>state: { heap: monolith,<br/>type: { a: [A*],<br/>heap[w]:heap: [A],<br/>this: [tests*] },<br/>value: #TOP# }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
+"node3" ["label"=<one = getPositive(a, getOne(a))<br/><br/>{ expressions: [one],<br/>state: { heap: monolith,<br/>type: { one: [int32] },<br/>value: { one: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node3","color"="gray"]
+"node9" ["label"=<positive = identity(a, one)<br/><br/>{ expressions: [positive],<br/>state: { heap: monolith,<br/>type: { one: [int32],<br/>positive: [int32] },<br/>value: { one: [10, 10],<br/>positive: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node9","color"="gray"]
+"node14" ["label"=<minusone = -1<br/><br/>{ expressions: [minusone],<br/>state: { heap: monolith,<br/>type: { minusone: [int32],<br/>one: [int32],<br/>positive: [int32] },<br/>value: { minusone: [-1, -1],<br/>one: [10, 10],<br/>positive: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node14","color"="gray"]
+"node17" ["label"=<negative = identity(a, minusone)<br/><br/>{ expressions: [negative],<br/>state: { heap: monolith,<br/>type: { minusone: [int32],<br/>negative: [int32],<br/>one: [int32],<br/>positive: [int32] },<br/>value: { minusone: [-1, -1],<br/>negative: [-1, -1],<br/>one: [10, 10],<br/>positive: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node17","color"="gray"]
+"node22" ["label"=<top = helper(this, one, a)<br/><br/>{ expressions: [top],<br/>state: { heap: monolith,<br/>type: { minusone: [int32],<br/>negative: [int32],<br/>one: [int32],<br/>positive: [int32],<br/>top: [int32] },<br/>value: { minusone: [-1, -1],<br/>negative: [-1, -1],<br/>one: [10, 10],<br/>positive: [10, 10],<br/>top: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node22","color"="gray"]
+"node28" ["label"=<ret<br/><br/>{ expressions: [skip],<br/>state: { heap: monolith,<br/>type: { minusone: [int32],<br/>negative: [int32],<br/>one: [int32],<br/>positive: [int32],<br/>top: [int32] },<br/>value: { minusone: [-1, -1],<br/>negative: [-1, -1],<br/>one: [10, 10],<br/>positive: [10, 10],<br/>top: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node28","color"="black"]
+subgraph "cluster_legend" {
+edge ["dir"="none"]
+graph ["label"=<Legend>,"style"="dotted"]
+"legend" ["label"=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, dashed</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>,"shape"="none"]
+}
+"node0" -> "node3" ["color"="black"]
+"node3" -> "node9" ["color"="black"]
+"node9" -> "node14" ["color"="black"]
+"node14" -> "node17" ["color"="black"]
+"node17" -> "node22" ["color"="black"]
+"node22" -> "node28" ["color"="black"]
+}

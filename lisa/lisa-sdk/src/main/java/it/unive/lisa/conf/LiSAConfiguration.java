@@ -67,23 +67,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 		/**
 		 * Graphs are dumped in Dot format.
 		 */
-		DOT,
-
-		/**
-		 * Graphs are dumped in compound GraphML format. Only root-level nodes
-		 * are included in the graph: to get a complete graph with sub-nodes,
-		 * use {@link #GRAPHML_WITH_SUBNODES}.
-		 */
-		GRAPHML,
-
-		/**
-		 * Graphs are dumped in compound GraphML format.All nodes, including
-		 * sub-nodes, are part of the graph, creating a compound graph. Note:
-		 * graphs generated with this option are big: files will have larger
-		 * dimension and the viewer will be slower. For a lighter alternative,
-		 * use {@link #GRAPHML}.
-		 */
-		GRAPHML_WITH_SUBNODES;
+		DOT;
 	}
 
 	/**

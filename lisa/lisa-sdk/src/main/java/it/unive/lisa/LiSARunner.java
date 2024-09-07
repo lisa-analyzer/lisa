@@ -270,19 +270,13 @@ public class LiSARunner<A extends AbstractState<A>> {
 		case DOT:
 			fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
 			break;
-		case GRAPHML:
-			fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(false).dump(writer));
-			break;
-		case GRAPHML_WITH_SUBNODES:
-			fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(true).dump(writer));
-			break;
 		case HTML:
 			fileManager.mkHtmlFile(filename, writer -> graph.toHtml(false, "results").dump(writer));
-			fileManager.usedPlainCytoscape();
+			fileManager.usedHtmlViewer();
 			break;
 		case HTML_WITH_SUBNODES:
 			fileManager.mkHtmlFile(filename, writer -> graph.toHtml(true, "results").dump(writer));
-			fileManager.usedCompoundCytoscape();
+			fileManager.usedHtmlViewer();
 			break;
 		case NONE:
 			break;
