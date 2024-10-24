@@ -106,6 +106,19 @@ NEW
 ASSERT
    : 'assert'
    ;
+
+IMPORT
+   : 'import'
+   ;
+
+AS
+   : 'as'
+   ;
+
+FROM
+   : 'from'
+   ;
+
    // =========================== STRING FUNCTIONS =========================== 
    
 STRCAT
@@ -314,4 +327,3 @@ fragment LetterOrDigit
 fragment Letter
    : [a-zA-Z$_]
    ;
-

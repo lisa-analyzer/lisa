@@ -317,7 +317,30 @@ unitNames
    : unitName (COMMA unitName)*
    ;
 
+/*
+ * IMPORT STATEMENTS
+ */
+importDeclaration
+   : IMPORT simpleImport (COMMA simpleImport)* SEMI
+   | FROM unitName IMPORT importTargets SEMI
+   ;
+
+simpleImport
+   : unitName (AS IDENTIFIER)?
+   ;
+
+importTargets
+   : importTarget (COMMA importTarget)*
+   | LPAREN importTarget (COMMA importTarget)* RPAREN
+   ;
+
+importTarget
+   : IDENTIFIER (AS IDENTIFIER)?
+   ;
+
+
 file
-   : unit*
+
+   : (importDeclaration)* unit*
    ;
 
