@@ -1,9 +1,39 @@
 dependencies {
-	// internal
-	api project(':lisa-sdk')
-	testImplementation project(':lisa-imp')
-
-	// testing
-	testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
+    // internal
+    api project(':lisa-sdk')
+    testImplementation project(':lisa-imp')
+    // testing
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
     testImplementation 'junit:junit:4.12'
+}
+
+ext {
+    apronPath = System.getenv("APRON_PATH") == null ? "*" : System.getenv("APRON_PATH")
+    excludeApronClass = !file(apronPath).exists()
+}
+
+task copyApronFiles(type: Copy) {
+    from apronPath
+    into './src/main/java/it/unive/lisa/apron'
+    onlyIf {
+        System.env['APRON_PATH'] != null
+    }
+}
+
+if (excludeApronClass) {
+    sourceSets {
+        main {
+            java {
+                exclude '**/Apron.java'
+            }
+        }
+        test {
+            java {
+                exclude '**/NumericAnalysesTestApron.java'
+            }
+        }
+    }
+} else {
+    compileJava.dependsOn(copyApronFiles)
+    sourcesJar.dependsOn(copyApronFiles)
 }
