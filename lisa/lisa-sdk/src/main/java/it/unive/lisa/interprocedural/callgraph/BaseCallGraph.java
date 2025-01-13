@@ -35,6 +35,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -118,10 +120,10 @@ public abstract class BaseCallGraph extends CallGraph {
 					types[i] = params[i].getStaticType().allInstances(call.getProgram().getTypes());
 		}
 
-		Collection<CFG> targets = new HashSet<>();
-		Collection<NativeCFG> nativeTargets = new HashSet<>();
-		Collection<CFG> targetsNoRec = new HashSet<>();
-		Collection<NativeCFG> nativeTargetsNoRec = new HashSet<>();
+		Set<CFG> targets = new HashSet<>();
+		Set<NativeCFG> nativeTargets = new HashSet<>();
+		Set<CFG> targetsNoRec = new HashSet<>();
+		Set<NativeCFG> nativeTargetsNoRec = new HashSet<>();
 
 		switch (call.getCallType()) {
 		case INSTANCE:
@@ -197,7 +199,7 @@ public abstract class BaseCallGraph extends CallGraph {
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, app.getEntryPoints().contains(call.getCFG()));
 
-		for (CFG target : targets) {
+		for (CFG target : SetUtils.union(targets, targetsNoRec)) {
 			CallGraphNode t = new CallGraphNode(this, target);
 			if (!adjacencyMatrix.containsNode(t))
 				addNode(t, app.getEntryPoints().contains(call.getCFG()));
@@ -205,7 +207,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
 
-		for (NativeCFG target : nativeTargets) {
+		for (NativeCFG target : SetUtils.union(nativeTargets, nativeTargetsNoRec)) {
 			CallGraphNode t = new CallGraphNode(this, target);
 			if (!adjacencyMatrix.containsNode(t))
 				addNode(t, false);

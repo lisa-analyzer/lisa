@@ -1,5 +1,12 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -25,11 +32,6 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
@@ -76,10 +78,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 		// new fixpoint iteration: restart
 		this.results = null;
 
-		Collection<CFG> all = new TreeSet<>((
-				c1,
-				c2) -> c1.getDescriptor().getLocation()
-						.compareTo(c2.getDescriptor().getLocation()));
+		Collection<CFG> all = new TreeSet<>(ModularWorstCaseAnalysis::sorter);
 		all.addAll(app.getAllCFGs());
 
 		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program",
@@ -110,6 +109,20 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A>> implements Int
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
+	}
+
+	private static int sorter(
+			CFG g1,
+			CFG g2) {
+		int cmp = g1.getDescriptor().getLocation().compareTo(g2.getDescriptor().getLocation());
+		if (cmp != 0)
+			return cmp;
+
+		// they might have been defined at the same location (e.g., synthetic
+		// location for generated code). But if they also have the same
+		// signature, then they should be equal...
+		return g1.getDescriptor().getFullSignatureWithParNames()
+				.compareTo(g2.getDescriptor().getFullSignatureWithParNames());
 	}
 
 	@Override
