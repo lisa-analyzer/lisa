@@ -1,5 +1,21 @@
 package it.unive.lisa.program.cfg;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -13,8 +29,10 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -35,26 +53,11 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -129,12 +132,30 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	}
 
 	/**
-	 * Yields the name of this control flow graph.
+	 * Yields the descriptor of this control flow graph.
 	 * 
 	 * @return the name
 	 */
 	public final CodeMemberDescriptor getDescriptor() {
 		return descriptor;
+	}
+
+	/**
+	 * Yields the unit where this CFG is defined.
+	 * 
+	 * @return the unit
+	 */
+	public final Unit getUnit() {
+		return descriptor.getUnit();
+	}
+
+	/**
+	 * Yields the program where this CFG is defined.
+	 * 
+	 * @return the program
+	 */
+	public final Program getProgram() {
+		return descriptor.getUnit().getProgram();
 	}
 
 	/**
@@ -775,7 +796,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * {@inheritDoc} This method checks that:
 	 * <ul>
 	 * <li>the underlying adjacency matrix is valid, through
-	 * {@link AdjacencyMatrix#validate(Collection)}</li>
+	 * {@link NodeList#validate(Collection)}</li>
 	 * <li>all {@link ControlFlowStructure}s of this cfg contains node
 	 * effectively in the cfg</li>
 	 * <li>all {@link Statement}s that stop the execution (according to
