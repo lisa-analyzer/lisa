@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.lattices;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.representation.MapRepresentation;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +8,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.representation.MapRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -222,6 +223,32 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	/**
+	 * Interface for transforming an individual value that admits a
+	 * {@link SemanticException} being thrown.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 *
+	 * @param <V> the type of values to transform
+	 */
+	@FunctionalInterface
+	public interface Transformer<V> {
+
+		/**
+		 * Yields the transformation of {@code value}.
+		 * 
+		 * @param value the value to transform
+		 * 
+		 * @return the transformed value
+		 * 
+		 * @throws SemanticException if something goes wrong while transforming
+		 *                               the value
+		 */
+		V transform(
+				V value)
+				throws SemanticException;
+	}
+
+	/**
 	 * Interface for the lift of lattice elements.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -256,7 +283,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @param <K> the key type
 	 */
 	@FunctionalInterface
-	public interface KeyFunctionalLift<K> {
+	public interface KeySetLift<K> {
 
 		/**
 		 * Yields the lift of {@code first} and {@code second} key sets.
@@ -294,7 +321,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	public F functionalLift(
 			F other,
 			V missing,
-			KeyFunctionalLift<K> keyLifter,
+			KeySetLift<K> keyLifter,
 			FunctionalLift<V> valueLifter)
 			throws SemanticException {
 		Map<K, V> function = mkNewFunction(null, false);
@@ -308,6 +335,48 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
 			}
 		return mk(lattice.lub(other.lattice), function);
+	}
+
+	/**
+	 * Transforms the key-value pairs in this function according to the given
+	 * transformers. A key-value pair will not be part of the result if the
+	 * transformation of either the key or the value returns {@code null}.
+	 * 
+	 * @param keyTransformer   the {@link Transformer} used to transform the
+	 *                             keys
+	 * @param valueTransformer the {@link Transformer} used to transform the
+	 *                             values
+	 * @param combiner         when the transformations of two separate keys
+	 *                             produce the same result, the transformation
+	 *                             of the respective values is combined through
+	 *                             this lifter
+	 * 
+	 * @return the transformed function
+	 * 
+	 * @throws SemanticException if an exception is raised by one of the
+	 *                               transformers
+	 */
+	@SuppressWarnings("unchecked")
+	public F transform(
+			Transformer<K> keyTransformer,
+			Transformer<V> valueTransformer,
+			FunctionalLift<V> combiner)
+			throws SemanticException {
+		if (isBottom() || isTop() || function == null)
+			return (F) this;
+
+		Map<K, V> function = mkNewFunction(null, false);
+		for (K id : getKeys()) {
+			K tKey = keyTransformer.transform(id);
+			V tValue = valueTransformer.transform(getState(id));
+			if (tKey != null && tValue != null)
+				if (!function.containsKey(tKey))
+					function.put(tKey, tValue);
+				else
+					function.put(tKey, combiner.lift(function.get(tKey), tValue));
+		}
+
+		return mk(lattice, function);
 	}
 
 	/**
