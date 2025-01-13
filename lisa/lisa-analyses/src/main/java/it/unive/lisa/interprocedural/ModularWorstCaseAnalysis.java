@@ -1,12 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -32,6 +25,11 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.

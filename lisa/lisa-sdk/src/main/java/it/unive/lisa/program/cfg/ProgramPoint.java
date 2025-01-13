@@ -20,9 +20,8 @@ public interface ProgramPoint extends CodeElement {
 	CFG getCFG();
 
 	/**
-	 * Yields the {@link Unit} where this program point is defined. By
-	 * default, this is obtained through the {@link CFG} returned by
-	 * {@link #getCFG()}.
+	 * Yields the {@link Unit} where this program point is defined. By default,
+	 * this is obtained through the {@link CFG} returned by {@link #getCFG()}.
 	 * 
 	 * @return the containing unit
 	 */

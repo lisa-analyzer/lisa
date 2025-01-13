@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.lattices;
 
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.representation.MapRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,13 +14,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.representation.MapRepresentation;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of

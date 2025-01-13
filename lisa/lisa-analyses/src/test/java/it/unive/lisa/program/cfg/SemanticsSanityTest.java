@@ -29,6 +29,7 @@ import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.analysis.numeric.UpperBounds.IdSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.types.InferredTypes;
@@ -473,6 +474,8 @@ public class SemanticsSanityTest {
 			return new UniqueScope();
 		if (param == Lattice.class)
 			return new Sign();
+		if (root == IdSet.class && param == Set.class)
+			return Collections.emptySet();
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);
