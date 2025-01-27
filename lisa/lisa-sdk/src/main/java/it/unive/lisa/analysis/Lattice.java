@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.util.collections.IterableArray;
+import it.unive.lisa.util.functional.BiFunction;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -75,6 +77,46 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 			throws SemanticException;
 
 	/**
+	 * Performs the lub operation between this lattice element and the given
+	 * ones, by repeatedly invoking {@link #lub(Lattice)} following the
+	 * iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the lub between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L lub(
+			L... others)
+			throws SemanticException {
+		return compress((L) this, new IterableArray<>(others), (
+				l1,
+				l2) -> l1.lub(l2));
+	}
+
+	/**
+	 * Performs the lub operation between this lattice element and the given
+	 * ones, by repeatedly invoking {@link #lub(Lattice)} following the
+	 * iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the lub between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L lub(
+			Iterable<L> others)
+			throws SemanticException {
+		return compress((L) this, others, (
+				l1,
+				l2) -> l1.lub(l2));
+	}
+
+	/**
 	 * Performs the greatest lower upper bound operation between this lattice
 	 * element and the given one. This operation is commutative.
 	 * 
@@ -88,6 +130,46 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 			L other)
 			throws SemanticException {
 		return bottom();
+	}
+
+	/**
+	 * Performs the glb operation between this lattice element and the given
+	 * ones, by repeatedly invoking {@link #glb(Lattice)} following the
+	 * iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the glb between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L glb(
+			L... others)
+			throws SemanticException {
+		return compress((L) this, new IterableArray<>(others), (
+				l1,
+				l2) -> l1.glb(l2));
+	}
+
+	/**
+	 * Performs the glb operation between this lattice element and the given
+	 * ones, by repeatedly invoking {@link #glb(Lattice)} following the
+	 * iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the glb between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L glb(
+			Iterable<L> others)
+			throws SemanticException {
+		return compress((L) this, others, (
+				l1,
+				l2) -> l1.glb(l2));
 	}
 
 	/**
@@ -158,6 +240,46 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	}
 
 	/**
+	 * Performs the widening operation between this lattice element and the
+	 * given ones, by repeatedly invoking {@link #widening(Lattice)} following
+	 * the iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the widening between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L widening(
+			L... others)
+			throws SemanticException {
+		return compress((L) this, new IterableArray<>(others), (
+				l1,
+				l2) -> l1.widening(l2));
+	}
+
+	/**
+	 * Performs the widening operation between this lattice element and the
+	 * given ones, by repeatedly invoking {@link #widening(Lattice)} following
+	 * the iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the widening between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L widening(
+			Iterable<L> others)
+			throws SemanticException {
+		return compress((L) this, others, (
+				l1,
+				l2) -> l1.widening(l2));
+	}
+
+	/**
 	 * Performs the narrowing operation between this lattice element and the
 	 * given one. This operation is not commutative. The default implementation
 	 * of this method delegates to {@link #glb(Lattice)}, and is thus safe for
@@ -173,5 +295,56 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 			L other)
 			throws SemanticException {
 		return glb(other);
+	}
+
+	/**
+	 * Performs the narrowing operation between this lattice element and the
+	 * given ones, by repeatedly invoking {@link #narrowing(Lattice)} following
+	 * the iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the narrowing between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L narrowing(
+			L... others)
+			throws SemanticException {
+		return compress((L) this, new IterableArray<>(others), (
+				l1,
+				l2) -> l1.narrowing(l2));
+	}
+
+	/**
+	 * Performs the narrowing operation between this lattice element and the
+	 * given ones, by repeatedly invoking {@link #narrowing(Lattice)} following
+	 * the iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the narrowing between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L narrowing(
+			Iterable<L> others)
+			throws SemanticException {
+		return compress((L) this, others, (
+				l1,
+				l2) -> l1.narrowing(l2));
+	}
+
+	private static <L extends Lattice<L>> L compress(
+			L starter,
+			Iterable<L> others,
+			BiFunction<L, L, L, SemanticException> combiner)
+			throws SemanticException {
+		L cursor = starter;
+		for (L o : others)
+			cursor = combiner.apply(cursor, o);
+		return cursor;
 	}
 }
