@@ -156,7 +156,9 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 
 	/**
 	 * Checks if the given expression is satisfied by the abstract values of
-	 * this domain, returning an instance of {@link Satisfiability}.
+	 * this domain, returning an instance of {@link Satisfiability}. The default
+	 * implementation of this method always returns
+	 * {@link Satisfiability#UNKNOWN}.
 	 * 
 	 * @param expression the expression whose satisfiability is to be evaluated
 	 * @param pp         the program point that where this operation is being
@@ -173,11 +175,13 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Satisfiability satisfies(
+	default Satisfiability satisfies(
 			E expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
-			throws SemanticException;
+			throws SemanticException {
+		return Satisfiability.UNKNOWN;
+	}
 
 	/**
 	 * Yields a unique instance of the specific domain, of class {@code domain},

@@ -35,6 +35,8 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * Checks whether {@code expression} is satisfied in {@code environment},
 	 * assuming that the values of program variables are the ones stored in
 	 * {@code environment} and returning an instance of {@link Satisfiability}.
+	 * The default implementation of this method always returns
+	 * {@link Satisfiability#UNKNOWN}.
 	 * 
 	 * @param expression  the expression whose satisfiability is to be evaluated
 	 * @param environment the environment containing the values of program
@@ -52,12 +54,14 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	Satisfiability satisfies(
+	default Satisfiability satisfies(
 			E expression,
 			F environment,
 			ProgramPoint pp,
 			SemanticOracle oracle)
-			throws SemanticException;
+			throws SemanticException {
+		return Satisfiability.UNKNOWN;
+	}
 
 	/**
 	 * Yields the environment {@code environment} on which the expression

@@ -114,16 +114,6 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public Satisfiability satisfies(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		// we leave the decision to the value domain
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
 	public StructuredRepresentation representation() {
 		return new SetRepresentation(names, StringRepresentation::new);
 	}

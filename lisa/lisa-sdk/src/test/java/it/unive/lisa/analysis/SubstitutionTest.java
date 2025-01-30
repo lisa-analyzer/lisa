@@ -3,10 +3,19 @@ package it.unive.lisa.analysis;
 import static it.unive.lisa.util.collections.CollectionUtilities.collect;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.function.Predicate;
+
+import org.junit.Test;
+
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -19,14 +28,6 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.function.Predicate;
-import org.junit.Test;
 
 public class SubstitutionTest {
 
@@ -90,15 +91,6 @@ public class SubstitutionTest {
 				Predicate<Identifier> test)
 				throws SemanticException {
 			return null;
-		}
-
-		@Override
-		public Satisfiability satisfies(
-				ValueExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null; // not used
 		}
 
 		@Override

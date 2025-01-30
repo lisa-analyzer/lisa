@@ -1,22 +1,22 @@
 package it.unive.lisa.analysis.dataflow;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.util.representation.SetRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
+
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.representation.SetRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A dataflow domain that collects instances of {@link DataflowElement}. A
@@ -189,15 +189,6 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 		Set<E> updated = new HashSet<>(elements);
 		updated.removeAll(toRemove);
 		return mk(domain, updated, false, false);
-	}
-
-	@Override
-	public Satisfiability satisfies(
-			ValueExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return Satisfiability.UNKNOWN;
 	}
 
 	@Override

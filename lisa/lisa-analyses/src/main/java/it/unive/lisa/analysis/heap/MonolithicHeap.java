@@ -98,16 +98,6 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public Satisfiability satisfies(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		// we leave the decision to the value domain
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
 	public MonolithicHeap forgetIdentifier(
 			Identifier id)
 			throws SemanticException {

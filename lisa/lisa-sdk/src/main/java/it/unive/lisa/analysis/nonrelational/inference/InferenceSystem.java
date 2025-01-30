@@ -1,8 +1,9 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.VariableLift;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -11,7 +12,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Map;
 
 /**
  * An inference system that model standard derivation systems. An inference
@@ -138,14 +138,6 @@ public class InferenceSystem<T extends InferredValue<T>>
 			throws SemanticException {
 		if (isBottom())
 			return this;
-
-		Satisfiability sat = lattice.satisfies(expression, this, src, oracle);
-		if (sat == Satisfiability.NOT_SATISFIED)
-			return bottom();
-
-		if (sat == Satisfiability.SATISFIED)
-			return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, src, oracle).getState());
-
 		return lattice.assume(this, expression, src, dest, oracle);
 	}
 

@@ -314,16 +314,6 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public Satisfiability satisfies(
-				SymbolicExpression expression,
-				HeapEnvironment<NRHeap> environment,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return Satisfiability.UNKNOWN;
-		}
-
-		@Override
 		public HeapEnvironment<NRHeap> assume(
 				HeapEnvironment<NRHeap> environment,
 				SymbolicExpression expression,

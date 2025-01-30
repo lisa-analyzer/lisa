@@ -335,18 +335,6 @@ public class UpperBounds
 		}
 
 		@Override
-		public Satisfiability satisfies(
-				ValueExpression expression,
-				UpperBounds environment,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			// since this won't be really used as a non relational domain,
-			// we don't care about the implementation of this method
-			return Satisfiability.UNKNOWN;
-		}
-
-		@Override
 		public UpperBounds assume(
 				UpperBounds environment,
 				ValueExpression expression,
