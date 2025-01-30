@@ -2,6 +2,23 @@ package it.unive.lisa;
 
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+
 import guru.nidi.graphviz.model.Factory;
 import guru.nidi.graphviz.model.MutableGraph;
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
@@ -19,7 +36,7 @@ import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
-import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
+import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
@@ -122,24 +139,9 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 
 //This test must live here since this project has all the others in its classpath, and reflections can detect all classes
 public class EqualityContractVerificationTest {
@@ -454,7 +456,7 @@ public class EqualityContractVerificationTest {
 		Collection<Class<?>> testable = new HashSet<>();
 		testable.addAll(scanner.getSubTypesOf(Lattice.class));
 		testable.addAll(scanner.getSubTypesOf(SemanticDomain.class));
-		testable.addAll(scanner.getSubTypesOf(NonRelationalElement.class));
+		testable.addAll(scanner.getSubTypesOf(NonRelationalDomain.class));
 		testable.addAll(scanner.getSubTypesOf(DataflowElement.class));
 
 		for (Class<?> subject : testable)

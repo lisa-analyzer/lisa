@@ -1,11 +1,14 @@
 package it.unive.lisa.analysis.types;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
+import it.unive.lisa.analysis.nonrelational.value.NonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -24,11 +27,9 @@ import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.Set;
 
 /**
- * An {@link InferredValue} holding a set of {@link Type}s, representing the
+ * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s, representing the
  * inferred runtime types of an {@link Expression}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
