@@ -2,23 +2,6 @@ package it.unive.lisa;
 
 import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
-
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-
 import guru.nidi.graphviz.model.Factory;
 import guru.nidi.graphviz.model.MutableGraph;
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
@@ -139,9 +122,24 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 //This test must live here since this project has all the others in its classpath, and reflections can detect all classes
 public class EqualityContractVerificationTest {

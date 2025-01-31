@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.types;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -27,10 +24,12 @@ import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s, representing the
- * inferred runtime types of an {@link Expression}.
+ * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s,
+ * representing the inferred runtime types of an {@link Expression}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

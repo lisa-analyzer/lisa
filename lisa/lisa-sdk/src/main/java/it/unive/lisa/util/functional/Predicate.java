@@ -25,5 +25,5 @@ public interface Predicate<T, E extends Exception> {
 	 */
 	boolean test(
 			T t)
-			throws Exception;
+			throws E;
 }

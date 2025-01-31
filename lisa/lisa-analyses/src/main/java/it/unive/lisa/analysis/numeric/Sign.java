@@ -357,10 +357,10 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 		else if (this.isTop() || other.isTop())
 			return Satisfiability.UNKNOWN;
 		else if (this.isNegative())
-			return other.isNegative() ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED; 
+			return other.isNegative() ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
 		else if (this.isZero())
 			return other.isNegative() ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
-		else 
+		else
 			return other.isPositive() ? Satisfiability.UNKNOWN : Satisfiability.SATISFIED;
 	}
 

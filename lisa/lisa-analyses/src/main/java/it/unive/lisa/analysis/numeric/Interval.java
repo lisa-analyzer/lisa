@@ -454,7 +454,7 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 		Interval update = null;
 		if (operator == ComparisonEq.INSTANCE)
 			// if eval is not a possible value, we go to bottom
-			update = starting.glb(eval); 
+			update = starting.glb(eval);
 		else if (operator == ComparisonGe.INSTANCE)
 			if (rightIsExpr)
 				update = lowIsMinusInfinity ? null : starting.glb(low_inf);

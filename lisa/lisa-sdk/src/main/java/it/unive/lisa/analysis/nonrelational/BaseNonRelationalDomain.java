@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Set;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -34,6 +32,7 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
+import java.util.Set;
 
 /**
  * Base implementation for {@link NonRelationalValueDomain}s. This class extends

@@ -30,8 +30,8 @@ import java.util.Objects;
 
 public abstract class AnalysisTestExecutor {
 
-	protected static final String EXPECTED_RESULTS_DIR = "imp-testcases";
-	protected static final String ACTUAL_RESULTS_DIR = "test-outputs";
+	public static final String EXPECTED_RESULTS_DIR = "imp-testcases";
+	public static final String ACTUAL_RESULTS_DIR = "test-outputs";
 
 	/**
 	 * Performs a test, running an analysis. The test will fail if:

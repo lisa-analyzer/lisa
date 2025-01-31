@@ -1,16 +1,12 @@
 package it.unive.lisa.analysis.nonInterference;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.GenericMapLattice;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.Environment;
+import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
@@ -28,9 +24,14 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 
 /**
- * The type-system based implementation of the non interference analysis.
+ * Implementation of the non interference analysis as an {@link Environment}
+ * containing instances of {@link NI}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -65,12 +66,15 @@ public class NonInterference
 
 	private GenericMapLattice<ProgramPoint, NI> guards;
 
+	/**
+	 * Builds the top instance of the non-interference domain.
+	 */
 	public NonInterference() {
 		super(new NI());
 		this.guards = new GenericMapLattice<ProgramPoint, NonInterference.NI>(NI.mkLowHigh());
 	}
 
-	public NonInterference(
+	private NonInterference(
 			NI domain,
 			Map<Identifier, NI> function,
 			GenericMapLattice<ProgramPoint, NI> guards) {
@@ -105,6 +109,13 @@ public class NonInterference
 		return new NonInterference(lattice, function, guards);
 	}
 
+	/**
+	 * Yields the state in which the execution is. This corresponds to the lub
+	 * of the {@link NI} instances of all the guards protecting the program
+	 * point where this object was created.
+	 * 
+	 * @return the execution state
+	 */
 	public NI getExecutionState() {
 		if (guards.function == null || guards.function.isEmpty())
 			// we return LH since that is the lowest non-error state
@@ -205,6 +216,14 @@ public class NonInterference
 		return new NonInterference(sss.lattice, sss.function, newGuards);
 	}
 
+	/**
+	 * A pair of integrity and confidentiality bits for the
+	 * {@link NonInterference} analysis. This class is made to be a
+	 * {@link NonRelationalDomain} just to be used in conjunction with
+	 * {@link NonInterference}, which is an {@link Environment}.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	public static class NI
 			implements
 			BaseNonRelationalDomain<NI, ValueExpression, NonInterference> {

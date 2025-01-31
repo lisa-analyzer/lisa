@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.dataflow;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -17,6 +10,12 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 /**
  * A dataflow domain that collects instances of {@link DataflowElement}. A

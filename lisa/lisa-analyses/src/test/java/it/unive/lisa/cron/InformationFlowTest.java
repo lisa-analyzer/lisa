@@ -1,9 +1,5 @@
 package it.unive.lisa.cron;
 
-import java.util.Collection;
-
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -37,6 +33,8 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import org.junit.Test;
 
 public class InformationFlowTest extends AnalysisTestExecutor {
 

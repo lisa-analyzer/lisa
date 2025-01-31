@@ -23,7 +23,7 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 		BaseLattice<T>,
 		BaseNonRelationalDomain<T, ValueExpression, TypeEnvironment<T>>,
 		NonRelationalTypeDomain<T> {
-	
+
 	@Override
 	default boolean canProcess(
 			SymbolicExpression expression,

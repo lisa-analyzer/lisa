@@ -2,12 +2,6 @@ package it.unive.lisa.analysis.types;
 
 import static org.apache.commons.collections4.CollectionUtils.intersection;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -36,10 +30,15 @@ import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
- * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s, representing the
- * inferred runtime types of an {@link Expression}.
+ * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s,
+ * representing the inferred runtime types of an {@link Expression}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
