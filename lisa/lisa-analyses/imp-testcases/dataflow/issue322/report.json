@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_~LiSAProgram.foo()_-309356675.json", "untyped_~LiSAProgram.main().json" ],
+  "info" : {
+    "cfgs" : "2",
+    "duration" : "420ms",
+    "end" : "2025-02-18T11:31:57.663+01:00",
+    "expressions" : "6",
+    "files" : "2",
+    "globals" : "1",
+    "members" : "2",
+    "programs" : "1",
+    "start" : "2025-02-18T11:31:57.243+01:00",
+    "statements" : "6",
+    "units" : "0",
+    "version" : "0.1b8",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/dataflow/issue322"
+  }
+}

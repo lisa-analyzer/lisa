@@ -18,7 +18,7 @@ import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrate
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
-import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.HashSet;
@@ -141,7 +141,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 					if (seen.add(unit)) {
 						Global global = cu.getInstanceGlobal(target, false);
 						if (global != null) {
-							Variable var = global.toSymbolicVariable(loc);
+							GlobalVariable var = global.toSymbolicVariable(loc);
 							AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
 							result = result.lub(state.smallStepSemantics(access, this));
 							atLeastOne = true;
@@ -162,7 +162,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 			return state.bottom();
 
 		Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
-		Variable var = new Variable(Untyped.INSTANCE, target, new Annotations(), getLocation());
+		GlobalVariable var = new GlobalVariable(Untyped.INSTANCE, target, new Annotations(), getLocation());
 		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
 		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
 		return state.smallStepSemantics(access, this);
