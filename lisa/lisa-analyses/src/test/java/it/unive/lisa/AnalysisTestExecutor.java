@@ -82,21 +82,29 @@ public abstract class AnalysisTestExecutor {
 	public void perform(
 			CronConfiguration conf,
 			boolean allMethods) {
+		Objects.requireNonNull(conf);
+		Objects.requireNonNull(conf.testDir);
+		Objects.requireNonNull(conf.programFile);
+		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, conf.testDir);
+		Path target = Paths.get(expectedPath.toString(), conf.programFile);
+		Program program = readProgram(target, allMethods);
+		perform(conf, program);
+	}
+
+	public void perform(
+			CronConfiguration conf,
+			Program program) {
 		String testMethod = getCaller();
 		System.out.println("### Testing " + testMethod);
 		Objects.requireNonNull(conf);
 		Objects.requireNonNull(conf.testDir);
-		Objects.requireNonNull(conf.programFile);
 
 		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, conf.testDir);
 		Path actualPath = Paths.get(ACTUAL_RESULTS_DIR, conf.testDir);
-		Path target = Paths.get(expectedPath.toString(), conf.programFile);
 		if (conf.testSubDir != null) {
 			expectedPath = Paths.get(expectedPath.toString(), conf.testSubDir);
 			actualPath = Paths.get(actualPath.toString(), conf.testSubDir);
 		}
-
-		Program program = readProgram(target, allMethods);
 
 		setupWorkdir(conf, actualPath);
 
@@ -128,7 +136,8 @@ public abstract class AnalysisTestExecutor {
 
 			// we parse the program again since the analysis might have
 			// finalized it or modified it, and we want to start from scratch
-			program = readProgram(target, allMethods);
+			// TODO: might need to enable this again
+			// program = readProgram(target, allMethods);
 
 			conf.optimize = true;
 			actualPath = Paths.get(actualPath.toString(), "optimized");
@@ -399,6 +408,11 @@ public abstract class AnalysisTestExecutor {
 		// 2: it.unive.lisa.test.AnalysisTest.getCaller()
 		// 3: it.unive.lisa.test.AnalysisTest.perform()
 		// 4: caller
-		return trace[4].getClassName() + "::" + trace[4].getMethodName();
+		for (StackTraceElement e : trace) {
+			if (!e.getClassName().equals("java.lang.Thread") && !e.getClassName().equals(getClass().getName()))
+				return e.getClassName() + "::" + e.getMethodName();
+		}
+
+		throw new AnalysisException("Unable to find caller test method");
 	}
 }
