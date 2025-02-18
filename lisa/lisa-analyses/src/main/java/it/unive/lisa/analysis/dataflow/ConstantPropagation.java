@@ -7,7 +7,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
@@ -212,9 +211,13 @@ public class ConstantPropagation
 	public ConstantPropagation popScope(
 			ScopeToken scope)
 			throws SemanticException {
-		if (!(id instanceof OutOfScopeIdentifier))
+		if (!id.canBeScoped())
 			return this;
 
-		return new ConstantPropagation(((OutOfScopeIdentifier) id).popScope(scope), constant);
+		SymbolicExpression popped = id.popScope(scope);
+		if (popped == null)
+			return null;
+
+		return new ConstantPropagation((Identifier) popped, constant);
 	}
 }

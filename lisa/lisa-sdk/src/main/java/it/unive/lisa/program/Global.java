@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Objects;
@@ -224,15 +224,15 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Creates a {@link Variable} that represent this global, that can be used
-	 * by {@link SemanticDomain}s to reference it.
+	 * Creates a {@link GlobalVariable} that represent this global, that can be
+	 * used by {@link SemanticDomain}s to reference it.
 	 * 
 	 * @param where the location where the variable will be generated
 	 * 
 	 * @return the variable representing this parameter
 	 */
-	public Variable toSymbolicVariable(
+	public GlobalVariable toSymbolicVariable(
 			CodeLocation where) {
-		return new Variable(staticType, name, annotations, where);
+		return new GlobalVariable(staticType, name, annotations, where);
 	}
 }

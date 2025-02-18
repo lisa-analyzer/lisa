@@ -3,8 +3,8 @@ package it.unive.lisa.analysis.dataflow;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.ListRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
@@ -144,9 +144,13 @@ public class ReachingDefinitions
 	public ReachingDefinitions popScope(
 			ScopeToken scope)
 			throws SemanticException {
-		if (!(variable instanceof OutOfScopeIdentifier))
+		if (!variable.canBeScoped())
+			return this;
+
+		SymbolicExpression popped = variable.popScope(scope);
+		if (popped == null)
 			return null;
 
-		return new ReachingDefinitions(((OutOfScopeIdentifier) variable).popScope(scope), programPoint);
+		return new ReachingDefinitions((Identifier) popped, programPoint);
 	}
 }

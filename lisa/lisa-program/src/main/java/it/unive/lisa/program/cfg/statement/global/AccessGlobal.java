@@ -13,7 +13,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 /**
@@ -137,7 +137,7 @@ public class AccessGlobal extends Expression {
 
 		// unit globals are unique, we can directly access those
 		return entryState.smallStepSemantics(
-				new Variable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
+				new GlobalVariable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
 				this);
 	}
 }
