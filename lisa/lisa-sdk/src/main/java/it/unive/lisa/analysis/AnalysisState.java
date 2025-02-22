@@ -8,10 +8,13 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -97,6 +100,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @param info                the additional information to be computed
 	 *                                during fixpoint computations
 	 */
+
 	public AnalysisState(
 			A state,
 			ExpressionSet computedExpressions,
@@ -105,6 +109,8 @@ public class AnalysisState<A extends AbstractState<A>>
 		this.computedExpressions = computedExpressions;
 		this.info = info;
 	}
+
+
 
 	/**
 	 * Yields the {@link AbstractState} embedded into this analysis state,
@@ -607,5 +613,26 @@ public class AnalysisState<A extends AbstractState<A>>
 	 */
 	public AnalysisState<A> withTopTypes() {
 		return new AnalysisState<>(state.withTopTypes(), computedExpressions, info);
+	}
+
+
+	private final Map<Pair<SymbolicExpression, AbstractState<A>>, Pair<AnalysisState<A>, AnalysisState<A>>> cache = new HashMap<>();
+
+	public Pair<AnalysisState<A>, AnalysisState<A>> split(SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint des) {
+		Pair<SymbolicExpression, AbstractState<A>> key = Pair.of(expression, state);
+
+		if(cache.containsKey(key)) {
+			Pair<AnalysisState<A>, AnalysisState<A>> result = cache.get(key);
+			return result;
+		}
+
+		Pair<A, A> states = state.split(expression, src, des, state);
+		AnalysisState<A> trueState = new AnalysisState<>(states.getLeft(), computedExpressions, info);
+		AnalysisState<A> falseState = new AnalysisState<A>(states.getRight(), computedExpressions, info);
+		Pair<AnalysisState<A>, AnalysisState<A>> splitStates = Pair.of(trueState, falseState);	
+		cache.put(key, splitStates);	
+		return splitStates;
 	}
 }

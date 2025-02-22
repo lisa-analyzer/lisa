@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
@@ -45,4 +48,7 @@ public interface AbstractState<A extends AbstractState<A>>
 	 * @return the copy with top types
 	 */
 	A withTopTypes();
+	
+	Pair<A, A> split(SymbolicExpression expr, ProgramPoint src,
+			ProgramPoint dest, SemanticOracle oracle);
 }

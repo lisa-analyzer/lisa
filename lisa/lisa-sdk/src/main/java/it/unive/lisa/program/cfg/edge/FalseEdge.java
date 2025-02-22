@@ -6,8 +6,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 
 /**
  * An edge connecting two statements, that is traversed when the condition
@@ -43,12 +41,8 @@ public class FalseEdge extends Edge {
 		ExpressionSet exprs = state.getComputedExpressions();
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : exprs) {
-			UnaryExpression negated = new UnaryExpression(
-					expr.getStaticType(),
-					expr,
-					LogicalNegation.INSTANCE,
-					expr.getCodeLocation());
-			result = result.lub(state.assume(negated, getSource(), getDestination()));
+			AnalysisState<A> falseState = state.split(expr, getSource(), getDestination()).getRight();
+			result = result.lub(falseState.assume(expr, getSource(), getDestination()));
 		}
 		return result;
 	}
