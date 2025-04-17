@@ -20,7 +20,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  */
 public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDomain<T>>
 		extends
-		BaseLattice<T>,
 		BaseNonRelationalDomain<T, ValueExpression, ValueEnvironment<T>>,
 		NonRelationalValueDomain<T> {
 

@@ -1,17 +1,17 @@
 package it.unive.lisa.analysis;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ObjectRepresentation;
-import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -24,10 +24,9 @@ import java.util.function.Predicate;
  * 
  * @param <A> the type of {@link AbstractState} embedded in this state
  */
-public class AnalysisState<A extends AbstractState<A>>
+public class AnalysisState<A extends AbstractState<A>> 
 		implements
 		BaseLattice<AnalysisState<A>>,
-		StructuredObject,
 		ScopedObject<AnalysisState<A>> {
 
 	/**

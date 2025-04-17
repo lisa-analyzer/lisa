@@ -1,10 +1,11 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import java.util.Set;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -32,12 +33,11 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
-import java.util.Set;
 
 /**
- * Base implementation for {@link NonRelationalValueDomain}s. This class extends
+ * Base implementation for {@link NonRelationalDomain}s. This class extends
  * {@link BaseLattice} and implements
- * {@link NonRelationalValueDomain#eval(SymbolicExpression, Environment, ProgramPoint, SemanticOracle)}
+ * {@link NonRelationalDomain#eval(SymbolicExpression, Environment, ProgramPoint, SemanticOracle)}
  * by taking care of the recursive computation of inner expressions evaluation.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

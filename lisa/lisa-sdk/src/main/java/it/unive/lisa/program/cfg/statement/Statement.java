@@ -18,7 +18,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement implements CodeNode<CFG, Statement, Edge>, ProgramPoint, Comparable<Statement> {
+public abstract class Statement implements CodeNode<CFG, Statement, Edge>, ProgramPoint {
 
 	/**
 	 * The cfg containing this statement.
