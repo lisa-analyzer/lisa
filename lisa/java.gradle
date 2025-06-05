@@ -45,6 +45,7 @@ javadoc {
     }
     options {
         links 'https://docs.oracle.com/javase/11/docs/api/'
+		addStringOption('Xdoclint:none', '-quiet')
     }
 }
 

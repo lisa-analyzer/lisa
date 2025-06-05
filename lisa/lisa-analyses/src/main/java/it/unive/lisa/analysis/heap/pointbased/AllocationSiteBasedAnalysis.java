@@ -218,16 +218,6 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	}
 
 	@Override
-	public Satisfiability satisfies(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		// we leave the decision to the value domain
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
 	public StructuredRepresentation representation() {
 		if (isTop())
 			return Lattice.topRepresentation();

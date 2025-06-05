@@ -6,7 +6,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ObjectRepresentation;
-import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,7 +26,6 @@ import java.util.function.Predicate;
 public class AnalysisState<A extends AbstractState<A>>
 		implements
 		BaseLattice<AnalysisState<A>>,
-		StructuredObject,
 		ScopedObject<AnalysisState<A>> {
 
 	/**

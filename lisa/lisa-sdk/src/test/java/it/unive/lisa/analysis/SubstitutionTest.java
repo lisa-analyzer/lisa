@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -90,15 +89,6 @@ public class SubstitutionTest {
 				Predicate<Identifier> test)
 				throws SemanticException {
 			return null;
-		}
-
-		@Override
-		public Satisfiability satisfies(
-				ValueExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null; // not used
 		}
 
 		@Override

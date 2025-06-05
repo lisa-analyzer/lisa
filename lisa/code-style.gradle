@@ -31,7 +31,7 @@ spotless {
     lineEndings 'UNIX'
     java {
         // tabs, no spaces
-        indentWithTabs()
+        leadingSpacesToTabs()
     
         // keep imports clean 
         importOrder() 

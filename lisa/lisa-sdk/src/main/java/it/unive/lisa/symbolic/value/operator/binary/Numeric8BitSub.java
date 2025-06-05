@@ -20,8 +20,7 @@ import it.unive.lisa.type.NumericType;
 public class Numeric8BitSub extends NumericOperation
 		implements
 		SubtractionOperator,
-		OverflowingOperator,
-		BinaryOperator {
+		OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.

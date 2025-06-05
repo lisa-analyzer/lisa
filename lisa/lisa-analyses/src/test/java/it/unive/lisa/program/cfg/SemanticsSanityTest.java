@@ -20,15 +20,13 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonRedundantSet.ValueNonRedundantSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
-import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
-import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.analysis.numeric.UpperBounds.IdSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.types.InferredTypes;
@@ -313,16 +311,6 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public Satisfiability satisfies(
-				SymbolicExpression expression,
-				HeapEnvironment<NRHeap> environment,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return Satisfiability.UNKNOWN;
-		}
-
-		@Override
 		public HeapEnvironment<NRHeap> assume(
 				HeapEnvironment<NRHeap> environment,
 				SymbolicExpression expression,
@@ -425,8 +413,6 @@ public class SemanticsSanityTest {
 			return new NRHeap();
 		if (root == TypeEnvironment.class)
 			return new InferredTypes();
-		if (root == InferenceSystem.class)
-			return new NonInterference();
 		if (root == PossibleDataflowDomain.class)
 			return new ReachingDefinitions();
 		if (root == DefiniteDataflowDomain.class)
@@ -457,8 +443,6 @@ public class SemanticsSanityTest {
 				return new ValueEnvironment<>(new Sign());
 		if (root == StatementStore.class)
 			return as;
-		if (root == InferredPair.class)
-			return new NonInterference();
 		if (param == CFG.class)
 			return cfg;
 		if (param == AnalysisState.class)
@@ -473,6 +457,8 @@ public class SemanticsSanityTest {
 			return new UniqueScope();
 		if (param == Lattice.class)
 			return new Sign();
+		if (root == IdSet.class && param == Set.class)
+			return Collections.emptySet();
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);

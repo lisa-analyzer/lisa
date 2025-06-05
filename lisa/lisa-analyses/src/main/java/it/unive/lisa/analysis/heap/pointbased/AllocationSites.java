@@ -83,15 +83,6 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public Satisfiability satisfies(
-			SymbolicExpression expression,
-			HeapEnvironment<AllocationSites> environment,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
 	public List<HeapReplacement> getSubstitution() {
 		return Collections.emptyList();
 	}

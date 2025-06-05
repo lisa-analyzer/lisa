@@ -24,7 +24,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
@@ -331,7 +330,11 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	 */
 	public Satisfiability eq(
 			Sign other) {
-		if (!this.equals(other))
+		if (this.isBottom() || other.isBottom())
+			return Satisfiability.BOTTOM;
+		else if (this.isTop() || other.isTop())
+			return Satisfiability.UNKNOWN;
+		else if (!this.equals(other))
 			return Satisfiability.NOT_SATISFIED;
 		else if (isZero())
 			return Satisfiability.SATISFIED;
@@ -349,25 +352,16 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	 */
 	public Satisfiability gt(
 			Sign other) {
-		if (this.equals(other))
-			return this.isZero() ? Satisfiability.NOT_SATISFIED : Satisfiability.UNKNOWN;
+		if (this.isBottom() || other.isBottom())
+			return Satisfiability.BOTTOM;
+		else if (this.isTop() || other.isTop())
+			return Satisfiability.UNKNOWN;
+		else if (this.isNegative())
+			return other.isNegative() ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
 		else if (this.isZero())
-			return other.isPositive() ? Satisfiability.NOT_SATISFIED : Satisfiability.SATISFIED;
-		else if (this.isPositive())
-			return Satisfiability.SATISFIED;
+			return other.isNegative() ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
 		else
-			return Satisfiability.NOT_SATISFIED;
-	}
-
-	@Override
-	public Satisfiability satisfiesTernaryExpression(
-			TernaryOperator operator,
-			Sign left,
-			Sign middle,
-			Sign right,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return Satisfiability.UNKNOWN;
+			return other.isPositive() ? Satisfiability.UNKNOWN : Satisfiability.SATISFIED;
 	}
 
 	@Override
@@ -400,31 +394,59 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 
 		Sign update = null;
 		if (operator == ComparisonEq.INSTANCE)
-			update = eval;
-		else if (operator == ComparisonGe.INSTANCE) {
-			if (rightIsExpr && eval.isPositive())
-				update = eval;
-			else if (!rightIsExpr && eval.isNegative())
-				update = eval;
-		} else if (operator == ComparisonLe.INSTANCE) {
-			if (rightIsExpr && eval.isNegative())
-				update = eval;
-			else if (!rightIsExpr && eval.isPositive())
-				update = eval;
-		} else if (operator == ComparisonLt.INSTANCE) {
-			if (rightIsExpr && (eval.isNegative() || eval.isZero()))
-				// x < 0/-
-				update = NEG;
-			else if (!rightIsExpr && (eval.isPositive() || eval.isZero()))
-				// 0/+ < x
-				update = POS;
-		} else if (operator == ComparisonGt.INSTANCE) {
-			if (rightIsExpr && (eval.isPositive() || eval.isZero()))
-				// x > +/0
-				update = POS;
-			else if (!rightIsExpr && (eval.isNegative() || eval.isZero()))
-				// -/0 > x
-				update = NEG;
+			update = starting.glb(eval);
+		else {
+			// the rule for an operator op is:
+			// - if `start op eval`, `update = U { start n v | v op eval, v in {
+			// +, 0, -} }`
+			// - if `eval op start`, `update = U { start n v | eval op v, v in {
+			// +, 0, -} }`
+
+			Sign[] all = new Sign[] { NEG, ZERO, POS };
+			if (operator == ComparisonGe.INSTANCE)
+				if (rightIsExpr) {
+					for (Sign s : all)
+						if (s.gt(eval).or(s.eq(eval)).mightBeTrue())
+							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
+				} else {
+					for (Sign s : all)
+						if (eval.gt(s).or(eval.eq(s)).mightBeTrue())
+							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
+				}
+			else if (operator == ComparisonLe.INSTANCE)
+				if (rightIsExpr) {
+					for (Sign s : all)
+						// we invert <= to > and look at the failing ones
+						if (s.gt(eval).mightBeFalse())
+							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
+				} else {
+					for (Sign s : all)
+						// we invert <= to > and look at the failing ones
+						if (eval.gt(s).mightBeFalse())
+							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
+				}
+			else if (operator == ComparisonLt.INSTANCE)
+				if (rightIsExpr) {
+					for (Sign s : all)
+						// we invert < to >= and look at the failing ones
+						if (s.gt(eval).or(s.eq(eval)).mightBeFalse())
+							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
+				} else {
+					for (Sign s : all)
+						// we invert < to >= and look at the failing ones
+						if (eval.gt(s).or(eval.eq(s)).mightBeFalse())
+							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
+				}
+			else if (operator == ComparisonGt.INSTANCE)
+				if (rightIsExpr) {
+					for (Sign s : all)
+						if (s.gt(eval).mightBeTrue())
+							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
+				} else {
+					for (Sign s : all)
+						if (eval.gt(s).mightBeTrue())
+							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
+				}
 		}
 
 		if (update == null)

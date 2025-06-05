@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
-import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonInterference.NonInterference.NI;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.taint.BaseTaint;
@@ -138,7 +138,7 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = new SimpleAbstractState<>(
 				new MonolithicHeap(),
-				new InferenceSystem<>(new NonInterference()),
+				new NonInterference(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/confidentiality";
@@ -154,7 +154,7 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = new SimpleAbstractState<>(
 				new MonolithicHeap(),
-				new InferenceSystem<>(new NonInterference()),
+				new NonInterference(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/integrity";
@@ -170,7 +170,7 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = new SimpleAbstractState<>(
 				new MonolithicHeap(),
-				new InferenceSystem<>(new NonInterference()),
+				new NonInterference(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
@@ -185,15 +185,12 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 	private static class NICheck
 			implements
 			SemanticCheck<
-					SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-							TypeEnvironment<InferredTypes>>> {
+					SimpleAbstractState<MonolithicHeap, NonInterference, TypeEnvironment<InferredTypes>>> {
 
 		@Override
-		@SuppressWarnings({ "unchecked" })
 		public boolean visit(
 				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>> tool,
+						SimpleAbstractState<MonolithicHeap, NonInterference, TypeEnvironment<InferredTypes>>> tool,
 				CFG graph,
 				Statement node) {
 			if (!(node instanceof Assignment))
@@ -206,18 +203,18 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 				try {
 					AnalyzedCFG<?> result = (AnalyzedCFG<?>) res;
 					AnalysisState<?> post = result.getAnalysisStateAfter(assign);
-					InferenceSystem<NonInterference> state = post.getState().getDomainInstance(InferenceSystem.class);
+					NonInterference state = post.getState().getDomainInstance(NonInterference.class);
 					AnalysisState<?> postL = result.getAnalysisStateAfter(assign.getLeft());
-					InferenceSystem<NonInterference> left = postL.getState().getDomainInstance(InferenceSystem.class);
+					NonInterference left = postL.getState().getDomainInstance(NonInterference.class);
 					AnalysisState<?> postR = result.getAnalysisStateAfter(assign.getRight());
-					InferenceSystem<NonInterference> right = postR.getState().getDomainInstance(InferenceSystem.class);
+					NonInterference right = postR.getState().getDomainInstance(NonInterference.class);
 
 					for (SymbolicExpression l : postL.getState().rewrite(postL.getComputedExpressions(), assign,
 							postL.getState()))
 						for (SymbolicExpression r : postR.getState().rewrite(postR.getComputedExpressions(), assign,
 								postR.getState())) {
-							NonInterference ll = left.eval((ValueExpression) l, assign.getLeft(), postL.getState());
-							NonInterference rr = right.eval((ValueExpression) r, assign.getRight(), postR.getState());
+							NI ll = left.eval((ValueExpression) l, assign.getLeft(), postL.getState());
+							NI rr = right.eval((ValueExpression) r, assign.getRight(), postR.getState());
 
 							if (ll.isLowConfidentiality() && rr.isHighConfidentiality())
 								tool.warnOn(assign,

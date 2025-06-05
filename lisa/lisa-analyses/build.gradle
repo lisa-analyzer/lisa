@@ -4,6 +4,6 @@ dependencies {
 	testImplementation project(':lisa-imp')
 
 	// testing
-	testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
+	testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.19.4'
     testImplementation 'junit:junit:4.12'
 }

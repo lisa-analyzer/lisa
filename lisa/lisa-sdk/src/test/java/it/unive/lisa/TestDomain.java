@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -68,15 +67,6 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 			Predicate<Identifier> test)
 			throws SemanticException {
 		return (T) this;
-	}
-
-	@Override
-	public Satisfiability satisfies(
-			E expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return Satisfiability.UNKNOWN;
 	}
 
 	@Override

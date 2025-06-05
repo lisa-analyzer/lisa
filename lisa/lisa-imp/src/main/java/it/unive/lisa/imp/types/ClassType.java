@@ -2,7 +2,6 @@ package it.unive.lisa.imp.types;
 
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.type.InMemoryType;
 import it.unive.lisa.type.PointerType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
@@ -26,7 +25,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class ClassType implements InMemoryType, UnitType {
+public final class ClassType implements UnitType {
 
 	private static final Map<String, ClassType> types = new HashMap<>();
 

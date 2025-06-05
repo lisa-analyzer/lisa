@@ -2,8 +2,6 @@ package it.unive.lisa;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
-import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
@@ -16,7 +14,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.Int32Type;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -86,57 +83,6 @@ public class TestParameterProvider {
 		@Override
 		public int hashCode() {
 			return getClass().hashCode();
-		}
-	}
-
-	public static class SampleIV implements BaseInferredValue<SampleIV> {
-
-		@Override
-		public StructuredRepresentation representation() {
-			return new StringRepresentation("sample");
-		}
-
-		@Override
-		public SampleIV top() {
-			return this;
-		}
-
-		@Override
-		public SampleIV bottom() {
-			return this;
-		}
-
-		@Override
-		public boolean canProcess(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle) {
-			return true;
-		}
-
-		@Override
-		public SampleIV lubAux(
-				SampleIV other)
-				throws SemanticException {
-			return this;
-		}
-
-		@Override
-		public boolean lessOrEqualAux(
-				SampleIV other)
-				throws SemanticException {
-			return true;
-		}
-
-		@Override
-		public boolean equals(
-				Object obj) {
-			return this == obj;
-		}
-
-		@Override
-		public int hashCode() {
-			return SampleIV.class.hashCode();
 		}
 	}
 
@@ -273,13 +219,6 @@ public class TestParameterProvider {
 			return (R) new SampleNRVD();
 		if (param == BaseNonRelationalValueDomain[].class)
 			return (R) new BaseNonRelationalValueDomain[0];
-
-		if (param == InferenceSystem.class)
-			return (R) new InferenceSystem<>(new SampleIV());
-		if (param == SampleIV.class || param == BaseInferredValue.class)
-			return (R) new SampleIV();
-		if (param == BaseInferredValue[].class)
-			return (R) new BaseInferredValue[0];
 
 		if (param == TypeEnvironment.class)
 			return (R) new TypeEnvironment<>(new SampleNRTD());

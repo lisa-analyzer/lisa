@@ -19,7 +19,7 @@ import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
-import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
+import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
@@ -454,7 +454,7 @@ public class EqualityContractVerificationTest {
 		Collection<Class<?>> testable = new HashSet<>();
 		testable.addAll(scanner.getSubTypesOf(Lattice.class));
 		testable.addAll(scanner.getSubTypesOf(SemanticDomain.class));
-		testable.addAll(scanner.getSubTypesOf(NonRelationalElement.class));
+		testable.addAll(scanner.getSubTypesOf(NonRelationalDomain.class));
 		testable.addAll(scanner.getSubTypesOf(DataflowElement.class));
 
 		for (Class<?> subject : testable)
