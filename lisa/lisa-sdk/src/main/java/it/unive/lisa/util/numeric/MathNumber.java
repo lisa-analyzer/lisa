@@ -568,7 +568,7 @@ public class MathNumber implements Comparable<MathNumber> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((number == null) ? 0 : number.hashCode());
+		result = prime * result + ((number == null) ? 0 : number.stripTrailingZeros().hashCode());
 		result = prime * result + sign;
 		return result;
 	}
@@ -586,7 +586,9 @@ public class MathNumber implements Comparable<MathNumber> {
 		if (number == null) {
 			if (other.number != null)
 				return false;
-		} else if (!number.equals(other.number))
+		} else if (other.number == null)
+				return false;
+		else if (number.compareTo(other.number) != 0)
 			return false;
 		if (sign != other.sign)
 			return false;
