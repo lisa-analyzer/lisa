@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.nonrelational.BaseNonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * Base implementation for {@link NonRelationalTypeDomain}s. This class extends
@@ -20,7 +19,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  */
 public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDomain<T>>
 		extends
-		BaseNonRelationalDomain<T, ValueExpression, TypeEnvironment<T>>,
+		BaseNonRelationalDomain<T, TypeEnvironment<T>>,
 		NonRelationalTypeDomain<T> {
 
 	@Override

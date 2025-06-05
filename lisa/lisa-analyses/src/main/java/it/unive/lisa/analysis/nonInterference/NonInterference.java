@@ -226,7 +226,7 @@ public class NonInterference
 	 */
 	public static class NI
 			implements
-			BaseNonRelationalDomain<NI, ValueExpression, NonInterference> {
+			BaseNonRelationalDomain<NI, NonInterference> {
 
 		/**
 		 * The value to use for bottom non interference levels.

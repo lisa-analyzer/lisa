@@ -587,7 +587,7 @@ public class MathNumber implements Comparable<MathNumber> {
 			if (other.number != null)
 				return false;
 		} else if (other.number == null)
-				return false;
+			return false;
 		else if (number.compareTo(other.number) != 0)
 			return false;
 		if (sign != other.sign)

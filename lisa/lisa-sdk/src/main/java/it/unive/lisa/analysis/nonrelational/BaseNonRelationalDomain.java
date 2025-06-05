@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Set;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -33,30 +31,36 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
+import java.util.Set;
 
 /**
- * Base implementation for {@link NonRelationalDomain}s. This class extends
- * {@link BaseLattice} and implements
+ * Base implementation for {@link NonRelationalDomain}s that can target
+ * {@link ValueExpression}. This class extends {@link BaseLattice} and
+ * implements
  * {@link NonRelationalDomain#eval(SymbolicExpression, Environment, ProgramPoint, SemanticOracle)}
  * by taking care of the recursive computation of inner expressions evaluation.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <T> the concrete type of this domain
+ * @param <F> the type of environments to use with this domain
  */
-public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E, F>,
-		E extends SymbolicExpression,
-		F extends Environment<F, E, T>>
+public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>,
+		F extends Environment<F, ValueExpression, T>>
 		extends
 		BaseLattice<T>,
-		NonRelationalDomain<T, E, F>,
+		NonRelationalDomain<T, ValueExpression, F>,
 		ExpressionVisitor<T> {
 
+	/**
+	 * The error message thrown when a heap expression is encountered while
+	 * traversing an expression.
+	 */
 	static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with a non-relational value domain";
 
 	@Override
 	default T eval(
-			E expression,
+			ValueExpression expression,
 			F environment,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -558,7 +562,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 
 	@Override
 	default Satisfiability satisfies(
-			E expression,
+			ValueExpression expression,
 			F environment,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -575,8 +579,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 
-			@SuppressWarnings("unchecked")
-			E e = (E) unary.getExpression();
+			ValueExpression e = (ValueExpression) unary.getExpression();
 			if (unary.getOperator() == LogicalNegation.INSTANCE)
 				return satisfies(e, environment, pp, oracle).negate();
 			else {
@@ -591,10 +594,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 
-			@SuppressWarnings("unchecked")
-			E eleft = (E) binary.getLeft();
-			@SuppressWarnings("unchecked")
-			E eright = (E) binary.getRight();
+			ValueExpression eleft = (ValueExpression) binary.getLeft();
+			ValueExpression eright = (ValueExpression) binary.getRight();
 
 			if (binary.getOperator() == LogicalAnd.INSTANCE)
 				return satisfies(eleft, environment, pp, oracle).and(satisfies(eright, environment, pp, oracle));
@@ -616,20 +617,17 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression ternary = (TernaryExpression) expression;
 
-			@SuppressWarnings("unchecked")
-			E eleft = (E) ternary.getLeft();
+			ValueExpression eleft = (ValueExpression) ternary.getLeft();
 			T left = eval(eleft, environment, pp, oracle);
 			if (left.isBottom())
 				return Satisfiability.BOTTOM;
 
-			@SuppressWarnings("unchecked")
-			E emiddle = (E) ternary.getMiddle();
+			ValueExpression emiddle = (ValueExpression) ternary.getMiddle();
 			T middle = eval(emiddle, environment, pp, oracle);
 			if (middle.isBottom())
 				return Satisfiability.BOTTOM;
 
-			@SuppressWarnings("unchecked")
-			E eright = (E) ternary.getRight();
+			ValueExpression eright = (ValueExpression) ternary.getRight();
 			T right = eval(eright, environment, pp, oracle);
 			if (right.isBottom())
 				return Satisfiability.BOTTOM;
@@ -828,7 +826,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 	@Override
 	default F assume(
 			F environment,
-			E expression,
+			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
@@ -838,26 +836,22 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 
 			UnaryOperator op = unary.getOperator();
 			if (op == LogicalNegation.INSTANCE) {
-				@SuppressWarnings("unchecked")
-				E rewritten = (E) unary.removeNegations();
+				ValueExpression rewritten = (ValueExpression) unary.removeNegations();
 				// It is possible that the expression cannot be rewritten (e.g.,
 				// !true) hence we recursively call assume iff something changed
 				if (rewritten != unary)
 					return assume(environment, rewritten, src, dest, oracle);
 			}
 
-			@SuppressWarnings("unchecked")
-			E earg = (E) unary.getExpression();
+			ValueExpression earg = (ValueExpression) unary.getExpression();
 			return assumeUnaryExpression(environment, op, earg, src, dest, oracle);
 		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 
-			@SuppressWarnings("unchecked")
-			E eleft = (E) binary.getLeft();
-			@SuppressWarnings("unchecked")
-			E eright = (E) binary.getRight();
+			ValueExpression eleft = (ValueExpression) binary.getLeft();
+			ValueExpression eright = (ValueExpression) binary.getRight();
 			BinaryOperator op = binary.getOperator();
 			if (op == LogicalAnd.INSTANCE)
 				return assume(environment, eleft, src, dest, oracle)
@@ -872,12 +866,9 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression ternary = (TernaryExpression) expression;
 
-			@SuppressWarnings("unchecked")
-			E eleft = (E) ternary.getLeft();
-			@SuppressWarnings("unchecked")
-			E emiddle = (E) ternary.getMiddle();
-			@SuppressWarnings("unchecked")
-			E eright = (E) ternary.getRight();
+			ValueExpression eleft = (ValueExpression) ternary.getLeft();
+			ValueExpression emiddle = (ValueExpression) ternary.getMiddle();
+			ValueExpression eright = (ValueExpression) ternary.getRight();
 			TernaryOperator op = ternary.getOperator();
 			return assumeTernaryExpression(environment, op, eleft, emiddle, eright, src, dest, oracle);
 		}
@@ -910,7 +901,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 	default F assumeUnaryExpression(
 			F environment,
 			UnaryOperator operator,
-			E expression,
+			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
@@ -946,8 +937,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 	default F assumeBinaryExpression(
 			F environment,
 			BinaryOperator operator,
-			E left,
-			E right,
+			ValueExpression left,
+			ValueExpression right,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
@@ -984,9 +975,9 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, E,
 	default F assumeTernaryExpression(
 			F environment,
 			TernaryOperator operator,
-			E left,
-			E middle,
-			E right,
+			ValueExpression left,
+			ValueExpression middle,
+			ValueExpression right,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
