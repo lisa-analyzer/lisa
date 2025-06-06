@@ -238,9 +238,12 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * @param other the other domain instance
 	 * 
 	 * @return the satisfiability result
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public Satisfiability contains(
-			Tarsis other) {
+			Tarsis other)
+			throws SemanticException {
 		try {
 			if (!a.hasCycle()
 					&& !other.a.hasCycle()
@@ -358,10 +361,13 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	 * 
 	 * @throws CyclicAutomatonException when the automaton is cyclic and its
 	 *                                      language is accessed
+	 * @throws SemanticException        if an error occurs during the
+	 *                                      computation
 	 */
 	public IntInterval indexOf(
 			Tarsis s)
-			throws CyclicAutomatonException {
+			throws CyclicAutomatonException,
+			SemanticException {
 		if (contains(s) == Satisfiability.NOT_SATISFIED)
 			return new IntInterval(-1, -1);
 		else if (a.hasCycle() || s.a.hasCycle() || s.a.acceptsTopEventually())

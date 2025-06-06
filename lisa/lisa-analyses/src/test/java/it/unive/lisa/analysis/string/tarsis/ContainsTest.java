@@ -267,7 +267,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestSelfContains() {
+	public void containsTestSelfContains() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("abc"));
 
 		// "abc".contanins("abc") = true
@@ -275,7 +275,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsEmptyStringConstantString() {
+	public void containsEmptyStringConstantString() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("abc"));
 		Tarsis search = new Tarsis(RegexAutomaton.emptyStr());
 
@@ -284,7 +284,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsEmptyStringFiniteStrings() {
+	public void containsEmptyStringFiniteStrings() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("a", "b", "c"));
 		Tarsis search = new Tarsis(RegexAutomaton.emptyStr());
 
@@ -293,7 +293,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsEmptyStringLoops() {
+	public void containsEmptyStringLoops() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("abc").star());
 		Tarsis search = new Tarsis(RegexAutomaton.emptyStr());
 
@@ -302,7 +302,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa001() {
+	public void containsTestOldFa001() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "sansa", "manga"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("an"));
 
@@ -311,7 +311,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa002() {
+	public void containsTestOldFa002() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "sansa", "manga"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("an", "p"));
 
@@ -320,7 +320,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa003() {
+	public void containsTestOldFa003() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "sansa", "manga"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("koala"));
 
@@ -329,7 +329,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa004() {
+	public void containsTestOldFa004() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda!mc", "mc!papanda", "polo!mc!panda"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("panda", "mc"));
 
@@ -339,7 +339,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa005() {
+	public void containsTestOldFa005() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda!mc", "mc!papanda", "polopanda"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("panda", "mc"));
 
@@ -348,7 +348,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa006() {
+	public void containsTestOldFa006() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "pandone", "pandina", "pandetta"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("pa", "pan"));
 
@@ -358,7 +358,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa007() {
+	public void containsTestOldFa007() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "ronda", "manga", "pandetta"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("an"));
 
@@ -367,7 +367,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa008() {
+	public void containsTestOldFa008() throws SemanticException {
 		Tarsis a = new Tarsis(
 				RegexAutomaton.strings("pandaat", "pandamat", "pansarat", "pansasat", "koladat", "kolabato",
 						"kosalata", "kosanaat"));
@@ -380,7 +380,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa009() {
+	public void containsTestOldFa009() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("pandk", "panck", "panrk"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("an"));
 
@@ -389,7 +389,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa010() {
+	public void containsTestOldFa010() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("pan", "pandk", "panck", "panrk"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("k"));
 
@@ -399,7 +399,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa011() {
+	public void containsTestOldFa011() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("pan", "pandk", "panck", "panrw"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("k"));
 
@@ -408,7 +408,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa012() {
+	public void containsTestOldFa012() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("panda"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("da"));
 
@@ -417,7 +417,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa013() {
+	public void containsTestOldFa013() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "nda", "a"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("nda", "a"));
 
@@ -426,7 +426,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa014() {
+	public void containsTestOldFa014() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "anda"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("nda", "a"));
 
@@ -435,7 +435,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa015() {
+	public void containsTestOldFa015() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "anda", "orda"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("nda", "a"));
 
@@ -444,7 +444,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa016() {
+	public void containsTestOldFa016() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "koala"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("nda", "ala"));
 
@@ -453,7 +453,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa017() {
+	public void containsTestOldFa017() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "anda", "nda"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("nda"));
 
@@ -462,7 +462,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa019() {
+	public void containsTestOldFa019() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "pand", "nd"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("panda"));
 
@@ -471,7 +471,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa020() {
+	public void containsTestOldFa020() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "pand", "nd"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("panda", "anda", "da"));
 
@@ -480,7 +480,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa021() {
+	public void containsTestOldFa021() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "pand", "nd"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("panda", "anda", "da", "d"));
 
@@ -489,7 +489,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa022() {
+	public void containsTestOldFa022() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "panda", "panda"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("panda"));
 
@@ -498,7 +498,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa023() {
+	public void containsTestOldFa023() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "pandapanda"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("panda"));
 
@@ -507,7 +507,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa024() {
+	public void containsTestOldFa024() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("panda", "pandapanda"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("pandapanda"));
 
@@ -516,7 +516,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa025() {
+	public void containsTestOldFa025() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("ordine"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("ine", "dine"));
 
@@ -525,7 +525,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa026() {
+	public void containsTestOldFa026() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("ordine", "sordine"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("ine", "dine"));
 
@@ -534,7 +534,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa027() {
+	public void containsTestOldFa027() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("ordine", "sordine"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("r"));
 
@@ -543,7 +543,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa028() {
+	public void containsTestOldFa028() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("a").star());
 		Tarsis search = new Tarsis(RegexAutomaton.string("a"));
 
@@ -552,7 +552,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa029() {
+	public void containsTestOldFa029() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("a").star());
 
 		// {a*}.contains(a*) = top
@@ -560,7 +560,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa030() {
+	public void containsTestOldFa030() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.emptyStr());
 		Tarsis search = new Tarsis(RegexAutomaton.string("e"));
 
@@ -569,7 +569,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa031() {
+	public void containsTestOldFa031() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("idea"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("idea"));
 
@@ -578,7 +578,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa033() {
+	public void containsTestOldFa033() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("idea2"));
 		Tarsis search = new Tarsis(RegexAutomaton.string("idea"));
 
@@ -587,7 +587,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa034() {
+	public void containsTestOldFa034() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.strings("idea", "riveda", "intrinseca"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("ea", "va", "ca"));
 
@@ -596,7 +596,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa035() {
+	public void containsTestOldFa035() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("pandapanda"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("da", "nda"));
 
@@ -605,7 +605,7 @@ public class ContainsTest {
 	}
 
 	@Test
-	public void containsTestOldFa036() {
+	public void containsTestOldFa036() throws SemanticException {
 		Tarsis a = new Tarsis(RegexAutomaton.string("pandapanda"));
 		Tarsis search = new Tarsis(RegexAutomaton.strings("ap", "p"));
 
