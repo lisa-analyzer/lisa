@@ -193,6 +193,12 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> im
 
 	@Override
 	public StructuredRepresentation representation() {
+		if (isTop())
+			return Lattice.topRepresentation();
+
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+
 		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 }

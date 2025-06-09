@@ -248,7 +248,7 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 				return mkSmashedValue(stringValue.top());
 
 			S partial = stringValue.bottom();
-			S temp = stringValue.bottom();
+			S temp;
 
 			outer: for (long b : begin)
 				if (b >= 0)
@@ -257,7 +257,11 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 							temp = partial.lub(left.stringValue.substring(b, e));
 						else if (b == e)
 							temp = partial.lub(this.stringValue.evalNonNullConstant(
-									new Constant(Untyped.INSTANCE, "", SyntheticLocation.INSTANCE), null, oracle));
+									new Constant(Untyped.INSTANCE, "", SyntheticLocation.INSTANCE),
+									null,
+									oracle));
+						else
+							temp = stringValue.bottom();
 
 						if (temp.equals(partial))
 							break outer;
