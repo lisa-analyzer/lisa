@@ -1,0 +1,16 @@
+class toString {
+    main(names) {
+        def res = "People : {";
+        def i = 0;
+        while (i < arraylen(names)) {
+            res = res + names[i];
+            if (i != arraylen(names) - 1)
+                res = res + ",";
+            i = i + 1;
+        }
+        res = res + "}";
+        assert res.contains("People");
+        assert res.contains(",");
+        assert res.contains("not");
+    }
+}

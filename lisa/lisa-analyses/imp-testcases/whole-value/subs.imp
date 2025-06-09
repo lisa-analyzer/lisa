@@ -1,0 +1,14 @@
+class subs {
+    main(nondet) {
+        def res = "substring test";
+        if (nondet)
+            res = res + " passed";
+        else
+            res = res + " failed";
+        res = res.substring(5, 18);
+        assert res.contains("g");
+        assert res.contains("p");
+        assert res.contains("f");
+        assert res.contains("d");
+    }
+}
