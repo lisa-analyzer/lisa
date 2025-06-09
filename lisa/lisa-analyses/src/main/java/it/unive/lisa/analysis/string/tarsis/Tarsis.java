@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.string.StringDomain;
+import it.unive.lisa.analysis.string.SmashedSumStringDomain;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
 import it.unive.lisa.analysis.string.fsa.StringSymbol;
@@ -39,7 +39,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Tarsis implements StringDomain<Tarsis> {
+public class Tarsis implements SmashedSumStringDomain<Tarsis> {
 
 	/**
 	 * Top element of the domain

@@ -29,7 +29,7 @@ import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.numeric.UpperBounds.IdSet;
 import it.unive.lisa.analysis.string.Prefix;
-import it.unive.lisa.analysis.string.StringDomain;
+import it.unive.lisa.analysis.string.SmashedSumStringDomain;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.types.InferredTypes;
@@ -464,7 +464,7 @@ public class SemanticsSanityTest {
 			return Collections.emptySet();
 		if (param == Interval.class)
 			return new Interval();
-		if (param == StringDomain.class)
+		if (param == SmashedSumStringDomain.class)
 			return new Prefix();
 		if (param == Satisfiability.class)
 			return Satisfiability.UNKNOWN;

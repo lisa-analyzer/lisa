@@ -27,7 +27,7 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Prefix implements StringDomain<Prefix> {
+public class Prefix implements SmashedSumStringDomain<Prefix> {
 
 	private final static Prefix TOP = new Prefix();
 	private final static Prefix BOTTOM = new Prefix(null);

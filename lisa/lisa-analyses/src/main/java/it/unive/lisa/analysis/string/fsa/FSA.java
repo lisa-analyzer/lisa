@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.string.StringDomain;
+import it.unive.lisa.analysis.string.SmashedSumStringDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -36,7 +36,7 @@ import java.util.TreeSet;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class FSA implements StringDomain<FSA> {
+public class FSA implements SmashedSumStringDomain<FSA> {
 
 	/**
 	 * Top element of the domain

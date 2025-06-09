@@ -13,7 +13,7 @@ import it.unive.lisa.util.numeric.IntInterval;
  *
  * @param <S> the concrete type of the instances of this domain
  */
-public interface StringDomain<S extends StringDomain<S>>
+public interface SmashedSumStringDomain<S extends SmashedSumStringDomain<S>>
 		extends
 		BaseNonRelationalValueDomain<S> {
 

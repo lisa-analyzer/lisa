@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.string.StringDomain;
+import it.unive.lisa.analysis.string.SmashedSumStringDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Bricks implements StringDomain<Bricks> {
+public class Bricks implements SmashedSumStringDomain<Bricks> {
 
 	private final List<Brick> bricks;
 
