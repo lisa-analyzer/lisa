@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.string;
+package it.unive.lisa.analysis.combination;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.Satisfiability;
