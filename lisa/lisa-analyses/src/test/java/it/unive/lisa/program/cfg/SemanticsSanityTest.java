@@ -25,8 +25,11 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.numeric.UpperBounds.IdSet;
+import it.unive.lisa.analysis.string.Prefix;
+import it.unive.lisa.analysis.string.StringDomain;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.types.InferredTypes;
@@ -459,6 +462,12 @@ public class SemanticsSanityTest {
 			return new Sign();
 		if (root == IdSet.class && param == Set.class)
 			return Collections.emptySet();
+		if (param == Interval.class)
+			return new Interval();
+		if (param == StringDomain.class)
+			return new Prefix();
+		if (param == Satisfiability.class)
+			return Satisfiability.UNKNOWN;
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);

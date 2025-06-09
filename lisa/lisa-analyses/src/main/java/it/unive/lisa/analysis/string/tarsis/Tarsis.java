@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.string.tarsis;
 
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -33,6 +27,10 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -235,8 +233,7 @@ public class Tarsis implements StringDomain<Tarsis> {
 	}
 
 	/**
-	 * Semantics of {@link StringEquals} between {@code this} and
-	 * {@code other}.
+	 * Semantics of {@link StringEquals} between {@code this} and {@code other}.
 	 * 
 	 * @param other the other domain instance
 	 * 
@@ -244,14 +241,16 @@ public class Tarsis implements StringDomain<Tarsis> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability eq(Tarsis other) throws SemanticException {
+	public Satisfiability eq(
+			Tarsis other)
+			throws SemanticException {
 		if (glb(other).isBottom())
 			return Satisfiability.NOT_SATISFIED;
 		if (this.a.hasCycle() || other.a.hasCycle())
 			return Satisfiability.UNKNOWN;
 		Satisfiability res = Satisfiability.BOTTOM;
 		try {
-			for (String a : this.a.getLanguage()) 
+			for (String a : this.a.getLanguage())
 				for (String b : other.a.getLanguage()) {
 					res = res.lub(eq(a, b));
 					if (res.isTop())
@@ -263,7 +262,10 @@ public class Tarsis implements StringDomain<Tarsis> {
 		return res;
 	}
 
-	private static Satisfiability eq(String a, String b) throws SemanticException {
+	private static Satisfiability eq(
+			String a,
+			String b)
+			throws SemanticException {
 		if (a.isEmpty() && b.isEmpty())
 			return Satisfiability.SATISFIED;
 		if (a.isEmpty())
@@ -274,9 +276,9 @@ public class Tarsis implements StringDomain<Tarsis> {
 			return Satisfiability.UNKNOWN;
 		char a0 = a.charAt(0);
 		char b0 = b.charAt(0);
-		if (a0 != b0 && a0 != 'Ͳ' && b0 != 'Ͳ') 
+		if (a0 != b0 && a0 != 'Ͳ' && b0 != 'Ͳ')
 			return Satisfiability.NOT_SATISFIED;
-		if (a0 == b0 && a0 != 'Ͳ') 
+		if (a0 == b0 && a0 != 'Ͳ')
 			return eq(a.substring(1), b.substring(1));
 		if (a0 == 'Ͳ' || b0 == 'Ͳ')
 			return Satisfiability.NOT_SATISFIED

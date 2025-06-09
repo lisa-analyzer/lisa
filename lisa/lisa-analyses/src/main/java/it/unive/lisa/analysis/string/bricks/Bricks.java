@@ -1,13 +1,5 @@
 package it.unive.lisa.analysis.string.bricks;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -22,6 +14,12 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The bricks string abstract domain.
@@ -51,7 +49,7 @@ public class Bricks implements StringDomain<Bricks> {
 	 * The indices range of a brick used in the widening.
 	 */
 	public static int kI = 20;
-	
+
 	/**
 	 * The number of strings in the set of a brick used in the widening.
 	 */
