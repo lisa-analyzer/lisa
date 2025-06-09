@@ -5,10 +5,10 @@ class subs {
             res = res + " passed";
         else
             res = res + " failed";
-        res = res.substring(5, 18);
-        assert res.contains("g");
-        assert res.contains("p");
-        assert res.contains("f");
-        assert res.contains("d");
+        res = strsub(res, 5, 18);
+        assert strcon(res, "g");
+        assert strcon(res, "p");
+        assert strcon(res, "f");
+        assert strcon(res, "d");
     }
 }

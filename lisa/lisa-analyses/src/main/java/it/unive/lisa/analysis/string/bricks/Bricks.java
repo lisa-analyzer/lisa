@@ -499,7 +499,9 @@ public class Bricks implements SmashedSumStringDomain<Bricks> {
 					return bricksat;
 				else
 					sat = sat.lub(bricksat);
-			} else {
+			} else if (b.isTop())
+				sat = sat.lub(Satisfiability.UNKNOWN);
+			else {
 				// the brick can be missing
 				for (String s : b.getStrings())
 					if (s.contains(String.valueOf(c)))

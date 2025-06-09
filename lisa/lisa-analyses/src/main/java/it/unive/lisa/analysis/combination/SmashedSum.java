@@ -5,10 +5,12 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
@@ -185,6 +187,11 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
+	public String toString() {
+		return representation().toString();
+	}
+
+	@Override
 	public SmashedSum<S> evalUnaryExpression(
 			UnaryOperator operator,
 			SmashedSum<S> arg,
@@ -288,7 +295,7 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 			throws SemanticException {
 		if (operator instanceof StringOperation && left.isString() && right.isString())
 			return stringValue.satisfiesBinaryExpression(operator, left.stringValue, right.stringValue, pp, oracle);
-		if (operator instanceof NumericOperation && left.isNumber() && right.isNumber())
+		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
 			return intValue.satisfiesBinaryExpression(operator, left.intValue, right.intValue, pp, oracle);
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
 			return boolValue.satisfiesBinaryExpression(operator, left.boolValue, right.boolValue, pp, oracle);
@@ -316,6 +323,18 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
+	public ValueEnvironment<SmashedSum<S>> assume(ValueEnvironment<SmashedSum<S>> environment,
+		ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle)
+		throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+		return BaseNonRelationalValueDomain.super.assume(environment, expression, src, dest, oracle);
+	}
+
+	@Override
 	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
@@ -340,15 +359,15 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	private boolean isNumber() {
-		return !isBottom() && stringValue.isBottom() && boolValue.isBottom();
+		return isTop() || (!isBottom() && stringValue.isBottom() && boolValue.isBottom());
 	}
 
 	private boolean isString() {
-		return !isBottom() && intValue.isBottom() && boolValue.isBottom();
+		return isTop() || (!isBottom() && intValue.isBottom() && boolValue.isBottom());
 	}
 
 	private boolean isBool() {
-		return !isBottom() && stringValue.isBottom() && intValue.isBottom();
+		return isTop() || (!isBottom() && stringValue.isBottom() && intValue.isBottom());
 	}
 
 	private SmashedSum<S> mkSmashedValue(

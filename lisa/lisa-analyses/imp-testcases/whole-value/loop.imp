@@ -1,8 +1,8 @@
 class loop {
-    main(nondet) {
+    main(nondet, value) {
         def res = "Repeat: ";
         while (nondet)
-            res = res + value + "!"
+            res = res + value + "!";
         assert strcon(res, "t"); 
         assert strcon(res, "!"); 
         assert strcon(res, "f");

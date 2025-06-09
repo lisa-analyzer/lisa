@@ -9,10 +9,7 @@ class count {
             def end = strlen(str);
             str = strsub(str, start, end); 
         }
-        
-		assert (count > 0); 
-		assert (count == 0);
-		assert (count == 3);
+        return count;
     }
 
     main(nondet) {

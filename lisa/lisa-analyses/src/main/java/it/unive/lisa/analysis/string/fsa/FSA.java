@@ -31,7 +31,9 @@ import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
- * exploiting a {@link SimpleAutomaton}.
+ * exploiting a {@link SimpleAutomaton}.<br><br><b>Caution:</b> the FSA domain 
+ * is buggy and requires lots of resources, to the point where it might be hard 
+ * to debug also on relatively small samples. Use with caution.
  *
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
@@ -170,9 +172,8 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (constant.getValue() instanceof String) {
+		if (constant.getValue() instanceof String)
 			return new FSA(new SimpleAutomaton((String) constant.getValue()));
-		}
 		return top();
 	}
 
@@ -216,9 +217,8 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringContains.INSTANCE) {
+		if (operator == StringContains.INSTANCE)
 			return left.contains(right);
-		}
 		return Satisfiability.UNKNOWN;
 	}
 

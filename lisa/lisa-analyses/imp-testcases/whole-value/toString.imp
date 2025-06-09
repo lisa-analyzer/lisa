@@ -9,8 +9,8 @@ class toString {
             i = i + 1;
         }
         res = res + "}";
-        assert res.contains("People");
-        assert res.contains(",");
-        assert res.contains("not");
+        assert strcon(res, "People");
+        assert strcon(res, ",");
+        assert strcon(res, "not");
     }
 }

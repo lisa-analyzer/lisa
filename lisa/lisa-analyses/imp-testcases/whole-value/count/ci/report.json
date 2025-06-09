@@ -1,0 +1,44 @@
+{
+  "warnings" : [ {
+    "message" : "['imp-testcases/whole-value/count.imp':22:20] on 'untyped count::main(count* this, untyped nondet)': [STATEMENT] This assertion might fail"
+  }, {
+    "message" : "['imp-testcases/whole-value/count.imp':23:21] on 'untyped count::main(count* this, untyped nondet)': [STATEMENT] This assertion might fail"
+  }, {
+    "message" : "['imp-testcases/whole-value/count.imp':24:21] on 'untyped count::main(count* this, untyped nondet)': [STATEMENT] This assertion might fail"
+  } ],
+  "files" : [ "report.json" ],
+  "info" : {
+    "cfgs" : "2",
+    "duration" : "396ms",
+    "end" : "2025-06-09T23:07:33.934+02:00",
+    "expressions" : "48",
+    "files" : "0",
+    "globals" : "0",
+    "members" : "2",
+    "programs" : "1",
+    "start" : "2025-06-09T23:07:33.538+02:00",
+    "statements" : "18",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "3"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "set",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "ReturnTopPolicy",
+    "optimize" : "true",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "AssertionCheck",
+    "serializeInputs" : "false",
+    "serializeResults" : "false",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/whole-value/count/ci"
+  }
+}

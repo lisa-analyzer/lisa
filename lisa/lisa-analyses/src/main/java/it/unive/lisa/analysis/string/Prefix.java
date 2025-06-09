@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -9,13 +11,11 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
-import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
 
 /**
  * The prefix string abstract domain.
@@ -165,8 +165,6 @@ public class Prefix implements SmashedSumStringDomain<Prefix> {
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringContains.INSTANCE && !left.prefix.startsWith(right.prefix))
-			return Satisfiability.NOT_SATISFIED;
 		if (operator == StringEquals.INSTANCE && !left.prefix.startsWith(right.prefix))
 			return Satisfiability.NOT_SATISFIED;
 		return Satisfiability.UNKNOWN;
