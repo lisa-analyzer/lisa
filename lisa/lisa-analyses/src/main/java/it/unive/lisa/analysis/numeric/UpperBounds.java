@@ -22,6 +22,8 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -320,6 +322,13 @@ public class UpperBounds
 			Set<Identifier> res = new HashSet<>(elements);
 			res.add(id);
 			return new IdSet(res);
+		}
+
+		@Override
+		public StructuredRepresentation representation() {
+			if (isTop())
+				return new StringRepresentation("()");
+			return super.representation();
 		}
 
 		@Override

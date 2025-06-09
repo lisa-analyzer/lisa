@@ -18,14 +18,30 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A bounded set of strings, where the maximum number of elements is defined by
+ * {@link #MAX_SIZE}. If the number of elements exceeds this limit, the set is
+ * considered to be top. The domain is defined
+ * <a href="https://link.springer.com/chapter/10.1007/978-3-642-54807-9_12">in
+ * this paper</a>.
+ *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class BoundedStringSet
 		extends
 		SetLattice<BoundedStringSet, String>
 		implements
 		SmashedSumStringDomain<BoundedStringSet> {
 
+	/**
+	 * The maximum number of elements that instances of this domain can contain
+	 * before being considered top.
+	 */
 	public static int MAX_SIZE = 10;
 
+	/**
+	 * Builds the top abstract value.
+	 */
 	public BoundedStringSet() {
 		super(Collections.emptySet(), true);
 	}
