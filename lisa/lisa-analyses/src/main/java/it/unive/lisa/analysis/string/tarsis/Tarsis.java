@@ -20,6 +20,7 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
+import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
 import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.numeric.IntInterval;
@@ -269,18 +270,19 @@ public class Tarsis implements StringDomain<Tarsis> {
 		if (a.isEmpty() && b.isEmpty())
 			return Satisfiability.SATISFIED;
 		if (a.isEmpty())
-			return b.equals("Ͳ") ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
+			return b.equals(TransitionSymbol.UNKNOWN_SYMBOL) ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
 		if (b.isEmpty())
-			return a.equals("Ͳ") ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
-		if (a.equals("Ͳ") || b.equals("Ͳ"))
+			return a.equals(TransitionSymbol.UNKNOWN_SYMBOL) ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
+		if (a.equals(TransitionSymbol.UNKNOWN_SYMBOL) || b.equals(TransitionSymbol.UNKNOWN_SYMBOL))
 			return Satisfiability.UNKNOWN;
 		char a0 = a.charAt(0);
 		char b0 = b.charAt(0);
-		if (a0 != b0 && a0 != 'Ͳ' && b0 != 'Ͳ')
+		char top = TransitionSymbol.UNKNOWN_SYMBOL.charAt(0);
+		if (a0 != b0 && a0 != top && b0 != top)
 			return Satisfiability.NOT_SATISFIED;
-		if (a0 == b0 && a0 != 'Ͳ')
+		if (a0 == b0 && a0 != top)
 			return eq(a.substring(1), b.substring(1));
-		if (a0 == 'Ͳ' || b0 == 'Ͳ')
+		if (a0 == top || b0 == top)
 			return Satisfiability.NOT_SATISFIED
 					.lub(eq(a.substring(1), b.substring(1)))
 					.lub(eq(a.substring(1), b))
@@ -357,12 +359,12 @@ public class Tarsis implements StringDomain<Tarsis> {
 	private Satisfiability contains(
 			String other,
 			String that) {
-		if (!other.contains("Ͳ")) {
+		if (!other.contains(TransitionSymbol.UNKNOWN_SYMBOL)) {
 			if (other.contains(that))
 				return Satisfiability.SATISFIED;
 			return Satisfiability.NOT_SATISFIED;
 		} else {
-			String otherWithoutTops = other.replaceAll("Ͳ", "");
+			String otherWithoutTops = other.replaceAll(TransitionSymbol.UNKNOWN_SYMBOL, "");
 			if (otherWithoutTops.contains(that))
 				return Satisfiability.SATISFIED;
 			else
