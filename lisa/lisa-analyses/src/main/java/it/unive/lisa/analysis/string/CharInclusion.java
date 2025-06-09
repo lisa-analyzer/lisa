@@ -1,30 +1,27 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
-import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
-import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
-import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
-import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The suffix string abstract domain.
@@ -37,7 +34,7 @@ import org.apache.commons.lang3.StringUtils;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion>, ContainsCharProvider {
+public class CharInclusion implements StringDomain<CharInclusion> {
 
 	private final Set<Character> certainlyContained;
 
@@ -207,14 +204,6 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 			return new CharInclusion(resultCertainlyContained, resultMaybeContained);
 		}
 
-		else if (operator == StringContains.INSTANCE ||
-				operator == StringEndsWith.INSTANCE ||
-				operator == StringEquals.INSTANCE ||
-				operator == StringIndexOf.INSTANCE ||
-				operator == StringStartsWith.INSTANCE) {
-			return TOP;
-		}
-
 		return TOP;
 	}
 
@@ -286,16 +275,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 		return (maybeContained != null && maybeContained.isEmpty()) && certainlyContained.isEmpty();
 	}
 
-	/**
-	 * Yields the char inclusion abstract value corresponding to the substring
-	 * of this char inclusion abstract value between two indexes.
-	 * 
-	 * @param begin where the substring starts
-	 * @param end   where the substring ends
-	 * 
-	 * @return the char inclusion abstract value corresponding to the substring
-	 *             of this char inclusion abstract value between two indexes
-	 */
+	@Override
 	public CharInclusion substring(
 			long begin,
 			long end) {
@@ -304,24 +284,12 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 		return new CharInclusion(new TreeSet<>(), maybeContained);
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum length
-	 * of this abstract value.
-	 * 
-	 * @return the minimum and maximum length of this abstract value
-	 */
+	@Override
 	public IntInterval length() {
 		return new IntInterval(new MathNumber(certainlyContained.size()), MathNumber.PLUS_INFINITY);
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum index
-	 * of {@code s} in {@code this}.
-	 *
-	 * @param s the string to be searched
-	 * 
-	 * @return the minimum and maximum index of {@code s} in {@code this}
-	 */
+	@Override
 	public IntInterval indexOf(
 			CharInclusion s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);

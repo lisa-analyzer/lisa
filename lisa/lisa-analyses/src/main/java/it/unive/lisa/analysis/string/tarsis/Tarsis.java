@@ -1,12 +1,17 @@
 package it.unive.lisa.analysis.string.tarsis;
 
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.string.ContainsCharProvider;
+import it.unive.lisa.analysis.string.StringDomain;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
 import it.unive.lisa.analysis.string.fsa.StringSymbol;
@@ -15,6 +20,7 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
@@ -27,10 +33,6 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -38,7 +40,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCharProvider {
+public class Tarsis implements StringDomain<Tarsis> {
 
 	/**
 	 * Top element of the domain
@@ -190,7 +192,6 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 		return top();
 	}
 
-	// TODO unary and ternary and all other binary
 	@Override
 	public Tarsis evalBinaryExpression(
 			BinaryOperator operator,
@@ -228,6 +229,61 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 			throws SemanticException {
 		if (operator == StringContains.INSTANCE)
 			return left.contains(right);
+		if (operator == StringEquals.INSTANCE)
+			return left.eq(right);
+		return Satisfiability.UNKNOWN;
+	}
+
+	/**
+	 * Semantics of {@link StringEquals} between {@code this} and
+	 * {@code other}.
+	 * 
+	 * @param other the other domain instance
+	 * 
+	 * @return the satisfiability result
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public Satisfiability eq(Tarsis other) throws SemanticException {
+		if (glb(other).isBottom())
+			return Satisfiability.NOT_SATISFIED;
+		if (this.a.hasCycle() || other.a.hasCycle())
+			return Satisfiability.UNKNOWN;
+		Satisfiability res = Satisfiability.BOTTOM;
+		try {
+			for (String a : this.a.getLanguage()) 
+				for (String b : other.a.getLanguage()) {
+					res = res.lub(eq(a, b));
+					if (res.isTop())
+						return res;
+				}
+		} catch (CyclicAutomatonException e) {
+			throw new SemanticException("The automaton is cyclic", e);
+		}
+		return res;
+	}
+
+	private static Satisfiability eq(String a, String b) throws SemanticException {
+		if (a.isEmpty() && b.isEmpty())
+			return Satisfiability.SATISFIED;
+		if (a.isEmpty())
+			return b.equals("Ͳ") ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
+		if (b.isEmpty())
+			return a.equals("Ͳ") ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
+		if (a.equals("Ͳ") || b.equals("Ͳ"))
+			return Satisfiability.UNKNOWN;
+		char a0 = a.charAt(0);
+		char b0 = b.charAt(0);
+		if (a0 != b0 && a0 != 'Ͳ' && b0 != 'Ͳ') 
+			return Satisfiability.NOT_SATISFIED;
+		if (a0 == b0 && a0 != 'Ͳ') 
+			return eq(a.substring(1), b.substring(1));
+		if (a0 == 'Ͳ' || b0 == 'Ͳ')
+			return Satisfiability.NOT_SATISFIED
+					.lub(eq(a.substring(1), b.substring(1)))
+					.lub(eq(a.substring(1), b))
+					.lub(eq(a, b.substring(1)));
+		// this should be unreachable
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -312,16 +368,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 		}
 	}
 
-	/**
-	 * Yields the Tarsis automaton corresponding to the substring of this Tarsis
-	 * automaton abstract value between two indexes.
-	 * 
-	 * @param begin where the substring starts
-	 * @param end   where the substring ends
-	 * 
-	 * @return the Tarsis automaton corresponding to the substring of this
-	 *             Tarsis automaton between two indexes
-	 */
+	@Override
 	public Tarsis substring(
 			long begin,
 			long end) {
@@ -339,40 +386,27 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 		return new Tarsis(result);
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum length
-	 * of this abstract value.
-	 * 
-	 * @return the minimum and maximum length of this abstract value
-	 */
+	@Override
 	public IntInterval length() {
 		int max = a.lenghtOfLongestString();
 		int min = a.toRegex().minLength();
 		return new IntInterval(Integer.valueOf(min), max == Integer.MAX_VALUE ? null : max);
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum index
-	 * of {@code s} in {@code this}.
-	 *
-	 * @param s the string to be searched
-	 * 
-	 * @return the minimum and maximum index of {@code s} in {@code this}
-	 * 
-	 * @throws CyclicAutomatonException when the automaton is cyclic and its
-	 *                                      language is accessed
-	 * @throws SemanticException        if an error occurs during the
-	 *                                      computation
-	 */
+	@Override
 	public IntInterval indexOf(
 			Tarsis s)
-			throws CyclicAutomatonException,
-			SemanticException {
+			throws SemanticException {
 		if (contains(s) == Satisfiability.NOT_SATISFIED)
 			return new IntInterval(-1, -1);
 		else if (a.hasCycle() || s.a.hasCycle() || s.a.acceptsTopEventually())
 			return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
-		Pair<Integer, Integer> interval = IndexFinder.findIndexesOf(a, s.a);
+		Pair<Integer, Integer> interval;
+		try {
+			interval = IndexFinder.findIndexesOf(a, s.a);
+		} catch (CyclicAutomatonException e) {
+			throw new SemanticException("The automaton is cyclic", e);
+		}
 		return new IntInterval(interval.getLeft(), interval.getRight());
 	}
 

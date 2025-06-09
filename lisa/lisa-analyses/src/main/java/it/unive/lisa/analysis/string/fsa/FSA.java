@@ -1,12 +1,17 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.string.ContainsCharProvider;
+import it.unive.lisa.analysis.string.StringDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -24,11 +29,6 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -37,7 +37,7 @@ import java.util.TreeSet;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvider {
+public class FSA implements StringDomain<FSA> {
 
 	/**
 	 * Top element of the domain
@@ -223,35 +223,27 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 		return Satisfiability.UNKNOWN;
 	}
 
-	/**
-	 * Yields the FSA automaton corresponding to the substring of this FSA
-	 * automaton abstract value between two indexes.
-	 * 
-	 * @param begin where the substring starts
-	 * @param end   where the substring ends
-	 * 
-	 * @return the FSA automaton corresponding to the substring of this FSA
-	 *             automaton between two indexes
-	 * 
-	 * @throws CyclicAutomatonException when the automaton is cyclic and its
-	 *                                      language is accessed
-	 */
+	@Override
 	public FSA substring(
 			long begin,
 			long end)
-			throws CyclicAutomatonException {
+			throws SemanticException {
 		if (isTop() || isBottom())
 			return this;
 
 		if (!a.hasCycle()) {
 			SimpleAutomaton result = this.a.emptyLanguage();
-			for (String s : a.getLanguage()) {
-				if (begin < s.length() && end < s.length())
-					result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
-				else
-					result = result.union(new SimpleAutomaton(""));
+			try {
+				for (String s : a.getLanguage()) {
+					if (begin < s.length() && end < s.length())
+						result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
+					else
+						result = result.union(new SimpleAutomaton(""));
 
-				return new FSA(result);
+					return new FSA(result);
+				}
+			} catch (CyclicAutomatonException e) {
+				throw new SemanticException("The automaton is cyclic", e);
 			}
 		}
 
@@ -276,26 +268,21 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 		return new IntInterval(a.toRegex().minLength(), a.lenghtOfLongestString());
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum index
-	 * of {@code s} in {@code this}.
-	 *
-	 * @param s the string to be searched
-	 * 
-	 * @return the minimum and maximum index of {@code s} in {@code this}
-	 * 
-	 * @throws CyclicAutomatonException when the automaton is cyclic and its
-	 *                                      language is accessed
-	 */
+	@Override
 	public IntInterval indexOf(
 			FSA s)
-			throws CyclicAutomatonException {
+			throws SemanticException {
 		if (a.hasCycle())
 			return mkInterval(-1, null);
 
 		if (!a.hasCycle() && !s.a.hasCycle()) {
-			Set<String> first = a.getLanguage();
-			Set<String> second = s.a.getLanguage();
+			Set<String> first, second;
+			try {
+				first = a.getLanguage();
+				second = s.a.getLanguage();
+			} catch (CyclicAutomatonException e) {
+				throw new SemanticException("The automaton is cyclic", e);
+			}
 
 			IntInterval result = null;
 			for (String f1 : first) {

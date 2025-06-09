@@ -1,26 +1,21 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
-import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
-import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
-import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
 
 /**
  * The prefix string abstract domain.
@@ -33,7 +28,7 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCharProvider {
+public class Prefix implements StringDomain<Prefix> {
 
 	private final static Prefix TOP = new Prefix();
 	private final static Prefix BOTTOM = new Prefix(null);
@@ -126,6 +121,15 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 		return new StringRepresentation(prefix + '*');
 	}
 
+	/**
+	 * Yields the prefix of this abstract value.
+	 * 
+	 * @return the prefix of this abstract value.
+	 */
+	public String getPrefix() {
+		return this.prefix;
+	}
+
 	@Override
 	public Prefix evalNonNullConstant(
 			Constant constant,
@@ -148,62 +152,27 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 			Prefix right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (operator == StringConcat.INSTANCE) {
+		if (operator == StringConcat.INSTANCE)
 			return left;
-		} else if (operator == StringContains.INSTANCE ||
-				operator == StringEndsWith.INSTANCE ||
-				operator == StringEquals.INSTANCE ||
-				operator == StringIndexOf.INSTANCE ||
-				operator == StringStartsWith.INSTANCE) {
-			return TOP;
-		}
-
 		return TOP;
 	}
 
 	@Override
-	public Prefix evalTernaryExpression(
-			TernaryOperator operator,
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryOperator operator,
 			Prefix left,
-			Prefix middle,
 			Prefix right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
-		if (operator == StringReplace.INSTANCE) {
-			String replace = right.getPrefix();
-			String string = middle.getPrefix();
-			String target = left.getPrefix();
-
-			if (!target.contains(replace))
-				return this;
-
-			return new Prefix(target.replace(replace, string));
-		}
-
-		return TOP;
+		if (operator == StringContains.INSTANCE && !left.prefix.startsWith(right.prefix))
+			return Satisfiability.NOT_SATISFIED;
+		if (operator == StringEquals.INSTANCE && !left.prefix.startsWith(right.prefix))
+			return Satisfiability.NOT_SATISFIED;
+		return Satisfiability.UNKNOWN;
 	}
 
-	/**
-	 * Yields the prefix of this abstract value.
-	 * 
-	 * @return the prefix of this abstract value.
-	 */
-	public String getPrefix() {
-		return this.prefix;
-	}
-
-	/**
-	 * Yields the prefix corresponding to the substring of this prefix between
-	 * two indexes.
-	 * 
-	 * @param begin where the substring starts
-	 * @param end   where the substring ends
-	 * 
-	 * @return the prefix corresponding to the substring of this prefix between
-	 *             two indexes
-	 */
+	@Override
 	public Prefix substring(
 			long begin,
 			long end) {
@@ -218,24 +187,12 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 		return new Prefix("");
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum length
-	 * of this abstract value.
-	 * 
-	 * @return the minimum and maximum length of this abstract value
-	 */
+	@Override
 	public IntInterval length() {
 		return new IntInterval(new MathNumber(prefix.length()), MathNumber.PLUS_INFINITY);
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum index
-	 * of {@code s} in {@code this}.
-	 *
-	 * @param s the string to be searched
-	 * 
-	 * @return the minimum and maximum index of {@code s} in {@code this}
-	 */
+	@Override
 	public IntInterval indexOf(
 			Prefix s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
