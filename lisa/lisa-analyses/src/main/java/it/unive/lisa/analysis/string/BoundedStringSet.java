@@ -264,7 +264,7 @@ public class BoundedStringSet
 
 		Set<String> result = new HashSet<>();
 		for (String str : elements) {
-			if (end < str.length())
+			if (end <= str.length())
 				result.add(str.substring((int) begin, (int) end));
 		}
 

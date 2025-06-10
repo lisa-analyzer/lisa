@@ -22,6 +22,7 @@ import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.string.BoundedStringSet;
 import it.unive.lisa.analysis.string.CharInclusion;
 import it.unive.lisa.analysis.string.Prefix;
 import it.unive.lisa.analysis.string.Suffix;
@@ -216,6 +217,14 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
+	public void toStringBSSTest() throws IOException, AnalysisSetupException {
+		int tmp = BoundedStringSet.MAX_SIZE;
+		BoundedStringSet.MAX_SIZE = 5;
+		perform("whole-value", "tostring/bss", "toString.imp", baseConf(new BoundedStringSet()));
+		BoundedStringSet.MAX_SIZE = tmp;
+	}
+
+	@Test
 	public void substringPrefixTest() throws IOException, AnalysisSetupException {
 		perform("whole-value", "substring/prefix", "subs.imp", baseConf(new Prefix()));
 	}
@@ -238,6 +247,14 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 	@Test
 	public void substringTarsisTest() throws IOException, AnalysisSetupException {
 		perform("whole-value", "substring/tarsis", "subs.imp", baseConf(new Tarsis()));
+	}
+
+	@Test
+	public void substringBSSTest() throws IOException, AnalysisSetupException {
+		int tmp = BoundedStringSet.MAX_SIZE;
+		BoundedStringSet.MAX_SIZE = 5;
+		perform("whole-value", "substring/bss", "subs.imp", baseConf(new BoundedStringSet()));
+		BoundedStringSet.MAX_SIZE = tmp;
 	}
 
 	@Test
@@ -266,6 +283,14 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
+	public void loopBSSTest() throws IOException, AnalysisSetupException {
+		int tmp = BoundedStringSet.MAX_SIZE;
+		BoundedStringSet.MAX_SIZE = 5;
+		perform("whole-value", "loop/bss", "loop.imp", baseConf(new BoundedStringSet()));
+		BoundedStringSet.MAX_SIZE = tmp;
+	}
+
+	@Test
 	public void cmPrefixTest() throws IOException, AnalysisSetupException {
 		perform("whole-value", "count/prefix", "count.imp", baseConf(new Prefix(), true));
 	}
@@ -288,5 +313,13 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 	@Test
 	public void cmTarsisTest() throws IOException, AnalysisSetupException {
 		perform("whole-value", "count/tarsis", "count.imp", baseConf(new Tarsis(), true));
+	}
+
+	@Test
+	public void cmBSSTest() throws IOException, AnalysisSetupException {
+		int tmp = BoundedStringSet.MAX_SIZE;
+		BoundedStringSet.MAX_SIZE = 5;
+		perform("whole-value", "count/bss", "count.imp", baseConf(new BoundedStringSet(), true));
+		BoundedStringSet.MAX_SIZE = tmp;
 	}
 }
