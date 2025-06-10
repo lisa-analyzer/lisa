@@ -232,7 +232,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			str.addInstanceCodeMember(new StringSubstring(unknownLocation, str));
 			str.addInstanceCodeMember(new ArrayLength(unknownLocation, program));
 
-			// add as possible types all arrays of the legal types (including user defined ones)
+			// add as possible types all arrays of the legal types (including
+			// user defined ones)
 			ArrayType.lookup(BoolType.INSTANCE, 1);
 			ArrayType.lookup(Float32Type.INSTANCE, 1);
 			ArrayType.lookup(Int32Type.INSTANCE, 1);

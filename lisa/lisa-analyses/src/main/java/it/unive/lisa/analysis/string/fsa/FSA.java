@@ -31,9 +31,11 @@ import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
- * exploiting a {@link SimpleAutomaton}.<br><br><b>Caution:</b> the FSA domain 
- * is buggy and requires lots of resources, to the point where it might be hard 
- * to debug also on relatively small samples. Use with caution.
+ * exploiting a {@link SimpleAutomaton}.<br>
+ * <br>
+ * <b>Caution:</b> the FSA domain is buggy and requires lots of resources, to
+ * the point where it might be hard to debug also on relatively small samples.
+ * Use with caution.
  *
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>

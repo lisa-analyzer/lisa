@@ -1,11 +1,5 @@
 package it.unive.lisa.cron;
 
-import java.io.IOException;
-
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
@@ -45,6 +39,10 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.io.IOException;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class WholeValueAnalysesTest extends AnalysisTestExecutor {
@@ -74,7 +72,8 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 						if (first) {
 							first = false;
 							@SuppressWarnings("unchecked")
-							ValueEnvironment<SmashedSum<S>> values = (ValueEnvironment<SmashedSum<S>>) state.getDomainInstance(ValueEnvironment.class);
+							ValueEnvironment<SmashedSum<S>> values = (ValueEnvironment<SmashedSum<S>>) state
+									.getDomainInstance(ValueEnvironment.class);
 							System.err.println("Values at first assertion:\n" + values);
 						}
 
@@ -96,12 +95,18 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			return true;
 		}
 
-		private void containsCharAssertion(CheckToolWithAnalysisResults<A> tool, Statement node, AnalyzedCFG<A> res,
-				VariableRef variable, StringLiteral ch) throws SemanticException {
+		private void containsCharAssertion(
+				CheckToolWithAnalysisResults<A> tool,
+				Statement node,
+				AnalyzedCFG<A> res,
+				VariableRef variable,
+				StringLiteral ch)
+				throws SemanticException {
 			AnalysisState<A> target = res.getAnalysisStateAfter(variable);
 			for (SymbolicExpression expr : target.getComputedExpressions()) {
 				@SuppressWarnings("unchecked")
-				ValueEnvironment<SmashedSum<S>> values = (ValueEnvironment<SmashedSum<S>>) target.getState().getDomainInstance(ValueEnvironment.class);
+				ValueEnvironment<SmashedSum<S>> values = (ValueEnvironment<SmashedSum<S>>) target.getState()
+						.getDomainInstance(ValueEnvironment.class);
 				S abstractString = values.getState((Identifier) expr).getStringValue();
 				Satisfiability sat = abstractString.containsChar(ch.getValue().charAt(0));
 				if (sat == Satisfiability.UNKNOWN)
@@ -113,7 +118,11 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			}
 		}
 
-		private void assertion(CheckToolWithAnalysisResults<A> tool, Statement node, AnalysisState<A> post, A state)
+		private void assertion(
+				CheckToolWithAnalysisResults<A> tool,
+				Statement node,
+				AnalysisState<A> post,
+				A state)
 				throws SemanticException {
 			for (SymbolicExpression expr : post.getComputedExpressions()) {
 				Satisfiability sat = state.satisfies(expr, node, state);
@@ -133,7 +142,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			if (message != null) {
 				tool.warnOn(node, message);
 				System.err.println("Warning on " + node.getLocation() + ": " + message);
-			} else 
+			} else
 				System.err.println("No warning on " + node.getLocation());
 		}
 	}
@@ -145,7 +154,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	private static <S extends SmashedSumStringDomain<S>> CronConfiguration baseConf(
-			S stringDomain, 
+			S stringDomain,
 			boolean traces)
 			throws AnalysisSetupException {
 		return baseConf(stringDomain, traces, false);
@@ -160,9 +169,9 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.jsonOutput = true;
 		conf.abstractState = new SimpleAbstractState<>(
-			new MonolithicHeap(),
-			new ValueEnvironment<>(new SmashedSum<>(new Interval(), stringDomain, Satisfiability.UNKNOWN)),
-			new TypeEnvironment<>(new InferredTypes()));
+				new MonolithicHeap(),
+				new ValueEnvironment<>(new SmashedSum<>(new Interval(), stringDomain, Satisfiability.UNKNOWN)),
+				new TypeEnvironment<>(new InferredTypes()));
 		if (traces)
 			conf.abstractState = new TracePartitioning(conf.abstractState);
 		conf.semanticChecks.add(new AssertionCheck<>());

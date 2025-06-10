@@ -323,9 +323,13 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public ValueEnvironment<SmashedSum<S>> assume(ValueEnvironment<SmashedSum<S>> environment,
-		ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle)
-		throws SemanticException {
+	public ValueEnvironment<SmashedSum<S>> assume(
+			ValueEnvironment<SmashedSum<S>> environment,
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
 		Satisfiability sat = satisfies(expression, environment, src, oracle);
 		if (sat == Satisfiability.NOT_SATISFIED)
 			return environment.bottom();
