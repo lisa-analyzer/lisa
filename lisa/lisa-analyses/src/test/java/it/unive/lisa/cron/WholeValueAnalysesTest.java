@@ -19,11 +19,13 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.combination.SmashedSum;
+import it.unive.lisa.analysis.combination.SmashedSumIntDomain;
 import it.unive.lisa.analysis.combination.SmashedSumStringDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.string.BoundedStringSet;
 import it.unive.lisa.analysis.string.CharInclusion;
@@ -54,7 +56,10 @@ import it.unive.lisa.symbolic.value.Identifier;
 
 public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
-	private static class AssertionCheck<A extends AbstractState<A>, S extends SmashedSumStringDomain<S>>
+	private static class AssertionCheck<
+			A extends AbstractState<A>, 
+			I extends SmashedSumIntDomain<I>,
+			S extends SmashedSumStringDomain<S>>
 			implements
 			SemanticCheck<A> {
 
@@ -62,7 +67,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 		private Map<CodeLocation, String> assertions = new HashMap<>();
 
-		private SmashedSum<S> valuesAtFirstAssertion;
+		private SmashedSum<I, S> valuesAtFirstAssertion;
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -86,7 +91,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 							first = false;
 							valuesAtFirstAssertion = null;
 							for (SymbolicExpression expr : targetPost.getComputedExpressions()) {
-								SmashedSum<S> smashedSum = (SmashedSum<S>) targetPost.getState()
+								SmashedSum<I, S> smashedSum = (SmashedSum<I, S>) targetPost.getState()
 										.getDomainInstance(ValueEnvironment.class).getState((Identifier) expr);
 								if (valuesAtFirstAssertion == null)
 									valuesAtFirstAssertion = smashedSum;
@@ -123,7 +128,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			AnalysisState<A> target = res.getAnalysisStateAfter(variable);
 			for (SymbolicExpression expr : target.getComputedExpressions()) {
 				@SuppressWarnings("unchecked")
-				ValueEnvironment<SmashedSum<S>> values = (ValueEnvironment<SmashedSum<S>>) target.getState()
+				ValueEnvironment<SmashedSum<I, S>> values = (ValueEnvironment<SmashedSum<I, S>>) target.getState()
 						.getDomainInstance(ValueEnvironment.class);
 				S abstractString = values.getState((Identifier) expr).getStringValue();
 				Satisfiability sat = abstractString.containsChar(ch.getValue().charAt(0));
@@ -167,6 +172,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static CronConfiguration mkConf(
+			SmashedSumIntDomain<?> intDomain,
 			SmashedSumStringDomain<?> stringDomain,
 			boolean traces)
 			throws AnalysisSetupException {
@@ -174,7 +180,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 		conf.jsonOutput = true;
 		conf.abstractState = new SimpleAbstractState<>(
 				new MonolithicHeap(),
-				new ValueEnvironment<>(new SmashedSum(new Interval(), stringDomain, Satisfiability.UNKNOWN)),
+				new ValueEnvironment<>(new SmashedSum(intDomain, stringDomain, Satisfiability.UNKNOWN)),
 				new TypeEnvironment<>(new InferredTypes()));
 		if (traces)
 			conf.abstractState = new TracePartitioning(conf.abstractState);
@@ -200,7 +206,12 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
-	private static Map<String, SmashedSumStringDomain<?>> DOMAINS = Map.of(
+	private static Map<String, SmashedSumIntDomain<?>> INT_DOMAINS = Map.of(
+			"intv", new Interval(),
+			"cp", new IntegerConstantPropagation()
+	);
+
+	private static Map<String, SmashedSumStringDomain<?>> STRING_DOMAINS = Map.of(
 			"prefix", new Prefix(),
 			"suffix", new Suffix(),
 			"ci", new CharInclusion(),
@@ -223,22 +234,23 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 	public void testSmashedSum() {
 		int tmp = BoundedStringSet.MAX_SIZE;
 		BoundedStringSet.MAX_SIZE = 5;
-		for (Map.Entry<String, SmashedSumStringDomain<?>> domain : DOMAINS.entrySet()) 
-			for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
-				CronConfiguration conf = mkConf(domain.getValue(), test.getValue());
-				// conf.analysisGraphs = it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
-				System.err.println("\n\n###Running test " + domain.getKey() + "/" + test.getKey());
-				perform("whole-value", "smashed/" + domain.getKey(), test.getKey(), conf);
-				AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
-				STATES.computeIfAbsent(
-						domain.getKey(),
-						k -> new HashMap<>())
-						.put(test.getKey(), check.valuesAtFirstAssertion);
-				MESSAGES.computeIfAbsent(
-						domain.getKey(),
-						k -> new HashMap<>())
-						.put(test.getKey(), check.assertions);
-			}
+		for (Map.Entry<String, SmashedSumIntDomain<?>> intDomain : INT_DOMAINS.entrySet())
+			for (Map.Entry<String, SmashedSumStringDomain<?>> strDomain : STRING_DOMAINS.entrySet())
+				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
+					CronConfiguration conf = mkConf(intDomain.getValue(), strDomain.getValue(), test.getValue());
+					// conf.analysisGraphs = it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
+					System.out.println("\n\n###Running test " + intDomain.getKey() + "-" + strDomain.getKey() + "/" + test.getKey());
+					perform("whole-value", "smashed/" + intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey(), test.getKey(), conf);
+					AssertionCheck<?, ?, ?> check = (AssertionCheck<?, ?, ?>) conf.semanticChecks.iterator().next();
+					STATES.computeIfAbsent(
+							intDomain.getKey() + "-" + strDomain.getKey(),
+							k -> new HashMap<>())
+							.put(test.getKey(), check.valuesAtFirstAssertion);
+					MESSAGES.computeIfAbsent(
+							intDomain.getKey() + "-" + strDomain.getKey(),
+							k -> new HashMap<>())
+							.put(test.getKey(), check.assertions);
+				}
 		BoundedStringSet.MAX_SIZE = tmp;
 	}
 
@@ -248,15 +260,18 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			System.out.println("\n\n### Test file: " + testFile);
 			
 			Set<CodeLocation> assertionLocs = new TreeSet<>(MESSAGES.values().iterator().next().get(testFile).keySet());
-			String[][] table = new String[DOMAINS.size() + 1][2 + assertionLocs.size()];
+			String[][] table = new String[STATES.size() + 1][2 + assertionLocs.size()];
 			table[0][0] = "DOMAIN";
 			int i = 1;
 			for (CodeLocation loc : assertionLocs)
 				table[0][i++] = "LINE " + ((SourceCodeLocation) loc).getLine();
 			table[0][i] = "APPROXIMATION";
 
+			Set<String> sortedDoms = new TreeSet<>();
+			for (String strDom : STRING_DOMAINS.keySet())
+			for (String intDom : INT_DOMAINS.keySet())
+			sortedDoms.add(intDom + "-" + strDom);
 			i = 1;
-			Set<String> sortedDoms = new TreeSet<>(DOMAINS.keySet());
 			for (String domain : sortedDoms) {
 				table[i][0] = domain;
 				Map<CodeLocation, String> messages = MESSAGES.get(domain).get(testFile);

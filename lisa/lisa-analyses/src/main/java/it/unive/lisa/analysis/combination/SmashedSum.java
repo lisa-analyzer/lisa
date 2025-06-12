@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
@@ -37,14 +36,18 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * non-relational string abstract domain.
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
+ * @param <I> the non-relational integer abstract domain
  * @param <S> the non-relational string abstract domain
  */
-public class SmashedSum<S extends SmashedSumStringDomain<S>>
+public class SmashedSum<
+		I extends SmashedSumIntDomain<I>,
+		S extends SmashedSumStringDomain<S>>
 		implements
-		BaseNonRelationalValueDomain<SmashedSum<S>> {
+		BaseNonRelationalValueDomain<SmashedSum<I, S>> {
 
-	private final Interval intValue;
+	private final I intValue;
 	private final S stringValue;
 	private final Satisfiability boolValue;
 
@@ -56,7 +59,7 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	 * @param boolValue   the abstract value for booleans
 	 */
 	public SmashedSum(
-			Interval intValue,
+			I intValue,
 			S stringValue,
 			Satisfiability boolValue) {
 		this.intValue = intValue;
@@ -69,7 +72,7 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	 * 
 	 * @return the integer abstract value
 	 */
-	public Interval getIntValue() {
+	public I getIntValue() {
 		return intValue;
 	}
 
@@ -92,7 +95,7 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public SmashedSum<S> evalNonNullConstant(
+	public SmashedSum<I, S> evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -107,25 +110,25 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public SmashedSum<S> lubAux(
-			SmashedSum<S> other)
+	public SmashedSum<I, S> lubAux(
+			SmashedSum<I, S> other)
 			throws SemanticException {
-		return new SmashedSum<S>(intValue.lub(other.intValue), stringValue.lub(other.stringValue),
+		return new SmashedSum<I, S>(intValue.lub(other.intValue), stringValue.lub(other.stringValue),
 				boolValue.lub(other.boolValue));
 	}
 
 	@Override
-	public SmashedSum<S> wideningAux(
-			SmashedSum<S> other)
+	public SmashedSum<I, S> wideningAux(
+			SmashedSum<I, S> other)
 			throws SemanticException {
-		return new SmashedSum<S>(intValue.widening(other.intValue), stringValue.widening(other.stringValue),
+		return new SmashedSum<I, S>(intValue.widening(other.intValue), stringValue.widening(other.stringValue),
 				boolValue.widening(other.boolValue));
 
 	}
 
 	@Override
 	public boolean lessOrEqualAux(
-			SmashedSum<S> other)
+			SmashedSum<I, S> other)
 			throws SemanticException {
 		return intValue.lessOrEqual(other.intValue) && stringValue.lessOrEqual(other.stringValue)
 				&& boolValue.lessOrEqual(other.boolValue);
@@ -137,8 +140,8 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public SmashedSum<S> top() {
-		return new SmashedSum<S>(intValue.top(), stringValue.top(), boolValue.top());
+	public SmashedSum<I, S> top() {
+		return new SmashedSum<I, S>(intValue.top(), stringValue.top(), boolValue.top());
 	}
 
 	@Override
@@ -147,8 +150,8 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public SmashedSum<S> bottom() {
-		return new SmashedSum<S>(intValue.bottom(), stringValue.bottom(), boolValue.bottom());
+	public SmashedSum<I, S> bottom() {
+		return new SmashedSum<I, S>(intValue.bottom(), stringValue.bottom(), boolValue.bottom());
 	}
 
 	@Override
@@ -170,7 +173,7 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SmashedSum<?> other = (SmashedSum<?>) obj;
+		SmashedSum<?, ?> other = (SmashedSum<?, ?>) obj;
 		if (intValue == null) {
 			if (other.intValue != null)
 				return false;
@@ -192,14 +195,14 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public SmashedSum<S> evalUnaryExpression(
+	public SmashedSum<I, S> evalUnaryExpression(
 			UnaryOperator operator,
-			SmashedSum<S> arg,
+			SmashedSum<I, S> arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (operator == StringLength.INSTANCE && arg.isString())
-			return mkSmashedValue(new Interval(arg.stringValue.length()));
+			return mkSmashedValue(intValue.fromInterval(arg.stringValue.length()));
 		if (operator == NumericNegation.INSTANCE && arg.isNumber())
 			return mkSmashedValue(intValue.evalUnaryExpression(operator, arg.intValue, pp, oracle));
 		if (operator == LogicalNegation.INSTANCE && arg.isBool())
@@ -208,10 +211,10 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public SmashedSum<S> evalBinaryExpression(
+	public SmashedSum<I, S> evalBinaryExpression(
 			BinaryOperator operator,
-			SmashedSum<S> left,
-			SmashedSum<S> right,
+			SmashedSum<I, S> left,
+			SmashedSum<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -227,7 +230,7 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE)
 			return mkSmashedValue(satisfiesBinaryExpression(operator, left, right, pp, oracle));
 		if (operator == StringIndexOf.INSTANCE && left.isString() && right.isString())
-			return mkSmashedValue(new Interval(left.stringValue.indexOf(right.stringValue)));
+			return mkSmashedValue(intValue.fromInterval(left.stringValue.indexOf(right.stringValue)));
 		if (operator == StringConcat.INSTANCE && left.isString() && right.isString())
 			return mkSmashedValue(
 					stringValue.evalBinaryExpression(operator, left.stringValue, right.stringValue, pp, oracle));
@@ -238,17 +241,17 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public SmashedSum<S> evalTernaryExpression(
+	public SmashedSum<I, S> evalTernaryExpression(
 			TernaryOperator operator,
-			SmashedSum<S> left,
-			SmashedSum<S> middle,
-			SmashedSum<S> right,
+			SmashedSum<I, S> left,
+			SmashedSum<I, S> middle,
+			SmashedSum<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (operator == StringSubstring.INSTANCE && left.isString() && middle.isNumber() && right.isNumber()) {
-			IntInterval begin = middle.intValue.interval;
-			IntInterval end = right.intValue.interval;
+			IntInterval begin = middle.intValue.toInterval();
+			IntInterval end = right.intValue.toInterval();
 
 			if (!begin.isFinite() || !end.isFinite())
 				return mkSmashedValue(stringValue.top());
@@ -288,8 +291,8 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryOperator operator,
-			SmashedSum<S> left,
-			SmashedSum<S> right,
+			SmashedSum<I, S> left,
+			SmashedSum<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -323,8 +326,8 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	@Override
-	public ValueEnvironment<SmashedSum<S>> assume(
-			ValueEnvironment<SmashedSum<S>> environment,
+	public ValueEnvironment<SmashedSum<I, S>> assume(
+			ValueEnvironment<SmashedSum<I, S>> environment,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
@@ -356,7 +359,7 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 	}
 
 	private boolean sameKind(
-			SmashedSum<S> other) {
+			SmashedSum<I, S> other) {
 		return (intValue.isBottom() == other.intValue.isBottom())
 				&& (stringValue.isBottom() == other.stringValue.isBottom())
 				&& (boolValue.isBottom() == other.boolValue.isBottom());
@@ -374,17 +377,17 @@ public class SmashedSum<S extends SmashedSumStringDomain<S>>
 		return isTop() || (!isBottom() && stringValue.isBottom() && intValue.isBottom());
 	}
 
-	private SmashedSum<S> mkSmashedValue(
+	private SmashedSum<I, S> mkSmashedValue(
 			S stringValue) {
 		return new SmashedSum<>(intValue.bottom(), stringValue, boolValue.bottom());
 	}
 
-	private SmashedSum<S> mkSmashedValue(
-			Interval intValue) {
+	private SmashedSum<I, S> mkSmashedValue(
+			I intValue) {
 		return new SmashedSum<>(intValue, stringValue.bottom(), boolValue.bottom());
 	}
 
-	private SmashedSum<S> mkSmashedValue(
+	private SmashedSum<I, S> mkSmashedValue(
 			Satisfiability boolValue) {
 		return new SmashedSum<>(intValue.bottom(), stringValue.bottom(), boolValue);
 	}

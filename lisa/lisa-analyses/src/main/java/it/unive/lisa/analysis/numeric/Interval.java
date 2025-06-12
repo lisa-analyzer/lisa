@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.SmashedSumIntDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
@@ -44,7 +45,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class Interval implements BaseNonRelationalValueDomain<Interval>, Comparable<Interval> {
+public class Interval implements SmashedSumIntDomain<Interval>, Comparable<Interval> {
 
 	/**
 	 * The abstract zero ({@code [0, 0]}) element.
@@ -496,5 +497,15 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 		if (o.isTop())
 			return -1;
 		return interval.compareTo(o.interval);
+	}
+
+	@Override
+	public Interval fromInterval(IntInterval intv) throws SemanticException {
+		return new Interval(intv);
+	}
+
+	@Override
+	public IntInterval toInterval() throws SemanticException {
+		return interval;
 	}
 }

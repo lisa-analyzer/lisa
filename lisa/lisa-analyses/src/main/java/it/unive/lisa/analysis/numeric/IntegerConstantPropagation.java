@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.SmashedSumIntDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
@@ -27,6 +28,8 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
@@ -42,7 +45,8 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<IntegerConstantPropagation> {
+public class IntegerConstantPropagation 
+	implements SmashedSumIntDomain<IntegerConstantPropagation> {
 
 	private static final IntegerConstantPropagation TOP = new IntegerConstantPropagation(true, false);
 	private static final IntegerConstantPropagation BOTTOM = new IntegerConstantPropagation(false, true);
@@ -285,5 +289,25 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 				return environment.putState((Identifier) right, eval);
 			}
 		return environment;
+	}
+
+	@Override
+	public IntegerConstantPropagation fromInterval(IntInterval intv) throws SemanticException {
+		if (intv.isFinite() && intv.getHigh().equals(intv.getLow()))
+			try {
+				return new IntegerConstantPropagation(intv.getLow().toInt());
+			} catch (MathNumberConversionException e) {
+				throw new SemanticException("Cannot convert " + intv + " to an integer constant", e);
+			}
+		return top();
+	}
+
+	@Override
+	public IntInterval toInterval() throws SemanticException {
+		if (isBottom())
+			return null;
+		if (isTop())
+			return IntInterval.INFINITY;
+		return new IntInterval(value, value);
 	}
 }

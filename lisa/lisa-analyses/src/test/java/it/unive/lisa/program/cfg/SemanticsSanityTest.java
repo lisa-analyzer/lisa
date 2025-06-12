@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.analysis.combination.SmashedSumIntDomain;
 import it.unive.lisa.analysis.combination.SmashedSumStringDomain;
 import it.unive.lisa.analysis.combination.ValueCartesianProduct;
 import it.unive.lisa.analysis.dataflow.AvailableExpressions;
@@ -462,7 +463,7 @@ public class SemanticsSanityTest {
 			return new Sign();
 		if (root == IdSet.class && param == Set.class)
 			return Collections.emptySet();
-		if (param == Interval.class)
+		if (param == Interval.class || param == SmashedSumIntDomain.class)
 			return new Interval();
 		if (param == SmashedSumStringDomain.class)
 			return new Prefix();
