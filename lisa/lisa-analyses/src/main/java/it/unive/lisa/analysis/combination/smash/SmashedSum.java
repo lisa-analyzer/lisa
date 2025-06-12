@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.combination;
+package it.unive.lisa.analysis.combination.smash;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;

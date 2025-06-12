@@ -1,5 +1,13 @@
 package it.unive.lisa.cron;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
@@ -10,11 +18,12 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractState;
-import it.unive.lisa.analysis.combination.SmashedSum;
-import it.unive.lisa.analysis.combination.SmashedSumIntDomain;
-import it.unive.lisa.analysis.combination.SmashedSumStringDomain;
+import it.unive.lisa.analysis.combination.smash.SmashedSum;
+import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
+import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
@@ -41,23 +50,13 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import org.junit.AfterClass;
-import org.junit.Test;
 
 public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
-	private static class AssertionCheck<
-			A extends AbstractState<A>,
-			I extends SmashedSumIntDomain<I>,
-			S extends SmashedSumStringDomain<S>>
+	private static class AssertionCheck<A extends AbstractState<A>>
 			implements
 			SemanticCheck<A> {
 
@@ -65,9 +64,9 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 		private Map<CodeLocation, String> assertions = new HashMap<>();
 
-		private SmashedSum<I, S> valuesAtFirstAssertion;
+		private Lattice<?> valuesAtFirstAssertion;
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public boolean visit(
 				CheckToolWithAnalysisResults<A> tool,
@@ -77,6 +76,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			if (node instanceof IMPAssert) {
 				Expression assertion = ((IMPAssert) node).getSubExpression();
 				Expression target = ((BinaryExpression) assertion).getLeft();
+				Expression conditional = ((BinaryExpression) assertion).getRight();
 
 				for (AnalyzedCFG<A> res : tool.getResultOf(graph)) {
 					AnalysisState<A> post = res.getAnalysisStateAfter(assertion);
@@ -87,23 +87,22 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 						if (first) {
 							first = false;
-							valuesAtFirstAssertion = null;
+							ValueEnvironment<?> env = targetPost.getState().getDomainInstance(ValueEnvironment.class);
+							Lattice vals = null;
 							for (SymbolicExpression expr : targetPost.getComputedExpressions()) {
-								SmashedSum<I, S> smashedSum = (SmashedSum<I, S>) targetPost.getState()
-										.getDomainInstance(ValueEnvironment.class).getState((Identifier) expr);
-								if (valuesAtFirstAssertion == null)
-									valuesAtFirstAssertion = smashedSum;
+								Lattice val = env.getState((Identifier) expr);
+								if (vals == null)
+									vals = val;
 								else
-									valuesAtFirstAssertion = valuesAtFirstAssertion.lub(smashedSum);
+									vals.lub(val);
 							}
+							valuesAtFirstAssertion = vals;
 						}
 
 						if (assertion instanceof IMPStringContains) {
-							Expression[] args = ((IMPStringContains) assertion).getSubExpressions();
-							VariableRef variable = (VariableRef) args[0];
-							StringLiteral ch = (StringLiteral) args[1];
+							StringLiteral ch = (StringLiteral) conditional;
 							if (ch.getValue().length() == 1)
-								containsCharAssertion(tool, node, res, variable, ch);
+								containsCharAssertion(tool, node, res, target, ch);
 							else
 								assertion(tool, node, post, state);
 						} else
@@ -116,19 +115,21 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			return true;
 		}
 
+		@SuppressWarnings("unchecked")
 		private void containsCharAssertion(
 				CheckToolWithAnalysisResults<A> tool,
 				Statement node,
 				AnalyzedCFG<A> res,
-				VariableRef variable,
+				Expression variable,
 				StringLiteral ch)
 				throws SemanticException {
 			AnalysisState<A> target = res.getAnalysisStateAfter(variable);
 			for (SymbolicExpression expr : target.getComputedExpressions()) {
-				@SuppressWarnings("unchecked")
-				ValueEnvironment<SmashedSum<I, S>> values = (ValueEnvironment<SmashedSum<I, S>>) target.getState()
-						.getDomainInstance(ValueEnvironment.class);
-				S abstractString = values.getState((Identifier) expr).getStringValue();
+				ValueEnvironment<?> values = target.getState().getDomainInstance(ValueEnvironment.class);
+				NonRelationalValueDomain<?> state = values.getState((Identifier) expr);
+				if (!(state instanceof SmashedSum))
+					throw new SemanticException("Only smashed sum is supported, but got " + state.getClass().getSimpleName());
+				SmashedSumStringDomain<?> abstractString = ((SmashedSum<?, ?>) state).getStringValue();
 				Satisfiability sat = abstractString.containsChar(ch.getValue().charAt(0));
 				if (sat == Satisfiability.UNKNOWN)
 					warnOn(tool, node, "This assertion might fail");
@@ -235,12 +236,12 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 					CronConfiguration conf = mkConf(intDomain.getValue(), strDomain.getValue(), test.getValue());
 					// conf.analysisGraphs =
 					// it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
-					System.out.println("\n\n###Running test " + intDomain.getKey() + "-" + strDomain.getKey() + "/"
-							+ test.getKey());
+					String testKey = intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey();
+					System.out.println("\n\n###Running test " + testKey);
 					perform("whole-value",
-							"smashed/" + intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey(),
+							"smashed/" + testKey,
 							test.getKey(), conf);
-					AssertionCheck<?, ?, ?> check = (AssertionCheck<?, ?, ?>) conf.semanticChecks.iterator().next();
+					AssertionCheck<?> check = (AssertionCheck<?>) conf.semanticChecks.iterator().next();
 					STATES.computeIfAbsent(
 							intDomain.getKey() + "-" + strDomain.getKey(),
 							k -> new HashMap<>())

@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.string.tarsis;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.combination.SmashedSumStringDomain;
+import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.string.fsa.FSA;
