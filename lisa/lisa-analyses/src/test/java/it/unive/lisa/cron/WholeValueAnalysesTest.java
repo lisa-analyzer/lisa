@@ -1,5 +1,13 @@
 package it.unive.lisa.cron;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
@@ -7,6 +15,7 @@ import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.combination.SmashedSum;
@@ -32,19 +41,17 @@ import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.io.IOException;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 	private static class AssertionCheck<A extends AbstractState<A>, S extends SmashedSumStringDomain<S>>
@@ -53,6 +60,11 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 		private boolean first = true;
 
+		private Map<CodeLocation, String> assertions = new HashMap<>();
+
+		private SmashedSum<S> valuesAtFirstAssertion;
+
+		@SuppressWarnings("unchecked")
 		@Override
 		public boolean visit(
 				CheckToolWithAnalysisResults<A> tool,
@@ -61,20 +73,26 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 			if (node instanceof IMPAssert) {
 				Expression assertion = ((IMPAssert) node).getSubExpression();
+				Expression target = ((BinaryExpression) assertion).getLeft();
 
 				for (AnalyzedCFG<A> res : tool.getResultOf(graph)) {
 					AnalysisState<A> post = res.getAnalysisStateAfter(assertion);
+					AnalysisState<A> targetPost = res.getAnalysisStateAfter(target);
 
 					try {
-						@SuppressWarnings("unchecked")
 						A state = (A) post.getState().getDomainInstance(SimpleAbstractState.class);
 
 						if (first) {
 							first = false;
-							@SuppressWarnings("unchecked")
-							ValueEnvironment<SmashedSum<S>> values = (ValueEnvironment<SmashedSum<S>>) state
-									.getDomainInstance(ValueEnvironment.class);
-							System.err.println("Values at first assertion:\n" + values);
+							valuesAtFirstAssertion = null;
+							for (SymbolicExpression expr : targetPost.getComputedExpressions()) {
+								SmashedSum<S> smashedSum = (SmashedSum<S>) targetPost.getState()
+										.getDomainInstance(ValueEnvironment.class).getState((Identifier) expr);
+								if (valuesAtFirstAssertion == null)
+									valuesAtFirstAssertion = smashedSum;
+								else
+									valuesAtFirstAssertion = valuesAtFirstAssertion.lub(smashedSum);
+							}
 						}
 
 						if (assertion instanceof IMPStringContains) {
@@ -141,36 +159,22 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 				String message) {
 			if (message != null) {
 				tool.warnOn(node, message);
-				System.err.println("Warning on " + node.getLocation() + ": " + message);
+				assertions.put(node.getLocation(), message.contains("might fail") ? "possible" : "definite");
 			} else
-				System.err.println("No warning on " + node.getLocation());
+				assertions.put(node.getLocation(), "-");
 		}
 	}
 
-	private static <S extends SmashedSumStringDomain<S>> CronConfiguration baseConf(
-			S stringDomain)
-			throws AnalysisSetupException {
-		return baseConf(stringDomain, false, false);
-	}
-
-	private static <S extends SmashedSumStringDomain<S>> CronConfiguration baseConf(
-			S stringDomain,
-			boolean traces)
-			throws AnalysisSetupException {
-		return baseConf(stringDomain, traces, false);
-	}
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static <S extends SmashedSumStringDomain<S>> CronConfiguration baseConf(
-			S stringDomain,
-			boolean traces,
-			boolean dump)
+	private static CronConfiguration mkConf(
+			SmashedSumStringDomain<?> stringDomain,
+			boolean traces)
 			throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.jsonOutput = true;
 		conf.abstractState = new SimpleAbstractState<>(
 				new MonolithicHeap(),
-				new ValueEnvironment<>(new SmashedSum<>(new Interval(), stringDomain, Satisfiability.UNKNOWN)),
+				new ValueEnvironment<>(new SmashedSum(new Interval(), stringDomain, Satisfiability.UNKNOWN)),
 				new TypeEnvironment<>(new InferredTypes()));
 		if (traces)
 			conf.abstractState = new TracePartitioning(conf.abstractState);
@@ -182,10 +186,6 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 		conf.optimize = true;
 		conf.hotspots = st -> st instanceof IMPAssert
 				|| (st instanceof Expression && ((Expression) st).getRootStatement() instanceof IMPAssert);
-		if (dump) {
-			conf.serializeResults = true;
-			conf.analysisGraphs = it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
-		}
 		return conf;
 	}
 
@@ -200,135 +200,114 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
-	@Test
-	public void toStringPrefixTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "tostring/prefix", "toString.imp", baseConf(new Prefix()));
-	}
+	private static Map<String, SmashedSumStringDomain<?>> DOMAINS = Map.of(
+			"prefix", new Prefix(),
+			"suffix", new Suffix(),
+			"ci", new CharInclusion(),
+			"bricks", new Bricks(),
+			"tarsis", new Tarsis(),
+			"bss", new BoundedStringSet()
+	);
+
+	private static Map<String, Boolean> TESTFILES = Map.of(
+			"toString.imp", false,
+			"subs.imp", false,
+			"loop.imp", false,
+			"count.imp", true
+	);
+
+	private static Map<String, Map<String, Lattice<?>>> STATES = new HashMap<>();
+	private static Map<String, Map<String, Map<CodeLocation, String>>> MESSAGES = new HashMap<>();
 
 	@Test
-	public void toStringSuffixTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "tostring/suffix", "toString.imp", baseConf(new Suffix()));
-	}
-
-	@Test
-	public void toStringCiTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "tostring/ci", "toString.imp", baseConf(new CharInclusion()));
-	}
-
-	@Test
-	public void toStringBricksTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "tostring/bricks", "toString.imp", baseConf(new Bricks()));
-	}
-
-	@Test
-	public void toStringTarsisTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "tostring/tarsis", "toString.imp", baseConf(new Tarsis()));
-	}
-
-	@Test
-	public void toStringBSSTest() throws IOException, AnalysisSetupException {
+	public void testSmashedSum() {
 		int tmp = BoundedStringSet.MAX_SIZE;
 		BoundedStringSet.MAX_SIZE = 5;
-		perform("whole-value", "tostring/bss", "toString.imp", baseConf(new BoundedStringSet()));
+		for (Map.Entry<String, SmashedSumStringDomain<?>> domain : DOMAINS.entrySet()) 
+			for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
+				CronConfiguration conf = mkConf(domain.getValue(), test.getValue());
+				// conf.analysisGraphs = it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
+				System.err.println("\n\n###Running test " + domain.getKey() + "/" + test.getKey());
+				perform("whole-value", "smashed/" + domain.getKey(), test.getKey(), conf);
+				AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+				STATES.computeIfAbsent(
+						domain.getKey(),
+						k -> new HashMap<>())
+						.put(test.getKey(), check.valuesAtFirstAssertion);
+				MESSAGES.computeIfAbsent(
+						domain.getKey(),
+						k -> new HashMap<>())
+						.put(test.getKey(), check.assertions);
+			}
 		BoundedStringSet.MAX_SIZE = tmp;
 	}
 
-	@Test
-	public void substringPrefixTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "substring/prefix", "subs.imp", baseConf(new Prefix()));
+	@AfterClass
+	public static void summary() {
+		for (String testFile : TESTFILES.keySet()) {
+			System.out.println("\n\n### Test file: " + testFile);
+			
+			Set<CodeLocation> assertionLocs = new TreeSet<>(MESSAGES.values().iterator().next().get(testFile).keySet());
+			String[][] table = new String[DOMAINS.size() + 1][2 + assertionLocs.size()];
+			table[0][0] = "DOMAIN";
+			int i = 1;
+			for (CodeLocation loc : assertionLocs)
+				table[0][i++] = "LINE " + ((SourceCodeLocation) loc).getLine();
+			table[0][i] = "APPROXIMATION";
+
+			i = 1;
+			Set<String> sortedDoms = new TreeSet<>(DOMAINS.keySet());
+			for (String domain : sortedDoms) {
+				table[i][0] = domain;
+				Map<CodeLocation, String> messages = MESSAGES.get(domain).get(testFile);
+				int j = 1;
+				for (CodeLocation loc : assertionLocs) {
+					String msg = messages.get(loc);
+					table[i][j++] = msg;
+				}
+				table[i][j] = STATES.get(domain).get(testFile).toString();
+				i++;
+			}
+			System.out.println(toString(table));
+		}
 	}
 
-	@Test
-	public void substringSuffixTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "substring/suffix", "subs.imp", baseConf(new Suffix()));
+	public static String toString(String[][] table) {
+		int cols = table[0].length;
+		int[] colWidths = new int[cols];
+		StringBuilder builder = new StringBuilder();
+
+		// Calculate max width for each column
+		for (int c = 0; c < cols; c++) 
+			for (String[] row : table) 
+				for (String line : row[c].split("\n")) 
+					colWidths[c] = Math.max(colWidths[c], line.length());
+
+		// Print each row
+		separatorLine(cols, colWidths, builder);
+		for (int r = 0; r < table.length; r++) {
+			for (int c = 0; c < cols; c++) {
+				if (c > 0)
+					builder.append(" ");
+				builder.append("| ").append(padRight(table[r][c], colWidths[c]));
+			}
+			builder.append("|\n");
+			if (r == 0 || r == table.length - 1)
+				separatorLine(cols, colWidths, builder);
+		}
+		return builder.toString();
 	}
 
-	@Test
-	public void substringCiTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "substring/ci", "subs.imp", baseConf(new CharInclusion()));
+	private static void separatorLine(int cols, int[] colWidths, StringBuilder builder) {
+		for (int c = 0; c < cols; c++) {
+			if (c > 0)
+				builder.append("-");
+			builder.append("+-").append("-".repeat(colWidths[c]));
+		}
+		builder.append("+\n");
 	}
 
-	@Test
-	public void substringBricksTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "substring/bricks", "subs.imp", baseConf(new Bricks()));
-	}
-
-	@Test
-	public void substringTarsisTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "substring/tarsis", "subs.imp", baseConf(new Tarsis()));
-	}
-
-	@Test
-	public void substringBSSTest() throws IOException, AnalysisSetupException {
-		int tmp = BoundedStringSet.MAX_SIZE;
-		BoundedStringSet.MAX_SIZE = 5;
-		perform("whole-value", "substring/bss", "subs.imp", baseConf(new BoundedStringSet()));
-		BoundedStringSet.MAX_SIZE = tmp;
-	}
-
-	@Test
-	public void loopPrefixTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "loop/prefix", "loop.imp", baseConf(new Prefix()));
-	}
-
-	@Test
-	public void loopSuffixTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "loop/suffix", "loop.imp", baseConf(new Suffix()));
-	}
-
-	@Test
-	public void loopCiTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "loop/ci", "loop.imp", baseConf(new CharInclusion()));
-	}
-
-	@Test
-	public void loopBricksTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "loop/bricks", "loop.imp", baseConf(new Bricks()));
-	}
-
-	@Test
-	public void loopTarsisTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "loop/tarsis", "loop.imp", baseConf(new Tarsis()));
-	}
-
-	@Test
-	public void loopBSSTest() throws IOException, AnalysisSetupException {
-		int tmp = BoundedStringSet.MAX_SIZE;
-		BoundedStringSet.MAX_SIZE = 5;
-		perform("whole-value", "loop/bss", "loop.imp", baseConf(new BoundedStringSet()));
-		BoundedStringSet.MAX_SIZE = tmp;
-	}
-
-	@Test
-	public void cmPrefixTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "count/prefix", "count.imp", baseConf(new Prefix(), true));
-	}
-
-	@Test
-	public void cmSuffixTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "count/suffix", "count.imp", baseConf(new Suffix(), true));
-	}
-
-	@Test
-	public void cmCiTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "count/ci", "count.imp", baseConf(new CharInclusion(), true));
-	}
-
-	@Test
-	public void cmBricksTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "count/bricks", "count.imp", baseConf(new Bricks(), true));
-	}
-
-	@Test
-	public void cmTarsisTest() throws IOException, AnalysisSetupException {
-		perform("whole-value", "count/tarsis", "count.imp", baseConf(new Tarsis(), true));
-	}
-
-	@Test
-	public void cmBSSTest() throws IOException, AnalysisSetupException {
-		int tmp = BoundedStringSet.MAX_SIZE;
-		BoundedStringSet.MAX_SIZE = 5;
-		perform("whole-value", "count/bss", "count.imp", baseConf(new BoundedStringSet(), true));
-		BoundedStringSet.MAX_SIZE = tmp;
+	private static String padRight(String s, int n) {
+		return String.format("%-" + n + "s", s);
 	}
 }
