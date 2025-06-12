@@ -45,8 +45,9 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class IntegerConstantPropagation 
-	implements SmashedSumIntDomain<IntegerConstantPropagation> {
+public class IntegerConstantPropagation
+		implements
+		SmashedSumIntDomain<IntegerConstantPropagation> {
 
 	private static final IntegerConstantPropagation TOP = new IntegerConstantPropagation(true, false);
 	private static final IntegerConstantPropagation BOTTOM = new IntegerConstantPropagation(false, true);
@@ -292,7 +293,9 @@ public class IntegerConstantPropagation
 	}
 
 	@Override
-	public IntegerConstantPropagation fromInterval(IntInterval intv) throws SemanticException {
+	public IntegerConstantPropagation fromInterval(
+			IntInterval intv)
+			throws SemanticException {
 		if (intv.isFinite() && intv.getHigh().equals(intv.getLow()))
 			try {
 				return new IntegerConstantPropagation(intv.getLow().toInt());

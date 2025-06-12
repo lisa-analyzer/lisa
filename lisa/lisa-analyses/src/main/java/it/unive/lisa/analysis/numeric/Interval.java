@@ -500,7 +500,9 @@ public class Interval implements SmashedSumIntDomain<Interval>, Comparable<Inter
 	}
 
 	@Override
-	public Interval fromInterval(IntInterval intv) throws SemanticException {
+	public Interval fromInterval(
+			IntInterval intv)
+			throws SemanticException {
 		return new Interval(intv);
 	}
 

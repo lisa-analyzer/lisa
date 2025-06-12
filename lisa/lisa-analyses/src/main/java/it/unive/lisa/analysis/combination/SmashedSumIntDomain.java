@@ -18,13 +18,25 @@ public interface SmashedSumIntDomain<I extends SmashedSumIntDomain<I>>
 
 	/**
 	 * Creates a new instance of this domain from the given interval.
+	 * 
+	 * @param intv the {@link IntInterval} to convert into an instance of this
+	 *                 domain
+	 * 
+	 * @return an {@link IntInterval} representing the range of values
+	 * 
+	 * @throws SemanticException if an error occurs during the conversion
 	 */
-	I fromInterval(IntInterval intv)
-		throws SemanticException;
+	I fromInterval(
+			IntInterval intv)
+			throws SemanticException;
 
 	/**
 	 * Converts this domain instance to an interval.
+	 * 
+	 * @return an {@link IntInterval} representing the range of values
+	 * 
+	 * @throws SemanticException if an error occurs during the conversion
 	 */
 	IntInterval toInterval()
-		throws SemanticException;
+			throws SemanticException;
 }

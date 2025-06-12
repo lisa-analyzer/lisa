@@ -1,13 +1,5 @@
 package it.unive.lisa.cron;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.junit.AfterClass;
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
@@ -53,11 +45,17 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 	private static class AssertionCheck<
-			A extends AbstractState<A>, 
+			A extends AbstractState<A>,
 			I extends SmashedSumIntDomain<I>,
 			S extends SmashedSumStringDomain<S>>
 			implements
@@ -208,8 +206,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 	private static Map<String, SmashedSumIntDomain<?>> INT_DOMAINS = Map.of(
 			"intv", new Interval(),
-			"cp", new IntegerConstantPropagation()
-	);
+			"cp", new IntegerConstantPropagation());
 
 	private static Map<String, SmashedSumStringDomain<?>> STRING_DOMAINS = Map.of(
 			"prefix", new Prefix(),
@@ -217,15 +214,13 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			"ci", new CharInclusion(),
 			"bricks", new Bricks(),
 			"tarsis", new Tarsis(),
-			"bss", new BoundedStringSet()
-	);
+			"bss", new BoundedStringSet());
 
 	private static Map<String, Boolean> TESTFILES = Map.of(
 			"toString.imp", false,
 			"subs.imp", false,
 			"loop.imp", false,
-			"count.imp", true
-	);
+			"count.imp", true);
 
 	private static Map<String, Map<String, Lattice<?>>> STATES = new HashMap<>();
 	private static Map<String, Map<String, Map<CodeLocation, String>>> MESSAGES = new HashMap<>();
@@ -238,9 +233,13 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 			for (Map.Entry<String, SmashedSumStringDomain<?>> strDomain : STRING_DOMAINS.entrySet())
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
 					CronConfiguration conf = mkConf(intDomain.getValue(), strDomain.getValue(), test.getValue());
-					// conf.analysisGraphs = it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
-					System.out.println("\n\n###Running test " + intDomain.getKey() + "-" + strDomain.getKey() + "/" + test.getKey());
-					perform("whole-value", "smashed/" + intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey(), test.getKey(), conf);
+					// conf.analysisGraphs =
+					// it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
+					System.out.println("\n\n###Running test " + intDomain.getKey() + "-" + strDomain.getKey() + "/"
+							+ test.getKey());
+					perform("whole-value",
+							"smashed/" + intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey(),
+							test.getKey(), conf);
 					AssertionCheck<?, ?, ?> check = (AssertionCheck<?, ?, ?>) conf.semanticChecks.iterator().next();
 					STATES.computeIfAbsent(
 							intDomain.getKey() + "-" + strDomain.getKey(),
@@ -258,7 +257,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 	public static void summary() {
 		for (String testFile : TESTFILES.keySet()) {
 			System.out.println("\n\n### Test file: " + testFile);
-			
+
 			Set<CodeLocation> assertionLocs = new TreeSet<>(MESSAGES.values().iterator().next().get(testFile).keySet());
 			String[][] table = new String[STATES.size() + 1][2 + assertionLocs.size()];
 			table[0][0] = "DOMAIN";
@@ -269,8 +268,8 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 			Set<String> sortedDoms = new TreeSet<>();
 			for (String strDom : STRING_DOMAINS.keySet())
-			for (String intDom : INT_DOMAINS.keySet())
-			sortedDoms.add(intDom + "-" + strDom);
+				for (String intDom : INT_DOMAINS.keySet())
+					sortedDoms.add(intDom + "-" + strDom);
 			i = 1;
 			for (String domain : sortedDoms) {
 				table[i][0] = domain;
@@ -287,15 +286,16 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 		}
 	}
 
-	public static String toString(String[][] table) {
+	public static String toString(
+			String[][] table) {
 		int cols = table[0].length;
 		int[] colWidths = new int[cols];
 		StringBuilder builder = new StringBuilder();
 
 		// Calculate max width for each column
-		for (int c = 0; c < cols; c++) 
-			for (String[] row : table) 
-				for (String line : row[c].split("\n")) 
+		for (int c = 0; c < cols; c++)
+			for (String[] row : table)
+				for (String line : row[c].split("\n"))
 					colWidths[c] = Math.max(colWidths[c], line.length());
 
 		// Print each row
@@ -313,7 +313,10 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 		return builder.toString();
 	}
 
-	private static void separatorLine(int cols, int[] colWidths, StringBuilder builder) {
+	private static void separatorLine(
+			int cols,
+			int[] colWidths,
+			StringBuilder builder) {
 		for (int c = 0; c < cols; c++) {
 			if (c > 0)
 				builder.append("-");
@@ -322,7 +325,9 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 		builder.append("+\n");
 	}
 
-	private static String padRight(String s, int n) {
+	private static String padRight(
+			String s,
+			int n) {
 		return String.format("%-" + n + "s", s);
 	}
 }
