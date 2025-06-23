@@ -247,16 +247,16 @@ public class WholeValueAnalysis<
 			return mkBoolValue(
 					boolValue.evalBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle));
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
-			return mkBoolValue(boolValue.generate(intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle).constraints(null, pp), pp));
+			return mkBoolValue(boolValue.generate(intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle).constraints(expression, pp), pp));
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE)
-			return mkBoolValue(boolValue.generate(satisfiesBinaryExpression(expression, left, right, pp, oracle).constraints(null, pp), pp));
+			return mkBoolValue(boolValue.generate(satisfiesBinaryExpression(expression, left, right, pp, oracle).constraints(expression, pp), pp));
 		if (operator == StringIndexOf.INSTANCE && left.isString() && right.isString())
-			return mkIntValue(intValue.generate(left.stringValue.indexOf(right.stringValue), pp));
+			return mkIntValue(intValue.generate(left.stringValue.indexOf_constr(expression, right.stringValue, pp), pp));
 		if (operator == StringConcat.INSTANCE && left.isString() && right.isString())
 			return mkStringValue(
 					stringValue.evalBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle));
 		if (operator instanceof StringOperation && left.isString() && right.isString())
-			return mkBoolValue(boolValue.generate(stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle).constraints(null, pp), pp));
+			return mkBoolValue(boolValue.generate(stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle).constraints(expression, pp), pp));
 		return top();
 	}
 
@@ -273,7 +273,7 @@ public class WholeValueAnalysis<
 		if (operator == StringSubstring.INSTANCE && left.isString() && middle.isNumber() && right.isNumber()) {
 			Set<BinaryExpression> begin = middle.intValue.constraints(null, pp);
 			Set<BinaryExpression> end = right.intValue.constraints(null, pp);
-			return mkStringValue(left.stringValue.substring(begin, end));
+			return mkStringValue(left.stringValue.substring(begin, end, pp));
 		} else if (operator == StringReplace.INSTANCE && left.isString() && middle.isString() && right.isString())
 			return mkStringValue(stringValue.evalTernaryExpression(expression, left.stringValue, middle.stringValue,
 					right.stringValue, pp, oracle));

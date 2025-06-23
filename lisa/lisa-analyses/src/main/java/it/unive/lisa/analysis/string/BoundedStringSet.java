@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -33,6 +34,7 @@ import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 
 /**
  * A bounded set of strings, where the maximum number of elements is defined by
@@ -364,7 +366,7 @@ public class BoundedStringSet
 	}
 
 	@Override
-	public BoundedStringSet substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2) throws SemanticException {
+	public BoundedStringSet substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2, ProgramPoint pp) throws SemanticException {
 		if (isBottom() || a1 == null || a2 == null)
 			return bottom();
 		
@@ -409,7 +411,7 @@ public class BoundedStringSet
 		if (maxI == null || maxJ == null || (maxJ - minJ) * (maxI - minI) * elements.size() > MAX_SIZE)
 			return top();
 
-		Set<String> el = new TreeSet<>();// TODO check both implementation and paper
+		Set<String> el = new TreeSet<>();
 		for (String str : elements)
 			for (int i = minI; i <= maxI; i++)
 				for (int j = minJ; i <= maxJ; j++)
@@ -419,5 +421,37 @@ public class BoundedStringSet
 						else
 							el.add(str.substring(i));
 		return new BoundedStringSet(el);
+	}
+
+	@Override
+	public Set<BinaryExpression> indexOf_constr(BinaryExpression expression, BoundedStringSet other, ProgramPoint pp)
+			throws SemanticException {
+		if (isBottom() || other.isBottom())
+			return null;
+
+		IntInterval indexes = indexOf(other);
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+
+		Set<BinaryExpression> constr = new HashSet<>();
+		try {
+			constr.add(new BinaryExpression(
+						booleanType, 
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(), pp.getLocation()),
+						expression, 
+						ComparisonLe.INSTANCE, 
+						pp.getLocation()
+				));
+			if (indexes.getHigh().isFinite()) 
+				constr.add(new BinaryExpression(
+						booleanType, 
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(), pp.getLocation()), 
+						expression, 
+						ComparisonGe.INSTANCE, 
+						pp.getLocation()
+				));
+		} catch (MathNumberConversionException e1) {
+			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
+		}
+		return constr;
 	}
 }

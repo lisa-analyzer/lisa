@@ -22,6 +22,7 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
@@ -32,6 +33,7 @@ import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
@@ -386,11 +388,43 @@ public class CharInclusion
 	}
 
 	@Override
-	public CharInclusion substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2) throws SemanticException {
+	public CharInclusion substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2, ProgramPoint pp) throws SemanticException {
 		if (isBottom() || a1 == null || a2 == null)
 			return bottom();
 		
 		// indexes does not matter for char inclusion
 		return substring(0, 0);
+	}
+
+	@Override
+	public Set<BinaryExpression> indexOf_constr(BinaryExpression expression, CharInclusion other, ProgramPoint pp)
+			throws SemanticException {
+		if (isBottom() || other.isBottom())
+			return null;
+
+		IntInterval indexes = indexOf(other);
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+
+		Set<BinaryExpression> constr = new HashSet<>();
+		try {
+			constr.add(new BinaryExpression(
+						booleanType, 
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(), pp.getLocation()),
+						expression, 
+						ComparisonLe.INSTANCE, 
+						pp.getLocation()
+				));
+			if (indexes.getHigh().isFinite()) 
+				constr.add(new BinaryExpression(
+						booleanType, 
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(), pp.getLocation()), 
+						expression, 
+						ComparisonGe.INSTANCE, 
+						pp.getLocation()
+				));
+		} catch (MathNumberConversionException e1) {
+			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
+		}
+		return constr;
 	}
 }

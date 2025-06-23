@@ -626,7 +626,6 @@ public class Tarsis
 			if (length.getHigh().isFinite()) 
 				constr.add(new BinaryExpression(
 						booleanType, 
-						// TODO what if this is infinite? modify paper
 						new Constant(pp.getProgram().getTypes().getIntegerType(), length.getHigh().toInt(), pp.getLocation()), 
 						strlen, 
 						ComparisonGe.INSTANCE, 
@@ -682,7 +681,7 @@ public class Tarsis
 	}
 
 	@Override
-	public Tarsis substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2) throws SemanticException {
+	public Tarsis substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2, ProgramPoint pp) throws SemanticException {
 		if (isBottom() || a1 == null || a2 == null)
 			return bottom();
 		
@@ -748,5 +747,37 @@ public class Tarsis
 			}
 
 		return partial;
+	}
+
+	@Override
+	public Set<BinaryExpression> indexOf_constr(
+			BinaryExpression expression, Tarsis other, ProgramPoint pp) throws SemanticException {
+		if (isBottom() || other.isBottom())
+			return null;
+
+		IntInterval indexes = indexOf(other);
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+
+		Set<BinaryExpression> constr = new HashSet<>();
+		try {
+			constr.add(new BinaryExpression(
+						booleanType, 
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(), pp.getLocation()),
+						expression, 
+						ComparisonLe.INSTANCE, 
+						pp.getLocation()
+				));
+			if (indexes.getHigh().isFinite()) 
+				constr.add(new BinaryExpression(
+						booleanType, 
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(), pp.getLocation()), 
+						expression, 
+						ComparisonGe.INSTANCE, 
+						pp.getLocation()
+				));
+		} catch (MathNumberConversionException e1) {
+			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
+		}
+		return constr;
 	}
 }

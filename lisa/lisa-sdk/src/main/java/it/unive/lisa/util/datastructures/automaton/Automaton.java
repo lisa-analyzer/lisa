@@ -1521,7 +1521,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		if (!getAllTransitionsConnecting(node, target).isEmpty())
 			return 1;
 		// should never happen
-		return -1; // TODO exception?
+		return -1;
 	}
 
 	private static State getMinimum(
@@ -1693,8 +1693,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 				lastFinalState = finalState;
 		}
 
-		// TODO exception if lastFinalState is still null? or if more than one
-		// init state?
+		// might wannt to throw an exception if lastFinalState is still null
+		// or if more than one init state exists
 
 		State nextState = getInitialState();
 		List<T> symbols = new LinkedList<>();
