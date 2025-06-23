@@ -63,4 +63,15 @@ public class StringUtilities {
 			String s) {
 		return s.replaceAll("\n|\t", "");
 	}
+
+	public static String gcp(String s1, String s2) {
+		String gcp = "";
+		int minlen = Math.min(s1.length(), s2.length());
+		for (int i = 0; i < minlen; i++)
+			if (s1.charAt(i) == s2.charAt(i))
+				gcp += s1.charAt(i);
+			else
+				break;
+		return gcp;
+	}
 }

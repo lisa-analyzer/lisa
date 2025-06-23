@@ -2,22 +2,36 @@ package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A bounded set of strings, where the maximum number of elements is defined by
@@ -32,7 +46,8 @@ public class BoundedStringSet
 		extends
 		SetLattice<BoundedStringSet, String>
 		implements
-		SmashedSumStringDomain<BoundedStringSet> {
+		SmashedSumStringDomain<BoundedStringSet>,
+		WholeValueStringDomain<BoundedStringSet> {
 
 	/**
 	 * The maximum number of elements that instances of this domain can contain
@@ -109,7 +124,7 @@ public class BoundedStringSet
 			if (left.isTop() || right.isTop())
 				return top();
 
-			Set<String> result = new HashSet<>();
+			Set<String> result = new TreeSet<>();
 			for (String l : left.elements)
 				for (String r : right.elements)
 					result.add(l + r);
@@ -138,7 +153,7 @@ public class BoundedStringSet
 			String replace = middle.elements.iterator().next();
 			String string = right.elements.iterator().next();
 
-			Set<String> result = new HashSet<>();
+			Set<String> result = new TreeSet<>();
 			for (String target : left.elements)
 				result.add(target.replace(replace, string));
 
@@ -262,12 +277,145 @@ public class BoundedStringSet
 		if (isBottom() || isTop())
 			return this;
 
-		Set<String> result = new HashSet<>();
+		Set<String> result = new TreeSet<>();
 		for (String str : elements) {
 			if (end <= str.length())
 				result.add(str.substring((int) begin, (int) end));
 		}
 
 		return new BoundedStringSet(result);
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return null;
+		
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e, StringLength.INSTANCE, pp.getLocation());
+		
+		if (isTop()) 
+			return Collections.singleton(
+				new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+					strlen, 
+					ComparisonLe.INSTANCE, 
+					e.getCodeLocation()
+			));
+		
+		int min = Integer.MAX_VALUE, max = 0;
+		String gcs = null, gcp = null;
+		for (String str : elements) {
+			min = Math.min(min, str.length());
+			max = Math.max(max, str.length());
+			if (gcp == null)
+				gcp = str;
+			else
+				gcp = StringUtilities.gcp(gcp, StringUtils.reverse(str));
+			if (gcs == null)
+				gcs = StringUtils.reverse(str);
+			else
+				gcs = StringUtilities.gcp(gcs, StringUtils.reverse(str));
+		}
+
+		return Set.of(
+			new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getIntegerType(), min, pp.getLocation()),
+					strlen, 
+					ComparisonLe.INSTANCE, 
+					e.getCodeLocation()
+			), new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getIntegerType(), max, pp.getLocation()),
+					strlen, 
+					ComparisonGe.INSTANCE, 
+					e.getCodeLocation()
+			), new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getStringType(), gcp, pp.getLocation()),
+					e, 
+					StringStartsWith.INSTANCE, 
+					e.getCodeLocation()
+			), new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getStringType(), gcs, pp.getLocation()),
+					e, 
+					StringEndsWith.INSTANCE, 
+					e.getCodeLocation()
+			));
+	}
+
+	@Override
+	public BoundedStringSet generate(Set<BinaryExpression> constraints, ProgramPoint pp) throws SemanticException {
+		if (constraints == null)
+			return bottom();
+		
+		for (BinaryExpression expr : constraints) 
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof String val)
+				return new BoundedStringSet(Collections.singleton(val));
+
+		return top();
+	}
+
+	@Override
+	public BoundedStringSet substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2) throws SemanticException {
+		if (isBottom() || a1 == null || a2 == null)
+			return bottom();
+		
+		Integer minI = null, maxI = null;
+		for (BinaryExpression expr : a1) 
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val)
+				minI = maxI = val;
+			else if (expr.getOperator() instanceof ComparisonLe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				minI = val;
+			else if (expr.getOperator() instanceof ComparisonGe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				maxI = val;
+		if (minI == null || minI < 0)
+			minI = 0;
+		if (maxI != null && maxI < minI)
+			maxI = minI;
+
+		Integer minJ = null, maxJ = null;
+		for (BinaryExpression expr : a2) 
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val)
+				minJ = maxJ = val;
+			else if (expr.getOperator() instanceof ComparisonLe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				minJ = val;
+			else if (expr.getOperator() instanceof ComparisonGe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				maxJ = val;
+		if (minJ == null || minJ < 0)
+			minJ = 0;
+		if (maxJ != null && maxJ < minJ)
+			maxJ = minJ;
+
+		if (maxI == null || maxJ == null || (maxJ - minJ) * (maxI - minI) * elements.size() > MAX_SIZE)
+			return top();
+
+		Set<String> el = new TreeSet<>();// TODO check both implementation and paper
+		for (String str : elements)
+			for (int i = minI; i <= maxI; i++)
+				for (int j = minJ; i <= maxJ; j++)
+					if (i <= j && i <= str.length())
+						if (j <= str.length())
+							el.add(str.substring(i, j));
+						else
+							el.add(str.substring(i));
+		return new BoundedStringSet(el);
 	}
 }

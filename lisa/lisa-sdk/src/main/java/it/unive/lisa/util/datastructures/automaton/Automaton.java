@@ -1982,4 +1982,27 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 */
 	public abstract RegularExpression symbolToRegex(
 			T symbol);
+
+	public String longestCommonPrefix() {
+		if (!isDeterministic())
+			return determinize().longestCommonPrefix();
+
+		State current = getInitialState();
+		String lcp = "";
+
+		while (current != null) {
+			if (current.isFinal())
+				return lcp;
+
+			Set<Transition<T>> outgoing = getOutgoingTransitionsFrom(current);
+			if (outgoing.size() != 1)
+				break;
+
+			Transition<T> dest = outgoing.iterator().next();
+			lcp += dest.getSymbol().toString();
+			current = dest.getDestination();
+		}
+
+		return lcp;
+	}
 }

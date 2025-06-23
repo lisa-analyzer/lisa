@@ -1,20 +1,32 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
 
 /**
  * The prefix string abstract domain.
@@ -27,7 +39,10 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Prefix implements SmashedSumStringDomain<Prefix> {
+public class Prefix 
+		implements 
+		SmashedSumStringDomain<Prefix>,
+		WholeValueStringDomain<Prefix> {
 
 	private final static Prefix TOP = new Prefix();
 	private final static Prefix BOTTOM = new Prefix(null);
@@ -203,5 +218,93 @@ public class Prefix implements SmashedSumStringDomain<Prefix> {
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 		return this.prefix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return null;
+		
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e, StringLength.INSTANCE, pp.getLocation());
+		
+		if (isTop()) 
+			return Collections.singleton(
+				new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+					strlen, 
+					ComparisonLe.INSTANCE, 
+					e.getCodeLocation()
+			));
+		
+		return Set.of(
+			new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getIntegerType(), prefix.length(), pp.getLocation()),
+					strlen, 
+					ComparisonLe.INSTANCE, 
+					e.getCodeLocation()
+			), new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getStringType(), prefix, pp.getLocation()),
+					e, 
+					StringStartsWith.INSTANCE, 
+					e.getCodeLocation()
+			));
+	}
+
+	@Override
+	public Prefix generate(Set<BinaryExpression> constraints, ProgramPoint pp) throws SemanticException {
+		if (constraints == null)
+			return bottom();
+		
+		for (BinaryExpression expr : constraints) 
+			if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringStartsWith)
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof String val)
+				return new Prefix(val);
+
+		return TOP;
+	}
+
+	@Override
+	public Prefix substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2) throws SemanticException {
+		if (isBottom() || a1 == null || a2 == null)
+			return bottom();
+		
+		Integer minI = null;
+		for (BinaryExpression expr : a1) 
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val)
+				minI = val;
+			else if (expr.getOperator() instanceof ComparisonLe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				minI = val;
+		if (minI == null || minI < 0)
+			minI = 0;
+
+		Integer minJ = null;
+		for (BinaryExpression expr : a2) 
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val)
+				minJ = val;
+			else if (expr.getOperator() instanceof ComparisonLe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				minJ = val;
+		if (minJ != null && minJ < minI)
+			minJ = minI;
+
+		// minI is always >= 0
+		// minJ is null (infinity) or >= minI
+		if (minJ != null && minJ <= prefix.length())
+			return new Prefix(prefix.substring(minI, minJ));
+		if (minI <= prefix.length())
+			return new Prefix(prefix.substring(minI));
+		return TOP;
 	}
 }

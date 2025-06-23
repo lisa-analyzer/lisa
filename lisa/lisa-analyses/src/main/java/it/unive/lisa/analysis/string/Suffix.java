@@ -1,20 +1,32 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
 
 /**
  * The suffix string abstract domain.
@@ -27,7 +39,10 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Suffix implements SmashedSumStringDomain<Suffix> {
+public class Suffix 
+		implements 
+		SmashedSumStringDomain<Suffix>,
+		WholeValueStringDomain<Suffix> {
 
 	private final static Suffix TOP = new Suffix();
 	private final static Suffix BOTTOM = new Suffix(null);
@@ -196,5 +211,58 @@ public class Suffix implements SmashedSumStringDomain<Suffix> {
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 		return this.suffix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return null;
+		
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e, StringLength.INSTANCE, pp.getLocation());
+		
+		if (isTop()) 
+			return Collections.singleton(
+				new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+					strlen, 
+					ComparisonLe.INSTANCE, 
+					e.getCodeLocation()
+			));
+		
+		return Set.of(
+			new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getIntegerType(), suffix.length(), pp.getLocation()),
+					strlen, 
+					ComparisonLe.INSTANCE, 
+					e.getCodeLocation()
+			), new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getStringType(), suffix, pp.getLocation()),
+					e, 
+					StringEndsWith.INSTANCE, 
+					e.getCodeLocation()
+			));
+	}
+
+	@Override
+	public Suffix generate(Set<BinaryExpression> constraints, ProgramPoint pp) throws SemanticException {
+		if (constraints == null)
+			return bottom();
+		
+		for (BinaryExpression expr : constraints) 
+			if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringEndsWith)
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof String val)
+				return new Suffix(val);
+
+		return TOP;
+	}
+
+	@Override
+	public Suffix substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2) throws SemanticException {
+		return TOP;
 	}
 }

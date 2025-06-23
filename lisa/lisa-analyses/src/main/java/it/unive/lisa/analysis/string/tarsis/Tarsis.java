@@ -1,8 +1,18 @@
 package it.unive.lisa.analysis.string.tarsis;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.numeric.Interval;
@@ -10,13 +20,23 @@ import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
 import it.unive.lisa.analysis.string.fsa.StringSymbol;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
@@ -28,10 +48,6 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -39,7 +55,10 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Tarsis implements SmashedSumStringDomain<Tarsis> {
+public class Tarsis 
+		implements 
+		SmashedSumStringDomain<Tarsis>,
+		WholeValueStringDomain<Tarsis> {
 
 	/**
 	 * Top element of the domain
@@ -542,5 +561,192 @@ public class Tarsis implements SmashedSumStringDomain<Tarsis> {
 			return this;
 
 		return new Tarsis(this.a.trim());
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return null;
+		
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e, StringLength.INSTANCE, pp.getLocation());
+		
+		if (isTop()) 
+			return Collections.singleton(
+				new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+					strlen, 
+					ComparisonLe.INSTANCE, 
+					e.getCodeLocation()
+			));
+
+		try {
+			if (!a.hasCycle() && a.getLanguage().size() == 1) {
+				String str = a.getLanguage().iterator().next();
+				return Set.of(
+					new BinaryExpression(
+							booleanType, 
+							new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(), pp.getLocation()),
+							strlen, 
+							ComparisonLe.INSTANCE, 
+							e.getCodeLocation()
+					), new BinaryExpression(
+							booleanType, 
+							new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(), pp.getLocation()),
+							strlen, 
+							ComparisonGe.INSTANCE, 
+							e.getCodeLocation()
+					), new BinaryExpression(
+							booleanType, 
+							new Constant(pp.getProgram().getTypes().getStringType(), str, pp.getLocation()),
+							e, 
+							ComparisonEq.INSTANCE, 
+							e.getCodeLocation()
+					));
+			}
+		} catch (CyclicAutomatonException e1) {
+			// should be unreachable, since we check for cycles before
+			throw new SemanticException("The automaton is cyclic", e1);
+		}
+
+		IntInterval length = length();
+		String lcp = a.longestCommonPrefix();
+		String lcs = a.reverse().longestCommonPrefix();
+
+		Set<BinaryExpression> constr = new HashSet<>();
+		try {
+			constr.add(new BinaryExpression(
+						booleanType, 
+						new Constant(pp.getProgram().getTypes().getIntegerType(), length.getLow().toInt(), pp.getLocation()),
+						strlen, 
+						ComparisonLe.INSTANCE, 
+						e.getCodeLocation()
+				));
+			if (length.getHigh().isFinite()) 
+				constr.add(new BinaryExpression(
+						booleanType, 
+						// TODO what if this is infinite? modify paper
+						new Constant(pp.getProgram().getTypes().getIntegerType(), length.getHigh().toInt(), pp.getLocation()), 
+						strlen, 
+						ComparisonGe.INSTANCE, 
+						e.getCodeLocation()
+				));
+		} catch (MathNumberConversionException e1) {
+			throw new SemanticException("Cannot convert stirng length bound to int", e1);
+		}
+
+		constr.add(new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getStringType(), lcp, pp.getLocation()),
+					e, 
+					StringStartsWith.INSTANCE, 
+					e.getCodeLocation()
+			));
+		constr.add(new BinaryExpression(
+					booleanType, 
+					new Constant(pp.getProgram().getTypes().getStringType(), lcs, pp.getLocation()),
+					e, 
+					StringEndsWith.INSTANCE, 
+					e.getCodeLocation()
+			));
+		return constr;
+	}
+
+	@Override
+	public Tarsis generate(Set<BinaryExpression> constraints, ProgramPoint pp) throws SemanticException {
+		if (constraints == null)
+			return bottom();
+		
+		String prefix = null, suffix = null;
+		for (BinaryExpression expr : constraints) 
+			if ((expr.getOperator() instanceof ComparisonEq)
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof String val)
+				return new Tarsis(a.singleString(val));
+			else if ((expr.getOperator() instanceof StringStartsWith)
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof String val)
+				prefix = val;
+			else if ((expr.getOperator() instanceof StringEndsWith)
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof String val)
+				suffix = val;
+		
+		Tarsis res = TOP;
+		if (prefix != null)
+			res = new Tarsis(a.singleString(prefix)).concat(res);
+		if (suffix != null)
+			res = res.concat(new Tarsis(a.singleString(prefix)));
+		return res;
+	}
+
+	@Override
+	public Tarsis substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2) throws SemanticException {
+		if (isBottom() || a1 == null || a2 == null)
+			return bottom();
+		
+		Integer minI = null, maxI = null;
+		for (BinaryExpression expr : a1) 
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val)
+				minI = maxI = val;
+			else if (expr.getOperator() instanceof ComparisonLe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				minI = val;
+			else if (expr.getOperator() instanceof ComparisonGe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				maxI = val;
+		if (minI == null || minI < 0)
+			minI = 0;
+		if (maxI != null && maxI < minI)
+			maxI = minI;
+
+		Integer minJ = null, maxJ = null;
+		for (BinaryExpression expr : a2) 
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val)
+				minJ = maxJ = val;
+			else if (expr.getOperator() instanceof ComparisonLe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				minJ = val;
+			else if (expr.getOperator() instanceof ComparisonGe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				maxJ = val;
+		if (minJ == null || minJ < 0)
+			minJ = 0;
+		if (maxJ != null && maxJ < minJ)
+			maxJ = minJ;
+
+		if (maxI == null || maxJ == null)
+			return TOP;
+
+		Tarsis partial = BOTTOM;
+		Tarsis temp;
+
+		outer: for (int i = minI; i < maxI; i++)
+			for (int j = minJ; j < maxJ; j++) {
+				if (i < j)
+					temp = partial.lub(substring(i, j));
+				else if (i == j)
+					temp = partial.lub(new Tarsis(a.emptyString()));
+				else
+					temp = BOTTOM;
+
+				if (temp.equals(partial))
+					break outer;
+
+				partial = temp;
+				if (partial.isTop())
+					break outer;
+			}
+
+		return partial;
 	}
 }

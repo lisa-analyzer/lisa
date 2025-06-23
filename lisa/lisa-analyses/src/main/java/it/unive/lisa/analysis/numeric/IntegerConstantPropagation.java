@@ -1,14 +1,19 @@
 package it.unive.lisa.analysis.numeric;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -47,7 +52,8 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  */
 public class IntegerConstantPropagation
 		implements
-		SmashedSumIntDomain<IntegerConstantPropagation> {
+		SmashedSumIntDomain<IntegerConstantPropagation>,
+		WholeValueDomain<IntegerConstantPropagation> {
 
 	private static final IntegerConstantPropagation TOP = new IntegerConstantPropagation(true, false);
 	private static final IntegerConstantPropagation BOTTOM = new IntegerConstantPropagation(false, true);
@@ -312,5 +318,46 @@ public class IntegerConstantPropagation
 		if (isTop())
 			return IntInterval.INFINITY;
 		return new IntInterval(value, value);
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+		if (isTop())
+			return Collections.emptySet();
+		if (isBottom())
+			return null;
+		return Collections.singleton(new BinaryExpression(
+				pp.getProgram().getTypes().getBooleanType(), 
+				new Constant(pp.getProgram().getTypes().getIntegerType(), value, e.getCodeLocation()), 
+				e,
+				ComparisonEq.INSTANCE, 
+				pp.getLocation()));
+	}
+
+	@Override
+	public IntegerConstantPropagation generate(Set<BinaryExpression> constraints, ProgramPoint pp)
+			throws SemanticException {
+		if (constraints == null)
+			return BOTTOM;
+		
+		Integer ge = null, le = null;
+		for (BinaryExpression expr : constraints) 
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val)
+				return new IntegerConstantPropagation(val);
+			else if (expr.getOperator() instanceof ComparisonGe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				ge = val;
+			else if (expr.getOperator() instanceof ComparisonLe
+					&& expr.getLeft() instanceof Constant con 
+					&& con.getValue() instanceof Integer val) 
+				le = val;
+
+		if (ge != null && ge.equals(le))
+			return new IntegerConstantPropagation(ge);
+
+		return TOP;
 	}
 }
