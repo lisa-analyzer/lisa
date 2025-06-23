@@ -238,7 +238,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 					String testKey = intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey();
 					System.out.println("\n\n###Running test " + testKey);
 					perform("whole-value",
-							"smashed/" + testKey,
+							"smashed/" + testKey.replace(".imp", ""),
 							test.getKey(), conf);
 					AssertionCheck<?> check = (AssertionCheck<?>) conf.semanticChecks.iterator().next();
 					STATES.computeIfAbsent(
