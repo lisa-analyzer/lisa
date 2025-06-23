@@ -219,15 +219,14 @@ public class InferredTypesTest {
 			throws SemanticException {
 		for (Entry<String, InferredTypes> first : combos.entrySet()) {
 			InferredTypes eval = domain.evalUnaryExpression(
-				new UnaryExpression(
-					Untyped.INSTANCE, 
-					new NullConstant(SyntheticLocation.INSTANCE), 
-					op, 
-					SyntheticLocation.INSTANCE
-				), 				
-				first.getValue(), 
-				fake, 
-				oracle);
+					new UnaryExpression(
+							Untyped.INSTANCE,
+							new NullConstant(SyntheticLocation.INSTANCE),
+							op,
+							SyntheticLocation.INSTANCE),
+					first.getValue(),
+					fake,
+					oracle);
 			if (operand.lessOrEqual(first.getValue())) {
 				assertFalse(String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
 						eval.isBottom());
@@ -246,15 +245,14 @@ public class InferredTypesTest {
 			throws SemanticException {
 		for (Entry<String, InferredTypes> first : combos.entrySet()) {
 			InferredTypes eval = domain.evalUnaryExpression(
-				new UnaryExpression(
-					Untyped.INSTANCE, 
-					new NullConstant(SyntheticLocation.INSTANCE), 
-					op, 
-					SyntheticLocation.INSTANCE
-				), 				
-				first.getValue(), 
-				fake, 
-				oracle);
+					new UnaryExpression(
+							Untyped.INSTANCE,
+							new NullConstant(SyntheticLocation.INSTANCE),
+							op,
+							SyntheticLocation.INSTANCE),
+					first.getValue(),
+					fake,
+					oracle);
 			if (expected.containsKey(first.getValue())) {
 				assertFalse(String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
 						eval.isBottom());
@@ -292,17 +290,16 @@ public class InferredTypesTest {
 		for (Entry<String, InferredTypes> first : combos.entrySet())
 			for (Entry<String, InferredTypes> second : combos.entrySet()) {
 				InferredTypes eval = domain.evalBinaryExpression(
-					new BinaryExpression(
-						Untyped.INSTANCE, 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						op, 
-						SyntheticLocation.INSTANCE
-					), 				
-					first.getValue(), 
-					second.getValue(),
-					fake, 
-					oracle);
+						new BinaryExpression(
+								Untyped.INSTANCE,
+								new NullConstant(SyntheticLocation.INSTANCE),
+								new NullConstant(SyntheticLocation.INSTANCE),
+								op,
+								SyntheticLocation.INSTANCE),
+						first.getValue(),
+						second.getValue(),
+						fake,
+						oracle);
 				if (left.lessOrEqual(first.getValue()) && right.lessOrEqual(second.getValue())) {
 					assertFalse(
 							String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(),
@@ -328,17 +325,16 @@ public class InferredTypesTest {
 		for (Entry<String, InferredTypes> first : combos.entrySet())
 			for (Entry<String, InferredTypes> second : combos.entrySet()) {
 				InferredTypes eval = domain.evalBinaryExpression(
-					new BinaryExpression(
-						Untyped.INSTANCE, 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						op, 
-						SyntheticLocation.INSTANCE
-					), 				
-					first.getValue(), 
-					second.getValue(),
-					fake, 
-					oracle);
+						new BinaryExpression(
+								Untyped.INSTANCE,
+								new NullConstant(SyntheticLocation.INSTANCE),
+								new NullConstant(SyntheticLocation.INSTANCE),
+								op,
+								SyntheticLocation.INSTANCE),
+						first.getValue(),
+						second.getValue(),
+						fake,
+						oracle);
 				if (notExcluded(exclusions, first, second)) {
 					assertFalse(
 							String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(),
@@ -375,17 +371,16 @@ public class InferredTypesTest {
 		for (Entry<String, InferredTypes> first : combos.entrySet())
 			for (Entry<String, InferredTypes> second : combos.entrySet()) {
 				InferredTypes eval = domain.evalBinaryExpression(
-					new BinaryExpression(
-						Untyped.INSTANCE, 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						op, 
-						SyntheticLocation.INSTANCE
-					), 				
-					first.getValue(), 
-					second.getValue(),
-					fake, 
-					oracle);
+						new BinaryExpression(
+								Untyped.INSTANCE,
+								new NullConstant(SyntheticLocation.INSTANCE),
+								new NullConstant(SyntheticLocation.INSTANCE),
+								op,
+								SyntheticLocation.INSTANCE),
+						first.getValue(),
+						second.getValue(),
+						fake,
+						oracle);
 				if (notExcluded(exclusions, first, second)) {
 					assertFalse(
 							String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(),
@@ -413,29 +408,27 @@ public class InferredTypesTest {
 			for (Entry<String, InferredTypes> second : combos.entrySet()) {
 				InferredTypes st = transformer.apply(second.getValue());
 				InferredTypes eval = domain.evalBinaryExpression(
-					new BinaryExpression(
-						Untyped.INSTANCE, 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						op, 
-						SyntheticLocation.INSTANCE
-					), 				
-					first.getValue(), 
-					second.getValue(),
-					fake, 
-					oracle);
+						new BinaryExpression(
+								Untyped.INSTANCE,
+								new NullConstant(SyntheticLocation.INSTANCE),
+								new NullConstant(SyntheticLocation.INSTANCE),
+								op,
+								SyntheticLocation.INSTANCE),
+						first.getValue(),
+						second.getValue(),
+						fake,
+						oracle);
 				InferredTypes evalT = domain.evalBinaryExpression(
-					new BinaryExpression(
-						Untyped.INSTANCE, 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						op, 
-						SyntheticLocation.INSTANCE
-					), 				
-					first.getValue(), 
-					st,
-					fake, 
-					oracle);
+						new BinaryExpression(
+								Untyped.INSTANCE,
+								new NullConstant(SyntheticLocation.INSTANCE),
+								new NullConstant(SyntheticLocation.INSTANCE),
+								op,
+								SyntheticLocation.INSTANCE),
+						first.getValue(),
+						st,
+						fake,
+						oracle);
 				assertTrue(
 						String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(),
 								first.getKey() + "," + second.getKey()),
@@ -519,19 +512,18 @@ public class InferredTypesTest {
 			for (Entry<String, InferredTypes> second : combos.entrySet())
 				for (Entry<String, InferredTypes> third : combos.entrySet()) {
 					InferredTypes eval = domain.evalTernaryExpression(
-						new TernaryExpression(
-							Untyped.INSTANCE, 
-							new NullConstant(SyntheticLocation.INSTANCE), 
-							new NullConstant(SyntheticLocation.INSTANCE), 
-							new NullConstant(SyntheticLocation.INSTANCE), 
-							op, 
-							SyntheticLocation.INSTANCE
-						), 				
-						first.getValue(), 
-						second.getValue(),
-						third.getValue(),
-						fake, 
-						oracle);
+							new TernaryExpression(
+									Untyped.INSTANCE,
+									new NullConstant(SyntheticLocation.INSTANCE),
+									new NullConstant(SyntheticLocation.INSTANCE),
+									new NullConstant(SyntheticLocation.INSTANCE),
+									op,
+									SyntheticLocation.INSTANCE),
+							first.getValue(),
+							second.getValue(),
+							third.getValue(),
+							fake,
+							oracle);
 					if (left.lessOrEqual(first.getValue()) && middle.lessOrEqual(second.getValue())
 							&& right.lessOrEqual(third.getValue())) {
 						assertFalse(
@@ -563,17 +555,16 @@ public class InferredTypesTest {
 			Satisfiability expected) {
 		assertEquals("Satisfies(" + left + " " + op + " " + right + ") returned wrong result", expected,
 				domain.satisfiesBinaryExpression(
-					new BinaryExpression(
-						Untyped.INSTANCE, 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						new NullConstant(SyntheticLocation.INSTANCE), 
-						op, 
-						SyntheticLocation.INSTANCE
-					), 				
-					left, 
-					right,
-					fake, 
-					oracle));
+						new BinaryExpression(
+								Untyped.INSTANCE,
+								new NullConstant(SyntheticLocation.INSTANCE),
+								new NullConstant(SyntheticLocation.INSTANCE),
+								op,
+								SyntheticLocation.INSTANCE),
+						left,
+						right,
+						fake,
+						oracle));
 	}
 
 	@Test

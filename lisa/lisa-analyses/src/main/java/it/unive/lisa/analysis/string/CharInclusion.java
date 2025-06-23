@@ -1,14 +1,5 @@
 package it.unive.lisa.analysis.string;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -36,6 +27,13 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The suffix string abstract domain.
@@ -48,10 +46,10 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class CharInclusion 
-	implements 
-	SmashedSumStringDomain<CharInclusion>,
-	WholeValueStringDomain<CharInclusion> {
+public class CharInclusion
+		implements
+		SmashedSumStringDomain<CharInclusion>,
+		WholeValueStringDomain<CharInclusion> {
 
 	private final Set<Character> certainlyContained;
 
@@ -80,9 +78,10 @@ public class CharInclusion
 		this.maybeContained = maybeContained;
 	}
 
-	private CharInclusion(String str) {
+	private CharInclusion(
+			String str) {
 		Set<Character> charsSet = str.chars()
-					.mapToObj(e -> (char) e).collect(Collectors.toCollection(TreeSet::new));
+				.mapToObj(e -> (char) e).collect(Collectors.toCollection(TreeSet::new));
 		this.certainlyContained = charsSet;
 		this.maybeContained = charsSet;
 	}
@@ -194,8 +193,8 @@ public class CharInclusion
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (constant.getValue() instanceof String str) 
-			return new CharInclusion(str);
+		if (constant.getValue() instanceof String)
+			return new CharInclusion(constant.getValue().toString());
 
 		return TOP;
 	}
@@ -330,74 +329,85 @@ public class CharInclusion
 	}
 
 	@Override
-	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isBottom())
 			return null;
-		
+
 		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
-		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e, StringLength.INSTANCE, pp.getLocation());
-		
-		if (isTop()) 
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e,
+				StringLength.INSTANCE, pp.getLocation());
+
+		if (isTop())
 			return Collections.singleton(
-				new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-					strlen, 
-					ComparisonLe.INSTANCE, 
-					e.getCodeLocation()
-			));
-		
+					new BinaryExpression(
+							booleanType,
+							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+							strlen,
+							ComparisonLe.INSTANCE,
+							e.getCodeLocation()));
+
 		Set<BinaryExpression> constr = new HashSet<>();
 		constr.add(new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getIntegerType(), certainlyContained.size(), pp.getLocation()),
-					strlen, 
-					ComparisonLe.INSTANCE, 
-					e.getCodeLocation()
-			));
-		for (Character c : certainlyContained) 
+				booleanType,
+				new Constant(pp.getProgram().getTypes().getIntegerType(), certainlyContained.size(), pp.getLocation()),
+				strlen,
+				ComparisonLe.INSTANCE,
+				e.getCodeLocation()));
+		for (Character c : certainlyContained)
 			constr.add(new BinaryExpression(
 					booleanType,
 					new Constant(pp.getProgram().getTypes().getStringType(), String.valueOf(c), pp.getLocation()),
 					e,
 					StringContains.INSTANCE,
-					pp.getLocation()
-			));
+					pp.getLocation()));
 		return constr;
 	}
 
 	@Override
-	public CharInclusion generate(Set<BinaryExpression> constraints, ProgramPoint pp) throws SemanticException {
+	public CharInclusion generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (constraints == null)
 			return bottom();
-		
+
 		CharInclusion acc = BOTTOM;
-		for (BinaryExpression expr : constraints) 
+		for (BinaryExpression expr : constraints)
 			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof String val)
-				return new CharInclusion(val);
-			else if ((expr.getOperator() instanceof StringStartsWith 
-						|| expr.getOperator() instanceof StringContains 
-						|| expr.getOperator() instanceof StringEndsWith)
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof String val)
-				acc = acc.lub(new CharInclusion(val));
+					&& expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof String)
+				return new CharInclusion(((Constant) expr.getLeft()).getValue().toString());
+			else if ((expr.getOperator() instanceof StringStartsWith
+					|| expr.getOperator() instanceof StringContains
+					|| expr.getOperator() instanceof StringEndsWith)
+					&& expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof String)
+				acc = acc.lub(new CharInclusion(((Constant) expr.getLeft()).getValue().toString()));
 
 		return acc;
 	}
 
 	@Override
-	public CharInclusion substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2, ProgramPoint pp) throws SemanticException {
+	public CharInclusion substring(
+			Set<BinaryExpression> a1,
+			Set<BinaryExpression> a2,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isBottom() || a1 == null || a2 == null)
 			return bottom();
-		
+
 		// indexes does not matter for char inclusion
 		return substring(0, 0);
 	}
 
 	@Override
-	public Set<BinaryExpression> indexOf_constr(BinaryExpression expression, CharInclusion other, ProgramPoint pp)
+	public Set<BinaryExpression> indexOf_constr(
+			BinaryExpression expression,
+			CharInclusion other,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isBottom() || other.isBottom())
 			return null;
@@ -408,20 +418,20 @@ public class CharInclusion
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
 			constr.add(new BinaryExpression(
-						booleanType, 
-						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(), pp.getLocation()),
-						expression, 
-						ComparisonLe.INSTANCE, 
-						pp.getLocation()
-				));
-			if (indexes.getHigh().isFinite()) 
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(),
+							pp.getLocation()),
+					expression,
+					ComparisonLe.INSTANCE,
+					pp.getLocation()));
+			if (indexes.getHigh().isFinite())
 				constr.add(new BinaryExpression(
-						booleanType, 
-						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(), pp.getLocation()), 
-						expression, 
-						ComparisonGe.INSTANCE, 
-						pp.getLocation()
-				));
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(),
+								pp.getLocation()),
+						expression,
+						ComparisonGe.INSTANCE,
+						pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}

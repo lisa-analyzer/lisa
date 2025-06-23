@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Set;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -32,6 +30,7 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
+import java.util.Set;
 
 /**
  * Base implementation for {@link NonRelationalDomain}s that can target
@@ -128,16 +127,16 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	/**
-	 * Yields the evaluation of a {@link UnaryExpression} applying
-	 * its operator to an expression whose abstract value is {@code arg}. It
-	 * is guaranteed that {@code arg} is not {@link #bottom()}.
+	 * Yields the evaluation of a {@link UnaryExpression} applying its operator
+	 * to an expression whose abstract value is {@code arg}. It is guaranteed
+	 * that {@code arg} is not {@link #bottom()}.
 	 * 
 	 * @param expression the expression to evaluate
-	 * @param arg      the instance of this domain representing the abstract
-	 *                     value of the expresion's argument
-	 * @param pp       the program point that where this operation is being
-	 *                     evaluated
-	 * @param oracle   the oracle for inter-domain communication
+	 * @param arg        the instance of this domain representing the abstract
+	 *                       value of the expresion's argument
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -227,20 +226,20 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	/**
-	 * Yields the evaluation of a {@link BinaryExpression} applying
-	 * its operator to two expressions whose abstract values are {@code left}
-	 * and {@code right}, respectively. It is guaranteed that both {@code left}
-	 * and {@code right} are not {@link #bottom()} and that {@code operator} is
+	 * Yields the evaluation of a {@link BinaryExpression} applying its operator
+	 * to two expressions whose abstract values are {@code left} and
+	 * {@code right}, respectively. It is guaranteed that both {@code left} and
+	 * {@code right} are not {@link #bottom()} and that {@code operator} is
 	 * neither {@link TypeCast} nor {@link TypeConv}.
 	 * 
 	 * @param expression the expression to evaluate
-	 * @param left     the instance of this domain representing the abstract
-	 *                     value of the left-hand side argument
-	 * @param right    the instance of this domain representing the abstract
-	 *                     value of the right-hand side argument
-	 * @param pp       the program point that where this operation is being
-	 *                     evaluated
-	 * @param oracle   the oracle for inter-domain communication
+	 * @param left       the instance of this domain representing the abstract
+	 *                       value of the left-hand side argument
+	 * @param right      the instance of this domain representing the abstract
+	 *                       value of the right-hand side argument
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -277,22 +276,21 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	/**
-	 * Yields the evaluation of a {@link TernaryExpression} applying
-	 * its operator to three expressions whose abstract values are
-	 * {@code left}, {@code middle} and {@code right}, respectively. It is
-	 * guaranteed that both {@code left} and {@code right} are not
-	 * {@link #bottom()}.
+	 * Yields the evaluation of a {@link TernaryExpression} applying its
+	 * operator to three expressions whose abstract values are {@code left},
+	 * {@code middle} and {@code right}, respectively. It is guaranteed that
+	 * both {@code left} and {@code right} are not {@link #bottom()}.
 	 * 
 	 * @param expression the expression to evaluate
-	 * @param left     the instance of this domain representing the abstract
-	 *                     value of the left-hand side argument
-	 * @param middle   the instance of this domain representing the abstract
-	 *                     value of the middle argument
-	 * @param right    the instance of this domain representing the abstract
-	 *                     value of the right-hand side argument
-	 * @param pp       the program point that where this operation is being
-	 *                     evaluated
-	 * @param oracle   the oracle for inter-domain communication
+	 * @param left       the instance of this domain representing the abstract
+	 *                       value of the left-hand side argument
+	 * @param middle     the instance of this domain representing the abstract
+	 *                       value of the middle argument
+	 * @param right      the instance of this domain representing the abstract
+	 *                       value of the right-hand side argument
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return the evaluation of the expression
 	 * 
@@ -576,7 +574,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 		if (expression instanceof Constant)
 			return satisfiesNonNullConstant((Constant) expression, pp, oracle);
 
-		if (expression instanceof UnaryExpression unary) {
+		if (expression instanceof UnaryExpression) {
+			UnaryExpression unary = (UnaryExpression) expression;
 			ValueExpression e = (ValueExpression) unary.getExpression();
 			if (unary.getOperator() == LogicalNegation.INSTANCE)
 				return satisfies(e, environment, pp, oracle).negate();
@@ -589,7 +588,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 			}
 		}
 
-		if (expression instanceof BinaryExpression binary) {
+		if (expression instanceof BinaryExpression) {
+			BinaryExpression binary = (BinaryExpression) expression;
 			ValueExpression eleft = (ValueExpression) binary.getLeft();
 			ValueExpression eright = (ValueExpression) binary.getRight();
 
@@ -610,7 +610,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 			}
 		}
 
-		if (expression instanceof TernaryExpression ternary) {
+		if (expression instanceof TernaryExpression) {
+			TernaryExpression ternary = (TernaryExpression) expression;
 			ValueExpression eleft = (ValueExpression) ternary.getLeft();
 			T left = eval(eleft, environment, pp, oracle);
 			if (left.isBottom())
@@ -708,18 +709,18 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	/**
-	 * Yields the satisfiability of a {@link UnaryExpression} applying
-	 * its operator to an expression whose abstract value is {@code arg},
-	 * returning an instance of {@link Satisfiability}. It is guaranteed that
+	 * Yields the satisfiability of a {@link UnaryExpression} applying its
+	 * operator to an expression whose abstract value is {@code arg}, returning
+	 * an instance of {@link Satisfiability}. It is guaranteed that
 	 * {@code operator} is not {@link LogicalNegation} and {@code arg} is not
 	 * {@link #bottom()}.
 	 * 
 	 * @param expression the expression whose satisfiability is to be assessed
-	 * @param arg      an instance of this abstract domain representing the
-	 *                     argument of the unary expression
-	 * @param pp       the program point that where this operation is being
-	 *                     evaluated
-	 * @param oracle   the oracle for inter-domain communication
+	 * @param arg        an instance of this abstract domain representing the
+	 *                       argument of the unary expression
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -740,23 +741,23 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	/**
-	 * Yields the satisfiability of a {@link BinaryExpression} applying
-	 * its operator to two expressions whose abstract values are
-	 * {@code left}, and {@code right}. This method returns an instance of
-	 * {@link Satisfiability}. It is guaranteed that {@code operator} is neither
-	 * {@link LogicalAnd} nor {@link LogicalOr}, and that both {@code left} and
-	 * {@code right} are not {@link #bottom()}.
+	 * Yields the satisfiability of a {@link BinaryExpression} applying its
+	 * operator to two expressions whose abstract values are {@code left}, and
+	 * {@code right}. This method returns an instance of {@link Satisfiability}.
+	 * It is guaranteed that {@code operator} is neither {@link LogicalAnd} nor
+	 * {@link LogicalOr}, and that both {@code left} and {@code right} are not
+	 * {@link #bottom()}.
 	 * 
 	 * @param expression the expression whose satisfiability is to be assessed
-	 * @param left     an instance of this abstract domain representing the
-	 *                     argument of the left-hand side of the binary
-	 *                     expression
-	 * @param right    an instance of this abstract domain representing the
-	 *                     argument of the right-hand side of the binary
-	 *                     expression
-	 * @param pp       the program point that where this operation is being
-	 *                     evaluated
-	 * @param oracle   the oracle for inter-domain communication
+	 * @param left       an instance of this abstract domain representing the
+	 *                       argument of the left-hand side of the binary
+	 *                       expression
+	 * @param right      an instance of this abstract domain representing the
+	 *                       argument of the right-hand side of the binary
+	 *                       expression
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -778,24 +779,24 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	/**
-	 * Yields the satisfiability of a {@link TernaryExpression} applying
-	 * its operator to three expressions whose abstract values are
-	 * {@code left}, {@code middle} and {@code right}. This method returns an
-	 * instance of {@link Satisfiability}. It is guaranteed that {@code left},
+	 * Yields the satisfiability of a {@link TernaryExpression} applying its
+	 * operator to three expressions whose abstract values are {@code left},
+	 * {@code middle} and {@code right}. This method returns an instance of
+	 * {@link Satisfiability}. It is guaranteed that {@code left},
 	 * {@code middle} and {@code right} are not {@link #bottom()}.
 	 * 
 	 * @param expression the expression whose satisfiability is to be assessed
-	 * @param left     an instance of this abstract domain representing the
-	 *                     argument of the left-most side of the ternary
-	 *                     expression
-	 * @param middle   an instance of this abstract domain representing the
-	 *                     argument in the middle of the ternary expression
-	 * @param right    an instance of this abstract domain representing the
-	 *                     argument of the right-most side of the ternary
-	 *                     expression
-	 * @param pp       the program point that where this operation is being
-	 *                     evaluated
-	 * @param oracle   the oracle for inter-domain communication
+	 * @param left       an instance of this abstract domain representing the
+	 *                       argument of the left-most side of the ternary
+	 *                       expression
+	 * @param middle     an instance of this abstract domain representing the
+	 *                       argument in the middle of the ternary expression
+	 * @param right      an instance of this abstract domain representing the
+	 *                       argument of the right-most side of the ternary
+	 *                       expression
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -825,7 +826,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (expression instanceof UnaryExpression unary) {
+		if (expression instanceof UnaryExpression) {
+			UnaryExpression unary = (UnaryExpression) expression;
 			UnaryOperator op = unary.getOperator();
 			if (op == LogicalNegation.INSTANCE) {
 				ValueExpression rewritten = (ValueExpression) unary.removeNegations();
@@ -838,7 +840,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 			return assumeUnaryExpression(environment, unary, src, dest, oracle);
 		}
 
-		if (expression instanceof BinaryExpression binary) {
+		if (expression instanceof BinaryExpression) {
+			BinaryExpression binary = (BinaryExpression) expression;
 			ValueExpression eleft = (ValueExpression) binary.getLeft();
 			ValueExpression eright = (ValueExpression) binary.getRight();
 			BinaryOperator op = binary.getOperator();
@@ -852,8 +855,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 				return assumeBinaryExpression(environment, binary, src, dest, oracle);
 		}
 
-		if (expression instanceof TernaryExpression ternary)
-			return assumeTernaryExpression(environment, ternary, src, dest, oracle);
+		if (expression instanceof TernaryExpression)
+			return assumeTernaryExpression(environment, (TernaryExpression) expression, src, dest, oracle);
 
 		return environment;
 	}
@@ -890,13 +893,13 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 
 	/**
 	 * Yields the environment {@code environment} assuming that a binary
-	 * expression holds. The binary expression with binary
-	 * operator {@link LogicalAnd} and {@link LogicalOr} are already handled by
+	 * expression holds. The binary expression with binary operator
+	 * {@link LogicalAnd} and {@link LogicalOr} are already handled by
 	 * {@link BaseNonRelationalDomain#assume}.
 	 * 
 	 * @param environment the environment on which the expression must be
 	 *                        assumed
-	 * @param expression    the expression to assume
+	 * @param expression  the expression to assume
 	 * @param src         the program point that where this operation is being
 	 *                        evaluated, corresponding to the one that generated
 	 *                        the given expression

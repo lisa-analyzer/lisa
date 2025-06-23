@@ -64,7 +64,9 @@ public class StringUtilities {
 		return s.replaceAll("\n|\t", "");
 	}
 
-	public static String gcp(String s1, String s2) {
+	public static String gcp(
+			String s1,
+			String s2) {
 		String gcp = "";
 		int minlen = Math.min(s1.length(), s2.length());
 		for (int i = 0; i < minlen; i++)

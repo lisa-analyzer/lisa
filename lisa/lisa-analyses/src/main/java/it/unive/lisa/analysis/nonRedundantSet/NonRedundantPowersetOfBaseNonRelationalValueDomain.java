@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
-import java.util.Collections;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
@@ -17,6 +13,9 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * This abstract class generalize the concept of an abstract domain whose domain

@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
@@ -36,6 +33,8 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * The overflow-insensitive basic integer constant propagation abstract domain,
@@ -311,39 +310,42 @@ public class IntegerConstantPropagation
 	}
 
 	@Override
-	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isTop())
 			return Collections.emptySet();
 		if (isBottom())
 			return null;
 		return Collections.singleton(new BinaryExpression(
-				pp.getProgram().getTypes().getBooleanType(), 
-				new Constant(pp.getProgram().getTypes().getIntegerType(), value, e.getCodeLocation()), 
+				pp.getProgram().getTypes().getBooleanType(),
+				new Constant(pp.getProgram().getTypes().getIntegerType(), value, e.getCodeLocation()),
 				e,
-				ComparisonEq.INSTANCE, 
+				ComparisonEq.INSTANCE,
 				pp.getLocation()));
 	}
 
 	@Override
-	public IntegerConstantPropagation generate(Set<BinaryExpression> constraints, ProgramPoint pp)
+	public IntegerConstantPropagation generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (constraints == null)
 			return BOTTOM;
-		
+
 		Integer ge = null, le = null;
-		for (BinaryExpression expr : constraints) 
-			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val)
-				return new IntegerConstantPropagation(val);
-			else if (expr.getOperator() instanceof ComparisonGe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				ge = val;
-			else if (expr.getOperator() instanceof ComparisonLe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				le = val;
+		for (BinaryExpression expr : constraints)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					return new IntegerConstantPropagation(val);
+				else if (expr.getOperator() instanceof ComparisonGe)
+					ge = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					le = val;
+			}
 
 		if (ge != null && ge.equals(le))
 			return new IntegerConstantPropagation(ge);

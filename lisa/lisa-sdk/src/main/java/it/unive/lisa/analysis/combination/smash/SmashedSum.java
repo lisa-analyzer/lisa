@@ -313,7 +313,8 @@ public class SmashedSum<
 			if (!left.sameKind(right))
 				return Satisfiability.NOT_SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
+				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp,
+						oracle);
 			if (left.isNumber())
 				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
 			if (left.isBool())
@@ -323,7 +324,8 @@ public class SmashedSum<
 			if (!left.sameKind(right))
 				return Satisfiability.SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
+				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp,
+						oracle);
 			if (left.isNumber())
 				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
 			if (left.isBool())

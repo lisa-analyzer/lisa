@@ -303,7 +303,7 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			SemanticOracle oracle) {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
-		
+
 		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE)
 			return left.eq(right);

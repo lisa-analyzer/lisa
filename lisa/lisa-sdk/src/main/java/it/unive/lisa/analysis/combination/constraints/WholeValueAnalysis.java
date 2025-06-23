@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.combination.constraints;
 
-import java.util.Set;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -32,15 +30,16 @@ import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Set;
 
 public class WholeValueAnalysis<
-    N extends WholeValueDomain<N>,
-    S extends WholeValueStringDomain<S>,
-    B extends WholeValueDomain<B>> 
-    implements
-    BaseNonRelationalValueDomain<WholeValueAnalysis<N, S, B>> {
+		N extends WholeValueDomain<N>,
+		S extends WholeValueStringDomain<S>,
+		B extends WholeValueDomain<B>>
+		implements
+		BaseNonRelationalValueDomain<WholeValueAnalysis<N, S, B>> {
 
-    private final N intValue;
+	private final N intValue;
 	private final S stringValue;
 	private final B boolValue;
 
@@ -60,29 +59,34 @@ public class WholeValueAnalysis<
 		this.boolValue = boolValue;
 	}
 
+	@Override
+	public WholeValueAnalysis<N, S, B> lubAux(
+			WholeValueAnalysis<N, S, B> other)
+			throws SemanticException {
+		return new WholeValueAnalysis<>(
+				this.intValue.lub(other.intValue),
+				this.stringValue.lub(other.stringValue),
+				this.boolValue.lub(other.boolValue));
+	}
 
-    @Override
-    public WholeValueAnalysis<N, S, B> lubAux(WholeValueAnalysis<N, S, B> other) throws SemanticException {
-        return new WholeValueAnalysis<>(
-                this.intValue.lub(other.intValue),
-                this.stringValue.lub(other.stringValue),
-                this.boolValue.lub(other.boolValue));
-    }
+	@Override
+	public boolean lessOrEqualAux(
+			WholeValueAnalysis<N, S, B> other)
+			throws SemanticException {
+		return this.intValue.lessOrEqual(other.intValue) &&
+				this.stringValue.lessOrEqual(other.stringValue) &&
+				this.boolValue.lessOrEqual(other.boolValue);
+	}
 
-    @Override
-    public boolean lessOrEqualAux(WholeValueAnalysis<N, S, B> other) throws SemanticException {
-        return this.intValue.lessOrEqual(other.intValue) &&
-               this.stringValue.lessOrEqual(other.stringValue) &&
-               this.boolValue.lessOrEqual(other.boolValue);
-    }
-
-    @Override
-    public WholeValueAnalysis<N, S, B> wideningAux(WholeValueAnalysis<N, S, B> other) throws SemanticException {
-        return new WholeValueAnalysis<>(
-                this.intValue.widening(other.intValue),
-                this.stringValue.widening(other.stringValue),
-                this.boolValue.widening(other.boolValue));
-    }
+	@Override
+	public WholeValueAnalysis<N, S, B> wideningAux(
+			WholeValueAnalysis<N, S, B> other)
+			throws SemanticException {
+		return new WholeValueAnalysis<>(
+				this.intValue.widening(other.intValue),
+				this.stringValue.widening(other.stringValue),
+				this.boolValue.widening(other.boolValue));
+	}
 
 	@Override
 	public boolean isTop() {
@@ -104,45 +108,45 @@ public class WholeValueAnalysis<
 		return new WholeValueAnalysis<>(intValue.bottom(), stringValue.bottom(), boolValue.bottom());
 	}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((intValue == null) ? 0 : intValue.hashCode());
-        result = prime * result + ((stringValue == null) ? 0 : stringValue.hashCode());
-        result = prime * result + ((boolValue == null) ? 0 : boolValue.hashCode());
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((intValue == null) ? 0 : intValue.hashCode());
+		result = prime * result + ((stringValue == null) ? 0 : stringValue.hashCode());
+		result = prime * result + ((boolValue == null) ? 0 : boolValue.hashCode());
+		return result;
+	}
 
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		WholeValueAnalysis<?, ?, ?> other = (WholeValueAnalysis<?, ?, ?>) obj;
+		if (intValue == null) {
+			if (other.intValue != null)
+				return false;
+		} else if (!intValue.equals(other.intValue))
+			return false;
+		if (stringValue == null) {
+			if (other.stringValue != null)
+				return false;
+		} else if (!stringValue.equals(other.stringValue))
+			return false;
+		if (boolValue == null) {
+			if (other.boolValue != null)
+				return false;
+		} else if (!boolValue.equals(other.boolValue))
+			return false;
+		return true;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        WholeValueAnalysis<?, ?, ?> other = (WholeValueAnalysis<?, ?, ?>) obj;
-        if (intValue == null) {
-            if (other.intValue != null)
-                return false;
-        } else if (!intValue.equals(other.intValue))
-            return false;
-        if (stringValue == null) {
-            if (other.stringValue != null)
-                return false;
-        } else if (!stringValue.equals(other.stringValue))
-            return false;
-        if (boolValue == null) {
-            if (other.boolValue != null)
-                return false;
-        } else if (!boolValue.equals(other.boolValue))
-            return false;
-        return true;
-    }
-
-    @Override
+	@Override
 	public StructuredRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
@@ -155,15 +159,15 @@ public class WholeValueAnalysis<
 		if (isBool())
 			return boolValue.representation();
 		return new StringRepresentation(
-				"(" + intValue.representation().toString() + ", " 
-                + stringValue.representation().toString() + ", "
-                + boolValue.representation().toString() + ")");
+				"(" + intValue.representation().toString() + ", "
+						+ stringValue.representation().toString() + ", "
+						+ boolValue.representation().toString() + ")");
 	}
 
-    @Override
-    public String toString() {
-        return representation().toString();
-    }
+	@Override
+	public String toString() {
+		return representation().toString();
+	}
 
 	private boolean sameKind(
 			WholeValueAnalysis<N, S, B> other) {
@@ -214,16 +218,17 @@ public class WholeValueAnalysis<
 		return top();
 	}
 
-    @Override
+	@Override
 	public WholeValueAnalysis<N, S, B> evalUnaryExpression(
 			UnaryExpression expression,
 			WholeValueAnalysis<N, S, B> arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-        UnaryOperator operator = expression.getOperator();
+		UnaryOperator operator = expression.getOperator();
 		if (operator == StringLength.INSTANCE && arg.isString())
-			return mkIntValue(intValue.generate(arg.stringValue.constraints((ValueExpression) expression.getExpression(), pp), pp));
+			return mkIntValue(intValue
+					.generate(arg.stringValue.constraints((ValueExpression) expression.getExpression(), pp), pp));
 		if (operator == NumericNegation.INSTANCE && arg.isNumber())
 			return mkIntValue(intValue.evalUnaryExpression(expression, arg.intValue, pp, oracle));
 		if (operator == LogicalNegation.INSTANCE && arg.isBool())
@@ -239,7 +244,7 @@ public class WholeValueAnalysis<
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-        BinaryOperator operator = expression.getOperator();
+		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof NumericOperation && left.isNumber() && right.isNumber())
 			return mkIntValue(
 					intValue.evalBinaryExpression(expression, left.intValue, right.intValue, pp, oracle));
@@ -247,16 +252,23 @@ public class WholeValueAnalysis<
 			return mkBoolValue(
 					boolValue.evalBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle));
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
-			return mkBoolValue(boolValue.generate(intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle).constraints(expression, pp), pp));
+			return mkBoolValue(boolValue
+					.generate(intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle)
+							.constraints(expression, pp), pp));
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE)
-			return mkBoolValue(boolValue.generate(satisfiesBinaryExpression(expression, left, right, pp, oracle).constraints(expression, pp), pp));
+			return mkBoolValue(boolValue.generate(
+					satisfiesBinaryExpression(expression, left, right, pp, oracle).constraints(expression, pp), pp));
 		if (operator == StringIndexOf.INSTANCE && left.isString() && right.isString())
-			return mkIntValue(intValue.generate(left.stringValue.indexOf_constr(expression, right.stringValue, pp), pp));
+			return mkIntValue(
+					intValue.generate(left.stringValue.indexOf_constr(expression, right.stringValue, pp), pp));
 		if (operator == StringConcat.INSTANCE && left.isString() && right.isString())
 			return mkStringValue(
 					stringValue.evalBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle));
 		if (operator instanceof StringOperation && left.isString() && right.isString())
-			return mkBoolValue(boolValue.generate(stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle).constraints(expression, pp), pp));
+			return mkBoolValue(boolValue.generate(
+					stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle)
+							.constraints(expression, pp),
+					pp));
 		return top();
 	}
 
@@ -269,7 +281,7 @@ public class WholeValueAnalysis<
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-        TernaryOperator operator = expression.getOperator();
+		TernaryOperator operator = expression.getOperator();
 		if (operator == StringSubstring.INSTANCE && left.isString() && middle.isNumber() && right.isNumber()) {
 			Set<BinaryExpression> begin = middle.intValue.constraints(null, pp);
 			Set<BinaryExpression> end = right.intValue.constraints(null, pp);
@@ -289,7 +301,7 @@ public class WholeValueAnalysis<
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-        BinaryOperator operator = expression.getOperator();
+		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof StringOperation && left.isString() && right.isString())
 			return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
@@ -300,7 +312,8 @@ public class WholeValueAnalysis<
 			if (!left.sameKind(right))
 				return Satisfiability.NOT_SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
+				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp,
+						oracle);
 			if (left.isNumber())
 				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
 			if (left.isBool())
@@ -310,7 +323,8 @@ public class WholeValueAnalysis<
 			if (!left.sameKind(right))
 				return Satisfiability.SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
+				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp,
+						oracle);
 			if (left.isNumber())
 				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
 			if (left.isBool())

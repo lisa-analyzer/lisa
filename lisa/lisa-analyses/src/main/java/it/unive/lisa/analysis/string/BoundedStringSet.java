@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.string;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
@@ -35,6 +28,11 @@ import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A bounded set of strings, where the maximum number of elements is defined by
@@ -291,23 +289,26 @@ public class BoundedStringSet
 	}
 
 	@Override
-	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isBottom())
 			return null;
-		
+
 		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
-		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e, StringLength.INSTANCE, pp.getLocation());
-		
-		if (isTop()) 
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e,
+				StringLength.INSTANCE, pp.getLocation());
+
+		if (isTop())
 			return Collections.singleton(
-				new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-					strlen, 
-					ComparisonLe.INSTANCE, 
-					e.getCodeLocation()
-			));
-		
+					new BinaryExpression(
+							booleanType,
+							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+							strlen,
+							ComparisonLe.INSTANCE,
+							e.getCodeLocation()));
+
 		int min = Integer.MAX_VALUE, max = 0;
 		String gcs = null, gcp = null;
 		for (String str : elements) {
@@ -324,85 +325,87 @@ public class BoundedStringSet
 		}
 
 		return Set.of(
-			new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getIntegerType(), min, pp.getLocation()),
-					strlen, 
-					ComparisonLe.INSTANCE, 
-					e.getCodeLocation()
-			), new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getIntegerType(), max, pp.getLocation()),
-					strlen, 
-					ComparisonGe.INSTANCE, 
-					e.getCodeLocation()
-			), new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getStringType(), gcp, pp.getLocation()),
-					e, 
-					StringStartsWith.INSTANCE, 
-					e.getCodeLocation()
-			), new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getStringType(), gcs, pp.getLocation()),
-					e, 
-					StringEndsWith.INSTANCE, 
-					e.getCodeLocation()
-			));
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), min, pp.getLocation()),
+						strlen,
+						ComparisonLe.INSTANCE,
+						e.getCodeLocation()),
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), max, pp.getLocation()),
+						strlen,
+						ComparisonGe.INSTANCE,
+						e.getCodeLocation()),
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getStringType(), gcp, pp.getLocation()),
+						e,
+						StringStartsWith.INSTANCE,
+						e.getCodeLocation()),
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getStringType(), gcs, pp.getLocation()),
+						e,
+						StringEndsWith.INSTANCE,
+						e.getCodeLocation()));
 	}
 
 	@Override
-	public BoundedStringSet generate(Set<BinaryExpression> constraints, ProgramPoint pp) throws SemanticException {
+	public BoundedStringSet generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (constraints == null)
 			return bottom();
-		
-		for (BinaryExpression expr : constraints) 
+
+		for (BinaryExpression expr : constraints)
 			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof String val)
-				return new BoundedStringSet(Collections.singleton(val));
+					&& expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof String)
+				return new BoundedStringSet(Collections.singleton(((Constant) expr.getLeft()).getValue().toString()));
 
 		return top();
 	}
 
 	@Override
-	public BoundedStringSet substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2, ProgramPoint pp) throws SemanticException {
+	public BoundedStringSet substring(
+			Set<BinaryExpression> a1,
+			Set<BinaryExpression> a2,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isBottom() || a1 == null || a2 == null)
 			return bottom();
-		
+
 		Integer minI = null, maxI = null;
-		for (BinaryExpression expr : a1) 
-			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val)
-				minI = maxI = val;
-			else if (expr.getOperator() instanceof ComparisonLe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				minI = val;
-			else if (expr.getOperator() instanceof ComparisonGe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				maxI = val;
+		for (BinaryExpression expr : a1)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					minI = maxI = val;
+				else if (expr.getOperator() instanceof ComparisonGe)
+					maxI = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					minI = val;
+			}
 		if (minI == null || minI < 0)
 			minI = 0;
 		if (maxI != null && maxI < minI)
 			maxI = minI;
 
 		Integer minJ = null, maxJ = null;
-		for (BinaryExpression expr : a2) 
-			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val)
-				minJ = maxJ = val;
-			else if (expr.getOperator() instanceof ComparisonLe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				minJ = val;
-			else if (expr.getOperator() instanceof ComparisonGe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				maxJ = val;
+		for (BinaryExpression expr : a2)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					minJ = maxJ = val;
+				else if (expr.getOperator() instanceof ComparisonGe)
+					maxJ = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					minJ = val;
+			}
 		if (minJ == null || minJ < 0)
 			minJ = 0;
 		if (maxJ != null && maxJ < minJ)
@@ -424,7 +427,10 @@ public class BoundedStringSet
 	}
 
 	@Override
-	public Set<BinaryExpression> indexOf_constr(BinaryExpression expression, BoundedStringSet other, ProgramPoint pp)
+	public Set<BinaryExpression> indexOf_constr(
+			BinaryExpression expression,
+			BoundedStringSet other,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isBottom() || other.isBottom())
 			return null;
@@ -435,20 +441,20 @@ public class BoundedStringSet
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
 			constr.add(new BinaryExpression(
-						booleanType, 
-						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(), pp.getLocation()),
-						expression, 
-						ComparisonLe.INSTANCE, 
-						pp.getLocation()
-				));
-			if (indexes.getHigh().isFinite()) 
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(),
+							pp.getLocation()),
+					expression,
+					ComparisonLe.INSTANCE,
+					pp.getLocation()));
+			if (indexes.getHigh().isFinite())
 				constr.add(new BinaryExpression(
-						booleanType, 
-						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(), pp.getLocation()), 
-						expression, 
-						ComparisonGe.INSTANCE, 
-						pp.getLocation()
-				));
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(),
+								pp.getLocation()),
+						expression,
+						ComparisonGe.INSTANCE,
+						pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}

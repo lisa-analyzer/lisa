@@ -1,13 +1,5 @@
 package it.unive.lisa.cron;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.junit.AfterClass;
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
@@ -53,6 +45,12 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
@@ -128,7 +126,8 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 				ValueEnvironment<?> values = target.getState().getDomainInstance(ValueEnvironment.class);
 				NonRelationalValueDomain<?> state = values.getState((Identifier) expr);
 				if (!(state instanceof SmashedSum))
-					throw new SemanticException("Only smashed sum is supported, but got " + state.getClass().getSimpleName());
+					throw new SemanticException(
+							"Only smashed sum is supported, but got " + state.getClass().getSimpleName());
 				SmashedSumStringDomain<?> abstractString = ((SmashedSum<?, ?>) state).getStringValue();
 				Satisfiability sat = abstractString.containsChar(ch.getValue().charAt(0));
 				if (sat == Satisfiability.UNKNOWN)

@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.lattices;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.constraints.WholeValueDomain;
@@ -20,6 +17,8 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * A lattice representing sets of possible Boolean values: {@code (true)},
@@ -270,7 +269,10 @@ public enum Satisfiability
 	}
 
 	@Override
-	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isTop())
 			return Collections.emptySet();
 		if (isBottom())
@@ -282,19 +284,22 @@ public enum Satisfiability
 				new Constant(boolType, this == SATISFIED ? true : false, e.getCodeLocation()),
 				e,
 				ComparisonEq.INSTANCE,
-				e.getCodeLocation()
-			));
+				e.getCodeLocation()));
 	}
 
 	@Override
-	public Satisfiability generate(Set<BinaryExpression> constraints, ProgramPoint pp) throws SemanticException {
+	public Satisfiability generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (constraints == null)
 			return BOTTOM;
 
-		for (BinaryExpression expr : constraints) 
-			if (expr.getOperator() instanceof ComparisonEq 
-					&& expr.getLeft() instanceof Constant con
-					&& con.getValue() instanceof Boolean val) {
+		for (BinaryExpression expr : constraints)
+			if (expr.getOperator() instanceof ComparisonEq
+					&& expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Boolean) {
+				Boolean val = (Boolean) ((Constant) expr.getLeft()).getValue();
 				if (val.booleanValue())
 					return SATISFIED;
 				else

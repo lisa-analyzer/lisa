@@ -23,10 +23,10 @@ public class ContainsTest {
 
 	private final SemanticOracle oracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
 	private final BinaryExpression expr = new BinaryExpression(
-			BoolType.INSTANCE, 
-			new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE), 
-			new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE), 
-			StringContains.INSTANCE, 
+			BoolType.INSTANCE,
+			new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
+			new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
+			StringContains.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
 	@Test

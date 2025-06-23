@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis.nonInterference;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -28,6 +23,10 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 
 /**
  * Implementation of the non interference analysis as an {@link Environment}

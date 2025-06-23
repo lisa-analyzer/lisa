@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.types;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -26,6 +23,8 @@ import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s,
@@ -183,10 +182,10 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 		Set<Type> lelems = left.type.allInstances(types);
 		Set<Type> relems = right.type.allInstances(types);
 		return new InferredTypes().satisfiesBinaryExpression(
-				expression, 
+				expression,
 				new InferredTypes(types, lelems),
-				new InferredTypes(types, relems), 
-				pp, 
+				new InferredTypes(types, relems),
+				pp,
 				oracle);
 	}
 

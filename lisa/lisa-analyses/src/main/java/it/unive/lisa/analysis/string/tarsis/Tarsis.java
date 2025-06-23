@@ -1,14 +1,5 @@
 package it.unive.lisa.analysis.string.tarsis;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -48,6 +39,13 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -55,8 +53,8 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Tarsis 
-		implements 
+public class Tarsis
+		implements
 		SmashedSumStringDomain<Tarsis>,
 		WholeValueStringDomain<Tarsis> {
 
@@ -564,46 +562,50 @@ public class Tarsis
 	}
 
 	@Override
-	public Set<BinaryExpression> constraints(ValueExpression e, ProgramPoint pp) throws SemanticException {
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isBottom())
 			return null;
-		
+
 		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
-		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e, StringLength.INSTANCE, pp.getLocation());
-		
-		if (isTop()) 
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e,
+				StringLength.INSTANCE, pp.getLocation());
+
+		if (isTop())
 			return Collections.singleton(
-				new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-					strlen, 
-					ComparisonLe.INSTANCE, 
-					e.getCodeLocation()
-			));
+					new BinaryExpression(
+							booleanType,
+							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+							strlen,
+							ComparisonLe.INSTANCE,
+							e.getCodeLocation()));
 
 		try {
 			if (!a.hasCycle() && a.getLanguage().size() == 1) {
 				String str = a.getLanguage().iterator().next();
 				return Set.of(
-					new BinaryExpression(
-							booleanType, 
-							new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(), pp.getLocation()),
-							strlen, 
-							ComparisonLe.INSTANCE, 
-							e.getCodeLocation()
-					), new BinaryExpression(
-							booleanType, 
-							new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(), pp.getLocation()),
-							strlen, 
-							ComparisonGe.INSTANCE, 
-							e.getCodeLocation()
-					), new BinaryExpression(
-							booleanType, 
-							new Constant(pp.getProgram().getTypes().getStringType(), str, pp.getLocation()),
-							e, 
-							ComparisonEq.INSTANCE, 
-							e.getCodeLocation()
-					));
+						new BinaryExpression(
+								booleanType,
+								new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(),
+										pp.getLocation()),
+								strlen,
+								ComparisonLe.INSTANCE,
+								e.getCodeLocation()),
+						new BinaryExpression(
+								booleanType,
+								new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(),
+										pp.getLocation()),
+								strlen,
+								ComparisonGe.INSTANCE,
+								e.getCodeLocation()),
+						new BinaryExpression(
+								booleanType,
+								new Constant(pp.getProgram().getTypes().getStringType(), str, pp.getLocation()),
+								e,
+								ComparisonEq.INSTANCE,
+								e.getCodeLocation()));
 			}
 		} catch (CyclicAutomatonException e1) {
 			// should be unreachable, since we check for cycles before
@@ -617,61 +619,60 @@ public class Tarsis
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
 			constr.add(new BinaryExpression(
-						booleanType, 
-						new Constant(pp.getProgram().getTypes().getIntegerType(), length.getLow().toInt(), pp.getLocation()),
-						strlen, 
-						ComparisonLe.INSTANCE, 
-						e.getCodeLocation()
-				));
-			if (length.getHigh().isFinite()) 
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), length.getLow().toInt(),
+							pp.getLocation()),
+					strlen,
+					ComparisonLe.INSTANCE,
+					e.getCodeLocation()));
+			if (length.getHigh().isFinite())
 				constr.add(new BinaryExpression(
-						booleanType, 
-						new Constant(pp.getProgram().getTypes().getIntegerType(), length.getHigh().toInt(), pp.getLocation()), 
-						strlen, 
-						ComparisonGe.INSTANCE, 
-						e.getCodeLocation()
-				));
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), length.getHigh().toInt(),
+								pp.getLocation()),
+						strlen,
+						ComparisonGe.INSTANCE,
+						e.getCodeLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng length bound to int", e1);
 		}
 
 		constr.add(new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getStringType(), lcp, pp.getLocation()),
-					e, 
-					StringStartsWith.INSTANCE, 
-					e.getCodeLocation()
-			));
+				booleanType,
+				new Constant(pp.getProgram().getTypes().getStringType(), lcp, pp.getLocation()),
+				e,
+				StringStartsWith.INSTANCE,
+				e.getCodeLocation()));
 		constr.add(new BinaryExpression(
-					booleanType, 
-					new Constant(pp.getProgram().getTypes().getStringType(), lcs, pp.getLocation()),
-					e, 
-					StringEndsWith.INSTANCE, 
-					e.getCodeLocation()
-			));
+				booleanType,
+				new Constant(pp.getProgram().getTypes().getStringType(), lcs, pp.getLocation()),
+				e,
+				StringEndsWith.INSTANCE,
+				e.getCodeLocation()));
 		return constr;
 	}
 
 	@Override
-	public Tarsis generate(Set<BinaryExpression> constraints, ProgramPoint pp) throws SemanticException {
+	public Tarsis generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (constraints == null)
 			return bottom();
-		
+
 		String prefix = null, suffix = null;
-		for (BinaryExpression expr : constraints) 
-			if ((expr.getOperator() instanceof ComparisonEq)
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof String val)
-				return new Tarsis(a.singleString(val));
-			else if ((expr.getOperator() instanceof StringStartsWith)
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof String val)
-				prefix = val;
-			else if ((expr.getOperator() instanceof StringEndsWith)
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof String val)
-				suffix = val;
-		
+		for (BinaryExpression expr : constraints)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof String) {
+				String val = (String) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					return new Tarsis(a.singleString(val));
+				else if (expr.getOperator() instanceof StringStartsWith)
+					prefix = val;
+				else if (expr.getOperator() instanceof StringEndsWith)
+					suffix = val;
+			}
+
 		Tarsis res = TOP;
 		if (prefix != null)
 			res = new Tarsis(a.singleString(prefix)).concat(res);
@@ -681,43 +682,43 @@ public class Tarsis
 	}
 
 	@Override
-	public Tarsis substring(Set<BinaryExpression> a1, Set<BinaryExpression> a2, ProgramPoint pp) throws SemanticException {
+	public Tarsis substring(
+			Set<BinaryExpression> a1,
+			Set<BinaryExpression> a2,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isBottom() || a1 == null || a2 == null)
 			return bottom();
-		
+
 		Integer minI = null, maxI = null;
-		for (BinaryExpression expr : a1) 
-			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val)
-				minI = maxI = val;
-			else if (expr.getOperator() instanceof ComparisonLe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				minI = val;
-			else if (expr.getOperator() instanceof ComparisonGe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				maxI = val;
+		for (BinaryExpression expr : a1)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					minI = maxI = val;
+				else if (expr.getOperator() instanceof ComparisonGe)
+					maxI = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					minI = val;
+			}
 		if (minI == null || minI < 0)
 			minI = 0;
 		if (maxI != null && maxI < minI)
 			maxI = minI;
 
 		Integer minJ = null, maxJ = null;
-		for (BinaryExpression expr : a2) 
-			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val)
-				minJ = maxJ = val;
-			else if (expr.getOperator() instanceof ComparisonLe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				minJ = val;
-			else if (expr.getOperator() instanceof ComparisonGe
-					&& expr.getLeft() instanceof Constant con 
-					&& con.getValue() instanceof Integer val) 
-				maxJ = val;
+		for (BinaryExpression expr : a2)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					minJ = maxJ = val;
+				else if (expr.getOperator() instanceof ComparisonGe)
+					maxJ = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					minJ = val;
+			}
 		if (minJ == null || minJ < 0)
 			minJ = 0;
 		if (maxJ != null && maxJ < minJ)
@@ -751,7 +752,10 @@ public class Tarsis
 
 	@Override
 	public Set<BinaryExpression> indexOf_constr(
-			BinaryExpression expression, Tarsis other, ProgramPoint pp) throws SemanticException {
+			BinaryExpression expression,
+			Tarsis other,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isBottom() || other.isBottom())
 			return null;
 
@@ -761,20 +765,20 @@ public class Tarsis
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
 			constr.add(new BinaryExpression(
-						booleanType, 
-						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(), pp.getLocation()),
-						expression, 
-						ComparisonLe.INSTANCE, 
-						pp.getLocation()
-				));
-			if (indexes.getHigh().isFinite()) 
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(),
+							pp.getLocation()),
+					expression,
+					ComparisonLe.INSTANCE,
+					pp.getLocation()));
+			if (indexes.getHigh().isFinite())
 				constr.add(new BinaryExpression(
-						booleanType, 
-						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(), pp.getLocation()), 
-						expression, 
-						ComparisonGe.INSTANCE, 
-						pp.getLocation()
-				));
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(),
+								pp.getLocation()),
+						expression,
+						ComparisonGe.INSTANCE,
+						pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}

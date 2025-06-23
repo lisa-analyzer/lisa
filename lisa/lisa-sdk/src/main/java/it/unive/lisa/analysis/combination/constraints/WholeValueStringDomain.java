@@ -1,15 +1,15 @@
 package it.unive.lisa.analysis.combination.constraints;
 
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import java.util.Set;
 
-public interface WholeValueStringDomain<D extends WholeValueStringDomain<D>> 
-        extends WholeValueDomain<D> {
-	
+public interface WholeValueStringDomain<D extends WholeValueStringDomain<D>>
+		extends
+		WholeValueDomain<D> {
+
 	/**
 	 * Simplified semantics of the string contains operator, checking a single
 	 * character is part of the string.
@@ -25,7 +25,7 @@ public interface WholeValueStringDomain<D extends WholeValueStringDomain<D>>
 			throws SemanticException;
 
 	/**
-	 * Yields the constraints modeling the indexes of the first occurrences of 
+	 * Yields the constraints modeling the indexes of the first occurrences of
 	 * of {@code other} in {@code this}.
 	 *
 	 * @param other the string to be searched
@@ -36,12 +36,13 @@ public interface WholeValueStringDomain<D extends WholeValueStringDomain<D>>
 	 */
 	Set<BinaryExpression> indexOf_constr(
 			BinaryExpression expression,
-			D other, 
+			D other,
 			ProgramPoint pp)
 			throws SemanticException;
 
-	D substring(Set<BinaryExpression> a1, 
-				Set<BinaryExpression> a2, 
-				ProgramPoint pp) 
-				throws SemanticException;
+	D substring(
+			Set<BinaryExpression> a1,
+			Set<BinaryExpression> a2,
+			ProgramPoint pp)
+			throws SemanticException;
 }
