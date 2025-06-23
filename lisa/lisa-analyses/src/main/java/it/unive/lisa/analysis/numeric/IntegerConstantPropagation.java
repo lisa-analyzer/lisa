@@ -16,6 +16,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
@@ -30,9 +31,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
@@ -138,7 +137,7 @@ public class IntegerConstantPropagation
 
 	@Override
 	public IntegerConstantPropagation evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			IntegerConstantPropagation arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
@@ -146,7 +145,7 @@ public class IntegerConstantPropagation
 		if (arg.isTop())
 			return top();
 
-		if (operator == NumericNegation.INSTANCE)
+		if (expression.getOperator() == NumericNegation.INSTANCE)
 			return new IntegerConstantPropagation(-value);
 
 		return top();
@@ -154,12 +153,12 @@ public class IntegerConstantPropagation
 
 	@Override
 	public IntegerConstantPropagation evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			IntegerConstantPropagation left,
 			IntegerConstantPropagation right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-
+		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof AdditionOperator)
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value + right.value);
 		else if (operator instanceof DivisionOperator)
@@ -185,17 +184,6 @@ public class IntegerConstantPropagation
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value - right.value);
 		else
 			return top();
-	}
-
-	@Override
-	public IntegerConstantPropagation evalTernaryExpression(
-			TernaryOperator operator,
-			IntegerConstantPropagation left,
-			IntegerConstantPropagation middle,
-			IntegerConstantPropagation right,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return top();
 	}
 
 	@Override
@@ -246,7 +234,7 @@ public class IntegerConstantPropagation
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			IntegerConstantPropagation left,
 			IntegerConstantPropagation right,
 			ProgramPoint pp,
@@ -255,6 +243,7 @@ public class IntegerConstantPropagation
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE)
 			return left.value.intValue() == right.value.intValue() ? Satisfiability.SATISFIED
 					: Satisfiability.NOT_SATISFIED;
@@ -276,13 +265,14 @@ public class IntegerConstantPropagation
 	@Override
 	public ValueEnvironment<IntegerConstantPropagation> assumeBinaryExpression(
 			ValueEnvironment<IntegerConstantPropagation> environment,
-			BinaryOperator operator,
-			ValueExpression left,
-			ValueExpression right,
+			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
 		if (operator == ComparisonEq.INSTANCE)
 			if (left instanceof Identifier) {
 				IntegerConstantPropagation eval = eval(right, environment, src, oracle);

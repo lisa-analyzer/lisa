@@ -1,5 +1,9 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
+import java.util.Collections;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
@@ -8,14 +12,11 @@ import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * This abstract class generalize the concept of an abstract domain whose domain
@@ -407,20 +408,20 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 
 	@Override
 	public C evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			C arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		SortedSet<E> newSet = new TreeSet<>();
 		for (E s : arg.elementsSet)
-			newSet.add(valueDomain.evalUnaryExpression(operator, s, pp, oracle));
+			newSet.add(valueDomain.evalUnaryExpression(expression, s, pp, oracle));
 		return mk(newSet).removeRedundancy().removeOverlapping();
 	}
 
 	@Override
 	public C evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			C left,
 			C right,
 			ProgramPoint pp,
@@ -429,13 +430,13 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 		SortedSet<E> newSet = new TreeSet<>();
 		for (E sLeft : left.elementsSet)
 			for (E sRight : right.elementsSet)
-				newSet.add(valueDomain.evalBinaryExpression(operator, sLeft, sRight, pp, oracle));
+				newSet.add(valueDomain.evalBinaryExpression(expression, sLeft, sRight, pp, oracle));
 		return mk(newSet).removeRedundancy().removeOverlapping();
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			C left,
 			C right,
 			ProgramPoint pp,
@@ -448,7 +449,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 		Satisfiability sat = Satisfiability.BOTTOM;
 		for (E sLeft : left.elementsSet)
 			for (E sRight : right.elementsSet)
-				sat = sat.lub(valueDomain.satisfiesBinaryExpression(operator, sLeft, sRight, pp, oracle));
+				sat = sat.lub(valueDomain.satisfiesBinaryExpression(expression, sLeft, sRight, pp, oracle));
 		return sat;
 	}
 

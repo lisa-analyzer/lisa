@@ -2,6 +2,12 @@ package it.unive.lisa.analysis.types;
 
 import static org.apache.commons.collections4.CollectionUtils.intersection;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -16,13 +22,13 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
@@ -30,11 +36,6 @@ import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
  * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s,
@@ -195,13 +196,13 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 
 	@Override
 	public InferredTypes evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			InferredTypes arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> elems = arg.isTop() ? types.getTypes() : arg.elements;
-		Set<Type> inferred = operator.typeInference(types, elems);
+		Set<Type> inferred = expression.getOperator().typeInference(types, elems);
 		if (inferred.isEmpty())
 			return BOTTOM;
 		return new InferredTypes(types, inferred);
@@ -209,7 +210,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 
 	@Override
 	public InferredTypes evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			InferredTypes left,
 			InferredTypes right,
 			ProgramPoint pp,
@@ -217,7 +218,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
 		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
-		Set<Type> inferred = operator.typeInference(types, lelems, relems);
+		Set<Type> inferred = expression.getOperator().typeInference(types, lelems, relems);
 		if (inferred.isEmpty())
 			return BOTTOM;
 		return new InferredTypes(types, inferred);
@@ -225,7 +226,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 
 	@Override
 	public InferredTypes evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			InferredTypes left,
 			InferredTypes middle,
 			InferredTypes right,
@@ -235,7 +236,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
 		Set<Type> melems = middle.isTop() ? types.getTypes() : middle.elements;
 		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
-		Set<Type> inferred = operator.typeInference(types, lelems, melems, relems);
+		Set<Type> inferred = expression.getOperator().typeInference(types, lelems, melems, relems);
 		if (inferred.isEmpty())
 			return BOTTOM;
 		return new InferredTypes(types, inferred);
@@ -243,7 +244,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			InferredTypes left,
 			InferredTypes right,
 			ProgramPoint pp,
@@ -251,6 +252,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
 		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE) {
 			Set<Type> lfiltered = lelems.stream().filter(Type::isTypeTokenType).collect(Collectors.toSet());
 			Set<Type> rfiltered = relems.stream().filter(Type::isTypeTokenType).collect(Collectors.toSet());
@@ -283,7 +285,7 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 					return Satisfiability.UNKNOWN;
 			}
 		} else if (operator == TypeCheck.INSTANCE) {
-			if (evalBinaryExpression(TypeCast.INSTANCE, left, right, pp, oracle).isBottom())
+			if (evalBinaryExpression(expression.withOperator(TypeCast.INSTANCE), left, right, pp, oracle).isBottom())
 				// no common types, the check will always fail
 				return Satisfiability.NOT_SATISFIED;
 			AtomicBoolean mightFail = new AtomicBoolean();

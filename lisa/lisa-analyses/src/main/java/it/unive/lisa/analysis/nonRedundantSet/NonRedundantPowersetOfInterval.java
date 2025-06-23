@@ -1,10 +1,14 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -14,8 +18,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * The finite non redundant powerset of {@link Interval} abstract domain
@@ -136,9 +138,7 @@ public class NonRedundantPowersetOfInterval
 	@Override
 	public ValueEnvironment<NonRedundantPowersetOfInterval> assumeBinaryExpression(
 			ValueEnvironment<NonRedundantPowersetOfInterval> environment,
-			BinaryOperator operator,
-			ValueExpression left,
-			ValueExpression right,
+			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
@@ -146,6 +146,9 @@ public class NonRedundantPowersetOfInterval
 		Identifier id;
 		NonRedundantPowersetOfInterval eval;
 		boolean rightIsExpr;
+		BinaryOperator operator = expression.getOperator();
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
 		if (left instanceof Identifier) {
 			eval = eval(right, environment, src, oracle);
 			id = (Identifier) left;

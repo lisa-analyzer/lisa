@@ -153,4 +153,9 @@ public class BinaryExpression extends ValueExpression {
 	public boolean mightNeedRewriting() {
 		return left.mightNeedRewriting() || right.mightNeedRewriting();
 	}
+
+	public BinaryExpression withOperator(
+			BinaryOperator operator) {
+		return new BinaryExpression(getStaticType(), left, right, operator, getCodeLocation());
+	}
 }

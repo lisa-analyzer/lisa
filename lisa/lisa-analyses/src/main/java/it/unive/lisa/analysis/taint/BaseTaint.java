@@ -14,10 +14,9 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
 /**
  * A taint analysis, that is, an information-flow analysis tracking only
@@ -195,7 +194,7 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 
 	@Override
 	public T evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			T arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -205,7 +204,7 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 
 	@Override
 	public T evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			T left,
 			T right,
 			ProgramPoint pp,
@@ -216,7 +215,7 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 
 	@Override
 	public T evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			T left,
 			T middle,
 			T right,

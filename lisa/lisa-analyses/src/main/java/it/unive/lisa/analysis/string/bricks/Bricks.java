@@ -1,25 +1,27 @@
 package it.unive.lisa.analysis.string.bricks;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The bricks string abstract domain.
@@ -161,13 +163,13 @@ public class Bricks implements SmashedSumStringDomain<Bricks> {
 
 	@Override
 	public Bricks evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Bricks left,
 			Bricks right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringConcat.INSTANCE) {
+		if (expression.getOperator() == StringConcat.INSTANCE) {
 			List<Brick> resultList = new ArrayList<>(left.bricks);
 			resultList.addAll(right.bricks);
 			return new Bricks(resultList);
@@ -198,7 +200,7 @@ public class Bricks implements SmashedSumStringDomain<Bricks> {
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Bricks left,
 			Bricks right,
 			ProgramPoint pp,
@@ -207,7 +209,7 @@ public class Bricks implements SmashedSumStringDomain<Bricks> {
 		if (left.isTop())
 			return Satisfiability.UNKNOWN;
 
-		if (operator == StringContains.INSTANCE)
+		if (expression.getOperator() == StringContains.INSTANCE)
 			return left.contains(right);
 
 		return Satisfiability.UNKNOWN;

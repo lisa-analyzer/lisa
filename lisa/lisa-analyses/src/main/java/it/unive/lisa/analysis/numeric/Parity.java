@@ -7,8 +7,10 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
@@ -19,7 +21,6 @@ import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
@@ -142,18 +143,18 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	public Parity evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			Parity arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (operator == NumericNegation.INSTANCE)
+		if (expression.getOperator() == NumericNegation.INSTANCE)
 			return arg;
 		return top();
 	}
 
 	@Override
 	public Parity evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Parity left,
 			Parity right,
 			ProgramPoint pp,
@@ -161,6 +162,7 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 		if (left.isTop() || right.isTop())
 			return top();
 
+		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof AdditionOperator || operator instanceof SubtractionOperator)
 			if (right.equals(left))
 				return EVEN;
@@ -222,13 +224,14 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 	@Override
 	public ValueEnvironment<Parity> assumeBinaryExpression(
 			ValueEnvironment<Parity> environment,
-			BinaryOperator operator,
-			ValueExpression left,
-			ValueExpression right,
+			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
 		if (operator == ComparisonEq.INSTANCE)
 			if (left instanceof Identifier) {
 				Parity eval = eval(right, environment, src, oracle);

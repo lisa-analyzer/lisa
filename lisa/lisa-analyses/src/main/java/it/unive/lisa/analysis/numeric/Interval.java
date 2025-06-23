@@ -16,6 +16,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
@@ -166,10 +167,11 @@ public class Interval
 
 	@Override
 	public Interval evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			Interval arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		UnaryOperator operator = expression.getOperator();
 		if (operator == NumericNegation.INSTANCE)
 			if (arg.isTop())
 				return top();
@@ -197,11 +199,12 @@ public class Interval
 
 	@Override
 	public Interval evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Interval left,
 			Interval right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		BinaryOperator operator = expression.getOperator();
 		if (!(operator instanceof DivisionOperator) && (left.isTop() || right.isTop()))
 			// with div, we can return zero or bottom even if one of the
 			// operands is top
@@ -337,7 +340,7 @@ public class Interval
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Interval left,
 			Interval right,
 			ProgramPoint pp,
@@ -345,6 +348,7 @@ public class Interval
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE) {
 			Interval glb = null;
 			try {
@@ -359,9 +363,9 @@ public class Interval
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		} else if (operator == ComparisonGe.INSTANCE)
-			return satisfiesBinaryExpression(ComparisonLe.INSTANCE, right, left, pp, oracle);
+			return satisfiesBinaryExpression(expression.withOperator(ComparisonLe.INSTANCE), right, left, pp, oracle);
 		else if (operator == ComparisonGt.INSTANCE)
-			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp, oracle);
+			return satisfiesBinaryExpression(expression.withOperator(ComparisonLt.INSTANCE), right, left, pp, oracle);
 		else if (operator == ComparisonLe.INSTANCE) {
 			Interval glb = null;
 			try {
@@ -431,9 +435,7 @@ public class Interval
 	@Override
 	public ValueEnvironment<Interval> assumeBinaryExpression(
 			ValueEnvironment<Interval> environment,
-			BinaryOperator operator,
-			ValueExpression left,
-			ValueExpression right,
+			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
@@ -441,6 +443,8 @@ public class Interval
 		Identifier id;
 		Interval eval;
 		boolean rightIsExpr;
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
 		if (left instanceof Identifier) {
 			eval = eval(right, environment, src, oracle);
 			id = (Identifier) left;
@@ -463,6 +467,7 @@ public class Interval
 		Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY, eval.interval.getHigh().subtract(MathNumber.ONE));
 
 		Interval update = null;
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE)
 			// if eval is not a possible value, we go to bottom
 			update = starting.glb(eval);

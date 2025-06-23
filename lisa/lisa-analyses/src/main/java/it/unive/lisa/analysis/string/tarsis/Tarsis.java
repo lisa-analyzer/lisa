@@ -22,6 +22,7 @@ import it.unive.lisa.analysis.string.fsa.StringSymbol;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -34,7 +35,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
@@ -212,39 +212,40 @@ public class Tarsis
 
 	@Override
 	public Tarsis evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Tarsis left,
 			Tarsis right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringConcat.INSTANCE)
+		if (expression.getOperator() == StringConcat.INSTANCE)
 			return new Tarsis(left.a.concat(right.a));
 		return top();
 	}
 
 	@Override
 	public Tarsis evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			Tarsis left,
 			Tarsis middle,
 			Tarsis right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringReplace.INSTANCE)
+		if (expression.getOperator() == StringReplace.INSTANCE)
 			return left.replace(middle, right);
 		return TOP;
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Tarsis left,
 			Tarsis right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
 		if (operator == StringContains.INSTANCE)
 			return left.contains(right);
 		if (operator == StringEquals.INSTANCE)
@@ -512,8 +513,7 @@ public class Tarsis
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 
-		return satisfiesBinaryExpression(StringContains.INSTANCE, this,
-				new Tarsis(RegexAutomaton.string(String.valueOf(c))), null, null);
+		return this.contains(new Tarsis(RegexAutomaton.string(String.valueOf(c))));
 	}
 
 	/**

@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -7,12 +13,12 @@ import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
@@ -23,11 +29,6 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -179,30 +180,29 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 		return top();
 	}
 
-	// TODO unary and ternary and all other binary
 	@Override
 	public FSA evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			FSA left,
 			FSA right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringConcat.INSTANCE)
+		if (expression.getOperator() == StringConcat.INSTANCE)
 			return new FSA(left.a.concat(right.a));
 		return top();
 	}
 
 	@Override
 	public FSA evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			FSA left,
 			FSA middle,
 			FSA right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringReplace.INSTANCE)
+		if (expression.getOperator() == StringReplace.INSTANCE)
 			try {
 				return new FSA(left.a.replace(middle.a, right.a));
 			} catch (CyclicAutomatonException e) {
@@ -213,13 +213,13 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			FSA left,
 			FSA right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringContains.INSTANCE)
+		if (expression.getOperator() == StringContains.INSTANCE)
 			return left.contains(right);
 		return Satisfiability.UNKNOWN;
 	}

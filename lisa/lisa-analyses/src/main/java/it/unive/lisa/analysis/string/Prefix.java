@@ -15,7 +15,6 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
@@ -161,25 +160,25 @@ public class Prefix
 
 	@Override
 	public Prefix evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Prefix left,
 			Prefix right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (operator == StringConcat.INSTANCE)
+		if (expression.getOperator() == StringConcat.INSTANCE)
 			return left;
 		return TOP;
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Prefix left,
 			Prefix right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringEquals.INSTANCE && !left.prefix.startsWith(right.prefix))
+		if (expression.getOperator() == StringEquals.INSTANCE && !left.prefix.startsWith(right.prefix))
 			return Satisfiability.NOT_SATISFIED;
 		return Satisfiability.UNKNOWN;
 	}

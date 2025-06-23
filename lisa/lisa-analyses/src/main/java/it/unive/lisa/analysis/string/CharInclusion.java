@@ -18,9 +18,9 @@ import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
@@ -28,7 +28,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.numeric.IntInterval;
@@ -201,12 +200,12 @@ public class CharInclusion
 
 	@Override
 	public CharInclusion evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			CharInclusion left,
 			CharInclusion right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (operator == StringConcat.INSTANCE) {
+		if (expression.getOperator() == StringConcat.INSTANCE) {
 			Set<Character> resultCertainlyContained = new TreeSet<>();
 			resultCertainlyContained.addAll(left.certainlyContained);
 			resultCertainlyContained.addAll(right.certainlyContained);
@@ -228,15 +227,14 @@ public class CharInclusion
 
 	@Override
 	public CharInclusion evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			CharInclusion left,
 			CharInclusion middle,
 			CharInclusion right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringReplace.INSTANCE) {
-
+		if (expression.getOperator() == StringReplace.INSTANCE) {
 			if (!left.certainlyContained.containsAll(middle.certainlyContained))
 				// no replace for sure
 				return this;
@@ -267,7 +265,7 @@ public class CharInclusion
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			CharInclusion left,
 			CharInclusion right,
 			ProgramPoint pp,
@@ -275,7 +273,7 @@ public class CharInclusion
 		if (left.isTop() || right.isBottom())
 			return Satisfiability.UNKNOWN;
 
-		if (operator == StringContains.INSTANCE)
+		if (expression.getOperator() == StringContains.INSTANCE)
 			if (right.isEmptyString())
 				return Satisfiability.SATISFIED;
 

@@ -8,7 +8,10 @@ import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -196,59 +199,62 @@ public class SmashedSum<
 
 	@Override
 	public SmashedSum<I, S> evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			SmashedSum<I, S> arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		UnaryOperator operator = expression.getOperator();
 		if (operator == StringLength.INSTANCE && arg.isString())
 			return mkSmashedValue(intValue.fromInterval(arg.stringValue.length()));
 		if (operator == NumericNegation.INSTANCE && arg.isNumber())
-			return mkSmashedValue(intValue.evalUnaryExpression(operator, arg.intValue, pp, oracle));
+			return mkSmashedValue(intValue.evalUnaryExpression(expression, arg.intValue, pp, oracle));
 		if (operator == LogicalNegation.INSTANCE && arg.isBool())
-			return mkSmashedValue(boolValue.evalUnaryExpression(operator, arg.boolValue, pp, oracle));
+			return mkSmashedValue(boolValue.evalUnaryExpression(expression, arg.boolValue, pp, oracle));
 		return top();
 	}
 
 	@Override
 	public SmashedSum<I, S> evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			SmashedSum<I, S> left,
 			SmashedSum<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof NumericOperation && left.isNumber() && right.isNumber())
 			return mkSmashedValue(
-					intValue.evalBinaryExpression(operator, left.intValue, right.intValue, pp, oracle));
+					intValue.evalBinaryExpression(expression, left.intValue, right.intValue, pp, oracle));
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
 			return mkSmashedValue(
-					boolValue.evalBinaryExpression(operator, left.boolValue, right.boolValue, pp, oracle));
+					boolValue.evalBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle));
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
 			return mkSmashedValue(
-					intValue.satisfiesBinaryExpression(operator, left.intValue, right.intValue, pp, oracle));
+					intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle));
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE)
-			return mkSmashedValue(satisfiesBinaryExpression(operator, left, right, pp, oracle));
+			return mkSmashedValue(satisfiesBinaryExpression(expression, left, right, pp, oracle));
 		if (operator == StringIndexOf.INSTANCE && left.isString() && right.isString())
 			return mkSmashedValue(intValue.fromInterval(left.stringValue.indexOf(right.stringValue)));
 		if (operator == StringConcat.INSTANCE && left.isString() && right.isString())
 			return mkSmashedValue(
-					stringValue.evalBinaryExpression(operator, left.stringValue, right.stringValue, pp, oracle));
+					stringValue.evalBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle));
 		if (operator instanceof StringOperation && left.isString() && right.isString())
 			return mkSmashedValue(
-					stringValue.satisfiesBinaryExpression(operator, left.stringValue, right.stringValue, pp, oracle));
+					stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle));
 		return top();
 	}
 
 	@Override
 	public SmashedSum<I, S> evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			SmashedSum<I, S> left,
 			SmashedSum<I, S> middle,
 			SmashedSum<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		TernaryOperator operator = expression.getOperator();
 		if (operator == StringSubstring.INSTANCE && left.isString() && middle.isNumber() && right.isNumber()) {
 			IntInterval begin = middle.intValue.toInterval();
 			IntInterval end = right.intValue.toInterval();
@@ -282,7 +288,7 @@ public class SmashedSum<
 
 			return mkSmashedValue(partial);
 		} else if (operator == StringReplace.INSTANCE && left.isString() && middle.isString() && right.isString())
-			return mkSmashedValue(stringValue.evalTernaryExpression(operator, left.stringValue, middle.stringValue,
+			return mkSmashedValue(stringValue.evalTernaryExpression(expression, left.stringValue, middle.stringValue,
 					right.stringValue, pp, oracle));
 
 		return top();
@@ -290,37 +296,38 @@ public class SmashedSum<
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			SmashedSum<I, S> left,
 			SmashedSum<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof StringOperation && left.isString() && right.isString())
-			return stringValue.satisfiesBinaryExpression(operator, left.stringValue, right.stringValue, pp, oracle);
+			return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
-			return intValue.satisfiesBinaryExpression(operator, left.intValue, right.intValue, pp, oracle);
+			return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
-			return boolValue.satisfiesBinaryExpression(operator, left.boolValue, right.boolValue, pp, oracle);
+			return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
 		if (operator == ComparisonEq.INSTANCE) {
 			if (!left.sameKind(right))
 				return Satisfiability.NOT_SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(operator, left.stringValue, right.stringValue, pp, oracle);
+				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
 			if (left.isNumber())
-				return intValue.satisfiesBinaryExpression(operator, left.intValue, right.intValue, pp, oracle);
+				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
 			if (left.isBool())
-				return boolValue.satisfiesBinaryExpression(operator, left.boolValue, right.boolValue, pp, oracle);
+				return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
 		}
 		if (operator == ComparisonNe.INSTANCE) {
 			if (!left.sameKind(right))
 				return Satisfiability.SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(operator, left.stringValue, right.stringValue, pp, oracle);
+				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
 			if (left.isNumber())
-				return intValue.satisfiesBinaryExpression(operator, left.intValue, right.intValue, pp, oracle);
+				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
 			if (left.isBool())
-				return boolValue.satisfiesBinaryExpression(operator, left.boolValue, right.boolValue, pp, oracle);
+				return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
 		}
 		return Satisfiability.UNKNOWN;
 	}

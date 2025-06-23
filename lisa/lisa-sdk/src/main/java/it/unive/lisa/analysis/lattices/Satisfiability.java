@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.combination.constraints.WholeValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -16,7 +17,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -233,24 +233,25 @@ public enum Satisfiability
 
 	@Override
 	public Satisfiability evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			Satisfiability arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == LogicalNegation.INSTANCE)
+		if (expression.getOperator() == LogicalNegation.INSTANCE)
 			return arg.negate();
 		return UNKNOWN;
 	}
 
 	@Override
 	public Satisfiability evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Satisfiability left,
 			Satisfiability right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
 		if (operator == LogicalAnd.INSTANCE)
 			return left.and(right);
 		if (operator == LogicalOr.INSTANCE)

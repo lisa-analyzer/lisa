@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
@@ -9,6 +15,7 @@ import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -21,17 +28,11 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.Collections;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A bounded set of strings, where the maximum number of elements is defined by
@@ -115,12 +116,12 @@ public class BoundedStringSet
 
 	@Override
 	public BoundedStringSet evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			BoundedStringSet left,
 			BoundedStringSet right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (operator == StringConcat.INSTANCE) {
+		if (expression.getOperator() == StringConcat.INSTANCE) {
 			if (left.isTop() || right.isTop())
 				return top();
 
@@ -136,14 +137,14 @@ public class BoundedStringSet
 
 	@Override
 	public BoundedStringSet evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			BoundedStringSet left,
 			BoundedStringSet middle,
 			BoundedStringSet right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringReplace.INSTANCE) {
+		if (expression.getOperator() == StringReplace.INSTANCE) {
 			if (left.isTop() || right.isTop() || middle.isTop()
 			// if we have more search/replace strings than one, we cannot
 			// guarantee what replacement will happen
@@ -165,12 +166,13 @@ public class BoundedStringSet
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			BoundedStringSet left,
 			BoundedStringSet right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
 		if (operator == StringContains.INSTANCE) {
 			if (left.isTop() || right.isTop())
 				return Satisfiability.UNKNOWN;
