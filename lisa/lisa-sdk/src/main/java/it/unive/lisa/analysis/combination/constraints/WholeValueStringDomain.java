@@ -6,6 +6,15 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import java.util.Set;
 
+/**
+ * A {@link WholeValueDomain} that is specifically designed to model concrete
+ * values of a string type. This interface extends the {@link WholeValueDomain}
+ * interface, providing additional methods to compute operations regarding
+ * strings where either the return value or the arguments are of a different
+ * data type, and are thus expressed as constraints.
+ * 
+ * @param <D> the concrete type of this domain
+ */
 public interface WholeValueStringDomain<D extends WholeValueStringDomain<D>>
 		extends
 		WholeValueDomain<D> {
@@ -28,7 +37,11 @@ public interface WholeValueStringDomain<D extends WholeValueStringDomain<D>>
 	 * Yields the constraints modeling the indexes of the first occurrences of
 	 * of {@code other} in {@code this}.
 	 *
-	 * @param other the string to be searched
+	 * @param expression the expression representing the indexOf operation, to
+	 *                       be included in the constraints
+	 * @param other      the string to be searched
+	 * @param pp         the program point at which the constraints are being
+	 *                       generated
 	 * 
 	 * @return the constraints denoting the indexes of the first occurrences
 	 * 
@@ -40,6 +53,19 @@ public interface WholeValueStringDomain<D extends WholeValueStringDomain<D>>
 			ProgramPoint pp)
 			throws SemanticException;
 
+	/**
+	 * Yields the result of the substring operation, where the indexes are
+	 * expressed as constraints.
+	 * 
+	 * @param a1 the set of constraints representing the starting index
+	 * @param a2 the set of constraints representing the ending index
+	 * @param pp the program point at which the operation is being computed
+	 * 
+	 * @return the result of the substring operation, expressed as a new
+	 *             instance of this domain
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	D substring(
 			Set<BinaryExpression> a1,
 			Set<BinaryExpression> a2,

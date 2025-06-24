@@ -1983,6 +1983,14 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	public abstract RegularExpression symbolToRegex(
 			T symbol);
 
+	/**
+	 * Yields the longest common prefix of the strings recognized by this
+	 * automaton. If the automaton is not deterministic, it is first
+	 * determinized.
+	 * 
+	 * @return the longest common prefix of the strings recognized by this
+	 *             automaton, or the empty string if no such prefix exists
+	 */
 	public String longestCommonPrefix() {
 		if (!isDeterministic())
 			return determinize().longestCommonPrefix();

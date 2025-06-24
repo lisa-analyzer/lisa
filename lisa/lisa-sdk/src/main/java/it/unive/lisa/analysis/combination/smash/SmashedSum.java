@@ -35,8 +35,8 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
- * The smashed-sum abstract domain between interval, satisfiability and a
- * non-relational string abstract domain.
+ * The smashed-sum abstract domain between satisfiability, a non-relational
+ * numeric abstract domain, and a non-relational string abstract domain.
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

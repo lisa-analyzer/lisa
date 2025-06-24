@@ -32,6 +32,17 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Set;
 
+/**
+ * The constraint-based whole-value analysis between a non-relational Boolean
+ * abstract domain, a non-relational numeric abstract domain, and a
+ * non-relational string abstract domain.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @param <N> the non-relational integer abstract domain
+ * @param <S> the non-relational string abstract domain
+ * @param <B> the non-relational Boolean abstract domain
+ */
 public class WholeValueAnalysis<
 		N extends WholeValueDomain<N>,
 		S extends WholeValueStringDomain<S>,

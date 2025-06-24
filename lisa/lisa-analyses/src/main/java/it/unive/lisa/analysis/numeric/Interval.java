@@ -547,7 +547,7 @@ public class Interval
 		} catch (MathNumberConversionException e1) {
 			ubound = null;
 		}
-		
+
 		try {
 			lbound = new BinaryExpression(
 					pp.getProgram().getTypes().getBooleanType(),

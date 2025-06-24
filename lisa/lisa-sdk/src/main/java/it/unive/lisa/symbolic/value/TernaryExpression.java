@@ -177,4 +177,17 @@ public class TernaryExpression extends ValueExpression {
 	public boolean mightNeedRewriting() {
 		return left.mightNeedRewriting() || middle.mightNeedRewriting() || right.mightNeedRewriting();
 	}
+
+	/**
+	 * Yields a copy of this expression with the given operator.
+	 * 
+	 * @param operator the operator to apply to the left, middle, and right
+	 *                     operands
+	 * 
+	 * @return the copy of this expression with the given operator
+	 */
+	public TernaryExpression withOperator(
+			TernaryOperator operator) {
+		return new TernaryExpression(getStaticType(), left, middle, right, operator, getCodeLocation());
+	}
 }

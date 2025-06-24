@@ -154,6 +154,13 @@ public class BinaryExpression extends ValueExpression {
 		return left.mightNeedRewriting() || right.mightNeedRewriting();
 	}
 
+	/**
+	 * Yields a copy of this expression with the given operator.
+	 * 
+	 * @param operator the operator to apply to the left and right operands
+	 * 
+	 * @return the copy of this expression with the given operator
+	 */
 	public BinaryExpression withOperator(
 			BinaryOperator operator) {
 		return new BinaryExpression(getStaticType(), left, right, operator, getCodeLocation());

@@ -132,7 +132,7 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 					SmashedSumStringDomain<?> abstractString = ((SmashedSum<?, ?>) state).getStringValue();
 					sat = abstractString.containsChar(ch.getValue().charAt(0));
 				} else {
-					WholeValueStringDomain<?> abstractString = ((WholeValueAnalysis<?,?,?>) state).getStringValue();
+					WholeValueStringDomain<?> abstractString = ((WholeValueAnalysis<?, ?, ?>) state).getStringValue();
 					sat = abstractString.containsChar(ch.getValue().charAt(0));
 				}
 				if (sat == Satisfiability.UNKNOWN)
@@ -201,23 +201,20 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 
 	private static Map<String, NonRelationalValueDomain<?>> INT_DOMAINS = Map.of(
 			"intv", new Interval(),
-			"cp", new IntegerConstantPropagation()
-			);
+			"cp", new IntegerConstantPropagation());
 
 	private static Map<String, NonRelationalValueDomain<?>> STRING_DOMAINS = Map.of(
 			"prefix", new Prefix(),
 			"suffix", new Suffix(),
 			"ci", new CharInclusion(),
 			"tarsis", new Tarsis(),
-			"bss", new BoundedStringSet()
-			);
+			"bss", new BoundedStringSet());
 
 	private static Map<String, Boolean> TESTFILES = Map.of(
 			"toString.imp", false,
 			"subs.imp", false,
 			"loop.imp", false,
-			"count.imp", true
-			);
+			"count.imp", true);
 
 	private static Map<String, Map<String, Lattice<?>>> STATES = new HashMap<>();
 	private static Map<String, Map<String, Map<CodeLocation, String>>> MESSAGES = new HashMap<>();
@@ -234,9 +231,9 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 					conf.abstractState = new SimpleAbstractState<>(
 							new MonolithicHeap(),
 							new ValueEnvironment<>(new SmashedSum(
-								(SmashedSumIntDomain) intDomain.getValue(), 
-								(SmashedSumStringDomain) strDomain.getValue(), 
-								Satisfiability.UNKNOWN)),
+									(SmashedSumIntDomain) intDomain.getValue(),
+									(SmashedSumStringDomain) strDomain.getValue(),
+									Satisfiability.UNKNOWN)),
 							new TypeEnvironment<>(new InferredTypes()));
 					if (test.getValue())
 						conf.abstractState = new TracePartitioning(conf.abstractState);
@@ -272,9 +269,9 @@ public class WholeValueAnalysesTest extends AnalysisTestExecutor {
 					conf.abstractState = new SimpleAbstractState<>(
 							new MonolithicHeap(),
 							new ValueEnvironment<>(new WholeValueAnalysis(
-								(WholeValueDomain) intDomain.getValue(), 
-								(WholeValueStringDomain) strDomain.getValue(), 
-								Satisfiability.UNKNOWN)),
+									(WholeValueDomain) intDomain.getValue(),
+									(WholeValueStringDomain) strDomain.getValue(),
+									Satisfiability.UNKNOWN)),
 							new TypeEnvironment<>(new InferredTypes()));
 					if (test.getValue())
 						conf.abstractState = new TracePartitioning(conf.abstractState);
