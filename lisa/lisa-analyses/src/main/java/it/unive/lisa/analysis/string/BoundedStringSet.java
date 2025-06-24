@@ -417,8 +417,8 @@ public class BoundedStringSet
 		Set<String> el = new TreeSet<>();
 		for (String str : elements)
 			for (int i = minI; i <= maxI; i++)
-				for (int j = minJ; i <= maxJ; j++)
-					if (i <= j && i <= str.length())
+				for (int j = minJ; j <= maxJ; j++)
+					if (i <= j && j <= str.length())
 						if (j <= str.length())
 							el.add(str.substring(i, j));
 						else

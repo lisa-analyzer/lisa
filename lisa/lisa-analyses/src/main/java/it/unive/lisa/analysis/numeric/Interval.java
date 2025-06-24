@@ -537,14 +537,19 @@ public class Interval
 
 		BinaryExpression lbound, ubound;
 		try {
-			lbound = new BinaryExpression(
+			ubound = new BinaryExpression(
 					pp.getProgram().getTypes().getBooleanType(),
 					new Constant(pp.getProgram().getTypes().getIntegerType(), interval.getHigh().toInt(),
 							pp.getLocation()),
 					e,
 					ComparisonGe.INSTANCE,
 					e.getCodeLocation());
-			ubound = new BinaryExpression(
+		} catch (MathNumberConversionException e1) {
+			ubound = null;
+		}
+		
+		try {
+			lbound = new BinaryExpression(
 					pp.getProgram().getTypes().getBooleanType(),
 					new Constant(pp.getProgram().getTypes().getIntegerType(), interval.getLow().toInt(),
 							pp.getLocation()),
@@ -552,12 +557,13 @@ public class Interval
 					ComparisonLe.INSTANCE,
 					e.getCodeLocation());
 		} catch (MathNumberConversionException e1) {
-			throw new SemanticException("Cannot convert interval bounds to integers", e1);
+			lbound = null;
 		}
+
 		if (interval.getLow().isMinusInfinity())
-			return Collections.singleton(lbound);
-		if (interval.getHigh().isPlusInfinity())
 			return Collections.singleton(ubound);
+		if (interval.getHigh().isPlusInfinity())
+			return Collections.singleton(lbound);
 		return Set.of(lbound, ubound);
 	}
 

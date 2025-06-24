@@ -59,6 +59,33 @@ public class WholeValueAnalysis<
 		this.boolValue = boolValue;
 	}
 
+	/**
+	 * Yields the integer abstract value.
+	 * 
+	 * @return the integer abstract value
+	 */
+	public N getIntValue() {
+		return intValue;
+	}
+
+	/**
+	 * Yields the string abstract value.
+	 * 
+	 * @return the string abstract value
+	 */
+	public S getStringValue() {
+		return stringValue;
+	}
+
+	/**
+	 * Yields the boolean abstract value.
+	 *
+	 * @return the boolean abstract value
+	 */
+	public B getBoolValue() {
+		return boolValue;
+	}
+
 	@Override
 	public WholeValueAnalysis<N, S, B> lubAux(
 			WholeValueAnalysis<N, S, B> other)
@@ -283,8 +310,8 @@ public class WholeValueAnalysis<
 			throws SemanticException {
 		TernaryOperator operator = expression.getOperator();
 		if (operator == StringSubstring.INSTANCE && left.isString() && middle.isNumber() && right.isNumber()) {
-			Set<BinaryExpression> begin = middle.intValue.constraints(null, pp);
-			Set<BinaryExpression> end = right.intValue.constraints(null, pp);
+			Set<BinaryExpression> begin = middle.intValue.constraints((ValueExpression) expression.getLeft(), pp);
+			Set<BinaryExpression> end = right.intValue.constraints((ValueExpression) expression.getRight(), pp);
 			return mkStringValue(left.stringValue.substring(begin, end, pp));
 		} else if (operator == StringReplace.INSTANCE && left.isString() && middle.isString() && right.isString())
 			return mkStringValue(stringValue.evalTernaryExpression(expression, left.stringValue, middle.stringValue,

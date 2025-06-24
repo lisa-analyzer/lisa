@@ -730,8 +730,8 @@ public class Tarsis
 		Tarsis partial = BOTTOM;
 		Tarsis temp;
 
-		outer: for (int i = minI; i < maxI; i++)
-			for (int j = minJ; j < maxJ; j++) {
+		outer: for (int i = minI; i <= maxI; i++)
+			for (int j = minJ; j <= maxJ; j++) {
 				if (i < j)
 					temp = partial.lub(substring(i, j));
 				else if (i == j)
