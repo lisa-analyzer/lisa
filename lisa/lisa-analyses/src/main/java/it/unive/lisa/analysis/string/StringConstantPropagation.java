@@ -7,7 +7,10 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
@@ -17,8 +20,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
@@ -119,7 +120,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 	@Override
 	public StringConstantPropagation evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			StringConstantPropagation arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
@@ -129,13 +130,12 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 	@Override
 	public StringConstantPropagation evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			StringConstantPropagation left,
 			StringConstantPropagation right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-
-		if (operator instanceof StringConcat)
+		if (expression.getOperator() instanceof StringConcat)
 			return left.isTop() || right.isTop() ? top() : new StringConstantPropagation(left.value + right.value);
 
 		return top();
@@ -143,14 +143,14 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 	@Override
 	public StringConstantPropagation evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			StringConstantPropagation left,
 			StringConstantPropagation middle,
 			StringConstantPropagation right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 
-		if (operator instanceof StringReplace) {
+		if (expression.getOperator() instanceof StringReplace) {
 			if (left.isTop() || right.isTop() || middle.isTop())
 				return top();
 
@@ -212,7 +212,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			StringConstantPropagation left,
 			StringConstantPropagation right,
 			ProgramPoint pp,
@@ -221,6 +221,7 @@ public class StringConstantPropagation implements BaseNonRelationalValueDomain<S
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE)
 			return left.value.equals(right.value) ? Satisfiability.SATISFIED
 					: Satisfiability.NOT_SATISFIED;

@@ -3,24 +3,31 @@ package it.unive.lisa.analysis.string;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
+import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
-import it.unive.lisa.symbolic.value.operator.binary.StringContains;
-import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
-import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The prefix string abstract domain.
@@ -33,7 +40,10 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCharProvider {
+public class Prefix
+		implements
+		SmashedSumStringDomain<Prefix>,
+		WholeValueStringDomain<Prefix> {
 
 	private final static Prefix TOP = new Prefix();
 	private final static Prefix BOTTOM = new Prefix(null);
@@ -126,6 +136,15 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 		return new StringRepresentation(prefix + '*');
 	}
 
+	/**
+	 * Yields the prefix of this abstract value.
+	 * 
+	 * @return the prefix of this abstract value.
+	 */
+	public String getPrefix() {
+		return this.prefix;
+	}
+
 	@Override
 	public Prefix evalNonNullConstant(
 			Constant constant,
@@ -143,67 +162,30 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 
 	@Override
 	public Prefix evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Prefix left,
 			Prefix right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (operator == StringConcat.INSTANCE) {
+		if (expression.getOperator() == StringConcat.INSTANCE)
 			return left;
-		} else if (operator == StringContains.INSTANCE ||
-				operator == StringEndsWith.INSTANCE ||
-				operator == StringEquals.INSTANCE ||
-				operator == StringIndexOf.INSTANCE ||
-				operator == StringStartsWith.INSTANCE) {
-			return TOP;
-		}
-
 		return TOP;
 	}
 
 	@Override
-	public Prefix evalTernaryExpression(
-			TernaryOperator operator,
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryExpression expression,
 			Prefix left,
-			Prefix middle,
 			Prefix right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
-		if (operator == StringReplace.INSTANCE) {
-			String replace = right.getPrefix();
-			String string = middle.getPrefix();
-			String target = left.getPrefix();
-
-			if (!target.contains(replace))
-				return this;
-
-			return new Prefix(target.replace(replace, string));
-		}
-
-		return TOP;
+		if (expression.getOperator() == StringEquals.INSTANCE && !left.prefix.startsWith(right.prefix))
+			return Satisfiability.NOT_SATISFIED;
+		return Satisfiability.UNKNOWN;
 	}
 
-	/**
-	 * Yields the prefix of this abstract value.
-	 * 
-	 * @return the prefix of this abstract value.
-	 */
-	public String getPrefix() {
-		return this.prefix;
-	}
-
-	/**
-	 * Yields the prefix corresponding to the substring of this prefix between
-	 * two indexes.
-	 * 
-	 * @param begin where the substring starts
-	 * @param end   where the substring ends
-	 * 
-	 * @return the prefix corresponding to the substring of this prefix between
-	 *             two indexes
-	 */
+	@Override
 	public Prefix substring(
 			long begin,
 			long end) {
@@ -218,24 +200,12 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 		return new Prefix("");
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum length
-	 * of this abstract value.
-	 * 
-	 * @return the minimum and maximum length of this abstract value
-	 */
+	@Override
 	public IntInterval length() {
 		return new IntInterval(new MathNumber(prefix.length()), MathNumber.PLUS_INFINITY);
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum index
-	 * of {@code s} in {@code this}.
-	 *
-	 * @param s the string to be searched
-	 * 
-	 * @return the minimum and maximum index of {@code s} in {@code this}
-	 */
+	@Override
 	public IntInterval indexOf(
 			Prefix s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
@@ -249,5 +219,137 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCha
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 		return this.prefix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isBottom())
+			return null;
+
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e,
+				StringLength.INSTANCE, pp.getLocation());
+
+		if (isTop())
+			return Collections.singleton(
+					new BinaryExpression(
+							booleanType,
+							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+							strlen,
+							ComparisonLe.INSTANCE,
+							e.getCodeLocation()));
+
+		return Set.of(
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), prefix.length(), pp.getLocation()),
+						strlen,
+						ComparisonLe.INSTANCE,
+						e.getCodeLocation()),
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getStringType(), prefix, pp.getLocation()),
+						e,
+						StringStartsWith.INSTANCE,
+						e.getCodeLocation()));
+	}
+
+	@Override
+	public Prefix generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (constraints == null)
+			return bottom();
+
+		for (BinaryExpression expr : constraints)
+			if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringStartsWith)
+					&& expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof String)
+				return new Prefix(((Constant) expr.getLeft()).getValue().toString());
+
+		return TOP;
+	}
+
+	@Override
+	public Prefix substring(
+			Set<BinaryExpression> a1,
+			Set<BinaryExpression> a2,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isBottom() || a1 == null || a2 == null)
+			return bottom();
+
+		Integer minI = null;
+		for (BinaryExpression expr : a1)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					minI = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					minI = val;
+			}
+		if (minI == null || minI < 0)
+			minI = 0;
+
+		Integer minJ = null;
+		for (BinaryExpression expr : a2)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					minJ = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					minJ = val;
+			}
+		if (minJ != null && minJ < minI)
+			minJ = minI;
+
+		// minI is always >= 0
+		// minJ is null (infinity) or >= minI
+		if (minJ != null && minJ <= prefix.length())
+			return new Prefix(prefix.substring(minI, minJ));
+		if (minI <= prefix.length())
+			return new Prefix(prefix.substring(minI));
+		return TOP;
+	}
+
+	@Override
+	public Set<BinaryExpression> indexOf_constr(
+			BinaryExpression expression,
+			Prefix other,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isBottom() || other.isBottom())
+			return null;
+
+		IntInterval indexes = indexOf(other);
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+
+		Set<BinaryExpression> constr = new HashSet<>();
+		try {
+			constr.add(new BinaryExpression(
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(),
+							pp.getLocation()),
+					expression,
+					ComparisonLe.INSTANCE,
+					pp.getLocation()));
+			if (indexes.getHigh().isFinite())
+				constr.add(new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(),
+								pp.getLocation()),
+						expression,
+						ComparisonGe.INSTANCE,
+						pp.getLocation()));
+		} catch (MathNumberConversionException e1) {
+			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
+		}
+		return constr;
 	}
 }

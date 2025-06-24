@@ -1521,7 +1521,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		if (!getAllTransitionsConnecting(node, target).isEmpty())
 			return 1;
 		// should never happen
-		return -1; // TODO exception?
+		return -1;
 	}
 
 	private static State getMinimum(
@@ -1693,8 +1693,8 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 				lastFinalState = finalState;
 		}
 
-		// TODO exception if lastFinalState is still null? or if more than one
-		// init state?
+		// might wannt to throw an exception if lastFinalState is still null
+		// or if more than one init state exists
 
 		State nextState = getInitialState();
 		List<T> symbols = new LinkedList<>();
@@ -1982,4 +1982,35 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 */
 	public abstract RegularExpression symbolToRegex(
 			T symbol);
+
+	/**
+	 * Yields the longest common prefix of the strings recognized by this
+	 * automaton. If the automaton is not deterministic, it is first
+	 * determinized.
+	 * 
+	 * @return the longest common prefix of the strings recognized by this
+	 *             automaton, or the empty string if no such prefix exists
+	 */
+	public String longestCommonPrefix() {
+		if (!isDeterministic())
+			return determinize().longestCommonPrefix();
+
+		State current = getInitialState();
+		String lcp = "";
+
+		while (current != null) {
+			if (current.isFinal())
+				return lcp;
+
+			Set<Transition<T>> outgoing = getOutgoingTransitionsFrom(current);
+			if (outgoing.size() != 1)
+				break;
+
+			Transition<T> dest = outgoing.iterator().next();
+			lcp += dest.getSymbol().toString();
+			current = dest.getDestination();
+		}
+
+		return lcp;
+	}
 }

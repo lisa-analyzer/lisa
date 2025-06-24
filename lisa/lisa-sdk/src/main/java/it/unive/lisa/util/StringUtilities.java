@@ -63,4 +63,26 @@ public class StringUtilities {
 			String s) {
 		return s.replaceAll("\n|\t", "");
 	}
+
+	/**
+	 * Yields the greatest common prefix of the two given strings, that is, the
+	 * longest prefix that is common to both strings.
+	 * 
+	 * @param s1 the first string
+	 * @param s2 the second string
+	 * 
+	 * @return the greatest common prefix of the two strings
+	 */
+	public static String gcp(
+			String s1,
+			String s2) {
+		String gcp = "";
+		int minlen = Math.min(s1.length(), s2.length());
+		for (int i = 0; i < minlen; i++)
+			if (s1.charAt(i) == s2.charAt(i))
+				gcp += s1.charAt(i);
+			else
+				break;
+		return gcp;
+	}
 }

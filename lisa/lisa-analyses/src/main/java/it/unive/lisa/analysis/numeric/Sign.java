@@ -8,8 +8,10 @@ import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
@@ -25,7 +27,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
@@ -183,11 +184,11 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public Sign evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			Sign arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (operator == NumericNegation.INSTANCE)
+		if (expression.getOperator() == NumericNegation.INSTANCE)
 			if (arg.isPositive())
 				return NEG;
 			else if (arg.isNegative())
@@ -201,11 +202,12 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public Sign evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Sign left,
 			Sign right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof AdditionOperator)
 			if (left.isZero())
 				return right;
@@ -294,7 +296,7 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Sign left,
 			Sign right,
 			ProgramPoint pp,
@@ -302,6 +304,7 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE)
 			return left.eq(right);
 		else if (operator == ComparisonGe.INSTANCE)
@@ -367,9 +370,7 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 	@Override
 	public ValueEnvironment<Sign> assumeBinaryExpression(
 			ValueEnvironment<Sign> environment,
-			BinaryOperator operator,
-			ValueExpression left,
-			ValueExpression right,
+			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
@@ -377,6 +378,9 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 		Identifier id;
 		Sign eval;
 		boolean rightIsExpr;
+		BinaryOperator operator = expression.getOperator();
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
 		if (left instanceof Identifier) {
 			eval = eval(right, environment, src, oracle);
 			id = (Identifier) left;

@@ -1,0 +1,14 @@
+class subs {
+    main(nondet) {
+        def res = "substring test";
+        if (nondet)
+            res = res + " passed";
+        else
+            res = res + " failed";
+        res = strsub(res, 5, 18);
+        assert strcon(res, "g");
+        assert strcon(res, "p");
+        assert strcon(res, "f");
+        assert strcon(res, "d");
+    }
+}

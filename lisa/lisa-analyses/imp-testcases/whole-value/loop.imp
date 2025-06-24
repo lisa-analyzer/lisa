@@ -1,0 +1,10 @@
+class loop {
+    main(nondet, value) {
+        def res = "Repeat: ";
+        while (nondet)
+            res = res + value + "!";
+        assert strcon(res, "t"); 
+        assert strcon(res, "!"); 
+        assert strcon(res, "f");
+    }
+}

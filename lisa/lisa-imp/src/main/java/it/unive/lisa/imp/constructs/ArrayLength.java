@@ -141,8 +141,8 @@ public class ArrayLength extends NativeCFG {
 			if (arraytypes.isEmpty())
 				return state.bottom();
 
-			ArrayType arraytype = Type.commonSupertype(arraytypes, getStaticType()).asArrayType();
-			HeapDereference container = new HeapDereference(arraytype, expr, getLocation());
+			Type cst = Type.commonSupertype(arraytypes, getStaticType());
+			HeapDereference container = new HeapDereference(cst, expr, getLocation());
 			AccessChild len = new AccessChild(
 					Int32Type.INSTANCE,
 					container,

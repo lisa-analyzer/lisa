@@ -1,0 +1,44 @@
+{
+  "warnings" : [ {
+    "message" : "['imp-testcases/whole-value/toString.imp':12:36] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
+  }, {
+    "message" : "['imp-testcases/whole-value/toString.imp':13:31] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
+  }, {
+    "message" : "['imp-testcases/whole-value/toString.imp':14:33] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
+  } ],
+  "files" : [ "report.json" ],
+  "info" : {
+    "cfgs" : "1",
+    "duration" : "13ms",
+    "end" : "2025-06-23T17:42:52.616+02:00",
+    "expressions" : "39",
+    "files" : "0",
+    "globals" : "0",
+    "members" : "1",
+    "programs" : "1",
+    "start" : "2025-06-23T17:42:52.603+02:00",
+    "statements" : "12",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "3"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "set",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "ReturnTopPolicy",
+    "optimize" : "true",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "AssertionCheck",
+    "serializeInputs" : "false",
+    "serializeResults" : "false",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/whole-value/smashed/cp-prefix-toString"
+  }
+}

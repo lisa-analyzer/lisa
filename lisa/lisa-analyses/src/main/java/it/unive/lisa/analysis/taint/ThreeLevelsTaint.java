@@ -4,8 +4,8 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
@@ -76,7 +76,7 @@ public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
 
 	@Override
 	public ThreeLevelsTaint evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			ThreeLevelsTaint left,
 			ThreeLevelsTaint right,
 			ProgramPoint pp,
@@ -93,7 +93,7 @@ public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
 
 	@Override
 	public ThreeLevelsTaint evalTernaryExpression(
-			TernaryOperator operator,
+			TernaryExpression expression,
 			ThreeLevelsTaint left,
 			ThreeLevelsTaint middle,
 			ThreeLevelsTaint right,

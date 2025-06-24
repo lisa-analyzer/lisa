@@ -6,6 +6,11 @@ import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.StringType;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
@@ -17,6 +22,12 @@ import org.junit.Test;
 public class ContainsTest {
 
 	private final SemanticOracle oracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
+	private final BinaryExpression expr = new BinaryExpression(
+			BoolType.INSTANCE,
+			new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
+			new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
+			StringContains.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 	@Test
 	public void test01() throws SemanticException {
@@ -51,7 +62,7 @@ public class ContainsTest {
 		FSA fsa1 = new FSA(a2);
 
 		assertEquals(Satisfiability.UNKNOWN,
-				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
+				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
 	}
 
 	@Test
@@ -87,7 +98,7 @@ public class ContainsTest {
 		FSA fsa1 = new FSA(a2);
 
 		assertEquals(Satisfiability.NOT_SATISFIED,
-				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
+				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
 	}
 
 	@Test
@@ -123,7 +134,7 @@ public class ContainsTest {
 		FSA fsa1 = new FSA(a2);
 
 		assertEquals(Satisfiability.SATISFIED,
-				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
+				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
 	}
 
 	@Test
@@ -161,7 +172,7 @@ public class ContainsTest {
 		FSA fsa1 = new FSA(a2);
 
 		assertEquals(Satisfiability.UNKNOWN,
-				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
+				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
 	}
 
 	@Test
@@ -196,7 +207,7 @@ public class ContainsTest {
 		FSA fsa1 = new FSA(a2);
 
 		assertEquals(Satisfiability.UNKNOWN,
-				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null, oracle));
+				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
 	}
 
 }

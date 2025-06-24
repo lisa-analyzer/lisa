@@ -194,6 +194,12 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> implements BaseL
 
 	@Override
 	public StructuredRepresentation representation() {
+		if (isTop())
+			return Lattice.topRepresentation();
+
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+
 		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 }

@@ -151,4 +151,16 @@ public class UnaryExpression extends ValueExpression {
 	public boolean mightNeedRewriting() {
 		return expression.mightNeedRewriting();
 	}
+
+	/**
+	 * Yields a copy of this expression with the given operator.
+	 * 
+	 * @param operator the operator to apply to the argument of this expression
+	 * 
+	 * @return the copy of this expression with the given operator
+	 */
+	public UnaryExpression withOperator(
+			UnaryOperator operator) {
+		return new UnaryExpression(getStaticType(), expression, operator, getCodeLocation());
+	}
 }

@@ -4,12 +4,16 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueDomain;
+import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
@@ -24,11 +28,13 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * The overflow-insensitive basic integer constant propagation abstract domain,
@@ -42,7 +48,10 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<IntegerConstantPropagation> {
+public class IntegerConstantPropagation
+		implements
+		SmashedSumIntDomain<IntegerConstantPropagation>,
+		WholeValueDomain<IntegerConstantPropagation> {
 
 	private static final IntegerConstantPropagation TOP = new IntegerConstantPropagation(true, false);
 	private static final IntegerConstantPropagation BOTTOM = new IntegerConstantPropagation(false, true);
@@ -127,7 +136,7 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 
 	@Override
 	public IntegerConstantPropagation evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			IntegerConstantPropagation arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
@@ -135,7 +144,7 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 		if (arg.isTop())
 			return top();
 
-		if (operator == NumericNegation.INSTANCE)
+		if (expression.getOperator() == NumericNegation.INSTANCE)
 			return new IntegerConstantPropagation(-value);
 
 		return top();
@@ -143,12 +152,12 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 
 	@Override
 	public IntegerConstantPropagation evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			IntegerConstantPropagation left,
 			IntegerConstantPropagation right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-
+		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof AdditionOperator)
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value + right.value);
 		else if (operator instanceof DivisionOperator)
@@ -174,17 +183,6 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value - right.value);
 		else
 			return top();
-	}
-
-	@Override
-	public IntegerConstantPropagation evalTernaryExpression(
-			TernaryOperator operator,
-			IntegerConstantPropagation left,
-			IntegerConstantPropagation middle,
-			IntegerConstantPropagation right,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return top();
 	}
 
 	@Override
@@ -235,7 +233,7 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			IntegerConstantPropagation left,
 			IntegerConstantPropagation right,
 			ProgramPoint pp,
@@ -244,6 +242,7 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE)
 			return left.value.intValue() == right.value.intValue() ? Satisfiability.SATISFIED
 					: Satisfiability.NOT_SATISFIED;
@@ -265,13 +264,14 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 	@Override
 	public ValueEnvironment<IntegerConstantPropagation> assumeBinaryExpression(
 			ValueEnvironment<IntegerConstantPropagation> environment,
-			BinaryOperator operator,
-			ValueExpression left,
-			ValueExpression right,
+			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
 		if (operator == ComparisonEq.INSTANCE)
 			if (left instanceof Identifier) {
 				IntegerConstantPropagation eval = eval(right, environment, src, oracle);
@@ -285,5 +285,71 @@ public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<
 				return environment.putState((Identifier) right, eval);
 			}
 		return environment;
+	}
+
+	@Override
+	public IntegerConstantPropagation fromInterval(
+			IntInterval intv)
+			throws SemanticException {
+		if (intv.isFinite() && intv.getHigh().equals(intv.getLow()))
+			try {
+				return new IntegerConstantPropagation(intv.getLow().toInt());
+			} catch (MathNumberConversionException e) {
+				throw new SemanticException("Cannot convert " + intv + " to an integer constant", e);
+			}
+		return top();
+	}
+
+	@Override
+	public IntInterval toInterval() throws SemanticException {
+		if (isBottom())
+			return null;
+		if (isTop())
+			return IntInterval.INFINITY;
+		return new IntInterval(value, value);
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isTop())
+			return Collections.emptySet();
+		if (isBottom())
+			return null;
+		return Collections.singleton(new BinaryExpression(
+				pp.getProgram().getTypes().getBooleanType(),
+				new Constant(pp.getProgram().getTypes().getIntegerType(), value, e.getCodeLocation()),
+				e,
+				ComparisonEq.INSTANCE,
+				pp.getLocation()));
+	}
+
+	@Override
+	public IntegerConstantPropagation generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (constraints == null)
+			return BOTTOM;
+
+		Integer ge = null, le = null;
+		for (BinaryExpression expr : constraints)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					return new IntegerConstantPropagation(val);
+				else if (expr.getOperator() instanceof ComparisonGe)
+					ge = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					le = val;
+			}
+
+		if (ge != null && ge.equals(le))
+			return new IntegerConstantPropagation(ge);
+
+		return TOP;
 	}
 }

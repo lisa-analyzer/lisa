@@ -4,6 +4,7 @@ import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.string.BoundedStringSet;
 import it.unive.lisa.analysis.string.CharInclusion;
 import it.unive.lisa.analysis.string.Prefix;
 import it.unive.lisa.analysis.string.SubstringDomain;
@@ -110,6 +111,20 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
+	public void testBoundedStringSet() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new ValueEnvironment<>(new BoundedStringSet()),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.testDir = "string";
+		conf.testSubDir = "bounded-string-set";
+		conf.programFile = "strings.imp";
+		perform(conf);
+	}
+
+	@Test
 	public void testSubstringDomain() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true; // dump results
@@ -120,7 +135,6 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 		conf.testDir = "string/subs-domain";
 		conf.testSubDir = "subs-domain";
 		conf.programFile = "strings-subs.imp";
-		// conf.analysisGraphs = GraphType.DOT;
 		perform(conf);
 
 	}
@@ -136,7 +150,6 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 		conf.testDir = "string/subs-domain-constants";
 		conf.testSubDir = "subs-domain-constants";
 		conf.programFile = "strings-subs-constants.imp";
-		// conf.analysisGraphs = GraphType.DOT;
 		perform(conf);
 	}
 }

@@ -4,12 +4,16 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueDomain;
+import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
@@ -29,8 +33,11 @@ import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * The overflow-insensitive interval abstract domain, approximating integer
@@ -44,7 +51,11 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class Interval implements BaseNonRelationalValueDomain<Interval>, Comparable<Interval> {
+public class Interval
+		implements
+		SmashedSumIntDomain<Interval>,
+		WholeValueDomain<Interval>,
+		Comparable<Interval> {
 
 	/**
 	 * The abstract zero ({@code [0, 0]}) element.
@@ -155,10 +166,11 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 
 	@Override
 	public Interval evalUnaryExpression(
-			UnaryOperator operator,
+			UnaryExpression expression,
 			Interval arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		UnaryOperator operator = expression.getOperator();
 		if (operator == NumericNegation.INSTANCE)
 			if (arg.isTop())
 				return top();
@@ -186,11 +198,12 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 
 	@Override
 	public Interval evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Interval left,
 			Interval right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		BinaryOperator operator = expression.getOperator();
 		if (!(operator instanceof DivisionOperator) && (left.isTop() || right.isTop()))
 			// with div, we can return zero or bottom even if one of the
 			// operands is top
@@ -326,7 +339,7 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Interval left,
 			Interval right,
 			ProgramPoint pp,
@@ -334,6 +347,7 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE) {
 			Interval glb = null;
 			try {
@@ -348,9 +362,9 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		} else if (operator == ComparisonGe.INSTANCE)
-			return satisfiesBinaryExpression(ComparisonLe.INSTANCE, right, left, pp, oracle);
+			return satisfiesBinaryExpression(expression.withOperator(ComparisonLe.INSTANCE), right, left, pp, oracle);
 		else if (operator == ComparisonGt.INSTANCE)
-			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp, oracle);
+			return satisfiesBinaryExpression(expression.withOperator(ComparisonLt.INSTANCE), right, left, pp, oracle);
 		else if (operator == ComparisonLe.INSTANCE) {
 			Interval glb = null;
 			try {
@@ -420,9 +434,7 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	@Override
 	public ValueEnvironment<Interval> assumeBinaryExpression(
 			ValueEnvironment<Interval> environment,
-			BinaryOperator operator,
-			ValueExpression left,
-			ValueExpression right,
+			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
@@ -430,6 +442,8 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 		Identifier id;
 		Interval eval;
 		boolean rightIsExpr;
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
 		if (left instanceof Identifier) {
 			eval = eval(right, environment, src, oracle);
 			id = (Identifier) left;
@@ -452,6 +466,7 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 		Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY, eval.interval.getHigh().subtract(MathNumber.ONE));
 
 		Interval update = null;
+		BinaryOperator operator = expression.getOperator();
 		if (operator == ComparisonEq.INSTANCE)
 			// if eval is not a possible value, we go to bottom
 			update = starting.glb(eval);
@@ -496,5 +511,86 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 		if (o.isTop())
 			return -1;
 		return interval.compareTo(o.interval);
+	}
+
+	@Override
+	public Interval fromInterval(
+			IntInterval intv)
+			throws SemanticException {
+		return new Interval(intv);
+	}
+
+	@Override
+	public IntInterval toInterval() throws SemanticException {
+		return interval;
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isTop())
+			return Collections.emptySet();
+		if (isBottom())
+			return null;
+
+		BinaryExpression lbound, ubound;
+		try {
+			ubound = new BinaryExpression(
+					pp.getProgram().getTypes().getBooleanType(),
+					new Constant(pp.getProgram().getTypes().getIntegerType(), interval.getHigh().toInt(),
+							pp.getLocation()),
+					e,
+					ComparisonGe.INSTANCE,
+					e.getCodeLocation());
+		} catch (MathNumberConversionException e1) {
+			ubound = null;
+		}
+
+		try {
+			lbound = new BinaryExpression(
+					pp.getProgram().getTypes().getBooleanType(),
+					new Constant(pp.getProgram().getTypes().getIntegerType(), interval.getLow().toInt(),
+							pp.getLocation()),
+					e,
+					ComparisonLe.INSTANCE,
+					e.getCodeLocation());
+		} catch (MathNumberConversionException e1) {
+			lbound = null;
+		}
+
+		if (interval.getLow().isMinusInfinity())
+			return Collections.singleton(ubound);
+		if (interval.getHigh().isPlusInfinity())
+			return Collections.singleton(lbound);
+		return Set.of(lbound, ubound);
+	}
+
+	@Override
+	public Interval generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (constraints == null)
+			return bottom();
+
+		Integer ge = null, le = null;
+		for (BinaryExpression expr : constraints)
+			if (expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					return new Interval(val, val);
+				else if (expr.getOperator() instanceof ComparisonGe)
+					ge = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					le = val;
+			}
+
+		if (ge == null && le == null)
+			return TOP;
+
+		return new Interval(new IntInterval(le, ge));
 	}
 }

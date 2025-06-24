@@ -17,10 +17,9 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -458,7 +457,7 @@ public class NonInterference
 
 		@Override
 		public NI evalUnaryExpression(
-				UnaryOperator operator,
+				UnaryExpression expression,
 				NI arg,
 				ProgramPoint pp,
 				SemanticOracle oracle)
@@ -468,7 +467,7 @@ public class NonInterference
 
 		@Override
 		public NI evalBinaryExpression(
-				BinaryOperator operator,
+				BinaryExpression expression,
 				NI left,
 				NI right,
 				ProgramPoint pp,
@@ -479,7 +478,7 @@ public class NonInterference
 
 		@Override
 		public NI evalTernaryExpression(
-				TernaryOperator operator,
+				TernaryExpression expression,
 				NI left,
 				NI middle,
 				NI right,

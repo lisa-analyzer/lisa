@@ -3,18 +3,13 @@ package it.unive.lisa.analysis.string.bricks;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
-import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
-import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
-import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
-import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
-import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
@@ -37,21 +32,24 @@ import org.apache.commons.lang3.StringUtils;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCharProvider {
+public class Bricks implements SmashedSumStringDomain<Bricks> {
 
 	private final List<Brick> bricks;
 
 	private final static Bricks TOP = new Bricks();
 
 	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
+
 	/**
 	 * The length of the bricks list used in the widening.
 	 */
 	public static int kL = 20;
+
 	/**
 	 * The indices range of a brick used in the widening.
 	 */
 	public static int kI = 20;
+
 	/**
 	 * The number of strings in the set of a brick used in the widening.
 	 */
@@ -163,23 +161,16 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 
 	@Override
 	public Bricks evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Bricks left,
 			Bricks right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (operator == StringConcat.INSTANCE) {
+		if (expression.getOperator() == StringConcat.INSTANCE) {
 			List<Brick> resultList = new ArrayList<>(left.bricks);
 			resultList.addAll(right.bricks);
-
 			return new Bricks(resultList);
-		} else if (operator == StringContains.INSTANCE ||
-				operator == StringEndsWith.INSTANCE ||
-				operator == StringEquals.INSTANCE ||
-				operator == StringIndexOf.INSTANCE ||
-				operator == StringStartsWith.INSTANCE) {
-			return TOP;
 		}
 		return TOP;
 	}
@@ -207,16 +198,16 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Bricks left,
 			Bricks right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (left.isTop() || right.isBottom())
+		if (left.isTop())
 			return Satisfiability.UNKNOWN;
 
-		if (operator == StringContains.INSTANCE)
+		if (expression.getOperator() == StringContains.INSTANCE)
 			return left.contains(right);
 
 		return Satisfiability.UNKNOWN;
@@ -400,47 +391,6 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 	}
 
 	/**
-	 * The substring method of the bricks domain.
-	 *
-	 * @param e The beginning index of the substring
-	 * @param b The ending index of the substring
-	 *
-	 * @return A new Bricks with all possible substrings if the conditions are
-	 *             met or TOP.
-	 */
-	public Bricks substring(
-			long e,
-			long b) {
-		this.normBricks();
-
-		Brick first = this.bricks.get(0);
-
-		TreeSet<String> result = new TreeSet<>();
-
-		if (first.getMin().equals(MathNumber.ONE)
-				&& first.getMax().equals(MathNumber.ONE)
-				&& first.getStrings() != null
-				&& !first.getStrings().isEmpty()) {
-			first.getStrings().forEach(s -> {
-				boolean allGreater = s.length() >= e;
-
-				if (allGreater)
-					result.add(s.substring((int) e, (int) b));
-			});
-		}
-
-		if (result.size() == first.getStrings().size()) {
-			List<Brick> resultList = new ArrayList<>();
-
-			resultList.add(new Brick(new IntInterval(1, 1), result));
-
-			return new Bricks(resultList);
-		}
-
-		return TOP;
-	}
-
-	/**
 	 * Pads the shortest brick list and adds empty brick elements to it, in
 	 * order to make it the same size of the longer brick list, while
 	 * maintaining the same position of equals elements between the two lists.
@@ -480,24 +430,45 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 		return lnew;
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum length
-	 * of this abstract value.
-	 * 
-	 * @return the minimum and maximum length of this abstract value
-	 */
+	@Override
+	public Bricks substring(
+			long e,
+			long b) {
+		this.normBricks();
+
+		Brick first = this.bricks.get(0);
+
+		TreeSet<String> result = new TreeSet<>();
+
+		if (first.getMin().equals(MathNumber.ONE)
+				&& first.getMax().equals(MathNumber.ONE)
+				&& first.getStrings() != null
+				&& !first.getStrings().isEmpty()) {
+			first.getStrings().forEach(s -> {
+				boolean allGreater = s.length() >= e;
+
+				if (allGreater)
+					result.add(s.substring((int) e, (int) b));
+			});
+		}
+
+		if (result.size() == first.getStrings().size()) {
+			List<Brick> resultList = new ArrayList<>();
+
+			resultList.add(new Brick(new IntInterval(1, 1), result));
+
+			return new Bricks(resultList);
+		}
+
+		return TOP;
+	}
+
+	@Override
 	public IntInterval length() {
 		return new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum index
-	 * of {@code s} in {@code this}.
-	 *
-	 * @param s the string to be searched
-	 * 
-	 * @return the minimum and maximum index of {@code s} in {@code this}
-	 */
+	@Override
 	public IntInterval indexOf(
 			Bricks s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
@@ -528,7 +499,9 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 					return bricksat;
 				else
 					sat = sat.lub(bricksat);
-			} else {
+			} else if (b.isTop())
+				sat = sat.lub(Satisfiability.UNKNOWN);
+			else {
 				// the brick can be missing
 				for (String s : b.getStrings())
 					if (s.contains(String.valueOf(c)))

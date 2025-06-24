@@ -13,8 +13,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
-import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -70,10 +70,11 @@ public class IMPArrayAccess extends BinaryExpression {
 		if (arraytypes.isEmpty())
 			return state.bottom();
 
-		ArrayType arraytype = Type.commonSupertype(arraytypes, getStaticType()).asArrayType();
-		HeapDereference container = new HeapDereference(arraytype, left, getLocation());
+		Type cst = Type.commonSupertype(arraytypes, getStaticType());
+		Type inner = cst.isArrayType() ? cst.asArrayType().getInnerType() : Untyped.INSTANCE;
+		HeapDereference container = new HeapDereference(cst, left, getLocation());
 		AccessChild elem = new AccessChild(
-				arraytype.getInnerType(),
+				inner,
 				container,
 				right,
 				getLocation());

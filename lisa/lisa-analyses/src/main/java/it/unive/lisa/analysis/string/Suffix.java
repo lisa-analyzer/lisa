@@ -3,24 +3,31 @@ package it.unive.lisa.analysis.string;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
+import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
-import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
-import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
-import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The suffix string abstract domain.
@@ -33,7 +40,10 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCharProvider {
+public class Suffix
+		implements
+		SmashedSumStringDomain<Suffix>,
+		WholeValueStringDomain<Suffix> {
 
 	private final static Suffix TOP = new Suffix();
 	private final static Suffix BOTTOM = new Suffix(null);
@@ -128,6 +138,15 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 		return new StringRepresentation('*' + suffix);
 	}
 
+	/**
+	 * Yields the suffix of this abstract value.
+	 *
+	 * @return the suffix of this abstract value.
+	 */
+	public String getSuffix() {
+		return this.suffix;
+	}
+
 	@Override
 	public Suffix evalNonNullConstant(
 			Constant constant,
@@ -144,91 +163,42 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 
 	@Override
 	public Suffix evalBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			Suffix left,
 			Suffix right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		if (operator == StringConcat.INSTANCE) {
+		if (expression.getOperator() == StringConcat.INSTANCE)
 			return right;
-		} else if (operator == StringContains.INSTANCE ||
-				operator == StringEndsWith.INSTANCE ||
-				operator == StringEquals.INSTANCE ||
-				operator == StringIndexOf.INSTANCE ||
-				operator == StringStartsWith.INSTANCE) {
-			return TOP;
-		}
-
 		return TOP;
 	}
 
 	@Override
-	public Suffix evalTernaryExpression(
-			TernaryOperator operator,
+	public Satisfiability satisfiesBinaryExpression(
+			BinaryExpression expression,
 			Suffix left,
-			Suffix middle,
 			Suffix right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
-		if (operator == StringReplace.INSTANCE) {
-			String replace = right.getSuffix();
-			String string = middle.getSuffix();
-			String target = left.getSuffix();
-
-			if (!target.contains(replace))
-				return this;
-
-			return new Suffix(target.replace(replace, string));
-		}
-
-		return TOP;
+		if (expression.getOperator() == StringEquals.INSTANCE && !left.suffix.endsWith(right.suffix))
+			return Satisfiability.NOT_SATISFIED;
+		return Satisfiability.UNKNOWN;
 	}
 
-	/**
-	 * Yields the suffix of this abstract value.
-	 *
-	 * @return the suffix of this abstract value.
-	 */
-	public String getSuffix() {
-		return this.suffix;
-	}
-
-	/**
-	 * Yields the suffix corresponding to the substring of this suffix between
-	 * two indexes.
-	 * 
-	 * @param begin where the substring starts
-	 * @param end   where the substring ends
-	 * 
-	 * @return the suffix corresponding to the substring of this suffix between
-	 *             two indexes
-	 */
+	@Override
 	public Suffix substring(
 			long begin,
 			long end) {
 		return new Suffix("");
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum length
-	 * of this abstract value.
-	 * 
-	 * @return the minimum and maximum length of this abstract value
-	 */
+	@Override
 	public IntInterval length() {
 		return new IntInterval(new MathNumber(suffix.length()), MathNumber.PLUS_INFINITY);
 	}
 
-	/**
-	 * Yields the {@link IntInterval} containing the minimum and maximum index
-	 * of {@code s} in {@code this}.
-	 *
-	 * @param s the string to be searched
-	 * 
-	 * @return the minimum and maximum index of {@code s} in {@code this}
-	 */
+	@Override
 	public IntInterval indexOf(
 			Suffix s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
@@ -242,5 +212,102 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCha
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 		return this.suffix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isBottom())
+			return null;
+
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e,
+				StringLength.INSTANCE, pp.getLocation());
+
+		if (isTop())
+			return Collections.singleton(
+					new BinaryExpression(
+							booleanType,
+							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+							strlen,
+							ComparisonLe.INSTANCE,
+							e.getCodeLocation()));
+
+		return Set.of(
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), suffix.length(), pp.getLocation()),
+						strlen,
+						ComparisonLe.INSTANCE,
+						e.getCodeLocation()),
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getStringType(), suffix, pp.getLocation()),
+						e,
+						StringEndsWith.INSTANCE,
+						e.getCodeLocation()));
+	}
+
+	@Override
+	public Suffix generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (constraints == null)
+			return bottom();
+
+		for (BinaryExpression expr : constraints)
+			if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringEndsWith)
+					&& expr.getLeft() instanceof Constant
+					&& ((Constant) expr.getLeft()).getValue() instanceof String)
+				return new Suffix(((Constant) expr.getLeft()).getValue().toString());
+
+		return TOP;
+	}
+
+	@Override
+	public Suffix substring(
+			Set<BinaryExpression> a1,
+			Set<BinaryExpression> a2,
+			ProgramPoint pp)
+			throws SemanticException {
+		return TOP;
+	}
+
+	@Override
+	public Set<BinaryExpression> indexOf_constr(
+			BinaryExpression expression,
+			Suffix other,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isBottom() || other.isBottom())
+			return null;
+
+		IntInterval indexes = indexOf(other);
+		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+
+		Set<BinaryExpression> constr = new HashSet<>();
+		try {
+			constr.add(new BinaryExpression(
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(),
+							pp.getLocation()),
+					expression,
+					ComparisonLe.INSTANCE,
+					pp.getLocation()));
+			if (indexes.getHigh().isFinite())
+				constr.add(new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(),
+								pp.getLocation()),
+						expression,
+						ComparisonGe.INSTANCE,
+						pp.getLocation()));
+		} catch (MathNumberConversionException e1) {
+			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
+		}
+		return constr;
 	}
 }

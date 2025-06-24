@@ -12,6 +12,9 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.combination.ValueCartesianProduct;
+import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
+import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
+import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.dataflow.AvailableExpressions;
 import it.unive.lisa.analysis.dataflow.DefiniteDataflowDomain;
 import it.unive.lisa.analysis.dataflow.PossibleDataflowDomain;
@@ -25,8 +28,10 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.numeric.UpperBounds.IdSet;
+import it.unive.lisa.analysis.string.Prefix;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.types.InferredTypes;
@@ -459,9 +464,23 @@ public class SemanticsSanityTest {
 			return new Sign();
 		if (root == IdSet.class && param == Set.class)
 			return Collections.emptySet();
+		if (param == Interval.class || param == SmashedSumIntDomain.class)
+			return new Interval();
+		if (param == SmashedSumStringDomain.class)
+			return new Prefix();
+		if (param == Satisfiability.class)
+			return Satisfiability.UNKNOWN;
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);
+	}
+
+	private Object shortcut(
+			Class<?> root) {
+		if (root == WholeValueAnalysis.class)
+			return new WholeValueAnalysis<>(new Interval(), new Prefix(), Satisfiability.UNKNOWN);
+
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -494,9 +513,13 @@ public class SemanticsSanityTest {
 					else if (c.getParameterCount() == 4)
 						quaternary = c;
 				}
-				if (clazz.getName().contains("FixpointInfo"))
-					System.out.println();
 				try {
+					instance = (T) shortcut(clazz);
+					if (instance != null) {
+						instances.add(instance);
+						nullary = unary = binary = ternary = quaternary = null;
+						continue;
+					}
 					if (nullary != null)
 						instance = (T) nullary.newInstance();
 					else if (unary != null) {

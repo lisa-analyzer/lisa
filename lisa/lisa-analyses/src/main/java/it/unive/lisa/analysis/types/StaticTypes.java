@@ -15,7 +15,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.type.NullType;
@@ -173,7 +172,7 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
-			BinaryOperator operator,
+			BinaryExpression expression,
 			StaticTypes left,
 			StaticTypes right,
 			ProgramPoint pp,
@@ -182,8 +181,12 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.type.allInstances(types);
 		Set<Type> relems = right.type.allInstances(types);
-		return new InferredTypes().satisfiesBinaryExpression(operator, new InferredTypes(types, lelems),
-				new InferredTypes(types, relems), pp, oracle);
+		return new InferredTypes().satisfiesBinaryExpression(
+				expression,
+				new InferredTypes(types, lelems),
+				new InferredTypes(types, relems),
+				pp,
+				oracle);
 	}
 
 	@Override
