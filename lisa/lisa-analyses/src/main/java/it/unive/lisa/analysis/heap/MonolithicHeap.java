@@ -194,10 +194,12 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			child.forEach(e -> acc.add(e.getStaticType()));
 			Type refType = Type.commonSupertype(acc, Untyped.INSTANCE);
 
-			HeapLocation loc = (HeapLocation) receiver.elements.iterator().next();
 			HeapLocation e = new HeapLocation(refType, MONOLITH_NAME, true,
 					expression.getCodeLocation());
-			e.setAllocation(loc.isAllocation());
+			if (receiver.elements.iterator().next() instanceof HeapLocation) {
+				HeapLocation loc = (HeapLocation) receiver.elements.iterator().next();
+				e.setAllocation(loc.isAllocation());
+			}
 			return new ExpressionSet(e);
 		}
 

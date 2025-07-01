@@ -1,5 +1,5 @@
 class A {
-    A() {
+    ~A() {
      def i1 = 0;
     }
     getOne() {

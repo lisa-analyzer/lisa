@@ -1,6 +1,11 @@
 class A {	
 	a;
 	b;
+
+	~A(x, y) {
+		this.a = x;
+		this.b = y;
+	}
 	
 	f1() {
 		def o1 = new A(1,2); 

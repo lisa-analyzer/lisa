@@ -249,19 +249,12 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			ProgramPoint pp = (ProgramPoint) params[0];
 			SemanticOracle oracle = (SemanticOracle) params[1];
 
-			for (SymbolicExpression rec : receiver) {
-				rec = removeTypingExpressions(rec);
-				if (rec instanceof MemoryPointer) {
-					MemoryPointer pid = (MemoryPointer) rec;
-					for (Type t : oracle.getRuntimeTypesOf(pid, pp, oracle))
-						if (t.isPointerType()) {
-							Type inner = t.asPointerType().getInnerType();
-							HeapLocation e = new HeapLocation(inner, inner.toString(), true,
-									expression.getCodeLocation());
-							result.add(e);
-						}
+			for (SymbolicExpression ch : child)
+				for (Type t : oracle.getRuntimeTypesOf(ch, pp, oracle)) {
+					HeapLocation e = new HeapLocation(t, t.toString(), true,
+							expression.getCodeLocation());
+					result.add(e);
 				}
-			}
 			return new ExpressionSet(result);
 		}
 

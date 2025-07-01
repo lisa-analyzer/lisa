@@ -126,8 +126,8 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			if (rhs instanceof MemoryPointer) {
 				HeapLocation rhs_ref = ((MemoryPointer) rhs).getReferencedLocation();
 				if (id instanceof MemoryPointer) {
-					// we have x = y, where both are pointers we perform *x = *y
-					// so that x and y become aliases
+					// we have x = y, where both are pointers
+					// we perform *x = *y so that x and y become aliases
 					Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
 					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(lhs_ref, rhs_ref, pp, oracle);
 					result = result.lub(mk(sss, heap));
