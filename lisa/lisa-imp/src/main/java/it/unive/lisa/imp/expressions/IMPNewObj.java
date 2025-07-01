@@ -87,7 +87,7 @@ public class IMPNewObj extends NaryExpression {
 		AnalysisState<A> allocated = state.smallStepSemantics(creation, this);
 
 		// we need to add the receiver to the parameters of the constructor call
-		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$lisareceiver", reftype);
+		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$rec@"+getLocation(), reftype);
 		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
 
 		// we also have to add the receiver inside the state
