@@ -375,6 +375,12 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+		
 		Identifier id;
 		Sign eval;
 		boolean rightIsExpr;

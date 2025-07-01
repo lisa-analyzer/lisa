@@ -269,6 +269,12 @@ public class IntegerConstantPropagation
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
 		BinaryOperator operator = expression.getOperator();
 		ValueExpression left = (ValueExpression) expression.getLeft();
 		ValueExpression right = (ValueExpression) expression.getRight();
