@@ -353,6 +353,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 				e = new StackAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
 			else
 				e = new HeapAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+			e.setAllocation(true);
 
 			// propagates the annotations of expression
 			// to the newly created allocation site

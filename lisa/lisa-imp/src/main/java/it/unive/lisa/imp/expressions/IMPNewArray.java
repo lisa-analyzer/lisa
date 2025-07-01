@@ -77,34 +77,38 @@ public class IMPNewArray extends NaryExpression {
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Type type = getStaticType();
-		MemoryAllocation alloc = new MemoryAllocation(type, getLocation(), staticallyAllocated);
-		AnalysisState<A> allocSt = state.smallStepSemantics(alloc, this);
-		ExpressionSet allocExps = allocSt.getComputedExpressions();
+		ReferenceType reftype = new ReferenceType(type);
+		MemoryAllocation creation = new MemoryAllocation(type, getLocation(), staticallyAllocated);
+		HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
-		AnalysisState<A> initSt = state.bottom();
-		for (SymbolicExpression allocExp : allocExps) {
+		// we start by allocating the memory region
+		AnalysisState<A> allocated = state.smallStepSemantics(creation, this);
+
+		// we define the length of the array as a child element
+		AnalysisState<A> sem = state.bottom();
+		for (SymbolicExpression alloc : allocated.getComputedExpressions()) {
 			AccessChild len = new AccessChild(
 					Int32Type.INSTANCE,
-					allocExp,
+					alloc,
 					new Variable(Untyped.INSTANCE, "len", getLocation()),
 					getLocation());
 
 			AnalysisState<A> lenSt = state.bottom();
 			// TODO fix when we'll support multidimensional arrays
 			for (SymbolicExpression dim : params[0])
-				lenSt = lenSt.lub(allocSt.assign(len, dim, this));
-			initSt = initSt.lub(lenSt);
+				lenSt = lenSt.lub(allocated.assign(len, dim, this));
+			sem = sem.lub(lenSt);
 		}
 
-		AnalysisState<A> refSt = state.bottom();
-		for (SymbolicExpression loc : allocSt.getComputedExpressions()) {
-			ReferenceType t = new ReferenceType(loc.getStaticType());
-			HeapReference ref = new HeapReference(t, loc, getLocation());
-			AnalysisState<A> refSem = initSt.smallStepSemantics(ref, this);
-			refSt = refSt.lub(refSem);
+		// finally, we leave a reference to the newly created array on the stack
+		AnalysisState<A> result = state.bottom();
+		for (SymbolicExpression loc : allocated.getComputedExpressions()) {
+			ReferenceType staticType = new ReferenceType(loc.getStaticType());
+			HeapReference locref = new HeapReference(staticType, loc, getLocation());
+			result = result.lub(sem.smallStepSemantics(locref, this));
 		}
 
-		return refSt;
+		return sem.smallStepSemantics(ref, this);
 	}
 
 	@Override

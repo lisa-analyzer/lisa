@@ -185,14 +185,19 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 				ExpressionSet child,
 				Object... params)
 				throws SemanticException {
+			if (receiver.size() != 1)
+				throw new SemanticException("Rewriting of receiver led to more than one expression");
+
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			Set<Type> acc = new HashSet<>();
 			child.forEach(e -> acc.add(e.getStaticType()));
 			Type refType = Type.commonSupertype(acc, Untyped.INSTANCE);
 
+			HeapLocation loc = (HeapLocation) receiver.elements.iterator().next();
 			HeapLocation e = new HeapLocation(refType, MONOLITH_NAME, true,
 					expression.getCodeLocation());
+			e.setAllocation(loc.isAllocation());
 			return new ExpressionSet(e);
 		}
 
@@ -205,6 +210,7 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			// new one is modeled through the monolith
 			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
 					expression.getCodeLocation());
+			e.setAllocation(true);
 			return new ExpressionSet(e);
 		}
 
@@ -214,14 +220,16 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 				ExpressionSet ref,
 				Object... params)
 				throws SemanticException {
+			if (ref.size() != 1)
+				throw new SemanticException("Rewriting of receiver led to more than one expression");
+
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			Set<Type> acc = new HashSet<>();
 			ref.forEach(e -> acc.add(e.getStaticType()));
 			Type refType = Type.commonSupertype(acc, Untyped.INSTANCE);
 
-			HeapLocation loc = new HeapLocation(refType, MONOLITH_NAME, true,
-					expression.getCodeLocation());
+			HeapLocation loc = (HeapLocation) ref.elements.iterator().next();
 			MemoryPointer e = new MemoryPointer(new ReferenceType(refType), loc, expression.getCodeLocation());
 			return new ExpressionSet(e);
 		}

@@ -16,6 +16,8 @@ import it.unive.lisa.type.Type;
  */
 public class HeapLocation extends Identifier {
 
+	private boolean isAllocation = false;
+
 	/**
 	 * Builds the heap location.
 	 * 
@@ -43,6 +45,9 @@ public class HeapLocation extends Identifier {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		// isAllocation is not considered in hashCode, as it is a property
+		// that is not relevant for the identity of the heap location
+		// (it is just a property that can be used to refine reasoning)
 		result = prime * result + (isWeak() ? 1231 : 1237);
 		return result;
 	}
@@ -59,6 +64,9 @@ public class HeapLocation extends Identifier {
 		HeapLocation other = (HeapLocation) obj;
 		if (isWeak() != other.isWeak())
 			return false;
+		// isAllocation is not considered in equals, as it is a property
+		// that is not relevant for the identity of the heap location
+		// (it is just a property that can be used to refine reasoning)
 		return true;
 	}
 
@@ -96,5 +104,29 @@ public class HeapLocation extends Identifier {
 			Object... params)
 			throws SemanticException {
 		return visitor.visit(this, params);
+	}
+
+	/**
+	 * Returns whether this heap location is a reference to a region being
+	 * freshly allocated or not. Value/type domains can exploit this information
+	 * to refine their reasoning.
+	 * 
+	 * @return whether this heap location is an allocation site or not
+	 */
+	public boolean isAllocation() {
+		return isAllocation;
+	}
+
+	/**
+	 * Sets whether this heap location is a reference to a region being freshly
+	 * allocated or not. Value/type domains can exploit this information to
+	 * refine their reasoning.
+	 * 
+	 * @param isAllocation whether this heap location is an allocation site or
+	 *                         not
+	 */
+	public void setAllocation(
+			boolean isAllocation) {
+		this.isAllocation = isAllocation;
 	}
 }

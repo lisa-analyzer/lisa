@@ -13,7 +13,9 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.TernaryExpression;
@@ -24,6 +26,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.NullType;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
@@ -150,10 +153,26 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		TypeSystem types = pp.getProgram().getTypes();
+		if (id instanceof HeapLocation && ((HeapLocation) id).isAllocation())
+			// if this is a heap location that is being allocated,
+			// its types are exactly the static type
+			return new InferredTypes(types, id.getStaticType());
+		if (id instanceof MemoryPointer) {
+			// if this is a memory pointer, its types are all the types
+			// that can be pointed to by the static type of the pointer
+			MemoryPointer mp = (MemoryPointer) id;
+			InferredTypes inner = evalIdentifier(mp.getReferencedLocation(), environment, pp, oracle);
+			if (inner.isTop())
+				return new InferredTypes(types, id.getStaticType().allInstances(types));
+			if (inner.isBottom())
+				return BOTTOM;
+			return new InferredTypes(types,
+					inner.elements.stream().map(t -> new ReferenceType(t)).collect(Collectors.toSet()));
+		}
 		InferredTypes eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp, oracle);
 		if (!eval.isTop())
 			return eval;
-		TypeSystem types = pp.getProgram().getTypes();
 		return new InferredTypes(types, id.getStaticType().allInstances(types));
 	}
 

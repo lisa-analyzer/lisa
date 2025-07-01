@@ -274,6 +274,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			Type t = expression.getStaticType();
 			if (t.isInMemoryType()) {
 				HeapLocation e = new HeapLocation(t, t.toString(), true, expression.getCodeLocation());
+				e.setAllocation(true);
 				result.add(e);
 			}
 			return new ExpressionSet(result);

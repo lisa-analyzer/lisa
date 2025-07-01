@@ -80,24 +80,35 @@ public class IMPNewObj extends NaryExpression {
 			throws SemanticException {
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
-		MemoryAllocation created = new MemoryAllocation(type, getLocation(), staticallyAllocated);
-		HeapReference ref = new HeapReference(reftype, created, getLocation());
+		MemoryAllocation creation = new MemoryAllocation(type, getLocation(), staticallyAllocated);
+		HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
-		// we need to add the receiver to the parameters
+		// we start by allocating the memory region
+		AnalysisState<A> allocated = state.smallStepSemantics(creation, this);
+
+		// we need to add the receiver to the parameters of the constructor call
 		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$lisareceiver", reftype);
 		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
 
 		// we also have to add the receiver inside the state
-		AnalysisState<A> callstate = paramThis.forwardSemantics(state, interprocedural, expressions);
+		AnalysisState<A> callstate = paramThis.forwardSemantics(allocated, interprocedural, expressions);
+		ExpressionSet[] fullParams = ArrayUtils.insert(0, params, callstate.getComputedExpressions());
+
+		// we store a reference to the newly created region in the receiver
 		AnalysisState<A> tmp = state.bottom();
-		for (SymbolicExpression v : callstate.getComputedExpressions())
-			tmp = tmp.lub(callstate.assign(v, ref, paramThis));
-		ExpressionSet[] fullParams = ArrayUtils.insert(0, params,
-				callstate.getComputedExpressions());
+		for (SymbolicExpression rec : callstate.getComputedExpressions())
+			tmp = tmp.lub(callstate.assign(rec, ref, paramThis));
+		// we store the approximation of the receiver in the sub-expressions
 		expressions.put(paramThis, tmp);
 
-		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(), CallType.INSTANCE, type.toString(),
-				type.toString(), fullExpressions);
+		// constructor call
+		UnresolvedCall call = new UnresolvedCall(
+				getCFG(),
+				getLocation(),
+				CallType.INSTANCE,
+				type.toString(),
+				type.toString(),
+				fullExpressions);
 		AnalysisState<A> sem = call.forwardSemanticsAux(interprocedural, tmp, fullParams, expressions);
 
 		// now remove the instrumented receiver
@@ -106,16 +117,9 @@ public class IMPNewObj extends NaryExpression {
 			if (v instanceof Identifier)
 				sem = sem.forgetIdentifier((Identifier) v);
 
-		sem = sem.smallStepSemantics(created, this);
-
-		AnalysisState<A> result = state.bottom();
-		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-			ReferenceType staticType = new ReferenceType(loc.getStaticType());
-			HeapReference locref = new HeapReference(staticType, loc, getLocation());
-			result = result.lub(sem.smallStepSemantics(locref, call));
-		}
-
-		return result;
+		// finally, we leave a reference to the newly created object on the
+		// stack
+		return sem.smallStepSemantics(ref, this);
 	}
 
 	@Override

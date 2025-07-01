@@ -362,6 +362,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 						expression.getCodeLocation().getCodeLocation(),
 						true,
 						expression.getCodeLocation());
+			id.setAllocation(true);
 
 			// propagates the annotations of expression
 			// to the newly created allocation site
