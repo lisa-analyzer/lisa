@@ -100,7 +100,8 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.optimize = false;
 		conf.serializeResults = true;
-		conf.testDir = "dataflow/issue322";
+		conf.testDir = "issues";
+		conf.testSubDir = "322";
 
 		perform(conf, program);
 	}

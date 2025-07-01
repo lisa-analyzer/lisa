@@ -33,6 +33,6 @@
     "syntacticChecks" : "",
     "useWideningPoints" : "true",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs/dataflow/issue322"
+    "workdir" : "test-outputs/issues/322"
   }
 }
