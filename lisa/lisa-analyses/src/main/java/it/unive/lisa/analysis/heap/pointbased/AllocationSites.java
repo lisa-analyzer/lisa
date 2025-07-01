@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -85,6 +86,38 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	@Override
 	public List<HeapReplacement> getSubstitution() {
 		return Collections.emptyList();
+	}
+
+	@Override
+	public boolean lessOrEqualAux(AllocationSites other) throws SemanticException {
+		Set<AllocationSite> hullLeft = new HashSet<>(elements);
+		Set<AllocationSite> hullRight = new HashSet<>(other.elements);
+		hullLeft.removeAll(other.elements);
+		hullRight.removeAll(elements);
+		if (hullLeft.isEmpty() && hullRight.isEmpty())
+			return true;
+
+		// there could be strong identifiers in this that are
+		// replaced by weak identifiers in other
+		for (AllocationSite left : hullLeft) 
+			if (left.isWeak())
+				// a weak identifier cannot be replaced by another one
+				return false;
+			else {
+				// if the left is strong, it must be present in the right
+				// as a weak identifier
+				Optional<AllocationSite> match = hullRight.stream().filter(e -> e.getName().equals(left.getName()) && e.isWeak()).findAny();
+				if (match.isEmpty())
+					// if there is no match, then the partial order does not hold
+					return false;
+				else 
+					// if there is a match, we just remove the alternative for other identifiers
+					// and proceed with the next one
+					hullRight.remove(match.get());
+			} 
+		
+		// if we reach here we found a match for all strong identifiers, we can just return true
+		return true;
 	}
 
 	@Override
