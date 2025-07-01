@@ -13,6 +13,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushFromConstraints;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
@@ -132,6 +134,17 @@ public class IntegerConstantPropagation
 		if (constant.getValue() instanceof Integer)
 			return new IntegerConstantPropagation((Integer) constant.getValue());
 		return top();
+	}
+
+	@Override
+	public IntegerConstantPropagation evalPushAny(
+			PushAny pushAny,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (pushAny instanceof PushFromConstraints)
+			return generate(((PushFromConstraints) pushAny).getConstraints(), pp);
+		return WholeValueDomain.super.evalPushAny(pushAny, pp, oracle);
 	}
 
 	@Override
