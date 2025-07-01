@@ -39,7 +39,6 @@ public class MemoryAbstractionsTest extends AnalysisTestExecutor {
 		conf.testDir = "heap";
 		conf.testSubDir = "pp";
 		conf.programFile = "heap-pp.imp";
-		conf.forceUpdate = true;
 		perform(conf, true);
 	}
 

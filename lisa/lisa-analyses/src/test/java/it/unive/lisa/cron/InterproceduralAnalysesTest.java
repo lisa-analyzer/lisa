@@ -1,7 +1,5 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
@@ -20,6 +18,7 @@ import it.unive.lisa.interprocedural.callgraph.CHACallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
+import org.junit.Test;
 
 public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 
@@ -136,7 +135,7 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-    public void issue324() throws ParsingException, AnalysisException {
+	public void issue324() throws ParsingException, AnalysisException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = DefaultConfiguration.simpleState(
@@ -149,5 +148,5 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.testSubDir = "324";
 		conf.programFile = "324.imp";
 		perform(conf);
-    }
+	}
 }
