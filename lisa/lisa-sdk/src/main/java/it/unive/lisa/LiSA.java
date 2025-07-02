@@ -9,6 +9,7 @@ import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -62,8 +63,30 @@ public class LiSA {
 	 * 
 	 * @throws AnalysisException if anything goes wrong during the analysis
 	 */
+	public LiSAReport run(
+			Program... programs)
+			throws AnalysisException {
+		return run(null, programs);
+	}
+
+	/**
+	 * Runs LiSA, executing all the checks that have been added.
+	 * 
+	 * @param infoProvider a callback that is invoked at the end of the
+	 *                         analysis, right before the report is dumped to
+	 *                         json. This can be used to provide additional
+	 *                         information to the report that will be included
+	 *                         in the dump
+	 * @param programs     the programs, each written in a single programming
+	 *                         language, to analyze
+	 * 
+	 * @return the {@link LiSAReport} containing the details of the analysis
+	 * 
+	 * @throws AnalysisException if anything goes wrong during the analysis
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public LiSAReport run(
+			Consumer<LiSAReport> infoProvider,
 			Program... programs)
 			throws AnalysisException {
 		LOG.info(conf.toString());
@@ -88,6 +111,8 @@ public class LiSA {
 		LOG.info("LiSA statistics:\n" + stats);
 
 		LiSAReport report = new LiSAReport(conf, stats, warnings, fileManager.createdFiles());
+		if (infoProvider != null)
+			infoProvider.accept(report);
 		if (conf.jsonOutput) {
 			LOG.info("Dumping analysis report to '" + REPORT_NAME + "'");
 			try {

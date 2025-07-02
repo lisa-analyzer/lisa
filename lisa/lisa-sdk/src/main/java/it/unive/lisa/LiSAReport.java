@@ -3,7 +3,10 @@ package it.unive.lisa;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.util.file.FileManager;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A structured report containing the information about an analysis that has
@@ -20,6 +23,8 @@ public class LiSAReport {
 	private final Collection<Warning> warnings;
 
 	private final Collection<String> createdFiles;
+
+	private final Map<String, StructuredRepresentation> additionalInfo;
 
 	/**
 	 * Builds the report.
@@ -38,6 +43,7 @@ public class LiSAReport {
 		this.configuration = configuration;
 		this.warnings = warnings;
 		this.createdFiles = createdFiles;
+		this.additionalInfo = new TreeMap<>();
 	}
 
 	/**
@@ -45,7 +51,7 @@ public class LiSAReport {
 	 * 
 	 * @return the information
 	 */
-	public LiSARunInfo getInfo() {
+	public LiSARunInfo getRunInfo() {
 		return info;
 	}
 
@@ -77,6 +83,16 @@ public class LiSAReport {
 		return createdFiles;
 	}
 
+	/**
+	 * Yields the additional information about the analysis, in the form of a
+	 * property bag.
+	 * 
+	 * @return the additional information
+	 */
+	public Map<String, StructuredRepresentation> getAdditionalInfo() {
+		return additionalInfo;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -85,6 +101,7 @@ public class LiSAReport {
 		result = prime * result + ((createdFiles == null) ? 0 : createdFiles.hashCode());
 		result = prime * result + ((info == null) ? 0 : info.hashCode());
 		result = prime * result + ((warnings == null) ? 0 : warnings.hashCode());
+		result = prime * result + ((additionalInfo == null) ? 0 : additionalInfo.hashCode());
 		return result;
 	}
 
@@ -118,12 +135,17 @@ public class LiSAReport {
 				return false;
 		} else if (!warnings.equals(other.warnings))
 			return false;
+		if (additionalInfo == null) {
+			if (other.additionalInfo != null)
+				return false;
+		} else if (!additionalInfo.equals(other.additionalInfo))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
 		return "LiSAReport [info=" + info + ", configuration=" + configuration + ", warnings=" + warnings
-				+ ", createdFiles=" + createdFiles + "]";
+				+ ", createdFiles=" + createdFiles + ", additionalInfo=" + additionalInfo + "]";
 	}
 }

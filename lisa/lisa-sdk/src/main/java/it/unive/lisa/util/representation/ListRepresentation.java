@@ -59,7 +59,7 @@ public class ListRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public SerializableValue toSerializableValue() {
+	public SerializableArray toSerializableValue() {
 		List<SerializableValue> values = new ArrayList<>(elements.size());
 		for (StructuredRepresentation e : elements)
 			values.add(e.toSerializableValue());

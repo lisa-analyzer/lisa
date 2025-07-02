@@ -211,7 +211,10 @@ public class EqualityContractVerificationTest {
 					&& clazz != ContextInsensitiveToken.class
 					// some testing classes that we do not care about end up
 					// here
-					&& !clazz.getName().contains("Test"))
+					&& !clazz.getName().contains("Test")
+					// this is a private class that we cannot reach in any other
+					// way
+					&& !clazz.getName().contains("JsonReport$NonEmptyFilter"))
 				notTested.add(clazz);
 		}
 

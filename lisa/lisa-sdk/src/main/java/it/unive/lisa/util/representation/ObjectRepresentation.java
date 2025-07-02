@@ -54,7 +54,7 @@ public class ObjectRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public SerializableValue toSerializableValue() {
+	public SerializableObject toSerializableValue() {
 		SortedMap<String, SerializableValue> fields = new TreeMap<>();
 		for (Entry<String, StructuredRepresentation> e : this.fields.entrySet())
 			fields.put(e.getKey(), e.getValue().toSerializableValue());
