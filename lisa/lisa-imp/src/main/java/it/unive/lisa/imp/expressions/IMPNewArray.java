@@ -101,13 +101,6 @@ public class IMPNewArray extends NaryExpression {
 		}
 
 		// finally, we leave a reference to the newly created array on the stack
-		AnalysisState<A> result = state.bottom();
-		for (SymbolicExpression loc : allocated.getComputedExpressions()) {
-			ReferenceType staticType = new ReferenceType(loc.getStaticType());
-			HeapReference locref = new HeapReference(staticType, loc, getLocation());
-			result = result.lub(sem.smallStepSemantics(locref, this));
-		}
-
 		return sem.smallStepSemantics(ref, this);
 	}
 

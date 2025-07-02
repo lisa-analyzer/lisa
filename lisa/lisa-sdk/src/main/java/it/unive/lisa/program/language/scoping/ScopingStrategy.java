@@ -53,9 +53,9 @@ public interface ScopingStrategy {
 	 * valid post-state of {@code call}. Specifically, the state returned by
 	 * this method corresponds to the parameter {@code state} modified by (i)
 	 * popping the scope introduced before the call happened (see
-	 * {@link #scope(CFGCall, ScopeToken, AnalysisState, ExpressionSet[])}), and (ii)
-	 * storing the returned value on the meta-variable left on the stack, if
-	 * any.
+	 * {@link #scope(CFGCall, ScopeToken, AnalysisState, ExpressionSet[])}), and
+	 * (ii) storing the returned value on the meta-variable left on the stack,
+	 * if any.
 	 * 
 	 * @param <A>   the type of {@link AbstractState} used by this strategy
 	 * @param call  the call that caused the computation of the given state
