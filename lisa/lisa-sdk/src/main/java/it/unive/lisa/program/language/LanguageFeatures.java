@@ -3,6 +3,9 @@ package it.unive.lisa.program.language;
 import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
+import it.unive.lisa.program.language.scoping.DefaultScopingStrategy;
+import it.unive.lisa.program.language.scoping.ScopingStrategy;
+import it.unive.lisa.program.language.validation.BaseValidationLogic;
 import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 
 /**
@@ -39,11 +42,23 @@ public abstract class LanguageFeatures {
 	public abstract ParameterAssigningStrategy getAssigningStrategy();
 
 	/**
+	 * Yields the {@link ScopingStrategy} that defines how scopes are pushed and
+	 * popped during the analysis, e.g., when entering and exiting a CFG.
+	 * 
+	 * @return the scoping strategy
+	 */
+	public ScopingStrategy getScopingStrategy() {
+		return new DefaultScopingStrategy();
+	}
+
+	/**
 	 * Yields the {@link ProgramValidationLogic} that validates the structure of
 	 * a program, identifying erroneous situations (e.g., code members with the
 	 * same signature) that can crash the analysis.
 	 * 
 	 * @return the validation logic
 	 */
-	public abstract ProgramValidationLogic getProgramValidationLogic();
+	public ProgramValidationLogic getProgramValidationLogic() {
+		return new BaseValidationLogic();
+	}
 }

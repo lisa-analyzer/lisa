@@ -1,0 +1,60 @@
+package it.unive.lisa.program.language.scoping;
+
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
+import org.apache.commons.lang3.tuple.Pair;
+
+/**
+ * A default implementation of {@link ScopingStrategy} that pushes/pops the
+ * scope on the whole state using {@link AnalysisState#pushScope(ScopeToken)}
+ * and {@link AnalysisState#popScope(ScopeToken)}.
+ */
+public class DefaultScopingStrategy
+		implements
+		ScopingStrategy {
+
+	@Override
+	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> scope(
+			CFGCall call,
+			ScopeToken scope,
+			AnalysisState<A> state,
+			ExpressionSet[] actuals)
+			throws SemanticException {
+		ExpressionSet[] locals = new ExpressionSet[actuals.length];
+		AnalysisState<A> callState = state.pushScope(scope);
+		for (int i = 0; i < actuals.length; i++)
+			locals[i] = actuals[i].pushScope(scope);
+		return Pair.of(callState, locals);
+	}
+
+	@Override
+	public <A extends AbstractState<A>> AnalysisState<A> unscope(
+			CFGCall call,
+			ScopeToken scope,
+			AnalysisState<A> state)
+			throws SemanticException {
+		if (call.returnsVoid(state))
+			return state.popScope(scope);
+
+		Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
+
+		if (state.getComputedExpressions().isEmpty()) {
+			// a return value is expected, but nothing is left on the stack
+			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
+			return state.assign(meta, inv, call).popScope(scope);
+		}
+
+		AnalysisState<A> tmp = state.bottom();
+		for (SymbolicExpression ret : state.getComputedExpressions())
+			tmp = tmp.lub(state.assign(meta, ret, call));
+
+		return tmp.popScope(scope);
+	}
+}

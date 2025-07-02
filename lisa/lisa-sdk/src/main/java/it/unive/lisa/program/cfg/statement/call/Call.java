@@ -7,13 +7,18 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.VoidType;
 import it.unive.lisa.util.collections.CollectionUtilities;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -302,5 +307,66 @@ public abstract class Call extends NaryExpression {
 			types[i] = t;
 		}
 		return types;
+	}
+
+	/**
+	 * Assuming that the result of executing this call is {@code returned}, this
+	 * method yields whether or not this call returned no value or its return
+	 * type is {@link VoidType}. If this method returns {@code true}, then no
+	 * value should be assigned to the call's meta variable.
+	 * 
+	 * @param <A>      the type of {@link AbstractState} in the analysis state
+	 * @param returned the post-state of the call
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public <A extends AbstractState<A>> boolean returnsVoid(
+			AnalysisState<A> returned) {
+		if (getStaticType().isVoidType())
+			return true;
+
+		if (!getStaticType().isUntyped())
+			return false;
+
+		if (this instanceof CFGCall) {
+			CFGCall cfgcall = (CFGCall) this;
+			Collection<CFG> targets = cfgcall.getTargetedCFGs();
+			if (!targets.isEmpty())
+				return !targets.iterator()
+						.next()
+						.getNormalExitpoints()
+						.stream()
+						// returned values will be stored in meta variables
+						.anyMatch(st -> st instanceof MetaVariableCreator);
+		}
+
+		if (this instanceof NativeCall) {
+			NativeCall nativecall = (NativeCall) this;
+			Collection<NativeCFG> targets = nativecall.getTargetedConstructs();
+			if (!targets.isEmpty())
+				// native cfgs will always rewrite to expressions and return a
+				// value
+				return false;
+		}
+
+		if (this instanceof TruncatedParamsCall)
+			return ((TruncatedParamsCall) this).getInnerCall().returnsVoid(returned);
+
+		if (this instanceof MultiCall) {
+			MultiCall multicall = (MultiCall) this;
+			Collection<Call> targets = multicall.getCalls();
+			if (!targets.isEmpty())
+				// we get the return type from one of its targets
+				return targets.iterator().next().returnsVoid(returned);
+		}
+
+		if (returned != null)
+			if (returned.getComputedExpressions().isEmpty())
+				return true;
+			else if (returned.getComputedExpressions().size() == 1
+					&& returned.getComputedExpressions().iterator().next() instanceof Skip)
+				return true;
+
+		return false;
 	}
 }

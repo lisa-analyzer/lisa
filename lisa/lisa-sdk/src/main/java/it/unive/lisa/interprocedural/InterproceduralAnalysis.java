@@ -3,7 +3,6 @@ package it.unive.lisa.interprocedural;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -13,26 +12,16 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.NativeCFG;
-import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.program.cfg.statement.call.MultiCall;
-import it.unive.lisa.program.cfg.statement.call.NativeCall;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PushInv;
-import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.VoidType;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Set;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * The definition of interprocedural analyses.
@@ -195,137 +184,4 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * @return the results of the fixpoint
 	 */
 	FixpointResults<A> getFixpointResults();
-
-	/**
-	 * Converts the pre-state of {@code call} to a valid entry state for one of
-	 * its targets. Specifically, the state returned by this method corresponds
-	 * to the given one modified by (i) pushing the scope that is introduced
-	 * when the call happens (and that can be popped with
-	 * {@link #unscope(CFGCall, ScopeToken, AnalysisState)}), and (ii)
-	 * generating the expressions for the formal parameters by pushing the same
-	 * scope to the ones of the actual parameters.
-	 * 
-	 * @param scope   the scope corresponding to the call
-	 * @param state   the exit state of the call's target
-	 * @param actuals the expressions representing the actual parameters at the
-	 *                    program point of the call
-	 * 
-	 * @return a pair containing the computed call state and the expressions
-	 *             corresponding to the formal parameters
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	default Pair<AnalysisState<A>, ExpressionSet[]> scope(
-			AnalysisState<A> state,
-			ScopeToken scope,
-			ExpressionSet[] actuals)
-			throws SemanticException {
-		ExpressionSet[] locals = new ExpressionSet[actuals.length];
-		AnalysisState<A> callState = state.pushScope(scope);
-		for (int i = 0; i < actuals.length; i++)
-			locals[i] = actuals[i].pushScope(scope);
-		return Pair.of(callState, locals);
-	}
-
-	/**
-	 * Converts the exit state of a cfg that was invoked by {@code call} to a
-	 * valid post-state of {@code call}. Specifically, the state returned by
-	 * this method corresponds to the given one modified by (i) popping the
-	 * scope introduced before the call happened (see
-	 * {@link #scope(AnalysisState, ScopeToken, ExpressionSet[])}), and (ii)
-	 * storing the returned value on the meta-variable left on the stack, if
-	 * any.
-	 * 
-	 * @param call  the call that caused the computation of the given state
-	 *                  through a fixpoint computation
-	 * @param scope the scope corresponding to the call
-	 * @param state the exit state of the call's target
-	 * 
-	 * @return the state that can be returned by the call
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	default AnalysisState<A> unscope(
-			CFGCall call,
-			ScopeToken scope,
-			AnalysisState<A> state)
-			throws SemanticException {
-		if (returnsVoid(call, state))
-			return state.popScope(scope);
-
-		Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
-
-		if (state.getComputedExpressions().isEmpty()) {
-			// a return value is expected, but nothing is left on the stack
-			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-			return state.assign(meta, inv, call).popScope(scope);
-		}
-
-		AnalysisState<A> tmp = state.bottom();
-		for (SymbolicExpression ret : state.getComputedExpressions())
-			tmp = tmp.lub(state.assign(meta, ret, call));
-
-		return tmp.popScope(scope);
-	}
-
-	/**
-	 * Yields whether or if this call returned no value or its return type is
-	 * {@link VoidType}. If this method returns {@code true}, then no value
-	 * should be assigned to the call's meta variable.
-	 * 
-	 * @param call     the call
-	 * @param returned the post-state of the call
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	default boolean returnsVoid(
-			Call call,
-			AnalysisState<A> returned) {
-		if (call.getStaticType().isVoidType())
-			return true;
-
-		if (!call.getStaticType().isUntyped())
-			return false;
-
-		if (call instanceof CFGCall) {
-			CFGCall cfgcall = (CFGCall) call;
-			Collection<CFG> targets = cfgcall.getTargetedCFGs();
-			if (!targets.isEmpty())
-				return !targets.iterator()
-						.next()
-						.getNormalExitpoints()
-						.stream()
-						// returned values will be stored in meta variables
-						.anyMatch(st -> st instanceof MetaVariableCreator);
-		}
-
-		if (call instanceof NativeCall) {
-			NativeCall nativecall = (NativeCall) call;
-			Collection<NativeCFG> targets = nativecall.getTargetedConstructs();
-			if (!targets.isEmpty())
-				// native cfgs will always rewrite to expressions and return a
-				// value
-				return false;
-		}
-
-		if (call instanceof TruncatedParamsCall)
-			return returnsVoid(((TruncatedParamsCall) call).getInnerCall(), returned);
-
-		if (call instanceof MultiCall) {
-			MultiCall multicall = (MultiCall) call;
-			Collection<Call> targets = multicall.getCalls();
-			if (!targets.isEmpty())
-				// we get the return type from one of its targets
-				return returnsVoid(targets.iterator().next(), returned);
-		}
-
-		if (returned != null)
-			if (returned.getComputedExpressions().isEmpty())
-				return true;
-			else if (returned.getComputedExpressions().size() == 1
-					&& returned.getComputedExpressions().iterator().next() instanceof Skip)
-				return true;
-
-		return false;
-	}
 }

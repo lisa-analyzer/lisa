@@ -94,7 +94,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 		// metavariable
 		AnalysisState<A> returned = compute(state, interprocedural, expressions, params);
 
-		if (interprocedural.returnsVoid(this, returned))
+		if (this.returnsVoid(returned))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
 			return returned.smallStepSemantics(new Skip(getLocation()), this);

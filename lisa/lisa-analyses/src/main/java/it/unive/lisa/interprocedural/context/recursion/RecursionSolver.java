@@ -74,7 +74,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 		finalEntryStates = new HashMap<>();
 		// the return value of each back call must be the same as the one
 		// starting the recursion, as they invoke the same cfg
-		returnsVoid = returnsVoid(recursion.getInvocation(), null);
+		returnsVoid = recursion.getInvocation().returnsVoid(null);
 		baseCases = new BaseCasesFinder<>(backing, recursion, returnsVoid);
 	}
 

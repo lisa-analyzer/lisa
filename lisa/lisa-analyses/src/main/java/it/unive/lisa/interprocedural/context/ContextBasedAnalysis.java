@@ -385,10 +385,13 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 		Parameter[] formals = cfg.getDescriptor().getFormals();
 
 		// prepare the state for the call: hide the visible variables
-		Pair<AnalysisState<A>, ExpressionSet[]> scoped = scope(
-				entryState,
-				scope,
-				parameters);
+		Pair<AnalysisState<A>, ExpressionSet[]> scoped = call.getProgram()
+				.getFeatures()
+				.getScopingStrategy()
+				.scope(call,
+						scope,
+						entryState,
+						parameters);
 		AnalysisState<A> callState = scoped.getLeft();
 		ExpressionSet[] locals = scoped.getRight();
 
@@ -422,7 +425,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 			LOG.info("Found recursion at " + call.getLocation());
 
 			// we return bottom for now
-			if (returnsVoid(call, null))
+			if (call.returnsVoid(null))
 				return entryState.bottom();
 			else
 				return new AnalysisState<>(
@@ -468,7 +471,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A>> extends CallGraphB
 			}
 
 			// save the resulting state
-			result = result.lub(unscope(call, scope, exitState));
+			result = result.lub(call.getProgram()
+					.getFeatures()
+					.getScopingStrategy()
+					.unscope(call, scope, exitState));
 		}
 
 		token = callerToken;

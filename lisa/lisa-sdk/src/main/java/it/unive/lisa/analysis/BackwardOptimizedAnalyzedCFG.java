@@ -296,7 +296,10 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			AnalysisState<A> state = exitState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();
-				state = state.lub(unscope(call, scope, res));
+				state = state.lub(call.getProgram()
+						.getFeatures()
+						.getScopingStrategy()
+						.unscope(call, scope, res));
 			}
 			return state;
 		}
