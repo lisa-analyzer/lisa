@@ -14,12 +14,14 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
@@ -196,6 +198,78 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
+	public TypeEnvironment<StaticTypes> assumeUnaryExpression(
+			TypeEnvironment<StaticTypes> environment,
+			UnaryExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
+		// we only support the negated type check
+		if (!(expression.getOperator() instanceof LogicalNegation)
+				|| !(expression.getExpression() instanceof BinaryExpression)
+				|| !(((BinaryExpression) expression.getExpression()).getOperator() instanceof TypeCheck))
+			return environment;
+
+		Identifier id;
+		StaticTypes eval;
+		ValueExpression left = (ValueExpression) ((BinaryExpression) expression.getExpression()).getLeft();
+		ValueExpression right = (ValueExpression) ((BinaryExpression) expression.getExpression()).getRight();
+		if (left instanceof Identifier) {
+			eval = eval(right, environment, src, oracle);
+			id = (Identifier) left;
+		} else if (right instanceof Identifier) {
+			eval = eval(left, environment, src, oracle);
+			id = (Identifier) right;
+		} else
+			return environment;
+
+		TypeSystem types = src.getProgram().getTypes();
+		Set<Type> elems = eval.type.allInstances(types);
+		if (elems.stream().anyMatch(Type::isTypeTokenType))
+			// if there is no type token in the evaluation,
+			// this is not a type condition and we cannot
+			// assume anything
+			return environment;
+
+		// these are all types compatible with the type tokens
+		Set<Type> okTypes = elems.stream()
+				.filter(Type::isTypeTokenType)
+				.map(Type::asTypeTokenType)
+				.map(TypeTokenType::getTypes)
+				.flatMap(Set::stream)
+				.flatMap(t -> t.allInstances(types).stream())
+				.collect(Collectors.toSet());
+
+		StaticTypes starting = environment.getState(id);
+		if (eval.isBottom() || starting.isBottom())
+			return environment.bottom();
+		StaticTypes update = null;
+
+		// we keep only the ones that can be casted
+		Type sup = Type.commonSupertype(SetUtils.difference(starting.type.allInstances(types), okTypes), null);
+		if (sup == null)
+			update = BOTTOM;
+		else if (sup == Untyped.INSTANCE)
+			update = top();
+		else
+			update = new StaticTypes(types, sup);
+
+		if (update == null)
+			return environment;
+		else if (update.isBottom())
+			return environment.bottom();
+		else
+			return environment.putState(id, update);
+	}
+
+	@Override
 	public TypeEnvironment<StaticTypes> assumeBinaryExpression(
 			TypeEnvironment<StaticTypes> environment,
 			BinaryExpression expression,
@@ -245,8 +319,12 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 		StaticTypes update = null;
 
 		if (operator == ComparisonEq.INSTANCE)
-			// if eval is not a possible value, we go to bottom
-			update = starting.glb(eval);
+			// eval.type is (or at least should be) exact, while starting.type
+			// can be an overapproximation. the equality *might* hold whenever
+			// eval.type can be assigned to starting.type (ie it is a subtype
+			// of it). the best we can do while preserving soundness
+			// is set the type to eval.type
+			update = eval.type.canBeAssignedTo(starting.type) ? eval : bottom();
 		else if (operator == TypeCheck.INSTANCE) {
 			// we keep only the ones that can be casted
 			Type sup = Type.commonSupertype(SetUtils.intersection(starting.type.allInstances(types), filtered), null);

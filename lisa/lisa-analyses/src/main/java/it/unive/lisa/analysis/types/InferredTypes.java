@@ -27,6 +27,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
@@ -324,6 +325,67 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 	}
 
 	@Override
+	public TypeEnvironment<InferredTypes> assumeUnaryExpression(
+			TypeEnvironment<InferredTypes> environment,
+			UnaryExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
+		// we only support the negated type check
+		if (!(expression.getOperator() instanceof LogicalNegation)
+				|| !(expression.getExpression() instanceof BinaryExpression)
+				|| !(((BinaryExpression) expression.getExpression()).getOperator() instanceof TypeCheck))
+			return environment;
+
+		Identifier id;
+		InferredTypes eval;
+		ValueExpression left = (ValueExpression) ((BinaryExpression) expression.getExpression()).getLeft();
+		ValueExpression right = (ValueExpression) ((BinaryExpression) expression.getExpression()).getRight();
+		if (left instanceof Identifier) {
+			eval = eval(right, environment, src, oracle);
+			id = (Identifier) left;
+		} else if (right instanceof Identifier) {
+			eval = eval(left, environment, src, oracle);
+			id = (Identifier) right;
+		} else
+			return environment;
+
+		TypeSystem types = src.getProgram().getTypes();
+		Set<Type> elems = eval.isTop() ? types.getTypes() : eval.elements;
+		if (elems.stream().anyMatch(Type::isTypeTokenType))
+			// if there is no type token in the evaluation,
+			// this is not a type condition and we cannot
+			// assume anything
+			return environment;
+
+		// these are all types compatible with the type tokens
+		Set<Type> okTypes = elems.stream()
+				.filter(Type::isTypeTokenType)
+				.map(Type::asTypeTokenType)
+				.map(TypeTokenType::getTypes)
+				.flatMap(Set::stream)
+				.flatMap(t -> t.allInstances(types).stream())
+				.collect(Collectors.toSet());
+
+		InferredTypes starting = environment.getState(id);
+		if (eval.isBottom() || starting.isBottom())
+			return environment.bottom();
+		// we keep only the ones that can be casted
+		InferredTypes update = new InferredTypes(types, difference(starting.elements, okTypes));
+		if (update.isBottom())
+			return environment.bottom();
+		else
+			return environment.putState(id, update);
+	}
+
+	@Override
 	public TypeEnvironment<InferredTypes> assumeBinaryExpression(
 			TypeEnvironment<InferredTypes> environment,
 			BinaryExpression expression,
@@ -352,20 +414,15 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 
 		TypeSystem types = src.getProgram().getTypes();
 		Set<Type> elems = eval.isTop() ? types.getTypes() : eval.elements;
-		Set<Type> filtered = elems.stream().filter(Type::isTypeTokenType).collect(Collectors.toSet());
-		if (filtered.isEmpty())
+		Set<Type> tokens = elems.stream().filter(Type::isTypeTokenType).collect(Collectors.toSet());
+		if (tokens.isEmpty())
 			// if there is no type token in the evaluation,
 			// this is not a type condition and we cannot
 			// assume anything
 			return environment;
 
-		// these are all types compatible with the type tokens
-		Set<Type> okTypes = elems.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
+		Set<Type> exactTypes = tokens.stream()
+				.flatMap(t -> t.asTypeTokenType().getTypes().stream())
 				.collect(Collectors.toSet());
 
 		BinaryOperator operator = expression.getOperator();
@@ -377,13 +434,13 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		if (operator == ComparisonEq.INSTANCE)
 			// we keep only the types allowed by the type tokens
 			// that were already there
-			update = new InferredTypes(types, intersection(starting.elements, okTypes));
+			update = new InferredTypes(types, intersection(starting.elements, exactTypes));
 		else if (operator == ComparisonNe.INSTANCE)
 			// we keep only the types that are not allowed by the type tokens
-			update = new InferredTypes(types, difference(starting.elements, okTypes));
+			update = new InferredTypes(types, difference(starting.elements, exactTypes));
 		else if (operator == TypeCheck.INSTANCE)
 			// we keep only the ones that can be casted
-			update = new InferredTypes(types, types.cast(starting.elements, filtered, null));
+			update = new InferredTypes(types, types.cast(starting.elements, tokens));
 
 		if (update == null)
 			return environment;

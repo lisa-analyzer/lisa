@@ -70,17 +70,23 @@ public class UnaryExpression extends ValueExpression {
 	@Override
 	public ValueExpression removeNegations() {
 		if (operator instanceof LogicalNegation && expression instanceof BinaryExpression) {
-			BinaryExpression binary = (BinaryExpression) expression;
-			ValueExpression left = (ValueExpression) binary.getLeft();
-			ValueExpression right = (ValueExpression) binary.getRight();
-			BinaryOperator op = binary.getOperator();
+			ValueExpression left = (ValueExpression) ((BinaryExpression) expression).getLeft();
+			ValueExpression right = (ValueExpression) ((BinaryExpression) expression).getRight();
+			BinaryOperator op = ((BinaryExpression) expression).getOperator();
 			BinaryOperator oppositeOp = op instanceof NegatableOperator
 					? (BinaryOperator) ((NegatableOperator) op).opposite()
 					: op;
-			BinaryExpression expr = new BinaryExpression(binary.getStaticType(), left.removeNegations(),
-					right.removeNegations(),
-					oppositeOp, getCodeLocation());
-			return expr;
+			ValueExpression oppositeLeft = left.removeNegations();
+			ValueExpression oppositeRight = right.removeNegations();
+			if (op == oppositeOp && left == oppositeLeft && right == oppositeRight)
+				// if nothing changed, preserve reference equality
+				return this;
+			return new BinaryExpression(
+					expression.getStaticType(),
+					oppositeLeft,
+					oppositeRight,
+					oppositeOp,
+					getCodeLocation());
 		}
 
 		return this;
