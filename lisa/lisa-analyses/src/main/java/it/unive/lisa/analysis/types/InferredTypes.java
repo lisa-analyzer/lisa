@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.types;
 
-import static org.apache.commons.collections4.CollectionUtils.intersection;
+import static org.apache.commons.collections4.SetUtils.difference;
+import static org.apache.commons.collections4.SetUtils.intersection;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
@@ -20,6 +21,7 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
@@ -321,6 +323,76 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 		return Satisfiability.UNKNOWN;
 	}
 
+	@Override
+	public TypeEnvironment<InferredTypes> assumeBinaryExpression(
+			TypeEnvironment<InferredTypes> environment,
+			BinaryExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
+		Identifier id;
+		InferredTypes eval;
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
+		if (left instanceof Identifier) {
+			eval = eval(right, environment, src, oracle);
+			id = (Identifier) left;
+		} else if (right instanceof Identifier) {
+			eval = eval(left, environment, src, oracle);
+			id = (Identifier) right;
+		} else
+			return environment;
+
+		TypeSystem types = src.getProgram().getTypes();
+		Set<Type> elems = eval.isTop() ? types.getTypes() : eval.elements;
+		Set<Type> filtered = elems.stream().filter(Type::isTypeTokenType).collect(Collectors.toSet());
+		if (filtered.isEmpty())
+			// if there is no type token in the evaluation,
+			// this is not a type condition and we cannot
+			// assume anything
+			return environment;
+
+		// these are all types compatible with the type tokens
+		Set<Type> okTypes = elems.stream()
+				.filter(Type::isTypeTokenType)
+				.map(Type::asTypeTokenType)
+				.map(TypeTokenType::getTypes)
+				.flatMap(Set::stream)
+				.flatMap(t -> t.allInstances(types).stream())
+				.collect(Collectors.toSet());
+
+		BinaryOperator operator = expression.getOperator();
+		InferredTypes starting = environment.getState(id);
+		if (eval.isBottom() || starting.isBottom())
+			return environment.bottom();
+		InferredTypes update = null;
+
+		if (operator == ComparisonEq.INSTANCE)
+			// we keep only the types allowed by the type tokens
+			// that were already there
+			update = new InferredTypes(types, intersection(starting.elements, okTypes));
+		else if (operator == ComparisonNe.INSTANCE)
+			// we keep only the types that are not allowed by the type tokens
+			update = new InferredTypes(types, difference(starting.elements, okTypes));
+		else if (operator == TypeCheck.INSTANCE)
+			// we keep only the ones that can be casted
+			update = new InferredTypes(types, types.cast(starting.elements, filtered, null));
+
+		if (update == null)
+			return environment;
+		else if (update.isBottom())
+			return environment.bottom();
+		else
+			return environment.putState(id, update);
+	}
+
 	/**
 	 * Checks whether or not the two given set of type tokens intersects,
 	 * meaning that there exists at least one type token {@code t1} from
@@ -366,6 +438,15 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes>
 			InferredTypes other)
 			throws SemanticException {
 		return other.elements.containsAll(elements);
+	}
+
+	@Override
+	public InferredTypes glbAux(
+			InferredTypes other)
+			throws SemanticException {
+		Set<Type> lub = new HashSet<>(elements);
+		lub.retainAll(other.elements);
+		return new InferredTypes(null, lub);
 	}
 
 	@Override

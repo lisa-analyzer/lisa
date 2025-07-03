@@ -15,16 +15,22 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
+import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.SetUtils;
 
 /**
  * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s,
@@ -190,6 +196,77 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
+	public TypeEnvironment<StaticTypes> assumeBinaryExpression(
+			TypeEnvironment<StaticTypes> environment,
+			BinaryExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
+		Identifier id;
+		StaticTypes eval;
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
+		if (left instanceof Identifier) {
+			eval = eval(right, environment, src, oracle);
+			id = (Identifier) left;
+		} else if (right instanceof Identifier) {
+			eval = eval(left, environment, src, oracle);
+			id = (Identifier) right;
+		} else
+			return environment;
+
+		TypeSystem types = src.getProgram().getTypes();
+		Set<Type> elems = eval.type.allInstances(types);
+		// these are all types compatible with the type tokens
+		Set<Type> filtered = elems.stream()
+				.filter(Type::isTypeTokenType)
+				.map(Type::asTypeTokenType)
+				.map(TypeTokenType::getTypes)
+				.flatMap(Set::stream)
+				.flatMap(t -> t.allInstances(types).stream())
+				.collect(Collectors.toSet());
+		if (filtered.isEmpty())
+			// if there is no type token in the evaluation,
+			// this is not a type condition and we cannot
+			// assume anything
+			return environment;
+
+		BinaryOperator operator = expression.getOperator();
+		StaticTypes starting = environment.getState(id);
+		if (eval.isBottom() || starting.isBottom())
+			return environment.bottom();
+		StaticTypes update = null;
+
+		if (operator == ComparisonEq.INSTANCE)
+			// if eval is not a possible value, we go to bottom
+			update = starting.glb(eval);
+		else if (operator == TypeCheck.INSTANCE) {
+			// we keep only the ones that can be casted
+			Type sup = Type.commonSupertype(SetUtils.intersection(starting.type.allInstances(types), filtered), null);
+			if (sup == null)
+				update = BOTTOM;
+			else if (sup == Untyped.INSTANCE)
+				update = top();
+			else
+				update = new StaticTypes(types, sup);
+		}
+
+		if (update == null)
+			return environment;
+		else if (update.isBottom())
+			return environment.bottom();
+		else
+			return environment.putState(id, update);
+	}
+
+	@Override
 	public StaticTypes lubAux(
 			StaticTypes other)
 			throws SemanticException {
@@ -201,6 +278,19 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 			StaticTypes other)
 			throws SemanticException {
 		return type.canBeAssignedTo(other.type);
+	}
+
+	@Override
+	public StaticTypes glbAux(
+			StaticTypes other)
+			throws SemanticException {
+		Type sup = Type.commonSupertype(SetUtils.intersection(type.allInstances(types), other.type.allInstances(types)),
+				null);
+		if (sup == null)
+			return BOTTOM;
+		if (sup == Untyped.INSTANCE)
+			return top();
+		return new StaticTypes(types, sup);
 	}
 
 	@Override

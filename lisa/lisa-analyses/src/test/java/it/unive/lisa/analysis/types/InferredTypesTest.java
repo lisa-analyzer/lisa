@@ -8,6 +8,7 @@ import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -16,9 +17,12 @@ import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
@@ -605,5 +609,53 @@ public class InferredTypesTest {
 		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.UNKNOWN);
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
+	}
+
+	private final Variable variable = new Variable(Int32Type.INSTANCE, "x", fake.getLocation());
+	private final TypeEnvironment<
+			InferredTypes> env = new TypeEnvironment<>(domain).putState(variable, bool_or_string);
+
+	private void assume(
+			BinaryOperator op,
+			ValueExpression expr,
+			InferredTypes expected)
+			throws SemanticException {
+		TypeEnvironment<InferredTypes> act = domain.assumeBinaryExpression(env,
+				new BinaryExpression(
+						BoolType.INSTANCE,
+						variable,
+						expr,
+						op,
+						fake.getLocation()),
+				fake,
+				fake,
+				oracle);
+
+		assertEquals("Assume(x " + op + " " + expr + ") returned wrong result", expected,
+				act.getState(variable));
+	}
+
+	@Test
+	public void testAssume() throws SemanticException {
+		assume(ComparisonEq.INSTANCE, new Constant(new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
+				"bool or string", fake.getLocation()), bool_or_string);
+		assume(ComparisonEq.INSTANCE, new Constant(new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
+				BoolType.INSTANCE, fake.getLocation()), bool);
+		assume(ComparisonEq.INSTANCE, new Constant(new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
+				Int32Type.INSTANCE, fake.getLocation()), domain.bottom());
+
+		assume(ComparisonNe.INSTANCE, new Constant(new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
+				"bool or string", fake.getLocation()), domain.bottom());
+		assume(ComparisonNe.INSTANCE, new Constant(new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
+				BoolType.INSTANCE, fake.getLocation()), string);
+		assume(ComparisonNe.INSTANCE, new Constant(new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
+				Int32Type.INSTANCE, fake.getLocation()), bool_or_string);
+
+		assume(TypeCheck.INSTANCE, new Constant(new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
+				"bool or string", fake.getLocation()), bool_or_string);
+		assume(TypeCheck.INSTANCE, new Constant(new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
+				BoolType.INSTANCE, fake.getLocation()), bool);
+		assume(TypeCheck.INSTANCE, new Constant(new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
+				Int32Type.INSTANCE, fake.getLocation()), domain.bottom());
 	}
 }
