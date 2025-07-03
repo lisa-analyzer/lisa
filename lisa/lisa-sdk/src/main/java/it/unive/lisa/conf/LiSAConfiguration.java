@@ -10,6 +10,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.logging.Log4jConfig;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -35,6 +36,13 @@ import org.apache.commons.io.FilenameUtils;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class LiSAConfiguration extends BaseConfiguration {
+
+	static {
+		// ensure that some logging configuration is in place
+		// if not, we set a default configuration
+		if (!Log4jConfig.isLog4jConfigured())
+			Log4jConfig.initializeLogging();
+	}
 
 	/**
 	 * The type of graphs that can be dumped by LiSA.

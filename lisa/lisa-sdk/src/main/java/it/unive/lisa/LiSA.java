@@ -2,6 +2,7 @@ package it.unive.lisa;
 
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.logging.Log4jConfig;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Application;
@@ -23,6 +24,13 @@ import org.joda.time.DateTime;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class LiSA {
+
+	static {
+		// ensure that some logging configuration is in place
+		// if not, we set a default configuration
+		if (!Log4jConfig.isLog4jConfigured())
+			Log4jConfig.initializeLogging();
+	}
 
 	private static final Logger LOG = LogManager.getLogger(LiSA.class);
 
