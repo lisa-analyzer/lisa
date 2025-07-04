@@ -235,6 +235,17 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
+	public TracePartitioning<A> forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		for (Entry<ExecutionTrace, A> trace : this)
+			result.put(trace.getKey(), trace.getValue().forgetIdentifiers(ids));
+		return new TracePartitioning<>(lattice, result);
+	}
+
+	@Override
 	public TracePartitioning<A> forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

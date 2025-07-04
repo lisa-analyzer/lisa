@@ -112,6 +112,11 @@ public class NoOpValues implements ValueDomain<NoOpValues> {
 	}
 
 	@Override
+	public NoOpValues forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return this;
+	}
+
+	@Override
 	public NoOpValues forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

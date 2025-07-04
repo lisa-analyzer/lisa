@@ -187,6 +187,13 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
+	public C forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		T1 newLeft = left.forgetIdentifiers(ids);
+		T2 newRight = right.forgetIdentifiers(ids);
+		return mk(newLeft, newRight);
+	}
+
+	@Override
 	public C forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

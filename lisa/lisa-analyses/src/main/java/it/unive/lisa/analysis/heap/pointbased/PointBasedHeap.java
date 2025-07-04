@@ -129,6 +129,11 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 	}
 
 	@Override
+	public PointBasedHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return mk(new PointBasedHeap(heapEnv.forgetIdentifiers(ids)));
+	}
+
+	@Override
 	public PointBasedHeap forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

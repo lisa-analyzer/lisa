@@ -263,6 +263,13 @@ public class Pentagon
 	}
 
 	@Override
+		public Pentagon forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return new Pentagon(
+				upperbounds.forgetIdentifiers(ids),
+				intervals.forgetIdentifiers(ids));
+		}
+
+	@Override
 	public Pentagon forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

@@ -229,7 +229,19 @@ public abstract class Environment<M extends Environment<M, E, T>,
 			return (M) this;
 
 		Map<Identifier, T> result = mkNewFunction(function, false);
-		if (result.containsKey(id))
+		result.remove(id);
+
+		return mk(lattice, result);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public M forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		if (isTop() || isBottom() || function == null)
+			return (M) this;
+
+		Map<Identifier, T> result = mkNewFunction(function, false);
+		for (Identifier id : ids)
 			result.remove(id);
 
 		return mk(lattice, result);

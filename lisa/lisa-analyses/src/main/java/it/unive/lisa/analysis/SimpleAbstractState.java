@@ -605,6 +605,14 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
+	public SimpleAbstractState<H, V, T> forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return new SimpleAbstractState<>(
+				heapState.forgetIdentifiers(ids),
+				valueState.forgetIdentifiers(ids),
+				typeState.forgetIdentifiers(ids));
+	}
+
+	@Override
 	public SimpleAbstractState<H, V, T> forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

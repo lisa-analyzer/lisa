@@ -151,15 +151,37 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	@Override
 	@SuppressWarnings("unchecked")
 	public D forgetIdentifier(
-			Identifier id)
+		Identifier id)
 			throws SemanticException {
 		if (isTop())
 			return (D) this;
 
 		Collection<E> toRemove = new LinkedList<>();
 		for (E e : elements)
-			if (e.getInvolvedIdentifiers().contains(id))
+		if (e.getInvolvedIdentifiers().contains(id))
 				toRemove.add(e);
+				
+		if (toRemove.isEmpty())
+		return (D) this;
+		
+		Set<E> updated = new HashSet<>(elements);
+		updated.removeAll(toRemove);
+		return mk(domain, updated, false, false);
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public D forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		if (isTop())
+			return (D) this;
+
+		Collection<E> toRemove = new LinkedList<>();
+		outer: for (E e : elements)
+			for (Identifier id : ids)
+				if (e.getInvolvedIdentifiers().contains(id)) {
+					toRemove.add(e);
+					continue outer;
+				}
 
 		if (toRemove.isEmpty())
 			return (D) this;

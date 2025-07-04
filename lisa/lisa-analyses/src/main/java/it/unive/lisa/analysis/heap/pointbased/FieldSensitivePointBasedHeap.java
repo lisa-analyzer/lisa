@@ -452,6 +452,11 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	}
 
 	@Override
+	public FieldSensitivePointBasedHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiers(ids), fields));
+	}
+
+	@Override
 	public FieldSensitivePointBasedHeap forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

@@ -107,6 +107,11 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
+	public TypeBasedHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return this;
+	}
+
+	@Override
 	public TypeBasedHeap forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

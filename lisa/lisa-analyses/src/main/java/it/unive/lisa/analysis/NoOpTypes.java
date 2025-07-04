@@ -121,6 +121,11 @@ public class NoOpTypes implements TypeDomain<NoOpTypes> {
 	}
 
 	@Override
+	public NoOpTypes forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return this;
+	}
+
+	@Override
 	public NoOpTypes forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

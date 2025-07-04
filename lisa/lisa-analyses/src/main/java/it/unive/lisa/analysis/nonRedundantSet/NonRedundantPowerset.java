@@ -351,9 +351,16 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 			Identifier id)
 			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
-		for (T elem : this.elements) {
+		for (T elem : this.elements) 
 			newElements.add(elem.forgetIdentifier(id));
-		}
+		return mk(newElements).removeRedundancy();
+	}
+
+	@Override
+	public C forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		Set<T> newElements = new TreeSet<>();
+		for (T elem : this.elements) 
+			newElements.add(elem.forgetIdentifiers(ids));
 		return mk(newElements).removeRedundancy();
 	}
 

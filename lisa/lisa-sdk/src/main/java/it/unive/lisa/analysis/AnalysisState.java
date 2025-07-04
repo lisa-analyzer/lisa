@@ -25,6 +25,10 @@ import java.util.function.Predicate;
  */
 public class AnalysisState<A extends AbstractState<A>>
 		implements
+		// we explicitly don't implement semantic domain here
+		// even if we have the same transformers, as the
+		// interface defines them with the SemanticOracle parameter
+		// that is reduntant here
 		BaseLattice<AnalysisState<A>>,
 		ScopedObject<AnalysisState<A>> {
 
@@ -480,8 +484,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	/**
-	 * Forgets all the given {@link Identifier}s by invoking
-	 * {@link #forgetIdentifier(Identifier)} on each given identifier.
+	 * Forgets all the given {@link Identifier}s. 
 	 * 
 	 * @param ids the collection of identifiers to forget
 	 * 
@@ -492,10 +495,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	public AnalysisState<A> forgetIdentifiers(
 			Iterable<Identifier> ids)
 			throws SemanticException {
-		AnalysisState<A> result = this;
-		for (Identifier id : ids)
-			result = result.forgetIdentifier(id);
-		return result;
+		return new AnalysisState<>(state.forgetIdentifiers(ids), computedExpressions, info);
 	}
 
 	@Override

@@ -602,6 +602,13 @@ public class Stability<V extends ValueDomain<V>>
 	}
 
 	@Override
+	public Stability<V> forgetIdentifiers(
+			Iterable<Identifier> ids)
+			throws SemanticException {
+		return new Stability<>(aux.forgetIdentifiers(ids), trends.forgetIdentifiers(ids));
+	}
+
+	@Override
 	public Stability<V> forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

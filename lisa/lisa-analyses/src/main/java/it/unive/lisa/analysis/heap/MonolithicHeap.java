@@ -105,6 +105,11 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
+	public MonolithicHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return this;
+	}
+
+	@Override
 	public MonolithicHeap forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {

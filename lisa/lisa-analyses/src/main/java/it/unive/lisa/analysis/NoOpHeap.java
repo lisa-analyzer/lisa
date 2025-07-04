@@ -131,6 +131,11 @@ public class NoOpHeap implements HeapDomain<NoOpHeap> {
 	}
 
 	@Override
+	public NoOpHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+		return this;
+	}
+
+	@Override
 	public NoOpHeap forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {
