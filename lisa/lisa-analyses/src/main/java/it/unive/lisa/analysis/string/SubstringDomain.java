@@ -292,7 +292,8 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	@Override
 	public SubstringDomain forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (!knowsIdentifier(id))
 			return this;
@@ -310,7 +311,8 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	@Override
 	public SubstringDomain forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (function == null || function.keySet().isEmpty())
 			return this;
@@ -332,7 +334,7 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 		for (Identifier id : ids) {
 			// Test each identifier
 			if (test.test(id)) {
-				result = result.forgetIdentifier(id);
+				result = result.forgetIdentifier(id, pp);
 			}
 		}
 
@@ -401,16 +403,18 @@ public class SubstringDomain extends FunctionalLattice<SubstringDomain, Identifi
 
 	@Override
 	public SubstringDomain pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new SubstringDomain(lattice.pushScope(token), mkNewFunction(function, true));
+		return new SubstringDomain(lattice.pushScope(token, pp), mkNewFunction(function, true));
 	}
 
 	@Override
 	public SubstringDomain popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new SubstringDomain(lattice.popScope(token), mkNewFunction(function, true));
+		return new SubstringDomain(lattice.popScope(token, pp), mkNewFunction(function, true));
 	}
 
 	/*

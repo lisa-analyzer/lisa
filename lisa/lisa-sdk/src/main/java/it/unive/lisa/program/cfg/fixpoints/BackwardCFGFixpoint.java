@@ -64,7 +64,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 		if (node instanceof Expression)
 			// we forget the meta variables now as the values are popped from
 			// the stack here
-			approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables());
+			approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables(), node);
 		return CompoundState.of(approx, expressions);
 	}
 
@@ -89,7 +89,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 		}
 
 		if (!ids.isEmpty())
-			approx = approx.forgetIdentifiers(ids);
+			approx = approx.forgetIdentifiers(ids, edge.getSource());
 
 		return CompoundState.of(approx, new StatementStore<>(approx.bottom()));
 	}

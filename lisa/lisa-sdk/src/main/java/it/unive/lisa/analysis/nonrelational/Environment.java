@@ -159,13 +159,14 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	public M pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		AtomicReference<SemanticException> holder = new AtomicReference<>();
 
 		M result = liftIdentifiers(id -> {
 			try {
-				return (Identifier) id.pushScope(scope);
+				return (Identifier) id.pushScope(scope, pp);
 			} catch (SemanticException e) {
 				holder.set(e);
 			}
@@ -180,13 +181,14 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	public M popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		AtomicReference<SemanticException> holder = new AtomicReference<>();
 
 		M result = liftIdentifiers(id -> {
 			try {
-				return (Identifier) id.popScope(scope);
+				return (Identifier) id.popScope(scope, pp);
 			} catch (SemanticException e) {
 				holder.set(e);
 			}
@@ -223,7 +225,8 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public M forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return (M) this;
@@ -236,7 +239,10 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public M forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return (M) this;
 
@@ -250,7 +256,8 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public M forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return (M) this;

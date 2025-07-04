@@ -251,7 +251,7 @@ public abstract class NaryStatement extends Statement {
 		for (Expression sub : subExpressions)
 			// we forget the meta variables now as the values are popped from
 			// the stack here
-			result = result.forgetIdentifiers(sub.getMetaVariables());
+			result = result.forgetIdentifiers(sub.getMetaVariables(), this);
 		return result;
 	}
 
@@ -309,7 +309,7 @@ public abstract class NaryStatement extends Statement {
 		for (Expression sub : subExpressions)
 			// we forget the meta variables now as the values are popped from
 			// the stack here
-			result = result.forgetIdentifiers(sub.getMetaVariables());
+			result = result.forgetIdentifiers(sub.getMetaVariables(), this);
 		return result;
 	}
 

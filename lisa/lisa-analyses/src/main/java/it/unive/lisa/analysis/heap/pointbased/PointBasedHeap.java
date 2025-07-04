@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.heap.pointbased;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collections;
 import java.util.List;
@@ -109,34 +110,41 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 
 	@Override
 	public PointBasedHeap popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.popScope(scope)));
+		return mk(new PointBasedHeap(heapEnv.popScope(scope, pp)));
 	}
 
 	@Override
 	public PointBasedHeap pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.pushScope(scope)));
+		return mk(new PointBasedHeap(heapEnv.pushScope(scope, pp)));
 	}
 
 	@Override
 	public PointBasedHeap forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.forgetIdentifier(id)));
+		return mk(new PointBasedHeap(heapEnv.forgetIdentifier(id, pp)));
 	}
 
 	@Override
-	public PointBasedHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.forgetIdentifiers(ids)));
+	public PointBasedHeap forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
+		return mk(new PointBasedHeap(heapEnv.forgetIdentifiers(ids, pp)));
 	}
 
 	@Override
 	public PointBasedHeap forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.forgetIdentifiersIf(test)));
+		return mk(new PointBasedHeap(heapEnv.forgetIdentifiersIf(test, pp)));
 	}
 }

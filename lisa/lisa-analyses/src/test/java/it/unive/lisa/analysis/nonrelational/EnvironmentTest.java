@@ -10,7 +10,9 @@ import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
@@ -33,6 +35,19 @@ public class EnvironmentTest {
 	private static final Identifier heapBweak = new HeapLocation(Untyped.INSTANCE, "b", true,
 			SyntheticLocation.INSTANCE);
 
+	private final ProgramPoint pp = new ProgramPoint() {
+
+		@Override
+		public CodeLocation getLocation() {
+			return SyntheticLocation.INSTANCE;
+		}
+
+		@Override
+		public CFG getCFG() {
+			return null;
+		}
+	};
+
 	@Test
 	public void testLubKeys() throws SemanticException {
 		assertEquals(Set.of(varA), env.lubKeys(Set.of(varA), Set.of(varA)));
@@ -45,12 +60,12 @@ public class EnvironmentTest {
 	@Test
 	public void testForgetIdentifier() throws SemanticException {
 		ValueEnvironment<Sign> tmp = env.top();
-		assertSame(tmp, tmp.forgetIdentifier(varA));
+		assertSame(tmp, tmp.forgetIdentifier(varA, pp));
 		tmp = env.bottom();
-		assertSame(tmp, tmp.forgetIdentifier(varA));
+		assertSame(tmp, tmp.forgetIdentifier(varA, pp));
 		tmp = env.putState(varA, new Sign());
-		assertEquals(env, tmp.forgetIdentifier(varA));
-		assertEquals(tmp, tmp.forgetIdentifier(varB));
+		assertEquals(env, tmp.forgetIdentifier(varA, pp));
+		assertEquals(tmp, tmp.forgetIdentifier(varB, pp));
 	}
 
 	@Test
@@ -66,13 +81,13 @@ public class EnvironmentTest {
 		ValueEnvironment<Sign> tmp = env.top();
 		ValueEnvironment<Sign> onlyA = tmp.putState(varA, state);
 
-		ValueEnvironment<Sign> onlyAscoped = tmp.putState((Identifier) varA.pushScope(scoper), state);
-		ValueEnvironment<Sign> actual = onlyA.pushScope(scoper);
+		ValueEnvironment<Sign> onlyAscoped = tmp.putState((Identifier) varA.pushScope(scoper, pp), state);
+		ValueEnvironment<Sign> actual = onlyA.pushScope(scoper, pp);
 		assertEquals(onlyAscoped, actual);
-		assertEquals(onlyA, actual.popScope(scoper));
+		assertEquals(onlyA, actual.popScope(scoper, pp));
 
 		ValueEnvironment<Sign> AandB = onlyA.putState(heapB, state);
-		ValueEnvironment<Sign> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper), state);
-		assertEquals(AandBscoped, AandB.pushScope(scoper));
+		ValueEnvironment<Sign> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper, pp), state);
+		assertEquals(AandBscoped, AandB.pushScope(scoper, pp));
 	}
 }

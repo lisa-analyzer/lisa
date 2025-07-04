@@ -351,32 +351,35 @@ public class AnalysisState<A extends AbstractState<A>>
 
 	@Override
 	public AnalysisState<A> pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		return new AnalysisState<>(
-				state.pushScope(scope),
-				onAllExpressions(this.computedExpressions, scope, true),
+				state.pushScope(scope, pp),
+				onAllExpressions(this.computedExpressions, scope, pp, true),
 				info);
 	}
 
 	private static ExpressionSet onAllExpressions(
 			ExpressionSet computedExpressions,
 			ScopeToken scope,
+			ProgramPoint pp,
 			boolean push)
 			throws SemanticException {
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression exp : computedExpressions)
-			result.add(push ? exp.pushScope(scope) : exp.popScope(scope));
+			result.add(push ? exp.pushScope(scope, pp) : exp.popScope(scope, pp));
 		return new ExpressionSet(result);
 	}
 
 	@Override
 	public AnalysisState<A> popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		return new AnalysisState<>(
-				state.popScope(scope),
-				onAllExpressions(this.computedExpressions, scope, false),
+				state.popScope(scope, pp),
+				onAllExpressions(this.computedExpressions, scope, pp, false),
 				info);
 	}
 
@@ -461,9 +464,10 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public AnalysisState<A> forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions, info);
+		return new AnalysisState<>(state.forgetIdentifier(id, pp), computedExpressions, info);
 	}
 
 	/**
@@ -478,13 +482,14 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public AnalysisState<A> forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new AnalysisState<>(state.forgetIdentifiersIf(test), computedExpressions, info);
+		return new AnalysisState<>(state.forgetIdentifiersIf(test, pp), computedExpressions, info);
 	}
 
 	/**
-	 * Forgets all the given {@link Identifier}s. 
+	 * Forgets all the given {@link Identifier}s.
 	 * 
 	 * @param ids the collection of identifiers to forget
 	 * 
@@ -493,9 +498,10 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public AnalysisState<A> forgetIdentifiers(
-			Iterable<Identifier> ids)
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new AnalysisState<>(state.forgetIdentifiers(ids), computedExpressions, info);
+		return new AnalysisState<>(state.forgetIdentifiers(ids, pp), computedExpressions, info);
 	}
 
 	@Override

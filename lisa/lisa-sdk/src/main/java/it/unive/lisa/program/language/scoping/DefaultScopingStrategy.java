@@ -28,9 +28,9 @@ public class DefaultScopingStrategy
 			ExpressionSet[] actuals)
 			throws SemanticException {
 		ExpressionSet[] locals = new ExpressionSet[actuals.length];
-		AnalysisState<A> callState = state.pushScope(scope);
+		AnalysisState<A> callState = state.pushScope(scope, call);
 		for (int i = 0; i < actuals.length; i++)
-			locals[i] = actuals[i].pushScope(scope);
+			locals[i] = actuals[i].pushScope(scope, call);
 		return Pair.of(callState, locals);
 	}
 
@@ -41,20 +41,20 @@ public class DefaultScopingStrategy
 			AnalysisState<A> state)
 			throws SemanticException {
 		if (call.returnsVoid(state))
-			return state.popScope(scope);
+			return state.popScope(scope, call);
 
-		Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
+		Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope, call);
 
 		if (state.getComputedExpressions().isEmpty()) {
 			// a return value is expected, but nothing is left on the stack
 			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-			return state.assign(meta, inv, call).popScope(scope);
+			return state.assign(meta, inv, call).popScope(scope, call);
 		}
 
 		AnalysisState<A> tmp = state.bottom();
 		for (SymbolicExpression ret : state.getComputedExpressions())
 			tmp = tmp.lub(state.assign(meta, ret, call));
 
-		return tmp.popScope(scope);
+		return tmp.popScope(scope, call);
 	}
 }

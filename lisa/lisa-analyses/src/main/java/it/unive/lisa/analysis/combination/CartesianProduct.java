@@ -179,44 +179,51 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 
 	@Override
 	public C forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
-		T1 newLeft = left.forgetIdentifier(id);
-		T2 newRight = right.forgetIdentifier(id);
+		T1 newLeft = left.forgetIdentifier(id, pp);
+		T2 newRight = right.forgetIdentifier(id, pp);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public C forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
-		T1 newLeft = left.forgetIdentifiers(ids);
-		T2 newRight = right.forgetIdentifiers(ids);
+	public C forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
+		T1 newLeft = left.forgetIdentifiers(ids, pp);
+		T2 newRight = right.forgetIdentifiers(ids, pp);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
 	public C forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
-		T1 newLeft = left.forgetIdentifiersIf(test);
-		T2 newRight = right.forgetIdentifiersIf(test);
+		T1 newLeft = left.forgetIdentifiersIf(test, pp);
+		T2 newRight = right.forgetIdentifiersIf(test, pp);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
 	public C pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		T1 newLeft = left.pushScope(scope);
-		T2 newRight = right.pushScope(scope);
+		T1 newLeft = left.pushScope(scope, pp);
+		T2 newRight = right.pushScope(scope, pp);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
 	public C popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		T1 newLeft = left.popScope(scope);
-		T2 newRight = right.popScope(scope);
+		T1 newLeft = left.popScope(scope, pp);
+		T2 newRight = right.popScope(scope, pp);
 		return mk(newLeft, newRight);
 
 	}

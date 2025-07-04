@@ -125,33 +125,40 @@ public class NoOpHeap implements HeapDomain<NoOpHeap> {
 
 	@Override
 	public NoOpHeap forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public NoOpHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public NoOpHeap forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
 	public NoOpHeap forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
 	public NoOpHeap pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
 	public NoOpHeap popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}

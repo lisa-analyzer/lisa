@@ -255,27 +255,32 @@ public class Pentagon
 
 	@Override
 	public Pentagon forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		return new Pentagon(
-				upperbounds.forgetIdentifier(id),
-				intervals.forgetIdentifier(id));
+				upperbounds.forgetIdentifier(id, pp),
+				intervals.forgetIdentifier(id, pp));
 	}
 
 	@Override
-		public Pentagon forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public Pentagon forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
 		return new Pentagon(
-				upperbounds.forgetIdentifiers(ids),
-				intervals.forgetIdentifiers(ids));
-		}
+				upperbounds.forgetIdentifiers(ids, pp),
+				intervals.forgetIdentifiers(ids, pp));
+	}
 
 	@Override
 	public Pentagon forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		return new Pentagon(
-				upperbounds.forgetIdentifiersIf(test),
-				intervals.forgetIdentifiersIf(test));
+				upperbounds.forgetIdentifiersIf(test, pp),
+				intervals.forgetIdentifiersIf(test, pp));
 	}
 
 	@Override
@@ -289,16 +294,18 @@ public class Pentagon
 
 	@Override
 	public Pentagon pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Pentagon(upperbounds.pushScope(token), intervals.pushScope(token));
+		return new Pentagon(upperbounds.pushScope(token, pp), intervals.pushScope(token, pp));
 	}
 
 	@Override
 	public Pentagon popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Pentagon(upperbounds.popScope(token), intervals.popScope(token));
+		return new Pentagon(upperbounds.popScope(token, pp), intervals.popScope(token, pp));
 	}
 
 	@Override

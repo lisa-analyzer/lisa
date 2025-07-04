@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
@@ -100,19 +101,30 @@ public class TernaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		TernaryExpression expr = new TernaryExpression(getStaticType(), left.pushScope(token), middle.pushScope(token),
-				right.pushScope(token), operator, getCodeLocation());
+		TernaryExpression expr = new TernaryExpression(
+				getStaticType(),
+				left.pushScope(token, pp),
+				middle.pushScope(token, pp),
+				right.pushScope(token, pp),
+				operator, getCodeLocation());
 		return expr;
 	}
 
 	@Override
 	public SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		TernaryExpression expr = new TernaryExpression(getStaticType(), left.popScope(token), middle.popScope(token),
-				right.popScope(token), operator, getCodeLocation());
+		TernaryExpression expr = new TernaryExpression(
+				getStaticType(),
+				left.popScope(token, pp),
+				middle.popScope(token, pp),
+				right.popScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 

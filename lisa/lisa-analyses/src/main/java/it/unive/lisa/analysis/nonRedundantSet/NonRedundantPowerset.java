@@ -348,51 +348,58 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public C forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
-		for (T elem : this.elements) 
-			newElements.add(elem.forgetIdentifier(id));
+		for (T elem : this.elements)
+			newElements.add(elem.forgetIdentifier(id, pp));
 		return mk(newElements).removeRedundancy();
 	}
 
 	@Override
-	public C forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public C forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
-		for (T elem : this.elements) 
-			newElements.add(elem.forgetIdentifiers(ids));
+		for (T elem : this.elements)
+			newElements.add(elem.forgetIdentifiers(ids, pp));
 		return mk(newElements).removeRedundancy();
 	}
 
 	@Override
 	public C forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
-			newElements.add(elem.forgetIdentifiersIf(test));
+			newElements.add(elem.forgetIdentifiersIf(test, pp));
 		}
 		return mk(newElements).removeRedundancy();
 	}
 
 	@Override
 	public C pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
-			newElements.add(elem.pushScope(token));
+			newElements.add(elem.pushScope(token, pp));
 		}
 		return mk(newElements).removeRedundancy();
 	}
 
 	@Override
 	public C popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		Set<T> newElements = new TreeSet<>();
 		for (T elem : this.elements) {
-			newElements.add(elem.popScope(token));
+			newElements.add(elem.popScope(token, pp));
 		}
 		return mk(newElements).removeRedundancy();
 	}

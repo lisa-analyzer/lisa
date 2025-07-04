@@ -109,7 +109,8 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	@Override
 	@SuppressWarnings("unchecked")
 	default H pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		return (H) this;
 	}
@@ -117,7 +118,8 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	@Override
 	@SuppressWarnings("unchecked")
 	default H popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		return (H) this;
 	}

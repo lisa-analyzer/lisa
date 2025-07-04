@@ -151,27 +151,31 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	@Override
 	@SuppressWarnings("unchecked")
 	public D forgetIdentifier(
-		Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop())
 			return (D) this;
 
 		Collection<E> toRemove = new LinkedList<>();
 		for (E e : elements)
-		if (e.getInvolvedIdentifiers().contains(id))
+			if (e.getInvolvedIdentifiers().contains(id))
 				toRemove.add(e);
-				
+
 		if (toRemove.isEmpty())
-		return (D) this;
-		
+			return (D) this;
+
 		Set<E> updated = new HashSet<>(elements);
 		updated.removeAll(toRemove);
 		return mk(domain, updated, false, false);
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
-	public D forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public D forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isTop())
 			return (D) this;
 
@@ -194,7 +198,8 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	@Override
 	@SuppressWarnings("unchecked")
 	public D forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop())
 			return (D) this;
@@ -287,7 +292,8 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	@Override
 	@SuppressWarnings("unchecked")
 	public D pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom())
 			return (D) this;
@@ -295,7 +301,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 		Set<E> result = new HashSet<>();
 		E pushed;
 		for (E element : this.elements)
-			if ((pushed = element.pushScope(scope)) != null)
+			if ((pushed = element.pushScope(scope, pp)) != null)
 				result.add(pushed);
 
 		return mk(domain, result, false, false);
@@ -304,7 +310,8 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	@Override
 	@SuppressWarnings("unchecked")
 	public D popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom())
 			return (D) this;
@@ -312,7 +319,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 		Set<E> result = new HashSet<>();
 		E popped;
 		for (E element : this.elements)
-			if ((popped = element.popScope(scope)) != null)
+			if ((popped = element.popScope(scope, pp)) != null)
 				result.add(popped);
 
 		return mk(domain, result, false, false);

@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticExceptionWrapper;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionUtilities;
@@ -139,21 +140,23 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 
 	@Override
 	public ExpressionSet pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		Set<SymbolicExpression> mapped = new HashSet<>();
 		for (SymbolicExpression exp : elements)
-			mapped.add(exp.pushScope(token));
+			mapped.add(exp.pushScope(token, pp));
 		return new ExpressionSet(mapped);
 	}
 
 	@Override
 	public ExpressionSet popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		Set<SymbolicExpression> mapped = new HashSet<>();
 		for (SymbolicExpression exp : elements)
-			mapped.add(exp.popScope(token));
+			mapped.add(exp.popScope(token, pp));
 		return new ExpressionSet(mapped);
 	}
 }

@@ -135,19 +135,21 @@ public class ReachingDefinitions
 
 	@Override
 	public ReachingDefinitions pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new ReachingDefinitions((Identifier) variable.pushScope(scope), programPoint);
+		return new ReachingDefinitions((Identifier) variable.pushScope(scope, pp), programPoint);
 	}
 
 	@Override
 	public ReachingDefinitions popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (!variable.canBeScoped())
 			return this;
 
-		SymbolicExpression popped = variable.popScope(scope);
+		SymbolicExpression popped = variable.popScope(scope, pp);
 		if (popped == null)
 			return null;
 

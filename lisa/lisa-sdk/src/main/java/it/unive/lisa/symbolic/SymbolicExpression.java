@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
@@ -76,7 +77,8 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 	 */
 	@Override
 	public abstract SymbolicExpression pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException;
 
 	/**
@@ -97,7 +99,8 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 	 */
 	@Override
 	public abstract SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException;
 
 	/**

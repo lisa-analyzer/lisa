@@ -115,7 +115,7 @@ public class IMPNewObj extends NaryExpression {
 		expressions.forget(paramThis);
 		for (SymbolicExpression v : callstate.getComputedExpressions())
 			if (v instanceof Identifier)
-				sem = sem.forgetIdentifier((Identifier) v);
+				sem = sem.forgetIdentifier((Identifier) v, this);
 
 		// finally, we leave a reference to the newly created object on the
 		// stack

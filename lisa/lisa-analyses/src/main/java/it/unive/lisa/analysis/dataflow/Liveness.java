@@ -76,16 +76,18 @@ public class Liveness
 
 	@Override
 	public Liveness pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Liveness((Identifier) id.pushScope(token));
+		return new Liveness((Identifier) id.pushScope(token, pp));
 	}
 
 	@Override
 	public Liveness popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Liveness((Identifier) id.popScope(token));
+		return new Liveness((Identifier) id.popScope(token, pp));
 	}
 
 	@Override

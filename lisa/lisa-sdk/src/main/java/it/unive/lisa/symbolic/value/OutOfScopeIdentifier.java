@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -44,13 +45,15 @@ public class OutOfScopeIdentifier extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token) {
+			ScopeToken token,
+			ProgramPoint pp) {
 		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override
 	public Identifier popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (getScope().equals(token))
 			return this.id;

@@ -268,7 +268,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 		// that are not sensible to scoping. All other variables are
 		// subjected to push and pop operations and cannot be
 		// considered a contribution of the recursive call.
-		res = res.forgetIdentifiersIf(i -> i.canBeScoped() && !i.equals(meta));
+		res = res.forgetIdentifiersIf(i -> i.canBeScoped() && !i.equals(meta), original);
 		return res;
 	}
 }

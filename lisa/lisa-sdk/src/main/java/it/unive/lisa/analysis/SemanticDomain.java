@@ -112,13 +112,15 @@ public interface SemanticDomain<
 	 * an identifier gets out of scope.
 	 * 
 	 * @param id the identifier to forget
+	 * @param pp the program point that where this operation is being evaluated
 	 * 
 	 * @return the semantic domain without information about the given id
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException;
 
 	/**
@@ -127,13 +129,16 @@ public interface SemanticDomain<
 	 * This method should be invoked whenever an identifier gets out of scope.
 	 * 
 	 * @param test the test to identify the targets of the removal
+	 * @param pp   the program point that where this operation is being
+	 *                 evaluated
 	 * 
 	 * @return the semantic domain without information about the ids
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException;
 
 	/**
@@ -142,18 +147,20 @@ public interface SemanticDomain<
 	 * {@link #forgetIdentifier(Identifier)} on each element.
 	 * 
 	 * @param ids the collection of identifiers to forget
+	 * @param pp  the program point that where this operation is being evaluated
 	 * 
 	 * @return the semantic domain without information about the given ids
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	default D forgetIdentifiers(
-			Iterable<Identifier> ids)
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
 			throws SemanticException {
 		@SuppressWarnings("unchecked")
 		D result = (D) this;
 		for (Identifier id : ids)
-			result = result.forgetIdentifier(id);
+			result = result.forgetIdentifier(id, pp);
 		return result;
 	}
 

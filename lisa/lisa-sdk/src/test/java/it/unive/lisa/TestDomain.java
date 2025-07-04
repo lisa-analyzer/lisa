@@ -57,28 +57,32 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 
 	@Override
 	public T forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
 	public T forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
 	public T pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
 	public T popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return (T) this;
 	}

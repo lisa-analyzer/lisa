@@ -342,11 +342,11 @@ public class PointBasedHeapTest {
 						new MemoryAllocation(untyped, loc1), loc1),
 				pp1, fakeOracle);
 
-		assertEquals(result.forgetIdentifier(x), emptyHeap);
-		assertEquals(result.forgetIdentifier(y), result);
+		assertEquals(result.forgetIdentifier(x, pp1), emptyHeap);
+		assertEquals(result.forgetIdentifier(y, pp1), result);
 
-		assertEquals(topHeap.forgetIdentifier(x), topHeap);
-		assertEquals(bottomHeap.forgetIdentifier(x), bottomHeap);
+		assertEquals(topHeap.forgetIdentifier(x, pp1), topHeap);
+		assertEquals(bottomHeap.forgetIdentifier(x, pp1), bottomHeap);
 	}
 
 	@Test
@@ -359,8 +359,8 @@ public class PointBasedHeapTest {
 			}
 		});
 
-		assertEquals(topHeap.pushScope(token), topHeap);
-		assertEquals(bottomHeap.pushScope(token), bottomHeap);
+		assertEquals(topHeap.pushScope(token, pp1), topHeap);
+		assertEquals(bottomHeap.pushScope(token, pp1), bottomHeap);
 
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
@@ -373,7 +373,7 @@ public class PointBasedHeapTest {
 				pp1, fakeOracle);
 
 		// x -> pp1 pushScope = [out-of-scope-id]x -> pp1
-		assertEquals(xAssign.pushScope(token), xPushedScopeAssign);
+		assertEquals(xAssign.pushScope(token, pp1), xPushedScopeAssign);
 	}
 
 	@Test
@@ -386,24 +386,24 @@ public class PointBasedHeapTest {
 			}
 		});
 
-		assertEquals(topHeap.popScope(token), topHeap);
-		assertEquals(bottomHeap.popScope(token), bottomHeap);
+		assertEquals(topHeap.popScope(token, pp1), topHeap);
+		assertEquals(bottomHeap.popScope(token, pp1), bottomHeap);
 
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
 						new MemoryAllocation(untyped, loc1), loc1),
 				pp1, fakeOracle);
 
-		PointBasedHeap xScopedAssign = topHeap.assign((Identifier) x.pushScope(token),
+		PointBasedHeap xScopedAssign = topHeap.assign((Identifier) x.pushScope(token, pp1),
 				new HeapReference(untyped,
 						new MemoryAllocation(untyped, loc1), loc1),
 				pp1, fakeOracle);
 
 		// [scoped]x -> pp1 popScope = x -> pp1
-		assertEquals(xAssign, xScopedAssign.popScope(token));
+		assertEquals(xAssign, xScopedAssign.popScope(token, pp1));
 
 		// x -> pp1 popScope = empty environment
-		assertEquals(xAssign.popScope(token), emptyHeap);
+		assertEquals(xAssign.popScope(token, pp1), emptyHeap);
 	}
 
 	@Test

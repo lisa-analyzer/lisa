@@ -182,15 +182,17 @@ public class AvailableExpressions
 
 	@Override
 	public AvailableExpressions pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new AvailableExpressions((ValueExpression) expression.pushScope(scope));
+		return new AvailableExpressions((ValueExpression) expression.pushScope(scope, pp));
 	}
 
 	@Override
 	public AvailableExpressions popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new AvailableExpressions((ValueExpression) expression.popScope(scope));
+		return new AvailableExpressions((ValueExpression) expression.popScope(scope, pp));
 	}
 }

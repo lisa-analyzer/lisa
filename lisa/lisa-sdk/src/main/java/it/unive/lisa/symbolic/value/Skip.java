@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.VoidType;
@@ -49,13 +50,15 @@ public class Skip extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token) {
+			ScopeToken token,
+			ProgramPoint pp) {
 		return this;
 	}
 
 	@Override
 	public SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}

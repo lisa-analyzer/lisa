@@ -8,6 +8,9 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int16Type;
 import it.unive.lisa.program.type.StringType;
@@ -102,6 +105,19 @@ public class SubstringDomainTest {
 			SyntheticLocation.INSTANCE);
 	ValueExpression XSubstringOfC = new BinaryExpression(BoolType.INSTANCE, c, x, StringContains.INSTANCE,
 			SyntheticLocation.INSTANCE);
+
+	private final ProgramPoint pp = new ProgramPoint() {
+
+		@Override
+		public CodeLocation getLocation() {
+			return SyntheticLocation.INSTANCE;
+		}
+
+		@Override
+		public CFG getCFG() {
+			return null;
+		}
+	};
 
 	public SubstringDomainTest() {
 		Map<Identifier, ExpressionInverseSet> mapA = new HashMap<>();
@@ -818,13 +834,13 @@ public class SubstringDomainTest {
 
 		SubstringDomain domain = new SubstringDomain(new ExpressionInverseSet(), f);
 
-		assertFalse(domain.forgetIdentifier(x).knowsIdentifier(x));
+		assertFalse(domain.forgetIdentifier(x, pp).knowsIdentifier(x));
 	}
 
 	@Test
 	public void testForgetIdentifier2() throws SemanticException {
 		SubstringDomain s = domainA.assign(y, XConcatA, null, null);
-		s = s.forgetIdentifier(x);
+		s = s.forgetIdentifier(x, pp);
 		assertEquals(s.getState(x), new ExpressionInverseSet().top());
 		assertFalse(s.getState(y).contains(x));
 		assertFalse(s.getState(y).contains(XConcatA));
@@ -834,7 +850,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testForgetIdentifier3() throws SemanticException {
 		SubstringDomain s = domainD.assign(y, XConcatA, null, null);
-		s = s.forgetIdentifier(x);
+		s = s.forgetIdentifier(x, pp);
 		assertEquals(s.getState(x), new ExpressionInverseSet().top());
 		assertFalse(s.getState(y).contains(x));
 		assertFalse(s.getState(y).contains(XConcatA));
@@ -844,7 +860,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testForgetIdentifiersIf() throws SemanticException {
 		SubstringDomain s = domainF.forgetIdentifiersIf((
-				id) -> id.getName().equals("w") || id.getName().equals("y"));
+				id) -> id.getName().equals("w") || id.getName().equals("y"), pp);
 		assertEquals(s.getState(w), new ExpressionInverseSet().top());
 		assertFalse(s.getState(x).contains(y));
 	}

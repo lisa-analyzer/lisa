@@ -115,33 +115,40 @@ public class NoOpTypes implements TypeDomain<NoOpTypes> {
 
 	@Override
 	public NoOpTypes forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public NoOpTypes forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public NoOpTypes forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
 	public NoOpTypes forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
 	public NoOpTypes pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
 	public NoOpTypes popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}

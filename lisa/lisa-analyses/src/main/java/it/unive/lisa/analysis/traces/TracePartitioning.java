@@ -223,38 +223,43 @@ public class TracePartitioning<A extends AbstractState<A>>
 
 	@Override
 	public TracePartitioning<A> forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
 		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifier(id));
+			result.put(trace.getKey(), trace.getValue().forgetIdentifier(id, pp));
 		return new TracePartitioning<>(lattice, result);
 	}
 
 	@Override
-	public TracePartitioning<A> forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public TracePartitioning<A> forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
 		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifiers(ids));
+			result.put(trace.getKey(), trace.getValue().forgetIdentifiers(ids, pp));
 		return new TracePartitioning<>(lattice, result);
 	}
 
 	@Override
 	public TracePartitioning<A> forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
 		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifiersIf(test));
+			result.put(trace.getKey(), trace.getValue().forgetIdentifiersIf(test, pp));
 		return new TracePartitioning<>(lattice, result);
 	}
 
@@ -282,27 +287,29 @@ public class TracePartitioning<A extends AbstractState<A>>
 
 	@Override
 	public TracePartitioning<A> pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
 		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().pushScope(token));
+			result.put(trace.getKey(), trace.getValue().pushScope(token, pp));
 		return new TracePartitioning<>(lattice, result);
 	}
 
 	@Override
 	public TracePartitioning<A> popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
 			return this;
 
 		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().popScope(token));
+			result.put(trace.getKey(), trace.getValue().popScope(token, pp));
 		return new TracePartitioning<>(lattice, result);
 	}
 

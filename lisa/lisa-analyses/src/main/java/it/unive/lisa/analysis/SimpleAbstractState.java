@@ -507,22 +507,29 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public SimpleAbstractState<H, V, T> pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new SimpleAbstractState<>(
-				heapState.pushScope(scope),
-				valueState.pushScope(scope),
-				typeState.pushScope(scope));
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
+		mo.heap = mo.heap.pushScope(scope, pp);
+		// it should not be necessary to apply substitutions here
+		// applySubstitution(mo, pp);
+		mo.value.pushScope(scope, pp);
+		mo.type.pushScope(scope, pp);
+		return new SimpleAbstractState<>(mo);
 	}
 
 	@Override
 	public SimpleAbstractState<H, V, T> popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new SimpleAbstractState<>(
-				heapState.popScope(scope),
-				valueState.popScope(scope),
-				typeState.popScope(scope));
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
+		mo.heap = mo.heap.popScope(scope, pp);
+		applySubstitution(mo, pp);
+		mo.value.popScope(scope, pp);
+		mo.type.popScope(scope, pp);
+		return new SimpleAbstractState<>(mo);
 	}
 
 	@Override
@@ -596,30 +603,41 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public SimpleAbstractState<H, V, T> forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new SimpleAbstractState<>(
-				heapState.forgetIdentifier(id),
-				valueState.forgetIdentifier(id),
-				typeState.forgetIdentifier(id));
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
+		mo.heap = mo.heap.forgetIdentifier(id, pp);
+		applySubstitution(mo, pp);
+		mo.value.forgetIdentifier(id, pp);
+		mo.type.forgetIdentifier(id, pp);
+		return new SimpleAbstractState<>(mo);
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
-		return new SimpleAbstractState<>(
-				heapState.forgetIdentifiers(ids),
-				valueState.forgetIdentifiers(ids),
-				typeState.forgetIdentifiers(ids));
+	public SimpleAbstractState<H, V, T> forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
+		mo.heap = mo.heap.forgetIdentifiers(ids, pp);
+		applySubstitution(mo, pp);
+		mo.value.forgetIdentifiers(ids, pp);
+		mo.type.forgetIdentifiers(ids, pp);
+		return new SimpleAbstractState<>(mo);
 	}
 
 	@Override
 	public SimpleAbstractState<H, V, T> forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new SimpleAbstractState<>(
-				heapState.forgetIdentifiersIf(test),
-				valueState.forgetIdentifiersIf(test),
-				typeState.forgetIdentifiersIf(test));
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
+		mo.heap = mo.heap.forgetIdentifiersIf(test, pp);
+		applySubstitution(mo, pp);
+		mo.value.forgetIdentifiersIf(test, pp);
+		mo.type.forgetIdentifiersIf(test, pp);
+		return new SimpleAbstractState<>(mo);
 	}
 
 	@Override

@@ -152,16 +152,18 @@ public class Stability<V extends ValueDomain<V>>
 
 	@Override
 	public Stability<V> pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Stability<>(aux.pushScope(token), trends.pushScope(token));
+		return new Stability<>(aux.pushScope(token, pp), trends.pushScope(token, pp));
 	}
 
 	@Override
 	public Stability<V> popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Stability<>(aux.popScope(token), trends.popScope(token));
+		return new Stability<>(aux.popScope(token, pp), trends.popScope(token, pp));
 	}
 
 	/**
@@ -596,23 +598,26 @@ public class Stability<V extends ValueDomain<V>>
 
 	@Override
 	public Stability<V> forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Stability<>(aux.forgetIdentifier(id), trends.forgetIdentifier(id));
+		return new Stability<>(aux.forgetIdentifier(id, pp), trends.forgetIdentifier(id, pp));
 	}
 
 	@Override
 	public Stability<V> forgetIdentifiers(
-			Iterable<Identifier> ids)
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Stability<>(aux.forgetIdentifiers(ids), trends.forgetIdentifiers(ids));
+		return new Stability<>(aux.forgetIdentifiers(ids, pp), trends.forgetIdentifiers(ids, pp));
 	}
 
 	@Override
 	public Stability<V> forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new Stability<>(aux.forgetIdentifiersIf(test), trends.forgetIdentifiersIf(test));
+		return new Stability<>(aux.forgetIdentifiersIf(test, pp), trends.forgetIdentifiersIf(test, pp));
 	}
 
 	@Override

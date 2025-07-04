@@ -59,7 +59,7 @@ public interface ValueDomain<D extends ValueDomain<D>>
 				partial = partial.assign(target, source, pp, oracle);
 			lub = lub.lub(partial);
 		}
-		return lub.forgetIdentifiers(r.getIdsToForget());
+		return lub.forgetIdentifiers(r.getIdsToForget(), pp);
 
 	}
 }

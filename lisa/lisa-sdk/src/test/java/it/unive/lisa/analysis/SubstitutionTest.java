@@ -77,7 +77,8 @@ public class SubstitutionTest {
 
 		@Override
 		public Collector forgetIdentifier(
-				Identifier id)
+				Identifier id,
+				ProgramPoint pp)
 				throws SemanticException {
 			Collector rem = new Collector(this);
 			rem.removed.elements().add(id);
@@ -86,21 +87,24 @@ public class SubstitutionTest {
 
 		@Override
 		public Collector forgetIdentifiersIf(
-				Predicate<Identifier> test)
+				Predicate<Identifier> test,
+				ProgramPoint pp)
 				throws SemanticException {
 			return null;
 		}
 
 		@Override
 		public Collector pushScope(
-				ScopeToken token)
+				ScopeToken token,
+				ProgramPoint pp)
 				throws SemanticException {
 			return null; // not used
 		}
 
 		@Override
 		public Collector popScope(
-				ScopeToken token)
+				ScopeToken token,
+				ProgramPoint pp)
 				throws SemanticException {
 			return null; // not used
 		}

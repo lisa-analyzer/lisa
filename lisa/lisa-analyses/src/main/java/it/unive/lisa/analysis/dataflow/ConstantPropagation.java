@@ -202,19 +202,21 @@ public class ConstantPropagation
 
 	@Override
 	public ConstantPropagation pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return new ConstantPropagation((Identifier) id.pushScope(scope), constant);
+		return new ConstantPropagation((Identifier) id.pushScope(scope, pp), constant);
 	}
 
 	@Override
 	public ConstantPropagation popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (!id.canBeScoped())
 			return this;
 
-		SymbolicExpression popped = id.popScope(scope);
+		SymbolicExpression popped = id.popScope(scope, pp);
 		if (popped == null)
 			return null;
 

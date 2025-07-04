@@ -387,16 +387,18 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 
 	@Override
 	public FieldSensitivePointBasedHeap popScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.popScope(scope), fields));
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.popScope(scope, pp), fields));
 	}
 
 	@Override
 	public FieldSensitivePointBasedHeap pushScope(
-			ScopeToken scope)
+			ScopeToken scope,
+			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.pushScope(scope), fields));
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.pushScope(scope, pp), fields));
 	}
 
 	@Override
@@ -446,20 +448,25 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 
 	@Override
 	public FieldSensitivePointBasedHeap forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifier(id), fields));
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifier(id, pp), fields));
 	}
 
 	@Override
-	public FieldSensitivePointBasedHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiers(ids), fields));
+	public FieldSensitivePointBasedHeap forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiers(ids, pp), fields));
 	}
 
 	@Override
 	public FieldSensitivePointBasedHeap forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiersIf(test), fields));
+		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiersIf(test, pp), fields));
 	}
 }

@@ -50,7 +50,7 @@ public interface TypeDomain<T extends TypeDomain<T>> extends TypeOracle, ValueDo
 				partial = partial.assign(target, source, pp, oracle);
 			lub = lub.lub(partial);
 		}
-		return lub.forgetIdentifiers(r.getIdsToForget());
+		return lub.forgetIdentifiers(r.getIdsToForget(), pp);
 
 	}
 }

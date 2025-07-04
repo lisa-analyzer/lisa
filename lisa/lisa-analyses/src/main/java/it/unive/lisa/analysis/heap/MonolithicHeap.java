@@ -99,19 +99,24 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 	@Override
 	public MonolithicHeap forgetIdentifier(
-			Identifier id)
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
 
 	@Override
-	public MonolithicHeap forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public MonolithicHeap forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
 		return this;
 	}
 
 	@Override
 	public MonolithicHeap forgetIdentifiersIf(
-			Predicate<Identifier> test)
+			Predicate<Identifier> test,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
