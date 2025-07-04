@@ -93,6 +93,123 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	 *                       types of program variables and concretized memory
 	 *                       locations
 	 */
+	@SuppressWarnings("unchecked")
+	public SimpleAbstractState(
+			H heapState) {
+		this.heapState = heapState;
+		this.valueState = (V) NoOpValues.TOP;
+		this.typeState = (T) NoOpTypes.TOP;
+	}
+
+	/**
+	 * Builds a new abstract state.
+	 * 
+	 * @param heapState  the domain containing information regarding heap
+	 *                       structures
+	 * @param valueState the domain containing information regarding values of
+	 *                       program variables and concretized memory locations
+	 * @param typeState  the domain containing information regarding runtime
+	 *                       types of program variables and concretized memory
+	 *                       locations
+	 */
+	@SuppressWarnings("unchecked")
+	public SimpleAbstractState(
+			V valueState) {
+		this.heapState = (H) NoOpHeap.TOP;
+		this.valueState = valueState;
+		this.typeState = (T) NoOpTypes.TOP;
+	}
+
+	/**
+	 * Builds a new abstract state.
+	 * 
+	 * @param heapState  the domain containing information regarding heap
+	 *                       structures
+	 * @param valueState the domain containing information regarding values of
+	 *                       program variables and concretized memory locations
+	 * @param typeState  the domain containing information regarding runtime
+	 *                       types of program variables and concretized memory
+	 *                       locations
+	 */
+	@SuppressWarnings("unchecked")
+	public SimpleAbstractState(
+			T typeState) {
+		this.heapState = (H) NoOpHeap.TOP;
+		this.valueState = (V) NoOpValues.TOP;
+		this.typeState = typeState;
+	}
+
+	/**
+	 * Builds a new abstract state.
+	 * 
+	 * @param heapState  the domain containing information regarding heap
+	 *                       structures
+	 * @param valueState the domain containing information regarding values of
+	 *                       program variables and concretized memory locations
+	 * @param typeState  the domain containing information regarding runtime
+	 *                       types of program variables and concretized memory
+	 *                       locations
+	 */
+	@SuppressWarnings("unchecked")
+	public SimpleAbstractState(
+			H heapState,
+			V valueState) {
+		this.heapState = heapState;
+		this.valueState = valueState;
+		this.typeState = (T) NoOpTypes.TOP;
+	}
+
+	/**
+	 * Builds a new abstract state.
+	 * 
+	 * @param heapState  the domain containing information regarding heap
+	 *                       structures
+	 * @param valueState the domain containing information regarding values of
+	 *                       program variables and concretized memory locations
+	 * @param typeState  the domain containing information regarding runtime
+	 *                       types of program variables and concretized memory
+	 *                       locations
+	 */
+	@SuppressWarnings("unchecked")
+	public SimpleAbstractState(
+			H heapState,
+			T typeState) {
+		this.heapState = heapState;
+		this.valueState = (V) NoOpValues.TOP;
+		this.typeState = typeState;
+	}
+
+	/**
+	 * Builds a new abstract state.
+	 * 
+	 * @param heapState  the domain containing information regarding heap
+	 *                       structures
+	 * @param valueState the domain containing information regarding values of
+	 *                       program variables and concretized memory locations
+	 * @param typeState  the domain containing information regarding runtime
+	 *                       types of program variables and concretized memory
+	 *                       locations
+	 */
+	@SuppressWarnings("unchecked")
+	public SimpleAbstractState(
+			V valueState,
+			T typeState) {
+		this.heapState = (H) NoOpHeap.TOP;
+		this.valueState = valueState;
+		this.typeState = typeState;
+	}
+
+	/**
+	 * Builds a new abstract state.
+	 * 
+	 * @param heapState  the domain containing information regarding heap
+	 *                       structures
+	 * @param valueState the domain containing information regarding values of
+	 *                       program variables and concretized memory locations
+	 * @param typeState  the domain containing information regarding runtime
+	 *                       types of program variables and concretized memory
+	 *                       locations
+	 */
 	public SimpleAbstractState(
 			H heapState,
 			V valueState,
@@ -100,6 +217,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		this.heapState = heapState;
 		this.valueState = valueState;
 		this.typeState = typeState;
+	}
+
+	private SimpleAbstractState(
+			MutableOracle<H, V, T> mo) {
+		this(mo.heap, mo.value, mo.type);
 	}
 
 	/**
@@ -136,15 +258,16 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
+
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
-			return new SimpleAbstractState<>(
-					heapState.assign(id, expression, pp, this),
-					valueState.assign(id, ve, pp, this),
-					typeState.assign(id, ve, pp, this));
+			mo.heap = mo.heap.assign(id, expression, pp, mo);
+			mo.type = mo.type.assign(id, ve, pp, mo);
+			mo.value = mo.value.assign(id, ve, pp, mo);
+			return new SimpleAbstractState<>(mo);
 		}
 
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.assign(id, expression, pp, mo);
 		ExpressionSet exprs = mo.heap.rewrite(expression, pp, mo);
 		if (exprs.isEmpty())
@@ -157,9 +280,9 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type.assign(id, ve, pp, mo);
-			V v = mo.value.assign(id, ve, pp, mo);
-			return new SimpleAbstractState<>(mo.heap, v, t);
+			mo.type = mo.type.assign(id, ve, pp, mo);
+			mo.value = mo.value.assign(id, ve, pp, mo);
+			return new SimpleAbstractState<>(mo);
 		}
 
 		T typeRes = mo.type.bottom();
@@ -168,10 +291,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type.assign(id, ve, pp, mo);
+			T t = mo.type;
+			mo.type = mo.type.assign(id, ve, pp, mo);
 			V v = mo.value.assign(id, ve, pp, mo);
-			typeRes = typeRes.lub(t);
+			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
+			mo.type = t; // we rollback the pre-eval state for the next
+							// expression
 		}
 
 		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
@@ -183,15 +309,16 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
+
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
-			return new SimpleAbstractState<>(
-					heapState.smallStepSemantics(expression, pp, this),
-					valueState.smallStepSemantics(ve, pp, this),
-					typeState.smallStepSemantics(ve, pp, this));
+			mo.heap = mo.heap.smallStepSemantics(expression, pp, mo);
+			mo.type = mo.type.smallStepSemantics(ve, pp, mo);
+			mo.value = mo.value.smallStepSemantics(ve, pp, mo);
+			return new SimpleAbstractState<>(mo);
 		}
 
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.smallStepSemantics(expression, pp, mo);
 		ExpressionSet exprs = mo.heap.rewrite(expression, pp, mo);
 		if (exprs.isEmpty())
@@ -204,13 +331,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type.smallStepSemantics(ve, pp, mo);
+			mo.type = mo.type.smallStepSemantics(ve, pp, mo);
 			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
 				// if the expression is a memory allocation, its type is
 				// registered in the type domain
-				t = t.assign((Identifier) ve, ve, pp, mo);
-			V v = mo.value.smallStepSemantics(ve, pp, mo);
-			return new SimpleAbstractState<>(mo.heap, v, t);
+				mo.type = mo.type.assign((Identifier) ve, ve, pp, mo);
+			mo.value = mo.value.smallStepSemantics(ve, pp, mo);
+			return new SimpleAbstractState<>(mo);
 		}
 
 		T typeRes = mo.type.bottom();
@@ -219,14 +346,17 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type.smallStepSemantics(ve, pp, mo);
+			T t = mo.type;
+			mo.type = mo.type.smallStepSemantics(ve, pp, mo);
 			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
 				// if the expression is a memory allocation, its type is
 				// registered in the type domain
-				t = t.assign((Identifier) ve, ve, pp, mo);
+				mo.type = mo.type.assign((Identifier) ve, ve, pp, mo);
 			V v = mo.value.smallStepSemantics(ve, pp, mo);
-			typeRes = typeRes.lub(t);
+			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
+			mo.type = t; // we rollback the pre-eval state for the next
+							// expression
 		}
 
 		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
@@ -257,21 +387,22 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
+		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
+
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
-			H h = heapState.assume(expression, src, dest, this);
-			if (h.isBottom())
+			mo.heap = heapState.assume(expression, src, dest, this);
+			if (mo.heap.isBottom())
 				return bottom();
-			T t = typeState.assume(ve, src, dest, this);
-			if (t.isBottom())
+			mo.type = typeState.assume(ve, src, dest, this);
+			if (mo.type.isBottom())
 				return bottom();
-			V v = valueState.assume(ve, src, dest, this);
-			if (v.isBottom())
+			mo.value = valueState.assume(ve, src, dest, this);
+			if (mo.value.isBottom())
 				return bottom();
-			return new SimpleAbstractState<>(h, v, t);
+			return new SimpleAbstractState<>(mo);
 		}
 
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.assume(expression, src, dest, mo);
 		if (mo.heap.isBottom())
 			return bottom();
@@ -286,13 +417,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type.assume(ve, src, dest, mo);
-			if (t.isBottom())
+			mo.type = mo.type.assume(ve, src, dest, mo);
+			if (mo.type.isBottom())
 				return bottom();
-			V v = mo.value.assume(ve, src, dest, mo);
-			if (v.isBottom())
+			mo.value = mo.value.assume(ve, src, dest, mo);
+			if (mo.value.isBottom())
 				return bottom();
-			return new SimpleAbstractState<>(mo.heap, v, t);
+			return new SimpleAbstractState<>(mo);
 		}
 
 		T typeRes = mo.type.bottom();
@@ -301,10 +432,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type.assume(ve, src, dest, mo);
+			T t = mo.type;
+			mo.type = mo.type.assume(ve, src, dest, mo);
 			V v = mo.value.assume(ve, src, dest, mo);
-			typeRes = typeRes.lub(t);
+			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
+			mo.type = t; // we rollback the pre-eval state for the next
+							// expression
 		}
 
 		if (typeRes.isBottom() || valueRes.isBottom())

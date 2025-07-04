@@ -21,7 +21,10 @@ import java.util.function.Predicate;
  * @param <I> the type of variable {@link Identifier} that this domain can
  *                handle
  */
-public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends SymbolicExpression, I extends Identifier>
+public interface SemanticDomain<
+		D extends SemanticDomain<D, E, I>,
+		E extends SymbolicExpression,
+		I extends Identifier>
 		extends
 		StructuredObject,
 		ScopedObject<D> {
