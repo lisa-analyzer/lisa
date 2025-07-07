@@ -82,4 +82,15 @@ public class HeapDereference extends HeapExpression {
 	public String toString() {
 		return "*(" + toDeref + ")";
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression e = toDeref.removeTypingExpressions();
+		if (e == toDeref)
+			return this;
+		return new HeapDereference(
+				getStaticType(),
+				e,
+				getCodeLocation());
+	}
 }

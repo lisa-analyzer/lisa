@@ -458,6 +458,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * an identifier gets out of scope.
 	 * 
 	 * @param id the identifier to forget
+	 * @param pp the program point that where this operation is being evaluated
 	 * 
 	 * @return the analysis state without information about the given id
 	 * 
@@ -476,6 +477,8 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * This method should be invoked whenever an identifier gets out of scope.
 	 * 
 	 * @param test the test to identify the targets of the removal
+	 * @param pp   the program point that where this operation is being
+	 *                 evaluated
 	 * 
 	 * @return the analysis state in without information about the ids
 	 * 
@@ -492,6 +495,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 * Forgets all the given {@link Identifier}s.
 	 * 
 	 * @param ids the collection of identifiers to forget
+	 * @param pp  the program point that where this operation is being evaluated
 	 * 
 	 * @return the analysis state without information about the given ids
 	 * 

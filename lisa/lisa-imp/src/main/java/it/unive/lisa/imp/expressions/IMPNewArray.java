@@ -17,6 +17,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.value.InstrumentedReceiver;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
@@ -84,24 +85,30 @@ public class IMPNewArray extends NaryExpression {
 		// we start by allocating the memory region
 		AnalysisState<A> allocated = state.smallStepSemantics(creation, this);
 
-		// we define the length of the array as a child element
-		AnalysisState<A> sem = state.bottom();
-		for (SymbolicExpression alloc : allocated.getComputedExpressions()) {
-			AccessChild len = new AccessChild(
-					Int32Type.INSTANCE,
-					alloc,
-					new Variable(Untyped.INSTANCE, "len", getLocation()),
-					getLocation());
+		// we create the synthetic variable that will hold the reference to the
+		// newly allocated array until it is assigned to a variable
+		InstrumentedReceiver array = new InstrumentedReceiver(reftype, true, getLocation());
+		AnalysisState<A> tmp = allocated.assign(array, ref, this);
 
-			AnalysisState<A> lenSt = state.bottom();
-			// TODO fix when we'll support multidimensional arrays
-			for (SymbolicExpression dim : params[0])
-				lenSt = lenSt.lub(allocated.assign(len, dim, this));
-			sem = sem.lub(lenSt);
-		}
+		// we define the length of the array as a child element
+		AccessChild len = new AccessChild(
+				Int32Type.INSTANCE,
+				array,
+				new Variable(Untyped.INSTANCE, "len", getLocation()),
+				getLocation());
+
+		AnalysisState<A> lenSt = state.bottom();
+		// TODO fix when we'll support multidimensional arrays
+		for (SymbolicExpression dim : params[0])
+			lenSt = lenSt.lub(tmp.assign(len, dim, this));
+
+		// we leave the synthetic array in the program variables
+		// until it is popped from the stack to keep a reference to the
+		// newly created array
+		getMetaVariables().add(array);
 
 		// finally, we leave a reference to the newly created array on the stack
-		return sem.smallStepSemantics(ref, this);
+		return lenSt.smallStepSemantics(array, this);
 	}
 
 	@Override

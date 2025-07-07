@@ -104,4 +104,9 @@ public class Constant extends ValueExpression {
 		Type t = getStaticType();
 		return !t.isValueType() || t.isUntyped();
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		return this;
+	}
 }

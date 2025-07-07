@@ -80,7 +80,13 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 			HeapEnvironment<AllocationSites> environment,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		return new AllocationSites(Collections.singleton((AllocationSite) expression), false);
+		AllocationSite site = (AllocationSite) expression;
+		if (site.isAllocation())
+			// we never store the allocation version of a site,
+			// otherwise it would be considered an allocation
+			// every time we retrieve it from the map
+			site = (AllocationSite) site.asNonAllocation();
+		return new AllocationSites(Collections.singleton(site), false);
 	}
 
 	@Override

@@ -172,4 +172,14 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 	 * @return whether or not this expression might need rewriting
 	 */
 	public abstract boolean mightNeedRewriting();
+
+	/**
+	 * Extracts the inner expressions from casts/conversions. If {@code this} is
+	 * of the form {@code e cast/conv type}, this method returns
+	 * {@code removeTypingExpressions(e)}. Otherwise, {@code this} is returned
+	 * after invoking this method on all sub-expressions.
+	 * 
+	 * @return the typing expression-free version of {@code this}
+	 */
+	public abstract SymbolicExpression removeTypingExpressions();
 }

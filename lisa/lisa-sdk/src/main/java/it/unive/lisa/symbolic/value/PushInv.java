@@ -78,4 +78,9 @@ public class PushInv extends ValueExpression {
 	public boolean mightNeedRewriting() {
 		return false;
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		return this;
+	}
 }

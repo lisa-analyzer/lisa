@@ -6,7 +6,9 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.operator.TypeOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.Type;
 
 /**
@@ -175,5 +177,22 @@ public class BinaryExpression extends ValueExpression {
 	public BinaryExpression withOperator(
 			BinaryOperator operator) {
 		return new BinaryExpression(getStaticType(), left, right, operator, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		if (operator instanceof TypeOperator && !(operator instanceof TypeCheck))
+			return left.removeTypingExpressions();
+
+		SymbolicExpression l = left.removeTypingExpressions();
+		SymbolicExpression r = right.removeTypingExpressions();
+		if (l == left && r == right)
+			return this;
+		return new BinaryExpression(
+				getStaticType(),
+				l,
+				r,
+				operator,
+				getCodeLocation());
 	}
 }

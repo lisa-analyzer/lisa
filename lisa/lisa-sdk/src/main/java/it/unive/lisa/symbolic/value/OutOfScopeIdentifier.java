@@ -86,4 +86,9 @@ public class OutOfScopeIdentifier extends Identifier {
 			throws SemanticException {
 		return visitor.visit(this, params);
 	}
+
+	@Override
+	public boolean isInstrumentedReceiver() {
+		return id.isInstrumentedReceiver();
+	}
 }

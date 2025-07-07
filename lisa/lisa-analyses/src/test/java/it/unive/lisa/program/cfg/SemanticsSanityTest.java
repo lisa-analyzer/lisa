@@ -6,6 +6,9 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NoOpHeap;
+import it.unive.lisa.analysis.NoOpTypes;
+import it.unive.lisa.analysis.NoOpValues;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -479,7 +482,12 @@ public class SemanticsSanityTest {
 			Class<?> root) {
 		if (root == WholeValueAnalysis.class)
 			return new WholeValueAnalysis<>(new Interval(), new Prefix(), Satisfiability.UNKNOWN);
-
+		if (root == NoOpTypes.class)
+			return NoOpTypes.TOP;
+		if (root == NoOpValues.class)
+			return NoOpValues.TOP;
+		if (root == NoOpHeap.class)
+			return NoOpHeap.TOP;
 		return null;
 	}
 

@@ -132,4 +132,17 @@ public class HeapLocation extends Identifier {
 			boolean isAllocation) {
 		this.isAllocation = isAllocation;
 	}
+
+	/**
+	 * Returns a non-allocation version of this location, that is, a version
+	 * where {@link #isAllocation()} returns false.
+	 * 
+	 * @return the non-allocation version of this location
+	 */
+	public HeapLocation asNonAllocation() {
+		if (!isAllocation)
+			return this;
+		else
+			return new HeapLocation(getStaticType(), getName(), isWeak(), getCodeLocation());
+	}
 }

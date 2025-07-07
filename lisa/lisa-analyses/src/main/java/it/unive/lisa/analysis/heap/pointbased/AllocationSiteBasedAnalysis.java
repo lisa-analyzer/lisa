@@ -26,10 +26,14 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
@@ -117,34 +121,88 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		A result = bottom();
 		List<HeapReplacement> replacements = new LinkedList<>();
 		ExpressionSet rhsExps;
-		if (expression.mightNeedRewriting())
+		boolean rhsIsReceiver = false;
+		if (expression instanceof Identifier) {
+			rhsExps = new ExpressionSet(resolveIdentifier((Identifier) expression));
+			rhsIsReceiver = ((Identifier) expression).isInstrumentedReceiver();
+		} else if (expression.mightNeedRewriting())
 			rhsExps = rewrite(expression, pp, oracle);
 		else
 			rhsExps = new ExpressionSet(expression);
 
 		for (SymbolicExpression rhs : rhsExps)
-			if (rhs instanceof MemoryPointer) {
-				HeapLocation rhs_ref = ((MemoryPointer) rhs).getReferencedLocation();
-				if (id instanceof MemoryPointer) {
-					// we have x = y, where both are pointers
-					// we perform *x = *y so that x and y become aliases
-					Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
-					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(lhs_ref, rhs_ref, pp, oracle);
-					result = result.lub(mk(sss, heap));
-				} else if (rhs_ref instanceof StackAllocationSite
-						&& !getAllocatedAt(((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
-					// for stack elements, assignment works as a shallow copy
-					// since there are no pointers to alias
-					result = result.lub(sss.shallowCopy(id, (StackAllocationSite) rhs_ref, replacements, pp, oracle));
-				else {
-					// aliasing: id and star_y points to the same object
-					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, rhs_ref, pp, oracle);
-					result = result.lub(mk(sss, heap));
-				}
-			} else
-				result = result.lub(sss);
+			result = result.lub(process(id, pp, oracle, sss, replacements, rhs, rhsIsReceiver));
+
+		if (!id.isWeak() && knowsIdentifier(id)) {
+			// we might make some location unreachable,
+			// so we have to perform garbage collection
+			HeapReplacement r = new HeapReplacement();
+			r.addSource(id);
+			replacements.addAll(expand(r));
+		}
 
 		return mk(result, replacements);
+	}
+
+	private A process(
+			Identifier id,
+			ProgramPoint pp,
+			SemanticOracle oracle,
+			A sss,
+			List<HeapReplacement> replacements,
+			SymbolicExpression rhs,
+			boolean rhsIsReceiver)
+			throws SemanticException {
+		rhs = rhs.removeTypingExpressions();
+		if (rhs instanceof MemoryPointer) {
+			HeapLocation rhs_ref = ((MemoryPointer) rhs).getReferencedLocation();
+			if (id instanceof MemoryPointer) {
+				// we have x = y, where both are pointers
+				// we perform *x = *y so that x and y become aliases
+				Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
+				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(lhs_ref, rhs_ref, pp, oracle);
+				return mk(sss, heap);
+			} else if (rhs_ref instanceof StackAllocationSite
+					// if we are allocating, we just perform normal aliasing
+					// as there is nothing to copy
+					&& !((StackAllocationSite) rhs_ref).isAllocation()
+					// if rhs is an instrumented receiver, it corresponds to
+					// something that
+					// is still on the stack while being initialized (eg with a
+					// constructor call)
+					// so we perform normal aliasing as there is nothing to copy
+					&& !rhsIsReceiver
+					&& !getAllocatedAt(((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
+				// for stack elements, assignment works as a shallow copy
+				// since there are no pointers to alias
+				return sss.shallowCopy(id, (StackAllocationSite) rhs_ref, replacements, pp, oracle);
+			else {
+				// aliasing: id and star_y points to the same object
+				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, rhs_ref, pp, oracle);
+				return mk(sss, heap);
+			}
+		} else
+			return sss;
+	}
+
+	/**
+	 * Expands the given heap replacement {@code base} by adding all locations
+	 * that are reachable <b>only</b> from the sources of {@code base},
+	 * effectively performing a garbage collection operation.
+	 * 
+	 * @param base the starting point for the expansion of the replacement
+	 * 
+	 * @return the expanded list of heap replacements
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	protected List<HeapReplacement> expand(
+			HeapReplacement base)
+			throws SemanticException {
+		HeapReplacement sub = new HeapReplacement();
+		for (Identifier id : base.getSources())
+			cut(id).forEach(sub::addSource);
+		return List.of(sub);
 	}
 
 	/**
@@ -269,6 +327,27 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		return Objects.equals(heapEnv, other.heapEnv) && Objects.equals(replacements, other.replacements);
 	}
 
+	/**
+	 * Implementation of {@link #equals(Object)} that ignores the substitutions.
+	 * 
+	 * @param obj the other domain instance
+	 * 
+	 * @return whether this instance is equal to {@code obj} up to sibstitutions
+	 */
+	public boolean equalUpToSubs(
+			A obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		return heapEnv.equalUpToSubs(obj.heapEnv);
+	}
+
+	@Override
+	public String toString() {
+		return representation().toString();
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public A semanticsOf(
@@ -286,6 +365,33 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			SemanticOracle oracle)
 			throws SemanticException {
 		return expression.accept(new Rewriter(), pp, oracle);
+	}
+
+	/**
+	 * Resolves the identifier {@code v} to the set of allocation sites that it
+	 * points to, if it is not a memory pointer and this domain instance
+	 * contains points-to information for {@code v}. Otherwise, a set with the
+	 * given identifier is returned.
+	 * 
+	 * @param v the identifier to be resolved
+	 * 
+	 * @return the set of allocation sites that {@code v} points to, or a set
+	 *             with {@code v} itself
+	 */
+	protected Set<SymbolicExpression> resolveIdentifier(
+			Identifier v) {
+		if (v instanceof MemoryPointer || !heapEnv.getKeys().contains(v))
+			return Set.of(v);
+		Set<SymbolicExpression> result = new HashSet<>();
+		for (AllocationSite site : heapEnv.getState(v)) {
+			MemoryPointer e = new MemoryPointer(
+					new ReferenceType(site.getStaticType()),
+					site,
+					site.getCodeLocation());
+			result.add(e);
+		}
+
+		return result;
 	}
 
 	/**
@@ -310,8 +416,17 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
+
+			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression rec : receiver) {
-				rec = removeTypingExpressions(rec);
+				rec = rec.removeTypingExpressions();
+				if (rec instanceof Identifier)
+					toProcess.addAll(resolveIdentifier((Identifier) rec));
+				else
+					toProcess.add(rec);
+			}
+
+			for (SymbolicExpression rec : toProcess)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
@@ -339,7 +454,6 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 					result.add(e);
 				} else if (rec instanceof AllocationSite)
 					result.add(((AllocationSite) rec).withType(expression.getStaticType()));
-			}
 
 			return new ExpressionSet(result);
 		}
@@ -380,8 +494,16 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 
+			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression loc : arg) {
-				loc = removeTypingExpressions(loc);
+				loc = loc.removeTypingExpressions();
+				if (loc instanceof Identifier)
+					toProcess.addAll(resolveIdentifier((Identifier) loc));
+				else
+					toProcess.add(loc);
+			}
+
+			for (SymbolicExpression loc : toProcess)
 				if (loc instanceof AllocationSite) {
 					AllocationSite allocSite = (AllocationSite) loc;
 					MemoryPointer e = new MemoryPointer(
@@ -397,7 +519,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 					result.add(e);
 				} else
 					result.add(loc);
-			}
+
 			return new ExpressionSet(result);
 		}
 
@@ -409,8 +531,16 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 
-			for (SymbolicExpression ref : arg) {
-				ref = removeTypingExpressions(ref);
+			Set<SymbolicExpression> toProcess = new HashSet<>();
+			for (SymbolicExpression rec : arg) {
+				rec = rec.removeTypingExpressions();
+				if (rec instanceof Identifier)
+					toProcess.addAll(resolveIdentifier((Identifier) rec));
+				else
+					toProcess.add(rec);
+			}
+
+			for (SymbolicExpression ref : toProcess)
 				if (ref instanceof MemoryPointer)
 					result.add(((MemoryPointer) ref).getReferencedLocation());
 				else if (ref instanceof Identifier) {
@@ -440,7 +570,6 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 					}
 				} else
 					result.add(ref);
-			}
 
 			return new ExpressionSet(result);
 		}
@@ -450,24 +579,7 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				Identifier expression,
 				Object... params)
 				throws SemanticException {
-			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
-				return new ExpressionSet(resolveIdentifier(expression));
-
 			return new ExpressionSet(expression);
-		}
-
-		private Set<SymbolicExpression> resolveIdentifier(
-				Identifier v) {
-			Set<SymbolicExpression> result = new HashSet<>();
-			for (AllocationSite site : heapEnv.getState(v)) {
-				MemoryPointer e = new MemoryPointer(
-						new ReferenceType(site.getStaticType()),
-						site,
-						site.getCodeLocation());
-				result.add(e);
-			}
-
-			return result;
 		}
 
 		@Override
@@ -566,5 +678,57 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		}
 
 		return Satisfiability.NOT_SATISFIED;
+	}
+
+	/**
+	 * Yields the cut of the program memory that is <b>only</b> reachable
+	 * starting from the given identifier {@code id}. The cut is expressed in
+	 * terms of the identifiers that are reachable. The returned set only
+	 * contains identifiers that can only be accessed with a memory traversal
+	 * starting at {@code id}. This set always contains {@code id} itself.
+	 * 
+	 * @param id the identifier from which the cut is performed
+	 * 
+	 * @return the collection of identifiers that are reachable only from
+	 *             {@code id}
+	 * 
+	 * @throws SemanticException if something goes wrong during the analysis
+	 */
+	public Collection<Identifier> cut(
+			Identifier id)
+			throws SemanticException {
+		// this gives us a quick way of checking if an id can be reached
+		// through multiple ancestors
+		Map<Identifier, Set<Identifier>> pointedTo = new HashMap<>();
+		for (Entry<Identifier, AllocationSites> entry : heapEnv) {
+			Identifier key = entry.getKey();
+			if (key instanceof AllocationSite)
+				// field information is not relevant for the cut
+				key = ((AllocationSite) key).withoutField();
+			for (AllocationSite site : entry.getValue())
+				// field information is not relevant for the cut
+				pointedTo.computeIfAbsent(site.withoutField(), k -> new HashSet<>()).add(key);
+		}
+
+		Set<Identifier> reachable = new HashSet<>();
+		Set<Identifier> frontier = new HashSet<>();
+
+		reachable.add(id);
+		frontier.add(id);
+
+		do {
+			Set<Identifier> tmp = new HashSet<>();
+			for (Identifier current : frontier)
+				for (AllocationSite site : heapEnv.getState(current)) {
+					site = site.withoutField();
+					if (!reachable.contains(site) && pointedTo.get(site).size() == 1) {
+						reachable.add(site);
+						tmp.add(site);
+					}
+				}
+			frontier = tmp;
+		} while (!frontier.isEmpty());
+
+		return reachable;
 	}
 }

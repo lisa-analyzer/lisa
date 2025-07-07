@@ -82,4 +82,15 @@ public class HeapReference extends HeapExpression {
 		T l = expression.accept(visitor, params);
 		return visitor.visit(this, l, params);
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression e = expression.removeTypingExpressions();
+		if (e == expression)
+			return this;
+		return new HeapReference(
+				getStaticType(),
+				e,
+				getCodeLocation());
+	}
 }

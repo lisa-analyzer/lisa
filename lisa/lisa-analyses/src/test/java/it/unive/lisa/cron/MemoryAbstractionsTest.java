@@ -56,4 +56,34 @@ public class MemoryAbstractionsTest extends AnalysisTestExecutor {
 		conf.programFile = "heap-pp-field.imp";
 		perform(conf, true);
 	}
+
+	@Test
+	public void fieldInsensitiveGCTest() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = DefaultConfiguration.simpleState(
+				new PointBasedHeap(),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.testDir = "heap";
+		conf.testSubDir = "pp-gc";
+		conf.programFile = "gc.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void fieldSensitiveGCTest() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = DefaultConfiguration.simpleState(
+				new FieldSensitivePointBasedHeap(),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.testDir = "heap";
+		conf.testSubDir = "pp-field-gc";
+		conf.programFile = "gc.imp";
+		perform(conf);
+	}
 }

@@ -107,4 +107,17 @@ public class AccessChild extends HeapExpression {
 		T ch = child.accept(visitor, params);
 		return visitor.visit(this, cont, ch, params);
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression cont = container.removeTypingExpressions();
+		SymbolicExpression ch = child.removeTypingExpressions();
+		if (cont == container && ch == child)
+			return this;
+		return new AccessChild(
+				getStaticType(),
+				cont,
+				ch,
+				getCodeLocation());
+	}
 }

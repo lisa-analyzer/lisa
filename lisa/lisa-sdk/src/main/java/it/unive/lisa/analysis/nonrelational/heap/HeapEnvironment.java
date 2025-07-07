@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -13,6 +14,11 @@ import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * An environment for a {@link NonRelationalHeapDomain}, that maps
@@ -177,6 +183,18 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		return true;
 	}
 
+	/**
+	 * Implementation of {@link #equals(Object)} that ignores the substitutions.
+	 * 
+	 * @param obj the other domain instance
+	 * 
+	 * @return whether this instance is equal to {@code obj} up to sibstitutions
+	 */
+	public boolean equalUpToSubs(
+			HeapEnvironment<T> obj) {
+		return super.equals(obj);
+	}
+
 	@Override
 	public Satisfiability alias(
 			SymbolicExpression x,
@@ -195,5 +213,124 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 			SemanticOracle oracle)
 			throws SemanticException {
 		return lattice.isReachableFrom(x, y, this, pp, oracle);
+	}
+
+	@Override
+	public HeapEnvironment<T> pushScope(
+			ScopeToken scope,
+			ProgramPoint pp)
+			throws SemanticException {
+		AtomicReference<SemanticException> holder = new AtomicReference<>();
+
+		HeapEnvironment<T> result = liftIdentifiers(id -> {
+			try {
+				return (Identifier) id.pushScope(scope, pp);
+			} catch (SemanticException e) {
+				holder.set(e);
+			}
+			return null;
+		});
+
+		if (holder.get() != null)
+			throw new SemanticException("Pushing the scope '" + scope + "' raised an error", holder.get());
+
+		return result;
+	}
+
+	@Override
+	public HeapEnvironment<T> popScope(
+			ScopeToken scope,
+			ProgramPoint pp)
+			throws SemanticException {
+		AtomicReference<SemanticException> holder = new AtomicReference<>();
+
+		HeapEnvironment<T> result = liftIdentifiers(id -> {
+			try {
+				return (Identifier) id.popScope(scope, pp);
+			} catch (SemanticException e) {
+				holder.set(e);
+			}
+			return null;
+		});
+
+		if (holder.get() != null)
+			throw new SemanticException("Popping the scope '" + scope + "' raised an error", holder.get());
+
+		return result;
+	}
+
+	private HeapEnvironment<T> liftIdentifiers(
+			UnaryOperator<Identifier> lifter)
+			throws SemanticException {
+		if (isBottom() || isTop())
+			return this;
+
+		Map<Identifier, T> function = mkNewFunction(null, false);
+		HeapReplacement r = new HeapReplacement();
+		for (Identifier id : getKeys()) {
+			Identifier lifted = lifter.apply(id);
+			if (lifted != null)
+				if (!function.containsKey(lifted))
+					function.put(lifted, getState(id));
+				else
+					function.put(lifted, getState(id).lub(function.get(lifted)));
+			else
+				r.addSource(id);
+		}
+
+		return new HeapEnvironment<>(lattice, function, List.of(r));
+	}
+
+	@Override
+	public HeapEnvironment<T> forgetIdentifier(
+			Identifier id,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<Identifier, T> result = mkNewFunction(function, false);
+		result.remove(id);
+
+		HeapReplacement r = new HeapReplacement();
+		r.addSource(id);
+
+		return new HeapEnvironment<>(lattice, result, List.of(r));
+	}
+
+	@Override
+	public HeapEnvironment<T> forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<Identifier, T> result = mkNewFunction(function, false);
+		for (Identifier id : ids)
+			result.remove(id);
+
+		HeapReplacement r = new HeapReplacement();
+		ids.forEach(r::addSource);
+
+		return new HeapEnvironment<>(lattice, result, List.of(r));
+	}
+
+	@Override
+	public HeapEnvironment<T> forgetIdentifiersIf(
+			Predicate<Identifier> test,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<Identifier, T> result = mkNewFunction(function, false);
+		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
+		keys.forEach(result::remove);
+
+		HeapReplacement r = new HeapReplacement();
+		keys.forEach(r::addSource);
+
+		return new HeapEnvironment<>(lattice, result, List.of(r));
 	}
 }

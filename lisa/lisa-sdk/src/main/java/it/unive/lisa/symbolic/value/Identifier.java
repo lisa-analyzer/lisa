@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
@@ -169,5 +170,23 @@ public abstract class Identifier extends ValueExpression {
 	public boolean mightNeedRewriting() {
 		Type t = getStaticType();
 		return !t.isValueType() || t.isUntyped();
+	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		return this;
+	}
+
+	/**
+	 * Yields whether or not this identifier is an instrumented receiver, that
+	 * is, a special variable reference that is used to represent objects,
+	 * arrays, or other data structures that are being initialized and that have
+	 * not been assigned to a variable yet, and thus live on the stack.
+	 * 
+	 * @return {@code true} if this identifier is an instrumented receiver,
+	 *             {@code false} otherwise
+	 */
+	public boolean isInstrumentedReceiver() {
+		return false;
 	}
 }

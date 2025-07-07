@@ -71,7 +71,7 @@ public class StackAllocationSite extends AllocationSite {
 	}
 
 	@Override
-	public AllocationSite toWeak() {
+	public StackAllocationSite toWeak() {
 		return isWeak() ? this
 				: new StackAllocationSite(
 						getStaticType(),
@@ -82,16 +82,49 @@ public class StackAllocationSite extends AllocationSite {
 	}
 
 	@Override
-	public AllocationSite withField(
+	public StackAllocationSite withField(
 			SymbolicExpression field) {
 		if (getField() != null)
 			throw new IllegalStateException("Cannot add a field to an allocation site that already has one");
-		return new StackAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());
+		return new StackAllocationSite(
+				getStaticType(),
+				getLocationName(),
+				field,
+				isWeak(),
+				getCodeLocation());
 	}
 
 	@Override
-	public AllocationSite withType(
+	public StackAllocationSite withType(
 			Type type) {
-		return new StackAllocationSite(type, getLocationName(), getField(), isWeak(), getCodeLocation());
+		return new StackAllocationSite(
+				type,
+				getLocationName(),
+				getField(),
+				isWeak(),
+				getCodeLocation());
+	}
+
+	@Override
+	public StackAllocationSite withoutField() {
+		if (getField() == null)
+			return this;
+		return new StackAllocationSite(
+				getStaticType(),
+				getLocationName(),
+				isWeak(),
+				getCodeLocation());
+	}
+
+	@Override
+	public StackAllocationSite asNonAllocation() {
+		if (!isAllocation())
+			return this;
+		return new StackAllocationSite(
+				getStaticType(),
+				getLocationName(),
+				getField(),
+				isWeak(),
+				getCodeLocation());
 	}
 }

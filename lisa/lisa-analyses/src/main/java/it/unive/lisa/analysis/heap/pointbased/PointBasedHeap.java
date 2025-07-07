@@ -55,7 +55,9 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 	@Override
 	public PointBasedHeap mk(
 			PointBasedHeap reference) {
-		return reference;
+		if (reference.replacements.isEmpty())
+			return reference;
+		return new PointBasedHeap(reference.heapEnv, List.of());
 	}
 
 	@Override
@@ -113,7 +115,12 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 			ScopeToken scope,
 			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.popScope(scope, pp)));
+		HeapEnvironment<AllocationSites> env = heapEnv.popScope(scope, pp);
+		if (env.getSubstitution().isEmpty())
+			return new PointBasedHeap(env);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		return new PointBasedHeap(env, expand(base));
 	}
 
 	@Override
@@ -121,7 +128,12 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 			ScopeToken scope,
 			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.pushScope(scope, pp)));
+		HeapEnvironment<AllocationSites> env = heapEnv.pushScope(scope, pp);
+		if (env.getSubstitution().isEmpty())
+			return new PointBasedHeap(env);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		return new PointBasedHeap(env, expand(base));
 	}
 
 	@Override
@@ -129,7 +141,12 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 			Identifier id,
 			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.forgetIdentifier(id, pp)));
+		HeapEnvironment<AllocationSites> env = heapEnv.forgetIdentifier(id, pp);
+		if (env.getSubstitution().isEmpty())
+			return new PointBasedHeap(env);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		return new PointBasedHeap(env, expand(base));
 	}
 
 	@Override
@@ -137,7 +154,12 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 			Iterable<Identifier> ids,
 			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.forgetIdentifiers(ids, pp)));
+		HeapEnvironment<AllocationSites> env = heapEnv.forgetIdentifiers(ids, pp);
+		if (env.getSubstitution().isEmpty())
+			return new PointBasedHeap(env);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		return new PointBasedHeap(env, expand(base));
 	}
 
 	@Override
@@ -145,6 +167,11 @@ public class PointBasedHeap extends AllocationSiteBasedAnalysis<PointBasedHeap> 
 			Predicate<Identifier> test,
 			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new PointBasedHeap(heapEnv.forgetIdentifiersIf(test, pp)));
+		HeapEnvironment<AllocationSites> env = heapEnv.forgetIdentifiersIf(test, pp);
+		if (env.getSubstitution().isEmpty())
+			return new PointBasedHeap(env);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		return new PointBasedHeap(env, expand(base));
 	}
 }

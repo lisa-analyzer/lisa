@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A field-insensitive program point-based {@link AllocationSiteBasedAnalysis}.
@@ -95,7 +96,9 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	@Override
 	public FieldSensitivePointBasedHeap mk(
 			FieldSensitivePointBasedHeap reference) {
-		return reference;
+		if (reference.replacements.isEmpty())
+			return reference;
+		return new FieldSensitivePointBasedHeap(reference.heapEnv, List.of(), reference.fields);
 	}
 
 	@Override
@@ -176,10 +179,13 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 			Map<AllocationSite, ExpressionSet> mapping = new HashMap<>(sss.fields.getMap());
 
 			ExpressionSet exprs;
-			if (accessChild.getContainer().mightNeedRewriting())
-				exprs = rewrite(accessChild.getContainer(), pp, oracle);
+			SymbolicExpression cont = accessChild.getContainer();
+			if (cont instanceof Identifier)
+				exprs = new ExpressionSet(resolveIdentifier((Identifier) cont));
+			else if (cont.mightNeedRewriting())
+				exprs = rewrite(cont, pp, oracle);
 			else
-				exprs = new ExpressionSet(accessChild.getContainer());
+				exprs = new ExpressionSet(cont);
 
 			for (SymbolicExpression rec : exprs)
 				if (rec instanceof MemoryPointer) {
@@ -245,7 +251,7 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 					env = new HeapEnvironment<>(env.lattice, map);
 				}
 
-				return mk(new FieldSensitivePointBasedHeap(env, replacements, fields));
+				return mk(new FieldSensitivePointBasedHeap(env, fields), replacements);
 			}
 		}
 
@@ -288,8 +294,16 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 
+			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression rec : receiver) {
-				rec = removeTypingExpressions(rec);
+				rec = rec.removeTypingExpressions();
+				if (rec instanceof Identifier)
+					toProcess.addAll(resolveIdentifier((Identifier) rec));
+				else
+					toProcess.add(rec);
+			}
+
+			for (SymbolicExpression rec : toProcess) {
 				if (rec instanceof MemoryPointer) {
 					AllocationSite site = (AllocationSite) ((MemoryPointer) rec).getReferencedLocation();
 					populate(expression, child, result, site);
@@ -350,9 +364,17 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 
 			AllocationSite e;
 			if (expression.isStackAllocation())
-				e = new StackAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+				e = new StackAllocationSite(
+						expression.getStaticType(),
+						pp,
+						weak,
+						expression.getCodeLocation());
 			else
-				e = new HeapAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+				e = new HeapAllocationSite(
+						expression.getStaticType(),
+						pp,
+						weak,
+						expression.getCodeLocation());
 			e.setAllocation(true);
 
 			// propagates the annotations of expression
@@ -386,19 +408,11 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	}
 
 	@Override
-	public FieldSensitivePointBasedHeap popScope(
-			ScopeToken scope,
-			ProgramPoint pp)
-			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.popScope(scope, pp), fields));
-	}
-
-	@Override
-	public FieldSensitivePointBasedHeap pushScope(
-			ScopeToken scope,
-			ProgramPoint pp)
-			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.pushScope(scope, pp), fields));
+	public boolean equalUpToSubs(
+			FieldSensitivePointBasedHeap obj) {
+		if (!super.equalUpToSubs(obj))
+			return false;
+		return Objects.equals(fields, obj.fields);
 	}
 
 	@Override
@@ -447,11 +461,55 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 	}
 
 	@Override
+	public FieldSensitivePointBasedHeap popScope(
+			ScopeToken scope,
+			ProgramPoint pp)
+			throws SemanticException {
+		HeapEnvironment<AllocationSites> env = heapEnv.popScope(scope, pp);
+		if (env.getSubstitution().isEmpty())
+			return new FieldSensitivePointBasedHeap(env, fields);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		Set<AllocationSite> sites = new HashSet<>();
+		for (Identifier id : base.getSources())
+			if (id instanceof AllocationSite)
+				sites.add((AllocationSite) id);
+		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
+		return new FieldSensitivePointBasedHeap(env, expand(base), f);
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap pushScope(
+			ScopeToken scope,
+			ProgramPoint pp)
+			throws SemanticException {
+		HeapEnvironment<AllocationSites> env = heapEnv.pushScope(scope, pp);
+		if (env.getSubstitution().isEmpty())
+			return new FieldSensitivePointBasedHeap(env, fields);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		Set<AllocationSite> sites = new HashSet<>();
+		for (Identifier id : base.getSources())
+			if (id instanceof AllocationSite)
+				sites.add((AllocationSite) id);
+		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
+		return new FieldSensitivePointBasedHeap(env, expand(base), f);
+	}
+
+	@Override
 	public FieldSensitivePointBasedHeap forgetIdentifier(
 			Identifier id,
 			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifier(id, pp), fields));
+		GenericMapLattice<AllocationSite, ExpressionSet> f = fields;
+		if (id instanceof AllocationSite)
+			f = f.remove((AllocationSite) id);
+		HeapEnvironment<AllocationSites> env = heapEnv.forgetIdentifier(id, pp);
+		if (env.getSubstitution().isEmpty())
+			return new FieldSensitivePointBasedHeap(env, f);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		return new FieldSensitivePointBasedHeap(env, expand(base), f);
 	}
 
 	@Override
@@ -459,7 +517,17 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 			Iterable<Identifier> ids,
 			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiers(ids, pp), fields));
+		Set<AllocationSite> sites = new HashSet<>();
+		for (Identifier id : ids)
+			if (id instanceof AllocationSite)
+				sites.add((AllocationSite) id);
+		HeapEnvironment<AllocationSites> env = heapEnv.forgetIdentifiers(ids, pp);
+		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
+		if (env.getSubstitution().isEmpty())
+			return new FieldSensitivePointBasedHeap(env, f);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		return new FieldSensitivePointBasedHeap(env, expand(base), f);
 	}
 
 	@Override
@@ -467,6 +535,33 @@ public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<Fi
 			Predicate<Identifier> test,
 			ProgramPoint pp)
 			throws SemanticException {
-		return mk(new FieldSensitivePointBasedHeap(heapEnv.forgetIdentifiersIf(test, pp), fields));
+		Set<AllocationSite> sites = heapEnv.getKeys()
+				.stream()
+				.filter(test)
+				.filter(k -> k instanceof AllocationSite)
+				.map(k -> (AllocationSite) k)
+				.collect(Collectors.toSet());
+		HeapEnvironment<AllocationSites> env = heapEnv.forgetIdentifiersIf(test, pp);
+		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
+		if (env.getSubstitution().isEmpty())
+			return new FieldSensitivePointBasedHeap(env, f);
+		// the substitution contains which variables were effectively removed
+		HeapReplacement base = env.getSubstitution().get(0);
+		return new FieldSensitivePointBasedHeap(env, expand(base), f);
+	}
+
+	@Override
+	protected List<HeapReplacement> expand(
+			HeapReplacement base)
+			throws SemanticException {
+		HeapReplacement sub = new HeapReplacement();
+		for (Identifier id : base.getSources())
+			cut(id).forEach(k -> {
+				sub.addSource(k);
+				if (k instanceof AllocationSite)
+					for (SymbolicExpression field : fields.getOtDefault((AllocationSite) k, new ExpressionSet()))
+						sub.addSource(((AllocationSite) k).withField(field));
+			});
+		return List.of(sub);
 	}
 }

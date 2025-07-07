@@ -295,7 +295,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			SemanticOracle oracle = (SemanticOracle) params[1];
 
 			for (SymbolicExpression refExp : ref) {
-				refExp = removeTypingExpressions(refExp);
+				refExp = refExp.removeTypingExpressions();
 				if (refExp instanceof HeapLocation) {
 					Set<Type> rt = oracle.getRuntimeTypesOf(refExp, pp, oracle);
 					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
@@ -321,7 +321,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			SemanticOracle oracle = (SemanticOracle) params[1];
 
 			for (SymbolicExpression derefExp : deref) {
-				derefExp = removeTypingExpressions(derefExp);
+				derefExp = derefExp.removeTypingExpressions();
 				if (derefExp instanceof Variable) {
 					Variable var = (Variable) derefExp;
 					for (Type t : oracle.getRuntimeTypesOf(var, pp, oracle))

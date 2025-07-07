@@ -10,6 +10,9 @@ import it.unive.lisa.analysis.BackwardAnalyzedCFG;
 import it.unive.lisa.analysis.BackwardOptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NoOpHeap;
+import it.unive.lisa.analysis.NoOpTypes;
+import it.unive.lisa.analysis.NoOpValues;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -73,6 +76,7 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.InstrumentedReceiverRef;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.NaryStatement;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
@@ -405,6 +409,8 @@ public class EqualityContractVerificationTest {
 						// string statements are already pluggable-friendly
 						|| st.getPackageName().equals("it.unive.lisa.program.cfg.statement.string"))
 					extra.add("originating");
+				if (st == InstrumentedReceiverRef.class)
+					extra.add("isArray");
 				if (Call.class.isAssignableFrom(st))
 					extra.add("source");
 				if (NaryExpression.class.isAssignableFrom(st))
@@ -473,6 +479,10 @@ public class EqualityContractVerificationTest {
 				verify(subject, Warning.NONFINAL_FIELDS);
 			else if (subject == StaticTypes.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("types"));
+			else if (subject == NoOpValues.class
+					|| subject == NoOpTypes.class
+					|| subject == NoOpHeap.class)
+				verify(subject, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
 			else if (subject != AnalyzedCFG.class
 					&& subject != OptimizedAnalyzedCFG.class
 					&& subject != BackwardAnalyzedCFG.class

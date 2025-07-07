@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import java.util.Objects;
 
@@ -136,5 +137,10 @@ public class MemoryAllocation extends HeapExpression {
 			Object... params)
 			throws SemanticException {
 		return visitor.visit(this, params);
+	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		return this;
 	}
 }

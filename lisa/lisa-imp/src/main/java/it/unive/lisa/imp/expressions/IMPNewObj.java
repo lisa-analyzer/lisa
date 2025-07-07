@@ -9,9 +9,9 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.InstrumentedReceiverRef;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -87,7 +87,7 @@ public class IMPNewObj extends NaryExpression {
 		AnalysisState<A> allocated = state.smallStepSemantics(creation, this);
 
 		// we need to add the receiver to the parameters of the constructor call
-		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$rec@" + getLocation(), reftype);
+		InstrumentedReceiverRef paramThis = new InstrumentedReceiverRef(getCFG(), getLocation(), false, reftype);
 		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
 
 		// we also have to add the receiver inside the state
@@ -115,11 +115,18 @@ public class IMPNewObj extends NaryExpression {
 		expressions.forget(paramThis);
 		for (SymbolicExpression v : callstate.getComputedExpressions())
 			if (v instanceof Identifier)
-				sem = sem.forgetIdentifier((Identifier) v, this);
+				// we leave the instrumented receiver in the program variables
+				// until it is popped from the stack to keep a reference to the
+				// newly created object and its fields
+				getMetaVariables().add((Identifier) v);
 
 		// finally, we leave a reference to the newly created object on the
-		// stack
-		return sem.smallStepSemantics(ref, this);
+		// stack; this correponds to the state after the constructor call
+		// but with the receiver left on the stack
+		return new AnalysisState<>(
+				sem.getState(),
+				callstate.getComputedExpressions(),
+				sem.getFixpointInformation());
 	}
 
 	@Override

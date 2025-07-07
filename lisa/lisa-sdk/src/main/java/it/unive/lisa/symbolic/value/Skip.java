@@ -75,4 +75,9 @@ public class Skip extends ValueExpression {
 	public boolean mightNeedRewriting() {
 		return false;
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		return this;
+	}
 }

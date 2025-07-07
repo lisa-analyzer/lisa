@@ -83,15 +83,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	private final T typeState;
 
 	/**
-	 * Builds a new abstract state.
+	 * Builds a new abstract state. The missing domains are set to the default
+	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * {@link NoOpTypes}).
 	 * 
-	 * @param heapState  the domain containing information regarding heap
-	 *                       structures
-	 * @param valueState the domain containing information regarding values of
-	 *                       program variables and concretized memory locations
-	 * @param typeState  the domain containing information regarding runtime
-	 *                       types of program variables and concretized memory
-	 *                       locations
+	 * @param heapState the domain containing information regarding heap
+	 *                      structures
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractState(
@@ -102,15 +99,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	/**
-	 * Builds a new abstract state.
+	 * Builds a new abstract state. The missing domains are set to the default
+	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * {@link NoOpTypes}).
 	 * 
-	 * @param heapState  the domain containing information regarding heap
-	 *                       structures
 	 * @param valueState the domain containing information regarding values of
 	 *                       program variables and concretized memory locations
-	 * @param typeState  the domain containing information regarding runtime
-	 *                       types of program variables and concretized memory
-	 *                       locations
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractState(
@@ -121,15 +115,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	/**
-	 * Builds a new abstract state.
+	 * Builds a new abstract state. The missing domains are set to the default
+	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * {@link NoOpTypes}).
 	 * 
-	 * @param heapState  the domain containing information regarding heap
-	 *                       structures
-	 * @param valueState the domain containing information regarding values of
-	 *                       program variables and concretized memory locations
-	 * @param typeState  the domain containing information regarding runtime
-	 *                       types of program variables and concretized memory
-	 *                       locations
+	 * @param typeState the domain containing information regarding runtime
+	 *                      types of program variables and concretized memory
+	 *                      locations
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractState(
@@ -140,15 +132,14 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	/**
-	 * Builds a new abstract state.
+	 * Builds a new abstract state. The missing domains are set to the default
+	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * {@link NoOpTypes}).
 	 * 
 	 * @param heapState  the domain containing information regarding heap
 	 *                       structures
 	 * @param valueState the domain containing information regarding values of
 	 *                       program variables and concretized memory locations
-	 * @param typeState  the domain containing information regarding runtime
-	 *                       types of program variables and concretized memory
-	 *                       locations
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractState(
@@ -160,15 +151,15 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	/**
-	 * Builds a new abstract state.
+	 * Builds a new abstract state. The missing domains are set to the default
+	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * {@link NoOpTypes}).
 	 * 
-	 * @param heapState  the domain containing information regarding heap
-	 *                       structures
-	 * @param valueState the domain containing information regarding values of
-	 *                       program variables and concretized memory locations
-	 * @param typeState  the domain containing information regarding runtime
-	 *                       types of program variables and concretized memory
-	 *                       locations
+	 * @param heapState the domain containing information regarding heap
+	 *                      structures
+	 * @param typeState the domain containing information regarding runtime
+	 *                      types of program variables and concretized memory
+	 *                      locations
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractState(
@@ -180,10 +171,10 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	/**
-	 * Builds a new abstract state.
+	 * Builds a new abstract state. The missing domains are set to the default
+	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * {@link NoOpTypes}).
 	 * 
-	 * @param heapState  the domain containing information regarding heap
-	 *                       structures
 	 * @param valueState the domain containing information regarding values of
 	 *                       program variables and concretized memory locations
 	 * @param typeState  the domain containing information regarding runtime
@@ -296,8 +287,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			V v = mo.value.assign(id, ve, pp, mo);
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
-			mo.type = t; // we rollback the pre-eval state for the next
-							// expression
+			// we rollback the pre-eval state for the next expression
+			mo.type = t;
 		}
 
 		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
@@ -355,8 +346,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			V v = mo.value.smallStepSemantics(ve, pp, mo);
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
-			mo.type = t; // we rollback the pre-eval state for the next
-							// expression
+			// we rollback the pre-eval state for the next expression
+			mo.type = t;
 		}
 
 		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
@@ -391,13 +382,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
-			mo.heap = heapState.assume(expression, src, dest, this);
+			mo.heap = mo.heap.assume(expression, src, dest, mo);
 			if (mo.heap.isBottom())
 				return bottom();
-			mo.type = typeState.assume(ve, src, dest, this);
+			mo.type = mo.type.assume(ve, src, dest, mo);
 			if (mo.type.isBottom())
 				return bottom();
-			mo.value = valueState.assume(ve, src, dest, this);
+			mo.value = mo.value.assume(ve, src, dest, mo);
 			if (mo.value.isBottom())
 				return bottom();
 			return new SimpleAbstractState<>(mo);
@@ -437,8 +428,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			V v = mo.value.assume(ve, src, dest, mo);
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
-			mo.type = t; // we rollback the pre-eval state for the next
-							// expression
+			// we rollback the pre-eval state for the next expression
+			mo.type = t;
 		}
 
 		if (typeRes.isBottom() || valueRes.isBottom())
@@ -512,10 +503,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			throws SemanticException {
 		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.pushScope(scope, pp);
-		// it should not be necessary to apply substitutions here
+		// it should not be necessary to apply substitutions here,
+		// as we are not deleting variables and the heap locations
+		// won't be masked by the scope
 		// applySubstitution(mo, pp);
-		mo.value.pushScope(scope, pp);
-		mo.type.pushScope(scope, pp);
+		mo.value = mo.value.pushScope(scope, pp);
+		mo.type = mo.type.pushScope(scope, pp);
 		return new SimpleAbstractState<>(mo);
 	}
 
@@ -527,8 +520,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.popScope(scope, pp);
 		applySubstitution(mo, pp);
-		mo.value.popScope(scope, pp);
-		mo.type.popScope(scope, pp);
+		mo.value = mo.value.popScope(scope, pp);
+		mo.type = mo.type.popScope(scope, pp);
 		return new SimpleAbstractState<>(mo);
 	}
 
@@ -609,8 +602,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.forgetIdentifier(id, pp);
 		applySubstitution(mo, pp);
-		mo.value.forgetIdentifier(id, pp);
-		mo.type.forgetIdentifier(id, pp);
+		mo.value = mo.value.forgetIdentifier(id, pp);
+		mo.type = mo.type.forgetIdentifier(id, pp);
 		return new SimpleAbstractState<>(mo);
 	}
 
@@ -622,8 +615,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.forgetIdentifiers(ids, pp);
 		applySubstitution(mo, pp);
-		mo.value.forgetIdentifiers(ids, pp);
-		mo.type.forgetIdentifiers(ids, pp);
+		mo.value = mo.value.forgetIdentifiers(ids, pp);
+		mo.type = mo.type.forgetIdentifiers(ids, pp);
 		return new SimpleAbstractState<>(mo);
 	}
 
@@ -635,8 +628,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
 		mo.heap = mo.heap.forgetIdentifiersIf(test, pp);
 		applySubstitution(mo, pp);
-		mo.value.forgetIdentifiersIf(test, pp);
-		mo.type.forgetIdentifiersIf(test, pp);
+		mo.value = mo.value.forgetIdentifiersIf(test, pp);
+		mo.type = mo.type.forgetIdentifiersIf(test, pp);
 		return new SimpleAbstractState<>(mo);
 	}
 

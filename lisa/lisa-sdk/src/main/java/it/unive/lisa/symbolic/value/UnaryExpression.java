@@ -178,4 +178,16 @@ public class UnaryExpression extends ValueExpression {
 			UnaryOperator operator) {
 		return new UnaryExpression(getStaticType(), expression, operator, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression e = expression.removeTypingExpressions();
+		if (expression == e)
+			return this;
+		return new UnaryExpression(
+				getStaticType(),
+				e,
+				operator,
+				getCodeLocation());
+	}
 }

@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_arrays.bitest(arrays__this).json", "untyped_arrays.test(arrays__this).json" ],
   "info" : {
     "cfgs" : "2",
-    "duration" : "420ms",
-    "end" : "2023-09-11T19:18:34.470+02:00",
+    "duration" : "957ms",
+    "end" : "2025-07-09T13:00:06.099+02:00",
     "expressions" : "64",
     "files" : "2",
     "globals" : "0",
     "members" : "2",
     "programs" : "1",
-    "start" : "2023-09-11T19:18:34.050+02:00",
+    "start" : "2025-07-09T13:00:05.142+02:00",
     "statements" : "19",
     "units" : "1",
-    "version" : "0.1b8",
+    "version" : "0.1",
     "warnings" : "0"
   },
   "configuration" : {

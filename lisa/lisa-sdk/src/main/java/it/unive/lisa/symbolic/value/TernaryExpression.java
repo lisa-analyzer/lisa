@@ -202,4 +202,20 @@ public class TernaryExpression extends ValueExpression {
 			TernaryOperator operator) {
 		return new TernaryExpression(getStaticType(), left, middle, right, operator, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression l = this.left.removeTypingExpressions();
+		SymbolicExpression m = this.middle.removeTypingExpressions();
+		SymbolicExpression r = this.right.removeTypingExpressions();
+		if (l == left && m == middle && r == this.right)
+			return this;
+		return new TernaryExpression(
+				getStaticType(),
+				l,
+				m,
+				r,
+				operator,
+				getCodeLocation());
+	}
 }
