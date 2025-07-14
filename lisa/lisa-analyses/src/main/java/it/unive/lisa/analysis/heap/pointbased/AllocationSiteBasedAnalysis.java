@@ -122,9 +122,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		List<HeapReplacement> replacements = new LinkedList<>();
 		ExpressionSet rhsExps;
 		boolean rhsIsReceiver = false;
-		
+
 		expression = expression.removeTypingExpressions();
-		
+
 		if (expression instanceof Identifier) {
 			rhsExps = new ExpressionSet(resolveIdentifier((Identifier) expression));
 			rhsIsReceiver = ((Identifier) expression).isInstrumentedReceiver();
