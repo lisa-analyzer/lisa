@@ -102,7 +102,12 @@ public class PushFromConstraints extends PushAny {
 
 	@Override
 	public String toString() {
-		return super.toString() + " ["
-				+ String.join(", ", constraints.stream().map(Object::toString).toArray(String[]::new)) + "]";
+		return super.toString() + " [" + String.join(
+				", ",
+				constraints.stream()
+						.map(Object::toString)
+						.sorted()
+						.toArray(String[]::new))
+				+ "]";
 	}
 }
