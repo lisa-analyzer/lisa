@@ -6,7 +6,9 @@ package it.unive.lisa.util.numeric;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class InfiniteIterationException extends RuntimeException {
+public class InfiniteIterationException
+		extends
+		RuntimeException {
 
 	private static final long serialVersionUID = -8505901233292219893L;
 
@@ -17,6 +19,8 @@ public class InfiniteIterationException extends RuntimeException {
 	 */
 	public InfiniteIterationException(
 			IntInterval i) {
-		super("Cannot iterate over the interval " + i);
+		super(
+				"Cannot iterate over the interval " + i);
 	}
+
 }

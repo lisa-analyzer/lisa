@@ -15,7 +15,9 @@ import java.util.Set;
  *
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public class CHACallGraph extends BaseCallGraph {
+public class CHACallGraph
+		extends
+		BaseCallGraph {
 
 	@Override
 	public Collection<Type> getPossibleTypesOfReceiver(

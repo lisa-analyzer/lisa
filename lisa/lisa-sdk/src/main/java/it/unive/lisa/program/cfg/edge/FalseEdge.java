@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.edge;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -17,7 +19,9 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class FalseEdge extends Edge {
+public class FalseEdge
+		extends
+		Edge {
 
 	/**
 	 * Builds the edge.
@@ -37,9 +41,11 @@ public class FalseEdge extends Edge {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> traverseForward(
-			AnalysisState<A> state)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+					AnalysisState<A> state,
+					Analysis<A, D> analysis)
+					throws SemanticException {
 		ExpressionSet exprs = state.getComputedExpressions();
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : exprs) {
@@ -48,16 +54,18 @@ public class FalseEdge extends Edge {
 					expr,
 					LogicalNegation.INSTANCE,
 					expr.getCodeLocation());
-			result = result.lub(state.assume(negated, getSource(), getDestination()));
+			result = result.lub(analysis.assume(state, negated, getSource(), getDestination()));
 		}
 		return result;
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> traverseBackwards(
-			AnalysisState<A> state)
-			throws SemanticException {
-		return traverseForward(state);
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+					AnalysisState<A> state,
+					Analysis<A, D> analysis)
+					throws SemanticException {
+		return traverseForward(state, analysis);
 	}
 
 	@Override
@@ -71,4 +79,5 @@ public class FalseEdge extends Edge {
 			Statement destination) {
 		return new FalseEdge(source, destination);
 	}
+
 }

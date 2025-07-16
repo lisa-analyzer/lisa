@@ -12,7 +12,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ReferenceType implements PointerType {
+public class ReferenceType
+		implements
+		PointerType {
 
 	private final Type innerType;
 
@@ -90,4 +92,5 @@ public class ReferenceType implements PointerType {
 	public String toString() {
 		return innerType + "*";
 	}
+
 }

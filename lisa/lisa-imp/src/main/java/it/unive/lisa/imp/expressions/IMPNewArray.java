@@ -1,6 +1,8 @@
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -32,7 +34,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewArray extends NaryExpression {
+public class IMPNewArray
+		extends
+		NaryExpression {
 
 	private final boolean staticallyAllocated;
 
@@ -57,8 +61,12 @@ public class IMPNewArray extends NaryExpression {
 			Type type,
 			boolean staticallyAllocated,
 			Expression[] dimensions) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type + "[]",
-				ArrayType.lookup(type, dimensions.length), dimensions);
+		super(
+				cfg,
+				new SourceCodeLocation(sourceFile, line, col),
+				(staticallyAllocated ? "" : "new ") + type + "[]",
+				ArrayType.lookup(type, dimensions.length),
+				dimensions);
 		if (dimensions.length != 1)
 			throw new UnsupportedOperationException("Multidimensional arrays are not yet supported");
 		this.staticallyAllocated = staticallyAllocated;
@@ -71,24 +79,26 @@ public class IMPNewArray extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			ExpressionSet[] params,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					ExpressionSet[] params,
+					StatementStore<A> expressions)
+					throws SemanticException {
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
 		MemoryAllocation creation = new MemoryAllocation(type, getLocation(), staticallyAllocated);
 		HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
 		// we start by allocating the memory region
-		AnalysisState<A> allocated = state.smallStepSemantics(creation, this);
+		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
 
 		// we create the synthetic variable that will hold the reference to the
 		// newly allocated array until it is assigned to a variable
 		InstrumentedReceiver array = new InstrumentedReceiver(reftype, true, getLocation());
-		AnalysisState<A> tmp = allocated.assign(array, ref, this);
+		AnalysisState<A> tmp = analysis.assign(allocated, array, ref, this);
 
 		// we define the length of the array as a child element
 		AccessChild len = new AccessChild(
@@ -100,7 +110,7 @@ public class IMPNewArray extends NaryExpression {
 		AnalysisState<A> lenSt = state.bottom();
 		// TODO fix when we'll support multidimensional arrays
 		for (SymbolicExpression dim : params[0])
-			lenSt = lenSt.lub(tmp.assign(len, dim, this));
+			lenSt = lenSt.lub(analysis.assign(tmp, len, dim, this));
 
 		// we leave the synthetic array in the program variables
 		// until it is popped from the stack to keep a reference to the
@@ -108,16 +118,17 @@ public class IMPNewArray extends NaryExpression {
 		getMetaVariables().add(array);
 
 		// finally, we leave a reference to the newly created array on the stack
-		return lenSt.smallStepSemantics(array, this);
+		return analysis.smallStepSemantics(lenSt, array, this);
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			ExpressionSet[] params,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					ExpressionSet[] params,
+					StatementStore<A> expressions)
+					throws SemanticException {
 		// TODO implement this when backward analysis will be out of
 		// beta
 		throw new UnsupportedOperationException();

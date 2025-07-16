@@ -9,9 +9,11 @@ import it.unive.lisa.type.Type;
 /**
  * A heap dereference expression.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class HeapDereference extends HeapExpression {
+public class HeapDereference
+		extends
+		HeapExpression {
 
 	/**
 	 * The symbolic expression to be dereferenced.
@@ -88,9 +90,20 @@ public class HeapDereference extends HeapExpression {
 		SymbolicExpression e = toDeref.removeTypingExpressions();
 		if (e == toDeref)
 			return this;
-		return new HeapDereference(
-				getStaticType(),
-				e,
-				getCodeLocation());
+		return new HeapDereference(getStaticType(), e, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression e = toDeref.replace(source, target);
+		if (e == toDeref)
+			return this;
+		return new HeapDereference(getStaticType(), e, getCodeLocation());
+	}
+
 }

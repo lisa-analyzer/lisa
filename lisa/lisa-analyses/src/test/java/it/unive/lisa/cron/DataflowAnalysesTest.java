@@ -5,9 +5,7 @@ import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.dataflow.AvailableExpressions;
 import it.unive.lisa.analysis.dataflow.ConstantPropagation;
-import it.unive.lisa.analysis.dataflow.DefiniteDataflowDomain;
 import it.unive.lisa.analysis.dataflow.Liveness;
-import it.unive.lisa.analysis.dataflow.PossibleDataflowDomain;
 import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
@@ -32,16 +30,19 @@ import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import java.util.Arrays;
 import org.junit.Test;
 
-public class DataflowAnalysesTest extends AnalysisTestExecutor {
+public class DataflowAnalysesTest
+		extends
+		AnalysisTestExecutor {
 
 	@Test
 	public void testAvailableExpressions() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new DefiniteDataflowDomain<>(new AvailableExpressions()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new AvailableExpressions(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/ae";
 		conf.programFile = "ae.imp";
 		perform(conf);
@@ -51,10 +52,11 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 	public void testConstantPropagation() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new DefiniteDataflowDomain<>(new ConstantPropagation()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new ConstantPropagation(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/cp";
 		conf.programFile = "cp.imp";
 		perform(conf);
@@ -64,10 +66,11 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 	public void testReachingDefinitions() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new PossibleDataflowDomain<>(new ReachingDefinitions()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new ReachingDefinitions(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/rd";
 		conf.programFile = "rd.imp";
 		perform(conf);
@@ -78,10 +81,11 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.interproceduralAnalysis = new BackwardModularWorstCaseAnalysis<>();
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new PossibleDataflowDomain<>(new Liveness()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new Liveness(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/liveness";
 		conf.programFile = "liveness.imp";
 		conf.compareWithOptimization = false;
@@ -93,10 +97,11 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 		Program program = buildProgram();
 
 		CronConfiguration conf = new CronConfiguration();
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new PossibleDataflowDomain<>(new ReachingDefinitions()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new ReachingDefinitions(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.optimize = false;
 		conf.serializeResults = true;
@@ -181,4 +186,5 @@ public class DataflowAnalysesTest extends AnalysisTestExecutor {
 	private CodeLocation getNewLocation() {
 		return new SourceCodeLocation("program", line++, 1);
 	}
+
 }

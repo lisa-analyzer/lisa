@@ -174,4 +174,5 @@ public class IsEqualTest {
 		TestAutomaton a2 = new TestAutomaton(states2, delta2);
 		assertTrue(!a.isEqualTo(a2));
 	}
+
 }

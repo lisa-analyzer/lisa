@@ -37,8 +37,7 @@ public class OptimizedFixpointTest {
 
 	private static class FixpointTester2
 			implements
-			FixpointImplementation<Statement, Edge,
-					CompoundState<TestAbstractState>> {
+			FixpointImplementation<Statement, Edge, CompoundState<TestAbstractState>> {
 
 		@Override
 		public CompoundState<TestAbstractState> semantics(
@@ -101,28 +100,19 @@ public class OptimizedFixpointTest {
 		graph.addEdge(new SequentialEdge(middle, end));
 		graph.computeBasicBlocks();
 
-		Map<Statement,
-				CompoundState<TestAbstractState>> res = null;
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(
-				new TestAbstractState(),
-				new ExpressionSet());
+		Map<Statement, CompoundState<TestAbstractState>> res = null;
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState>(graph,
-					false, st -> st instanceof Call).fixpoint(
-							Map.of(source, comp),
-							FIFOWorkingSet.mk(),
-							new FixpointTester2());
+			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
+					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
 
 		assertNotNull("Fixpoint failed", res);
-		assertEquals("Fixpoint returned wrong result",
-				Map.of(middle, comp,
-						end, comp),
-				res);
+		assertEquals("Fixpoint returned wrong result", Map.of(middle, comp, end, comp), res);
 	}
 
 	@Test
@@ -149,28 +139,19 @@ public class OptimizedFixpointTest {
 		graph.extractControlFlowStructures(new ControlFlowExtractor());
 		graph.computeBasicBlocks();
 
-		Map<Statement,
-				CompoundState<TestAbstractState>> res = null;
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(
-				new TestAbstractState(),
-				new ExpressionSet());
+		Map<Statement, CompoundState<TestAbstractState>> res = null;
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState>(graph,
-					false, st -> st instanceof Call).fixpoint(
-							Map.of(source, comp),
-							FIFOWorkingSet.mk(),
-							new FixpointTester2());
+			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
+					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
 
 		assertNotNull("Fixpoint failed", res);
-		assertEquals("Fixpoint returned wrong result",
-				Map.of(left, comp,
-						end, comp),
-				res);
+		assertEquals("Fixpoint returned wrong result", Map.of(left, comp, end, comp), res);
 	}
 
 	@Test
@@ -197,28 +178,19 @@ public class OptimizedFixpointTest {
 		graph.extractControlFlowStructures(new ControlFlowExtractor());
 		graph.computeBasicBlocks();
 
-		Map<Statement,
-				CompoundState<TestAbstractState>> res = null;
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(
-				new TestAbstractState(),
-				new ExpressionSet());
+		Map<Statement, CompoundState<TestAbstractState>> res = null;
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState>(graph,
-					false, st -> st instanceof Call).fixpoint(
-							Map.of(source, comp),
-							FIFOWorkingSet.mk(),
-							new FixpointTester2());
+			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
+					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
 
 		assertNotNull("Fixpoint failed", res);
-		assertEquals("Fixpoint returned wrong result",
-				Map.of(join, comp,
-						left, comp,
-						end, comp),
-				res);
+		assertEquals("Fixpoint returned wrong result", Map.of(join, comp, left, comp, end, comp), res);
 	}
+
 }

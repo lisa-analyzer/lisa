@@ -20,11 +20,17 @@ public class BitLogicTest {
 		for (int i = 0; i < 63; i++) {
 			long bitmask = 1L << (i % 64);
 			long pow = (long) Math.pow(2, i);
-			assertEquals("Wrong bitmask for " + i + ": expected " + pow + ", got " + bitmask, pow, bitmask);
+			assertEquals(
+					"Wrong bitmask for " + i + ": expected " + pow + ", got " + bitmask,
+					pow,
+					bitmask);
 		}
 		long _63 = -9223372036854775808L; // this is 2^63 in two's complement
 		long bitmask = 1L << (63 % 64);
-		assertEquals("Wrong bitmask for 63: expected " + _63 + ", got " + bitmask, _63, bitmask);
+		assertEquals(
+				"Wrong bitmask for 63: expected " + _63 + ", got " + bitmask,
+				_63,
+				bitmask);
 	}
 
 	@Test
@@ -34,7 +40,10 @@ public class BitLogicTest {
 			int test = Math.abs(random.nextInt());
 			int index = test >> 6;
 			int div = test / 64;
-			assertEquals("Wrong bitvector index for " + test + ": expected " + div + ", got " + index, div, index);
+			assertEquals(
+					"Wrong bitvector index for " + test + ": expected " + div + ", got " + index,
+					div,
+					index);
 		}
 	}
 
@@ -48,21 +57,36 @@ public class BitLogicTest {
 			// represented by the bitvector
 			int test = random.nextInt(length * 64);
 
-			assertEquals("Testing " + test + ": the bitvector is not set to 0 before the computation", 0L, smash(bits));
-			assertFalse("Testing " + test + ": the corresponding bit is set at the beginning",
+			assertEquals(
+					"Testing " + test + ": the bitvector is not set to 0 before the computation",
+					0L,
+					smash(bits));
+			assertFalse(
+					"Testing " + test + ": the corresponding bit is set at the beginning",
 					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 
 			bits[test >> 6] |= 1L << (test % 64);
-			assertNotEquals("Testing " + test + ": set() did not modify the bitvector (still equal to 0)", 0L,
+			assertNotEquals(
+					"Testing " + test + ": set() did not modify the bitvector (still equal to 0)",
+					0L,
 					smash(bits));
-			assertArrayEquals("Testing " + test + ": set() did not modfiy the bits appropriately",
-					new int[] { test }, actives(bits));
-			assertTrue("Testing " + test + ": isset() does not detect the modification made by set()",
+			assertArrayEquals(
+					"Testing " + test + ": set() did not modfiy the bits appropriately",
+					new int[] {
+							test
+					},
+					actives(bits));
+			assertTrue(
+					"Testing " + test + ": isset() does not detect the modification made by set()",
 					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 
 			bits[test >> 6] &= ~(1L << (test % 64));
-			assertEquals("Testing " + test + ": unset() did not bring the bitvector to 0", 0L, smash(bits));
-			assertFalse("Testing " + test + ": isset() does not detect the modification made by unset()",
+			assertEquals(
+					"Testing " + test + ": unset() did not bring the bitvector to 0",
+					0L,
+					smash(bits));
+			assertFalse(
+					"Testing " + test + ": isset() does not detect the modification made by unset()",
 					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 		}
 	}
@@ -90,4 +114,5 @@ public class BitLogicTest {
 
 		return res.stream().mapToInt(i -> i).toArray();
 	}
+
 }

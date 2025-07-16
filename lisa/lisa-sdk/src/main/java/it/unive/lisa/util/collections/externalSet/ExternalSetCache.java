@@ -171,4 +171,5 @@ public class ExternalSetCache<T> {
 	synchronized Collection<T> getAllElements() {
 		return Collections.unmodifiableCollection(elements);
 	}
+
 }

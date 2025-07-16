@@ -1,18 +1,12 @@
 package it.unive.lisa.analysis.stability;
 
+import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.PushInv;
-import it.unive.lisa.type.Type;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A single-variable numerical trend. Instances of this class (corresponding to
@@ -21,7 +15,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Trend implements BaseNonRelationalValueDomain<Trend> {
+public class Trend
+		implements
+		BaseLattice<Trend> {
 
 	/**
 	 * The abstract top element.
@@ -156,7 +152,8 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
 	 * @return whether this trend is possibly growing.
 	 */
 	public Satisfiability isPossiblyGrowing() {
-		return isInc() || isNonDec() ? Satisfiability.SATISFIED
+		return isInc() || isNonDec()
+				? Satisfiability.SATISFIED
 				: (isDec() || isNonInc() ? Satisfiability.NOT_SATISFIED : Satisfiability.UNKNOWN);
 	}
 
@@ -266,14 +263,11 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
 			return other;
 		else if (other.lessOrEqual(this))
 			return this;
-		else if ((this.isStable() && other.isInc())
-				|| (this.isInc() && other.isStable()))
+		else if ((this.isStable() && other.isInc()) || (this.isInc() && other.isStable()))
 			return NON_DEC;
-		else if ((this.isStable() && other.isDec())
-				|| (this.isDec() && other.isStable()))
+		else if ((this.isStable() && other.isDec()) || (this.isDec() && other.isStable()))
 			return NON_INC;
-		else if ((this.isInc() && other.isDec())
-				|| (this.isDec() && other.isInc()))
+		else if ((this.isInc() && other.isDec()) || (this.isDec() && other.isInc()))
 			return NON_STABLE;
 		return TOP;
 	}
@@ -286,14 +280,11 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
 			return this;
 		else if (other.lessOrEqual(this))
 			return other;
-		else if ((this.isNonDec() && other.isNonStable())
-				|| (this.isNonStable() && other.isNonDec()))
+		else if ((this.isNonDec() && other.isNonStable()) || (this.isNonStable() && other.isNonDec()))
 			return INC;
-		else if ((this.isNonInc() && other.isNonStable())
-				|| (this.isNonStable() && other.isNonInc()))
+		else if ((this.isNonInc() && other.isNonStable()) || (this.isNonStable() && other.isNonInc()))
 			return DEC;
-		else if ((this.isNonDec() && other.isNonInc())
-				|| (this.isNonInc() && other.isNonDec()))
+		else if ((this.isNonDec() && other.isNonInc()) || (this.isNonInc() && other.isNonDec()))
 			return STABLE;
 		return BOTTOM;
 	}
@@ -333,35 +324,8 @@ public class Trend implements BaseNonRelationalValueDomain<Trend> {
 	}
 
 	@Override
-	public boolean canProcess(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		if (expression instanceof PushInv)
-			// the type approximation of a pushinv is bottom, so the below check
-			// will always fail regardless of the kind of value we are tracking
-			return expression.getStaticType().isNumericType();
-
-		Set<Type> rts = null;
-		try {
-			rts = oracle.getRuntimeTypesOf(expression, pp, oracle);
-		} catch (SemanticException e) {
-			return false;
-		}
-
-		if (rts == null || rts.isEmpty())
-			// if we have no runtime types, either the type domain has no type
-			// information for the given expression (thus it can be anything,
-			// also something that we can track) or the computation returned
-			// bottom (and the whole state is likely going to go to bottom
-			// anyway).
-			return true;
-
-		return rts.stream().anyMatch(Type::isNumericType);
-	}
-
-	@Override
 	public String toString() {
 		return representation().toString();
 	}
+
 }

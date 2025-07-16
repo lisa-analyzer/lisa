@@ -22,7 +22,9 @@ import it.unive.lisa.program.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringStartsWith extends NativeCFG {
+public class StringStartsWith
+		extends
+		NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -33,9 +35,15 @@ public class StringStartsWith extends NativeCFG {
 	public StringStartsWith(
 			CodeLocation location,
 			ClassUnit stringUnit) {
-		super(new CodeMemberDescriptor(location, stringUnit, true, "startsWith", BoolType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE),
-				new Parameter(location, "other", StringType.INSTANCE)),
+		super(
+				new CodeMemberDescriptor(
+						location,
+						stringUnit,
+						true,
+						"startsWith",
+						BoolType.INSTANCE,
+						new Parameter(location, "this", StringType.INSTANCE),
+						new Parameter(location, "other", StringType.INSTANCE)),
 				IMPStringStartsWith.class);
 	}
 
@@ -46,7 +54,11 @@ public class StringStartsWith extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringStartsWith extends StartsWith implements PluggableStatement {
+	public static class IMPStringStartsWith
+			extends
+			StartsWith
+			implements
+			PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the
@@ -107,5 +119,7 @@ public class StringStartsWith extends NativeCFG {
 				Expression right) {
 			super(cfg, location, left, right);
 		}
+
 	}
+
 }

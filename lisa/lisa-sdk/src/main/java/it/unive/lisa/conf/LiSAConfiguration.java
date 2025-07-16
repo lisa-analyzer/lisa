@@ -1,7 +1,7 @@
 package it.unive.lisa.conf;
 
 import it.unive.lisa.LiSA;
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
@@ -35,7 +35,9 @@ import org.apache.commons.io.FilenameUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LiSAConfiguration extends BaseConfiguration {
+public class LiSAConfiguration
+		extends
+		BaseConfiguration {
 
 	static {
 		// ensure that some logging configuration is in place
@@ -129,7 +131,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * through {@link #callGraph}) that has been built. Defaults to an empty
 	 * set.
 	 */
-	public final Collection<SemanticCheck<?>> semanticChecks = new HashSet<>();
+	public final Collection<SemanticCheck<?, ?>> semanticChecks = new HashSet<>();
 
 	/**
 	 * The {@link CallGraph} instance to use during the analysis. Defaults to
@@ -141,15 +143,14 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * The {@link InterproceduralAnalysis} instance to use during the analysis.
 	 * Defaults to {@code null}.
 	 */
-	public InterproceduralAnalysis<?> interproceduralAnalysis;
+	public InterproceduralAnalysis<?, ?> interproceduralAnalysis;
 
 	/**
-	 * The {@link AbstractState} instance to run during the analysis. This will
-	 * be used as singleton to retrieve the top instances needed to boot up the
-	 * analysis, and can thus be any lattice element. If no value is set for
-	 * this field, no analysis will be executed. Defaults to {@code null}.
+	 * The {@link AbstractDomain} to be run during the analysis. If no value is
+	 * set for this field, no analysis will be executed. Defaults to
+	 * {@code null}.
 	 */
-	public AbstractState<?> abstractState;
+	public AbstractDomain<?> analysis;
 
 	/**
 	 * Sets the format to use for dumping graph files, named
@@ -306,7 +307,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 			for (Field field : LiSAConfiguration.class.getFields())
 				if (!Modifier.isStatic(field.getModifiers())
 						// we skip the semantic configuration
-						&& !AbstractState.class.isAssignableFrom(field.getType())
+						&& !AbstractDomain.class.isAssignableFrom(field.getType())
 						&& !CallGraph.class.isAssignableFrom(field.getType())
 						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
@@ -347,7 +348,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 			for (Field field : LiSAConfiguration.class.getFields())
 				if (!Modifier.isStatic(field.getModifiers())
 						// we skip the semantic configuration
-						&& !AbstractState.class.isAssignableFrom(field.getType())
+						&& !AbstractDomain.class.isAssignableFrom(field.getType())
 						&& !CallGraph.class.isAssignableFrom(field.getType())
 						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
@@ -356,8 +357,11 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 					String val;
 					if (Collection.class.isAssignableFrom(field.getType()))
-						val = ((Collection<?>) value).stream().map(e -> e.getClass().getSimpleName())
-								.sorted().collect(new CollectionUtilities.StringCollector<>(", "));
+						val = ((Collection<?>) value)
+								.stream()
+								.map(e -> e.getClass().getSimpleName())
+								.sorted()
+								.collect(new CollectionUtilities.StringCollector<>(", "));
 					else if (Class.class.isAssignableFrom(field.getType()))
 						val = ((Class<?>) value).getSimpleName();
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
@@ -379,4 +383,5 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 		return bag;
 	}
+
 }

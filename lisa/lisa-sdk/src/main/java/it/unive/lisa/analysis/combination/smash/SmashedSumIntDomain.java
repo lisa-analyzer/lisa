@@ -1,42 +1,48 @@
 package it.unive.lisa.analysis.combination.smash;
 
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.util.numeric.IntInterval;
 
 /**
- * Interface for a numeric analysis that exposes utility methods to compute
- * semantics operations.
+ * Interface for a {@link BaseNonRelationalValueDomain} for numeric values that
+ * can be used in the smashed-sum abstract domain.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
- * @param <I> the concrete type of the instances of this domain
+ * @param <L> the type of lattice produced by this domain
  */
-public interface SmashedSumIntDomain<I extends SmashedSumIntDomain<I>>
+public interface SmashedSumIntDomain<L extends Lattice<L>>
 		extends
-		BaseNonRelationalValueDomain<I> {
+		BaseNonRelationalValueDomain<L> {
 
 	/**
-	 * Creates a new instance of this domain from the given interval.
+	 * Creates a new instance of the lattice produced by this domain from the
+	 * given interval.
 	 * 
-	 * @param intv the {@link IntInterval} to convert into an instance of this
-	 *                 domain
+	 * @param intv the {@link IntInterval} to convert into an instance of the
+	 *                 lattice
 	 * 
 	 * @return an {@link IntInterval} representing the range of values
 	 * 
 	 * @throws SemanticException if an error occurs during the conversion
 	 */
-	I fromInterval(
+	L fromInterval(
 			IntInterval intv)
 			throws SemanticException;
 
 	/**
-	 * Converts this domain instance to an interval.
+	 * Converts a lattice produced by this domain to an interval.
+	 * 
+	 * @param current the lattice instance to convert
 	 * 
 	 * @return an {@link IntInterval} representing the range of values
 	 * 
 	 * @throws SemanticException if an error occurs during the conversion
 	 */
-	IntInterval toInterval()
+	IntInterval toInterval(
+			L current)
 			throws SemanticException;
+
 }

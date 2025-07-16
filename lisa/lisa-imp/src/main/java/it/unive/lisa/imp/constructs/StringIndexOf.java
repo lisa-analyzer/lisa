@@ -21,7 +21,9 @@ import it.unive.lisa.program.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringIndexOf extends NativeCFG {
+public class StringIndexOf
+		extends
+		NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -32,9 +34,15 @@ public class StringIndexOf extends NativeCFG {
 	public StringIndexOf(
 			CodeLocation location,
 			ClassUnit stringUnit) {
-		super(new CodeMemberDescriptor(location, stringUnit, true, "indexOf", StringType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE),
-				new Parameter(location, "search", StringType.INSTANCE)),
+		super(
+				new CodeMemberDescriptor(
+						location,
+						stringUnit,
+						true,
+						"indexOf",
+						StringType.INSTANCE,
+						new Parameter(location, "this", StringType.INSTANCE),
+						new Parameter(location, "search", StringType.INSTANCE)),
 				IMPStringIndexOf.class);
 	}
 
@@ -45,7 +53,11 @@ public class StringIndexOf extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringIndexOf extends IndexOf implements PluggableStatement {
+	public static class IMPStringIndexOf
+			extends
+			IndexOf
+			implements
+			PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the
@@ -106,5 +118,7 @@ public class StringIndexOf extends NativeCFG {
 				Expression right) {
 			super(cfg, location, left, right);
 		}
+
 	}
+
 }

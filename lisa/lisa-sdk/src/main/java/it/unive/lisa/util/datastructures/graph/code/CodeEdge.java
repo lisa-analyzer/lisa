@@ -11,7 +11,9 @@ import it.unive.lisa.util.datastructures.graph.Edge;
  * @param <N> the type of the {@link CodeNode}s in this list
  * @param <E> the type of the {@link CodeEdge}s in this list
  */
-public interface CodeEdge<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
+public interface CodeEdge<G extends CodeGraph<G, N, E>,
+		N extends CodeNode<G, N, E>,
+		E extends CodeEdge<G, N, E>>
 		extends
 		Edge<G, N, E>,
 		Comparable<E> {
@@ -38,4 +40,5 @@ public interface CodeEdge<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N,
 	E newInstance(
 			N source,
 			N destination);
+
 }

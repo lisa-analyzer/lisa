@@ -67,4 +67,5 @@ public class ScopeToken {
 	public String toString() {
 		return "[" + scoper.getLocation() + "]";
 	}
+
 }

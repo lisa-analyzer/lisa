@@ -14,11 +14,13 @@ import java.util.HashSet;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-public class VisualizationTest extends AnalysisTestExecutor {
+public class VisualizationTest
+		extends
+		AnalysisTestExecutor {
 
 	private static CronConfiguration config() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.abstractState = DefaultConfiguration.defaultAbstractState();
+		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		return conf;
@@ -30,13 +32,17 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		for (GraphType cls : GraphType.values())
 			if (cls != GraphType.NONE)
 				try {
-					VisualizationTest.class.getMethod("test" + cls.name());
+					VisualizationTest.class
+							.getMethod(
+									"test" + cls.name());
 				} catch (NoSuchMethodException | SecurityException e) {
 					notTested.add(cls);
 				}
 
 		if (!notTested.isEmpty())
-			System.err.println("The following visualization types have not been tested: " + notTested);
+			System.err
+					.println(
+							"The following visualization types have not been tested: " + notTested);
 
 		assertTrue("Not all visualization types have been tested", notTested.isEmpty());
 	}
@@ -91,4 +97,5 @@ public class VisualizationTest extends AnalysisTestExecutor {
 		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
+
 }

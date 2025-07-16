@@ -2,6 +2,7 @@ package it.unive.lisa.analysis;
 
 import static org.junit.Assert.assertEquals;
 
+import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestInterproceduralAnalysis;
 import it.unive.lisa.TestLanguageFeatures;
@@ -21,30 +22,27 @@ import org.junit.Test;
 
 public class AnalyzedCFGTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0),
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "Testing", false);
+	private static final ClassUnit unit = new ClassUnit(
+			new SourceCodeLocation("unknown", 0, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"Testing",
+			false);
 
 	@Test
-	public void testIssue189() throws SemanticException {
+	public void testIssue189()
+			throws SemanticException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyIf"));
 		VariableRef x = new VariableRef(cfg, unknown, "x");
 		Return y = new Return(cfg, unknown, x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(
-				new TestAbstractState(),
-				new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
-		AnalyzedCFG<TestAbstractState> res = new AnalyzedCFG<>(
-				cfg,
-				new UniqueScope(),
-				state,
-				entries,
-				results);
+		AnalyzedCFG<TestAbstractState> res = new AnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -53,27 +51,27 @@ public class AnalyzedCFGTest {
 	}
 
 	@Test
-	public void testIssue189Optimized() throws SemanticException {
+	public void testIssue189Optimized()
+			throws SemanticException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyIf"));
 		VariableRef x = new VariableRef(cfg, unknown, "x");
 		Return y = new Return(cfg, unknown, x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(
-				new TestAbstractState(),
-				new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
-		OptimizedAnalyzedCFG<TestAbstractState> res = new OptimizedAnalyzedCFG<>(
-				cfg,
-				new UniqueScope(),
-				state,
-				entries,
-				results,
-				new TestInterproceduralAnalysis<>());
+		OptimizedAnalyzedCFG<TestAbstractState,
+				TestAbstractDomain> res = new OptimizedAnalyzedCFG<>(
+						cfg,
+						new UniqueScope(),
+						state,
+						entries,
+						results,
+						new TestInterproceduralAnalysis<>());
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -82,26 +80,21 @@ public class AnalyzedCFGTest {
 	}
 
 	@Test
-	public void testIssue189Backward() throws SemanticException {
+	public void testIssue189Backward()
+			throws SemanticException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyIf"));
 		VariableRef x = new VariableRef(cfg, unknown, "x");
 		Return y = new Return(cfg, unknown, x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(
-				new TestAbstractState(),
-				new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
-		BackwardAnalyzedCFG<TestAbstractState> res = new BackwardAnalyzedCFG<>(
-				cfg,
-				new UniqueScope(),
-				state,
-				entries,
-				results);
+		BackwardAnalyzedCFG<
+				TestAbstractState> res = new BackwardAnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -110,31 +103,32 @@ public class AnalyzedCFGTest {
 	}
 
 	@Test
-	public void testIssue189BackwardOptimized() throws SemanticException {
+	public void testIssue189BackwardOptimized()
+			throws SemanticException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyIf"));
 		VariableRef x = new VariableRef(cfg, unknown, "x");
 		Return y = new Return(cfg, unknown, x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(
-				new TestAbstractState(),
-				new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
-		BackwardOptimizedAnalyzedCFG<TestAbstractState> res = new BackwardOptimizedAnalyzedCFG<>(
-				cfg,
-				new UniqueScope(),
-				state,
-				entries,
-				results,
-				new TestInterproceduralAnalysis<>());
+		BackwardOptimizedAnalyzedCFG<TestAbstractState,
+				TestAbstractDomain> res = new BackwardOptimizedAnalyzedCFG<>(
+						cfg,
+						new UniqueScope(),
+						state,
+						entries,
+						results,
+						new TestInterproceduralAnalysis<>());
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
 		assertEquals(state, res.getAnalysisStateAfter(x));
 		assertEquals(state, res.getAnalysisStateBefore(x));
 	}
+
 }

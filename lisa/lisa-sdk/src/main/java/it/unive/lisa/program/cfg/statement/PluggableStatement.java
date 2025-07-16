@@ -29,4 +29,5 @@ public interface PluggableStatement {
 	 */
 	void setOriginatingStatement(
 			Statement st);
+
 }

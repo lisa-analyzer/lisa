@@ -26,17 +26,22 @@ import org.junit.Test;
 public class CFGSimplificationTest {
 
 	@Test
-	public void testSimpleSimplification() throws ProgramValidationException {
+	public void testSimpleSimplification()
+			throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(new TestLanguageFeatures(), new TestTypeSystem()), "foo",
+		ClassUnit unit = new ClassUnit(
+				unknown,
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+				"foo",
 				false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, true, "foo"));
-		Assignment assign = new Assignment(first, unknown,
+		Assignment assign = new Assignment(
+				first,
+				unknown,
 				new VariableRef(first, unknown, "x"),
 				new VariableRef(first, unknown, "a"));
 		NoOp noop = new NoOp(first, unknown);
-		Return ret = new Return(first, unknown,
-				new VariableRef(first, unknown, "x"));
+		Return ret = new Return(first, unknown, new VariableRef(first, unknown, "x"));
 		first.addNode(assign, true);
 		first.addNode(noop);
 		first.addNode(ret);
@@ -44,7 +49,9 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop, ret));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknown, unit, true, "foo"));
-		assign = new Assignment(second, unknown,
+		assign = new Assignment(
+				second,
+				unknown,
 				new VariableRef(second, unknown, "x"),
 				new VariableRef(second, unknown, "a"));
 		ret = new Return(second, unknown, new VariableRef(second, unknown, "x"));
@@ -59,13 +66,20 @@ public class CFGSimplificationTest {
 	}
 
 	@Test
-	public void testDoubleSimplification() throws ProgramValidationException {
+	public void testDoubleSimplification()
+			throws ProgramValidationException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
-		ClassUnit unit = new ClassUnit(unknownLocation, new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-				"foo", false);
+		ClassUnit unit = new ClassUnit(
+				unknownLocation,
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+				"foo",
+				false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
-		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+		Assignment assign = new Assignment(
+				first,
+				unknownLocation,
+				new VariableRef(first, unknownLocation, "x"),
 				new VariableRef(first, unknownLocation, "a"));
 		NoOp noop1 = new NoOp(first, unknownLocation);
 		NoOp noop2 = new NoOp(first, unknownLocation2);
@@ -79,7 +93,9 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop2, ret));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
-		assign = new Assignment(second, unknownLocation,
+		assign = new Assignment(
+				second,
+				unknownLocation,
 				new VariableRef(second, unknownLocation, "x"),
 				new VariableRef(second, unknownLocation, "a"));
 		ret = new Return(second, unknownLocation, new VariableRef(second, unknownLocation, "x"));
@@ -94,13 +110,20 @@ public class CFGSimplificationTest {
 	}
 
 	@Test
-	public void testConditionalSimplification() throws ProgramValidationException {
+	public void testConditionalSimplification()
+			throws ProgramValidationException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
-		ClassUnit unit = new ClassUnit(unknownLocation, new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-				"foo", false);
+		ClassUnit unit = new ClassUnit(
+				unknownLocation,
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+				"foo",
+				false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
-		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+		Assignment assign = new Assignment(
+				first,
+				unknownLocation,
+				new VariableRef(first, unknownLocation, "x"),
 				new VariableRef(first, unknownLocation, "a"));
 		VariableRef gt = new VariableRef(first, unknownLocation, "x");
 		VariableRef print = new VariableRef(first, unknownLocation, "f");
@@ -127,13 +150,14 @@ public class CFGSimplificationTest {
 		first.addControlFlowStructure(new IfThenElse(first.getNodeList(), gt, noop2, tbranch, fbranch));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
-		assign = new Assignment(second, unknownLocation,
+		assign = new Assignment(
+				second,
+				unknownLocation,
 				new VariableRef(second, unknownLocation, "x"),
 				new VariableRef(second, unknownLocation, "a"));
 		gt = new VariableRef(second, unknownLocation, "x");
 		print = new VariableRef(second, unknownLocation, "f");
-		ret = new Return(second, unknownLocation,
-				new VariableRef(second, unknownLocation, "x"));
+		ret = new Return(second, unknownLocation, new VariableRef(second, unknownLocation, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(gt);
@@ -158,17 +182,22 @@ public class CFGSimplificationTest {
 	}
 
 	@Test
-	public void testSimplificationWithDuplicateStatements() throws ProgramValidationException {
+	public void testSimplificationWithDuplicateStatements()
+			throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(new TestLanguageFeatures(), new TestTypeSystem()), "foo",
+		ClassUnit unit = new ClassUnit(
+				unknown,
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+				"foo",
 				false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, true, "foo"));
-		Assignment assign = new Assignment(first, unknown,
+		Assignment assign = new Assignment(
+				first,
+				unknown,
 				new VariableRef(first, unknown, "x"),
 				new VariableRef(first, unknown, "a"));
 		NoOp noop = new NoOp(first, unknown);
-		Return ret = new Return(first, unknown,
-				new VariableRef(first, unknown, "x"));
+		Return ret = new Return(first, unknown, new VariableRef(first, unknown, "x"));
 		first.addNode(assign, true);
 		first.addNode(noop);
 		first.addNode(ret);
@@ -176,7 +205,9 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop, ret));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknown, unit, true, "foo"));
-		assign = new Assignment(second, unknown,
+		assign = new Assignment(
+				second,
+				unknown,
 				new VariableRef(second, unknown, "x"),
 				new VariableRef(second, unknown, "a"));
 		ret = new Return(second, unknown, new VariableRef(first, unknown, "x"));
@@ -191,17 +222,22 @@ public class CFGSimplificationTest {
 	}
 
 	@Test
-	public void testSimplificationAtTheStart() throws ProgramValidationException {
+	public void testSimplificationAtTheStart()
+			throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(new TestLanguageFeatures(), new TestTypeSystem()), "foo",
+		ClassUnit unit = new ClassUnit(
+				unknown,
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+				"foo",
 				false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
 		NoOp start = new NoOp(first, unknown);
-		Assignment assign = new Assignment(first, unknown,
+		Assignment assign = new Assignment(
+				first,
+				unknown,
 				new VariableRef(first, unknown, "x"),
 				new VariableRef(first, unknown, "a"));
-		Return ret = new Return(first, unknown,
-				new VariableRef(first, unknown, "x"));
+		Return ret = new Return(first, unknown, new VariableRef(first, unknown, "x"));
 		first.addNode(start, true);
 		first.addNode(assign);
 		first.addNode(ret);
@@ -209,7 +245,9 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(start, assign));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
-		assign = new Assignment(second, unknown,
+		assign = new Assignment(
+				second,
+				unknown,
 				new VariableRef(second, unknown, "x"),
 				new VariableRef(second, unknown, "a"));
 		ret = new Return(second, unknown, new VariableRef(first, unknown, "x"));
@@ -224,15 +262,23 @@ public class CFGSimplificationTest {
 	}
 
 	@Test
-	public void testSimplificationAtTheEnd() throws ProgramValidationException {
+	public void testSimplificationAtTheEnd()
+			throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(new TestLanguageFeatures(), new TestTypeSystem()), "foo",
+		ClassUnit unit = new ClassUnit(
+				unknown,
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+				"foo",
 				false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
-		Assignment assign1 = new Assignment(first, unknown,
+		Assignment assign1 = new Assignment(
+				first,
+				unknown,
 				new VariableRef(first, unknown, "x"),
 				new VariableRef(first, unknown, "a"));
-		Assignment assign2 = new Assignment(first, unknown,
+		Assignment assign2 = new Assignment(
+				first,
+				unknown,
 				new VariableRef(first, unknown, "y"),
 				new VariableRef(first, unknown, "a"));
 		NoOp end = new NoOp(first, unknown);
@@ -243,10 +289,14 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign2, end));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
-		assign1 = new Assignment(second, unknown,
+		assign1 = new Assignment(
+				second,
+				unknown,
 				new VariableRef(second, unknown, "x"),
 				new VariableRef(second, unknown, "a"));
-		assign2 = new Assignment(second, unknown,
+		assign2 = new Assignment(
+				second,
+				unknown,
 				new VariableRef(second, unknown, "y"),
 				new VariableRef(second, unknown, "a"));
 
@@ -260,18 +310,28 @@ public class CFGSimplificationTest {
 	}
 
 	@Test
-	public void testSimplificationAtTheEndWithBranch() throws ProgramValidationException {
+	public void testSimplificationAtTheEndWithBranch()
+			throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(new TestLanguageFeatures(), new TestTypeSystem()), "foo",
+		ClassUnit unit = new ClassUnit(
+				unknown,
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+				"foo",
 				false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
-		Assignment assign1 = new Assignment(first, unknown,
+		Assignment assign1 = new Assignment(
+				first,
+				unknown,
 				new VariableRef(first, unknown, "b"),
 				new VariableRef(first, unknown, "b"));
-		Assignment assign2 = new Assignment(first, unknown,
+		Assignment assign2 = new Assignment(
+				first,
+				unknown,
 				new VariableRef(first, unknown, "x"),
 				new VariableRef(first, unknown, "a"));
-		Assignment assign3 = new Assignment(first, unknown,
+		Assignment assign3 = new Assignment(
+				first,
+				unknown,
 				new VariableRef(first, unknown, "y"),
 				new VariableRef(first, unknown, "a"));
 		NoOp end = new NoOp(first, unknown);
@@ -291,13 +351,19 @@ public class CFGSimplificationTest {
 		first.addControlFlowStructure(new IfThenElse(first.getNodeList(), assign1, end, tbranch, fbranch));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
-		assign1 = new Assignment(second, unknown,
+		assign1 = new Assignment(
+				second,
+				unknown,
 				new VariableRef(second, unknown, "b"),
 				new VariableRef(second, unknown, "b"));
-		assign2 = new Assignment(second, unknown,
+		assign2 = new Assignment(
+				second,
+				unknown,
 				new VariableRef(second, unknown, "x"),
 				new VariableRef(second, unknown, "a"));
-		assign3 = new Assignment(second, unknown,
+		assign3 = new Assignment(
+				second,
+				unknown,
 				new VariableRef(second, unknown, "y"),
 				new VariableRef(first, unknown, "a"));
 		second.addNode(assign1, true);
@@ -320,13 +386,20 @@ public class CFGSimplificationTest {
 	}
 
 	@Test
-	public void testIssue210() throws ProgramValidationException {
+	public void testIssue210()
+			throws ProgramValidationException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
-		ClassUnit unit = new ClassUnit(unknownLocation, new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-				"foo", false);
+		ClassUnit unit = new ClassUnit(
+				unknownLocation,
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+				"foo",
+				false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
-		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+		Assignment assign = new Assignment(
+				first,
+				unknownLocation,
+				new VariableRef(first, unknownLocation, "x"),
 				new VariableRef(first, unknownLocation, "a"));
 		VariableRef gt = new VariableRef(first, unknownLocation, "x");
 		NoOp noop = new NoOp(first, unknownLocation);
@@ -352,4 +425,5 @@ public class CFGSimplificationTest {
 		first.simplify();
 		first.validate();
 	}
+
 }

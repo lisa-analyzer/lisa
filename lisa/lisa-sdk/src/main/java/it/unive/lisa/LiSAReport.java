@@ -148,4 +148,5 @@ public class LiSAReport {
 		return "LiSAReport [info=" + info + ", configuration=" + configuration + ", warnings=" + warnings
 				+ ", createdFiles=" + createdFiles + ", additionalInfo=" + additionalInfo + "]";
 	}
+
 }

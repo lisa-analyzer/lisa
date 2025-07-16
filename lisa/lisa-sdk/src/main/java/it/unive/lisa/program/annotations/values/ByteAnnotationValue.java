@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * A byte annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ByteAnnotationValue implements BasicAnnotationValue {
+public class ByteAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final byte b;
 
@@ -56,4 +58,5 @@ public class ByteAnnotationValue implements BasicAnnotationValue {
 		ByteAnnotationValue other = (ByteAnnotationValue) o;
 		return Byte.compare(b, other.b);
 	}
+
 }

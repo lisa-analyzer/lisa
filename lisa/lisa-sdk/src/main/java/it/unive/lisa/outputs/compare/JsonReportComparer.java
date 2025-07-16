@@ -141,6 +141,7 @@ public class JsonReportComparer {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public interface DiffAlgorithm {
+
 		/**
 		 * Reports a difference in one of the components of the reports.
 		 * 
@@ -317,6 +318,7 @@ public class JsonReportComparer {
 		default boolean verboseLabelDiff() {
 			return true;
 		}
+
 	}
 
 	/**
@@ -450,10 +452,8 @@ public class JsonReportComparer {
 			JsonReport first,
 			JsonReport second,
 			DiffAlgorithm diff) {
-		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(
-				String.class,
-				first.getFiles(),
-				second.getFiles());
+		CollectionsDiffBuilder<
+				String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(), second.getFiles());
 		files.compute(String::compareTo);
 
 		if (!files.getCommons().isEmpty())
@@ -510,10 +510,8 @@ public class JsonReportComparer {
 			DiffAlgorithm diff,
 			TriConsumer<String, String, String> reporter,
 			Predicate<String> ignore) {
-		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
-				String.class,
-				first.keySet(),
-				second.keySet());
+		CollectionsDiffBuilder<
+				String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(), second.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.getOnlyFirst().isEmpty())
@@ -623,20 +621,20 @@ public class JsonReportComparer {
 				if (currentS == null)
 					break;
 				else {
-					diff.fileDiff(leftpath, rightpath, format(
-							NO_DESC,
-							"First",
-							currentS.getNodeId(),
-							rlabels.get(currentS.getNodeId())));
+					diff
+							.fileDiff(
+									leftpath,
+									rightpath,
+									format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
 					currentS = null;
 					continue;
 				}
 			else if (currentS == null) {
-				diff.fileDiff(leftpath, rightpath, format(
-						NO_DESC,
-						"Second",
-						currentF.getNodeId(),
-						llabels.get(currentF.getNodeId())));
+				diff
+						.fileDiff(
+								leftpath,
+								rightpath,
+								format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 				continue;
 			}
@@ -645,31 +643,36 @@ public class JsonReportComparer {
 			int sid = currentS.getNodeId();
 			if (fid == sid) {
 				if (diff.verboseLabelDiff())
-					diff.fileDiff(leftpath, rightpath, format(
-							DESC_DIFF_VERBOSE,
-							currentF.getNodeId(),
-							llabels.get(currentF.getNodeId()),
-							diff(currentF.getDescription(), currentS.getDescription())));
+					diff
+							.fileDiff(
+									leftpath,
+									rightpath,
+									format(
+											DESC_DIFF_VERBOSE,
+											currentF.getNodeId(),
+											llabels.get(currentF.getNodeId()),
+											diff(currentF.getDescription(), currentS.getDescription())));
 				else
-					diff.fileDiff(leftpath, rightpath, format(
-							DESC_DIFF,
-							currentF.getNodeId(),
-							llabels.get(currentF.getNodeId())));
+					diff
+							.fileDiff(
+									leftpath,
+									rightpath,
+									format(DESC_DIFF, currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 				currentS = null;
 			} else if (fid < sid) {
-				diff.fileDiff(leftpath, rightpath, format(
-						NO_DESC,
-						"Second",
-						currentF.getNodeId(),
-						llabels.get(currentF.getNodeId())));
+				diff
+						.fileDiff(
+								leftpath,
+								rightpath,
+								format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 			} else {
-				diff.fileDiff(leftpath, rightpath, format(
-						NO_DESC,
-						"First",
-						currentS.getNodeId(),
-						rlabels.get(currentS.getNodeId())));
+				diff
+						.fileDiff(
+								leftpath,
+								rightpath,
+								format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
 				currentS = null;
 			}
 		}
@@ -683,15 +686,22 @@ public class JsonReportComparer {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class BaseDiffAlgorithm implements DiffAlgorithm {
+	public static class BaseDiffAlgorithm
+			implements
+			DiffAlgorithm {
 
 		private static final Logger LOG = LogManager.getLogger(BaseDiffAlgorithm.class);
 
 		private static final String FILES_ONLY = "Files only in the {} report:";
+
 		private static final String WARNINGS_ONLY = "Warnings only in the {} report:";
+
 		private static final String INFOS_ONLY = "Run info keys only in the {} report:";
+
 		private static final String CONFS_ONLY = "Configuration keys only in the {} report:";
+
 		private static final String FILE_DIFF = "['{}'] {}";
+
 		private static final String VALUE_DIFF = "Different values for {} key '{}': '{}' and '{}'";
 
 		@Override
@@ -734,7 +744,9 @@ public class JsonReportComparer {
 			}
 
 			for (Object o : reported)
-				LOG.warn("\t" + o);
+				LOG
+						.warn(
+								"\t" + o);
 		}
 
 		@Override
@@ -761,6 +773,7 @@ public class JsonReportComparer {
 				String second) {
 			LOG.warn(VALUE_DIFF, "configuration", key, first, second);
 		}
+
 	}
 
 	private static final String diff(
@@ -817,7 +830,8 @@ public class JsonReportComparer {
 		StringBuilder inner;
 		for (int i = 0; i < min; i++)
 			if (diff(depth + 1, inner = new StringBuilder(), felements.get(i), selements.get(i))) {
-				builder.append("\t".repeat(depth))
+				builder
+						.append("\t".repeat(depth))
 						.append(">ELEMENT #")
 						.append(i)
 						.append(":\n")
@@ -827,12 +841,14 @@ public class JsonReportComparer {
 			}
 
 		if (fsize > min) {
-			builder.append("\t".repeat(depth))
+			builder
+					.append("\t".repeat(depth))
 					.append(">EXPECTED HAS ")
 					.append(fsize - min)
 					.append(" MORE ELEMENT(S):\n");
 			for (int i = min; i < fsize; i++) {
-				builder.append("\t".repeat(depth + 1))
+				builder
+						.append("\t".repeat(depth + 1))
 						.append(">ELEMENT #")
 						.append(i)
 						.append(":\n")
@@ -844,12 +860,10 @@ public class JsonReportComparer {
 		}
 
 		if (ssize > min) {
-			builder.append("\t".repeat(depth))
-					.append(">ACTUAL HAS ")
-					.append(ssize - min)
-					.append(" MORE ELEMENT(S):\n");
+			builder.append("\t".repeat(depth)).append(">ACTUAL HAS ").append(ssize - min).append(" MORE ELEMENT(S):\n");
 			for (int i = min; i < ssize; i++) {
-				builder.append("\t".repeat(depth + 1))
+				builder
+						.append("\t".repeat(depth + 1))
 						.append(">ELEMENT #")
 						.append(i)
 						.append(":\n")
@@ -878,9 +892,13 @@ public class JsonReportComparer {
 		boolean atLeastOne = false;
 		StringBuilder inner;
 		for (Pair<String, String> field : diff.getCommons())
-			if (diff(depth + 1, inner = new StringBuilder(), felements.get(field.getLeft()),
+			if (diff(
+					depth + 1,
+					inner = new StringBuilder(),
+					felements.get(field.getLeft()),
 					selements.get(field.getLeft()))) {
-				builder.append("\t".repeat(depth))
+				builder
+						.append("\t".repeat(depth))
 						.append(">FIELD ")
 						.append(field.getLeft())
 						.append(":\n")
@@ -890,12 +908,14 @@ public class JsonReportComparer {
 			}
 
 		if (!diff.getOnlyFirst().isEmpty()) {
-			builder.append("\t".repeat(depth))
+			builder
+					.append("\t".repeat(depth))
 					.append(">EXPECTED HAS ")
 					.append(diff.getOnlyFirst().size())
 					.append(" MORE FIELD(S):\n");
 			for (String field : diff.getOnlyFirst()) {
-				builder.append("\t".repeat(depth + 1))
+				builder
+						.append("\t".repeat(depth + 1))
 						.append(">FIELD ")
 						.append(field)
 						.append(":\n")
@@ -907,12 +927,14 @@ public class JsonReportComparer {
 		}
 
 		if (!diff.getOnlySecond().isEmpty()) {
-			builder.append("\t".repeat(depth))
+			builder
+					.append("\t".repeat(depth))
 					.append(">ACTUAL HAS ")
 					.append(diff.getOnlySecond().size())
 					.append(" MORE FIELD(S):\n");
 			for (String field : diff.getOnlySecond()) {
-				builder.append("\t".repeat(depth + 1))
+				builder
+						.append("\t".repeat(depth + 1))
 						.append(">FIELD ")
 						.append(field)
 						.append(":\n")
@@ -931,7 +953,8 @@ public class JsonReportComparer {
 			StringBuilder builder,
 			SerializableValue first,
 			SerializableValue second) {
-		builder.append("\t".repeat(depth))
+		builder
+				.append("\t".repeat(depth))
 				.append(first)
 				.append("\n")
 				.append("\t".repeat(depth))
@@ -939,4 +962,5 @@ public class JsonReportComparer {
 				.append("\t".repeat(depth))
 				.append(second);
 	}
+
 }

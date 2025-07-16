@@ -163,4 +163,5 @@ public class StringSearcher {
 		searchString = toSearch;
 		path.clear();
 	}
+
 }

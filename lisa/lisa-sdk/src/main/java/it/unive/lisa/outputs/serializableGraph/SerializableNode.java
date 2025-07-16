@@ -17,7 +17,9 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableNode implements Comparable<SerializableNode> {
+public class SerializableNode
+		implements
+		Comparable<SerializableNode> {
 
 	private final int id;
 
@@ -125,9 +127,10 @@ public class SerializableNode implements Comparable<SerializableNode> {
 		if ((cmp = Integer.compare(unknownFields.keySet().size(), o.unknownFields.keySet().size())) != 0)
 			return cmp;
 
-		CollectionsDiffBuilder<
-				String> builder = new CollectionsDiffBuilder<>(String.class, unknownFields.keySet(),
-						o.unknownFields.keySet());
+		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
+				String.class,
+				unknownFields.keySet(),
+				o.unknownFields.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())
@@ -190,4 +193,5 @@ public class SerializableNode implements Comparable<SerializableNode> {
 	public String toString() {
 		return id + "(" + subNodes + "):" + text;
 	}
+
 }

@@ -20,7 +20,9 @@ import java.util.Set;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class PushFromConstraints extends PushAny {
+public class PushFromConstraints
+		extends
+		PushAny {
 
 	private final Set<BinaryExpression> constraints;
 
@@ -110,4 +112,5 @@ public class PushFromConstraints extends PushAny {
 						.toArray(String[]::new))
 				+ "]";
 	}
+
 }

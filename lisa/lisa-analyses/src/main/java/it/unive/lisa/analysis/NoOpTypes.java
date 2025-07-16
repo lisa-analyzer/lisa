@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.lattices.SingleTypeLattice;
 import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -7,154 +8,64 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
- * A no-op type domain that represents a top or bottom state without any actual
- * type information. This is useful in analyses where type information is not
- * relevant or when a placeholder is needed. Note that this domain cannot
- * produce typing information:
+ * A no-op type domain that uses {@link SingleTypeLattice} as lattice structure.
+ * This is useful in analyses where type information is not relevant or when a
+ * placeholder is needed. Note that this domain cannot produce typing
+ * information:
  * {@link #getRuntimeTypesOf(SymbolicExpression, ProgramPoint, SemanticOracle)}
  * always returns all possible types, and
  * {@link #getDynamicTypeOf(SymbolicExpression, ProgramPoint, SemanticOracle)}
  * always returns {@link Untyped#INSTANCE}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NoOpTypes implements TypeDomain<NoOpTypes> {
+public class NoOpTypes
+		implements
+		TypeDomain<SingleTypeLattice> {
 
-	/**
-	 * The top element of this domain, representing the default state.
-	 */
-	public static final NoOpTypes TOP = new NoOpTypes();
-
-	/**
-	 * The bottom element of this domain, representing an erroneous or undefined
-	 * state.
-	 */
-	public static final NoOpTypes BOTTOM = new NoOpTypes();
-
-	private NoOpTypes() {
-		// private constructor to prevent instantiation
+	@Override
+	public SingleTypeLattice makeLattice() {
+		return SingleTypeLattice.SINGLETON;
 	}
 
 	@Override
-	public boolean lessOrEqual(
-			NoOpTypes other)
-			throws SemanticException {
-		return isBottom() || other.isTop();
-	}
-
-	@Override
-	public NoOpTypes lub(
-			NoOpTypes other)
-			throws SemanticException {
-		return isBottom() && other.isBottom() ? BOTTOM : TOP;
-	}
-
-	@Override
-	public NoOpTypes glb(
-			NoOpTypes other)
-			throws SemanticException {
-		return isBottom() || other.isBottom() ? BOTTOM : TOP;
-	}
-
-	@Override
-	public NoOpTypes top() {
-		return TOP;
-	}
-
-	@Override
-	public NoOpTypes bottom() {
-		return BOTTOM;
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-		else
-			return new StringRepresentation("-");
-	}
-
-	@Override
-	public NoOpTypes assign(
+	public SingleTypeLattice assign(
+			SingleTypeLattice state,
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return this;
+		return state;
 	}
 
 	@Override
-	public NoOpTypes smallStepSemantics(
+	public SingleTypeLattice smallStepSemantics(
+			SingleTypeLattice state,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return this;
+		return state;
 	}
 
 	@Override
-	public NoOpTypes assume(
+	public SingleTypeLattice assume(
+			SingleTypeLattice state,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public boolean knowsIdentifier(
-			Identifier id) {
-		return false;
-	}
-
-	@Override
-	public NoOpTypes forgetIdentifier(
-			Identifier id,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public NoOpTypes forgetIdentifiers(
-			Iterable<Identifier> ids,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public NoOpTypes forgetIdentifiersIf(
-			Predicate<Identifier> test,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public NoOpTypes pushScope(
-			ScopeToken token,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public NoOpTypes popScope(
-			ScopeToken token,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
+		return state;
 	}
 
 	@Override
 	public Set<Type> getRuntimeTypesOf(
+			SingleTypeLattice state,
 			SymbolicExpression e,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -164,10 +75,12 @@ public class NoOpTypes implements TypeDomain<NoOpTypes> {
 
 	@Override
 	public Type getDynamicTypeOf(
+			SingleTypeLattice state,
 			SymbolicExpression e,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		return Untyped.INSTANCE;
 	}
+
 }

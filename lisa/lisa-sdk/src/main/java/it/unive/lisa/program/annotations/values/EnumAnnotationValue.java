@@ -3,11 +3,14 @@ package it.unive.lisa.program.annotations.values;
 /**
  * An enum annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class EnumAnnotationValue implements BasicAnnotationValue {
+public class EnumAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final String name;
+
 	private final String field;
 
 	/**
@@ -72,4 +75,5 @@ public class EnumAnnotationValue implements BasicAnnotationValue {
 			return cmp;
 		return field.compareTo(other.field);
 	}
+
 }

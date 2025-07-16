@@ -8,7 +8,9 @@ import it.unive.lisa.program.cfg.ProgramPoint;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LoopSummary extends TraceToken {
+public class LoopSummary
+		extends
+		TraceToken {
 
 	/**
 	 * Builds the summary.
@@ -44,4 +46,5 @@ public class LoopSummary extends TraceToken {
 	public String toString() {
 		return "[" + super.toString() + "]Summary";
 	}
+
 }

@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * A char annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class CharAnnotationValue implements BasicAnnotationValue {
+public class CharAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final char c;
 
@@ -56,4 +58,5 @@ public class CharAnnotationValue implements BasicAnnotationValue {
 		CharAnnotationValue other = (CharAnnotationValue) o;
 		return Character.compare(c, other.c);
 	}
+
 }

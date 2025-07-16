@@ -191,4 +191,5 @@ public class CheckTool {
 	public Collection<Warning> getWarnings() {
 		return Collections.unmodifiableCollection(warnings);
 	}
+
 }

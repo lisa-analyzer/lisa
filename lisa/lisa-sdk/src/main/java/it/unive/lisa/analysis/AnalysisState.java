@@ -1,12 +1,12 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -14,23 +14,23 @@ import java.util.function.Predicate;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
- * composed by an {@link AbstractState} modeling the abstract values of program
+ * composed by an {@link AbstractDomain} modeling the abstract values of program
  * variables and heap locations, and a collection of {@link SymbolicExpression}s
  * keeping trace of what has been evaluated and is available for later
- * computations, but is not stored in memory (i.e. the stack).
+ * computations, but is not stored in memory (i.e. the stack). Additionally, it
+ * maintains arbitrary information that can be used to keep track of properties
+ * during fixpoint computations, accessible through
+ * {@link #getFixpointInformation()}
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} embedded in this state
+ * @param <A> the type of {@link AbstractLattice} produced by the
+ *                {@link AbstractDomain}
  */
-public class AnalysisState<A extends AbstractState<A>>
+public class AnalysisState<A extends AbstractLattice<A>>
 		implements
-		// we explicitly don't implement semantic domain here
-		// even if we have the same transformers, as the
-		// interface defines them with the SemanticOracle parameter
-		// that is reduntant here
-		BaseLattice<AnalysisState<A>>,
-		ScopedObject<AnalysisState<A>> {
+		DomainLattice<AnalysisState<A>, AnalysisState<A>>,
+		BaseLattice<AnalysisState<A>> {
 
 	/**
 	 * The abstract state of program variables and memory locations
@@ -51,33 +51,33 @@ public class AnalysisState<A extends AbstractState<A>>
 	/**
 	 * Builds a new state.
 	 * 
-	 * @param state              the {@link AbstractState} to embed in this
+	 * @param state              the {@link AbstractDomain} to embed in this
 	 *                               analysis state
 	 * @param computedExpression the expression that has been computed
 	 */
 	public AnalysisState(
 			A state,
 			SymbolicExpression computedExpression) {
-		this(state, new ExpressionSet(computedExpression), null);
+		this(state, new ExpressionSet(computedExpression), new FixpointInfo());
 	}
 
 	/**
 	 * Builds a new state.
 	 * 
-	 * @param state               the {@link AbstractState} to embed in this
+	 * @param state               the {@link AbstractDomain} to embed in this
 	 *                                analysis state
 	 * @param computedExpressions the expressions that have been computed
 	 */
 	public AnalysisState(
 			A state,
 			ExpressionSet computedExpressions) {
-		this(state, computedExpressions, null);
+		this(state, computedExpressions, new FixpointInfo());
 	}
 
 	/**
 	 * Builds a new state.
 	 * 
-	 * @param state              the {@link AbstractState} to embed in this
+	 * @param state              the {@link AbstractDomain} to embed in this
 	 *                               analysis state
 	 * @param computedExpression the expression that has been computed
 	 * @param info               the additional information to be computed
@@ -93,7 +93,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	/**
 	 * Builds a new state.
 	 * 
-	 * @param state               the {@link AbstractState} to embed in this
+	 * @param state               the {@link AbstractDomain} to embed in this
 	 *                                analysis state
 	 * @param computedExpressions the expressions that have been computed
 	 * @param info                the additional information to be computed
@@ -109,7 +109,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	/**
-	 * Yields the {@link AbstractState} embedded into this analysis state,
+	 * Yields the {@link AbstractDomain} embedded into this analysis state,
 	 * containing abstract values for program variables and memory locations.
 	 * 
 	 * @return the abstract state
@@ -139,7 +139,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	 */
 	public Lattice<?> getInfo(
 			String key) {
-		return info == null ? null : info.get(key);
+		return info.get(key);
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	public <T> T getInfo(
 			String key,
 			Class<T> type) {
-		return info == null ? null : info.get(key, type);
+		return info.get(key, type);
 	}
 
 	/**
@@ -174,8 +174,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	public AnalysisState<A> storeInfo(
 			String key,
 			Lattice<?> info) {
-		FixpointInfo fixinfo = this.info == null ? new FixpointInfo() : this.info;
-		fixinfo = fixinfo.put(key, info);
+		FixpointInfo fixinfo = this.info.put(key, info);
 		return new AnalysisState<>(state, computedExpressions, fixinfo);
 	}
 
@@ -198,8 +197,7 @@ public class AnalysisState<A extends AbstractState<A>>
 			String key,
 			Lattice<?> info)
 			throws SemanticException {
-		FixpointInfo fixinfo = this.info == null ? new FixpointInfo() : this.info;
-		fixinfo = fixinfo.putWeak(key, info);
+		FixpointInfo fixinfo = this.info.putWeak(key, info);
 		return new AnalysisState<>(state, computedExpressions, fixinfo);
 	}
 
@@ -217,136 +215,6 @@ public class AnalysisState<A extends AbstractState<A>>
 	 */
 	public ExpressionSet getComputedExpressions() {
 		return computedExpressions;
-	}
-
-	/**
-	 * Yields a copy of this state, where {@code id} has been assigned to
-	 * {@code value}.
-	 * 
-	 * @param id    the identifier to assign the value to
-	 * @param value the expression to assign
-	 * @param pp    the program point that where this operation is being
-	 *                  evaluated
-	 * 
-	 * @return a copy of this domain, modified by the assignment
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public AnalysisState<A> assign(
-			Identifier id,
-			SymbolicExpression value,
-			ProgramPoint pp)
-			throws SemanticException {
-		A s = state.assign(id, value, pp, state);
-		return new AnalysisState<>(s, new ExpressionSet(id), info);
-	}
-
-	/**
-	 * Yields a copy of this analysis state, where the symbolic expression
-	 * {@code id} has been assigned to {@code value}: if {@code id} is not an
-	 * {@code Identifier}, then it is rewritten before performing the
-	 * assignment.
-	 * 
-	 * @param id         the symbolic expression to be assigned
-	 * @param expression the expression to assign
-	 * @param pp         the program point that where this operation is being
-	 *                       evaluated
-	 * 
-	 * @return a copy of this analysis state, modified by the assignment
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public AnalysisState<A> assign(
-			SymbolicExpression id,
-			SymbolicExpression expression,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (id instanceof Identifier)
-			return assign((Identifier) id, expression, pp);
-
-		A s = state.bottom();
-		AnalysisState<A> sem = smallStepSemantics(id, pp);
-		ExpressionSet rewritten = sem.state.rewrite(id, pp, state);
-		for (SymbolicExpression i : rewritten)
-			if (!(i instanceof Identifier))
-				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
-			else
-				s = s.lub(sem.state.assign((Identifier) i, expression, pp, state));
-		return new AnalysisState<>(s, rewritten, info);
-	}
-
-	/**
-	 * Yields a copy of this state, that has been modified accordingly to the
-	 * semantics of the given {@code expression}.
-	 * 
-	 * @param expression the expression whose semantics need to be computed
-	 * @param pp         the program point that where this operation is being
-	 *                       evaluated
-	 * 
-	 * @return a copy of this domain, modified accordingly to the semantics of
-	 *             {@code expression}
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public AnalysisState<A> smallStepSemantics(
-			SymbolicExpression expression,
-			ProgramPoint pp)
-			throws SemanticException {
-		A s = state.smallStepSemantics(expression, pp, state);
-		return new AnalysisState<>(s, new ExpressionSet(expression), info);
-	}
-
-	/**
-	 * Yields a copy of this state, modified by assuming that the given
-	 * expression holds. It is required that the returned domain is in relation
-	 * with this one. A safe (but imprecise) implementation of this method can
-	 * always return {@code this}.
-	 * 
-	 * @param expression the expression to assume to hold.
-	 * @param src        the program point that where this operation is being
-	 *                       evaluated, corresponding to the one that generated
-	 *                       the given expression
-	 * @param dest       the program point where the execution will move after
-	 *                       the expression has been assumed
-	 * 
-	 * @return the (optionally) modified copy of this domain
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public AnalysisState<A> assume(
-			SymbolicExpression expression,
-			ProgramPoint src,
-			ProgramPoint dest)
-			throws SemanticException {
-		A assume = state.assume(expression, src, dest, state);
-		if (assume.isBottom())
-			return bottom();
-		return new AnalysisState<>(assume, computedExpressions, info);
-	}
-
-	/**
-	 * Checks if the given expression is satisfied by the abstract values of
-	 * this state, returning an instance of {@link Satisfiability}.
-	 * 
-	 * @param expression the expression whose satisfiability is to be evaluated
-	 * @param pp         the program point that where this operation is being
-	 *                       evaluated
-	 * 
-	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied
-	 *             by the values of this domain,
-	 *             {@link Satisfiability#NOT_SATISFIED} if it is not satisfied,
-	 *             or {@link Satisfiability#UNKNOWN} if it is either impossible
-	 *             to determine if it satisfied, or if it is satisfied by some
-	 *             values and not by some others (this is equivalent to a TOP
-	 *             boolean value)
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public Satisfiability satisfies(
-			SymbolicExpression expression,
-			ProgramPoint pp)
-			throws SemanticException {
-		return state.satisfies(expression, pp, state);
 	}
 
 	@Override
@@ -390,7 +258,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.lub(other.state),
 				computedExpressions.lub(other.computedExpressions),
-				info == null ? other.info : info.lub(other.info));
+				info.lub(other.info));
 	}
 
 	@Override
@@ -400,7 +268,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.glb(other.state),
 				computedExpressions.glb(other.computedExpressions),
-				info == null ? null : info.glb(other.info));
+				info.glb(other.info));
 	}
 
 	@Override
@@ -410,7 +278,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.widening(other.state),
 				computedExpressions.lub(other.computedExpressions),
-				info == null ? other.info : info.widening(other.info));
+				info.widening(other.info));
 	}
 
 	@Override
@@ -420,7 +288,7 @@ public class AnalysisState<A extends AbstractState<A>>
 		return new AnalysisState<>(
 				state.narrowing(other.state),
 				computedExpressions.glb(other.computedExpressions),
-				info == null ? null : info.narrowing(other.info));
+				info.narrowing(other.info));
 	}
 
 	@Override
@@ -429,12 +297,12 @@ public class AnalysisState<A extends AbstractState<A>>
 			throws SemanticException {
 		return state.lessOrEqual(other.state)
 				&& computedExpressions.lessOrEqual(other.computedExpressions)
-				&& (info == null ? true : info.lessOrEqual(other.info));
+				&& info.lessOrEqual(other.info);
 	}
 
 	@Override
 	public AnalysisState<A> top() {
-		return new AnalysisState<>(state.top(), computedExpressions.top(), null);
+		return new AnalysisState<>(state.top(), computedExpressions.top(), info.top());
 	}
 
 	@Override
@@ -444,12 +312,12 @@ public class AnalysisState<A extends AbstractState<A>>
 
 	@Override
 	public boolean isTop() {
-		return state.isTop() && computedExpressions.isTop() && info == null;
+		return state.isTop() && computedExpressions.isTop() && info.isTop();
 	}
 
 	@Override
 	public boolean isBottom() {
-		return state.isBottom() && computedExpressions.isBottom() && (info != null && info.isBottom());
+		return state.isBottom() && computedExpressions.isBottom() && info.isBottom();
 	}
 
 	/**
@@ -505,6 +373,8 @@ public class AnalysisState<A extends AbstractState<A>>
 			Iterable<Identifier> ids,
 			ProgramPoint pp)
 			throws SemanticException {
+		if (ids == null || !ids.iterator().hasNext())
+			return this;
 		return new AnalysisState<>(state.forgetIdentifiers(ids, pp), computedExpressions, info);
 	}
 
@@ -555,25 +425,10 @@ public class AnalysisState<A extends AbstractState<A>>
 
 		StructuredRepresentation stateRepr = state.representation();
 		StructuredRepresentation exprRepr = computedExpressions.representation();
-		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr));
-	}
 
-	/**
-	 * Variant of {@link #representation()} that also includes
-	 * {@link #getFixpointInformation()}.
-	 * 
-	 * @return the enriched representation
-	 */
-	public StructuredRepresentation representationWithInfo() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-		if (isTop())
-			return Lattice.topRepresentation();
-		if (info == null || info.isBottom())
-			return representation();
+		if (info.isEmpty())
+			return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr));
 
-		StructuredRepresentation stateRepr = state.representation();
-		StructuredRepresentation exprRepr = computedExpressions.representation();
 		StructuredRepresentation infoRepr = info.representation();
 		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr, "info", infoRepr));
 	}
@@ -584,7 +439,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	/**
-	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * Yields a copy of this state, but with the {@link AbstractDomain}'s inner
 	 * memory abstraction set to top. This is useful to represent effects of
 	 * unknown calls that arbitrarily manipulate the memory.
 	 * 
@@ -595,7 +450,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	/**
-	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * Yields a copy of this state, but with the {@link AbstractDomain}'s inner
 	 * value abstraction set to top. This is useful to represent effects of
 	 * unknown calls that arbitrarily manipulate the values of variables.
 	 * 
@@ -606,7 +461,7 @@ public class AnalysisState<A extends AbstractState<A>>
 	}
 
 	/**
-	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * Yields a copy of this state, but with the {@link AbstractDomain}'s inner
 	 * type abstraction set to top. This is useful to represent effects of
 	 * unknown calls that arbitrarily manipulate the values of variables (and
 	 * their type accordingly).
@@ -616,4 +471,17 @@ public class AnalysisState<A extends AbstractState<A>>
 	public AnalysisState<A> withTopTypes() {
 		return new AnalysisState<>(state.withTopTypes(), computedExpressions, info);
 	}
+
+	@Override
+	public boolean knowsIdentifier(
+			Identifier id) {
+		return state.knowsIdentifier(id);
+	}
+
+	@Override
+	public <D extends Lattice<D>> Collection<D> getAllLatticeInstances(
+			Class<D> domain) {
+		return state.getAllLatticeInstances(domain);
+	}
+
 }

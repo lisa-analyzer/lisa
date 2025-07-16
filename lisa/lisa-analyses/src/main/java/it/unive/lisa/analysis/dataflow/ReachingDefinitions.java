@@ -12,6 +12,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An implementation of the reaching definition dataflow analysis.
@@ -19,101 +20,40 @@ import java.util.HashSet;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ReachingDefinitions
-		implements
-		DataflowElement<PossibleDataflowDomain<ReachingDefinitions>, ReachingDefinitions> {
+		extends
+		DataflowDomain<PossibleSet<ReachingDefinitions.RD>, ReachingDefinitions.RD> {
 
-	private final Identifier variable;
-
-	private final ProgramPoint programPoint;
-
-	/**
-	 * Builds an empty reaching definition object.
-	 */
-	public ReachingDefinitions() {
-		this(null, null);
+	@Override
+	public PossibleSet<RD> makeLattice() {
+		return new PossibleSet<>();
 	}
 
-	/**
-	 * Builds a new reaching definition object.
-	 * 
-	 * @param variable the variable being defined
-	 * @param pp       the location where the definition happens
-	 */
-	public ReachingDefinitions(
-			Identifier variable,
+	@Override
+	public Set<RD> gen(
+			PossibleSet<RD> state,
+			Identifier id,
+			ValueExpression expression,
 			ProgramPoint pp) {
-		this.programPoint = pp;
-		this.variable = variable;
+		return Collections.singleton(new RD(id, pp));
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((programPoint == null) ? 0 : programPoint.hashCode());
-		result = prime * result + ((variable == null) ? 0 : variable.hashCode());
-		return result;
+	public Set<RD> gen(
+			PossibleSet<RD> state,
+			ValueExpression expression,
+			ProgramPoint pp) {
+		return Collections.emptySet();
 	}
 
 	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ReachingDefinitions other = (ReachingDefinitions) obj;
-		if (programPoint == null) {
-			if (other.programPoint != null)
-				return false;
-		} else if (!programPoint.equals(other.programPoint))
-			return false;
-		if (variable == null) {
-			if (other.variable != null)
-				return false;
-		} else if (!variable.equals(other.variable))
-			return false;
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return representation().toString();
-	}
-
-	@Override
-	public Collection<Identifier> getInvolvedIdentifiers() {
-		return Collections.singleton(variable);
-	}
-
-	@Override
-	public Collection<ReachingDefinitions> gen(
+	public Set<RD> kill(
+			PossibleSet<RD> state,
 			Identifier id,
 			ValueExpression expression,
-			ProgramPoint pp,
-			PossibleDataflowDomain<ReachingDefinitions> domain) {
-		return Collections.singleton(new ReachingDefinitions(id, pp));
-	}
+			ProgramPoint pp) {
+		Set<RD> result = new HashSet<>();
 
-	@Override
-	public Collection<ReachingDefinitions> gen(
-			ValueExpression expression,
-			ProgramPoint pp,
-			PossibleDataflowDomain<ReachingDefinitions> domain) {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public Collection<ReachingDefinitions> kill(
-			Identifier id,
-			ValueExpression expression,
-			ProgramPoint pp,
-			PossibleDataflowDomain<ReachingDefinitions> domain) {
-		Collection<ReachingDefinitions> result = new HashSet<>();
-
-		for (ReachingDefinitions rd : domain.getDataflowElements())
+		for (RD rd : state.getDataflowElements())
 			if (rd.variable.equals(id))
 				result.add(rd);
 
@@ -121,38 +61,114 @@ public class ReachingDefinitions
 	}
 
 	@Override
-	public Collection<ReachingDefinitions> kill(
+	public Set<RD> kill(
+			PossibleSet<RD> state,
 			ValueExpression expression,
-			ProgramPoint pp,
-			PossibleDataflowDomain<ReachingDefinitions> domain) {
-		return Collections.emptyList();
+			ProgramPoint pp) {
+		return Collections.emptySet();
 	}
 
-	@Override
-	public StructuredRepresentation representation() {
-		return new ListRepresentation(new StringRepresentation(variable), new StringRepresentation(programPoint));
+	/**
+	 * A reaching definition dataflow element, that is, a pair of an identifier
+	 * and a program point where the definition of the identifier happens.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static class RD
+			implements
+			DataflowElement<RD> {
+
+		private final Identifier variable;
+
+		private final ProgramPoint programPoint;
+
+		private RD(
+				Identifier variable,
+				ProgramPoint programPoint) {
+			this.variable = variable;
+			this.programPoint = programPoint;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((programPoint == null) ? 0 : programPoint.hashCode());
+			result = prime * result + ((variable == null) ? 0 : variable.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(
+				Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			RD other = (RD) obj;
+			if (programPoint == null) {
+				if (other.programPoint != null)
+					return false;
+			} else if (!programPoint.equals(other.programPoint))
+				return false;
+			if (variable == null) {
+				if (other.variable != null)
+					return false;
+			} else if (!variable.equals(other.variable))
+				return false;
+			return true;
+		}
+
+		@Override
+		public StructuredRepresentation representation() {
+			return new ListRepresentation(new StringRepresentation(variable), new StringRepresentation(programPoint));
+		}
+
+		@Override
+		public String toString() {
+			return representation().toString();
+		}
+
+		@Override
+		public Collection<Identifier> getInvolvedIdentifiers() {
+			return Collections.singleton(variable);
+		}
+
+		@Override
+		public RD pushScope(
+				ScopeToken scope,
+				ProgramPoint pp)
+				throws SemanticException {
+			return new RD((Identifier) variable.pushScope(scope, pp), programPoint);
+		}
+
+		@Override
+		public RD popScope(
+				ScopeToken scope,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (!variable.canBeScoped())
+				return this;
+
+			SymbolicExpression popped = variable.popScope(scope, pp);
+			if (popped == null)
+				return null;
+
+			return new RD((Identifier) popped, programPoint);
+		}
+
+		@Override
+		public RD replaceIdentifier(
+				Identifier source,
+				Identifier target) {
+			SymbolicExpression e = variable.replace(source, target);
+			if (e == variable)
+				return this;
+			return new RD((Identifier) e, programPoint);
+		}
+
 	}
 
-	@Override
-	public ReachingDefinitions pushScope(
-			ScopeToken scope,
-			ProgramPoint pp)
-			throws SemanticException {
-		return new ReachingDefinitions((Identifier) variable.pushScope(scope, pp), programPoint);
-	}
-
-	@Override
-	public ReachingDefinitions popScope(
-			ScopeToken scope,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (!variable.canBeScoped())
-			return this;
-
-		SymbolicExpression popped = variable.popScope(scope, pp);
-		if (popped == null)
-			return null;
-
-		return new ReachingDefinitions((Identifier) popped, programPoint);
-	}
 }

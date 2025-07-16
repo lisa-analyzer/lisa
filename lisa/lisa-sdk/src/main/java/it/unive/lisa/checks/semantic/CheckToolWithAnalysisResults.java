@@ -1,6 +1,8 @@
 package it.unive.lisa.checks.semantic;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -23,13 +25,20 @@ import java.util.Map;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained in the results
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} ran during the analysis
  */
-public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends CheckTool {
+public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		extends
+		CheckTool {
 
 	private final Map<CFG, Collection<AnalyzedCFG<A>>> results;
 
 	private final CallGraph callgraph;
+
+	private final Analysis<A, D> analysis;
 
 	/**
 	 * Builds the tool, storing the given results.
@@ -39,15 +48,19 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * @param results       the results to store
 	 * @param callgraph     the callgraph that has been built during the
 	 *                          analysis
+	 * @param analysis      the analysis that has been executed to produce the
+	 *                          results
 	 */
 	public CheckToolWithAnalysisResults(
 			LiSAConfiguration configuration,
 			FileManager fileManager,
 			Map<CFG, Collection<AnalyzedCFG<A>>> results,
-			CallGraph callgraph) {
+			CallGraph callgraph,
+			Analysis<A, D> analysis) {
 		super(configuration, fileManager);
 		this.results = results;
 		this.callgraph = callgraph;
+		this.analysis = analysis;
 	}
 
 	/**
@@ -56,14 +69,18 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	 * @param other     the tool to copy
 	 * @param results   the results to store
 	 * @param callgraph the callgraph that has been built during the analysis
+	 * @param analysis  the analysis that has been executed to produce the
+	 *                      results
 	 */
 	public CheckToolWithAnalysisResults(
 			CheckTool other,
 			Map<CFG, Collection<AnalyzedCFG<A>>> results,
-			CallGraph callgraph) {
+			CallGraph callgraph,
+			Analysis<A, D> analysis) {
 		super(other);
 		this.results = results;
 		this.callgraph = callgraph;
+		this.analysis = analysis;
 	}
 
 	/**
@@ -77,6 +94,16 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 	public Collection<AnalyzedCFG<A>> getResultOf(
 			CFG cfg) {
 		return results.get(cfg);
+	}
+
+	/**
+	 * Yields the analysis that has been executed to produce the results stored
+	 * in this tool.
+	 * 
+	 * @return the analysis
+	 */
+	public Analysis<A, D> getAnalysis() {
+		return analysis;
 	}
 
 	/**
@@ -150,9 +177,14 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A>> extends Ch
 			store.put(e, result.getAnalysisStateAfter(e));
 
 		try {
-			return callgraph.resolve(call, call.parameterTypes(store), null);
+			@SuppressWarnings({
+					"rawtypes", "unchecked"
+			})
+			Analysis<A, D> analysis = new Analysis(getConfiguration().analysis);
+			return callgraph.resolve(call, call.parameterTypes(store, analysis), null);
 		} catch (CallResolutionException e) {
 			return null;
 		}
 	}
+
 }

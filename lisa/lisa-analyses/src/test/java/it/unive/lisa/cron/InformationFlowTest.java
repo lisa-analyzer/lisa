@@ -6,15 +6,19 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.SimpleAbstractDomain;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.nonInterference.NIEnv;
+import it.unive.lisa.analysis.nonInterference.NIEnv.NI;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
-import it.unive.lisa.analysis.nonInterference.NonInterference.NI;
-import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
+import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.taint.BaseTaint;
-import it.unive.lisa.analysis.taint.Taint;
+import it.unive.lisa.analysis.taint.BaseTaint.TaintLattice;
 import it.unive.lisa.analysis.taint.ThreeLevelsTaint;
+import it.unive.lisa.analysis.taint.TwoLevelsTaint;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -33,18 +37,20 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
 import org.junit.Test;
 
-public class InformationFlowTest extends AnalysisTestExecutor {
+public class InformationFlowTest
+		extends
+		AnalysisTestExecutor {
 
 	@Test
 	public void testTaint() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Taint()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new TwoLevelsTaint(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.serializeResults = true;
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
@@ -60,10 +66,11 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 	@Test
 	public void testThreeLevelsTaint() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new ThreeLevelsTaint()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new ThreeLevelsTaint(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.serializeResults = true;
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
@@ -76,49 +83,65 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
-	private static class TaintCheck<T extends BaseTaint<T>>
+	private static class TaintCheck<L extends TaintLattice<L>>
 			implements
-			SemanticCheck<
-					SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>> {
+			SemanticCheck<SimpleAbstractState<MonolithicHeap.Monolith,
+					ValueEnvironment<L>,
+					TypeEnvironment<InferredTypes.TypeSet>>,
+					SimpleAbstractDomain<MonolithicHeap.Monolith,
+							ValueEnvironment<L>,
+							TypeEnvironment<InferredTypes.TypeSet>>> {
 
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>> tool,
+				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap.Monolith,
+						ValueEnvironment<L>,
+						TypeEnvironment<InferredTypes.TypeSet>>,
+						SimpleAbstractDomain<MonolithicHeap.Monolith,
+								ValueEnvironment<L>,
+								TypeEnvironment<InferredTypes.TypeSet>>> tool,
 				CFG graph,
 				Statement node) {
 			if (!(node instanceof UnresolvedCall))
 				return true;
 
 			UnresolvedCall call = (UnresolvedCall) node;
+			BaseTaint<L> domain = (BaseTaint<L>) tool.getAnalysis().domain.valueDomain;
 
 			try {
-				for (AnalyzedCFG<
-						SimpleAbstractState<
-								MonolithicHeap,
-								ValueEnvironment<T>,
-								TypeEnvironment<InferredTypes>>> result : tool.getResultOf(call.getCFG())) {
-
+				for (AnalyzedCFG<SimpleAbstractState<MonolithicHeap.Monolith,
+						ValueEnvironment<L>,
+						TypeEnvironment<InferredTypes.TypeSet>>> result : tool.getResultOf(call.getCFG())) {
 					Call resolved = (Call) tool.getResolvedVersion(call, result);
+
 					if (resolved instanceof CFGCall) {
 						CFGCall cfg = (CFGCall) resolved;
 						for (CodeMember n : cfg.getTargets()) {
 							Parameter[] parameters = n.getDescriptor().getFormals();
 							for (int i = 0; i < parameters.length; i++)
 								if (parameters[i].getAnnotations().contains(BaseTaint.CLEAN_MATCHER)) {
-									AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>,
-											TypeEnvironment<InferredTypes>>> post = result
+									AnalysisState<SimpleAbstractState<MonolithicHeap.Monolith,
+											ValueEnvironment<L>,
+											TypeEnvironment<InferredTypes.TypeSet>>> post = result
 													.getAnalysisStateAfter(call.getParameters()[i]);
-									for (SymbolicExpression e : post.getState().rewrite(post.getComputedExpressions(),
-											node, post.getState())) {
-										T stack = post
-												.getState()
-												.getValueState()
-												.eval((ValueExpression) e, node, post.getState());
+									SemanticOracle oracle = tool.getAnalysis().domain.makeOracle(post.getState());
+
+									for (SymbolicExpression e : tool
+											.getAnalysis()
+											.rewrite(post, post.getComputedExpressions(), node)) {
+										L stack = domain
+												.eval(post.getState().valueState, (ValueExpression) e, node, oracle);
+
 										if (stack.isAlwaysTainted())
-											tool.warnOn(call, "Parameter " + i + " is always tainted");
+											tool
+													.warnOn(
+															call,
+															"Parameter " + i + " is always tainted");
 										else if (stack.isPossiblyTainted())
-											tool.warnOn(call, "Parameter " + i + " is possibly tainted");
+											tool
+													.warnOn(
+															call,
+															"Parameter " + i + " is possibly tainted");
 									}
 								}
 						}
@@ -130,16 +153,14 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 
 			return true;
 		}
+
 	}
 
 	@Test
 	public void testConfidentialityNI() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = new SimpleAbstractState<>(
-				new MonolithicHeap(),
-				new NonInterference(),
-				new TypeEnvironment<>(new InferredTypes()));
+		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/confidentiality";
 		conf.programFile = "program.imp";
@@ -152,10 +173,7 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 	public void testIntegrityNI() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = new SimpleAbstractState<>(
-				new MonolithicHeap(),
-				new NonInterference(),
-				new TypeEnvironment<>(new InferredTypes()));
+		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/integrity";
 		conf.programFile = "program.imp";
@@ -168,10 +186,7 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 	public void testDeclassification() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = new SimpleAbstractState<>(
-				new MonolithicHeap(),
-				new NonInterference(),
-				new TypeEnvironment<>(new InferredTypes()));
+		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.semanticChecks.add(new NICheck());
@@ -184,53 +199,72 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 
 	private static class NICheck
 			implements
-			SemanticCheck<
-					SimpleAbstractState<MonolithicHeap, NonInterference, TypeEnvironment<InferredTypes>>> {
+			SemanticCheck<SimpleAbstractState<MonolithicHeap.Monolith, NIEnv, TypeEnvironment<InferredTypes.TypeSet>>,
+					SimpleAbstractDomain<MonolithicHeap.Monolith, NIEnv, TypeEnvironment<InferredTypes.TypeSet>>> {
 
 		@Override
 		public boolean visit(
 				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, NonInterference, TypeEnvironment<InferredTypes>>> tool,
+						SimpleAbstractState<MonolithicHeap.Monolith, NIEnv, TypeEnvironment<InferredTypes.TypeSet>>,
+						SimpleAbstractDomain<MonolithicHeap.Monolith,
+								NIEnv,
+								TypeEnvironment<InferredTypes.TypeSet>>> tool,
 				CFG graph,
 				Statement node) {
 			if (!(node instanceof Assignment))
 				return true;
 
 			Assignment assign = (Assignment) node;
-			Collection<?> results = tool.getResultOf(graph);
+			var results = tool.getResultOf(graph);
 
-			for (Object res : results)
+			for (var result : results)
 				try {
-					AnalyzedCFG<?> result = (AnalyzedCFG<?>) res;
-					AnalysisState<?> post = result.getAnalysisStateAfter(assign);
-					NonInterference state = post.getState().getDomainInstance(NonInterference.class);
-					AnalysisState<?> postL = result.getAnalysisStateAfter(assign.getLeft());
-					NonInterference left = postL.getState().getDomainInstance(NonInterference.class);
-					AnalysisState<?> postR = result.getAnalysisStateAfter(assign.getRight());
-					NonInterference right = postR.getState().getDomainInstance(NonInterference.class);
+					var post = result.getAnalysisStateAfter(assign);
+					NIEnv state = post.getState().getLatticeInstance(NIEnv.class);
+					var postL = result.getAnalysisStateAfter(assign.getLeft());
+					var postR = result.getAnalysisStateAfter(assign.getRight());
+					NonInterference domain = (NonInterference) tool.getAnalysis().domain.valueDomain;
+					SemanticOracle oracleL = tool.getAnalysis().domain.makeOracle(postL.getState());
+					SemanticOracle oracleR = tool.getAnalysis().domain.makeOracle(postR.getState());
 
-					for (SymbolicExpression l : postL.getState().rewrite(postL.getComputedExpressions(), assign,
-							postL.getState()))
-						for (SymbolicExpression r : postR.getState().rewrite(postR.getComputedExpressions(), assign,
-								postR.getState())) {
-							NI ll = left.eval((ValueExpression) l, assign.getLeft(), postL.getState());
-							NI rr = right.eval((ValueExpression) r, assign.getRight(), postR.getState());
+					for (SymbolicExpression l : tool
+							.getAnalysis()
+							.rewrite(postL, postL.getComputedExpressions(), assign))
+						for (SymbolicExpression r : tool
+								.getAnalysis()
+								.rewrite(postR, postR.getComputedExpressions(), assign)) {
+							NI ll = domain
+									.eval(postL.getState().valueState, (ValueExpression) l, assign.getLeft(), oracleL);
+							NI rr = domain
+									.eval(
+											postR.getState().valueState,
+											(ValueExpression) r,
+											assign.getRight(),
+											oracleR);
 
 							if (ll.isLowConfidentiality() && rr.isHighConfidentiality())
-								tool.warnOn(assign,
-										"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
+								tool
+										.warnOn(
+												assign,
+												"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
 
 							if (ll.isLowConfidentiality() && state.getExecutionState().isHighConfidentiality())
-								tool.warnOn(assign,
-										"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
+								tool
+										.warnOn(
+												assign,
+												"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
 
 							if (ll.isHighIntegrity() && rr.isLowIntegrity())
-								tool.warnOn(assign,
-										"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
+								tool
+										.warnOn(
+												assign,
+												"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
 
 							if (ll.isHighIntegrity() && state.getExecutionState().isLowIntegrity())
-								tool.warnOn(assign,
-										"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
+								tool
+										.warnOn(
+												assign,
+												"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
 						}
 				} catch (SemanticException e) {
 					throw new RuntimeException(e);
@@ -238,5 +272,7 @@ public class InformationFlowTest extends AnalysisTestExecutor {
 
 			return true;
 		}
+
 	}
+
 }

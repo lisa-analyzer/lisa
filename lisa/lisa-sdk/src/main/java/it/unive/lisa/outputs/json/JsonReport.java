@@ -36,6 +36,7 @@ public class JsonReport {
 	private final Map<String, String> configuration;
 
 	private static class NonEmptyFilter {
+
 		@Override
 		public boolean equals(
 				Object obj) {
@@ -45,6 +46,7 @@ public class JsonReport {
 			}
 			return obj == null;
 		}
+
 	}
 
 	@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NonEmptyFilter.class)
@@ -64,8 +66,12 @@ public class JsonReport {
 	 */
 	public JsonReport(
 			LiSAReport report) {
-		this(report.getWarnings(), report.getCreatedFiles(), report.getRunInfo().toPropertyBag(),
-				report.getConfiguration().toPropertyBag(), report.getAdditionalInfo());
+		this(
+				report.getWarnings(),
+				report.getCreatedFiles(),
+				report.getRunInfo().toPropertyBag(),
+				report.getConfiguration().toPropertyBag(),
+				report.getAdditionalInfo());
 	}
 
 	private JsonReport(
@@ -235,7 +241,9 @@ public class JsonReport {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class JsonWarning implements Comparable<JsonWarning> {
+	public static class JsonWarning
+			implements
+			Comparable<JsonWarning> {
 
 		private String message;
 
@@ -312,5 +320,7 @@ public class JsonReport {
 				JsonWarning o) {
 			return message.compareTo(o.message);
 		}
+
 	}
+
 }

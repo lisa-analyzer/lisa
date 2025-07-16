@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * A float annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class FloatAnnotationValue implements BasicAnnotationValue {
+public class FloatAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final float f;
 
@@ -56,4 +58,5 @@ public class FloatAnnotationValue implements BasicAnnotationValue {
 		FloatAnnotationValue other = (FloatAnnotationValue) o;
 		return Float.compare(f, other.f);
 	}
+
 }

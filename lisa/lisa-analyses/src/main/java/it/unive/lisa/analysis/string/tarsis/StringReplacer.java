@@ -180,4 +180,5 @@ public class StringReplacer {
 
 		return new RegexAutomaton(states, delta);
 	}
+
 }

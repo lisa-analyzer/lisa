@@ -6,7 +6,9 @@ package it.unive.lisa.outputs;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OutputDumpingException extends RuntimeException {
+public class OutputDumpingException
+		extends
+		RuntimeException {
 
 	private static final long serialVersionUID = -6224754350892145958L;
 

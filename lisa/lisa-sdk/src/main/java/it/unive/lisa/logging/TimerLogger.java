@@ -144,7 +144,9 @@ public final class TimerLogger {
 	}
 
 	private static class Wrapper<T> {
+
 		private T ret;
+
 	}
 
 	/**
@@ -160,6 +162,7 @@ public final class TimerLogger {
 		 * Runs the action.
 		 */
 		void run();
+
 	}
 
 	/**
@@ -178,5 +181,7 @@ public final class TimerLogger {
 		 * @return the produced element
 		 */
 		R run();
+
 	}
+
 }

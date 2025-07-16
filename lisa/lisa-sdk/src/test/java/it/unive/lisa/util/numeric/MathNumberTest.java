@@ -212,4 +212,5 @@ public class MathNumberTest {
 		assertEquals("-inf max +inf != -inf", PLUS_INFINITY, MINUS_INFINITY.max(PLUS_INFINITY));
 		assertEquals("-inf max -inf != -inf", MINUS_INFINITY, MINUS_INFINITY.max(MINUS_INFINITY));
 	}
+
 }

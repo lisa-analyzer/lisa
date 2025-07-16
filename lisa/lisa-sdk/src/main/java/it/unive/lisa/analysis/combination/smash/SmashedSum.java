@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.BooleanPowerset;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -31,12 +32,12 @@ import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.numeric.IntInterval;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
- * The smashed-sum abstract domain between satisfiability, a non-relational
- * numeric abstract domain, and a non-relational string abstract domain.
+ * The smashed-sum abstract domain between {@link BooleanPowerset}, a
+ * non-relational numeric abstract domain, and a non-relational string abstract
+ * domain. This domains tracks environments of smashed values, which are values
+ * of one of the types produced by the client domains.
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -44,239 +45,155 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @param <I> the non-relational integer abstract domain
  * @param <S> the non-relational string abstract domain
  */
-public class SmashedSum<
-		I extends SmashedSumIntDomain<I>,
-		S extends SmashedSumStringDomain<S>>
+public class SmashedSum<I extends Lattice<I>,
+		S extends Lattice<S>>
 		implements
-		BaseNonRelationalValueDomain<SmashedSum<I, S>> {
-
-	private final I intValue;
-	private final S stringValue;
-	private final Satisfiability boolValue;
+		BaseNonRelationalValueDomain<SmashedValue<I, S>> {
 
 	/**
-	 * Builds an abstract element of this domain.
+	 * The integer domain.
+	 */
+	public final SmashedSumIntDomain<I> intDom;
+
+	/**
+	 * The string domain.
+	 */
+	public final SmashedSumStringDomain<S> strDom;
+
+	/**
+	 * The boolean domain.
+	 */
+	public final BooleanPowerset boolDom;
+
+	/**
+	 * Builds a smashed-sum abstract domain.
 	 * 
-	 * @param intValue    the abstract value for intergers
-	 * @param stringValue the abstract value for strings
-	 * @param boolValue   the abstract value for booleans
+	 * @param intDom the integer domain
+	 * @param strDom the string domain
 	 */
 	public SmashedSum(
-			I intValue,
-			S stringValue,
-			Satisfiability boolValue) {
-		this.intValue = intValue;
-		this.stringValue = stringValue;
-		this.boolValue = boolValue;
+			SmashedSumIntDomain<I> intDom,
+			SmashedSumStringDomain<S> strDom) {
+		this.intDom = intDom;
+		this.strDom = strDom;
+		this.boolDom = new BooleanPowerset();
 	}
 
-	/**
-	 * Yields the integer abstract value.
-	 * 
-	 * @return the integer abstract value
-	 */
-	public I getIntValue() {
-		return intValue;
+	private SmashedValue<I, S> mkInt(
+			I intDom) {
+		return new SmashedValue<>(intDom, strDom.bottom(), boolDom.bottom());
 	}
 
-	/**
-	 * Yields the string abstract value.
-	 * 
-	 * @return the string abstract value
-	 */
-	public S getStringValue() {
-		return stringValue;
+	private SmashedValue<I, S> mkString(
+			S strDom) {
+		return new SmashedValue<>(intDom.bottom(), strDom, boolDom.bottom());
 	}
 
-	/**
-	 * Yields the boolean abstract value.
-	 *
-	 * @return the boolean abstract value
-	 */
-	public Satisfiability getBoolValue() {
-		return boolValue;
+	private SmashedValue<I, S> mkBool(
+			Satisfiability boolDom) {
+		return new SmashedValue<>(intDom.bottom(), strDom.bottom(), boolDom);
 	}
 
 	@Override
-	public SmashedSum<I, S> evalNonNullConstant(
+	public SmashedValue<I, S> evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (constant.getValue() instanceof Integer)
-			return mkSmashedValue(intValue.evalNonNullConstant(constant, pp, oracle));
+			return mkInt(intDom.evalNonNullConstant(constant, pp, oracle));
 		else if (constant.getValue() instanceof String)
-			return mkSmashedValue(stringValue.evalNonNullConstant(constant, pp, oracle));
+			return mkString(strDom.evalNonNullConstant(constant, pp, oracle));
 		else if (constant.getValue() instanceof Boolean)
-			return mkSmashedValue(boolValue.evalNonNullConstant(constant, pp, oracle));
+			return mkBool(boolDom.evalNonNullConstant(constant, pp, oracle));
 		return top();
 	}
 
 	@Override
-	public SmashedSum<I, S> lubAux(
-			SmashedSum<I, S> other)
-			throws SemanticException {
-		return new SmashedSum<I, S>(intValue.lub(other.intValue), stringValue.lub(other.stringValue),
-				boolValue.lub(other.boolValue));
-	}
-
-	@Override
-	public SmashedSum<I, S> wideningAux(
-			SmashedSum<I, S> other)
-			throws SemanticException {
-		return new SmashedSum<I, S>(intValue.widening(other.intValue), stringValue.widening(other.stringValue),
-				boolValue.widening(other.boolValue));
-
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			SmashedSum<I, S> other)
-			throws SemanticException {
-		return intValue.lessOrEqual(other.intValue) && stringValue.lessOrEqual(other.stringValue)
-				&& boolValue.lessOrEqual(other.boolValue);
-	}
-
-	@Override
-	public boolean isTop() {
-		return intValue.isTop() && stringValue.isTop() && boolValue.isTop();
-	}
-
-	@Override
-	public SmashedSum<I, S> top() {
-		return new SmashedSum<I, S>(intValue.top(), stringValue.top(), boolValue.top());
-	}
-
-	@Override
-	public boolean isBottom() {
-		return intValue.isBottom() && stringValue.isBottom() && boolValue.isBottom();
-	}
-
-	@Override
-	public SmashedSum<I, S> bottom() {
-		return new SmashedSum<I, S>(intValue.bottom(), stringValue.bottom(), boolValue.bottom());
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((intValue == null) ? 0 : intValue.hashCode());
-		result = prime * result + ((stringValue == null) ? 0 : stringValue.hashCode());
-		result = prime * result + ((boolValue == null) ? 0 : boolValue.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SmashedSum<?, ?> other = (SmashedSum<?, ?>) obj;
-		if (intValue == null) {
-			if (other.intValue != null)
-				return false;
-		} else if (!intValue.equals(other.intValue))
-			return false;
-		if (stringValue == null) {
-			if (other.stringValue != null)
-				return false;
-		} else if (!stringValue.equals(other.stringValue))
-			return false;
-		if (boolValue != other.boolValue)
-			return false;
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return representation().toString();
-	}
-
-	@Override
-	public SmashedSum<I, S> evalUnaryExpression(
+	public SmashedValue<I, S> evalUnaryExpression(
 			UnaryExpression expression,
-			SmashedSum<I, S> arg,
+			SmashedValue<I, S> arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		UnaryOperator operator = expression.getOperator();
 		if (operator == StringLength.INSTANCE && arg.isString())
-			return mkSmashedValue(intValue.fromInterval(arg.stringValue.length()));
+			return mkInt(intDom.fromInterval(strDom.length(arg.getStringValue())));
 		if (operator == NumericNegation.INSTANCE && arg.isNumber())
-			return mkSmashedValue(intValue.evalUnaryExpression(expression, arg.intValue, pp, oracle));
+			return mkInt(intDom.evalUnaryExpression(expression, arg.getIntValue(), pp, oracle));
 		if (operator == LogicalNegation.INSTANCE && arg.isBool())
-			return mkSmashedValue(boolValue.evalUnaryExpression(expression, arg.boolValue, pp, oracle));
+			return mkBool(boolDom.evalUnaryExpression(expression, arg.getBoolValue(), pp, oracle));
 		return top();
 	}
 
 	@Override
-	public SmashedSum<I, S> evalBinaryExpression(
+	public SmashedValue<I, S> evalBinaryExpression(
 			BinaryExpression expression,
-			SmashedSum<I, S> left,
-			SmashedSum<I, S> right,
+			SmashedValue<I, S> left,
+			SmashedValue<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof NumericOperation && left.isNumber() && right.isNumber())
-			return mkSmashedValue(
-					intValue.evalBinaryExpression(expression, left.intValue, right.intValue, pp, oracle));
+			return mkInt(intDom.evalBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle));
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
-			return mkSmashedValue(
-					boolValue.evalBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle));
+			return mkBool(
+					boolDom.evalBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle));
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
-			return mkSmashedValue(
-					intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle));
+			return mkBool(
+					intDom.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle));
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE)
-			return mkSmashedValue(satisfiesBinaryExpression(expression, left, right, pp, oracle));
+			return mkBool(satisfiesBinaryExpression(expression, left, right, pp, oracle));
 		if (operator == StringIndexOf.INSTANCE && left.isString() && right.isString())
-			return mkSmashedValue(intValue.fromInterval(left.stringValue.indexOf(right.stringValue)));
+			return mkInt(intDom.fromInterval(strDom.indexOf(left.getStringValue(), right.getStringValue())));
 		if (operator == StringConcat.INSTANCE && left.isString() && right.isString())
-			return mkSmashedValue(
-					stringValue.evalBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle));
+			return mkString(
+					strDom.evalBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle));
 		if (operator instanceof StringOperation && left.isString() && right.isString())
-			return mkSmashedValue(
-					stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle));
+			return mkBool(
+					strDom
+							.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
+									oracle));
 		return top();
 	}
 
 	@Override
-	public SmashedSum<I, S> evalTernaryExpression(
+	public SmashedValue<I, S> evalTernaryExpression(
 			TernaryExpression expression,
-			SmashedSum<I, S> left,
-			SmashedSum<I, S> middle,
-			SmashedSum<I, S> right,
+			SmashedValue<I, S> left,
+			SmashedValue<I, S> middle,
+			SmashedValue<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		TernaryOperator operator = expression.getOperator();
 		if (operator == StringSubstring.INSTANCE && left.isString() && middle.isNumber() && right.isNumber()) {
-			IntInterval begin = middle.intValue.toInterval();
-			IntInterval end = right.intValue.toInterval();
+			IntInterval begin = intDom.toInterval(middle.getIntValue());
+			IntInterval end = intDom.toInterval(right.getIntValue());
 
 			if (!begin.isFinite() || !end.isFinite())
-				return mkSmashedValue(stringValue.top());
+				return mkString(strDom.top());
 
-			S partial = stringValue.bottom();
+			S partial = strDom.bottom();
 			S temp;
 
 			outer: for (long b : begin)
 				if (b >= 0)
 					for (long e : end) {
 						if (b < e)
-							temp = partial.lub(left.stringValue.substring(b, e));
+							temp = partial.lub(strDom.substring(left.getStringValue(), b, e));
 						else if (b == e)
-							temp = partial.lub(this.stringValue.evalNonNullConstant(
-									new Constant(Untyped.INSTANCE, "", SyntheticLocation.INSTANCE),
-									null,
-									oracle));
+							temp = partial
+									.lub(
+											this.strDom
+													.evalNonNullConstant(
+															new Constant(Untyped.INSTANCE, "",
+																	SyntheticLocation.INSTANCE),
+															null,
+															oracle));
 						else
-							temp = stringValue.bottom();
+							temp = strDom.bottom();
 
 						if (temp.equals(partial))
 							break outer;
@@ -286,10 +203,17 @@ public class SmashedSum<
 							break outer;
 					}
 
-			return mkSmashedValue(partial);
+			return mkString(partial);
 		} else if (operator == StringReplace.INSTANCE && left.isString() && middle.isString() && right.isString())
-			return mkSmashedValue(stringValue.evalTernaryExpression(expression, left.stringValue, middle.stringValue,
-					right.stringValue, pp, oracle));
+			return mkString(
+					strDom
+							.evalTernaryExpression(
+									expression,
+									left.getStringValue(),
+									middle.getStringValue(),
+									right.getStringValue(),
+									pp,
+									oracle));
 
 		return top();
 	}
@@ -297,52 +221,59 @@ public class SmashedSum<
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			SmashedSum<I, S> left,
-			SmashedSum<I, S> right,
+			SmashedValue<I, S> left,
+			SmashedValue<I, S> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof StringOperation && left.isString() && right.isString())
-			return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
+			return strDom
+					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
-			return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
+			return intDom.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
-			return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
+			return boolDom.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		if (operator == ComparisonEq.INSTANCE) {
 			if (!left.sameKind(right))
 				return Satisfiability.NOT_SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp,
-						oracle);
+				return strDom
+						.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
+								oracle);
 			if (left.isNumber())
-				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
+				return intDom
+						.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 			if (left.isBool())
-				return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
+				return boolDom
+						.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		}
 		if (operator == ComparisonNe.INSTANCE) {
 			if (!left.sameKind(right))
 				return Satisfiability.SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp,
-						oracle);
+				return strDom
+						.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
+								oracle);
 			if (left.isNumber())
-				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
+				return intDom
+						.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 			if (left.isBool())
-				return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
+				return boolDom
+						.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		}
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public ValueEnvironment<SmashedSum<I, S>> assume(
-			ValueEnvironment<SmashedSum<I, S>> environment,
+	public ValueEnvironment<SmashedValue<I, S>> assume(
+			ValueEnvironment<SmashedValue<I, S>> environment,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		Satisfiability sat = satisfies(environment, expression, src, oracle);
 		if (sat == Satisfiability.NOT_SATISFIED)
 			return environment.bottom();
 		if (sat == Satisfiability.SATISFIED)
@@ -351,53 +282,18 @@ public class SmashedSum<
 	}
 
 	@Override
-	public StructuredRepresentation representation() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-		if (isTop())
-			return Lattice.topRepresentation();
-		if (isString())
-			return stringValue.representation();
-		if (isNumber())
-			return intValue.representation();
-		if (isBool())
-			return boolValue.representation();
-		return new StringRepresentation(
-				"(" + intValue.representation().toString() + ", " + stringValue.representation().toString() + ", "
-						+ boolValue.representation().toString() + ")");
+	public SmashedValue<I, S> top() {
+		return new SmashedValue<>(intDom.top(), strDom.top(), boolDom.top());
 	}
 
-	private boolean sameKind(
-			SmashedSum<I, S> other) {
-		return (intValue.isBottom() == other.intValue.isBottom())
-				&& (stringValue.isBottom() == other.stringValue.isBottom())
-				&& (boolValue.isBottom() == other.boolValue.isBottom());
+	@Override
+	public SmashedValue<I, S> bottom() {
+		return new SmashedValue<>(intDom.bottom(), strDom.bottom(), boolDom.bottom());
 	}
 
-	private boolean isNumber() {
-		return isTop() || (!isBottom() && stringValue.isBottom() && boolValue.isBottom());
+	@Override
+	public ValueEnvironment<SmashedValue<I, S>> makeLattice() {
+		return new ValueEnvironment<>(top());
 	}
 
-	private boolean isString() {
-		return isTop() || (!isBottom() && intValue.isBottom() && boolValue.isBottom());
-	}
-
-	private boolean isBool() {
-		return isTop() || (!isBottom() && stringValue.isBottom() && intValue.isBottom());
-	}
-
-	private SmashedSum<I, S> mkSmashedValue(
-			S stringValue) {
-		return new SmashedSum<>(intValue.bottom(), stringValue, boolValue.bottom());
-	}
-
-	private SmashedSum<I, S> mkSmashedValue(
-			I intValue) {
-		return new SmashedSum<>(intValue, stringValue.bottom(), boolValue.bottom());
-	}
-
-	private SmashedSum<I, S> mkSmashedValue(
-			Satisfiability boolValue) {
-		return new SmashedSum<>(intValue.bottom(), stringValue.bottom(), boolValue);
-	}
 }

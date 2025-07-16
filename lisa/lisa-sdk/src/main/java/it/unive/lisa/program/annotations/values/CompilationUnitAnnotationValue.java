@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * A compilation unit annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class CompilationUnitAnnotationValue implements BasicAnnotationValue {
+public class CompilationUnitAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final String unitName;
 
@@ -59,4 +61,5 @@ public class CompilationUnitAnnotationValue implements BasicAnnotationValue {
 		CompilationUnitAnnotationValue other = (CompilationUnitAnnotationValue) o;
 		return unitName.compareTo(other.unitName);
 	}
+
 }

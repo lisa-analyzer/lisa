@@ -10,7 +10,8 @@ import org.junit.Test;
 public class UnionTest {
 
 	@Test
-	public void test01() throws CyclicAutomatonException {
+	public void test01()
+			throws CyclicAutomatonException {
 		SortedSet<State> states1 = new TreeSet<>();
 		SortedSet<State> states2 = new TreeSet<>();
 		State[] st1 = new State[3];
@@ -42,7 +43,8 @@ public class UnionTest {
 	}
 
 	@Test
-	public void test02() throws CyclicAutomatonException {
+	public void test02()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st1 = new State[3];
 		st1[0] = new State(0, true, false);
@@ -64,7 +66,8 @@ public class UnionTest {
 	}
 
 	@Test
-	public void test03() throws CyclicAutomatonException {
+	public void test03()
+			throws CyclicAutomatonException {
 		SortedSet<State> states1 = new TreeSet<>();
 		SortedSet<State> states2 = new TreeSet<>();
 		State[] st1 = new State[4];
@@ -98,4 +101,5 @@ public class UnionTest {
 		exp.add("b");
 		assertEquals(exp, a1.union(a2).getLanguage());
 	}
+
 }

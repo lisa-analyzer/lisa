@@ -4,9 +4,11 @@ package it.unive.lisa.util.datastructures.automaton;
  * A class that describes an {@link Automaton} state.
  * 
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public final class State implements Comparable<State> {
+public final class State
+		implements
+		Comparable<State> {
 
 	/**
 	 * Whether this state is final.
@@ -119,4 +121,5 @@ public final class State implements Comparable<State> {
 	public String getState() {
 		return "q" + id;
 	}
+
 }

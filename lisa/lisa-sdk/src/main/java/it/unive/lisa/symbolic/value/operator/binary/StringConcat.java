@@ -16,7 +16,9 @@ import it.unive.lisa.type.TypeSystem;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringConcat extends StringOperation {
+public class StringConcat
+		extends
+		StringOperation {
 
 	/**
 	 * The singleton instance of this class.
@@ -41,4 +43,5 @@ public class StringConcat extends StringOperation {
 			TypeSystem types) {
 		return types.getStringType();
 	}
+
 }

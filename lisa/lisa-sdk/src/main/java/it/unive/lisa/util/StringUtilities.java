@@ -48,7 +48,10 @@ public class StringUtilities {
 			String indent,
 			int amount) {
 		String offset = indent.repeat(amount);
-		return offset + target.replace("\n", "\n" + offset);
+		return offset + target
+				.replace(
+						"\n",
+						"\n" + offset);
 	}
 
 	/**
@@ -85,4 +88,5 @@ public class StringUtilities {
 				break;
 		return gcp;
 	}
+
 }

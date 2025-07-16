@@ -1,24 +1,24 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
+import it.unive.lisa.analysis.heap.HeapLattice;
+import it.unive.lisa.analysis.lattices.SingleHeapLattice;
+import it.unive.lisa.analysis.lattices.SingleTypeLattice;
+import it.unive.lisa.analysis.lattices.SingleValueLattice;
 import it.unive.lisa.analysis.type.TypeDomain;
+import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.type.Type;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -26,23 +26,23 @@ import java.util.function.Predicate;
  * locations, and a type state that can give types to expressions knowing the
  * ones of variables.<br>
  * <br>
- * The interaction between heap and value/type domains follows the one defined
+ * The interaction between heap and value/type states follows the one defined
  * <a href=
  * "https://www.sciencedirect.com/science/article/pii/S0304397516300299">in this
  * paper</a>.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <H> the type of {@link HeapDomain} embedded in this state
- * @param <V> the type of {@link ValueDomain} embedded in this state
- * @param <T> the type of {@link TypeDomain} embedded in this state
+ * @param <H> the type of {@link HeapLattice} embedded in this state
+ * @param <V> the type of {@link ValueLattice} embedded in this state
+ * @param <T> the type of {@link TypeLattice} embedded in this state
  */
-public class SimpleAbstractState<H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
+public class SimpleAbstractState<H extends HeapLattice<H>,
+		V extends ValueLattice<V>,
+		T extends TypeLattice<T>>
 		implements
 		BaseLattice<SimpleAbstractState<H, V, T>>,
-		AbstractState<SimpleAbstractState<H, V, T>> {
+		AbstractLattice<SimpleAbstractState<H, V, T>> {
 
 	/**
 	 * The key that should be used to store the instance of {@link HeapDomain}
@@ -66,79 +66,79 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	public static final String VALUE_REPRESENTATION_KEY = "value";
 
 	/**
-	 * The domain containing information regarding heap structures
+	 * The state containing information regarding memory structures.
 	 */
-	private final H heapState;
+	public final H heapState;
 
 	/**
-	 * The domain containing information regarding values of program variables
-	 * and concretized memory locations
+	 * The state containing information regarding values of program variables
+	 * and concretized memory locations.
 	 */
-	private final V valueState;
+	public final V valueState;
 
 	/**
-	 * The domain containing runtime types information regarding runtime types
-	 * of program variables and concretized memory locations
+	 * The state containing runtime types information regarding runtime types of
+	 * program variables and concretized memory locations.
 	 */
-	private final T typeState;
+	public final T typeState;
 
 	/**
-	 * Builds a new abstract state. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
-	 * {@link NoOpTypes}).
+	 * Builds a new abstract state. The missing states are set to the default
+	 * no-op ones (i.e., {@link SingleHeapLattice}, {@link SingleValueLattice},
+	 * and {@link SingleTypeLattice}).
 	 * 
-	 * @param heapState the domain containing information regarding heap
+	 * @param heapState the state containing information regarding heap
 	 *                      structures
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractState(
 			H heapState) {
 		this.heapState = heapState;
-		this.valueState = (V) NoOpValues.TOP;
-		this.typeState = (T) NoOpTypes.TOP;
+		this.valueState = (V) SingleValueLattice.SINGLETON;
+		this.typeState = (T) SingleTypeLattice.SINGLETON;
 	}
 
 	/**
-	 * Builds a new abstract state. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
-	 * {@link NoOpTypes}).
+	 * Builds a new abstract state. The missing states are set to the default
+	 * no-op ones (i.e., {@link SingleHeapLattice}, {@link SingleValueLattice},
+	 * and {@link SingleTypeLattice}).
 	 * 
-	 * @param valueState the domain containing information regarding values of
+	 * @param valueState the state containing information regarding values of
 	 *                       program variables and concretized memory locations
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractState(
 			V valueState) {
-		this.heapState = (H) NoOpHeap.TOP;
+		this.heapState = (H) SingleHeapLattice.SINGLETON;
 		this.valueState = valueState;
-		this.typeState = (T) NoOpTypes.TOP;
+		this.typeState = (T) SingleTypeLattice.SINGLETON;
 	}
 
 	/**
-	 * Builds a new abstract state. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
-	 * {@link NoOpTypes}).
+	 * Builds a new abstract state. The missing states are set to the default
+	 * no-op ones (i.e., {@link SingleHeapLattice}, {@link SingleValueLattice},
+	 * and {@link SingleTypeLattice}).
 	 * 
-	 * @param typeState the domain containing information regarding runtime
-	 *                      types of program variables and concretized memory
+	 * @param typeState the state containing information regarding runtime types
+	 *                      of program variables and concretized memory
 	 *                      locations
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractState(
 			T typeState) {
-		this.heapState = (H) NoOpHeap.TOP;
-		this.valueState = (V) NoOpValues.TOP;
+		this.heapState = (H) SingleHeapLattice.SINGLETON;
+		this.valueState = (V) SingleValueLattice.SINGLETON;
 		this.typeState = typeState;
 	}
 
 	/**
-	 * Builds a new abstract state. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
-	 * {@link NoOpTypes}).
+	 * Builds a new abstract state. The missing states are set to the default
+	 * no-op ones (i.e., {@link SingleHeapLattice}, {@link SingleValueLattice},
+	 * and {@link SingleTypeLattice}).
 	 * 
-	 * @param heapState  the domain containing information regarding heap
+	 * @param heapState  the state containing information regarding heap
 	 *                       structures
-	 * @param valueState the domain containing information regarding values of
+	 * @param valueState the state containing information regarding values of
 	 *                       program variables and concretized memory locations
 	 */
 	@SuppressWarnings("unchecked")
@@ -147,18 +147,18 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			V valueState) {
 		this.heapState = heapState;
 		this.valueState = valueState;
-		this.typeState = (T) NoOpTypes.TOP;
+		this.typeState = (T) SingleTypeLattice.SINGLETON;
 	}
 
 	/**
-	 * Builds a new abstract state. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
-	 * {@link NoOpTypes}).
+	 * Builds a new abstract state. The missing states are set to the default
+	 * no-op ones (i.e., {@link SingleHeapLattice}, {@link SingleValueLattice},
+	 * and {@link SingleTypeLattice}).
 	 * 
-	 * @param heapState the domain containing information regarding heap
+	 * @param heapState the state containing information regarding heap
 	 *                      structures
-	 * @param typeState the domain containing information regarding runtime
-	 *                      types of program variables and concretized memory
+	 * @param typeState the state containing information regarding runtime types
+	 *                      of program variables and concretized memory
 	 *                      locations
 	 */
 	@SuppressWarnings("unchecked")
@@ -166,18 +166,18 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			H heapState,
 			T typeState) {
 		this.heapState = heapState;
-		this.valueState = (V) NoOpValues.TOP;
+		this.valueState = (V) SingleValueLattice.SINGLETON;
 		this.typeState = typeState;
 	}
 
 	/**
-	 * Builds a new abstract state. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
-	 * {@link NoOpTypes}).
+	 * Builds a new abstract state. The missing states are set to the default
+	 * no-op ones (i.e., {@link SingleHeapLattice}, {@link SingleValueLattice},
+	 * and {@link SingleTypeLattice}).
 	 * 
-	 * @param valueState the domain containing information regarding values of
+	 * @param valueState the state containing information regarding values of
 	 *                       program variables and concretized memory locations
-	 * @param typeState  the domain containing information regarding runtime
+	 * @param typeState  the state containing information regarding runtime
 	 *                       types of program variables and concretized memory
 	 *                       locations
 	 */
@@ -185,7 +185,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	public SimpleAbstractState(
 			V valueState,
 			T typeState) {
-		this.heapState = (H) NoOpHeap.TOP;
+		this.heapState = (H) SingleHeapLattice.SINGLETON;
 		this.valueState = valueState;
 		this.typeState = typeState;
 	}
@@ -193,11 +193,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	/**
 	 * Builds a new abstract state.
 	 * 
-	 * @param heapState  the domain containing information regarding heap
+	 * @param heapState  the state containing information regarding heap
 	 *                       structures
-	 * @param valueState the domain containing information regarding values of
+	 * @param valueState the state containing information regarding values of
 	 *                       program variables and concretized memory locations
-	 * @param typeState  the domain containing information regarding runtime
+	 * @param typeState  the state containing information regarding runtime
 	 *                       types of program variables and concretized memory
 	 *                       locations
 	 */
@@ -210,290 +210,30 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		this.typeState = typeState;
 	}
 
-	private SimpleAbstractState(
-			MutableOracle<H, V, T> mo) {
+	/**
+	 * Builds a new abstract state with the information contained in the given
+	 * oracle.
+	 * 
+	 * @param mo the oracle containing the components for the state to be
+	 *               created
+	 */
+	public SimpleAbstractState(
+			SimpleAbstractDomain<H, V, T>.MutableOracle mo) {
 		this(mo.heap, mo.value, mo.type);
 	}
 
-	/**
-	 * Yields the {@link HeapDomain} contained in this state.
-	 * 
-	 * @return the heap domain
-	 */
-	public H getHeapState() {
-		return heapState;
-	}
-
-	/**
-	 * Yields the {@link ValueDomain} contained in this state.
-	 * 
-	 * @return the value domain
-	 */
-	public V getValueState() {
-		return valueState;
-	}
-
-	/**
-	 * Yields the {@link TypeDomain} contained in this state.
-	 * 
-	 * @return the type domain
-	 */
-	public T getTypeState() {
-		return typeState;
-	}
-
-	@Override
-	public SimpleAbstractState<H, V, T> assign(
-			Identifier id,
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
+	private SimpleAbstractState<H, V, T> applySubstitution(
+			List<HeapReplacement> subs,
+			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
-
-		if (!expression.mightNeedRewriting()) {
-			ValueExpression ve = (ValueExpression) expression;
-			mo.heap = mo.heap.assign(id, expression, pp, mo);
-			mo.type = mo.type.assign(id, ve, pp, mo);
-			mo.value = mo.value.assign(id, ve, pp, mo);
-			return new SimpleAbstractState<>(mo);
-		}
-
-		mo.heap = mo.heap.assign(id, expression, pp, mo);
-		ExpressionSet exprs = mo.heap.rewrite(expression, pp, mo);
-		if (exprs.isEmpty())
-			return bottom();
-
-		applySubstitution(mo, pp);
-
-		if (exprs.elements.size() == 1) {
-			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (!(expr instanceof ValueExpression))
-				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expr;
-			mo.type = mo.type.assign(id, ve, pp, mo);
-			mo.value = mo.value.assign(id, ve, pp, mo);
-			return new SimpleAbstractState<>(mo);
-		}
-
-		T typeRes = mo.type.bottom();
-		V valueRes = mo.value.bottom();
-		for (SymbolicExpression expr : exprs) {
-			if (!(expr instanceof ValueExpression))
-				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type;
-			mo.type = mo.type.assign(id, ve, pp, mo);
-			V v = mo.value.assign(id, ve, pp, mo);
-			typeRes = typeRes.lub(mo.type);
-			valueRes = valueRes.lub(v);
-			// we rollback the pre-eval state for the next expression
-			mo.type = t;
-		}
-
-		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
-	}
-
-	@Override
-	public SimpleAbstractState<H, V, T> smallStepSemantics(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
-
-		if (!expression.mightNeedRewriting()) {
-			ValueExpression ve = (ValueExpression) expression;
-			mo.heap = mo.heap.smallStepSemantics(expression, pp, mo);
-			mo.type = mo.type.smallStepSemantics(ve, pp, mo);
-			mo.value = mo.value.smallStepSemantics(ve, pp, mo);
-			return new SimpleAbstractState<>(mo);
-		}
-
-		mo.heap = mo.heap.smallStepSemantics(expression, pp, mo);
-		ExpressionSet exprs = mo.heap.rewrite(expression, pp, mo);
-		if (exprs.isEmpty())
-			return bottom();
-
-		applySubstitution(mo, pp);
-
-		if (exprs.elements.size() == 1) {
-			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (!(expr instanceof ValueExpression))
-				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expr;
-			mo.type = mo.type.smallStepSemantics(ve, pp, mo);
-			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
-				// if the expression is a memory allocation, its type is
-				// registered in the type domain
-				mo.type = mo.type.assign((Identifier) ve, ve, pp, mo);
-			mo.value = mo.value.smallStepSemantics(ve, pp, mo);
-			return new SimpleAbstractState<>(mo);
-		}
-
-		T typeRes = mo.type.bottom();
-		V valueRes = mo.value.bottom();
-		for (SymbolicExpression expr : exprs) {
-			if (!(expr instanceof ValueExpression))
-				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type;
-			mo.type = mo.type.smallStepSemantics(ve, pp, mo);
-			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
-				// if the expression is a memory allocation, its type is
-				// registered in the type domain
-				mo.type = mo.type.assign((Identifier) ve, ve, pp, mo);
-			V v = mo.value.smallStepSemantics(ve, pp, mo);
-			typeRes = typeRes.lub(mo.type);
-			valueRes = valueRes.lub(v);
-			// we rollback the pre-eval state for the next expression
-			mo.type = t;
-		}
-
-		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
-	}
-
-	private static <H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> void applySubstitution(
-					MutableOracle<H, V, T> mo,
-					ProgramPoint pp)
-					throws SemanticException {
-		List<HeapReplacement> subs = mo.heap.getSubstitution();
+		T t = typeState;
+		V v = valueState;
 		if (subs != null)
 			for (HeapReplacement repl : subs) {
-				T t = mo.type.applyReplacement(repl, pp, mo);
-				V v = mo.value.applyReplacement(repl, pp, mo);
-				// we update the oracle after both replacements have been
-				// applied to not lose info on the sources that will be removed
-				mo.type = t;
-				mo.value = v;
+				t = t.applyReplacement(repl, pp);
+				v = v.applyReplacement(repl, pp);
 			}
-	}
-
-	@Override
-	public SimpleAbstractState<H, V, T> assume(
-			SymbolicExpression expression,
-			ProgramPoint src,
-			ProgramPoint dest,
-			SemanticOracle oracle)
-			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
-
-		if (!expression.mightNeedRewriting()) {
-			ValueExpression ve = (ValueExpression) expression;
-			mo.heap = mo.heap.assume(expression, src, dest, mo);
-			if (mo.heap.isBottom())
-				return bottom();
-			mo.type = mo.type.assume(ve, src, dest, mo);
-			if (mo.type.isBottom())
-				return bottom();
-			mo.value = mo.value.assume(ve, src, dest, mo);
-			if (mo.value.isBottom())
-				return bottom();
-			return new SimpleAbstractState<>(mo);
-		}
-
-		mo.heap = mo.heap.assume(expression, src, dest, mo);
-		if (mo.heap.isBottom())
-			return bottom();
-		ExpressionSet exprs = mo.heap.rewrite(expression, src, mo);
-		if (exprs.isEmpty())
-			return bottom();
-
-		applySubstitution(mo, src);
-
-		if (exprs.elements.size() == 1) {
-			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (!(expr instanceof ValueExpression))
-				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expr;
-			mo.type = mo.type.assume(ve, src, dest, mo);
-			if (mo.type.isBottom())
-				return bottom();
-			mo.value = mo.value.assume(ve, src, dest, mo);
-			if (mo.value.isBottom())
-				return bottom();
-			return new SimpleAbstractState<>(mo);
-		}
-
-		T typeRes = mo.type.bottom();
-		V valueRes = mo.value.bottom();
-		for (SymbolicExpression expr : exprs) {
-			if (!(expr instanceof ValueExpression))
-				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expr;
-			T t = mo.type;
-			mo.type = mo.type.assume(ve, src, dest, mo);
-			V v = mo.value.assume(ve, src, dest, mo);
-			typeRes = typeRes.lub(mo.type);
-			valueRes = valueRes.lub(v);
-			// we rollback the pre-eval state for the next expression
-			mo.type = t;
-		}
-
-		if (typeRes.isBottom() || valueRes.isBottom())
-			return bottom();
-
-		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
-	}
-
-	@Override
-	public Satisfiability satisfies(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		Satisfiability heapsat = heapState.satisfies(expression, pp, this);
-		if (heapsat == Satisfiability.BOTTOM)
-			return Satisfiability.BOTTOM;
-
-		if (!expression.mightNeedRewriting()) {
-			ValueExpression ve = (ValueExpression) expression;
-			Satisfiability typesat = typeState.satisfies(ve, pp, this);
-			if (typesat == Satisfiability.BOTTOM)
-				return Satisfiability.BOTTOM;
-			Satisfiability valuesat = valueState.satisfies(ve, pp, this);
-			if (valuesat == Satisfiability.BOTTOM)
-				return Satisfiability.BOTTOM;
-			return heapsat.glb(typesat).glb(valuesat);
-		}
-
-		ExpressionSet exprs = heapState.rewrite(expression, pp, this);
-		if (exprs.isEmpty())
-			return Satisfiability.BOTTOM;
-
-		if (exprs.elements.size() == 1) {
-			SymbolicExpression expr = exprs.elements.iterator().next();
-			if (!(expr instanceof ValueExpression))
-				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expression;
-			Satisfiability typesat = typeState.satisfies(ve, pp, this);
-			if (typesat == Satisfiability.BOTTOM)
-				return Satisfiability.BOTTOM;
-			Satisfiability valuesat = valueState.satisfies(ve, pp, this);
-			if (valuesat == Satisfiability.BOTTOM)
-				return Satisfiability.BOTTOM;
-			return heapsat.glb(typesat).glb(valuesat);
-		}
-
-		Satisfiability typesat = Satisfiability.BOTTOM;
-		Satisfiability valuesat = Satisfiability.BOTTOM;
-		for (SymbolicExpression expr : exprs) {
-			if (!(expr instanceof ValueExpression))
-				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expr;
-			Satisfiability sat = typeState.satisfies(ve, pp, this);
-			if (sat == Satisfiability.BOTTOM)
-				return sat;
-			typesat = typesat.lub(sat);
-
-			sat = valueState.satisfies(ve, pp, this);
-			if (sat == Satisfiability.BOTTOM)
-				return sat;
-			valuesat = valuesat.lub(sat);
-		}
-		return heapsat.glb(typesat).glb(valuesat);
+		return new SimpleAbstractState<>(heapState, v, t);
 	}
 
 	@Override
@@ -501,15 +241,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ScopeToken scope,
 			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
-		mo.heap = mo.heap.pushScope(scope, pp);
 		// it should not be necessary to apply substitutions here,
 		// as we are not deleting variables and the heap locations
 		// won't be masked by the scope
-		// applySubstitution(mo, pp);
-		mo.value = mo.value.pushScope(scope, pp);
-		mo.type = mo.type.pushScope(scope, pp);
-		return new SimpleAbstractState<>(mo);
+		return new SimpleAbstractState<>(
+				heapState.pushScope(scope, pp).getLeft(),
+				valueState.pushScope(scope, pp),
+				typeState.pushScope(scope, pp));
 	}
 
 	@Override
@@ -517,12 +255,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			ScopeToken scope,
 			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
-		mo.heap = mo.heap.popScope(scope, pp);
-		applySubstitution(mo, pp);
-		mo.value = mo.value.popScope(scope, pp);
-		mo.type = mo.type.popScope(scope, pp);
-		return new SimpleAbstractState<>(mo);
+		Pair<H, List<HeapReplacement>> heap = heapState.popScope(scope, pp);
+		SimpleAbstractState<H, V, T> subs = applySubstitution(heap.getRight(), pp);
+		V v = subs.valueState.popScope(scope, pp);
+		T t = subs.typeState.popScope(scope, pp);
+		return new SimpleAbstractState<>(heap.getLeft(), v, t);
 	}
 
 	@Override
@@ -599,12 +336,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			Identifier id,
 			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
-		mo.heap = mo.heap.forgetIdentifier(id, pp);
-		applySubstitution(mo, pp);
-		mo.value = mo.value.forgetIdentifier(id, pp);
-		mo.type = mo.type.forgetIdentifier(id, pp);
-		return new SimpleAbstractState<>(mo);
+		Pair<H, List<HeapReplacement>> heap = heapState.forgetIdentifier(id, pp);
+		SimpleAbstractState<H, V, T> subs = applySubstitution(heap.getRight(), pp);
+		V v = subs.valueState.forgetIdentifier(id, pp);
+		T t = subs.typeState.forgetIdentifier(id, pp);
+		return new SimpleAbstractState<>(heap.getLeft(), v, t);
 	}
 
 	@Override
@@ -612,12 +348,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			Iterable<Identifier> ids,
 			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
-		mo.heap = mo.heap.forgetIdentifiers(ids, pp);
-		applySubstitution(mo, pp);
-		mo.value = mo.value.forgetIdentifiers(ids, pp);
-		mo.type = mo.type.forgetIdentifiers(ids, pp);
-		return new SimpleAbstractState<>(mo);
+		Pair<H, List<HeapReplacement>> heap = heapState.forgetIdentifiers(ids, pp);
+		SimpleAbstractState<H, V, T> subs = applySubstitution(heap.getRight(), pp);
+		V v = subs.valueState.forgetIdentifiers(ids, pp);
+		T t = subs.typeState.forgetIdentifiers(ids, pp);
+		return new SimpleAbstractState<>(heap.getLeft(), v, t);
 	}
 
 	@Override
@@ -625,12 +360,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			Predicate<Identifier> test,
 			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle<H, V, T> mo = new MutableOracle<>(heapState, valueState, typeState);
-		mo.heap = mo.heap.forgetIdentifiersIf(test, pp);
-		applySubstitution(mo, pp);
-		mo.value = mo.value.forgetIdentifiersIf(test, pp);
-		mo.type = mo.type.forgetIdentifiersIf(test, pp);
-		return new SimpleAbstractState<>(mo);
+		Pair<H, List<HeapReplacement>> heap = heapState.forgetIdentifiersIf(test, pp);
+		SimpleAbstractState<H, V, T> subs = applySubstitution(heap.getRight(), pp);
+		V v = subs.valueState.forgetIdentifiersIf(test, pp);
+		T t = subs.typeState.forgetIdentifiersIf(test, pp);
+		return new SimpleAbstractState<>(heap.getLeft(), v, t);
 	}
 
 	@Override
@@ -681,63 +415,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		StructuredRepresentation h = heapState.representation();
 		StructuredRepresentation t = typeState.representation();
 		StructuredRepresentation v = valueState.representation();
-		return new ObjectRepresentation(Map.of(
-				HEAP_REPRESENTATION_KEY, h,
-				TYPE_REPRESENTATION_KEY, t,
-				VALUE_REPRESENTATION_KEY, v));
+		return new ObjectRepresentation(
+				Map.of(HEAP_REPRESENTATION_KEY, h, TYPE_REPRESENTATION_KEY, t, VALUE_REPRESENTATION_KEY, v));
 	}
 
 	@Override
 	public String toString() {
 		return representation().toString();
-	}
-
-	@Override
-	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(
-			Class<D> domain) {
-		Collection<D> result = AbstractState.super.getAllDomainInstances(domain);
-		result.addAll(heapState.getAllDomainInstances(domain));
-		result.addAll(typeState.getAllDomainInstances(domain));
-		result.addAll(valueState.getAllDomainInstances(domain));
-		return result;
-	}
-
-	@Override
-	public ExpressionSet rewrite(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (!expression.mightNeedRewriting())
-			return new ExpressionSet(expression);
-		return heapState.rewrite(expression, pp, oracle);
-	}
-
-	@Override
-	public ExpressionSet rewrite(
-			ExpressionSet expressions,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return heapState.rewrite(expressions, pp, oracle);
-	}
-
-	@Override
-	public Set<Type> getRuntimeTypesOf(
-			SymbolicExpression e,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return typeState.getRuntimeTypesOf(e, pp, oracle);
-	}
-
-	@Override
-	public Type getDynamicTypeOf(
-			SymbolicExpression e,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return typeState.getDynamicTypeOf(e, pp, oracle);
 	}
 
 	@Override
@@ -761,106 +445,14 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		return new SimpleAbstractState<>(heapState, valueState, typeState.top());
 	}
 
-	private static class MutableOracle<H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> implements SemanticOracle {
-
-		private H heap;
-		private V value;
-		private T type;
-
-		public MutableOracle(
-				H heap,
-				V value,
-				T type) {
-			this.heap = heap;
-			this.value = value;
-			this.type = type;
-		}
-
-		@Override
-		public ExpressionSet rewrite(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			if (!expression.mightNeedRewriting())
-				return new ExpressionSet(expression);
-			return heap.rewrite(expression, pp, this);
-		}
-
-		@Override
-		public Set<Type> getRuntimeTypesOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return type.getRuntimeTypesOf(e, pp, this);
-		}
-
-		@Override
-		public Type getDynamicTypeOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return type.getDynamicTypeOf(e, pp, this);
-		}
-
-		@Override
-		public String toString() {
-			if (heap.isBottom() || type.isBottom() || value.isBottom())
-				return Lattice.bottomRepresentation().toString();
-			if (heap.isTop() && type.isTop() && value.isTop())
-				return Lattice.topRepresentation().toString();
-
-			StructuredRepresentation h = heap.representation();
-			StructuredRepresentation t = type.representation();
-			StructuredRepresentation v = value.representation();
-			return new ObjectRepresentation(Map.of(
-					HEAP_REPRESENTATION_KEY, h,
-					TYPE_REPRESENTATION_KEY, t,
-					VALUE_REPRESENTATION_KEY, v)).toString();
-		}
-
-		@Override
-		public Satisfiability alias(
-				SymbolicExpression x,
-				SymbolicExpression y,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return heap.alias(x, y, pp, oracle);
-		}
-
-		@Override
-		public Satisfiability isReachableFrom(
-				SymbolicExpression x,
-				SymbolicExpression y,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return heap.isReachableFrom(x, y, pp, oracle);
-		}
-	}
-
 	@Override
-	public Satisfiability alias(
-			SymbolicExpression x,
-			SymbolicExpression y,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return heapState.alias(x, y, pp, oracle);
+	public <D extends Lattice<D>> Collection<D> getAllLatticeInstances(
+			Class<D> lattice) {
+		Collection<D> result = AbstractLattice.super.getAllLatticeInstances(lattice);
+		result.addAll(heapState.getAllLatticeInstances(lattice));
+		result.addAll(typeState.getAllLatticeInstances(lattice));
+		result.addAll(valueState.getAllLatticeInstances(lattice));
+		return result;
 	}
 
-	@Override
-	public Satisfiability isReachableFrom(
-			SymbolicExpression x,
-			SymbolicExpression y,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return heapState.isReachableFrom(x, y, pp, oracle);
-	}
 }

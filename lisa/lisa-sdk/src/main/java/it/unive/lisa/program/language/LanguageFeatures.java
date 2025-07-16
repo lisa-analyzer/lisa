@@ -61,4 +61,5 @@ public abstract class LanguageFeatures {
 	public ProgramValidationLogic getProgramValidationLogic() {
 		return new BaseValidationLogic();
 	}
+
 }

@@ -24,7 +24,9 @@ import java.lang.reflect.Method;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NativeCFG implements CodeMember {
+public class NativeCFG
+		implements
+		CodeMember {
 
 	/**
 	 * The descriptor of this control flow graph
@@ -53,8 +55,9 @@ public class NativeCFG implements CodeMember {
 			CodeMemberDescriptor descriptor,
 			Class<? extends NaryExpression> construct) {
 		if (!PluggableStatement.class.isAssignableFrom(construct))
-			throw new IllegalArgumentException(construct + " must implement the " + PluggableStatement.class.getName()
-					+ " to be used within native cfgs");
+			throw new IllegalArgumentException(
+					construct + " must implement the " + PluggableStatement.class.getName()
+							+ " to be used within native cfgs");
 		this.descriptor = descriptor;
 		this.construct = construct;
 	}
@@ -91,13 +94,19 @@ public class NativeCFG implements CodeMember {
 
 		try {
 			Method builder = construct.getDeclaredMethod("build", CFG.class, CodeLocation.class, Expression[].class);
-			NaryExpression instance = (NaryExpression) builder.invoke(null, original.getCFG(), original.getLocation(),
-					params);
+			NaryExpression instance = (NaryExpression) builder
+					.invoke(null, original.getCFG(), original.getLocation(), params);
 			((PluggableStatement) instance).setOriginatingStatement(original);
 			return instance;
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+		} catch (NoSuchMethodException
+				| SecurityException
+				| IllegalAccessException
+				| IllegalArgumentException
 				| InvocationTargetException e) {
-			throw new CallResolutionException("Unable to create call to native construct " + construct.getName(), e);
+			throw new CallResolutionException(
+					"Unable to create call to native construct " + construct.getName(),
+					e);
 		}
 	}
+
 }

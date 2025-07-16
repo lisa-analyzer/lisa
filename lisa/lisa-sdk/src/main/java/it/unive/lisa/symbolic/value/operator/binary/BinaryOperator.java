@@ -12,7 +12,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface BinaryOperator extends Operator {
+public interface BinaryOperator
+		extends
+		Operator {
 
 	/**
 	 * Computes the runtime types of this expression (i.e., of the result of
@@ -32,4 +34,5 @@ public interface BinaryOperator extends Operator {
 			TypeSystem types,
 			Set<Type> left,
 			Set<Type> right);
+
 }

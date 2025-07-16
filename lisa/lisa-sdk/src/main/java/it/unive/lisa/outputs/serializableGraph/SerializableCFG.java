@@ -73,10 +73,12 @@ public class SerializableCFG {
 			process(source, nodes, descrs, node, descriptionGenerator, gen.result);
 
 		for (Edge edge : source.getEdges())
-			edges.add(new SerializableEdge(
-					gen.result.get(edge.getSource()).getLeft(),
-					gen.result.get(edge.getDestination()).getLeft(),
-					edge.getClass().getSimpleName()));
+			edges
+					.add(
+							new SerializableEdge(
+									gen.result.get(edge.getSource()).getLeft(),
+									gen.result.get(edge.getDestination()).getLeft(),
+									edge.getClass().getSimpleName()));
 
 		return new SerializableGraph(name, desc, nodes, edges, descrs);
 	}
@@ -117,6 +119,7 @@ public class SerializableCFG {
 			GraphVisitor<CFG, Statement, Edge, Void> {
 
 		private int offset = 0;
+
 		private Map<Statement, Pair<Integer, List<Statement>>> result = new IdentityHashMap<>();
 
 		@Override
@@ -137,5 +140,7 @@ public class SerializableCFG {
 			result.put(node, Pair.of(offset++, inners));
 			return true;
 		}
+
 	}
+
 }

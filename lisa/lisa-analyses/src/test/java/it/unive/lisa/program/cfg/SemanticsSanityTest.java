@@ -2,266 +2,38 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.fail;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.NoOpHeap;
-import it.unive.lisa.analysis.NoOpTypes;
-import it.unive.lisa.analysis.NoOpValues;
+import it.unive.lisa.analysis.SemanticComponent;
 import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.SimpleAbstractState;
-import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.combination.ValueCartesianProduct;
-import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
-import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
-import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
-import it.unive.lisa.analysis.dataflow.AvailableExpressions;
-import it.unive.lisa.analysis.dataflow.DefiniteDataflowDomain;
-import it.unive.lisa.analysis.dataflow.PossibleDataflowDomain;
-import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonRedundantSet.ValueNonRedundantSet;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
-import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.numeric.Sign;
-import it.unive.lisa.analysis.numeric.UpperBounds.IdSet;
-import it.unive.lisa.analysis.string.Prefix;
-import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.analysis.type.TypeDomain;
-import it.unive.lisa.analysis.types.InferredTypes;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.imp.IMPFeatures;
-import it.unive.lisa.imp.types.IMPTypeSystem;
-import it.unive.lisa.interprocedural.CFGResults;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
-import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
-import it.unive.lisa.interprocedural.ScopeId;
-import it.unive.lisa.interprocedural.UniqueScope;
-import it.unive.lisa.interprocedural.WorstCasePolicy;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
-import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
-import it.unive.lisa.program.Application;
-import it.unive.lisa.program.ClassUnit;
-import it.unive.lisa.program.Global;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
-import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.MultiCall;
 import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
-import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
-import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
-import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
-import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.program.type.BoolType;
-import it.unive.lisa.program.type.StringType;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import org.junit.Before;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
 public class SemanticsSanityTest {
-
-	private ClassUnit unit;
-	private CFG cfg;
-	private CallGraph cg;
-	private InterproceduralAnalysis<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
-			TypeEnvironment<InferredTypes>>> interprocedural;
-	private AnalysisState<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> as;
-	private StatementStore<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> store;
-	private Expression fake;
-	private final SemanticOracle fakeOracle = new SemanticOracle() {
-
-		@Override
-		public Set<Type> getRuntimeTypesOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return Collections.singleton(e.getStaticType());
-		}
-
-		@Override
-		public Type getDynamicTypeOf(
-				SymbolicExpression e,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return e.getStaticType();
-		}
-
-		@Override
-		public ExpressionSet rewrite(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return new ExpressionSet(expression);
-		}
-
-		@Override
-		public Satisfiability alias(
-				SymbolicExpression x,
-				SymbolicExpression y,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return Satisfiability.UNKNOWN;
-		}
-
-		@Override
-		public Satisfiability isReachableFrom(
-				SymbolicExpression x,
-				SymbolicExpression y,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return Satisfiability.UNKNOWN;
-		}
-	};
-
-	@Before
-	public void setup() throws CallGraphConstructionException, InterproceduralAnalysisException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation("unknown", 0, 0);
-
-		Program p = new Program(new IMPFeatures(), new IMPTypeSystem());
-		Application app = new Application(p);
-		unit = new ClassUnit(unknownLocation, p, "foo", false);
-		p.addUnit(unit);
-		cfg = new CFG(new CodeMemberDescriptor(unknownLocation, unit, false, "foo"));
-		cg = new RTACallGraph();
-		cg.init(app);
-		interprocedural = new ModularWorstCaseAnalysis<>();
-		interprocedural.init(app, cg, WorstCasePolicy.INSTANCE);
-		as = new AnalysisState<>(
-				new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
-						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet());
-		store = new StatementStore<>(as);
-		fake = new Expression(cfg, unknownLocation) {
-
-			@Override
-			public <V> boolean accept(
-					GraphVisitor<CFG, Statement, Edge, V> visitor,
-					V tool) {
-				return false;
-			}
-
-			@Override
-			public String toString() {
-				return "fake";
-			}
-
-			@Override
-			protected int compareSameClass(
-					Statement o) {
-				return 0;
-			}
-
-			@Override
-			public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
-				return entryState
-						.smallStepSemantics(
-								new Variable(Untyped.INSTANCE, "fake",
-										new SourceCodeLocation("unknown", 0, 0)),
-								fake);
-			}
-		};
-	}
-
-	private Object valueFor(
-			Class<?> param) {
-		if (param == CFG.class)
-			return cfg;
-		if (param == String.class)
-			return "foo";
-		if (param == Expression.class)
-			return fake;
-		if (param == Global.class)
-			return new Global(new SourceCodeLocation("unknown", 0, 0), unit, "foo", false);
-		if (param == Object.class)
-			return new Object();
-		if (param == Type.class)
-			return StringType.INSTANCE;
-		if (param == Expression[].class)
-			return new Expression[] { fake };
-		if (param == Collection.class)
-			return Collections.emptyList();
-		if (param == ParameterMatchingStrategy.class)
-			return StaticTypesMatchingStrategy.INSTANCE;
-		if (param == Unit.class)
-			return unit;
-		if (param == CodeLocation.class)
-			return new SourceCodeLocation("unknown", 0, 0);
-		if (param == CallType.class)
-			return CallType.STATIC;
-		if (param == EvaluationOrder.class)
-			return LeftToRightEvaluation.INSTANCE;
-		if (param == UnresolvedCall.class || param == Call.class)
-			return new UnresolvedCall(cfg, new SourceCodeLocation("unknown", 0, 0), CallType.STATIC, "fake", "fake");
-		if (param == byte.class || param == Byte.class)
-			return (byte) 0;
-		if (param == short.class || param == Short.class)
-			return (short) 0;
-		if (param == int.class || param == Integer.class)
-			return 0;
-		if (param == float.class || param == Float.class)
-			return -1f;
-		if (param == boolean.class || param == Boolean.class)
-			return false;
-		if (param == long.class || param == Long.class)
-			return 0L;
-		if (param == double.class || param == Double.class)
-			return 0.1;
-
-		throw new UnsupportedOperationException("No default value for parameter of type " + param);
-	}
 
 	@Test
 	public void testSemanticsOfStatements() {
@@ -277,225 +49,45 @@ public class SemanticsSanityTest {
 						Class<?>[] types = c.getParameterTypes();
 						Object[] params = new Object[types.length];
 						for (int i = 0; i < params.length; i++)
-							params[i] = valueFor(types[i]);
+							params[i] = TestParameterProvider.provideParam(c, types[i]);
 						Statement st = (Statement) c.newInstance(params);
-						st.forwardSemantics(as, interprocedural, store);
+						st
+								.forwardSemantics(
+										TestParameterProvider.as,
+										TestParameterProvider.interprocedural,
+										TestParameterProvider.store);
 					} catch (Exception e) {
-						failures.computeIfAbsent(statement, s -> new HashMap<>())
+						failures
+								.computeIfAbsent(statement, s -> new HashMap<>())
 								.put(Arrays.toString(c.getParameterTypes()), e);
 					}
 			}
 
 		for (Entry<Class<? extends Statement>, Map<String, Exception>> entry : failures.entrySet())
 			for (Entry<String, Exception> e : entry.getValue().entrySet()) {
-				System.err.println(entry.getKey() + " failed for " + e.getKey() + " due to " + e.getValue());
+				System.err
+						.println(
+								entry.getKey() + " failed for " + e.getKey() + " due to " + e.getValue());
 				e.getValue().printStackTrace(System.err);
 			}
 
 		if (!failures.isEmpty())
-			fail(failures.size() + "/" + total + " semantics evaluation failed");
+			fail(
+					failures.size() + "/" + total + " semantics evaluation failed");
 	}
 
 	private boolean excluded(
 			Class<? extends Statement> statement) {
 		// these just forward the semantics to the inner call
-		return statement == MultiCall.class
-				|| statement == TruncatedParamsCall.class;
-	}
-
-	private static class NRHeap implements NonRelationalHeapDomain<NRHeap> {
-
-		private static final NRHeap BOTTOM = new NRHeap();
-		private static final NRHeap TOP = new NRHeap();
-
-		@Override
-		public NRHeap eval(
-				SymbolicExpression expression,
-				HeapEnvironment<NRHeap> environment,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return top();
-		}
-
-		@Override
-		public HeapEnvironment<NRHeap> assume(
-				HeapEnvironment<NRHeap> environment,
-				SymbolicExpression expression,
-				ProgramPoint src,
-				ProgramPoint dest,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return environment;
-		}
-
-		@Override
-		public NRHeap glb(
-				NRHeap other)
-				throws SemanticException {
-			return bottom();
-		}
-
-		@Override
-		public StructuredRepresentation representation() {
-			return new StringRepresentation("");
-		}
-
-		@Override
-		public NRHeap lub(
-				NRHeap other)
-				throws SemanticException {
-			return top();
-		}
-
-		@Override
-		public boolean lessOrEqual(
-				NRHeap other)
-				throws SemanticException {
-			return false;
-		}
-
-		@Override
-		public NRHeap top() {
-			return TOP;
-		}
-
-		@Override
-		public NRHeap bottom() {
-			return BOTTOM;
-		}
-
-		@Override
-		public boolean canProcess(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle) {
-			return true;
-		}
-
-		@Override
-		public List<HeapReplacement> getSubstitution() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public ExpressionSet rewrite(
-				SymbolicExpression expression,
-				HeapEnvironment<NRHeap> environment,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return new ExpressionSet();
-		}
-
-		@Override
-		public Satisfiability alias(
-				SymbolicExpression x,
-				SymbolicExpression y,
-				HeapEnvironment<NRHeap> environment,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return Satisfiability.UNKNOWN;
-		}
-
-		@Override
-		public Satisfiability isReachableFrom(
-				SymbolicExpression x,
-				SymbolicExpression y,
-				HeapEnvironment<NRHeap> environment,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return Satisfiability.UNKNOWN;
-		}
-
-	}
-
-	private Object domainFor(
-			Class<?> root,
-			Class<?> param) {
-		if (root == ValueEnvironment.class)
-			return new Sign();
-		if (root == HeapEnvironment.class)
-			return new NRHeap();
-		if (root == TypeEnvironment.class)
-			return new InferredTypes();
-		if (root == PossibleDataflowDomain.class)
-			return new ReachingDefinitions();
-		if (root == DefiniteDataflowDomain.class)
-			return new AvailableExpressions();
-		if (param == AbstractState.class)
-			return new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
-					new TypeEnvironment<>(new InferredTypes()));
-		if (param == SymbolicExpression.class)
-			return new Skip(new SourceCodeLocation("unknown", 0, 0));
-		if (param == ExpressionSet.class)
-			return new ExpressionSet();
-		if (param == SymbolAliasing.class)
-			return new SymbolAliasing();
-		if (param == HeapDomain.class)
-			return new MonolithicHeap();
-		if (param == ValueDomain.class)
-			return new ValueEnvironment<>(new Sign());
-		if (param == TypeDomain.class)
-			return new TypeEnvironment<>(new InferredTypes());
-		if (root == ValueCartesianProduct.class || param == ValueEnvironment.class)
-			return new ValueEnvironment<>(new Sign());
-		if (root == ValueNonRedundantSet.class)
-			if (param == SortedSet.class)
-				return new TreeSet<ValueEnvironment<Sign>>();
-			else if (param == boolean.class)
-				return true;
-			else if (param == ValueDomain.class)
-				return new ValueEnvironment<>(new Sign());
-		if (root == StatementStore.class)
-			return as;
-		if (param == CFG.class)
-			return cfg;
-		if (param == AnalysisState.class)
-			return as;
-		if (param == AnalyzedCFG.class)
-			return new AnalyzedCFG<>(cfg, new UniqueScope(), as);
-		if (param == CFGResults.class)
-			return new CFGResults<>(new AnalyzedCFG<>(cfg, new UniqueScope(), as));
-		if (param == InterproceduralAnalysis.class)
-			return interprocedural;
-		if (param == ScopeId.class)
-			return new UniqueScope();
-		if (param == Lattice.class)
-			return new Sign();
-		if (root == IdSet.class && param == Set.class)
-			return Collections.emptySet();
-		if (param == Interval.class || param == SmashedSumIntDomain.class)
-			return new Interval();
-		if (param == SmashedSumStringDomain.class)
-			return new Prefix();
-		if (param == Satisfiability.class)
-			return Satisfiability.UNKNOWN;
-
-		throw new UnsupportedOperationException(
-				"No default domain for domain " + root + " and parameter of type " + param);
-	}
-
-	private Object shortcut(
-			Class<?> root) {
-		if (root == WholeValueAnalysis.class)
-			return new WholeValueAnalysis<>(new Interval(), new Prefix(), Satisfiability.UNKNOWN);
-		if (root == NoOpTypes.class)
-			return NoOpTypes.TOP;
-		if (root == NoOpValues.class)
-			return NoOpValues.TOP;
-		if (root == NoOpHeap.class)
-			return NoOpHeap.TOP;
-		return null;
+		return statement == MultiCall.class || statement == TruncatedParamsCall.class;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> int buildDomainsInstances(
-			Set<Class<? extends T>> classes,
-			Set<T> instances,
-			List<String> failures) {
+	private <O,
+			T extends O> int buildDomainsInstances(
+					Set<Class<? extends T>> classes,
+					Set<O> instances,
+					List<String> failures) {
 		int total = 0;
 		Constructor<?> nullary, unary, binary, ternary, quaternary;
 		nullary = unary = binary = ternary = quaternary = null;
@@ -522,7 +114,7 @@ public class SemanticsSanityTest {
 						quaternary = c;
 				}
 				try {
-					instance = (T) shortcut(clazz);
+					instance = (T) TestParameterProvider.build(clazz);
 					if (instance != null) {
 						instances.add(instance);
 						nullary = unary = binary = ternary = quaternary = null;
@@ -532,29 +124,31 @@ public class SemanticsSanityTest {
 						instance = (T) nullary.newInstance();
 					else if (unary != null) {
 						Class<?>[] types = unary.getParameterTypes();
-						Object param = domainFor(clazz, types[0]);
+						Object param = TestParameterProvider.domainFor(clazz, types[0]);
 						instance = (T) unary.newInstance(param);
 					} else if (binary != null) {
 						Class<?>[] types = binary.getParameterTypes();
-						Object param1 = domainFor(clazz, types[0]);
-						Object param2 = domainFor(clazz, types[1]);
+						Object param1 = TestParameterProvider.domainFor(clazz, types[0]);
+						Object param2 = TestParameterProvider.domainFor(clazz, types[1]);
 						instance = (T) binary.newInstance(param1, param2);
 					} else if (ternary != null) {
 						Class<?>[] types = ternary.getParameterTypes();
-						Object param1 = domainFor(clazz, types[0]);
-						Object param2 = domainFor(clazz, types[1]);
-						Object param3 = domainFor(clazz, types[2]);
+						Object param1 = TestParameterProvider.domainFor(clazz, types[0]);
+						Object param2 = TestParameterProvider.domainFor(clazz, types[1]);
+						Object param3 = TestParameterProvider.domainFor(clazz, types[2]);
 						instance = (T) ternary.newInstance(param1, param2, param3);
 					} else if (quaternary != null) {
 						Class<?>[] types = quaternary.getParameterTypes();
-						Object param1 = domainFor(clazz, types[0]);
-						Object param2 = domainFor(clazz, types[1]);
-						Object param3 = domainFor(clazz, types[2]);
-						Object param4 = domainFor(clazz, types[3]);
+						Object param1 = TestParameterProvider.domainFor(clazz, types[0]);
+						Object param2 = TestParameterProvider.domainFor(clazz, types[1]);
+						Object param3 = TestParameterProvider.domainFor(clazz, types[2]);
+						Object param4 = TestParameterProvider.domainFor(clazz, types[3]);
 						instance = (T) quaternary.newInstance(param1, param2, param3, param4);
 					} else {
 						failures.add(clazz.getName());
-						System.err.println("No suitable consturctor found for " + clazz.getName());
+						System.err
+								.println(
+										"No suitable consturctor found for " + clazz.getName());
 						continue;
 					}
 
@@ -563,7 +157,9 @@ public class SemanticsSanityTest {
 					nullary = unary = binary = ternary = quaternary = null;
 				} catch (Exception e) {
 					failures.add(clazz.getName());
-					System.err.println("Instantiation of class " + clazz.getName() + " failed due to " + e);
+					System.err
+							.println(
+									"Instantiation of class " + clazz.getName() + " failed due to " + e);
 					e.printStackTrace(System.err);
 				}
 			}
@@ -572,7 +168,9 @@ public class SemanticsSanityTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({
+			"rawtypes", "unchecked"
+	})
 	public void testAssignOnBottom() {
 		List<String> failures = new ArrayList<>();
 
@@ -580,18 +178,38 @@ public class SemanticsSanityTest {
 
 		Reflections scanner = new Reflections("it.unive.lisa", new SubTypesScanner());
 		Set<Class<? extends SemanticDomain>> domains = scanner.getSubTypesOf(SemanticDomain.class);
-		Set<SemanticDomain> instances = new HashSet<>();
+		Set<Object> instances = new HashSet<>();
 		int total = buildDomainsInstances(domains, instances, failures);
+		scanner = new Reflections("it.unive.lisa", new SubTypesScanner());
+		Set<Class<? extends SemanticComponent>> components = scanner.getSubTypesOf(SemanticComponent.class);
+		total += buildDomainsInstances(components, instances, failures);
 
-		for (SemanticDomain instance : instances)
+		Variable v = new Variable(bool, "b", SyntheticLocation.INSTANCE);
+		PushAny arg = new PushAny(bool, SyntheticLocation.INSTANCE);
+		for (Object instance : instances)
 			try {
-				instance = (SemanticDomain) ((Lattice) instance).bottom();
-				Variable v = new Variable(bool, "b", new SourceCodeLocation("unknown", 0, 0));
-				instance = instance.assign(v, new PushAny(bool, new SourceCodeLocation("unknown", 0, 0)), fake,
-						fakeOracle);
-				boolean isBottom = ((Lattice) instance).isBottom();
-				if (instance instanceof AnalysisState) {
-					AnalysisState state = (AnalysisState) instance;
+				Object res;
+				if (instance instanceof SemanticDomain) {
+					SemanticDomain dom = (SemanticDomain) instance;
+					DomainLattice l = (DomainLattice) dom.makeLattice().bottom();
+					res = dom.assign(l, v, arg, TestParameterProvider.provideParam(null, ProgramPoint.class));
+				} else {
+					SemanticComponent dom = (SemanticComponent) instance;
+					DomainLattice l = (DomainLattice) dom.makeLattice().bottom();
+					res = dom
+							.assign(
+									l,
+									v,
+									arg,
+									TestParameterProvider.provideParam(null, ProgramPoint.class),
+									TestParameterProvider.provideParam(null, SemanticOracle.class));
+				}
+				if (res instanceof Pair)
+					// heap domains return a pair of (state, replacements)
+					res = ((Pair) res).getLeft();
+				boolean isBottom = ((Lattice) res).isBottom();
+				if (res instanceof AnalysisState) {
+					AnalysisState state = (AnalysisState) res;
 					isBottom = state.getState().isBottom()
 							&& state.getFixpointInformation() != null
 							&& state.getFixpointInformation().isBottom()
@@ -602,21 +220,28 @@ public class SemanticsSanityTest {
 
 				if (!isBottom) {
 					failures.add(instance.getClass().getName());
-					System.err.println("Assigning to the bottom instance of " + instance.getClass().getName()
-							+ " returned a non-bottom instance");
+					System.err
+							.println(
+									"Assigning to the bottom instance of " + instance.getClass().getName()
+											+ " returned a non-bottom instance");
 				}
 			} catch (Exception e) {
 				failures.add(instance.getClass().getName());
-				System.err.println("assignOnBottom: " + instance.getClass().getName() + " failed due to " + e);
+				System.err
+						.println(
+								"assignOnBottom: " + instance.getClass().getName() + " failed due to " + e);
 				e.printStackTrace(System.err);
 			}
 
 		if (!failures.isEmpty())
-			fail(failures.size() + "/" + total + " assignments failed");
+			fail(
+					failures.size() + "/" + total + " assignments failed");
 	}
 
 	@Test
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({
+			"rawtypes"
+	})
 	public void testIsTopIsBottom() {
 		List<String> failures = new ArrayList<>();
 
@@ -630,20 +255,28 @@ public class SemanticsSanityTest {
 			try {
 				if (!instance.bottom().isBottom()) {
 					failures.add(instance.getClass().getName());
-					System.err.println("bottom().isBottom() returned false on " + instance.getClass().getName());
+					System.err
+							.println(
+									"bottom().isBottom() returned false on " + instance.getClass().getName());
 				}
 
 				if (!instance.top().isTop()) {
 					failures.add(instance.getClass().getName());
-					System.err.println("top().isTop() returned false on " + instance.getClass().getName());
+					System.err
+							.println(
+									"top().isTop() returned false on " + instance.getClass().getName());
 				}
 			} catch (Exception e) {
 				failures.add(instance.getClass().getName());
-				System.err.println("isTopIsBottom: " + instance.getClass().getName() + " failed due to " + e);
+				System.err
+						.println(
+								"isTopIsBottom: " + instance.getClass().getName() + " failed due to " + e);
 				e.printStackTrace(System.err);
 			}
 
 		if (!failures.isEmpty())
-			fail(failures.size() + "/" + total + " tests failed");
+			fail(
+					failures.size() + "/" + total + " tests failed");
 	}
+
 }

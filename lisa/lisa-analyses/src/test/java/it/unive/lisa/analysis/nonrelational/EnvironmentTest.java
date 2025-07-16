@@ -24,15 +24,27 @@ public class EnvironmentTest {
 
 	// we use a value environment as candidate since it is the simpler
 	// implementation possible
-	private static final ValueEnvironment<Sign> env = new ValueEnvironment<>(new Sign().bottom());
+	private static final ValueEnvironment<
+			Sign.SignLattice> env = new ValueEnvironment<>(new Sign.SignLattice().bottom());
 
 	private static final Identifier varA = new Variable(Untyped.INSTANCE, "a", SyntheticLocation.INSTANCE);
+
 	private static final Identifier varB = new Variable(Untyped.INSTANCE, "b", SyntheticLocation.INSTANCE);
+
 	private static final Identifier heapA = new HeapLocation(Untyped.INSTANCE, "a", false, SyntheticLocation.INSTANCE);
+
 	private static final Identifier heapB = new HeapLocation(Untyped.INSTANCE, "b", false, SyntheticLocation.INSTANCE);
-	private static final Identifier heapAweak = new HeapLocation(Untyped.INSTANCE, "a", true,
+
+	private static final Identifier heapAweak = new HeapLocation(
+			Untyped.INSTANCE,
+			"a",
+			true,
 			SyntheticLocation.INSTANCE);
-	private static final Identifier heapBweak = new HeapLocation(Untyped.INSTANCE, "b", true,
+
+	private static final Identifier heapBweak = new HeapLocation(
+			Untyped.INSTANCE,
+			"b",
+			true,
 			SyntheticLocation.INSTANCE);
 
 	private final ProgramPoint pp = new ProgramPoint() {
@@ -46,10 +58,12 @@ public class EnvironmentTest {
 		public CFG getCFG() {
 			return null;
 		}
+
 	};
 
 	@Test
-	public void testLubKeys() throws SemanticException {
+	public void testLubKeys()
+			throws SemanticException {
 		assertEquals(Set.of(varA), env.lubKeys(Set.of(varA), Set.of(varA)));
 		assertEquals(Set.of(varA, varB), env.lubKeys(Set.of(varA), Set.of(varB)));
 		assertEquals(Set.of(heapAweak), env.lubKeys(Set.of(heapAweak), Set.of(heapA)));
@@ -58,36 +72,41 @@ public class EnvironmentTest {
 	}
 
 	@Test
-	public void testForgetIdentifier() throws SemanticException {
-		ValueEnvironment<Sign> tmp = env.top();
+	public void testForgetIdentifier()
+			throws SemanticException {
+		ValueEnvironment<Sign.SignLattice> tmp = env.top();
 		assertSame(tmp, tmp.forgetIdentifier(varA, pp));
 		tmp = env.bottom();
 		assertSame(tmp, tmp.forgetIdentifier(varA, pp));
-		tmp = env.putState(varA, new Sign());
+		tmp = env.putState(varA, new Sign.SignLattice());
 		assertEquals(env, tmp.forgetIdentifier(varA, pp));
 		assertEquals(tmp, tmp.forgetIdentifier(varB, pp));
 	}
 
 	@Test
-	public void testScopes() throws SemanticException {
-		Sign state = new Sign();
+	public void testScopes()
+			throws SemanticException {
+		Sign.SignLattice state = new Sign.SignLattice();
 		ScopeToken scoper = new ScopeToken(new CodeElement() {
 
 			@Override
 			public CodeLocation getLocation() {
 				return new SourceCodeLocation("fake", 0, 0);
 			}
-		});
-		ValueEnvironment<Sign> tmp = env.top();
-		ValueEnvironment<Sign> onlyA = tmp.putState(varA, state);
 
-		ValueEnvironment<Sign> onlyAscoped = tmp.putState((Identifier) varA.pushScope(scoper, pp), state);
-		ValueEnvironment<Sign> actual = onlyA.pushScope(scoper, pp);
+		});
+		ValueEnvironment<Sign.SignLattice> tmp = env.top();
+		ValueEnvironment<Sign.SignLattice> onlyA = tmp.putState(varA, state);
+
+		ValueEnvironment<Sign.SignLattice> onlyAscoped = tmp.putState((Identifier) varA.pushScope(scoper, pp), state);
+		ValueEnvironment<Sign.SignLattice> actual = onlyA.pushScope(scoper, pp);
 		assertEquals(onlyAscoped, actual);
 		assertEquals(onlyA, actual.popScope(scoper, pp));
 
-		ValueEnvironment<Sign> AandB = onlyA.putState(heapB, state);
-		ValueEnvironment<Sign> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper, pp), state);
+		ValueEnvironment<Sign.SignLattice> AandB = onlyA.putState(heapB, state);
+		ValueEnvironment<
+				Sign.SignLattice> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper, pp), state);
 		assertEquals(AandBscoped, AandB.pushScope(scoper, pp));
 	}
+
 }

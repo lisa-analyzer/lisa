@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -24,7 +25,9 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OpenCall extends CallWithResult {
+public class OpenCall
+		extends
+		CallWithResult {
 
 	/**
 	 * Builds the open call, happening at the given location in the program.
@@ -46,7 +49,14 @@ public class OpenCall extends CallWithResult {
 			String qualifier,
 			String targetName,
 			Expression... parameters) {
-		super(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE,
+		super(
+				cfg,
+				location,
+				callType,
+				qualifier,
+				targetName,
+				LeftToRightEvaluation.INSTANCE,
+				Untyped.INSTANCE,
 				parameters);
 	}
 
@@ -101,8 +111,7 @@ public class OpenCall extends CallWithResult {
 			Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType,
-				parameters);
+		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType, parameters);
 	}
 
 	/**
@@ -140,8 +149,15 @@ public class OpenCall extends CallWithResult {
 	 */
 	public OpenCall(
 			UnresolvedCall source) {
-		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(),
-				source.getTargetName(), source.getOrder(), source.getStaticType(), source.getParameters());
+		this(
+				source.getCFG(),
+				source.getLocation(),
+				source.getCallType(),
+				source.getQualifier(),
+				source.getTargetName(),
+				source.getOrder(),
+				source.getStaticType(),
+				source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);
@@ -160,16 +176,20 @@ public class OpenCall extends CallWithResult {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new Variable(getStaticType(), "open_call_ret_value@" + getLocation(), getLocation());
+		return new Variable(
+				getStaticType(),
+				"open_call_ret_value@" + getLocation(),
+				getLocation());
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> compute(
-			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
-			StatementStore<A> expressions,
-			ExpressionSet[] parameters)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> compute(
+					AnalysisState<A> entryState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					ExpressionSet[] parameters)
+					throws SemanticException {
 		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
 	}
 
@@ -177,4 +197,5 @@ public class OpenCall extends CallWithResult {
 	public Collection<CodeMember> getTargets() {
 		return Collections.emptySet();
 	}
+
 }

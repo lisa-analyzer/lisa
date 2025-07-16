@@ -4,8 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.Environment;
-import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -37,49 +36,12 @@ import java.util.Set;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class UpperBounds
-		extends
-		Environment<UpperBounds, ValueExpression, UpperBounds.IdSet>
 		implements
-		ValueDomain<UpperBounds> {
-
-	/**
-	 * Builds a new instance of upper bounds.
-	 */
-	public UpperBounds() {
-		super(new IdSet(Collections.emptySet()).top());
-	}
-
-	/**
-	 * Builds a new instance of upper bounds.
-	 * 
-	 * @param lattice  the {@link IdSet} instance to use as singleton
-	 * @param function the mapping for the upper bounds
-	 */
-	public UpperBounds(
-			IdSet lattice,
-			Map<Identifier, IdSet> function) {
-		super(lattice, function);
-	}
+		ValueDomain<ValueEnvironment<UpperBounds.IdSet>> {
 
 	@Override
-	public UpperBounds mk(
-			IdSet lattice,
-			Map<Identifier, IdSet> function) {
-		return new UpperBounds(lattice, function);
-	}
-
-	@Override
-	public UpperBounds top() {
-		return new UpperBounds(lattice.top(), null);
-	}
-
-	@Override
-	public UpperBounds bottom() {
-		return new UpperBounds(lattice.bottom(), null);
-	}
-
-	@Override
-	public UpperBounds assign(
+	public ValueEnvironment<IdSet> assign(
+			ValueEnvironment<IdSet> state,
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
@@ -88,7 +50,7 @@ public class UpperBounds
 		// cleanup: if a variable is reassigned, it can no longer be an
 		// upperbound of other variables
 		Map<Identifier, IdSet> cleanup = new HashMap<>();
-		for (Map.Entry<Identifier, IdSet> entry : this) {
+		for (Map.Entry<Identifier, IdSet> entry : state) {
 			if (entry.getKey().equals(id))
 				continue;
 			if (!entry.getValue().contains(id))
@@ -114,37 +76,39 @@ public class UpperBounds
 					// id = y - c (where c is the constant)
 					Identifier y = (Identifier) be.getLeft();
 					if (sign > 0)
-						cleanup.put(id, getState(y).add(y));
+						cleanup.put(id, state.getState(y).add(y));
 					else if (sign < 0)
 						// this is effectively an addition
-						cleanup.put(y, getState(y).add(id));
+						cleanup.put(y, state.getState(y).add(id));
 				} else if (op instanceof AdditionOperator) {
 					// bonus: id = y + c (where c is the constant)
 					Identifier y = (Identifier) be.getLeft();
 					if (sign > 0)
-						cleanup.put(y, getState(y).add(id));
+						cleanup.put(y, state.getState(y).add(id));
 					else if (sign < 0)
 						// this is effectively a subtraction
-						cleanup.put(id, getState(y).add(y));
+						cleanup.put(id, state.getState(y).add(y));
 				}
 			}
 		}
 
-		return new UpperBounds(lattice, cleanup);
+		return new ValueEnvironment<>(state.lattice, cleanup);
 	}
 
 	@Override
-	public UpperBounds smallStepSemantics(
+	public ValueEnvironment<IdSet> smallStepSemantics(
+			ValueEnvironment<IdSet> state,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		// nothing to do
-		return this;
+		return state;
 	}
 
 	@Override
 	public Satisfiability satisfies(
+			ValueEnvironment<IdSet> state,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -164,15 +128,15 @@ public class UpperBounds
 		Identifier y = (Identifier) right;
 
 		if (operator instanceof ComparisonLt) {
-			return Satisfiability.fromBoolean(getState(x).contains(y));
+			return Satisfiability.fromBoolean(state.getState(x).contains(y));
 		} else if (operator instanceof ComparisonLe) {
-			if (getState(x).contains(y))
+			if (state.getState(x).contains(y))
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		} else if (operator instanceof ComparisonGt) {
-			return Satisfiability.fromBoolean(getState(y).contains(x));
+			return Satisfiability.fromBoolean(state.getState(y).contains(x));
 		} else if (operator instanceof ComparisonGe) {
-			if (getState(y).contains(x))
+			if (state.getState(y).contains(x))
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		}
@@ -181,14 +145,15 @@ public class UpperBounds
 	}
 
 	@Override
-	public UpperBounds assume(
+	public ValueEnvironment<IdSet> assume(
+			ValueEnvironment<IdSet> state,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (!(expression instanceof BinaryExpression))
-			return this;
+		if (state.isBottom() || !(expression instanceof BinaryExpression))
+			return state;
 
 		BinaryExpression bexp = (BinaryExpression) expression;
 		SymbolicExpression left = bexp.getLeft();
@@ -196,33 +161,34 @@ public class UpperBounds
 		BinaryOperator operator = bexp.getOperator();
 
 		if (!(left instanceof Identifier && right instanceof Identifier))
-			return this;
+			return state;
 
 		Identifier x = (Identifier) left;
 		Identifier y = (Identifier) right;
 
 		if (operator instanceof ComparisonLt) {
 			// [[x < y]](s) = s[x -> s(x) U s(y) U {y}]
-			IdSet s_x = getState(x);
-			IdSet s_y = getState(y);
+			IdSet s_x = state.getState(x);
+			IdSet s_y = state.getState(y);
 			IdSet y_singleton = new IdSet(Collections.singleton(y));
 			IdSet set = s_x.glb(s_y).glb(y_singleton);
-			return putState(x, set);
+			return state.putState(x, set);
 		} else if (operator instanceof ComparisonEq) {
 			// [[x == y]](s) = s[x,y -> s(x) U s(y)]
-			IdSet s_x = getState(x);
-			IdSet s_y = getState(y);
+			IdSet s_x = state.getState(x);
+			IdSet s_y = state.getState(y);
 			IdSet set = s_x.glb(s_y);
-			return putState(x, set).putState(y, set);
+			return state.putState(x, set).putState(y, set);
 		} else if (operator instanceof ComparisonLe) {
 			// [[x <= y]](s) = s[x -> s(x) U s(y)]
-			IdSet s_x = getState(x);
-			IdSet s_y = getState(y);
+			IdSet s_x = state.getState(x);
+			IdSet s_y = state.getState(y);
 			IdSet set = s_x.glb(s_y);
-			return putState(x, set);
+			return state.putState(x, set);
 		} else if (operator instanceof ComparisonGt) {
 			// x > y --> y < x
 			return assume(
+					state,
 					new BinaryExpression(
 							expression.getStaticType(),
 							right,
@@ -235,6 +201,7 @@ public class UpperBounds
 		} else if (operator instanceof ComparisonGe) {
 			// x >= y --> y <= x
 			return assume(
+					state,
 					new BinaryExpression(
 							expression.getStaticType(),
 							right,
@@ -246,21 +213,22 @@ public class UpperBounds
 					oracle);
 		}
 
-		return this;
+		return state;
+	}
+
+	@Override
+	public ValueEnvironment<IdSet> makeLattice() {
+		return new ValueEnvironment<>(new IdSet(Collections.emptySet(), true));
 	}
 
 	/**
-	 * An {@link InverseSetLattice} of {@link Identifier}s. This class is made
-	 * to be a {@link NonRelationalDomain} just to be used in conjunction with
-	 * {@link UpperBounds}, which is an {@link Environment}.
+	 * An {@link InverseSetLattice} of {@link Identifier}s.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IdSet
 			extends
-			InverseSetLattice<IdSet, Identifier>
-			implements
-			NonRelationalDomain<IdSet, ValueExpression, UpperBounds> {
+			InverseSetLattice<IdSet, Identifier> {
 
 		/**
 		 * Builds the lattice.
@@ -331,39 +299,6 @@ public class UpperBounds
 			return super.representation();
 		}
 
-		@Override
-		public IdSet eval(
-				ValueExpression expression,
-				UpperBounds environment,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			// since this won't be really used as a non relational domain,
-			// we don't care about the implementation of this method
-			return top();
-		}
-
-		@Override
-		public UpperBounds assume(
-				UpperBounds environment,
-				ValueExpression expression,
-				ProgramPoint src,
-				ProgramPoint dest,
-				SemanticOracle oracle)
-				throws SemanticException {
-			// since this won't be really used as a non relational domain,
-			// we don't care about the implementation of this method
-			return environment;
-		}
-
-		@Override
-		public boolean canProcess(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle) {
-			// since this won't be really used as a non relational domain,
-			// we don't care about the implementation of this method
-			return true;
-		}
 	}
+
 }

@@ -1,12 +1,12 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
+import it.unive.lisa.analysis.heap.HeapLattice;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -25,17 +25,11 @@ import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A base class for heap analyses based on the allocation sites of the objects
@@ -46,180 +40,141 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the concrete type of analysis that methods of this class return
+ * @param <L> the type {@link FunctionalLattice} used to track points-to
+ *                information for the heap locations
  */
-public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedAnalysis<A>>
+public abstract class AllocationSiteBasedAnalysis<
+		L extends FunctionalLattice<L, Identifier, AllocationSites> & HeapLattice<L>>
 		implements
-		BaseHeapDomain<A> {
+		BaseHeapDomain<L> {
 
-	/**
-	 * An heap environment tracking which allocation sites are associated to
-	 * each identifier.
-	 */
-	public final HeapEnvironment<AllocationSites> heapEnv;
-
-	/**
-	 * The replacements to be applied after the generation of this domain
-	 * instance.
-	 */
-	public final List<HeapReplacement> replacements;
-
-	/**
-	 * Builds a new instance of allocation site-based heap.
-	 */
-	protected AllocationSiteBasedAnalysis() {
-		this(new HeapEnvironment<>(new AllocationSites()));
-	}
-
-	/**
-	 * Builds a new instance of allocation site-based heap from its heap
-	 * environment.
-	 * 
-	 * @param heapEnv the heap environment that this instance tracks
-	 */
-	public AllocationSiteBasedAnalysis(
-			HeapEnvironment<AllocationSites> heapEnv) {
-		this(heapEnv, Collections.emptyList());
-	}
-
-	/**
-	 * Builds a new instance of allocation site-based heap from its heap
-	 * environment and replacements.
-	 * 
-	 * @param heapEnv      the heap environment that this instance tracks
-	 * @param replacements the heap replacements of this instance
-	 */
-	public AllocationSiteBasedAnalysis(
-			HeapEnvironment<AllocationSites> heapEnv,
-			List<HeapReplacement> replacements) {
-		this.heapEnv = heapEnv;
-		this.replacements = replacements.isEmpty() ? Collections.emptyList() : replacements;
-	}
-
-	/**
-	 * Builds a new instance of this class by copying abstract information from
-	 * {@code reference} and using the given environment for storing points-to
-	 * information.
-	 * 
-	 * @param reference the domain whose abstract information needs to be copied
-	 * @param heapEnv   the heap environment that this instance tracks
-	 * 
-	 * @return the new instance
-	 */
-	protected abstract A mk(
-			A reference,
-			HeapEnvironment<AllocationSites> heapEnv);
+	private final Rewriter rewriter = new Rewriter();
 
 	@Override
-	public A assign(
+	public Pair<L, List<HeapReplacement>> assign(
+			L state,
 			Identifier id,
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		A sss = smallStepSemantics(expression, pp, oracle);
-		A result = bottom();
+		Pair<L, List<HeapReplacement>> sss = smallStepSemantics(state, expression, pp, oracle);
+		L result = state.bottom();
 		List<HeapReplacement> replacements = new LinkedList<>();
+		sss.getRight().forEach(replacements::add);
 		ExpressionSet rhsExps;
 		boolean rhsIsReceiver = false;
 
 		expression = expression.removeTypingExpressions();
 
 		if (expression instanceof Identifier) {
-			rhsExps = new ExpressionSet(resolveIdentifier((Identifier) expression));
+			rhsExps = new ExpressionSet(resolveIdentifier(state, (Identifier) expression));
 			rhsIsReceiver = ((Identifier) expression).isInstrumentedReceiver();
 		} else if (expression.mightNeedRewriting())
-			rhsExps = rewrite(expression, pp, oracle);
+			rhsExps = rewrite(state, expression, pp, oracle);
 		else
 			rhsExps = new ExpressionSet(expression);
 
 		for (SymbolicExpression rhs : rhsExps)
-			result = result.lub(process(id, pp, oracle, sss, replacements, rhs, rhsIsReceiver));
+			result = result.lub(process(id, pp, oracle, sss.getLeft(), replacements, rhs, rhsIsReceiver));
 
-		if (!id.isWeak() && knowsIdentifier(id)) {
+		if (!id.isWeak() && state.knowsIdentifier(id)) {
 			// we might make some location unreachable,
 			// so we have to perform garbage collection
 			HeapReplacement r = new HeapReplacement();
 			r.addSource(id);
-			replacements.addAll(expand(r));
+			replacements.addAll(state.expand(r));
 		}
 
-		return mk(result, replacements);
+		return Pair.of(result, replacements);
 	}
 
-	private A process(
+	private L process(
 			Identifier id,
 			ProgramPoint pp,
 			SemanticOracle oracle,
-			A sss,
+			L sss,
 			List<HeapReplacement> replacements,
 			SymbolicExpression rhs,
 			boolean rhsIsReceiver)
 			throws SemanticException {
 		if (rhs instanceof MemoryPointer) {
-			HeapLocation rhs_ref = ((MemoryPointer) rhs).getReferencedLocation();
+			if (!(((MemoryPointer) rhs).getReferencedLocation() instanceof AllocationSite))
+				throw new SemanticException("Cannot assign a non-allocation site location");
+			// we have x = y, where y is a pointer to an allocation site
+			AllocationSite rhs_ref = (AllocationSite) ((MemoryPointer) rhs).getReferencedLocation();
 			if (id instanceof MemoryPointer) {
 				// we have x = y, where both are pointers
 				// we perform *x = *y so that x and y become aliases
 				Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
-				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(lhs_ref, rhs_ref, pp, oracle);
-				return mk(sss, heap);
+				return store(sss, lhs_ref, rhs_ref);
 			} else if (rhs_ref instanceof StackAllocationSite
 					// if we are allocating, we just perform normal aliasing
 					// as there is nothing to copy
 					&& !((StackAllocationSite) rhs_ref).isAllocation()
 					// if rhs is an instrumented receiver, it corresponds to
-					// something that
-					// is still on the stack while being initialized (eg with a
-					// constructor call)
-					// so we perform normal aliasing as there is nothing to copy
+					// something that is still on the stack while being
+					// initialized (eg with a constructor call) so we
+					// perform normal aliasing as there is nothing to copy
 					&& !rhsIsReceiver
-					&& !getAllocatedAt(((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
+					&& !getAllocatedAt(sss, ((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
 				// for stack elements, assignment works as a shallow copy
 				// since there are no pointers to alias
-				return sss.shallowCopy(id, (StackAllocationSite) rhs_ref, replacements, pp, oracle);
+				return shallowCopy(sss, id, (StackAllocationSite) rhs_ref, replacements);
 			else {
 				// aliasing: id and star_y points to the same object
-				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, rhs_ref, pp, oracle);
-				return mk(sss, heap);
+				return store(sss, id, rhs_ref);
 			}
 		} else
 			return sss;
 	}
 
 	/**
-	 * Expands the given heap replacement {@code base} by adding all locations
-	 * that are reachable <b>only</b> from the sources of {@code base},
-	 * effectively performing a garbage collection operation.
+	 * Stores the allocation site {@code site} in the identifier {@code id} in
+	 * the given state. This method ensures that (i) weak identifiers are
+	 * correctly handled (performing a join with the current state of the
+	 * identifier), and that the site being stored does not correspond to an
+	 * allocation according to {@link HeapLocation#isAllocation()}.
 	 * 
-	 * @param base the starting point for the expansion of the replacement
+	 * @param state the state where to store the allocation site
+	 * @param id    the identifier where to store the allocation site
+	 * @param site  the allocation site to be stored
 	 * 
-	 * @return the expanded list of heap replacements
+	 * @return a new state where {@code id} is updated with {@code site}
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	protected List<HeapReplacement> expand(
-			HeapReplacement base)
+	protected L store(
+			L state,
+			Identifier id,
+			AllocationSite site)
 			throws SemanticException {
-		HeapReplacement sub = new HeapReplacement();
-		for (Identifier id : base.getSources())
-			cut(id).forEach(sub::addSource);
-		return List.of(sub);
+		if (site.isAllocation())
+			// we never store the allocation version of a site,
+			// otherwise it would be considered an allocation
+			// every time we retrieve it from the map
+			site = (AllocationSite) site.asNonAllocation();
+		AllocationSites states = new AllocationSites(site);
+		if (id.isWeak() && state.knowsIdentifier(id))
+			states = states.lub(state.getState(id));
+		return state.putState(id, states);
 	}
 
 	/**
 	 * Yields an allocation site name {@code id} if it is tracked by this
 	 * domain, {@code null} otherwise.
 	 * 
+	 * @param state    the current state of the analysis
 	 * @param location allocation site's name to be searched
 	 * 
 	 * @return an allocation site name {@code id} if it is tracked by this
 	 *             domain, {@code null} otherwise
 	 */
 	protected Set<AllocationSite> getAllocatedAt(
+			L state,
 			String location) {
 		Set<AllocationSite> sites = new HashSet<>();
-		for (AllocationSites set : heapEnv.getValues())
+		for (AllocationSites set : state.getValues())
 			for (AllocationSite site : set)
 				if (site.getLocationName().equals(location))
 					sites.add(site);
@@ -229,33 +184,32 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 
 	/**
 	 * Performs the assignment of {@code site} to the identifier {@code id} when
-	 * {@code site} is a static allocation site, thus performing a shallow copy
+	 * {@code site} is a stack allocation site, thus performing a shallow copy
 	 * instead of aliasing handling the heap replacements.
 	 * 
+	 * @param state        the current state of the analysis
 	 * @param id           the identifier to be updated
 	 * @param site         the allocation site to be assigned
 	 * @param replacements the list of replacements to be updated
-	 * @param pp           the program point where this operation occurs
-	 * @param oracle       the oracle for inter-domain communication
 	 * 
 	 * @return the point-based heap instance where {@code id} is updated with
 	 *             {@code star_y} and the needed heap replacements
 	 * 
 	 * @throws SemanticException if something goes wrong during the analysis
 	 */
-	@SuppressWarnings("unchecked")
-	public A shallowCopy(
+	public L shallowCopy(
+			L state,
 			Identifier id,
 			StackAllocationSite site,
-			List<HeapReplacement> replacements,
-			ProgramPoint pp,
-			SemanticOracle oracle)
+			List<HeapReplacement> replacements)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
-		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
-				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
-		HeapEnvironment<AllocationSites> tmp = heapEnv.assign(id, clone, pp, oracle);
+		StackAllocationSite clone = new StackAllocationSite(
+				site.getStaticType(),
+				id.getCodeLocation().toString(),
+				site.isWeak(),
+				id.getCodeLocation());
 
 		HeapReplacement replacement = new HeapReplacement();
 		replacement.addSource(site);
@@ -263,110 +217,38 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 		replacement.addTarget(site);
 		replacements.add(replacement);
 
-		return mk((A) this, tmp);
+		return store(state, id, clone);
 	}
 
 	@Override
-	public A assume(
+	public Pair<L, List<HeapReplacement>> assume(
+			L state,
 			SymbolicExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		// we just rewrite the expression if needed
-		return smallStepSemantics(expression, src, oracle);
+		return Pair.of(state, List.of());
 	}
 
 	@Override
-	public StructuredRepresentation representation() {
-		if (isTop())
-			return Lattice.topRepresentation();
-
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-
-		return heapEnv.representation();
-	}
-
-	@Override
-	public boolean isTop() {
-		return heapEnv.isTop();
-	}
-
-	@Override
-	public boolean isBottom() {
-		return heapEnv.isBottom();
-	}
-
-	@Override
-	public List<HeapReplacement> getSubstitution() {
-		return replacements;
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			A other)
-			throws SemanticException {
-		return heapEnv.lessOrEqual(other.heapEnv);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(heapEnv, replacements);
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		@SuppressWarnings("unchecked")
-		A other = (A) obj;
-		return Objects.equals(heapEnv, other.heapEnv) && Objects.equals(replacements, other.replacements);
-	}
-
-	/**
-	 * Implementation of {@link #equals(Object)} that ignores the substitutions.
-	 * 
-	 * @param obj the other domain instance
-	 * 
-	 * @return whether this instance is equal to {@code obj} up to sibstitutions
-	 */
-	public boolean equalUpToSubs(
-			A obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		return heapEnv.equalUpToSubs(obj.heapEnv);
-	}
-
-	@Override
-	public String toString() {
-		return representation().toString();
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public A semanticsOf(
+	public Pair<L, List<HeapReplacement>> semanticsOf(
+			L state,
 			HeapExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return (A) this;
+		return Pair.of(state, List.of());
 	}
 
 	@Override
 	public ExpressionSet rewrite(
+			L state,
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(new Rewriter(), pp, oracle);
+		return expression.accept(rewriter, state);
 	}
 
 	/**
@@ -375,23 +257,21 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * contains points-to information for {@code v}. Otherwise, a set with the
 	 * given identifier is returned.
 	 * 
-	 * @param v the identifier to be resolved
+	 * @param state the current state of the analysis
+	 * @param v     the identifier to be resolved
 	 * 
 	 * @return the set of allocation sites that {@code v} points to, or a set
 	 *             with {@code v} itself
 	 */
 	protected Set<SymbolicExpression> resolveIdentifier(
+			L state,
 			Identifier v) {
-		if (v instanceof MemoryPointer || !heapEnv.getKeys().contains(v))
+		if (v instanceof MemoryPointer || !state.getKeys().contains(v))
 			return Set.of(v);
+
 		Set<SymbolicExpression> result = new HashSet<>();
-		for (AllocationSite site : heapEnv.getState(v)) {
-			MemoryPointer e = new MemoryPointer(
-					new ReferenceType(site.getStaticType()),
-					site,
-					site.getCodeLocation());
-			result.add(e);
-		}
+		for (AllocationSite site : state.getState(v))
+			result.add(new MemoryPointer(new ReferenceType(site.getStaticType()), site, site.getCodeLocation()));
 
 		return result;
 	}
@@ -402,7 +282,9 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public class Rewriter extends BaseHeapDomain.Rewriter {
+	public class Rewriter
+			extends
+			BaseHeapDomain.Rewriter {
 
 		/*
 		 * note that all the cases where we are adding a plain expression to the
@@ -418,12 +300,14 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
+			@SuppressWarnings("unchecked")
+			L state = (L) params[0];
 
 			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression rec : receiver) {
 				rec = rec.removeTypingExpressions();
 				if (rec instanceof Identifier)
-					toProcess.addAll(resolveIdentifier((Identifier) rec));
+					toProcess.addAll(resolveIdentifier(state, (Identifier) rec));
 				else
 					toProcess.add(rec);
 			}
@@ -495,12 +379,14 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
+			@SuppressWarnings("unchecked")
+			L state = (L) params[0];
 
 			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression loc : arg) {
 				loc = loc.removeTypingExpressions();
 				if (loc instanceof Identifier)
-					toProcess.addAll(resolveIdentifier((Identifier) loc));
+					toProcess.addAll(resolveIdentifier(state, (Identifier) loc));
 				else
 					toProcess.add(loc);
 			}
@@ -532,12 +418,14 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				Object... params)
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
+			@SuppressWarnings("unchecked")
+			L state = (L) params[0];
 
 			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression rec : arg) {
 				rec = rec.removeTypingExpressions();
 				if (rec instanceof Identifier)
-					toProcess.addAll(resolveIdentifier((Identifier) rec));
+					toProcess.addAll(resolveIdentifier(state, (Identifier) rec));
 				else
 					toProcess.add(rec);
 			}
@@ -548,20 +436,29 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 				else if (ref instanceof Identifier) {
 					// this could be aliasing!
 					Identifier id = (Identifier) ref;
-					if (heapEnv.getKeys().contains(id))
-						result.addAll(resolveIdentifier(id));
+					if (state.getKeys().contains(id))
+						result.addAll(resolveIdentifier(state, id));
 					else if (id instanceof Variable) {
 						// this is a variable from the program that we know
 						// nothing about
 						CodeLocation loc = expression.getCodeLocation();
 						AllocationSite site;
 						if (id.getStaticType().isPointerType())
-							site = new HeapAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+							site = new HeapAllocationSite(
+									id.getStaticType(),
+									"unknown@" + id.getName(),
+									true,
+									loc);
 						else if (id.getStaticType().isInMemoryType() || id.getStaticType().isUntyped())
-							site = new StackAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+							site = new StackAllocationSite(
+									id.getStaticType(),
+									"unknown@" + id.getName(),
+									true,
+									loc);
 						else
-							throw new SemanticException("The type " + id.getStaticType()
-									+ " cannot be allocated by point-based heap domains");
+							throw new SemanticException(
+									"The type " + id.getStaticType()
+											+ " cannot be allocated by point-based heap domains");
 
 						// propagates the annotations of the variable
 						// to the newly created allocation site
@@ -592,43 +489,45 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 			if (expression.getStaticType().isPointerType()) {
 				Type inner = expression.getStaticType().asPointerType().getInnerType();
 				CodeLocation loc = expression.getCodeLocation();
-				HeapAllocationSite site = new HeapAllocationSite(inner, "unknown@" + loc.getCodeLocation(), false, loc);
+				HeapAllocationSite site = new HeapAllocationSite(
+						inner,
+						"unknown@" + loc.getCodeLocation(),
+						false,
+						loc);
 				return new ExpressionSet(new MemoryPointer(expression.getStaticType(), site, loc));
 			} else if (expression.getStaticType().isInMemoryType()) {
 				Type type = expression.getStaticType();
 				CodeLocation loc = expression.getCodeLocation();
-				StackAllocationSite site = new StackAllocationSite(type, "unknown@" + loc.getCodeLocation(), false,
+				StackAllocationSite site = new StackAllocationSite(
+						type,
+						"unknown@" + loc.getCodeLocation(),
+						false,
 						loc);
 				return new ExpressionSet(new MemoryPointer(expression.getStaticType(), site, loc));
 			}
 			return new ExpressionSet(expression);
 		}
-	}
 
-	@Override
-	public boolean knowsIdentifier(
-			Identifier id) {
-		return heapEnv.knowsIdentifier(id) || (id instanceof AllocationSite
-				&& heapEnv.getValues().stream().anyMatch(as -> as.contains((AllocationSite) id)));
 	}
 
 	@Override
 	public Satisfiability alias(
+			L state,
 			SymbolicExpression x,
 			SymbolicExpression y,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (isTop())
+		if (state.isTop())
 			return Satisfiability.UNKNOWN;
-		if (isBottom())
+		if (state.isBottom())
 			return Satisfiability.BOTTOM;
 
 		boolean atLeastOne = false;
 		boolean all = true;
 
-		ExpressionSet xrs = rewrite(x, pp, oracle);
-		ExpressionSet yrs = rewrite(y, pp, oracle);
+		ExpressionSet xrs = rewrite(state, x, pp, oracle);
+		ExpressionSet yrs = rewrite(state, y, pp, oracle);
 
 		for (SymbolicExpression xr : xrs)
 			for (SymbolicExpression yr : yrs)
@@ -654,83 +553,33 @@ public abstract class AllocationSiteBasedAnalysis<A extends AllocationSiteBasedA
 
 	@Override
 	public Satisfiability isReachableFrom(
+			L state,
 			SymbolicExpression x,
 			SymbolicExpression y,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (isTop())
+		if (state.isTop())
 			return Satisfiability.UNKNOWN;
-		if (isBottom())
+		if (state.isBottom())
 			return Satisfiability.BOTTOM;
 
 		WorkingSet<SymbolicExpression> ws = VisitOnceFIFOWorkingSet.mk();
-		rewrite(x, pp, oracle).elements().forEach(ws::push);
-		ExpressionSet targets = rewrite(y, pp, oracle);
+		rewrite(state, x, pp, oracle).elements().forEach(ws::push);
+		ExpressionSet targets = rewrite(state, y, pp, oracle);
 
 		while (!ws.isEmpty()) {
 			SymbolicExpression current = ws.peek();
 			if (targets.elements().contains(current))
 				return Satisfiability.SATISFIED;
 
-			if (current instanceof Identifier && heapEnv.knowsIdentifier((Identifier) current))
-				heapEnv.getState((Identifier) current).elements().forEach(ws::push);
+			if (current instanceof Identifier && state.knowsIdentifier((Identifier) current))
+				state.getState((Identifier) current).elements().forEach(ws::push);
 			else
-				rewrite(current, pp, oracle).elements().forEach(ws::push);
+				rewrite(state, current, pp, oracle).elements().forEach(ws::push);
 		}
 
 		return Satisfiability.NOT_SATISFIED;
 	}
 
-	/**
-	 * Yields the cut of the program memory that is <b>only</b> reachable
-	 * starting from the given identifier {@code id}. The cut is expressed in
-	 * terms of the identifiers that are reachable. The returned set only
-	 * contains identifiers that can only be accessed with a memory traversal
-	 * starting at {@code id}. This set always contains {@code id} itself.
-	 * 
-	 * @param id the identifier from which the cut is performed
-	 * 
-	 * @return the collection of identifiers that are reachable only from
-	 *             {@code id}
-	 * 
-	 * @throws SemanticException if something goes wrong during the analysis
-	 */
-	public Collection<Identifier> cut(
-			Identifier id)
-			throws SemanticException {
-		// this gives us a quick way of checking if an id can be reached
-		// through multiple ancestors
-		Map<Identifier, Set<Identifier>> pointedTo = new HashMap<>();
-		for (Entry<Identifier, AllocationSites> entry : heapEnv) {
-			Identifier key = entry.getKey();
-			if (key instanceof AllocationSite)
-				// field information is not relevant for the cut
-				key = ((AllocationSite) key).withoutField();
-			for (AllocationSite site : entry.getValue())
-				// field information is not relevant for the cut
-				pointedTo.computeIfAbsent(site.withoutField(), k -> new HashSet<>()).add(key);
-		}
-
-		Set<Identifier> reachable = new HashSet<>();
-		Set<Identifier> frontier = new HashSet<>();
-
-		reachable.add(id);
-		frontier.add(id);
-
-		do {
-			Set<Identifier> tmp = new HashSet<>();
-			for (Identifier current : frontier)
-				for (AllocationSite site : heapEnv.getState(current)) {
-					site = site.withoutField();
-					if (!reachable.contains(site) && pointedTo.get(site).size() == 1) {
-						reachable.add(site);
-						tmp.add(site);
-					}
-				}
-			frontier = tmp;
-		} while (!frontier.isEmpty());
-
-		return reachable;
-	}
 }

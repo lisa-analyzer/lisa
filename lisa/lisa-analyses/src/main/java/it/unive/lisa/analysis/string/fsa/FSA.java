@@ -1,11 +1,9 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -21,12 +19,8 @@ import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
@@ -40,246 +34,130 @@ import java.util.TreeSet;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class FSA implements SmashedSumStringDomain<FSA> {
-
-	/**
-	 * Top element of the domain
-	 */
-	private static final FSA TOP = new FSA(new SimpleAutomaton("").unknownString());
-
-	/**
-	 * The parameter used for the widening operator.
-	 */
-	public static final int WIDENING_TH = 5;
-
-	/**
-	 * Used to store the string representation
-	 */
-	private final SimpleAutomaton a;
-
-	/**
-	 * Creates a new FSA object representing the TOP element.
-	 */
-	public FSA() {
-		// we use the empty language as it is memory-efficient
-		this.a = new SimpleAutomaton("").emptyLanguage();
-	}
-
-	/**
-	 * Creates a new FSA object using a {@link SimpleAutomaton}.
-	 * 
-	 * @param a the {@link SimpleAutomaton} used for object construction.
-	 */
-	public FSA(
-			SimpleAutomaton a) {
-		this.a = a;
-	}
+public class FSA
+		implements
+		SmashedSumStringDomain<SimpleAutomaton> {
 
 	@Override
-	public FSA lubAux(
-			FSA other)
-			throws SemanticException {
-		return new FSA(this.a.union(other.a).minimize());
-	}
-
-	@Override
-	public FSA glbAux(
-			FSA other)
-			throws SemanticException {
-		return new FSA(this.a.intersection(other.a).minimize());
-	}
-
-	@Override
-	public FSA wideningAux(
-			FSA other)
-			throws SemanticException {
-		return new FSA(this.a.union(other.a).widening(getSizeDiffCapped(other)));
-	}
-
-	/**
-	 * Yields the size of this string, that is, the number of states of the
-	 * underlying automaton.
-	 * 
-	 * @return the size of this string
-	 */
-	public int size() {
-		return a.getStates().size();
-	}
-
-	private int getSizeDiffCapped(
-			FSA other) {
-		int size = size();
-		int otherSize = other.size();
-		if (size > otherSize)
-			return Math.min(size - otherSize, WIDENING_TH);
-		else if (size < otherSize)
-			return Math.min(otherSize - size, WIDENING_TH);
-		else
-			return WIDENING_TH;
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			FSA other)
-			throws SemanticException {
-		return this.a.isContained(other.a);
-	}
-
-	@Override
-	public boolean equals(
-			Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		FSA fsa = (FSA) o;
-		return Objects.equals(a, fsa.a);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(a);
-	}
-
-	@Override
-	public FSA top() {
-		return TOP;
-	}
-
-	@Override
-	public boolean isBottom() {
-		return !isTop() && this.a.acceptsEmptyLanguage();
-	}
-
-	@Override
-	public FSA bottom() {
-		SortedSet<State> states = new TreeSet<>();
-		states.add(new State(0, true, false));
-		return new FSA(new SimpleAutomaton(states, new TreeSet<>()));
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-		else if (isTop())
-			return Lattice.topRepresentation();
-
-		return new StringRepresentation(this.a.toRegex().simplify());
-	}
-
-	@Override
-	public FSA evalNonNullConstant(
+	public SimpleAutomaton evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (constant.getValue() instanceof String)
-			return new FSA(new SimpleAutomaton((String) constant.getValue()));
-		return top();
+			return new SimpleAutomaton((String) constant.getValue());
+		return SimpleAutomaton.TOP;
 	}
 
 	@Override
-	public FSA evalBinaryExpression(
+	public SimpleAutomaton evalBinaryExpression(
 			BinaryExpression expression,
-			FSA left,
-			FSA right,
+			SimpleAutomaton left,
+			SimpleAutomaton right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression.getOperator() == StringConcat.INSTANCE)
-			return new FSA(left.a.concat(right.a));
-		return top();
+			return left.concat(right);
+		return SimpleAutomaton.TOP;
 	}
 
 	@Override
-	public FSA evalTernaryExpression(
+	public SimpleAutomaton evalTernaryExpression(
 			TernaryExpression expression,
-			FSA left,
-			FSA middle,
-			FSA right,
+			SimpleAutomaton left,
+			SimpleAutomaton middle,
+			SimpleAutomaton right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression.getOperator() == StringReplace.INSTANCE)
 			try {
-				return new FSA(left.a.replace(middle.a, right.a));
+				return left.replace(middle, right);
 			} catch (CyclicAutomatonException e) {
-				return TOP;
+				return SimpleAutomaton.TOP;
 			}
-		return TOP;
+		return SimpleAutomaton.TOP;
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			FSA left,
-			FSA right,
+			SimpleAutomaton left,
+			SimpleAutomaton right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression.getOperator() == StringContains.INSTANCE)
-			return left.contains(right);
+			return contains(left, right);
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public FSA substring(
+	public SimpleAutomaton substring(
+			SimpleAutomaton current,
 			long begin,
 			long end)
 			throws SemanticException {
-		if (isTop() || isBottom())
-			return this;
+		if (current.isTop() || current.isBottom())
+			return current;
 
-		if (!a.hasCycle()) {
-			SimpleAutomaton result = this.a.emptyLanguage();
+		if (!current.hasCycle()) {
+			SimpleAutomaton result = current.emptyLanguage();
 			try {
-				for (String s : a.getLanguage()) {
+				for (String s : current.getLanguage()) {
 					if (begin < s.length() && end < s.length())
 						result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
 					else
 						result = result.union(new SimpleAutomaton(""));
 
-					return new FSA(result);
+					return result;
 				}
 			} catch (CyclicAutomatonException e) {
 				throw new SemanticException("The automaton is cyclic", e);
 			}
 		}
 
-		SimpleAutomaton[] array = this.a.toRegex().substring((int) begin, (int) end)
+		SimpleAutomaton[] array = current
+				.toRegex()
+				.substring((int) begin, (int) end)
 				.parallelStream()
-				.map(s -> new SimpleAutomaton(s.toString())).toArray(SimpleAutomaton[]::new);
+				.map(s -> new SimpleAutomaton(s.toString()))
+				.toArray(SimpleAutomaton[]::new);
 
-		SimpleAutomaton result = this.a.emptyLanguage();
+		SimpleAutomaton result = current.emptyLanguage();
 
 		for (int i = 0; i < array.length; i++)
 			result = result.union(array[i]);
-		return new FSA(result);
+		return result;
 	}
 
 	/**
 	 * Yields the {@link IntInterval} containing the minimum and maximum length
-	 * of this abstract value.
+	 * of the given abstract value.
+	 * 
+	 * @param current the current automaton
 	 * 
 	 * @return the minimum and maximum length of this abstract value
 	 */
-	public IntInterval length() {
-		return new IntInterval(a.toRegex().minLength(), a.lenghtOfLongestString());
+	public IntInterval length(
+			SimpleAutomaton current) {
+		return current.length();
 	}
 
 	@Override
 	public IntInterval indexOf(
-			FSA s)
+			SimpleAutomaton current,
+			SimpleAutomaton s)
 			throws SemanticException {
-		if (a.hasCycle())
+		if (current.hasCycle())
 			return mkInterval(-1, null);
 
-		if (!a.hasCycle() && !s.a.hasCycle()) {
+		if (!current.hasCycle() && !s.hasCycle()) {
 			Set<String> first, second;
 			try {
-				first = a.getLanguage();
-				second = s.a.getLanguage();
+				first = current.getLanguage();
+				second = s.getLanguage();
 			} catch (CyclicAutomatonException e) {
 				throw new SemanticException("The automaton is cyclic", e);
 			}
@@ -303,17 +181,18 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 		}
 
 		HashSet<Integer> indexesOf = new HashSet<>();
-		for (State q : a.getStates()) {
-			SimpleAutomaton build = a.factorsChangingInitialState(q);
-			if (!build.intersection(s.a).acceptsEmptyLanguage())
-				indexesOf.add(a.maximumPath(q, q).size() - 1);
+		for (State q : current.getStates()) {
+			SimpleAutomaton build = current.factorsChangingInitialState(q);
+			if (!build.intersection(s).acceptsEmptyLanguage())
+				indexesOf.add(current.maximumPath(q, q).size() - 1);
 		}
 
 		// No state in the automaton can read search
 		if (indexesOf.isEmpty())
 			return mkInterval(-1, -1);
-		else if (s.a.recognizesExactlyOneString() && a.recognizesExactlyOneString())
-			return mkInterval(indexesOf.stream().mapToInt(i -> i).min().getAsInt(),
+		else if (s.recognizesExactlyOneString() && current.recognizesExactlyOneString())
+			return mkInterval(
+					indexesOf.stream().mapToInt(i -> i).min().getAsInt(),
 					indexesOf.stream().mapToInt(i -> i).max().getAsInt());
 		else
 			return mkInterval(-1, indexesOf.stream().mapToInt(i -> i).max().getAsInt());
@@ -322,13 +201,15 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 	/**
 	 * Yields the concatenation between two automata.
 	 * 
-	 * @param other the other automaton
+	 * @param current the current automaton
+	 * @param other   the other automaton
 	 * 
 	 * @return the concatenation between two automata
 	 */
-	public FSA concat(
-			FSA other) {
-		return new FSA(this.a.concat(other.a));
+	public SimpleAutomaton concat(
+			SimpleAutomaton current,
+			SimpleAutomaton other) {
+		return current.concat(other);
 	}
 
 	private IntInterval mkInterval(
@@ -346,25 +227,26 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 	}
 
 	/**
-	 * Yields if this automaton recognizes strings recognized by the other
+	 * Yields if the given automaton recognizes strings recognized by the other
 	 * automaton.
 	 * 
-	 * @param other the other automaton
+	 * @param current the current automaton
+	 * @param other   the other automaton
 	 * 
-	 * @return if this automaton recognizes strings recognized by the other
+	 * @return if the given automaton recognizes strings recognized by the other
 	 *             automaton
 	 */
 	public Satisfiability contains(
-			FSA other) {
-
-		if (other.a.isEqualTo(a.emptyString()))
+			SimpleAutomaton current,
+			SimpleAutomaton other) {
+		if (other.isEqualTo(current.emptyString()))
 			return Satisfiability.SATISFIED;
-		else if (this.a.factors().intersection(other.a).acceptsEmptyLanguage())
+		else if (current.factors().intersection(other).acceptsEmptyLanguage())
 			return Satisfiability.NOT_SATISFIED;
 		else
 			try {
-				Set<String> rightLang = other.a.getLanguage();
-				Set<String> leftLang = a.getLanguage();
+				Set<String> rightLang = other.getLanguage();
+				Set<String> leftLang = current.getLanguage();
 				// right accepts only the empty string
 				if (rightLang.size() == 1 && rightLang.contains(""))
 					return Satisfiability.SATISFIED;
@@ -392,34 +274,37 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 	 * Yields the replacement of occurrences of {@code search} inside
 	 * {@code this} with {@code repl}.
 	 * 
-	 * @param search the domain instance containing the automaton to search
-	 * @param repl   the domain instance containing the automaton to use as
-	 *                   replacement
+	 * @param current the current automaton
+	 * @param search  the domain instance containing the automaton to search
+	 * @param repl    the domain instance containing the automaton to use as
+	 *                    replacement
 	 * 
-	 * @return the domain instance containing the replaced automaton
+	 * @return the automaton containing the replaced strings
 	 */
-	public FSA replace(
-			FSA search,
-			FSA repl) {
+	public SimpleAutomaton replace(
+			SimpleAutomaton current,
+			SimpleAutomaton search,
+			SimpleAutomaton repl) {
 		try {
-			return new FSA(this.a.replace(search.a, repl.a));
+			return current.replace(search, repl);
 		} catch (CyclicAutomatonException e) {
-			return TOP;
+			return SimpleAutomaton.TOP;
 		}
 	}
 
 	@Override
 	public Satisfiability containsChar(
+			SimpleAutomaton current,
 			char c)
 			throws SemanticException {
-		if (isTop())
+		if (current.isTop())
 			return Satisfiability.UNKNOWN;
-		if (isBottom())
+		if (current.isBottom())
 			return Satisfiability.BOTTOM;
-		if (!a.hasCycle()) {
+		if (!current.hasCycle()) {
 			Satisfiability sat = Satisfiability.BOTTOM;
 			try {
-				for (String s : a.getLanguage())
+				for (String s : current.getLanguage())
 					if (s.contains(String.valueOf(c)))
 						sat = sat.lub(Satisfiability.SATISFIED);
 					else
@@ -433,18 +318,18 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 		WorkingSet<State> ws = FIFOWorkingSet.mk();
 		Set<State> visited = new TreeSet<>();
 
-		for (State q : a.getInitialStates())
+		for (State q : current.getInitialStates())
 			ws.push(q);
 
 		while (!ws.isEmpty()) {
 			State top = ws.pop();
-			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top)) {
+			for (Transition<StringSymbol> tr : current.getOutgoingTransitionsFrom(top)) {
 				if (tr.getSymbol().getSymbol().equals(String.valueOf(c)))
 					return Satisfiability.SATISFIED;
 			}
 			visited.add(top);
 
-			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top))
+			for (Transition<StringSymbol> tr : current.getOutgoingTransitionsFrom(top))
 				if (visited.contains(tr.getDestination()))
 					return Satisfiability.UNKNOWN;
 				else
@@ -455,35 +340,51 @@ public class FSA implements SmashedSumStringDomain<FSA> {
 	}
 
 	/**
-	 * Yields a new FSA where trailing and leading whitespaces have been removed
-	 * from {@code this}.
+	 * Yields a new automaton where trailing and leading whitespaces have been
+	 * removed from {@code this}.
 	 * 
-	 * @return a new FSA where trailing and leading whitespaces have been
+	 * @param current the current automaton
+	 * 
+	 * @return a new automaton where trailing and leading whitespaces have been
 	 *             removed from {@code this}
 	 */
-	public FSA trim() {
-		if (isBottom() || isTop())
-			return this;
-		return new FSA(this.a.trim());
+	public SimpleAutomaton trim(
+			SimpleAutomaton current) {
+		if (current.isBottom() || current.isTop())
+			return current;
+		return current.trim();
 	}
 
 	/**
-	 * Yields a new FSA instance recognizing each string of {@code this}
-	 * automaton repeated k-times, with k belonging to {@code intv}.
+	 * Yields a new automaton recognizing each string of {@code this} automaton
+	 * repeated k-times, with k belonging to {@code intv}.
 	 * 
-	 * @param i the interval
+	 * @param current the current automaton
+	 * @param i       the interval
 	 * 
-	 * @return a new FSA instance recognizing each string of {@code this}
-	 *             automaton repeated k-times, with k belonging to {@code intv}
+	 * @return a new automaton recognizing each string of {@code this} automaton
+	 *             repeated k-times, with k belonging to {@code intv}
 	 * 
 	 * @throws MathNumberConversionException if {@code intv} is iterated but is
 	 *                                           not finite
 	 */
-	public FSA repeat(
-			Interval i)
+	public SimpleAutomaton repeat(
+			SimpleAutomaton current,
+			IntInterval i)
 			throws MathNumberConversionException {
-		if (isBottom() || isTop())
-			return this;
-		return new FSA(this.a.repeat(i));
+		if (current.isBottom() || current.isTop())
+			return current;
+		return current.repeat(i);
 	}
+
+	@Override
+	public SimpleAutomaton top() {
+		return SimpleAutomaton.TOP;
+	}
+
+	@Override
+	public SimpleAutomaton bottom() {
+		return SimpleAutomaton.TOP.bottom();
+	}
+
 }

@@ -22,7 +22,9 @@ import java.util.TreeSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OrderBasedWorkingSet implements WorkingSet<Statement> {
+public class OrderBasedWorkingSet
+		implements
+		WorkingSet<Statement> {
 
 	private final SortedSet<Statement> ws;
 

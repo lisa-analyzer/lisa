@@ -1,6 +1,8 @@
 package it.unive.lisa;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
@@ -45,10 +47,12 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state that will be used in the analysis fixpoint
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class LiSARunner<A extends AbstractState<A>> {
+public class LiSARunner<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>> {
 
 	private static final Logger LOG = LogManager.getLogger(LiSARunner.class);
 
@@ -56,11 +60,11 @@ public class LiSARunner<A extends AbstractState<A>> {
 
 	private final FileManager fileManager;
 
-	private final InterproceduralAnalysis<A> interproc;
+	private final InterproceduralAnalysis<A, D> interproc;
+
+	private final Analysis<A, D> analysis;
 
 	private final CallGraph callGraph;
-
-	private final A state;
 
 	/**
 	 * Builds the runner.
@@ -69,19 +73,19 @@ public class LiSARunner<A extends AbstractState<A>> {
 	 * @param fileManager the file manager for the analysis
 	 * @param interproc   the interprocedural analysis to use
 	 * @param callGraph   the call graph to use
-	 * @param state       the abstract state to use for the analysis
+	 * @param analysis    the analysis to run
 	 */
 	LiSARunner(
 			LiSAConfiguration conf,
 			FileManager fileManager,
-			InterproceduralAnalysis<A> interproc,
+			InterproceduralAnalysis<A, D> interproc,
 			CallGraph callGraph,
-			A state) {
+			Analysis<A, D> analysis) {
 		this.conf = conf;
 		this.fileManager = fileManager;
 		this.interproc = interproc;
 		this.callGraph = callGraph;
-		this.state = state;
+		this.analysis = analysis;
 	}
 
 	/**
@@ -118,8 +122,10 @@ public class LiSARunner<A extends AbstractState<A>> {
 			if (conf.serializeResults || conf.analysisGraphs != GraphType.NONE)
 				dumpResults(allCFGs, fixconf);
 
-			@SuppressWarnings({ "rawtypes", "unchecked" })
-			Collection<SemanticCheck<A>> semanticChecks = (Collection) conf.semanticChecks;
+			@SuppressWarnings({
+					"rawtypes", "unchecked"
+			})
+			Collection<SemanticCheck<A, D>> semanticChecks = (Collection) conf.semanticChecks;
 			if (!semanticChecks.isEmpty())
 				tool = runSemanticChecks(app, allCFGs, tool, semanticChecks);
 			else
@@ -164,8 +170,7 @@ public class LiSARunner<A extends AbstractState<A>> {
 
 				dumpSingleGraph(filename, graph);
 			} catch (IOException e) {
-				LOG.error("Exception while dumping the analysis results on {}",
-						cfg.getDescriptor().getFullSignature());
+				LOG.error("Exception while dumping the analysis results on {}", cfg.getDescriptor().getFullSignature());
 				LOG.error(e);
 			}
 		}
@@ -177,17 +182,16 @@ public class LiSARunner<A extends AbstractState<A>> {
 			callGraph.init(app);
 		} catch (CallGraphConstructionException e) {
 			LOG.fatal("Exception while building the call graph for the input program", e);
-			throw new AnalysisSetupException(
-					"Exception while building the call graph for the input program",
-					e);
+			throw new AnalysisSetupException("Exception while building the call graph for the input program", e);
 		}
 
 		try {
-			interproc.init(app, callGraph, conf.openCallPolicy);
+			interproc.init(app, callGraph, conf.openCallPolicy, analysis);
 		} catch (InterproceduralAnalysisException e) {
 			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisSetupException(
-					"Exception while building the interprocedural analysis for the input program", e);
+					"Exception while building the interprocedural analysis for the input program",
+					e);
 		}
 	}
 
@@ -201,8 +205,8 @@ public class LiSARunner<A extends AbstractState<A>> {
 			throw new AnalysisSetupException(
 					"The provided interprocedural analysis needs a call graph to function, but none has been provided");
 
-		if (state == null) {
-			LOG.warn("Skipping analysis execution since no abstract sate has been provided");
+		if (analysis == null) {
+			LOG.warn("Skipping analysis execution since no analysis has been provided");
 			return false;
 		}
 
@@ -211,18 +215,16 @@ public class LiSARunner<A extends AbstractState<A>> {
 
 	private void analyze(
 			FixpointConfiguration fixconf) {
-		A state = this.state.top();
-		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
-				() -> {
-					try {
-						interproc.fixpoint(
-								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE)),
-								fixconf);
-					} catch (FixpointException e) {
-						LOG.fatal("Exception during fixpoint computation", e);
-						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
-					}
-				});
+		AnalysisState<A> state = this.analysis.makeLattice();
+		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
+			try {
+				interproc
+						.fixpoint(new AnalysisState<>(state.getState(), new Skip(SyntheticLocation.INSTANCE)), fixconf);
+			} catch (FixpointException e) {
+				LOG.fatal("Exception during fixpoint computation", e);
+				throw new AnalysisExecutionException("Exception during fixpoint computation", e);
+			}
+		});
 	}
 
 	@SuppressWarnings("unchecked")
@@ -232,16 +234,13 @@ public class LiSARunner<A extends AbstractState<A>> {
 		BiFunction<CFG, Statement, SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding
 				? (
 						cfg,
-						st) -> ((OptimizedAnalyzedCFG<A>) cfg)
+						st) -> ((OptimizedAnalyzedCFG<A, D>) cfg)
 								.getUnwindedAnalysisStateAfter(st, fixconf)
 								.representation()
 								.toSerializableValue()
 				: (
 						cfg,
-						st) -> ((AnalyzedCFG<A>) cfg)
-								.getAnalysisStateAfter(st)
-								.representation()
-								.toSerializableValue();
+						st) -> ((AnalyzedCFG<A>) cfg).getAnalysisStateAfter(st).representation().toSerializableValue();
 
 		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 			for (AnalyzedCFG<A> result : interproc.getAnalysisResultsOf(cfg)) {
@@ -255,8 +254,10 @@ public class LiSARunner<A extends AbstractState<A>> {
 						fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
 					dumpSingleGraph(filename, graph);
 				} catch (IOException e) {
-					LOG.error("Exception while dumping the analysis results on {}",
-							cfg.getDescriptor().getFullSignature());
+					LOG
+							.error(
+									"Exception while dumping the analysis results on {}",
+									cfg.getDescriptor().getFullSignature());
 					LOG.error(e);
 				}
 			}
@@ -281,7 +282,8 @@ public class LiSARunner<A extends AbstractState<A>> {
 		case NONE:
 			break;
 		default:
-			throw new AnalysisExecutionException("Unknown graph type: " + conf.analysisGraphs);
+			throw new AnalysisExecutionException(
+					"Unknown graph type: " + conf.analysisGraphs);
 		}
 	}
 
@@ -289,14 +291,12 @@ public class LiSARunner<A extends AbstractState<A>> {
 			Application app,
 			Collection<CFG> allCFGs,
 			CheckTool tool,
-			Collection<SemanticCheck<A>> semanticChecks) {
+			Collection<SemanticCheck<A, D>> semanticChecks) {
 		Map<CFG, Collection<AnalyzedCFG<A>>> results = new IdentityHashMap<>(allCFGs.size());
 		for (CFG cfg : allCFGs)
 			results.put(cfg, interproc.getAnalysisResultsOf(cfg));
-		CheckToolWithAnalysisResults<A> tool2 = new CheckToolWithAnalysisResults<>(
-				tool,
-				results,
-				callGraph);
+		CheckToolWithAnalysisResults<A,
+				D> tool2 = new CheckToolWithAnalysisResults<>(tool, results, callGraph, analysis);
 		ChecksExecutor.executeAll(tool2, app, semanticChecks);
 		return tool2;
 	}
@@ -311,4 +311,5 @@ public class LiSARunner<A extends AbstractState<A>> {
 			LOG.error(e);
 		}
 	}
+
 }

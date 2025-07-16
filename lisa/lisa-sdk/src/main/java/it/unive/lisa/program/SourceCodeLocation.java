@@ -10,9 +10,11 @@ import org.apache.commons.lang3.StringUtils;
  * source code, the line and the column where the element appears.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * @author <a href="mailto:vincenzo.arceri@unive.it">VincenzoArceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">VincenzoArceri</a>
  */
-public class SourceCodeLocation implements CodeLocation {
+public class SourceCodeLocation
+		implements
+		CodeLocation {
 
 	/**
 	 * The source file where this code element happens. If it is unknown, this
@@ -146,4 +148,5 @@ public class SourceCodeLocation implements CodeLocation {
 
 		return Integer.compare(getCol(), o.getCol());
 	}
+
 }

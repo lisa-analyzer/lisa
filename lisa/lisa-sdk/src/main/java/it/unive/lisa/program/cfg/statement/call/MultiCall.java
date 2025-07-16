@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -21,7 +22,11 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MultiCall extends Call implements ResolvedCall {
+public class MultiCall
+		extends
+		Call
+		implements
+		ResolvedCall {
 
 	/**
 	 * The underlying calls
@@ -38,7 +43,8 @@ public class MultiCall extends Call implements ResolvedCall {
 	public MultiCall(
 			UnresolvedCall source,
 			Call... calls) {
-		super(source.getCFG(),
+		super(
+				source.getCFG(),
 				source.getLocation(),
 				source.getCallType(),
 				source.getQualifier(),
@@ -50,7 +56,8 @@ public class MultiCall extends Call implements ResolvedCall {
 		for (Call target : calls) {
 			Objects.requireNonNull(target, "A call underlying a multi call cannot be null");
 			if (!(target instanceof ResolvedCall))
-				throw new IllegalArgumentException(target + " has not been resolved yet");
+				throw new IllegalArgumentException(
+						target + " has not been resolved yet");
 		}
 		this.calls = List.of(calls);
 	}
@@ -139,12 +146,13 @@ public class MultiCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			ExpressionSet[] params,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					ExpressionSet[] params,
+					StatementStore<A> expressions)
+					throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 
 		for (Call call : calls) {
@@ -157,7 +165,11 @@ public class MultiCall extends Call implements ResolvedCall {
 
 	@Override
 	public Collection<CodeMember> getTargets() {
-		return calls.stream().map(ResolvedCall.class::cast).flatMap(c -> c.getTargets().stream())
+		return calls
+				.stream()
+				.map(ResolvedCall.class::cast)
+				.flatMap(c -> c.getTargets().stream())
 				.collect(Collectors.toSet());
 	}
+
 }

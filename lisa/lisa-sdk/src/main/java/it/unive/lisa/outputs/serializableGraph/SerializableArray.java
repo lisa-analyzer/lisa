@@ -13,7 +13,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableArray extends SerializableValue {
+public class SerializableArray
+		extends
+		SerializableValue {
 
 	private final List<SerializableValue> elements;
 
@@ -100,9 +102,10 @@ public class SerializableArray extends SerializableValue {
 		if ((cmp = Integer.compare(elements.size(), other.elements.size())) != 0)
 			return cmp;
 
-		CollectionsDiffBuilder<
-				SerializableValue> builder = new CollectionsDiffBuilder<>(SerializableValue.class, elements,
-						other.elements);
+		CollectionsDiffBuilder<SerializableValue> builder = new CollectionsDiffBuilder<>(
+				SerializableValue.class,
+				elements,
+				other.elements);
 		builder.compute(SerializableValue::compareTo);
 
 		if (builder.sameContent())
@@ -111,4 +114,5 @@ public class SerializableArray extends SerializableValue {
 
 		return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
 	}
+
 }

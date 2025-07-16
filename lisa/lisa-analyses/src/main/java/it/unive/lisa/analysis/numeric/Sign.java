@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Sign.SignLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -33,178 +34,268 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 /**
  * The basic overflow-insensitive Sign abstract domain, tracking zero, strictly
  * positive and strictly negative integer values, implemented as a
- * {@link BaseNonRelationalValueDomain}, handling top and bottom values for the
- * expression evaluation and bottom values for the expression satisfiability.
- * Top and bottom cases for least upper bounds, widening and less or equals
- * operations are handled by {@link BaseLattice} in {@link BaseLattice#lub},
- * {@link BaseLattice#widening} and {@link BaseLattice#lessOrEqual} methods,
- * respectively.
+ * {@link BaseNonRelationalValueDomain}.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Sign implements BaseNonRelationalValueDomain<Sign> {
+public class Sign
+		implements
+		BaseNonRelationalValueDomain<SignLattice> {
 
 	/**
-	 * The abstract positive element.
-	 */
-	public static final Sign POS = new Sign((byte) 4);
-
-	/**
-	 * The abstract negative element.
-	 */
-	public static final Sign NEG = new Sign((byte) 3);
-
-	/**
-	 * The abstract zero element.
-	 */
-	public static final Sign ZERO = new Sign((byte) 2);
-
-	/**
-	 * The abstract top element.
-	 */
-	public static final Sign TOP = new Sign((byte) 0);
-
-	/**
-	 * The abstract bottom element.
-	 */
-	public static final Sign BOTTOM = new Sign((byte) 1);
-
-	private final byte sign;
-
-	/**
-	 * Builds the sign abstract domain, representing the top of the sign
-	 * abstract domain.
-	 */
-	public Sign() {
-		this((byte) 0);
-	}
-
-	/**
-	 * Builds the sign instance for the given sign value.
+	 * The lattice structure the values, which can be positive, negative, zero,
+	 * top or bottom.
 	 * 
-	 * @param sign the sign (0 = top, 1 = bottom, 2 = zero, 3 = negative, 4 =
-	 *                 positive)
+	 * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
 	 */
-	public Sign(
-			byte sign) {
-		this.sign = sign;
+	public static class SignLattice
+			implements
+			BaseLattice<SignLattice> {
+
+		/**
+		 * The abstract positive element.
+		 */
+		public static final SignLattice POS = new SignLattice((byte) 4);
+
+		/**
+		 * The abstract negative element.
+		 */
+		public static final SignLattice NEG = new SignLattice((byte) 3);
+
+		/**
+		 * The abstract zero element.
+		 */
+		public static final SignLattice ZERO = new SignLattice((byte) 2);
+
+		/**
+		 * The abstract top element.
+		 */
+		public static final SignLattice TOP = new SignLattice((byte) 0);
+
+		/**
+		 * The abstract bottom element.
+		 */
+		public static final SignLattice BOTTOM = new SignLattice((byte) 1);
+
+		private final byte sign;
+
+		/**
+		 * Builds the sign abstract domain, representing the top of the sign
+		 * abstract domain.
+		 */
+		public SignLattice() {
+			this((byte) 0);
+		}
+
+		/**
+		 * Builds the sign instance for the given sign value.
+		 * 
+		 * @param sign the sign (0 = top, 1 = bottom, 2 = zero, 3 = negative, 4
+		 *                 = positive)
+		 */
+		private SignLattice(
+				byte sign) {
+			this.sign = sign;
+		}
+
+		@Override
+		public SignLattice top() {
+			return TOP;
+		}
+
+		@Override
+		public SignLattice bottom() {
+			return BOTTOM;
+		}
+
+		@Override
+		public String toString() {
+			return representation().toString();
+		}
+
+		@Override
+		public StructuredRepresentation representation() {
+			if (isBottom())
+				return Lattice.bottomRepresentation();
+			if (isTop())
+				return Lattice.topRepresentation();
+
+			String repr;
+			if (this == ZERO)
+				repr = "0";
+			else if (this == POS)
+				repr = "+";
+			else
+				repr = "-";
+
+			return new StringRepresentation(repr);
+		}
+
+		/**
+		 * Yields whether or not this is the positive sign.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		public boolean isPositive() {
+			return this == POS;
+		}
+
+		/**
+		 * Yields whether or not this is the zero sign.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		public boolean isZero() {
+			return this == ZERO;
+		}
+
+		/**
+		 * Yields whether or not this is the negative sign.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		public boolean isNegative() {
+			return this == NEG;
+		}
+
+		/**
+		 * Yields the sign opposite to this one. Top and bottom elements do not
+		 * change.
+		 * 
+		 * @return the opposite sign
+		 */
+		public SignLattice opposite() {
+			if (isTop() || isBottom())
+				return this;
+			return isPositive() ? NEG : isNegative() ? POS : ZERO;
+		}
+
+		@Override
+		public SignLattice lubAux(
+				SignLattice other)
+				throws SemanticException {
+			return SignLattice.TOP;
+		}
+
+		@Override
+		public boolean lessOrEqualAux(
+				SignLattice other)
+				throws SemanticException {
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + sign;
+			return result;
+		}
+
+		@Override
+		public boolean equals(
+				Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SignLattice other = (SignLattice) obj;
+			if (sign != other.sign)
+				return false;
+			return true;
+		}
+
+		/**
+		 * Tests if this instance is equal to the given one, returning a
+		 * {@link Satisfiability} element.
+		 * 
+		 * @param other the instance
+		 * 
+		 * @return the satisfiability of {@code this = other}
+		 */
+		public Satisfiability eq(
+				SignLattice other) {
+			if (this.isBottom() || other.isBottom())
+				return Satisfiability.BOTTOM;
+			else if (this.isTop() || other.isTop())
+				return Satisfiability.UNKNOWN;
+			else if (!this.equals(other))
+				return Satisfiability.NOT_SATISFIED;
+			else if (isZero())
+				return Satisfiability.SATISFIED;
+			else
+				return Satisfiability.UNKNOWN;
+		}
+
+		/**
+		 * Tests if this instance is greater than the given one, returning a
+		 * {@link Satisfiability} element.
+		 * 
+		 * @param other the instance
+		 * 
+		 * @return the satisfiability of {@code this > other}
+		 */
+		public Satisfiability gt(
+				SignLattice other) {
+			if (this.isBottom() || other.isBottom())
+				return Satisfiability.BOTTOM;
+			else if (this.isTop() || other.isTop())
+				return Satisfiability.UNKNOWN;
+			else if (this.isNegative())
+				return other.isNegative() ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
+			else if (this.isZero())
+				return other.isNegative() ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
+			else
+				return other.isPositive() ? Satisfiability.UNKNOWN : Satisfiability.SATISFIED;
+		}
+
 	}
 
 	@Override
-	public Sign top() {
-		return TOP;
-	}
-
-	@Override
-	public Sign bottom() {
-		return BOTTOM;
-	}
-
-	@Override
-	public String toString() {
-		return representation().toString();
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-		if (isTop())
-			return Lattice.topRepresentation();
-
-		String repr;
-		if (this == ZERO)
-			repr = "0";
-		else if (this == POS)
-			repr = "+";
-		else
-			repr = "-";
-
-		return new StringRepresentation(repr);
-	}
-
-	@Override
-	public Sign evalNullConstant(
+	public SignLattice evalNullConstant(
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		return top();
 	}
 
 	@Override
-	public Sign evalNonNullConstant(
+	public SignLattice evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
-			return i == 0 ? ZERO : i > 0 ? POS : NEG;
+			return i == 0 ? SignLattice.ZERO : i > 0 ? SignLattice.POS : SignLattice.NEG;
 		}
 
-		return top();
-	}
-
-	/**
-	 * Yields whether or not this is the positive sign.
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	public boolean isPositive() {
-		return this == POS;
-	}
-
-	/**
-	 * Yields whether or not this is the zero sign.
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	public boolean isZero() {
-		return this == ZERO;
-	}
-
-	/**
-	 * Yields whether or not this is the negative sign.
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	public boolean isNegative() {
-		return this == NEG;
-	}
-
-	/**
-	 * Yields the sign opposite to this one. Top and bottom elements do not
-	 * change.
-	 * 
-	 * @return the opposite sign
-	 */
-	public Sign opposite() {
-		if (isTop() || isBottom())
-			return this;
-		return isPositive() ? NEG : isNegative() ? POS : ZERO;
+		return SignLattice.TOP;
 	}
 
 	@Override
-	public Sign evalUnaryExpression(
+	public SignLattice evalUnaryExpression(
 			UnaryExpression expression,
-			Sign arg,
+			SignLattice arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (expression.getOperator() == NumericNegation.INSTANCE)
 			if (arg.isPositive())
-				return NEG;
+				return SignLattice.NEG;
 			else if (arg.isNegative())
-				return POS;
+				return SignLattice.POS;
 			else if (arg.isZero())
-				return ZERO;
+				return SignLattice.ZERO;
 			else
-				return TOP;
-		return TOP;
+				return SignLattice.TOP;
+		return SignLattice.TOP;
 	}
 
 	@Override
-	public Sign evalBinaryExpression(
+	public SignLattice evalBinaryExpression(
 			BinaryExpression expression,
-			Sign left,
-			Sign right,
+			SignLattice left,
+			SignLattice right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		BinaryOperator operator = expression.getOperator();
@@ -230,16 +321,16 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			if (right.isZero())
 				return bottom();
 			else if (left.isZero())
-				return ZERO;
+				return SignLattice.ZERO;
 			else if (left.equals(right))
 				// top/top = top
 				// +/+ = +
 				// -/- = +
-				return left.isTop() ? left : POS;
+				return left.isTop() ? left : SignLattice.POS;
 			else if (!left.isTop() && left.equals(right.opposite()))
 				// +/- = -
 				// -/+ = -
-				return NEG;
+				return SignLattice.NEG;
 			else
 				return top();
 		else if (operator instanceof ModuloOperator)
@@ -248,57 +339,20 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			return left;
 		else if (operator instanceof MultiplicationOperator)
 			if (left.isZero() || right.isZero())
-				return ZERO;
+				return SignLattice.ZERO;
 			else if (left.equals(right))
-				return POS;
+				return SignLattice.POS;
 			else
-				return NEG;
+				return SignLattice.NEG;
 		else
-			return TOP;
-	}
-
-	@Override
-	public Sign lubAux(
-			Sign other)
-			throws SemanticException {
-		return TOP;
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			Sign other)
-			throws SemanticException {
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + sign;
-		return result;
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Sign other = (Sign) obj;
-		if (sign != other.sign)
-			return false;
-		return true;
+			return SignLattice.TOP;
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			Sign left,
-			Sign right,
+			SignLattice left,
+			SignLattice right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (left.isTop() || right.isTop())
@@ -323,86 +377,42 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			return Satisfiability.UNKNOWN;
 	}
 
-	/**
-	 * Tests if this instance is equal to the given one, returning a
-	 * {@link Satisfiability} element.
-	 * 
-	 * @param other the instance
-	 * 
-	 * @return the satisfiability of {@code this = other}
-	 */
-	public Satisfiability eq(
-			Sign other) {
-		if (this.isBottom() || other.isBottom())
-			return Satisfiability.BOTTOM;
-		else if (this.isTop() || other.isTop())
-			return Satisfiability.UNKNOWN;
-		else if (!this.equals(other))
-			return Satisfiability.NOT_SATISFIED;
-		else if (isZero())
-			return Satisfiability.SATISFIED;
-		else
-			return Satisfiability.UNKNOWN;
-	}
-
-	/**
-	 * Tests if this instance is greater than the given one, returning a
-	 * {@link Satisfiability} element.
-	 * 
-	 * @param other the instance
-	 * 
-	 * @return the satisfiability of {@code this > other}
-	 */
-	public Satisfiability gt(
-			Sign other) {
-		if (this.isBottom() || other.isBottom())
-			return Satisfiability.BOTTOM;
-		else if (this.isTop() || other.isTop())
-			return Satisfiability.UNKNOWN;
-		else if (this.isNegative())
-			return other.isNegative() ? Satisfiability.UNKNOWN : Satisfiability.NOT_SATISFIED;
-		else if (this.isZero())
-			return other.isNegative() ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
-		else
-			return other.isPositive() ? Satisfiability.UNKNOWN : Satisfiability.SATISFIED;
-	}
-
 	@Override
-	public ValueEnvironment<Sign> assumeBinaryExpression(
-			ValueEnvironment<Sign> environment,
+	public ValueEnvironment<SignLattice> assumeBinaryExpression(
+			ValueEnvironment<SignLattice> environment,
 			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		Satisfiability sat = satisfies(environment, expression, src, oracle);
 		if (sat == Satisfiability.NOT_SATISFIED)
 			return environment.bottom();
 		if (sat == Satisfiability.SATISFIED)
 			return environment;
 
 		Identifier id;
-		Sign eval;
+		SignLattice eval;
 		boolean rightIsExpr;
 		BinaryOperator operator = expression.getOperator();
 		ValueExpression left = (ValueExpression) expression.getLeft();
 		ValueExpression right = (ValueExpression) expression.getRight();
 		if (left instanceof Identifier) {
-			eval = eval(right, environment, src, oracle);
+			eval = eval(environment, right, src, oracle);
 			id = (Identifier) left;
 			rightIsExpr = true;
 		} else if (right instanceof Identifier) {
-			eval = eval(left, environment, src, oracle);
+			eval = eval(environment, left, src, oracle);
 			id = (Identifier) right;
 			rightIsExpr = false;
 		} else
 			return environment;
 
-		Sign starting = environment.getState(id);
+		SignLattice starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
 
-		Sign update = null;
+		SignLattice update = null;
 		if (operator == ComparisonEq.INSTANCE)
 			update = starting.glb(eval);
 		else {
@@ -412,48 +422,50 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			// - if `eval op start`, `update = U { start n v | eval op v, v in {
 			// +, 0, -} }`
 
-			Sign[] all = new Sign[] { NEG, ZERO, POS };
+			SignLattice[] all = new SignLattice[] {
+					SignLattice.NEG, SignLattice.ZERO, SignLattice.POS
+			};
 			if (operator == ComparisonGe.INSTANCE)
 				if (rightIsExpr) {
-					for (Sign s : all)
+					for (SignLattice s : all)
 						if (s.gt(eval).or(s.eq(eval)).mightBeTrue())
 							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
 				} else {
-					for (Sign s : all)
+					for (SignLattice s : all)
 						if (eval.gt(s).or(eval.eq(s)).mightBeTrue())
 							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
 				}
 			else if (operator == ComparisonLe.INSTANCE)
 				if (rightIsExpr) {
-					for (Sign s : all)
+					for (SignLattice s : all)
 						// we invert <= to > and look at the failing ones
 						if (s.gt(eval).mightBeFalse())
 							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
 				} else {
-					for (Sign s : all)
+					for (SignLattice s : all)
 						// we invert <= to > and look at the failing ones
 						if (eval.gt(s).mightBeFalse())
 							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
 				}
 			else if (operator == ComparisonLt.INSTANCE)
 				if (rightIsExpr) {
-					for (Sign s : all)
+					for (SignLattice s : all)
 						// we invert < to >= and look at the failing ones
 						if (s.gt(eval).or(s.eq(eval)).mightBeFalse())
 							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
 				} else {
-					for (Sign s : all)
+					for (SignLattice s : all)
 						// we invert < to >= and look at the failing ones
 						if (eval.gt(s).or(eval.eq(s)).mightBeFalse())
 							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
 				}
 			else if (operator == ComparisonGt.INSTANCE)
 				if (rightIsExpr) {
-					for (Sign s : all)
+					for (SignLattice s : all)
 						if (s.gt(eval).mightBeTrue())
 							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
 				} else {
-					for (Sign s : all)
+					for (SignLattice s : all)
 						if (eval.gt(s).mightBeTrue())
 							update = update == null ? starting.glb(s) : update.lub(starting.glb(s));
 				}
@@ -466,4 +478,15 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 		else
 			return environment.putState(id, update);
 	}
+
+	@Override
+	public SignLattice top() {
+		return SignLattice.TOP;
+	}
+
+	@Override
+	public SignLattice bottom() {
+		return SignLattice.BOTTOM;
+	}
+
 }

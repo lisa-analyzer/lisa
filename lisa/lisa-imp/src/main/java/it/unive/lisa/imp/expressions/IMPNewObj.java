@@ -1,6 +1,8 @@
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -35,7 +37,9 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewObj extends NaryExpression {
+public class IMPNewObj
+		extends
+		NaryExpression {
 
 	private final boolean staticallyAllocated;
 
@@ -60,7 +64,11 @@ public class IMPNewObj extends NaryExpression {
 			Type type,
 			boolean staticallyAllocated,
 			Expression... parameters) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type, type,
+		super(
+				cfg,
+				new SourceCodeLocation(sourceFile, line, col),
+				(staticallyAllocated ? "" : "new ") + type,
+				type,
 				parameters);
 		this.staticallyAllocated = staticallyAllocated;
 	}
@@ -72,19 +80,21 @@ public class IMPNewObj extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			ExpressionSet[] params,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					ExpressionSet[] params,
+					StatementStore<A> expressions)
+					throws SemanticException {
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
 		MemoryAllocation creation = new MemoryAllocation(type, getLocation(), staticallyAllocated);
 		HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
 		// we start by allocating the memory region
-		AnalysisState<A> allocated = state.smallStepSemantics(creation, this);
+		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
 
 		// we need to add the receiver to the parameters of the constructor call
 		InstrumentedReceiverRef paramThis = new InstrumentedReceiverRef(getCFG(), getLocation(), false, reftype);
@@ -97,7 +107,7 @@ public class IMPNewObj extends NaryExpression {
 		// we store a reference to the newly created region in the receiver
 		AnalysisState<A> tmp = state.bottom();
 		for (SymbolicExpression rec : callstate.getComputedExpressions())
-			tmp = tmp.lub(callstate.assign(rec, ref, paramThis));
+			tmp = tmp.lub(analysis.assign(callstate, rec, ref, paramThis));
 		// we store the approximation of the receiver in the sub-expressions
 		expressions.put(paramThis, tmp);
 
@@ -123,19 +133,17 @@ public class IMPNewObj extends NaryExpression {
 		// finally, we leave a reference to the newly created object on the
 		// stack; this correponds to the state after the constructor call
 		// but with the receiver left on the stack
-		return new AnalysisState<>(
-				sem.getState(),
-				callstate.getComputedExpressions(),
-				sem.getFixpointInformation());
+		return new AnalysisState<>(sem.getState(), callstate.getComputedExpressions(), sem.getFixpointInformation());
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			ExpressionSet[] params,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					ExpressionSet[] params,
+					StatementStore<A> expressions)
+					throws SemanticException {
 		// TODO implement this when backward analysis will be out of
 		// beta
 		throw new UnsupportedOperationException();
@@ -161,4 +169,5 @@ public class IMPNewObj extends NaryExpression {
 		IMPNewObj other = (IMPNewObj) obj;
 		return staticallyAllocated == other.staticallyAllocated;
 	}
+
 }

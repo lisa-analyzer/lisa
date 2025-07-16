@@ -2,7 +2,8 @@ package it.unive.lisa.program.cfg.fixpoints;
 
 import static java.lang.String.format;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.program.cfg.CFG;
@@ -32,10 +33,10 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
+ * @param <A> the type of {@link AbstractDomain} contained into the analysis
  *                state
  */
-public class OptimizedBackwardFixpoint<A extends AbstractState<A>>
+public class OptimizedBackwardFixpoint<A extends AbstractLattice<A>>
 		extends
 		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> {
 
@@ -67,9 +68,10 @@ public class OptimizedBackwardFixpoint<A extends AbstractState<A>>
 			Fixpoint.FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
 			Map<Statement, CompoundState<A>> initialResult)
 			throws FixpointException {
-		Map<Statement, CompoundState<A>> result = initialResult == null
-				? new HashMap<>(graph.getNodesCount())
-				: new HashMap<>(initialResult);
+		Map<Statement,
+				CompoundState<A>> result = initialResult == null
+						? new HashMap<>(graph.getNodesCount())
+						: new HashMap<>(initialResult);
 
 		Map<Statement, Statement[]> bbs = new HashMap<>();
 		for (Entry<Statement, Statement[]> bb : graph.getBasicBlocks().entrySet()) {
@@ -88,21 +90,21 @@ public class OptimizedBackwardFixpoint<A extends AbstractState<A>>
 			Statement current = ws.pop();
 
 			if (current == null)
-				throw new FixpointException("null node encountered during fixpoint in '" + graph + "'");
+				throw new FixpointException(
+						"null node encountered during fixpoint in '" + graph + "'");
 			if (!graph.containsNode(current))
-				throw new FixpointException("'" + current + "' is not part of '" + graph + "'");
+				throw new FixpointException(
+						"'" + current + "' is not part of '" + graph + "'");
 
 			Statement[] bb = bbs.get(current);
 			if (bb == null)
-				throw new FixpointException("'" + current + "' is not the leader of a basic block of '" + graph + "'");
+				throw new FixpointException(
+						"'" + current + "' is not the leader of a basic block of '" + graph + "'");
 
-			CompoundState<A> exitstate = getExitState(
-					current,
-					startingPoints.get(current),
-					implementation,
-					result);
+			CompoundState<A> exitstate = getExitState(current, startingPoints.get(current), implementation, result);
 			if (exitstate == null)
-				throw new FixpointException("'" + current + "' does not have an entry state");
+				throw new FixpointException(
+						"'" + current + "' does not have an entry state");
 
 			newApprox = analyze(result, implementation, exitstate, bb);
 
@@ -155,9 +157,7 @@ public class OptimizedBackwardFixpoint<A extends AbstractState<A>>
 			Statement[] bb)
 			throws FixpointException {
 		StatementStore<A> emptyIntermediate = exitstate.intermediateStates.bottom();
-		CompoundState<A> newApprox = CompoundState.of(
-				exitstate.postState.bottom(),
-				emptyIntermediate);
+		CompoundState<A> newApprox = CompoundState.of(exitstate.postState.bottom(), emptyIntermediate);
 		CompoundState<A> exit = exitstate;
 		for (int i = bb.length - 1; i >= 0; i--)
 			try {
@@ -171,8 +171,7 @@ public class OptimizedBackwardFixpoint<A extends AbstractState<A>>
 					if (intermediate.getKey().stopsExecution()
 							|| (hotspots != null && hotspots.test(intermediate.getKey())))
 						result.put(intermediate.getKey(), CompoundState.of(intermediate.getValue(), emptyIntermediate));
-				if (cursor != bb[0] && (cursor.stopsExecution()
-						|| (hotspots != null && hotspots.test(cursor))))
+				if (cursor != bb[0] && (cursor.stopsExecution() || (hotspots != null && hotspots.test(cursor))))
 					result.put(cursor, CompoundState.of(newApprox.postState, emptyIntermediate));
 
 				exit = newApprox;
@@ -182,4 +181,5 @@ public class OptimizedBackwardFixpoint<A extends AbstractState<A>>
 
 		return CompoundState.of(newApprox.postState, emptyIntermediate);
 	}
+
 }

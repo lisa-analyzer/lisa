@@ -3,10 +3,18 @@ package it.unive.lisa.analysis.dataflow;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.ExpressionVisitor;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
@@ -16,6 +24,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An implementation of the available expressions dataflow analysis, that
@@ -24,87 +33,34 @@ import java.util.HashSet;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class AvailableExpressions
-		implements
-		DataflowElement<DefiniteDataflowDomain<AvailableExpressions>, AvailableExpressions> {
+		extends
+		DataflowDomain<DefiniteSet<AvailableExpressions.AE>, AvailableExpressions.AE> {
 
-	private final ValueExpression expression;
-
-	/**
-	 * Builds an empty available expressions object.
-	 */
-	public AvailableExpressions() {
-		this(null);
-	}
-
-	/**
-	 * Builds the available expressions object.
-	 * 
-	 * @param expression the expression of this element
-	 */
-	public AvailableExpressions(
-			ValueExpression expression) {
-		this.expression = expression;
+	@Override
+	public DefiniteSet<AE> makeLattice() {
+		return new DefiniteSet<>();
 	}
 
 	@Override
-	public String toString() {
-		return representation().toString();
-	}
-
-	@Override
-	public Collection<Identifier> getInvolvedIdentifiers() {
-		return getIdentifierOperands(expression);
-	}
-
-	private static Collection<Identifier> getIdentifierOperands(
-			ValueExpression expression) {
-		Collection<Identifier> result = new HashSet<>();
-
-		if (expression == null)
-			return result;
-
-		if (expression instanceof Identifier)
-			result.add((Identifier) expression);
-
-		if (expression instanceof UnaryExpression)
-			result.addAll(getIdentifierOperands((ValueExpression) ((UnaryExpression) expression).getExpression()));
-
-		if (expression instanceof BinaryExpression) {
-			BinaryExpression binary = (BinaryExpression) expression;
-			result.addAll(getIdentifierOperands((ValueExpression) binary.getLeft()));
-			result.addAll(getIdentifierOperands((ValueExpression) binary.getRight()));
-		}
-
-		if (expression instanceof TernaryExpression) {
-			TernaryExpression ternary = (TernaryExpression) expression;
-			result.addAll(getIdentifierOperands((ValueExpression) ternary.getLeft()));
-			result.addAll(getIdentifierOperands((ValueExpression) ternary.getMiddle()));
-			result.addAll(getIdentifierOperands((ValueExpression) ternary.getRight()));
-		}
-
-		return result;
-	}
-
-	@Override
-	public Collection<AvailableExpressions> gen(
+	public Set<AE> gen(
+			DefiniteSet<AE> state,
 			Identifier id,
 			ValueExpression expression,
-			ProgramPoint pp,
-			DefiniteDataflowDomain<AvailableExpressions> domain) {
-		Collection<AvailableExpressions> result = new HashSet<>();
-		AvailableExpressions ae = new AvailableExpressions(expression);
+			ProgramPoint pp) {
+		Set<AE> result = new HashSet<>();
+		AE ae = new AE(expression);
 		if (!ae.getInvolvedIdentifiers().contains(id) && filter(expression))
 			result.add(ae);
 		return result;
 	}
 
 	@Override
-	public Collection<AvailableExpressions> gen(
+	public Set<AE> gen(
+			DefiniteSet<AE> state,
 			ValueExpression expression,
-			ProgramPoint pp,
-			DefiniteDataflowDomain<AvailableExpressions> domain) {
-		Collection<AvailableExpressions> result = new HashSet<>();
-		AvailableExpressions ae = new AvailableExpressions(expression);
+			ProgramPoint pp) {
+		Set<AE> result = new HashSet<>();
+		AE ae = new AE(expression);
 		if (filter(expression))
 			result.add(ae);
 		return result;
@@ -124,15 +80,15 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public Collection<AvailableExpressions> kill(
+	public Set<AE> kill(
+			DefiniteSet<AE> state,
 			Identifier id,
 			ValueExpression expression,
-			ProgramPoint pp,
-			DefiniteDataflowDomain<AvailableExpressions> domain) {
-		Collection<AvailableExpressions> result = new HashSet<>();
+			ProgramPoint pp) {
+		Set<AE> result = new HashSet<>();
 
-		for (AvailableExpressions ae : domain.getDataflowElements()) {
-			Collection<Identifier> ids = getIdentifierOperands(ae.expression);
+		for (AE ae : state.getDataflowElements()) {
+			Collection<Identifier> ids = ae.getInvolvedIdentifiers();
 
 			if (ids.contains(id))
 				result.add(ae);
@@ -142,57 +98,240 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public Collection<AvailableExpressions> kill(
+	public Set<AE> kill(
+			DefiniteSet<AE> state,
 			ValueExpression expression,
-			ProgramPoint pp,
-			DefiniteDataflowDomain<AvailableExpressions> domain) {
-		return Collections.emptyList();
+			ProgramPoint pp) {
+		return Collections.emptySet();
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((expression == null) ? 0 : expression.hashCode());
-		return result;
+	/**
+	 * An expression visitor that collects all the identifiers that appear in a
+	 * given expression.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static class IDCollector
+			implements
+			ExpressionVisitor<Collection<Identifier>> {
+
+		private final Collection<Identifier> result = new HashSet<>();
+
+		@Override
+		public Collection<Identifier> visit(
+				HeapExpression expression,
+				Collection<Identifier>[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				AccessChild expression,
+				Collection<Identifier> receiver,
+				Collection<Identifier> child,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				MemoryAllocation expression,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				HeapReference expression,
+				Collection<Identifier> arg,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				HeapDereference expression,
+				Collection<Identifier> arg,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				ValueExpression expression,
+				Collection<Identifier>[] subExpressions,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				UnaryExpression expression,
+				Collection<Identifier> arg,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				BinaryExpression expression,
+				Collection<Identifier> left,
+				Collection<Identifier> right,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				TernaryExpression expression,
+				Collection<Identifier> left,
+				Collection<Identifier> middle,
+				Collection<Identifier> right,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				Skip expression,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				PushAny expression,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				PushInv expression,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				Constant expression,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				Identifier expression,
+				Object... params)
+				throws SemanticException {
+			result.add(expression);
+			return result;
+		}
+
 	}
 
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AvailableExpressions other = (AvailableExpressions) obj;
-		if (expression == null) {
-			if (other.expression != null)
+	/**
+	 * An available expression dataflow element, that is, an expression that is
+	 * available at a given program point.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static class AE
+			implements
+			DataflowElement<AE> {
+
+		private final ValueExpression expression;
+
+		private AE(
+				ValueExpression expression) {
+			this.expression = expression;
+		}
+
+		@Override
+		public String toString() {
+			return representation().toString();
+		}
+
+		@Override
+		public Collection<Identifier> getInvolvedIdentifiers() {
+			try {
+				return expression.accept(new AvailableExpressions.IDCollector(), new Object[0]);
+			} catch (SemanticException e) {
+				return Collections.emptySet();
+			}
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((expression == null) ? 0 : expression.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(
+				Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
 				return false;
-		} else if (!expression.equals(other.expression))
-			return false;
-		return true;
+			if (getClass() != obj.getClass())
+				return false;
+			AE other = (AE) obj;
+			if (expression == null) {
+				if (other.expression != null)
+					return false;
+			} else if (!expression.equals(other.expression))
+				return false;
+			return true;
+		}
+
+		@Override
+		public StructuredRepresentation representation() {
+			return new StringRepresentation(expression);
+		}
+
+		@Override
+		public AE pushScope(
+				ScopeToken scope,
+				ProgramPoint pp)
+				throws SemanticException {
+			return new AE((ValueExpression) expression.pushScope(scope, pp));
+		}
+
+		@Override
+		public AE popScope(
+				ScopeToken scope,
+				ProgramPoint pp)
+				throws SemanticException {
+			return new AE((ValueExpression) expression.popScope(scope, pp));
+		}
+
+		@Override
+		public AE replaceIdentifier(
+				Identifier source,
+				Identifier target) {
+			SymbolicExpression e = expression.replace(source, target);
+			if (e == expression)
+				return this;
+			return new AE((ValueExpression) e);
+		}
+
 	}
 
-	@Override
-	public StructuredRepresentation representation() {
-		return new StringRepresentation(expression);
-	}
-
-	@Override
-	public AvailableExpressions pushScope(
-			ScopeToken scope,
-			ProgramPoint pp)
-			throws SemanticException {
-		return new AvailableExpressions((ValueExpression) expression.pushScope(scope, pp));
-	}
-
-	@Override
-	public AvailableExpressions popScope(
-			ScopeToken scope,
-			ProgramPoint pp)
-			throws SemanticException {
-		return new AvailableExpressions((ValueExpression) expression.popScope(scope, pp));
-	}
 }

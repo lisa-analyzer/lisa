@@ -19,7 +19,12 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric8BitRem extends NumericOperation implements RemainderOperator, OverflowingOperator {
+public class Numeric8BitRem
+		extends
+		NumericOperation
+		implements
+		RemainderOperator,
+		OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -38,4 +43,5 @@ public class Numeric8BitRem extends NumericOperation implements RemainderOperato
 	public String toString() {
 		return "%";
 	}
+
 }

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.string.CharInclusion.CI;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Test;
@@ -24,12 +25,14 @@ public class CharInclusionTest {
 		maybeContained.add('e');
 		maybeContained.add('f');
 
-		assertEquals(new CharInclusion(certainlyContained, maybeContained).representation().toString(),
+		assertEquals(
+				new CI(certainlyContained, maybeContained).representation().toString(),
 				"CertainlyContained: {a, b, c}, MaybeContained: {d, e, f}");
 	}
 
 	@Test
-	public void lubAuxTest() throws SemanticException {
+	public void lubAuxTest()
+			throws SemanticException {
 		Set<Character> certainlyContained = new TreeSet<>();
 		Set<Character> maybeContained = new TreeSet<>();
 
@@ -61,13 +64,13 @@ public class CharInclusionTest {
 		maybeContainedResult.add('z');
 
 		assertEquals(
-				new CharInclusion(certainlyContained, maybeContained)
-						.lubAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)),
-				new CharInclusion(certainlyContainedResult, maybeContainedResult));
+				new CI(certainlyContained, maybeContained).lubAux(new CI(otherCertainlyContained, otherMaybeContained)),
+				new CI(certainlyContainedResult, maybeContainedResult));
 	}
 
 	@Test
-	public void testLessOrEqualAux() throws SemanticException {
+	public void testLessOrEqualAux()
+			throws SemanticException {
 		Set<Character> certainlyContained = new TreeSet<>();
 		Set<Character> maybeContained = new TreeSet<>();
 
@@ -88,12 +91,14 @@ public class CharInclusionTest {
 
 		maybeContained.add('h');
 
-		assertTrue(new CharInclusion(certainlyContained, maybeContained)
-				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
+		assertTrue(
+				new CI(certainlyContained, maybeContained)
+						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 	@Test
-	public void testLessOrEqualAux1() throws SemanticException {
+	public void testLessOrEqualAux1()
+			throws SemanticException {
 		Set<Character> certainlyContained = new TreeSet<>();
 		Set<Character> maybeContained = new TreeSet<>();
 
@@ -117,12 +122,14 @@ public class CharInclusionTest {
 
 		otherMaybeContained.add('h');
 
-		assertFalse(new CharInclusion(certainlyContained, maybeContained)
-				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
+		assertFalse(
+				new CI(certainlyContained, maybeContained)
+						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 	@Test
-	public void testLessOrEqualAux2() throws SemanticException {
+	public void testLessOrEqualAux2()
+			throws SemanticException {
 		Set<Character> certainlyContained = new TreeSet<>();
 		Set<Character> maybeContained = new TreeSet<>();
 
@@ -144,12 +151,14 @@ public class CharInclusionTest {
 
 		otherMaybeContained.add('h');
 
-		assertFalse(new CharInclusion(certainlyContained, maybeContained)
-				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
+		assertFalse(
+				new CI(certainlyContained, maybeContained)
+						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 	@Test
-	public void testLessOrEqualAux3() throws SemanticException {
+	public void testLessOrEqualAux3()
+			throws SemanticException {
 		Set<Character> certainlyContained = new TreeSet<>();
 		Set<Character> maybeContained = new TreeSet<>();
 
@@ -174,12 +183,14 @@ public class CharInclusionTest {
 		maybeContained.add('f');
 		maybeContained.add('g');
 
-		assertFalse(new CharInclusion(certainlyContained, maybeContained)
-				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
+		assertFalse(
+				new CI(certainlyContained, maybeContained)
+						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 	@Test
-	public void testLessOrEqualAux4() throws SemanticException {
+	public void testLessOrEqualAux4()
+			throws SemanticException {
 		Set<Character> certainlyContained = new TreeSet<>();
 		Set<Character> maybeContained = new TreeSet<>();
 
@@ -204,7 +215,9 @@ public class CharInclusionTest {
 		otherMaybeContained.add('e');
 		otherMaybeContained.add('f');
 
-		assertTrue(new CharInclusion(certainlyContained, maybeContained)
-				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
+		assertTrue(
+				new CI(certainlyContained, maybeContained)
+						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
+
 }

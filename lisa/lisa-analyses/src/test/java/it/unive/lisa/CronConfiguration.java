@@ -9,7 +9,9 @@ import it.unive.lisa.conf.LiSAConfiguration;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CronConfiguration extends DefaultConfiguration {
+public class CronConfiguration
+		extends
+		DefaultConfiguration {
 
 	/**
 	 * The name of the test folder; this is used for searching expected results
@@ -40,4 +42,5 @@ public class CronConfiguration extends DefaultConfiguration {
 	 * and the results will be checked to be equal to the non-optimized version.
 	 */
 	public boolean compareWithOptimization = true;
+
 }

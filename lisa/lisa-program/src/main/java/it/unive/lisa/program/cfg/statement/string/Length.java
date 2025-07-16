@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.statement.string;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -34,7 +36,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression {
+public class Length
+		extends
+		it.unive.lisa.program.cfg.statement.UnaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -66,22 +70,22 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			SymbolicExpression expr,
-			StatementStore<A> expressions)
-			throws SemanticException {
-		if (state.getState().getRuntimeTypesOf(expr, this, state.getState()).stream().noneMatch(Type::isStringType))
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					SymbolicExpression expr,
+					StatementStore<A> expressions)
+					throws SemanticException {
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		if (analysis.getRuntimeTypesOf(state, expr, this).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
-		return state.smallStepSemantics(
-				new UnaryExpression(
-						getStaticType(),
-						expr,
-						StringLength.INSTANCE,
-						getLocation()),
-				originating == null ? this : originating);
+		return analysis
+				.smallStepSemantics(
+						state,
+						new UnaryExpression(getStaticType(), expr, StringLength.INSTANCE, getLocation()),
+						originating == null ? this : originating);
 	}
 
 }

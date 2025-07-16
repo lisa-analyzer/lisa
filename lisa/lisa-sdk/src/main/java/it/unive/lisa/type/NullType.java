@@ -11,9 +11,11 @@ import java.util.Set;
  * type are unique. The unique instance of this type can be retrieved by
  * {@link NullType#INSTANCE}.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class NullType implements InMemoryType {
+public class NullType
+		implements
+		InMemoryType {
 
 	/**
 	 * Unique instance of {@link NullType}.
@@ -61,4 +63,5 @@ public class NullType implements InMemoryType {
 			TypeSystem types) {
 		return Collections.singleton(this);
 	}
+
 }

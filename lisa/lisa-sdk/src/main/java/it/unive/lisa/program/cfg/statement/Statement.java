@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -18,7 +19,10 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement implements CodeNode<CFG, Statement, Edge>, ProgramPoint {
+public abstract class Statement
+		implements
+		CodeNode<CFG, Statement, Edge>,
+		ProgramPoint {
 
 	/**
 	 * The cfg containing this statement.
@@ -110,7 +114,10 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * of each nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}.
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param entryState      the entry state that represents the abstract
 	 *                            values of each program variable and memory
 	 *                            location when the execution reaches this
@@ -125,11 +132,12 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
-			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
-			StatementStore<A> expressions)
-			throws SemanticException;
+	public abstract <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+					AnalysisState<A> entryState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException;
 
 	/**
 	 * Computes the backward semantics of the statement, expressing how semantic
@@ -142,7 +150,10 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * as it is fine for most atomic statements. One should redefine this method
 	 * if a statement's semantics is composed of a series of smaller operations.
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param exitState       the exit state that represents the abstract values
 	 *                            of each program variable and memory location
 	 *                            when the execution reaches this statement
@@ -156,11 +167,12 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
-			AnalysisState<A> exitState,
-			InterproceduralAnalysis<A> interprocedural,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
+					AnalysisState<A> exitState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException {
 		return forwardSemantics(exitState, interprocedural, expressions);
 	}
 
@@ -264,4 +276,5 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 			Statement other) {
 		return null;
 	}
+
 }

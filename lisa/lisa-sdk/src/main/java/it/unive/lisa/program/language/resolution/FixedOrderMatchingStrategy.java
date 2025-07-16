@@ -12,7 +12,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class FixedOrderMatchingStrategy implements ParameterMatchingStrategy {
+public abstract class FixedOrderMatchingStrategy
+		implements
+		ParameterMatchingStrategy {
 
 	@Override
 	public final boolean matches(
@@ -49,4 +51,5 @@ public abstract class FixedOrderMatchingStrategy implements ParameterMatchingStr
 			Parameter formal,
 			Expression actual,
 			Set<Type> types);
+
 }

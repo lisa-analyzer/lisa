@@ -28,7 +28,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <N> the type of {@link CodeNode}s in this graph
  * @param <E> the type of {@link CodeEdge}s in this graph
  */
-public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
+public abstract class CodeGraph<G extends CodeGraph<G, N, E>,
+		N extends CodeNode<G, N, E>,
+		E extends CodeEdge<G, N, E>>
 		implements
 		Graph<G, N, E> {
 
@@ -190,7 +192,8 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	@Override
 	public SerializableGraph toSerializableGraph(
 			BiFunction<G, N, SerializableValue> descriptionGenerator) {
-		throw new UnsupportedOperationException(getClass().getName() + " does not provide a serialization logic");
+		throw new UnsupportedOperationException(
+				getClass().getName() + " does not provide a serialization logic");
 	}
 
 	@Override
@@ -249,7 +252,9 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 			Class<? extends N> target,
 			Collection<E> removedEdges,
 			Map<Pair<E, E>, E> replacedEdges) {
-		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
+		Set<N> targets = getNodes()
+				.stream()
+				.filter(k -> target.isAssignableFrom(k.getClass()))
 				.collect(Collectors.toSet());
 		targets.forEach(this::preSimplify);
 		list.simplify(targets, entrypoints, removedEdges, replacedEdges);
@@ -265,4 +270,5 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 			N node) {
 		// nothing to do, but subclasses might redefine
 	}
+
 }

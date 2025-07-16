@@ -26,7 +26,10 @@ import java.util.Set;
  * @param <E> the type of the {@link Edge}s in the source graph
  * @param <T> the type of data computed by the fixpoint
  */
-public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>, T> {
+public class BackwardFixpoint<G extends Graph<G, N, E>,
+		N extends Node<G, N, E>,
+		E extends Edge<G, N, E>,
+		T> {
 
 	/**
 	 * Common format for error messages.
@@ -121,13 +124,16 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 			N current = ws.pop();
 
 			if (current == null)
-				throw new FixpointException("null node encountered during fixpoint in '" + graph + "'");
+				throw new FixpointException(
+						"null node encountered during fixpoint in '" + graph + "'");
 			if (!graph.containsNode(current))
-				throw new FixpointException("'" + current + "' is not part of '" + graph + "'");
+				throw new FixpointException(
+						"'" + current + "' is not part of '" + graph + "'");
 
 			T exitstate = getExitState(current, startingPoints.get(current), implementation, result);
 			if (exitstate == null)
-				throw new FixpointException("'" + current + "' does not have an entry state");
+				throw new FixpointException(
+						"'" + current + "' does not have an entry state");
 
 			try {
 				newApprox = implementation.semantics(current, exitstate);
@@ -136,9 +142,10 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 			}
 
 			T oldApprox = result.get(current);
+			T postApprox = newApprox;
 			if (oldApprox != null)
 				try {
-					newApprox = implementation.operation(current, newApprox, oldApprox);
+					postApprox = implementation.operation(current, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
@@ -149,8 +156,8 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 						|| oldApprox == null
 						// or if we got a result that should not be considered
 						// equal
-						|| !implementation.equality(current, newApprox, oldApprox)) {
-					result.put(current, newApprox);
+						|| !implementation.equality(current, postApprox, oldApprox)) {
+					result.put(current, postApprox);
 					for (N instr : graph.predecessorsOf(current))
 						ws.push(instr);
 				}
@@ -209,4 +216,5 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 
 		return exitstate;
 	}
+
 }

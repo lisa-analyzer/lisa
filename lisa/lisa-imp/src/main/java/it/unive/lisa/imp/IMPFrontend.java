@@ -82,7 +82,9 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPFrontend extends IMPParserBaseVisitor<Object> {
+public class IMPFrontend
+		extends
+		IMPParserBaseVisitor<Object> {
 
 	private static final Logger log = LogManager.getLogger(IMPFrontend.class);
 
@@ -200,7 +202,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		InterfaceType.clearAll();
 
 		try {
-			log.info("Reading file... " + file);
+			log
+					.info(
+							"Reading file... " + file);
 			IMPLexer lexer;
 			if (inputStream == null)
 				try (InputStream stream = new FileInputStream(file)) {
@@ -252,22 +256,42 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 			return p;
 		} catch (FileNotFoundException e) {
-			log.fatal(file + " does not exist", e);
-			throw new ParsingException("Target file '" + file + "' does not exist", e);
+			log
+					.fatal(
+							file + " does not exist",
+							e);
+			throw new ParsingException(
+					"Target file '" + file + "' does not exist",
+					e);
 		} catch (IOException e) {
-			log.fatal("Unable to open " + file, e);
-			throw new ParsingException("Unable to open " + file, e);
+			log
+					.fatal(
+							"Unable to open " + file,
+							e);
+			throw new ParsingException(
+					"Unable to open " + file,
+					e);
 		} catch (IMPSyntaxException e) {
-			log.fatal(file + " is not well-formed", e);
-			throw new ParsingException("Incorrect IMP file: " + file, e);
+			log
+					.fatal(
+							file + " is not well-formed",
+							e);
+			throw new ParsingException(
+					"Incorrect IMP file: " + file,
+					e);
 		} catch (RecognitionException e) {
 			throw Antlr4Util.handleRecognitionException(file, e);
 		} catch (Exception e) {
 			if (e.getCause() instanceof RecognitionException)
 				throw Antlr4Util.handleRecognitionException(file, (RecognitionException) e.getCause());
 			else {
-				log.error("Parser thrown an exception while parsing " + file, e);
-				throw new ParsingException("Parser thrown an exception while parsing " + file, e);
+				log
+						.error(
+								"Parser thrown an exception while parsing " + file,
+								e);
+				throw new ParsingException(
+						"Parser thrown an exception while parsing " + file,
+						e);
 			}
 		}
 	}
@@ -349,10 +373,15 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			unit.addInstanceCodeMember(visitMethodDeclaration(decl));
 
 		for (CodeMember cm : unit.getInstanceCodeMembers(false)) {
-			if (unit.getInstanceCodeMembers(false).stream()
-					.anyMatch(c -> c != cm && c.getDescriptor().matchesSignature(cm.getDescriptor())
-							&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
-				throw new IMPSyntaxException("Duplicate code member: " + cm);
+			if (unit
+					.getInstanceCodeMembers(false)
+					.stream()
+					.anyMatch(
+							c -> c != cm
+									&& c.getDescriptor().matchesSignature(cm.getDescriptor())
+									&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
+				throw new IMPSyntaxException(
+						"Duplicate code member: " + cm);
 		}
 
 		for (FieldDeclarationContext decl : ctx.interfaceMemberDeclarations().fieldDeclaration())
@@ -391,10 +420,15 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			unit.addInstanceCodeMember(visitSignatureDeclaration(decl));
 
 		for (CodeMember cm : unit.getInstanceCodeMembers(false)) {
-			if (unit.getInstanceCodeMembers(false).stream()
-					.anyMatch(c -> c != cm && c.getDescriptor().matchesSignature(cm.getDescriptor())
-							&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
-				throw new IMPSyntaxException("Duplicate code member: " + cm);
+			if (unit
+					.getInstanceCodeMembers(false)
+					.stream()
+					.anyMatch(
+							c -> c != cm
+									&& c.getDescriptor().matchesSignature(cm.getDescriptor())
+									&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
+				throw new IMPSyntaxException(
+						"Duplicate code member: " + cm);
 			if (isEntryPoint(cm))
 				program.addEntryPoint((CFG) cm);
 		}
@@ -406,9 +440,12 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			unit.addInstanceGlobal(visitFieldDeclaration(decl));
 
 		for (Global global : unit.getInstanceGlobals(false))
-			if (unit.getInstanceGlobals(false).stream()
+			if (unit
+					.getInstanceGlobals(false)
+					.stream()
 					.anyMatch(g -> g != global && g.getName().equals(global.getName())))
-				throw new IMPSyntaxException("Duplicate global: " + global);
+				throw new IMPSyntaxException(
+						"Duplicate global: " + global);
 
 		return unit;
 	}
@@ -470,7 +507,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
-				true, ctx.name.getText(), Untyped.INSTANCE,
+				true,
+				ctx.name.getText(),
+				Untyped.INSTANCE,
 				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
 				visitFormals(ctx.formals()));
 		descriptor.setOverridable(true);
@@ -482,7 +521,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
-				true, ctx.name.getText(), Untyped.INSTANCE,
+				true,
+				ctx.name.getText(),
+				Untyped.INSTANCE,
 				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
 				visitFormals(ctx.formals()));
 		descriptor.setOverridable(false);
@@ -494,7 +535,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
-				true, ctx.name.getText(), Untyped.INSTANCE,
+				true,
+				ctx.name.getText(),
+				Untyped.INSTANCE,
 				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
 				visitFormals(ctx.formals()));
 
@@ -510,7 +553,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Parameter[] visitFormals(
 			FormalsContext ctx) {
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
-		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",
+		formals[0] = new Parameter(
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				"this",
 				new ReferenceType(ClassType.lookup(this.currentUnit.getName(), this.currentUnit)));
 		int i = 1;
 		for (FormalContext f : ctx.formal())
@@ -521,8 +566,12 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter visitFormal(
 			FormalContext ctx) {
-		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE, null, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
+		return new Parameter(
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				ctx.name.getText(),
+				Untyped.INSTANCE,
+				null,
+				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 
 	@Override
@@ -551,6 +600,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			else
 				return new Constant(Int32Type.INSTANCE, Integer.parseInt(ctx.LITERAL_DECIMAL().getText()), location);
 
-		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
+		throw new UnsupportedOperationException(
+				"Type of literal not supported: " + ctx);
 	}
+
 }

@@ -5,9 +5,11 @@ import it.unive.lisa.program.annotations.values.AnnotationValue;
 /**
  * A member of an annotation.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class AnnotationMember implements Comparable<AnnotationMember> {
+public class AnnotationMember
+		implements
+		Comparable<AnnotationMember> {
 
 	private final String id;
 
@@ -89,4 +91,5 @@ public class AnnotationMember implements Comparable<AnnotationMember> {
 			return cmp;
 		return value.compareTo(o.value);
 	}
+
 }

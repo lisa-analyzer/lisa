@@ -21,63 +21,86 @@ public class HierarchyComputationTest {
 			Program prog,
 			String name) {
 		Unit unit = prog.getUnits().stream().filter(u -> u.getName().equals(name)).findFirst().get();
-		assertNotNull("'" + name + "' unit not found", unit);
+		assertNotNull(
+				"'" + name + "' unit not found",
+				unit);
 		return unit;
 	}
 
 	private static CFG findCFG(
 			ClassUnit unit,
 			String name) {
-		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+		CFG cfg = unit
+				.getInstanceCFGs(false)
+				.stream()
+				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
-		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		assertNotNull(
+				"'" + unit.getName() + "' unit does not contain cfg '" + name + "'",
+				cfg);
 		return cfg;
 	}
 
 	private static AbstractCodeMember findSignatureCFG(
 			ClassUnit unit,
 			String name) {
-		AbstractCodeMember cfg = unit.getAbstractCodeMembers(false).stream()
+		AbstractCodeMember cfg = unit
+				.getAbstractCodeMembers(false)
+				.stream()
 				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
-		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		assertNotNull(
+				"'" + unit.getName() + "' unit does not contain cfg '" + name + "'",
+				cfg);
 		return cfg;
 	}
 
 	private static AbstractCodeMember findSignatureCFG(
 			InterfaceUnit unit,
 			String name) {
-		AbstractCodeMember cfg = unit.getAbstractCodeMembers(false).stream()
+		AbstractCodeMember cfg = unit
+				.getAbstractCodeMembers(false)
+				.stream()
 				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
-		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		assertNotNull(
+				"'" + unit.getName() + "' unit does not contain cfg '" + name + "'",
+				cfg);
 		return cfg;
 	}
 
 	private static CFG findImplementedCFG(
 			InterfaceUnit unit,
 			String name) {
-		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+		CFG cfg = unit
+				.getInstanceCFGs(false)
+				.stream()
+				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
-		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		assertNotNull(
+				"'" + unit.getName() + "' unit does not contain cfg '" + name + "'",
+				cfg);
 		return cfg;
 	}
 
 	private static void isInstance(
 			CompilationUnit sup,
 			Unit unit) {
-		assertTrue("'" + unit.getName() + "' is not among '" + sup.getName() + "' instances",
+		assertTrue(
+				"'" + unit.getName() + "' is not among '" + sup.getName() + "' instances",
 				sup.getInstances().contains(unit));
 		if (sup != unit) {
 			if (unit instanceof ClassUnit)
-				assertTrue("'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
+				assertTrue(
+						"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
 						((ClassUnit) unit).isInstanceOf(sup));
 			else
-				assertTrue("'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
+				assertTrue(
+						"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
 						((InterfaceUnit) unit).isInstanceOf((InterfaceUnit) sup));
 		}
 	}
@@ -85,10 +108,12 @@ public class HierarchyComputationTest {
 	private static void notInstance(
 			CompilationUnit sup,
 			CompilationUnit unit) {
-		assertFalse("'" + unit.getName() + "' is among '" + sup.getName() + "' instances",
+		assertFalse(
+				"'" + unit.getName() + "' is among '" + sup.getName() + "' instances",
 				sup.getInstances().contains(unit));
 		if (sup != unit)
-			assertFalse("'" + sup.getName() + "' is among '" + unit.getName() + "' superunits",
+			assertFalse(
+					"'" + sup.getName() + "' is among '" + unit.getName() + "' superunits",
 					unit.getImmediateAncestors().contains(sup));
 	}
 
@@ -96,8 +121,8 @@ public class HierarchyComputationTest {
 			CodeMember sup,
 			CodeMember cfg) {
 		assertTrue(
-				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '"
-						+ cfg.getDescriptor().getFullName() + "'",
+				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '" + cfg.getDescriptor().getFullName()
+						+ "'",
 				sup.getDescriptor().overriddenBy().contains(cfg));
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' does not override '" + cfg.getDescriptor().getFullName()
@@ -109,24 +134,27 @@ public class HierarchyComputationTest {
 			CFG sup,
 			CFG cfg) {
 		assertFalse(
-				"'" + sup.getDescriptor().getFullName() + "' is overridden by '"
-						+ cfg.getDescriptor().getFullName() + "'",
+				"'" + sup.getDescriptor().getFullName() + "' is overridden by '" + cfg.getDescriptor().getFullName()
+						+ "'",
 				sup.getDescriptor().overriddenBy().contains(cfg));
 		assertFalse(
-				"'" + sup.getDescriptor().getFullName() + "' overrides '" + cfg.getDescriptor().getFullName()
-						+ "'",
+				"'" + sup.getDescriptor().getFullName() + "' overrides '" + cfg.getDescriptor().getFullName() + "'",
 				cfg.getDescriptor().overrides().contains(sup));
 	}
 
 	@Test
-	public void testSingle() throws ParsingException, ProgramValidationException {
+	public void testSingle()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/single.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 		// we just check that no exception is thrown
 	}
 
 	@Test
-	public void testSimpleInheritance() throws ParsingException, ProgramValidationException {
+	public void testSimpleInheritance()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-inheritance.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
@@ -145,19 +173,25 @@ public class HierarchyComputationTest {
 	}
 
 	@Test(expected = ProgramValidationException.class)
-	public void testFinalCfg() throws ParsingException, ProgramValidationException {
+	public void testFinalCfg()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/final-cfg.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test(expected = ProgramValidationException.class)
-	public void testTree() throws ParsingException, ProgramValidationException {
+	public void testTree()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test
-	public void testTreeSanitized() throws ParsingException, ProgramValidationException {
+	public void testTreeSanitized()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree-sanitized.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
@@ -220,7 +254,9 @@ public class HierarchyComputationTest {
 	}
 
 	@Test
-	public void testSkipOne() throws ParsingException, ProgramValidationException {
+	public void testSkipOne()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/skip-one.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
@@ -241,7 +277,9 @@ public class HierarchyComputationTest {
 	}
 
 	@Test
-	public void testSimpleInterfaces() throws ParsingException, ProgramValidationException {
+	public void testSimpleInterfaces()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-interfaces.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
@@ -264,7 +302,9 @@ public class HierarchyComputationTest {
 	}
 
 	@Test
-	public void testMultiInterfaces() throws ParsingException, ProgramValidationException {
+	public void testMultiInterfaces()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/multi-interfaces.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
@@ -292,9 +332,11 @@ public class HierarchyComputationTest {
 	}
 
 	@Test
-	public void testDefaultMethodsInterface() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/default-methods-interface.imp",
-				false);
+	public void testDefaultMethodsInterface()
+			throws ParsingException,
+			ProgramValidationException {
+		Program prog = IMPFrontend
+				.processFile("imp-testcases/program-finalization/default-methods-interface.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
@@ -321,15 +363,19 @@ public class HierarchyComputationTest {
 	}
 
 	@Test(expected = ProgramValidationException.class)
-	public void testInterfaces() throws ParsingException, ProgramValidationException {
+	public void testInterfaces()
+			throws ParsingException,
+			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test
-	public void testOverridingDefaultMethods() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/overriding-default-method.imp",
-				false);
+	public void testOverridingDefaultMethods()
+			throws ParsingException,
+			ProgramValidationException {
+		Program prog = IMPFrontend
+				.processFile("imp-testcases/program-finalization/overriding-default-method.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
@@ -357,23 +403,27 @@ public class HierarchyComputationTest {
 	}
 
 	@Test(expected = ProgramValidationException.class)
-	public void testAbstractClass() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp",
-				false);
+	public void testAbstractClass()
+			throws ParsingException,
+			ProgramValidationException {
+		Program prog = IMPFrontend
+				.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test(expected = ProgramValidationException.class)
-	public void testExtendingButNotImpl() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/extending-but-not-impl.imp",
-				false);
+	public void testExtendingButNotImpl()
+			throws ParsingException,
+			ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/extending-but-not-impl.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test
-	public void testSimpleAbstractClass() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-abstract-class.imp",
-				false);
+	public void testSimpleAbstractClass()
+			throws ParsingException,
+			ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-abstract-class.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
@@ -391,9 +441,10 @@ public class HierarchyComputationTest {
 	}
 
 	@Test
-	public void testAbstractClassExt() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/abstract-class-ext.imp",
-				false);
+	public void testAbstractClassExt()
+			throws ParsingException,
+			ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/abstract-class-ext.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
@@ -415,4 +466,5 @@ public class HierarchyComputationTest {
 		notInstance(third, first);
 		notInstance(second, first);
 	}
+
 }

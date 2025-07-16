@@ -15,4 +15,5 @@ public interface StructuredObject {
 	 * @return the representation
 	 */
 	StructuredRepresentation representation();
+
 }

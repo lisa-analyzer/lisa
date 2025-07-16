@@ -54,6 +54,7 @@ public class LiSARunInfo {
 				statements++;
 			return true;
 		}
+
 	}
 
 	/**
@@ -63,13 +64,20 @@ public class LiSARunInfo {
 	 * <i>milliseconds</i>ms. Note that zeros are omitted.
 	 */
 	public static final PeriodFormatter PERIOD_FORMAT = new PeriodFormatterBuilder()
-			.appendYears().appendSuffix("Y ")
-			.appendMonths().appendSuffix("M ")
-			.appendDays().appendSuffix("D ")
-			.appendHours().appendSuffix("h ")
-			.appendMinutes().appendSuffix("m ")
-			.appendSeconds().appendSuffix("s ")
-			.appendMillis().appendSuffix("ms")
+			.appendYears()
+			.appendSuffix("Y ")
+			.appendMonths()
+			.appendSuffix("M ")
+			.appendDays()
+			.appendSuffix("D ")
+			.appendHours()
+			.appendSuffix("h ")
+			.appendMinutes()
+			.appendSuffix("m ")
+			.appendSeconds()
+			.appendSuffix("s ")
+			.appendMillis()
+			.appendSuffix("ms")
 			.printZeroNever()
 			.toFormatter();
 
@@ -260,17 +268,10 @@ public class LiSARunInfo {
 
 	@Override
 	public String toString() {
-		return "Version " + version +
-				"\nDuration: " + duration + " (started: " + start + ", ended: " + end + ")" +
-				"\nPrograms: " + programs +
-				"\nUnits: " + units +
-				"\nGlobals: " + globals +
-				"\nCode Members: " + members +
-				"\nCFGs: " + cfgs +
-				"\nStatements: " + statements +
-				"\nExpressions: " + expressions +
-				"\nGenerated Warnings: " + warnings +
-				"\nGenerated Files: " + files;
+		return "Version " + version + "\nDuration: " + duration + " (started: " + start + ", ended: " + end + ")"
+				+ "\nPrograms: " + programs + "\nUnits: " + units + "\nGlobals: " + globals + "\nCode Members: "
+				+ members + "\nCFGs: " + cfgs + "\nStatements: " + statements + "\nExpressions: " + expressions
+				+ "\nGenerated Warnings: " + warnings + "\nGenerated Files: " + files;
 	}
 
 	/**
@@ -294,4 +295,5 @@ public class LiSARunInfo {
 		}
 		return bag;
 	}
+
 }

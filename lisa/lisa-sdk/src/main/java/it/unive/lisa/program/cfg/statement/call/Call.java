@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -29,7 +31,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Call extends NaryExpression {
+public abstract class Call
+		extends
+		NaryExpression {
 
 	/**
 	 * Possible types of a call, identifying the type of targets (instance or
@@ -115,7 +119,9 @@ public abstract class Call extends NaryExpression {
 	private static String completeName(
 			String qualifier,
 			String name) {
-		return StringUtils.isNotBlank(qualifier) ? qualifier + "::" + name : name;
+		return StringUtils.isNotBlank(qualifier)
+				? qualifier + "::" + name
+				: name;
 	}
 
 	/**
@@ -284,9 +290,13 @@ public abstract class Call extends NaryExpression {
 	 * Yields an array containing the runtime types of the parameters of this
 	 * call, retrieved by accessing the given {@link StatementStore}.
 	 * 
-	 * @param <A>         the type of {@link AbstractState}
+	 * @param <A>         the kind of {@link AbstractLattice} produced by the
+	 *                        domain {@code D}
+	 * @param <D>         the kind of {@link AbstractDomain} to run during the
+	 *                        analysis
 	 * @param expressions the store containing the computed states for the
 	 *                        parameters
+	 * @param analysis    the {@link Analysis} that is being executed
 	 * 
 	 * @return the array of parameter types
 	 * 
@@ -294,16 +304,18 @@ public abstract class Call extends NaryExpression {
 	 *                               types
 	 */
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A>> Set<Type>[] parameterTypes(
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> Set<Type>[] parameterTypes(
+					StatementStore<A> expressions,
+					Analysis<A, D> analysis)
+					throws SemanticException {
 		Expression[] actuals = getParameters();
 		Set<Type>[] types = new Set[actuals.length];
 		for (int i = 0; i < actuals.length; i++) {
 			AnalysisState<A> state = expressions.getState(actuals[i]);
 			Set<Type> t = new HashSet<>();
 			for (SymbolicExpression e : state.getComputedExpressions())
-				t.addAll(state.getState().getRuntimeTypesOf(e, this, state.getState()));
+				t.addAll(analysis.getRuntimeTypesOf(state, e, this));
 			types[i] = t;
 		}
 		return types;
@@ -315,12 +327,12 @@ public abstract class Call extends NaryExpression {
 	 * type is {@link VoidType}. If this method returns {@code true}, then no
 	 * value should be assigned to the call's meta variable.
 	 * 
-	 * @param <A>      the type of {@link AbstractState} in the analysis state
+	 * @param <A>      the type of {@link AbstractDomain} in the analysis state
 	 * @param returned the post-state of the call
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public <A extends AbstractState<A>> boolean returnsVoid(
+	public <A extends AbstractLattice<A>> boolean returnsVoid(
 			AnalysisState<A> returned) {
 		if (getStaticType().isVoidType())
 			return true;
@@ -332,7 +344,8 @@ public abstract class Call extends NaryExpression {
 			CFGCall cfgcall = (CFGCall) this;
 			Collection<CFG> targets = cfgcall.getTargetedCFGs();
 			if (!targets.isEmpty())
-				return !targets.iterator()
+				return !targets
+						.iterator()
 						.next()
 						.getNormalExitpoints()
 						.stream()
@@ -369,4 +382,5 @@ public abstract class Call extends NaryExpression {
 
 		return false;
 	}
+
 }

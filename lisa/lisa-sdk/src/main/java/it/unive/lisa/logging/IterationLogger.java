@@ -211,4 +211,5 @@ public final class IterationLogger {
 			int size) {
 		return new CountingIterable<>(it, new Counter(logger, level, message, objects, size, 0.025));
 	}
+
 }

@@ -2,16 +2,16 @@ package it.unive.lisa.analysis.nonrelational.heap;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
+import it.unive.lisa.analysis.heap.HeapLattice;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,30 +19,22 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * An environment for a {@link NonRelationalHeapDomain}, that maps
- * {@link Identifier}s to instances of such domain. This is a
- * {@link FunctionalLattice}, that is, it implements a function mapping keys
- * (identifiers) to values (instances of the domain), and lattice operations are
- * automatically lifted for individual elements of the environment if they are
- * mapped to the same key.
+ * An {@link Environment} that is also a {@link HeapLattice}, tracking locations
+ * pointed by variables and heap locations.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <T> the concrete instance of the {@link NonRelationalHeapDomain} whose
- *                instances are mapped in this environment
+ * @param <L> the type of the lattice used to represent the locations stored in
+ *                this environment
  */
-public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
+public class HeapEnvironment<L extends HeapValue<L>>
 		extends
-		Environment<HeapEnvironment<T>, SymbolicExpression, T>
+		FunctionalLattice<HeapEnvironment<L>, Identifier, L>
 		implements
-		HeapDomain<HeapEnvironment<T>> {
-
-	/**
-	 * The substitution
-	 */
-	private final List<HeapReplacement> substitution;
+		HeapLattice<HeapEnvironment<L>> {
 
 	/**
 	 * Builds an empty environment.
@@ -51,22 +43,8 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	 *                   to retrieve top and bottom values
 	 */
 	public HeapEnvironment(
-			T domain) {
+			L domain) {
 		super(domain);
-		substitution = Collections.emptyList();
-	}
-
-	/**
-	 * Builds an empty environment from a given mapping.
-	 * 
-	 * @param domain   singleton instance to be used during semantic operations
-	 *                     to retrieve top and bottom values
-	 * @param function the initial mapping of this heap environment
-	 */
-	public HeapEnvironment(
-			T domain,
-			Map<Identifier, T> function) {
-		this(domain, function, Collections.emptyList());
 	}
 
 	/**
@@ -75,154 +53,25 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	 * {@code lattice.isTop()} holds, and it is the bottom environment if
 	 * {@code lattice.isBottom()} holds.
 	 * 
-	 * @param domain       a singleton instance to be used during semantic
-	 *                         operations to retrieve top and bottom values
-	 * @param function     the function representing the mapping contained in
-	 *                         the new environment; can be {@code null}
-	 * @param substitution the list of substitutions that has been generated
-	 *                         together with the fresh instance being built
+	 * @param domain   a singleton instance to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the function representing the mapping contained in the
+	 *                     new environment; can be {@code null}
 	 */
 	public HeapEnvironment(
-			T domain,
-			Map<Identifier, T> function,
-			List<HeapReplacement> substitution) {
+			L domain,
+			Map<Identifier, L> function) {
 		super(domain, function);
-		this.substitution = substitution;
 	}
 
 	@Override
-	public HeapEnvironment<T> mk(
-			T lattice,
-			Map<Identifier, T> function) {
-		return new HeapEnvironment<>(lattice, function);
-	}
-
-	@Override
-	public ExpressionSet rewrite(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return lattice.rewrite(expression, this, pp, oracle);
-	}
-
-	@Override
-	public List<HeapReplacement> getSubstitution() {
-		return substitution;
-	}
-
-	@Override
-	public HeapEnvironment<T> smallStepSemantics(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (isBottom())
-			return this;
-		T eval = lattice.eval(expression, this, pp, oracle);
-		return new HeapEnvironment<>(lattice, function, eval.getSubstitution());
-	}
-
-	@Override
-	public HeapEnvironment<T> top() {
-		return isTop() ? this
-				: new HeapEnvironment<>(lattice.top(), null, Collections.emptyList());
-	}
-
-	@Override
-	public HeapEnvironment<T> bottom() {
-		return isBottom() ? this
-				: new HeapEnvironment<>(lattice.bottom(), null, Collections.emptyList());
-	}
-
-	@Override
-	public boolean isTop() {
-		return super.isTop() && substitution.isEmpty();
-	}
-
-	@Override
-	public boolean isBottom() {
-		return super.isBottom() && substitution.isEmpty();
-	}
-
-	// TODO how do we lub/widen/glb/narrow the substitutions?
-
-	@Override
-	public boolean lessOrEqualAux(
-			HeapEnvironment<T> other)
-			throws SemanticException {
-		if (!super.lessOrEqualAux(other))
-			return false;
-		// TODO how do we check the substitutions?
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((substitution == null) ? 0 : substitution.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		HeapEnvironment<?> other = (HeapEnvironment<?>) obj;
-		if (substitution == null) {
-			if (other.substitution != null)
-				return false;
-		} else if (!substitution.equals(other.substitution))
-			return false;
-		return true;
-	}
-
-	/**
-	 * Implementation of {@link #equals(Object)} that ignores the substitutions.
-	 * 
-	 * @param obj the other domain instance
-	 * 
-	 * @return whether this instance is equal to {@code obj} up to sibstitutions
-	 */
-	public boolean equalUpToSubs(
-			HeapEnvironment<T> obj) {
-		return super.equals(obj);
-	}
-
-	@Override
-	public Satisfiability alias(
-			SymbolicExpression x,
-			SymbolicExpression y,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return lattice.alias(x, y, this, pp, oracle);
-	}
-
-	@Override
-	public Satisfiability isReachableFrom(
-			SymbolicExpression x,
-			SymbolicExpression y,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return lattice.isReachableFrom(x, y, this, pp, oracle);
-	}
-
-	@Override
-	public HeapEnvironment<T> pushScope(
+	public Pair<HeapEnvironment<L>, List<HeapReplacement>> pushScope(
 			ScopeToken scope,
 			ProgramPoint pp)
 			throws SemanticException {
 		AtomicReference<SemanticException> holder = new AtomicReference<>();
 
-		HeapEnvironment<T> result = liftIdentifiers(id -> {
+		Pair<HeapEnvironment<L>, List<HeapReplacement>> result = liftIdentifiers(id -> {
 			try {
 				return (Identifier) id.pushScope(scope, pp);
 			} catch (SemanticException e) {
@@ -232,19 +81,21 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		});
 
 		if (holder.get() != null)
-			throw new SemanticException("Pushing the scope '" + scope + "' raised an error", holder.get());
+			throw new SemanticException(
+					"Pushing the scope '" + scope + "' raised an error",
+					holder.get());
 
 		return result;
 	}
 
 	@Override
-	public HeapEnvironment<T> popScope(
+	public Pair<HeapEnvironment<L>, List<HeapReplacement>> popScope(
 			ScopeToken scope,
 			ProgramPoint pp)
 			throws SemanticException {
 		AtomicReference<SemanticException> holder = new AtomicReference<>();
 
-		HeapEnvironment<T> result = liftIdentifiers(id -> {
+		Pair<HeapEnvironment<L>, List<HeapReplacement>> result = liftIdentifiers(id -> {
 			try {
 				return (Identifier) id.popScope(scope, pp);
 			} catch (SemanticException e) {
@@ -254,83 +105,158 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		});
 
 		if (holder.get() != null)
-			throw new SemanticException("Popping the scope '" + scope + "' raised an error", holder.get());
+			throw new SemanticException(
+					"Popping the scope '" + scope + "' raised an error",
+					holder.get());
 
 		return result;
 	}
 
-	private HeapEnvironment<T> liftIdentifiers(
+	private Pair<HeapEnvironment<L>, List<HeapReplacement>> liftIdentifiers(
 			UnaryOperator<Identifier> lifter)
 			throws SemanticException {
 		if (isBottom() || isTop())
-			return this;
+			return Pair.of(this, List.of());
 
-		Map<Identifier, T> function = mkNewFunction(null, false);
-		HeapReplacement r = new HeapReplacement();
+		Map<Identifier, L> function = mkNewFunction(null, false);
+		HeapReplacement removed = new HeapReplacement();
+		List<HeapReplacement> r = new LinkedList<>();
+
 		for (Identifier id : getKeys()) {
 			Identifier lifted = lifter.apply(id);
-			if (lifted != null)
+			if (lifted != null) {
+				if (lifted.equals(id))
+					// we track the renaming
+					r.add(new HeapReplacement().withSource(id).withTarget(lifted));
 				if (!function.containsKey(lifted))
 					function.put(lifted, getState(id));
 				else
 					function.put(lifted, getState(id).lub(function.get(lifted)));
-			else
-				r.addSource(id);
+			} else
+				// we track the removal
+				removed.addSource(id);
 		}
 
-		return new HeapEnvironment<>(lattice, function, List.of(r));
+		if (r.isEmpty() && removed.getSources().isEmpty())
+			return Pair.of(new HeapEnvironment<>(lattice, function), Collections.emptyList());
+
+		r.addAll(expand(removed));
+		return Pair.of(new HeapEnvironment<>(lattice, function), r);
 	}
 
 	@Override
-	public HeapEnvironment<T> forgetIdentifier(
+	public Pair<HeapEnvironment<L>, List<HeapReplacement>> forgetIdentifier(
 			Identifier id,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
-			return this;
+			return Pair.of(this, List.of());
 
-		Map<Identifier, T> result = mkNewFunction(function, false);
+		Map<Identifier, L> result = mkNewFunction(function, false);
 		result.remove(id);
+		HeapReplacement r = new HeapReplacement().withSource(id);
 
-		HeapReplacement r = new HeapReplacement();
-		r.addSource(id);
-
-		return new HeapEnvironment<>(lattice, result, List.of(r));
+		return Pair.of(new HeapEnvironment<>(lattice, result), expand(r));
 	}
 
 	@Override
-	public HeapEnvironment<T> forgetIdentifiers(
+	public Pair<HeapEnvironment<L>, List<HeapReplacement>> forgetIdentifiers(
 			Iterable<Identifier> ids,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
-			return this;
+			return Pair.of(this, List.of());
 
-		Map<Identifier, T> result = mkNewFunction(function, false);
+		Map<Identifier, L> result = mkNewFunction(function, false);
 		for (Identifier id : ids)
 			result.remove(id);
 
 		HeapReplacement r = new HeapReplacement();
 		ids.forEach(r::addSource);
 
-		return new HeapEnvironment<>(lattice, result, List.of(r));
+		return Pair.of(new HeapEnvironment<>(lattice, result), expand(r));
 	}
 
 	@Override
-	public HeapEnvironment<T> forgetIdentifiersIf(
+	public Pair<HeapEnvironment<L>, List<HeapReplacement>> forgetIdentifiersIf(
 			Predicate<Identifier> test,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || function == null)
-			return this;
+			return Pair.of(this, List.of());
 
-		Map<Identifier, T> result = mkNewFunction(function, false);
+		Map<Identifier, L> result = mkNewFunction(function, false);
 		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
 		keys.forEach(result::remove);
+
+		if (keys.isEmpty())
+			return Pair.of(new HeapEnvironment<>(lattice, result), Collections.emptyList());
 
 		HeapReplacement r = new HeapReplacement();
 		keys.forEach(r::addSource);
 
-		return new HeapEnvironment<>(lattice, result, List.of(r));
+		return Pair.of(new HeapEnvironment<>(lattice, result), expand(r));
 	}
+
+	@Override
+	public Set<Identifier> lubKeys(
+			Set<Identifier> k1,
+			Set<Identifier> k2)
+			throws SemanticException {
+		Set<Identifier> keys = new HashSet<>();
+		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, k1, k2);
+		// this is needed for a name-only comparison
+		builder.compute(Comparator.comparing(Identifier::getName));
+		keys.addAll(builder.getOnlyFirst());
+		keys.addAll(builder.getOnlySecond());
+		for (Pair<Identifier, Identifier> pair : builder.getCommons())
+			try {
+				keys.add(pair.getLeft().lub(pair.getRight()));
+			} catch (SemanticException e) {
+				throw new SemanticException(
+						"Unable to lub " + pair.getLeft() + " and " + pair.getRight(),
+						e);
+			}
+		return keys;
+	}
+
+	@Override
+	public L stateOfUnknown(
+			Identifier key) {
+		return lattice.unknownValue(key);
+	}
+
+	@Override
+	public boolean knowsIdentifier(
+			Identifier id) {
+		return getKeys().contains(id);
+	}
+
+	@Override
+	public HeapEnvironment<L> top() {
+		return isTop() ? this : new HeapEnvironment<>(lattice.top(), null);
+	}
+
+	@Override
+	public HeapEnvironment<L> bottom() {
+		return isBottom() ? this : new HeapEnvironment<>(lattice.bottom(), null);
+	}
+
+	@Override
+	public HeapEnvironment<L> mk(
+			L lattice,
+			Map<Identifier, L> function) {
+		return new HeapEnvironment<>(lattice, function);
+	}
+
+	@Override
+	public List<HeapReplacement> expand(
+			HeapReplacement base)
+			throws SemanticException {
+		HeapReplacement sub = new HeapReplacement();
+		for (Identifier id : base.getSources())
+			lattice.reachableOnlyFrom(this, id).forEach(sub::addSource);
+		return List.of(sub);
+	}
+
 }

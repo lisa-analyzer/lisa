@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.statement.global;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -29,7 +31,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessInstanceGlobal extends UnaryExpression {
+public class AccessInstanceGlobal
+		extends
+		UnaryExpression {
 
 	/**
 	 * The global being accessed
@@ -114,17 +118,19 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			SymbolicExpression expr,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					SymbolicExpression expr,
+					StatementStore<A> expressions)
+					throws SemanticException {
 		CodeLocation loc = getLocation();
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
 
 		AnalysisState<A> result = state.bottom();
 		boolean atLeastOne = false;
-		Set<Type> types = state.getState().getRuntimeTypesOf(expr, this, state.getState());
+		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
 
 		for (Type recType : types)
 			if (recType.isPointerType()) {
@@ -143,7 +149,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 						if (global != null) {
 							GlobalVariable var = global.toSymbolicVariable(loc);
 							AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
-							result = result.lub(state.smallStepSemantics(access, this));
+							result = result.lub(analysis.smallStepSemantics(state, access, this));
 							atLeastOne = true;
 						}
 					}
@@ -165,6 +171,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		GlobalVariable var = new GlobalVariable(Untyped.INSTANCE, target, new Annotations(), getLocation());
 		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
 		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
-		return state.smallStepSemantics(access, this);
+		return analysis.smallStepSemantics(state, access, this);
 	}
+
 }

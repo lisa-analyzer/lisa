@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.evaluation;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -14,7 +15,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LeftToRightEvaluation implements EvaluationOrder {
+public class LeftToRightEvaluation
+		implements
+		EvaluationOrder {
 
 	/**
 	 * The singleton instance of this class.
@@ -25,13 +28,14 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> evaluate(
-			Expression[] subExpressions,
-			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
-			StatementStore<A> expressions,
-			ExpressionSet[] computed)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> evaluate(
+					Expression[] subExpressions,
+					AnalysisState<A> entryState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					ExpressionSet[] computed)
+					throws SemanticException {
 		if (subExpressions.length == 0)
 			return entryState;
 
@@ -47,13 +51,14 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> bwdEvaluate(
-			Expression[] subExpressions,
-			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
-			StatementStore<A> expressions,
-			ExpressionSet[] computed)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> bwdEvaluate(
+					Expression[] subExpressions,
+					AnalysisState<A> entryState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					ExpressionSet[] computed)
+					throws SemanticException {
 		if (subExpressions.length == 0)
 			return entryState;
 
@@ -93,4 +98,5 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 			int len) {
 		return len - 1;
 	}
+
 }

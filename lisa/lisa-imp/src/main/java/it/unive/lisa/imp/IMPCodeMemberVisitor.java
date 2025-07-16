@@ -117,7 +117,9 @@ import org.apache.commons.lang3.tuple.Triple;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
+class IMPCodeMemberVisitor
+		extends
+		IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
@@ -201,13 +203,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitBlock(
 			BlockContext ctx) {
-		Map<String, Pair<VariableRef,
-				Annotations>> backup = new HashMap<>(visibleIds);
+		Map<String, Pair<VariableRef, Annotations>> backup = new HashMap<>(visibleIds);
 		NodeList<CFG, Statement, Edge> block = new NodeList<>(new SequentialEdge());
 
 		Statement first = null, last = null;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
-			Triple<Statement, NodeList<CFG, Statement, Edge>,
+			Triple<Statement,
+					NodeList<CFG, Statement, Edge>,
 					Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
 			block.mergeWith(st.getMiddle());
 			if (first == null)
@@ -221,8 +223,16 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		for (Entry<String, Pair<VariableRef, Annotations>> id : visibleIds.entrySet())
 			if (!backup.containsKey(id.getKey())) {
 				VariableRef ref = id.getValue().getLeft();
-				descriptor.addVariable(new VariableTableEntry(ref.getLocation(),
-						0, ref.getRootStatement(), last, id.getKey(), Untyped.INSTANCE, id.getValue().getRight()));
+				descriptor
+						.addVariable(
+								new VariableTableEntry(
+										ref.getLocation(),
+										0,
+										ref.getRootStatement(),
+										last,
+										id.getKey(),
+										Untyped.INSTANCE,
+										id.getValue().getRight()));
 				toRemove.add(id.getKey());
 			}
 
@@ -258,12 +268,16 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			st = new IMPAssert(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
 		else if (ctx.RETURN() != null)
 			if (ctx.expression() != null)
-				st = new Return(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				st = new Return(
+						cfg,
+						new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 						visitExpression(ctx.expression()));
 			else
 				st = new Ret(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 		else if (ctx.THROW() != null)
-			st = new Throw(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+			st = new Throw(
+					cfg,
+					new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 					visitExpression(ctx.expression()));
 		else if (ctx.skip != null)
 			st = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
@@ -274,7 +288,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.command != null)
 			st = visitExpression(ctx.command);
 		else
-			throw new IllegalArgumentException("Statement '" + ctx.toString() + "' cannot be parsed");
+			throw new IllegalArgumentException(
+					"Statement '" + ctx.toString() + "' cannot be parsed");
 
 		NodeList<CFG, Statement, Edge> adj = new NodeList<>(new SequentialEdge());
 		adj.addNode(st);
@@ -307,8 +322,14 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			ite.addEdge(new FalseEdge(condition, noop));
 
-		cfs.add(new IfThenElse(list, condition, noop, then.getMiddle().getNodes(),
-				otherwise == null ? Collections.emptyList() : otherwise.getMiddle().getNodes()));
+		cfs
+				.add(
+						new IfThenElse(
+								list,
+								condition,
+								noop,
+								then.getMiddle().getNodes(),
+								otherwise == null ? Collections.emptyList() : otherwise.getMiddle().getNodes()));
 
 		return Triple.of(condition, ite, noop);
 	}
@@ -352,7 +373,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Statement condition = visitParExpr(ctx.parExpr());
 		loop.addNode(condition);
 
-		Triple<Statement, NodeList<CFG, Statement, Edge>,
+		Triple<Statement,
+				NodeList<CFG, Statement, Edge>,
 				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
 		loop.mergeWith(body.getMiddle());
 		loop.addEdge(new TrueEdge(condition, body.getLeft()));
@@ -398,7 +420,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			loop.addEdge(new SequentialEdge(first, condition));
 
-		Triple<Statement, NodeList<CFG, Statement, Edge>,
+		Triple<Statement,
+				NodeList<CFG, Statement, Edge>,
 				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
 		loop.mergeWith(body.getMiddle());
 		loop.addEdge(new TrueEdge(condition, body.getLeft()));
@@ -441,8 +464,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.arrayAccess() != null)
 			target = visitArrayAccess(ctx.arrayAccess());
 		else
-			throw new IMPSyntaxException("Target of the assignment at " + expression.getLocation()
-					+ " is neither an identifier, a field access or an array access");
+			throw new IMPSyntaxException(
+					"Target of the assignment at " + expression.getLocation()
+							+ " is neither an identifier, a field access or an array access");
 
 		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), target, expression);
 	}
@@ -450,9 +474,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	private VariableRef visitVar(
 			TerminalNode identifier,
 			boolean localReference) {
-		VariableRef ref = new VariableRef(cfg,
+		VariableRef ref = new VariableRef(
+				cfg,
 				new SourceCodeLocation(file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol())),
-				identifier.getText(), Untyped.INSTANCE);
+				identifier.getText(),
+				Untyped.INSTANCE);
 		if (localReference && !visibleIds.containsKey(ref.getName()))
 			throw new IMPSyntaxException(
 					"Referencing undeclared variable '" + ref.getName() + "' at " + ref.getLocation());
@@ -463,7 +489,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	public AccessInstanceGlobal visitFieldAccess(
 			FieldAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
-		return new AccessInstanceGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver,
+		return new AccessInstanceGlobal(
+				cfg,
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				receiver,
 				ctx.name.getText());
 	}
 
@@ -495,7 +524,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (ctx.IDENTIFIER() != null)
 			return visitVar(ctx.IDENTIFIER(), true);
 		else
-			return new Int32Literal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+			return new Int32Literal(
+					cfg,
+					new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 					Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 	}
 
@@ -517,42 +548,78 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 				return new Negation(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
 		else if (ctx.left != null && ctx.right != null)
 			if (ctx.MUL() != null)
-				return new Multiplication(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Multiplication(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.DIV() != null)
-				return new Division(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Division(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.MOD() != null)
-				return new Remainder(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Remainder(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.ADD() != null)
 				return new IMPAddOrConcat(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
 			else if (ctx.SUB() != null)
-				return new Subtraction(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Subtraction(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.GT() != null)
-				return new GreaterThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new GreaterThan(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.GE() != null)
-				return new GreaterOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new GreaterOrEqual(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.LT() != null)
-				return new LessThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new LessThan(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.LE() != null)
-				return new LessOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new LessOrEqual(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.EQUAL() != null)
-				return new Equal(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Equal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.NOTEQUAL() != null)
-				return new NotEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new NotEqual(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.AND() != null)
-				return new And(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new And(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else
-				return new Or(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Or(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 		else if (ctx.NEW() != null)
 			if (ctx.newBasicArrayExpr() != null)
@@ -575,7 +642,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.arrayExpr() != null)
 			return visitArrayExpr(ctx.arrayExpr());
 
-		throw new UnsupportedOperationException("Type of expression not supported: " + ctx);
+		throw new UnsupportedOperationException(
+				"Type of expression not supported: " + ctx);
 	}
 
 	@Override
@@ -589,7 +657,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.ternaryStringExpr() != null)
 			returned = visitTernaryStringExpr(ctx.ternaryStringExpr());
 		else
-			throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+			throw new UnsupportedOperationException(
+					"Type of string expression not supported: " + ctx);
 
 		if (returned instanceof PluggableStatement)
 			// These string operations are also native constructs
@@ -609,59 +678,115 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			UnaryStringExprContext ctx) {
 		if (ctx.STRLEN() != null)
 			return new StringLength.IMPStringLength(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.op));
-		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+		throw new UnsupportedOperationException(
+				"Type of string expression not supported: " + ctx);
 	}
 
 	@Override
 	public Expression visitBinaryStringExpr(
 			BinaryStringExprContext ctx) {
 		if (ctx.STRCAT() != null)
-			return new StringConcat.IMPStringConcat(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringConcat.IMPStringConcat(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRCONTAINS() != null)
-			return new StringContains.IMPStringContains(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringContains.IMPStringContains(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRENDS() != null)
-			return new StringEndsWith.IMPStringEndsWith(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringEndsWith.IMPStringEndsWith(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STREQ() != null)
-			return new StringEquals.IMPStringEquals(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringEquals.IMPStringEquals(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRINDEXOF() != null)
-			return new StringIndexOf.IMPStringIndexOf(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringIndexOf.IMPStringIndexOf(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRSTARTS() != null)
-			return new StringStartsWith.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
-					visitExpression(ctx.left), visitExpression(ctx.right));
+			return new StringStartsWith.IMPStringStartsWith(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.right));
 
-		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+		throw new UnsupportedOperationException(
+				"Type of string expression not supported: " + ctx);
 	}
 
 	@Override
 	public Expression visitTernaryStringExpr(
 			TernaryStringExprContext ctx) {
 		if (ctx.STRREPLACE() != null)
-			return new StringReplace.IMPStringReplace(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
-					visitExpression(ctx.middle), visitExpression(ctx.right));
-		else if (ctx.STRSUB() != null)
-			return new StringSubstring.IMPStringSubstring(cfg, file, getLine(ctx), getCol(ctx),
+			return new StringReplace.IMPStringReplace(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
 					visitExpression(ctx.left),
-					visitExpression(ctx.middle), visitExpression(ctx.right));
+					visitExpression(ctx.middle),
+					visitExpression(ctx.right));
+		else if (ctx.STRSUB() != null)
+			return new StringSubstring.IMPStringSubstring(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.middle),
+					visitExpression(ctx.right));
 
-		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+		throw new UnsupportedOperationException(
+				"Type of string expression not supported: " + ctx);
 	}
 
 	private Expression visitBumpBasicArrayExpr(
 			NewBasicArrayExprContext ctx) {
-		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				true, visitArrayCreatorRest(ctx.arrayCreatorRest()));
+		return new IMPNewArray(
+				cfg,
+				file,
+				getLine(ctx),
+				getCol(ctx),
+				visitPrimitiveType(ctx.primitiveType()),
+				true,
+				visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
 	public Expression visitNewBasicArrayExpr(
 			NewBasicArrayExprContext ctx) {
-		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				false, visitArrayCreatorRest(ctx.arrayCreatorRest()));
+		return new IMPNewArray(
+				cfg,
+				file,
+				getLine(ctx),
+				getCol(ctx),
+				visitPrimitiveType(ctx.primitiveType()),
+				false,
+				visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
@@ -690,7 +815,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		// have been created during the preprocessing
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
 		if (ctx.arrayCreatorRest() != null)
-			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base, true,
+			return new IMPNewArray(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					base,
+					true,
 					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
 			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, true, visitArguments(ctx.arguments()));
@@ -703,7 +834,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		// have been created during the preprocessing
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
 		if (ctx.arrayCreatorRest() != null)
-			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base, false,
+			return new IMPNewArray(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					base,
+					false,
 					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
 			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, false, visitArguments(ctx.arguments()));
@@ -742,8 +879,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Expression receiver = visitReceiver(ctx.receiver());
 		String name = ctx.name.getText();
 		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
-		return new UnresolvedCall(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), CallType.INSTANCE, null,
-				name, args);
+		return new UnresolvedCall(
+				cfg,
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				CallType.INSTANCE,
+				null,
+				name,
+				args);
 	}
 
 	@Override
@@ -775,20 +917,29 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), clean(ctx));
 		else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
-				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
+				return new Float32Literal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
 						-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 			else
-				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
+				return new Float32Literal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
 						Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 		else if (ctx.LITERAL_DECIMAL() != null)
 			if (ctx.SUB() != null)
-				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
+				return new Int32Literal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
 						-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 			else
-				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
+				return new Int32Literal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
 						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
-		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
+		throw new UnsupportedOperationException(
+				"Type of literal not supported: " + ctx);
 	}
 
 	/**
@@ -805,4 +956,5 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return text.substring(1, text.length() - 1);
 		return text;
 	}
+
 }

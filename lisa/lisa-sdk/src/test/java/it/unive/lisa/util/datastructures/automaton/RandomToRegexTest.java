@@ -17,6 +17,7 @@ import org.junit.Test;
 public class RandomToRegexTest {
 
 	private final SortedSet<State> states = new TreeSet<>();
+
 	private final Map<Integer, State> mapping = new HashMap<>();
 
 	@Before
@@ -46,7 +47,9 @@ public class RandomToRegexTest {
 			TestAutomaton a) {
 		RegularExpression fromRegex = a.toRegex().simplify();
 		TestAutomaton revert = fromRegex.toAutomaton(a);
-		assertTrue(a + " is different from " + revert, a.isEqualTo(revert));
+		assertTrue(
+				a + " is different from " + revert,
+				a.isEqualTo(revert));
 	}
 
 	/**
@@ -108,4 +111,5 @@ public class RandomToRegexTest {
 		for (int k = 0; k < numberOfGeneratedAutomata; k++)
 			check(generateAutomaton(states, mapping, numberOfTransitionsForEachState, sizeOfChar));
 	}
+
 }

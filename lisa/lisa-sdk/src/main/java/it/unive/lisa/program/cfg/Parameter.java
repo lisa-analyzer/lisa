@@ -16,9 +16,11 @@ import java.util.Objects;
  * defined. No information about the CFG where the parameter appears is
  * contained.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Parameter implements CodeElement {
+public class Parameter
+		implements
+		CodeElement {
 
 	/**
 	 * The name of this parameter
@@ -222,4 +224,5 @@ public class Parameter implements CodeElement {
 	public Variable toSymbolicVariable() {
 		return new Variable(staticType, name, annotations, location);
 	}
+
 }

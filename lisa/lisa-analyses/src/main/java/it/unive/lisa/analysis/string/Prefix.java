@@ -1,8 +1,10 @@
 package it.unive.lisa.analysis.string;
 
+import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
@@ -42,141 +44,216 @@ import java.util.Set;
  */
 public class Prefix
 		implements
-		SmashedSumStringDomain<Prefix>,
-		WholeValueStringDomain<Prefix> {
-
-	private final static Prefix TOP = new Prefix();
-	private final static Prefix BOTTOM = new Prefix(null);
-	private final String prefix;
+		SmashedSumStringDomain<Prefix.Pref>,
+		WholeValueStringDomain<Prefix.Pref> {
 
 	/**
-	 * Builds the top prefix abstract element.
-	 */
-	public Prefix() {
-		this("");
-	}
-
-	/**
-	 * Builds a prefix abstract element.
+	 * A lattice structure tracking prefixes of strings.
 	 * 
-	 * @param prefix the prefix
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public Prefix(
-			String prefix) {
-		this.prefix = prefix;
-	}
+	public static class Pref
+			implements
+			BaseLattice<Pref>,
+			WholeValueElement<Pref> {
 
-	@Override
-	public Prefix lubAux(
-			Prefix other)
-			throws SemanticException {
-		String otherPrefixString = other.prefix;
-		StringBuilder result = new StringBuilder();
+		private final static Pref TOP = new Pref();
 
-		int i = 0;
-		while (i <= prefix.length() - 1 &&
-				i <= otherPrefixString.length() - 1 &&
-				prefix.charAt(i) == otherPrefixString.charAt(i)) {
-			result.append(prefix.charAt(i++));
+		private final static Pref BOTTOM = new Pref(null);
+
+		private final String prefix;
+
+		/**
+		 * Builds the top prefix abstract element.
+		 */
+		public Pref() {
+			this("");
 		}
 
-		if (result.length() != 0)
-			return new Prefix(result.toString());
-
-		else
-			return TOP;
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			Prefix other)
-			throws SemanticException {
-		if (other.prefix.length() <= this.prefix.length()) {
-			Prefix lub = this.lubAux(other);
-
-			return lub.prefix.length() == other.prefix.length();
+		/**
+		 * Builds a prefix abstract element.
+		 * 
+		 * @param prefix the prefix
+		 */
+		public Pref(
+				String prefix) {
+			this.prefix = prefix;
 		}
 
-		return false;
-	}
+		@Override
+		public Pref lubAux(
+				Pref other)
+				throws SemanticException {
+			String otherPrefixString = other.prefix;
+			StringBuilder result = new StringBuilder();
 
-	@Override
-	public boolean equals(
-			Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
+			int i = 0;
+			while (i <= prefix.length() - 1
+					&& i <= otherPrefixString.length() - 1
+					&& prefix.charAt(i) == otherPrefixString.charAt(i)) {
+				result.append(prefix.charAt(i++));
+			}
+
+			if (result.length() != 0)
+				return new Pref(result.toString());
+
+			else
+				return TOP;
+		}
+
+		@Override
+		public boolean lessOrEqualAux(
+				Pref other)
+				throws SemanticException {
+			if (other.prefix.length() <= this.prefix.length()) {
+				Pref lub = this.lubAux(other);
+
+				return lub.prefix.length() == other.prefix.length();
+			}
+
 			return false;
-		Prefix prefix1 = (Prefix) o;
-		return Objects.equals(prefix, prefix1.prefix);
+		}
+
+		@Override
+		public boolean equals(
+				Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			Pref prefix1 = (Pref) o;
+			return Objects.equals(prefix, prefix1.prefix);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(prefix);
+		}
+
+		@Override
+		public Pref top() {
+			return TOP;
+		}
+
+		@Override
+		public Pref bottom() {
+			return BOTTOM;
+		}
+
+		@Override
+		public StructuredRepresentation representation() {
+			if (isBottom())
+				return Lattice.bottomRepresentation();
+			if (isTop())
+				return Lattice.topRepresentation();
+
+			return new StringRepresentation(prefix + '*');
+		}
+
+		/**
+		 * Yields the prefix of this abstract value.
+		 * 
+		 * @return the prefix of this abstract value.
+		 */
+		public String getPrefix() {
+			return this.prefix;
+		}
+
+		@Override
+		public Set<BinaryExpression> constraints(
+				ValueExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (isBottom())
+				return null;
+
+			BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+			UnaryExpression strlen = new UnaryExpression(
+					pp.getProgram().getTypes().getIntegerType(),
+					e,
+					StringLength.INSTANCE,
+					pp.getLocation());
+
+			if (isTop())
+				return Collections
+						.singleton(
+								new BinaryExpression(
+										booleanType,
+										new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+										strlen,
+										ComparisonLe.INSTANCE,
+										e.getCodeLocation()));
+
+			return Set
+					.of(
+							new BinaryExpression(
+									booleanType,
+									new Constant(
+											pp.getProgram().getTypes().getIntegerType(),
+											prefix.length(),
+											pp.getLocation()),
+									strlen,
+									ComparisonLe.INSTANCE,
+									e.getCodeLocation()),
+							new BinaryExpression(
+									booleanType,
+									new Constant(pp.getProgram().getTypes().getStringType(), prefix, pp.getLocation()),
+									e,
+									StringStartsWith.INSTANCE,
+									e.getCodeLocation()));
+		}
+
+		@Override
+		public Pref generate(
+				Set<BinaryExpression> constraints,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (constraints == null)
+				return bottom();
+
+			for (BinaryExpression expr : constraints)
+				if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringStartsWith)
+						&& expr.getLeft() instanceof Constant
+						&& ((Constant) expr.getLeft()).getValue() instanceof String)
+					return new Pref(((Constant) expr.getLeft()).getValue().toString());
+
+			return TOP;
+		}
+
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(prefix);
-	}
-
-	@Override
-	public Prefix top() {
-		return TOP;
-	}
-
-	@Override
-	public Prefix bottom() {
-		return BOTTOM;
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-		if (isTop())
-			return Lattice.topRepresentation();
-
-		return new StringRepresentation(prefix + '*');
-	}
-
-	/**
-	 * Yields the prefix of this abstract value.
-	 * 
-	 * @return the prefix of this abstract value.
-	 */
-	public String getPrefix() {
-		return this.prefix;
-	}
-
-	@Override
-	public Prefix evalNonNullConstant(
+	public Pref evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (constant.getValue() instanceof String) {
 			String str = (String) constant.getValue();
 			if (!str.isEmpty())
-				return new Prefix(str);
+				return new Pref(str);
 
 		}
 
-		return TOP;
+		return Pref.TOP;
 	}
 
 	@Override
-	public Prefix evalBinaryExpression(
+	public Pref evalBinaryExpression(
 			BinaryExpression expression,
-			Prefix left,
-			Prefix right,
+			Pref left,
+			Pref right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (expression.getOperator() == StringConcat.INSTANCE)
 			return left;
-		return TOP;
+		return Pref.TOP;
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			Prefix left,
-			Prefix right,
+			Pref left,
+			Pref right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -186,107 +263,58 @@ public class Prefix
 	}
 
 	@Override
-	public Prefix substring(
+	public Pref substring(
+			Pref s,
 			long begin,
 			long end) {
-		if (isTop() || isBottom())
-			return this;
+		if (s.isTop() || s.isBottom())
+			return s;
 
-		if (end <= getPrefix().length())
-			return new Prefix(getPrefix().substring((int) begin, (int) end));
-		else if (begin < getPrefix().length())
-			return new Prefix(getPrefix().substring((int) begin));
+		if (end <= s.getPrefix().length())
+			return new Pref(s.getPrefix().substring((int) begin, (int) end));
+		else if (begin < s.getPrefix().length())
+			return new Pref(s.getPrefix().substring((int) begin));
 
-		return new Prefix("");
+		return new Pref("");
 	}
 
 	@Override
-	public IntInterval length() {
-		return new IntInterval(new MathNumber(prefix.length()), MathNumber.PLUS_INFINITY);
+	public IntInterval length(
+			Pref s) {
+		return new IntInterval(new MathNumber(s.getPrefix().length()), MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
 	public IntInterval indexOf(
-			Prefix s) {
+			Pref current,
+			Pref other) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
 	public Satisfiability containsChar(
+			Pref current,
 			char c) {
-		if (isTop())
+		if (current.isTop())
 			return Satisfiability.UNKNOWN;
-		if (isBottom())
+		if (current.isBottom())
 			return Satisfiability.BOTTOM;
-		return this.prefix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
+		return current.getPrefix().contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public Set<BinaryExpression> constraints(
-			ValueExpression e,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isBottom())
-			return null;
-
-		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
-		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e,
-				StringLength.INSTANCE, pp.getLocation());
-
-		if (isTop())
-			return Collections.singleton(
-					new BinaryExpression(
-							booleanType,
-							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-							strlen,
-							ComparisonLe.INSTANCE,
-							e.getCodeLocation()));
-
-		return Set.of(
-				new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getIntegerType(), prefix.length(), pp.getLocation()),
-						strlen,
-						ComparisonLe.INSTANCE,
-						e.getCodeLocation()),
-				new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getStringType(), prefix, pp.getLocation()),
-						e,
-						StringStartsWith.INSTANCE,
-						e.getCodeLocation()));
-	}
-
-	@Override
-	public Prefix generate(
-			Set<BinaryExpression> constraints,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (constraints == null)
-			return bottom();
-
-		for (BinaryExpression expr : constraints)
-			if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringStartsWith)
-					&& expr.getLeft() instanceof Constant
-					&& ((Constant) expr.getLeft()).getValue() instanceof String)
-				return new Prefix(((Constant) expr.getLeft()).getValue().toString());
-
-		return TOP;
-	}
-
-	@Override
-	public Prefix substring(
+	public Pref substring(
+			Pref prefix,
 			Set<BinaryExpression> a1,
 			Set<BinaryExpression> a2,
 			ProgramPoint pp)
 			throws SemanticException {
-		if (isBottom() || a1 == null || a2 == null)
+		if (prefix.isBottom() || a1 == null || a2 == null)
 			return bottom();
 
 		Integer minI = null;
 		for (BinaryExpression expr : a1)
-			if (expr.getLeft() instanceof Constant
-					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+			if (expr.getLeft() instanceof Constant && ((Constant) expr.getLeft()).getValue() instanceof Integer) {
 				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
 				if (expr.getOperator() instanceof ComparisonEq)
 					minI = val;
@@ -298,8 +326,7 @@ public class Prefix
 
 		Integer minJ = null;
 		for (BinaryExpression expr : a2)
-			if (expr.getLeft() instanceof Constant
-					&& ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+			if (expr.getLeft() instanceof Constant && ((Constant) expr.getLeft()).getValue() instanceof Integer) {
 				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
 				if (expr.getOperator() instanceof ComparisonEq)
 					minJ = val;
@@ -311,45 +338,65 @@ public class Prefix
 
 		// minI is always >= 0
 		// minJ is null (infinity) or >= minI
-		if (minJ != null && minJ <= prefix.length())
-			return new Prefix(prefix.substring(minI, minJ));
-		if (minI <= prefix.length())
-			return new Prefix(prefix.substring(minI));
-		return TOP;
+		if (minJ != null && minJ <= prefix.getPrefix().length())
+			return new Pref(prefix.getPrefix().substring(minI, minJ));
+		if (minI <= prefix.getPrefix().length())
+			return new Pref(prefix.getPrefix().substring(minI));
+		return Pref.TOP;
 	}
 
 	@Override
 	public Set<BinaryExpression> indexOf_constr(
 			BinaryExpression expression,
-			Prefix other,
+			Pref current,
+			Pref other,
 			ProgramPoint pp)
 			throws SemanticException {
-		if (isBottom() || other.isBottom())
+		if (current.isBottom() || other.isBottom())
 			return null;
 
-		IntInterval indexes = indexOf(other);
+		IntInterval indexes = indexOf(current, other);
 		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
 
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
-			constr.add(new BinaryExpression(
-					booleanType,
-					new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(),
-							pp.getLocation()),
-					expression,
-					ComparisonLe.INSTANCE,
-					pp.getLocation()));
+			constr
+					.add(
+							new BinaryExpression(
+									booleanType,
+									new Constant(
+											pp.getProgram().getTypes().getIntegerType(),
+											indexes.getLow().toInt(),
+											pp.getLocation()),
+									expression,
+									ComparisonLe.INSTANCE,
+									pp.getLocation()));
 			if (indexes.getHigh().isFinite())
-				constr.add(new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(),
-								pp.getLocation()),
-						expression,
-						ComparisonGe.INSTANCE,
-						pp.getLocation()));
+				constr
+						.add(
+								new BinaryExpression(
+										booleanType,
+										new Constant(
+												pp.getProgram().getTypes().getIntegerType(),
+												indexes.getHigh().toInt(),
+												pp.getLocation()),
+										expression,
+										ComparisonGe.INSTANCE,
+										pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}
 		return constr;
 	}
+
+	@Override
+	public Pref top() {
+		return Pref.TOP;
+	}
+
+	@Override
+	public Pref bottom() {
+		return Pref.BOTTOM;
+	}
+
 }

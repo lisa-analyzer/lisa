@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.heap;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -25,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -32,18 +34,143 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
+public class MonolithicHeap
+		implements
+		BaseHeapDomain<MonolithicHeap.Monolith> {
 
-	private static final MonolithicHeap TOP = new MonolithicHeap();
+	/**
+	 * A monolithic heap lattice that consists of a single element
+	 * ({@link Monolith#SINGLETON}) and a bottom element
+	 * ({@link Monolith#BOTTOM}). The single element represents the whole heap,
+	 * while the bottom element represents erroneous states. All memory
+	 * locations are abstracted to a single heap location, which is the
+	 * monolith.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static class Monolith
+			implements
+			HeapLattice<Monolith> {
 
-	private static final MonolithicHeap BOTTOM = new MonolithicHeap();
+		/**
+		 * The singleton instance of the monolithic heap.
+		 */
+		public static final Monolith SINGLETON = new Monolith();
+
+		/**
+		 * The bottom element of the monolithic heap, which represents erroneous
+		 * states.
+		 */
+		public static final Monolith BOTTOM = new Monolith();
+
+		private static final StructuredRepresentation REPR = new StringRepresentation("monolith");
+
+		private Monolith() {
+		}
+
+		@Override
+		public boolean lessOrEqual(
+				Monolith other)
+				throws SemanticException {
+			return this == BOTTOM || other == SINGLETON;
+		}
+
+		@Override
+		public Monolith lub(
+				Monolith other)
+				throws SemanticException {
+			return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
+		}
+
+		@Override
+		public Monolith glb(
+				Monolith other)
+				throws SemanticException {
+			return this == SINGLETON && other == SINGLETON ? SINGLETON : BOTTOM;
+		}
+
+		@Override
+		public Monolith top() {
+			return SINGLETON;
+		}
+
+		@Override
+		public Monolith bottom() {
+			return BOTTOM;
+		}
+
+		@Override
+		public StructuredRepresentation representation() {
+			if (isBottom())
+				return Lattice.bottomRepresentation();
+			return REPR;
+		}
+
+		@Override
+		public Pair<Monolith, List<HeapReplacement>> pushScope(
+				ScopeToken token,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public Pair<Monolith, List<HeapReplacement>> popScope(
+				ScopeToken token,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public boolean knowsIdentifier(
+				Identifier id) {
+			return false;
+		}
+
+		@Override
+		public Pair<Monolith, List<HeapReplacement>> forgetIdentifier(
+				Identifier id,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public Pair<Monolith, List<HeapReplacement>> forgetIdentifiers(
+				Iterable<Identifier> ids,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public Pair<Monolith, List<HeapReplacement>> forgetIdentifiersIf(
+				Predicate<Identifier> test,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public List<HeapReplacement> expand(
+				HeapReplacement base)
+				throws SemanticException {
+			return List.of(base);
+		}
+
+	}
 
 	private static final String MONOLITH_NAME = "heap";
 
-	private static final StructuredRepresentation REPR = new StringRepresentation("monolith");
+	@Override
+	public Monolith makeLattice() {
+		return Monolith.SINGLETON;
+	}
 
 	@Override
 	public ExpressionSet rewrite(
+			Monolith state,
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -52,127 +179,34 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public List<HeapReplacement> getSubstitution() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public MonolithicHeap assign(
+	public Pair<Monolith, List<HeapReplacement>> assign(
+			Monolith state,
 			Identifier id,
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return this;
+		return Pair.of(state, Collections.emptyList());
 	}
 
 	@Override
-	public MonolithicHeap mk(
-			MonolithicHeap reference) {
-		return TOP;
-	}
-
-	@Override
-	public MonolithicHeap mk(
-			MonolithicHeap reference,
-			List<HeapReplacement> replacements) {
-		return TOP;
-	}
-
-	@Override
-	public MonolithicHeap semanticsOf(
+	public Pair<Monolith, List<HeapReplacement>> semanticsOf(
+			Monolith state,
 			HeapExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		return this;
+		return Pair.of(state, Collections.emptyList());
 	}
 
 	@Override
-	public MonolithicHeap assume(
+	public Pair<Monolith, List<HeapReplacement>> assume(
+			Monolith state,
 			SymbolicExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public MonolithicHeap forgetIdentifier(
-			Identifier id,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public MonolithicHeap forgetIdentifiers(
-			Iterable<Identifier> ids,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public MonolithicHeap forgetIdentifiersIf(
-			Predicate<Identifier> test,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public MonolithicHeap lubAux(
-			MonolithicHeap other)
-			throws SemanticException {
-		return TOP;
-	}
-
-	@Override
-	public MonolithicHeap glbAux(
-			MonolithicHeap other)
-			throws SemanticException {
-		return TOP;
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			MonolithicHeap other)
-			throws SemanticException {
-		return true;
-	}
-
-	@Override
-	public MonolithicHeap top() {
-		return TOP;
-	}
-
-	@Override
-	public MonolithicHeap bottom() {
-		return BOTTOM;
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		return isBottom() ? Lattice.bottomRepresentation() : REPR;
-	}
-
-	@Override
-	public int hashCode() {
-		return MonolithicHeap.class.hashCode();
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		MonolithicHeap other = (MonolithicHeap) obj;
-		return isTop() == other.isTop() && isBottom() == other.isBottom();
+		return Pair.of(state, Collections.emptyList());
 	}
 
 	/**
@@ -181,7 +215,9 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class Rewriter extends BaseHeapDomain.Rewriter {
+	public static class Rewriter
+			extends
+			BaseHeapDomain.Rewriter {
 
 		/**
 		 * The singleton instance of this rewriter.
@@ -204,8 +240,7 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			child.forEach(e -> acc.add(e.getStaticType()));
 			Type refType = Type.commonSupertype(acc, Untyped.INSTANCE);
 
-			HeapLocation e = new HeapLocation(refType, MONOLITH_NAME, true,
-					expression.getCodeLocation());
+			HeapLocation e = new HeapLocation(refType, MONOLITH_NAME, true, expression.getCodeLocation());
 			if (receiver.elements.iterator().next() instanceof HeapLocation) {
 				HeapLocation loc = (HeapLocation) receiver.elements.iterator().next();
 				e.setAllocation(loc.isAllocation());
@@ -220,7 +255,10 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
-			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
+			HeapLocation e = new HeapLocation(
+					expression.getStaticType(),
+					MONOLITH_NAME,
+					true,
 					expression.getCodeLocation());
 			e.setAllocation(true);
 			return new ExpressionSet(e);
@@ -256,16 +294,12 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			// new one is modeled through the monolith
 			return deref;
 		}
-	}
 
-	@Override
-	public boolean knowsIdentifier(
-			Identifier id) {
-		return false;
 	}
 
 	@Override
 	public Satisfiability alias(
+			Monolith state,
 			SymbolicExpression x,
 			SymbolicExpression y,
 			ProgramPoint pp,
@@ -276,6 +310,7 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 	@Override
 	public Satisfiability isReachableFrom(
+			Monolith state,
 			SymbolicExpression x,
 			SymbolicExpression y,
 			ProgramPoint pp,
@@ -283,4 +318,5 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
+
 }

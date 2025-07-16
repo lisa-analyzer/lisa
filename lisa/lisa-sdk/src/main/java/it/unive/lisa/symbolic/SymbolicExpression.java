@@ -19,7 +19,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class SymbolicExpression implements ScopedObject<SymbolicExpression> {
+public abstract class SymbolicExpression
+		implements
+		ScopedObject<SymbolicExpression> {
 
 	/**
 	 * The code location of the statement that has generated this symbolic
@@ -182,4 +184,19 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 	 * @return the typing expression-free version of {@code this}
 	 */
 	public abstract SymbolicExpression removeTypingExpressions();
+
+	/**
+	 * Replaces all occurrences of the given source expression with the target
+	 * expression in this expression. If the source is not present, this
+	 * expression is returned as-is.
+	 * 
+	 * @param source the expression to be replaced
+	 * @param target the expression to replace with
+	 * 
+	 * @return the updated expression
+	 */
+	public abstract SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target);
+
 }

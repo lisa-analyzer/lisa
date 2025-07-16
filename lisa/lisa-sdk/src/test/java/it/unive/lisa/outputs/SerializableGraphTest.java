@@ -30,8 +30,11 @@ import org.junit.Test;
 
 public class SerializableGraphTest {
 
-	private static final ClassUnit unit = new ClassUnit(SyntheticLocation.INSTANCE,
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "Testing", false);
+	private static final ClassUnit unit = new ClassUnit(
+			SyntheticLocation.INSTANCE,
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"Testing",
+			false);
 
 	private static void addNode(
 			SortedSet<SerializableNode> nodes,

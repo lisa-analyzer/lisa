@@ -1,6 +1,6 @@
 package it.unive.lisa.interprocedural.context.recursion;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
@@ -13,10 +13,10 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
+ * @param <A> the type of {@link AbstractLattice} contained into the analysis
  *                state
  */
-public class Recursion<A extends AbstractState<A>> {
+public class Recursion<A extends AbstractLattice<A>> {
 
 	private final Call start;
 
@@ -158,4 +158,5 @@ public class Recursion<A extends AbstractState<A>> {
 	public String toString() {
 		return members.toString() + " (started at " + start.getLocation() + ")";
 	}
+
 }

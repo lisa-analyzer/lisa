@@ -18,7 +18,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnaryExpression extends ValueExpression {
+public class UnaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The inner expression
@@ -184,10 +186,20 @@ public class UnaryExpression extends ValueExpression {
 		SymbolicExpression e = expression.removeTypingExpressions();
 		if (expression == e)
 			return this;
-		return new UnaryExpression(
-				getStaticType(),
-				e,
-				operator,
-				getCodeLocation());
+		return new UnaryExpression(getStaticType(), e, operator, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression e = expression.replace(source, target);
+		if (expression == e)
+			return this;
+		return new UnaryExpression(getStaticType(), e, operator, getCodeLocation());
+	}
+
 }

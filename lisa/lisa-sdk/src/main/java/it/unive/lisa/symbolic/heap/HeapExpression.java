@@ -17,7 +17,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class HeapExpression extends SymbolicExpression {
+public abstract class HeapExpression
+		extends
+		SymbolicExpression {
 
 	/**
 	 * Builds the heap expression.
@@ -53,4 +55,5 @@ public abstract class HeapExpression extends SymbolicExpression {
 	public final boolean mightNeedRewriting() {
 		return true;
 	}
+
 }

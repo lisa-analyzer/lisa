@@ -1,6 +1,8 @@
 package it.unive.lisa.interprocedural.context.recursion;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -27,10 +29,14 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAnalysis<A> {
+public class BaseCasesFinder<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		extends
+		ContextBasedAnalysis<A, D> {
 
 	private final Recursion<A> recursion;
 
@@ -45,7 +51,7 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 	 * @param returnsVoid whether or not the recursion returns void
 	 */
 	public BaseCasesFinder(
-			ContextBasedAnalysis<A> backing,
+			ContextBasedAnalysis<A, D> backing,
 			Recursion<A> recursion,
 			boolean returnsVoid) {
 		super(backing);
@@ -57,7 +63,8 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 	public void init(
 			Application app,
 			CallGraph callgraph,
-			OpenCallPolicy policy)
+			OpenCallPolicy policy,
+			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		// we mark this as unsupported to make sure it never gets used as a root
 		// analysis
@@ -87,7 +94,7 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 			if (returnsVoid)
 				return entryState.bottom();
 			else
-				return entryState.bottom().smallStepSemantics(call.getMetaVariable(), call);
+				return analysis.smallStepSemantics(entryState.bottom(), call.getMetaVariable(), call);
 		}
 
 		return super.getAbstractResultOf(call, entryState, parameters, expressions);
@@ -117,7 +124,8 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 	 * 
 	 * @throws SemanticException if an exception happens during the computation
 	 */
-	public AnalysisState<A> find() throws SemanticException {
+	public AnalysisState<A> find()
+			throws SemanticException {
 		Call start = recursion.getInvocation();
 		CompoundState<A> entryState = recursion.getEntryState();
 
@@ -130,10 +138,8 @@ public class BaseCasesFinder<A extends AbstractState<A>> extends ContextBasedAna
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
 		// it should be enough to send values to top, retaining all type
 		// information
-		return start.forwardSemanticsAux(
-				this,
-				entryState.postState.withTopValues(),
-				params,
-				entryState.intermediateStates);
+		return start
+				.forwardSemanticsAux(this, entryState.postState.withTopValues(), params, entryState.intermediateStates);
 	}
+
 }

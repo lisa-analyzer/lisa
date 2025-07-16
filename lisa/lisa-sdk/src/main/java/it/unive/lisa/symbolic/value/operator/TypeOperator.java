@@ -7,6 +7,8 @@ import it.unive.lisa.symbolic.value.Operator;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface TypeOperator extends Operator {
+public interface TypeOperator
+		extends
+		Operator {
 
 }

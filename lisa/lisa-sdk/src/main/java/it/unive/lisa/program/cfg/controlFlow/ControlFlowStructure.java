@@ -210,4 +210,5 @@ public abstract class ControlFlowStructure {
 	 * @return the targeted statements
 	 */
 	public abstract Collection<Statement> getTargetedStatements();
+
 }

@@ -31,6 +31,7 @@ import java.util.Objects;
 public abstract class AnalysisTestExecutor {
 
 	public static final String EXPECTED_RESULTS_DIR = "imp-testcases";
+
 	public static final String ACTUAL_RESULTS_DIR = "test-outputs";
 
 	/**
@@ -95,7 +96,9 @@ public abstract class AnalysisTestExecutor {
 			CronConfiguration conf,
 			Program program) {
 		String testMethod = getCaller();
-		System.out.println("### Testing " + testMethod);
+		System.out
+				.println(
+						"### Testing " + testMethod);
 		Objects.requireNonNull(conf);
 		Objects.requireNonNull(conf.testDir);
 
@@ -121,10 +124,14 @@ public abstract class AnalysisTestExecutor {
 		if (!expFile.exists()) {
 			boolean update = "true".equals(System.getProperty("lisa.cron.update")) || conf.forceUpdate;
 			if (!update) {
-				System.out.println("No '" + LiSA.REPORT_NAME + "' found in the expected folder, exiting...");
+				System.out
+						.println(
+								"No '" + LiSA.REPORT_NAME + "' found in the expected folder, exiting...");
 				return;
 			} else {
-				System.out.println("No '" + LiSA.REPORT_NAME + "' found in the expected folder, copying results...");
+				System.out
+						.println(
+								"No '" + LiSA.REPORT_NAME + "' found in the expected folder, copying results...");
 				copyFiles(expectedPath, actualPath, expFile, actFile);
 			}
 		}
@@ -132,7 +139,9 @@ public abstract class AnalysisTestExecutor {
 		compare(conf, expectedPath, actualPath, expFile, actFile, false);
 
 		if (conf.compareWithOptimization && !conf.optimize) {
-			System.out.println("### Testing " + testMethod + " with optimization enabled");
+			System.out
+					.println(
+							"### Testing " + testMethod + " with optimization enabled");
 
 			// we parse the program again since the analysis might have
 			// finalized it or modified it, and we want to start from scratch
@@ -164,35 +173,27 @@ public abstract class AnalysisTestExecutor {
 			JsonReport actual = JsonReport.read(r);
 			Accumulator acc = new Accumulator(expectedPath);
 			if (optimized)
-				assertTrue("Optimized results are different",
-						JsonReportComparer.compare(
-								expected,
-								actual,
-								expectedPath.toFile(),
-								actualPath.toFile(),
-								new OptimizedRunDiff()));
+				assertTrue(
+						"Optimized results are different",
+						JsonReportComparer
+								.compare(expected, actual, expectedPath.toFile(), actualPath.toFile(),
+										new OptimizedRunDiff()));
 			else if (!update)
-				assertTrue("Results are different",
-						JsonReportComparer.compare(
-								expected,
-								actual,
-								expectedPath.toFile(),
-								actualPath.toFile()));
-			else if (!JsonReportComparer.compare(
-					expected,
-					actual,
-					expectedPath.toFile(),
-					actualPath.toFile(),
-					acc)) {
+				assertTrue(
+						"Results are different",
+						JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
+			else if (!JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile(), acc)) {
 				System.err.println("Results are different, regenerating differences");
 				regen(expectedPath, actualPath, expFile, actFile, acc);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
-			fail("File not found: " + e.getMessage());
+			fail(
+					"File not found: " + e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			fail("Unable to compare reports: " + e.getMessage());
+			fail(
+					"Unable to compare reports: " + e.getMessage());
 		}
 	}
 
@@ -207,7 +208,9 @@ public abstract class AnalysisTestExecutor {
 			createDirectories(expectedPath);
 
 			copy(actFile.toPath(), expFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			System.err.println("- Copied " + LiSA.REPORT_NAME);
+			System.err
+					.println(
+							"- Copied " + LiSA.REPORT_NAME);
 
 			for (String file : actual.getFiles()) {
 				Path f = Paths.get(file);
@@ -215,16 +218,20 @@ public abstract class AnalysisTestExecutor {
 					Path path = Paths.get(expectedPath.toString(), f.toString());
 					createDirectories(path.getParent());
 					copy(Paths.get(actualPath.toString(), f.toString()), path);
-					System.err.println("- Copied (new) " + f);
+					System.err
+							.println(
+									"- Copied (new) " + f);
 				}
 			}
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
-			fail("File not found: " + e.getMessage());
+			fail(
+					"File not found: " + e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			fail("Unable to compare reports: " + e.getMessage());
+			fail(
+					"Unable to compare reports: " + e.getMessage());
 		}
 	}
 
@@ -235,30 +242,39 @@ public abstract class AnalysisTestExecutor {
 			File actFile,
 			Accumulator acc)
 			throws IOException {
-		boolean updateReport = acc.changedWarnings || acc.changedConf || acc.changedInfos
-				|| !acc.addedFilePaths.isEmpty() || !acc.removedFilePaths.isEmpty()
+		boolean updateReport = acc.changedWarnings
+				|| acc.changedConf
+				|| acc.changedInfos
+				|| !acc.addedFilePaths.isEmpty()
+				|| !acc.removedFilePaths.isEmpty()
 				|| !acc.changedFileName.isEmpty();
 		if (updateReport) {
 			copy(actFile.toPath(), expFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			System.err.println("- Updated " + LiSA.REPORT_NAME);
+			System.err
+					.println(
+							"- Updated " + LiSA.REPORT_NAME);
 		}
 		for (Path f : acc.removedFilePaths) {
 			delete(Paths.get(expectedPath.toString(), f.toString()));
-			System.err.println("- Deleted " + f);
+			System.err
+					.println(
+							"- Deleted " + f);
 		}
 		for (Path f : acc.addedFilePaths)
 			if (!f.getFileName().toString().equals(LiSA.REPORT_NAME)) {
 				Path path = Paths.get(expectedPath.toString(), f.toString());
 				createDirectories(path.getParent());
 				copy(Paths.get(actualPath.toString(), f.toString()), path);
-				System.err.println("- Copied (new) " + f);
+				System.err
+						.println(
+								"- Copied (new) " + f);
 			}
 		for (Path f : acc.changedFileName) {
 			Path fresh = Paths.get(expectedPath.toString(), f.toString());
-			copy(Paths.get(actualPath.toString(), f.toString()),
-					fresh,
-					StandardCopyOption.REPLACE_EXISTING);
-			System.err.println("- Copied (update) " + fresh);
+			copy(Paths.get(actualPath.toString(), f.toString()), fresh, StandardCopyOption.REPLACE_EXISTING);
+			System.err
+					.println(
+							"- Copied (update) " + fresh);
 		}
 	}
 
@@ -270,7 +286,8 @@ public abstract class AnalysisTestExecutor {
 			program = IMPFrontend.processFile(target.toString(), !allMethods);
 		} catch (ParsingException e) {
 			e.printStackTrace(System.err);
-			fail("Exception while parsing '" + target + "': " + e.getMessage());
+			fail(
+					"Exception while parsing '" + target + "': " + e.getMessage());
 		}
 		return program;
 	}
@@ -295,18 +312,26 @@ public abstract class AnalysisTestExecutor {
 			FileManager.forceDeleteFolder(workdir.toString());
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			fail("Cannot delete working directory '" + workdir + "': " + e.getMessage());
+			fail(
+					"Cannot delete working directory '" + workdir + "': " + e.getMessage());
 		}
 		configuration.workdir = workdir.toString();
 	}
 
-	private class Accumulator implements DiffAlgorithm {
+	private class Accumulator
+			implements
+			DiffAlgorithm {
 
 		private final Collection<Path> changedFileName = new HashSet<>();
+
 		private final Collection<Path> addedFilePaths = new HashSet<>();
+
 		private final Collection<Path> removedFilePaths = new HashSet<>();
+
 		private boolean changedInfos = false;
+
 		private boolean changedConf = false;
+
 		private boolean changedWarnings = false;
 
 		private final Path exp;
@@ -389,9 +414,13 @@ public abstract class AnalysisTestExecutor {
 				String second) {
 			changedConf = true;
 		}
+
 	}
 
-	private static class OptimizedRunDiff extends BaseDiffAlgorithm {
+	private static class OptimizedRunDiff
+			extends
+			BaseDiffAlgorithm {
+
 		@Override
 		public boolean shouldCompareConfigurations() {
 			// optimized runs use the same configuration except for
@@ -399,6 +428,7 @@ public abstract class AnalysisTestExecutor {
 			// have already been checked in the regular test execution
 			return false;
 		}
+
 	}
 
 	private String getCaller() {
@@ -415,4 +445,5 @@ public abstract class AnalysisTestExecutor {
 
 		throw new AnalysisException("Unable to find caller test method");
 	}
+
 }

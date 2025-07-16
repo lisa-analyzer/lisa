@@ -1,62 +1,21 @@
 package it.unive.lisa;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.Set;
+import java.util.function.Predicate;
 
-public class TestAbstractState extends TestDomain<TestAbstractState, SymbolicExpression>
+public class TestAbstractState
 		implements
-		AbstractState<TestAbstractState> {
+		AbstractLattice<TestAbstractState> {
 
 	@Override
 	public StructuredRepresentation representation() {
 		return new StringRepresentation("state");
-	}
-
-	@Override
-	public ExpressionSet rewrite(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return new ExpressionSet(expression);
-	}
-
-	@Override
-	public ExpressionSet rewrite(
-			ExpressionSet expressions,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return expressions;
-	}
-
-	@Override
-	public Set<Type> getRuntimeTypesOf(
-			SymbolicExpression e,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return Collections.singleton(Untyped.INSTANCE);
-	}
-
-	@Override
-	public Type getDynamicTypeOf(
-			SymbolicExpression e,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return Untyped.INSTANCE;
 	}
 
 	@Override
@@ -75,22 +34,73 @@ public class TestAbstractState extends TestDomain<TestAbstractState, SymbolicExp
 	}
 
 	@Override
-	public Satisfiability alias(
-			SymbolicExpression x,
-			SymbolicExpression y,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return Satisfiability.UNKNOWN;
+	public boolean knowsIdentifier(
+			Identifier id) {
+		return false;
 	}
 
 	@Override
-	public Satisfiability isReachableFrom(
-			SymbolicExpression x,
-			SymbolicExpression y,
-			ProgramPoint pp,
-			SemanticOracle oracle)
+	public TestAbstractState forgetIdentifier(
+			Identifier id,
+			ProgramPoint pp)
 			throws SemanticException {
-		return Satisfiability.UNKNOWN;
+		return this;
 	}
+
+	@Override
+	public TestAbstractState forgetIdentifiersIf(
+			Predicate<Identifier> test,
+			ProgramPoint pp)
+			throws SemanticException {
+		return this;
+	}
+
+	@Override
+	public TestAbstractState forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
+		return this;
+	}
+
+	@Override
+	public boolean lessOrEqual(
+			TestAbstractState other)
+			throws SemanticException {
+		return true;
+	}
+
+	@Override
+	public TestAbstractState lub(
+			TestAbstractState other)
+			throws SemanticException {
+		return this;
+	}
+
+	@Override
+	public TestAbstractState top() {
+		return this;
+	}
+
+	@Override
+	public TestAbstractState bottom() {
+		return this;
+	}
+
+	@Override
+	public TestAbstractState pushScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		return this;
+	}
+
+	@Override
+	public TestAbstractState popScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		return this;
+	}
+
 }

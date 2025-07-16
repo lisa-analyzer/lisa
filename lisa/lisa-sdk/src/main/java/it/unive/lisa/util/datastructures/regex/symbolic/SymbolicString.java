@@ -13,10 +13,13 @@ import org.apache.commons.lang3.StringUtils;
  * An extended string, that is, a string composed of an array of
  * {@link SymbolicChar}.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class SymbolicString implements Comparable<SymbolicString>, Iterable<SymbolicChar> {
+public final class SymbolicString
+		implements
+		Comparable<SymbolicString>,
+		Iterable<SymbolicChar> {
 
 	/**
 	 * The underlying {@link SymbolicChar} array
@@ -106,7 +109,10 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	 */
 	public static SymbolicString mkStringFromChar(
 			char ch) {
-		return new SymbolicString(new SymbolicChar[] { new SymbolicChar(ch) });
+		return new SymbolicString(
+				new SymbolicChar[] {
+						new SymbolicChar(ch)
+				});
 	}
 
 	private SymbolicString(
@@ -296,4 +302,5 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 	public Iterator<SymbolicChar> iterator() {
 		return new IterableArray<>(value).iterator();
 	}
+
 }

@@ -1,6 +1,8 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
@@ -30,9 +32,14 @@ import org.apache.logging.log4j.Logger;
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
  * 
- * @param <A> the {@link AbstractState} of the analysis
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implements InterproceduralAnalysis<A> {
+public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		implements
+		InterproceduralAnalysis<A, D> {
 
 	private static final Logger LOG = LogManager.getLogger(BackwardModularWorstCaseAnalysis.class);
 
@@ -52,6 +59,11 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 	 * The cash of the fixpoints' results.
 	 */
 	private FixpointResults<A> results;
+
+	/**
+	 * The analysis that is being run.
+	 */
+	private Analysis<A, D> analysis;
 
 	/**
 	 * Builds the interprocedural analysis.
@@ -75,14 +87,10 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 		// new fixpoint iteration: restart
 		this.results = null;
 
-		Collection<CFG> all = new TreeSet<>((
-				c1,
-				c2) -> c1.getDescriptor().getLocation()
-						.compareTo(c2.getDescriptor().getLocation()));
+		Collection<CFG> all = new TreeSet<>(ModularWorstCaseAnalysis::sorter);
 		all.addAll(app.getAllCFGs());
 
-		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program",
-				"cfgs"))
+		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program", "cfgs"))
 			try {
 				AnalysisState<A> st = entryState.bottom();
 
@@ -94,14 +102,16 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 					this.results = new FixpointResults<>(value.top());
 				}
 
-				results.putResult(cfg, ID, cfg.backwardFixpoint(
-						entryState,
-						this,
-						WorkingSet.of(conf.fixpointWorkingSet),
-						conf,
-						ID));
+				results
+						.putResult(
+								cfg,
+								ID,
+								cfg.backwardFixpoint(entryState, this, WorkingSet.of(conf.fixpointWorkingSet), conf,
+										ID));
 			} catch (SemanticException e) {
-				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
+				throw new FixpointException(
+						"Error while creating the entrystate for " + cfg,
+						e);
 			}
 	}
 
@@ -118,8 +128,14 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(),
-				call.getTargetName(), call.getStaticType(), call.getParameters());
+		OpenCall open = new OpenCall(
+				call.getCFG(),
+				call.getLocation(),
+				call.getCallType(),
+				call.getQualifier(),
+				call.getTargetName(),
+				call.getStaticType(),
+				call.getParameters());
 		return getAbstractResultOf(open, entryState, parameters, expressions);
 	}
 
@@ -130,18 +146,20 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return policy.apply(call, entryState, parameters);
+		return policy.apply(call, entryState, analysis, parameters);
 	}
 
 	@Override
 	public void init(
 			Application app,
 			CallGraph callgraph,
-			OpenCallPolicy policy)
+			OpenCallPolicy policy,
+			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		this.app = app;
 		this.policy = policy;
 		this.results = null;
+		this.analysis = analysis;
 	}
 
 	@Override
@@ -157,4 +175,10 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractState<A>> implem
 	public FixpointResults<A> getFixpointResults() {
 		return results;
 	}
+
+	@Override
+	public Analysis<A, D> getAnalysis() {
+		return analysis;
+	}
+
 }

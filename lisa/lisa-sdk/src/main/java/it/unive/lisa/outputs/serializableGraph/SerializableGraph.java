@@ -198,7 +198,8 @@ public class SerializableGraph {
 	public void addNode(
 			SerializableNode node) {
 		if (nodes.stream().map(n -> n.getId()).anyMatch(i -> i == node.getId()))
-			throw new IllegalArgumentException("A node with the same id " + node.getId() + " is already in the graph");
+			throw new IllegalArgumentException(
+					"A node with the same id " + node.getId() + " is already in the graph");
 		nodes.add(node);
 	}
 
@@ -336,4 +337,5 @@ public class SerializableGraph {
 			return false;
 		return true;
 	}
+
 }

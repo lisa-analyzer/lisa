@@ -5,6 +5,8 @@ package it.unive.lisa.type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface InMemoryType extends Type {
+public interface InMemoryType
+		extends
+		Type {
 
 }

@@ -20,7 +20,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CodeMemberDescriptor implements CodeElement {
+public class CodeMemberDescriptor
+		implements
+		CodeElement {
 
 	/**
 	 * The unit the cfg belongs to
@@ -147,7 +149,10 @@ public class CodeMemberDescriptor implements CodeElement {
 		Objects.requireNonNull(returnType, "The return type of a CFG cannot be null");
 		Objects.requireNonNull(location, "The location of a CFG cannot be null");
 		for (int i = 0; i < formals.length; i++)
-			Objects.requireNonNull(formals[i], "The " + i + "-th formal parameter of a CFG cannot be null");
+			Objects
+					.requireNonNull(
+							formals[i],
+							"The " + i + "-th formal parameter of a CFG cannot be null");
 		this.location = location;
 		this.unit = unit;
 		this.name = name;
@@ -163,8 +168,14 @@ public class CodeMemberDescriptor implements CodeElement {
 		this.variables = new LinkedList<>();
 		int i = 0;
 		for (Parameter formal : formals)
-			addVariable(new VariableTableEntry(formal.getLocation(), i++, null, null,
-					formal.getName(), formal.getStaticType()));
+			addVariable(
+					new VariableTableEntry(
+							formal.getLocation(),
+							i++,
+							null,
+							null,
+							formal.getName(),
+							formal.getStaticType()));
 	}
 
 	/**
@@ -474,4 +485,5 @@ public class CodeMemberDescriptor implements CodeElement {
 			Annotation ann) {
 		annotations.addAnnotation(ann);
 	}
+
 }

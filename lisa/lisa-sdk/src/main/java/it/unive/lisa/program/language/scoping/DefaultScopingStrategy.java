@@ -1,6 +1,8 @@
 package it.unive.lisa.program.language.scoping;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -21,12 +23,14 @@ public class DefaultScopingStrategy
 		ScopingStrategy {
 
 	@Override
-	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> scope(
-			CFGCall call,
-			ScopeToken scope,
-			AnalysisState<A> state,
-			ExpressionSet[] actuals)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> scope(
+					CFGCall call,
+					ScopeToken scope,
+					AnalysisState<A> state,
+					Analysis<A, D> analysis,
+					ExpressionSet[] actuals)
+					throws SemanticException {
 		ExpressionSet[] locals = new ExpressionSet[actuals.length];
 		AnalysisState<A> callState = state.pushScope(scope, call);
 		for (int i = 0; i < actuals.length; i++)
@@ -35,11 +39,13 @@ public class DefaultScopingStrategy
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> unscope(
-			CFGCall call,
-			ScopeToken scope,
-			AnalysisState<A> state)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> unscope(
+					CFGCall call,
+					ScopeToken scope,
+					AnalysisState<A> state,
+					Analysis<A, D> analysis)
+					throws SemanticException {
 		if (call.returnsVoid(state))
 			return state.popScope(scope, call);
 
@@ -48,13 +54,14 @@ public class DefaultScopingStrategy
 		if (state.getComputedExpressions().isEmpty()) {
 			// a return value is expected, but nothing is left on the stack
 			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-			return state.assign(meta, inv, call).popScope(scope, call);
+			return analysis.assign(state, meta, inv, call).popScope(scope, call);
 		}
 
 		AnalysisState<A> tmp = state.bottom();
 		for (SymbolicExpression ret : state.getComputedExpressions())
-			tmp = tmp.lub(state.assign(meta, ret, call));
+			tmp = tmp.lub(analysis.assign(state, meta, ret, call));
 
 		return tmp.popScope(scope, call);
 	}
+
 }

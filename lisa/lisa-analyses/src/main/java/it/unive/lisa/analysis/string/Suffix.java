@@ -1,8 +1,10 @@
 package it.unive.lisa.analysis.string;
 
+import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
@@ -42,142 +44,215 @@ import java.util.Set;
  */
 public class Suffix
 		implements
-		SmashedSumStringDomain<Suffix>,
-		WholeValueStringDomain<Suffix> {
-
-	private final static Suffix TOP = new Suffix();
-	private final static Suffix BOTTOM = new Suffix(null);
-	private final String suffix;
+		SmashedSumStringDomain<Suffix.Suff>,
+		WholeValueStringDomain<Suffix.Suff> {
 
 	/**
-	 * Builds the top suffix abstract element.
+	 * A lattice structure tracking suffixes of strings.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public Suffix() {
-		this("");
-	}
+	public static class Suff
+			implements
+			BaseLattice<Suff>,
+			WholeValueElement<Suff> {
 
-	/**
-	 * Builds a suffix abstract element.
-	 *
-	 * @param suffix the suffix
-	 */
-	public Suffix(
-			String suffix) {
-		this.suffix = suffix;
-	}
+		private final static Suff TOP = new Suff();
 
-	@Override
-	public Suffix lubAux(
-			Suffix other)
-			throws SemanticException {
-		String otherSuffix = other.suffix;
-		StringBuilder result = new StringBuilder();
+		private final static Suff BOTTOM = new Suff(null);
 
-		int i = suffix.length() - 1;
-		int j = otherSuffix.length() - 1;
+		private final String suffix;
 
-		while (i >= 0 && j >= 0 &&
-				suffix.charAt(i) == otherSuffix.charAt(j)) {
-			result.append(suffix.charAt(i--));
-			j--;
+		/**
+		 * Builds the top suffix abstract element.
+		 */
+		public Suff() {
+			this("");
 		}
 
-		if (result.length() != 0)
-			return new Suffix(result.reverse().toString());
-
-		else
-			return TOP;
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			Suffix other)
-			throws SemanticException {
-		if (other.suffix.length() <= this.suffix.length()) {
-			Suffix lub = this.lubAux(other);
-
-			return lub.suffix.length() == other.suffix.length();
+		/**
+		 * Builds a suffix abstract element.
+		 *
+		 * @param suffix the suffix
+		 */
+		public Suff(
+				String suffix) {
+			this.suffix = suffix;
 		}
 
-		return false;
-	}
+		@Override
+		public Suff lubAux(
+				Suff other)
+				throws SemanticException {
+			String otherSuffix = other.suffix;
+			StringBuilder result = new StringBuilder();
 
-	@Override
-	public boolean equals(
-			Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
+			int i = suffix.length() - 1;
+			int j = otherSuffix.length() - 1;
+
+			while (i >= 0 && j >= 0 && suffix.charAt(i) == otherSuffix.charAt(j)) {
+				result.append(suffix.charAt(i--));
+				j--;
+			}
+
+			if (result.length() != 0)
+				return new Suff(result.reverse().toString());
+
+			else
+				return TOP;
+		}
+
+		@Override
+		public boolean lessOrEqualAux(
+				Suff other)
+				throws SemanticException {
+			if (other.suffix.length() <= this.suffix.length()) {
+				Suff lub = this.lubAux(other);
+				return lub.suffix.length() == other.suffix.length();
+			}
+
 			return false;
-		Suffix suffix1 = (Suffix) o;
-		return Objects.equals(suffix, suffix1.suffix);
+		}
+
+		@Override
+		public boolean equals(
+				Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			Suff suffix1 = (Suff) o;
+			return Objects.equals(suffix, suffix1.suffix);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(suffix);
+		}
+
+		@Override
+		public Suff top() {
+			return TOP;
+		}
+
+		@Override
+		public Suff bottom() {
+			return BOTTOM;
+		}
+
+		@Override
+		public StructuredRepresentation representation() {
+			if (isBottom())
+				return Lattice.bottomRepresentation();
+			if (isTop())
+				return Lattice.topRepresentation();
+
+			return new StringRepresentation('*' + suffix);
+		}
+
+		/**
+		 * Yields the suffix of this abstract value.
+		 *
+		 * @return the suffix of this abstract value.
+		 */
+		public String getSuffix() {
+			return this.suffix;
+		}
+
+		@Override
+		public Set<BinaryExpression> constraints(
+				ValueExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (isBottom())
+				return null;
+
+			BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
+			UnaryExpression strlen = new UnaryExpression(
+					pp.getProgram().getTypes().getIntegerType(),
+					e,
+					StringLength.INSTANCE,
+					pp.getLocation());
+
+			if (isTop())
+				return Collections
+						.singleton(
+								new BinaryExpression(
+										booleanType,
+										new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+										strlen,
+										ComparisonLe.INSTANCE,
+										e.getCodeLocation()));
+
+			return Set
+					.of(
+							new BinaryExpression(
+									booleanType,
+									new Constant(
+											pp.getProgram().getTypes().getIntegerType(),
+											suffix.length(),
+											pp.getLocation()),
+									strlen,
+									ComparisonLe.INSTANCE,
+									e.getCodeLocation()),
+							new BinaryExpression(
+									booleanType,
+									new Constant(pp.getProgram().getTypes().getStringType(), suffix, pp.getLocation()),
+									e,
+									StringEndsWith.INSTANCE,
+									e.getCodeLocation()));
+		}
+
+		@Override
+		public Suff generate(
+				Set<BinaryExpression> constraints,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (constraints == null)
+				return bottom();
+
+			for (BinaryExpression expr : constraints)
+				if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringEndsWith)
+						&& expr.getLeft() instanceof Constant
+						&& ((Constant) expr.getLeft()).getValue() instanceof String)
+					return new Suff(((Constant) expr.getLeft()).getValue().toString());
+
+			return TOP;
+		}
+
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(suffix);
-	}
-
-	@Override
-	public Suffix top() {
-		return TOP;
-	}
-
-	@Override
-	public Suffix bottom() {
-		return BOTTOM;
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-		if (isTop())
-			return Lattice.topRepresentation();
-
-		return new StringRepresentation('*' + suffix);
-	}
-
-	/**
-	 * Yields the suffix of this abstract value.
-	 *
-	 * @return the suffix of this abstract value.
-	 */
-	public String getSuffix() {
-		return this.suffix;
-	}
-
-	@Override
-	public Suffix evalNonNullConstant(
+	public Suff evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (constant.getValue() instanceof String) {
 			String str = (String) constant.getValue();
 			if (!str.isEmpty())
-				return new Suffix(str);
+				return new Suff(str);
 		}
 
-		return TOP;
+		return Suff.TOP;
 	}
 
 	@Override
-	public Suffix evalBinaryExpression(
+	public Suff evalBinaryExpression(
 			BinaryExpression expression,
-			Suffix left,
-			Suffix right,
+			Suff left,
+			Suff right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (expression.getOperator() == StringConcat.INSTANCE)
 			return right;
-		return TOP;
+		return Suff.TOP;
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			Suffix left,
-			Suffix right,
+			Suff left,
+			Suff right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -187,127 +262,99 @@ public class Suffix
 	}
 
 	@Override
-	public Suffix substring(
+	public Suff substring(
+			Suff current,
 			long begin,
 			long end) {
-		return new Suffix("");
+		return new Suff("");
 	}
 
 	@Override
-	public IntInterval length() {
-		return new IntInterval(new MathNumber(suffix.length()), MathNumber.PLUS_INFINITY);
+	public IntInterval length(
+			Suff current) {
+		return new IntInterval(new MathNumber(current.suffix.length()), MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
 	public IntInterval indexOf(
-			Suffix s) {
+			Suff current,
+			Suff other) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
 	public Satisfiability containsChar(
+			Suff current,
 			char c) {
-		if (isTop())
+		if (current.isTop())
 			return Satisfiability.UNKNOWN;
-		if (isBottom())
+		if (current.isBottom())
 			return Satisfiability.BOTTOM;
-		return this.suffix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
+		return current.suffix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public Set<BinaryExpression> constraints(
-			ValueExpression e,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isBottom())
-			return null;
-
-		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
-		UnaryExpression strlen = new UnaryExpression(pp.getProgram().getTypes().getIntegerType(), e,
-				StringLength.INSTANCE, pp.getLocation());
-
-		if (isTop())
-			return Collections.singleton(
-					new BinaryExpression(
-							booleanType,
-							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-							strlen,
-							ComparisonLe.INSTANCE,
-							e.getCodeLocation()));
-
-		return Set.of(
-				new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getIntegerType(), suffix.length(), pp.getLocation()),
-						strlen,
-						ComparisonLe.INSTANCE,
-						e.getCodeLocation()),
-				new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getStringType(), suffix, pp.getLocation()),
-						e,
-						StringEndsWith.INSTANCE,
-						e.getCodeLocation()));
-	}
-
-	@Override
-	public Suffix generate(
-			Set<BinaryExpression> constraints,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (constraints == null)
-			return bottom();
-
-		for (BinaryExpression expr : constraints)
-			if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringEndsWith)
-					&& expr.getLeft() instanceof Constant
-					&& ((Constant) expr.getLeft()).getValue() instanceof String)
-				return new Suffix(((Constant) expr.getLeft()).getValue().toString());
-
-		return TOP;
-	}
-
-	@Override
-	public Suffix substring(
+	public Suff substring(
+			Suff current,
 			Set<BinaryExpression> a1,
 			Set<BinaryExpression> a2,
 			ProgramPoint pp)
 			throws SemanticException {
-		return TOP;
+		return Suff.TOP;
 	}
 
 	@Override
 	public Set<BinaryExpression> indexOf_constr(
 			BinaryExpression expression,
-			Suffix other,
+			Suff current,
+			Suff other,
 			ProgramPoint pp)
 			throws SemanticException {
-		if (isBottom() || other.isBottom())
+		if (current.isBottom() || other.isBottom())
 			return null;
 
-		IntInterval indexes = indexOf(other);
+		IntInterval indexes = indexOf(current, other);
 		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
 
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
-			constr.add(new BinaryExpression(
-					booleanType,
-					new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getLow().toInt(),
-							pp.getLocation()),
-					expression,
-					ComparisonLe.INSTANCE,
-					pp.getLocation()));
+			constr
+					.add(
+							new BinaryExpression(
+									booleanType,
+									new Constant(
+											pp.getProgram().getTypes().getIntegerType(),
+											indexes.getLow().toInt(),
+											pp.getLocation()),
+									expression,
+									ComparisonLe.INSTANCE,
+									pp.getLocation()));
 			if (indexes.getHigh().isFinite())
-				constr.add(new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getIntegerType(), indexes.getHigh().toInt(),
-								pp.getLocation()),
-						expression,
-						ComparisonGe.INSTANCE,
-						pp.getLocation()));
+				constr
+						.add(
+								new BinaryExpression(
+										booleanType,
+										new Constant(
+												pp.getProgram().getTypes().getIntegerType(),
+												indexes.getHigh().toInt(),
+												pp.getLocation()),
+										expression,
+										ComparisonGe.INSTANCE,
+										pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}
 		return constr;
 	}
+
+	@Override
+	public Suff top() {
+		return Suff.TOP;
+	}
+
+	@Override
+	public Suff bottom() {
+		return Suff.BOTTOM;
+	}
+
 }

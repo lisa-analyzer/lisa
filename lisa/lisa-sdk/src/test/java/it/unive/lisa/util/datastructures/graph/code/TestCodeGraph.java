@@ -2,13 +2,17 @@ package it.unive.lisa.util.datastructures.graph.code;
 
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
-public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCodeNode, TestCodeGraph.TestCodeEdge> {
+public class TestCodeGraph
+		extends
+		CodeGraph<TestCodeGraph, TestCodeGraph.TestCodeNode, TestCodeGraph.TestCodeEdge> {
 
 	protected TestCodeGraph() {
 		super(new TestCodeEdge(null, null));
 	}
 
-	public static class TestCodeNode implements CodeNode<TestCodeGraph, TestCodeNode, TestCodeEdge> {
+	public static class TestCodeNode
+			implements
+			CodeNode<TestCodeGraph, TestCodeNode, TestCodeEdge> {
 
 		private final int id;
 
@@ -57,9 +61,12 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 				TestCodeNode o) {
 			return id - o.id;
 		}
+
 	}
 
-	public static class TestCodeEdge implements CodeEdge<TestCodeGraph, TestCodeNode, TestCodeEdge> {
+	public static class TestCodeEdge
+			implements
+			CodeEdge<TestCodeGraph, TestCodeNode, TestCodeEdge> {
 
 		private final TestCodeNode source, destination;
 
@@ -143,5 +150,7 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 				return source.id - o.source.id;
 			return destination.id - o.destination.id;
 		}
+
 	}
+
 }

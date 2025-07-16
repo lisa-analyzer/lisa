@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.statement.string;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -34,7 +36,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Contains extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class Contains
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -58,7 +62,12 @@ public class Contains extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 			CodeLocation location,
 			Expression left,
 			Expression right) {
-		super(cfg, location, "contains", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left,
+		super(
+				cfg,
+				location,
+				"contains",
+				cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(),
+				left,
 				right);
 	}
 
@@ -69,25 +78,25 @@ public class Contains extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdBinarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			SymbolicExpression left,
-			SymbolicExpression right,
-			StatementStore<A> expressions)
-			throws SemanticException {
-		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isStringType))
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					SymbolicExpression left,
+					SymbolicExpression right,
+					StatementStore<A> expressions)
+					throws SemanticException {
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		if (analysis.getRuntimeTypesOf(state, left, this).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, right, this).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
-		return state.smallStepSemantics(
-				new BinaryExpression(
-						getStaticType(),
-						left,
-						right,
-						StringContains.INSTANCE,
-						getLocation()),
-				originating == null ? this : originating);
+		return analysis
+				.smallStepSemantics(
+						state,
+						new BinaryExpression(getStaticType(), left, right, StringContains.INSTANCE, getLocation()),
+						originating == null ? this : originating);
 	}
+
 }

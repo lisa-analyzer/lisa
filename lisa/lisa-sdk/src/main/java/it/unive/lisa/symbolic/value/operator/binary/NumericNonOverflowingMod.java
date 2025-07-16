@@ -16,7 +16,11 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NumericNonOverflowingMod extends NumericOperation implements ModuloOperator {
+public class NumericNonOverflowingMod
+		extends
+		NumericOperation
+		implements
+		ModuloOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -35,4 +39,5 @@ public class NumericNonOverflowingMod extends NumericOperation implements Modulo
 	public String toString() {
 		return "%";
 	}
+
 }

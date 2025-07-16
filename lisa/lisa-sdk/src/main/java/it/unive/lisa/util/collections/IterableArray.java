@@ -11,7 +11,9 @@ import java.util.NoSuchElementException;
  * 
  * @param <E> the element type of the underlying array
  */
-public class IterableArray<E> implements Iterable<E> {
+public class IterableArray<E>
+		implements
+		Iterable<E> {
 
 	/**
 	 * The underlying array
@@ -71,7 +73,9 @@ public class IterableArray<E> implements Iterable<E> {
 		return new IteratorFromArray();
 	}
 
-	private final class IteratorFromArray implements Iterator<E> {
+	private final class IteratorFromArray
+			implements
+			Iterator<E> {
 
 		private int pos;
 
@@ -95,5 +99,7 @@ public class IterableArray<E> implements Iterable<E> {
 		public void remove() {
 			throw new UnsupportedOperationException("Cannot remove elements from an iterator built over an array");
 		}
+
 	}
+
 }

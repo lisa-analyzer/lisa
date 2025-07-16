@@ -10,7 +10,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class StackAllocationSite extends AllocationSite {
+public class StackAllocationSite
+		extends
+		AllocationSite {
 
 	/**
 	 * Builds a stack allocation site.
@@ -72,13 +74,9 @@ public class StackAllocationSite extends AllocationSite {
 
 	@Override
 	public StackAllocationSite toWeak() {
-		return isWeak() ? this
-				: new StackAllocationSite(
-						getStaticType(),
-						getLocationName(),
-						getField(),
-						true,
-						getCodeLocation());
+		return isWeak()
+				? this
+				: new StackAllocationSite(getStaticType(), getLocationName(), getField(), true, getCodeLocation());
 	}
 
 	@Override
@@ -86,45 +84,27 @@ public class StackAllocationSite extends AllocationSite {
 			SymbolicExpression field) {
 		if (getField() != null)
 			throw new IllegalStateException("Cannot add a field to an allocation site that already has one");
-		return new StackAllocationSite(
-				getStaticType(),
-				getLocationName(),
-				field,
-				isWeak(),
-				getCodeLocation());
+		return new StackAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());
 	}
 
 	@Override
 	public StackAllocationSite withType(
 			Type type) {
-		return new StackAllocationSite(
-				type,
-				getLocationName(),
-				getField(),
-				isWeak(),
-				getCodeLocation());
+		return new StackAllocationSite(type, getLocationName(), getField(), isWeak(), getCodeLocation());
 	}
 
 	@Override
 	public StackAllocationSite withoutField() {
 		if (getField() == null)
 			return this;
-		return new StackAllocationSite(
-				getStaticType(),
-				getLocationName(),
-				isWeak(),
-				getCodeLocation());
+		return new StackAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
 	}
 
 	@Override
 	public StackAllocationSite asNonAllocation() {
 		if (!isAllocation())
 			return this;
-		return new StackAllocationSite(
-				getStaticType(),
-				getLocationName(),
-				getField(),
-				isWeak(),
-				getCodeLocation());
+		return new StackAllocationSite(getStaticType(), getLocationName(), getField(), isWeak(), getCodeLocation());
 	}
+
 }

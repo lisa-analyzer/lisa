@@ -1,6 +1,7 @@
 package it.unive.lisa.checks.semantic;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.checks.Check;
 
 /**
@@ -11,7 +12,12 @@ import it.unive.lisa.checks.Check;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained in the results
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public interface SemanticCheck<A extends AbstractState<A>> extends Check<CheckToolWithAnalysisResults<A>> {
+public interface SemanticCheck<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		extends
+		Check<CheckToolWithAnalysisResults<A, D>> {
 }

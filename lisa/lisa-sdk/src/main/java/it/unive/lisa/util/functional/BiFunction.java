@@ -13,7 +13,10 @@ package it.unive.lisa.util.functional;
  *                function
  */
 @FunctionalInterface
-public interface BiFunction<T, U, R, E extends Exception> {
+public interface BiFunction<T,
+		U,
+		R,
+		E extends Exception> {
 
 	/**
 	 * Applies this function to the given arguments.
@@ -29,4 +32,5 @@ public interface BiFunction<T, U, R, E extends Exception> {
 			T t,
 			U u)
 			throws E;
+
 }

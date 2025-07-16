@@ -97,4 +97,5 @@ public class IsContainedTest {
 		assertTrue(a2.isContained(a));
 		assertTrue(!a.isContained(a2));
 	}
+
 }

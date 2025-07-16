@@ -15,7 +15,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ListRepresentation extends StructuredRepresentation {
+public class ListRepresentation
+		extends
+		StructuredRepresentation {
 
 	/**
 	 * The elements of contained in this list.
@@ -78,8 +80,7 @@ public class ListRepresentation extends StructuredRepresentation {
 		StringBuilder sb = new StringBuilder("[");
 		boolean first = true;
 		for (String e : strs) {
-			sb.append(first ? "\n" : ",\n")
-					.append(StringUtilities.indent(e.toString(), "  ", 1));
+			sb.append(first ? "\n" : ",\n").append(StringUtilities.indent(e.toString(), "  ", 1));
 			first = false;
 		}
 		sb.append("\n]");
@@ -111,4 +112,5 @@ public class ListRepresentation extends StructuredRepresentation {
 			return false;
 		return true;
 	}
+
 }

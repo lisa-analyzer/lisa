@@ -7,9 +7,12 @@ import java.util.Iterator;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class IntIntervalIterator implements Iterator<Long> {
+public class IntIntervalIterator
+		implements
+		Iterator<Long> {
 
 	private long init;
+
 	private final long end;
 
 	/**
@@ -34,4 +37,5 @@ public class IntIntervalIterator implements Iterator<Long> {
 	public Long next() {
 		return init++;
 	}
+
 }

@@ -27,7 +27,7 @@ publishing {
                     developer {
                         id = 'VincenzoArceri'
                         name = 'Vincenzo Arceri'
-                        email = 'vincenzo.arceri@unive.it'
+                        email = 'vincenzo.arceri@unipr.it'
                         url = 'https://vincenzoarceri.github.io/'
                         organization = 'Ca\' Foscari University of Venice, Italy'
                         organizationUrl = 'https://www.unive.it/'

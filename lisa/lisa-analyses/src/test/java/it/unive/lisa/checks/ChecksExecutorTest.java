@@ -11,9 +11,13 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.io.IOException;
 import org.junit.Test;
 
-public class ChecksExecutorTest extends AnalysisTestExecutor {
+public class ChecksExecutorTest
+		extends
+		AnalysisTestExecutor {
 
-	private static class VariableI implements SyntacticCheck {
+	private static class VariableI
+			implements
+			SyntacticCheck {
 
 		@Override
 		public boolean visit(
@@ -24,14 +28,18 @@ public class ChecksExecutorTest extends AnalysisTestExecutor {
 				tool.warnOn(node, "Found variable i");
 			return true;
 		}
+
 	}
 
 	@Test
-	public void testSyntacticChecks() throws IOException, ParsingException {
+	public void testSyntacticChecks()
+			throws IOException,
+			ParsingException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.syntacticChecks.add(new VariableI());
 		conf.testDir = "syntactic";
 		conf.programFile = "expressions.imp";
 		perform(conf);
 	}
+
 }

@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -21,111 +19,76 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
  * cases of
- * {@link #smallStepSemantics(SymbolicExpression, ProgramPoint, SemanticOracle)}.
- * All implementers of {@link HeapDomain} should inherit from this class for
- * ensuring a consistent behavior on the base cases, unless explicitly needed.
+ * {@link #smallStepSemantics(SymbolicExpression, ProgramPoint, SemanticOracle)}
+ * and providing a base expression rewriting strategy as an
+ * {@link ExpressionVisitor}. All implementers of {@link HeapDomain} should
+ * inherit from this class for ensuring a consistent behavior on the base cases,
+ * unless explicitly needed.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <H> the concrete {@link BaseHeapDomain} instance
+ * @param <L> the type of {@link HeapLattice} produced by this domain
  */
-public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice<H>, HeapDomain<H> {
+public interface BaseHeapDomain<L extends HeapLattice<L>>
+		extends
+		HeapDomain<L> {
 
 	@Override
-	@SuppressWarnings("unchecked")
-	default H smallStepSemantics(
+	default Pair<L, List<HeapReplacement>> smallStepSemantics(
+			L state,
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression instanceof HeapExpression)
-			return semanticsOf((HeapExpression) expression, pp, oracle);
+			return semanticsOf(state, (HeapExpression) expression, pp, oracle);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
-			return smallStepSemantics(unary.getExpression(), pp, oracle);
+			return smallStepSemantics(state, unary.getExpression(), pp, oracle);
 		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
-			H sem = smallStepSemantics(binary.getLeft(), pp, oracle);
-			if (sem.isBottom())
-				return sem;
-			return sem.smallStepSemantics(binary.getRight(), pp, oracle);
+			Pair<L, List<HeapReplacement>> sem1 = smallStepSemantics(state, binary.getLeft(), pp, oracle);
+			if (sem1.getLeft().isBottom())
+				return sem1;
+			Pair<L, List<HeapReplacement>> sem2 = smallStepSemantics(sem1.getLeft(), binary.getRight(), pp, oracle);
+			return Pair.of(sem2.getLeft(), ListUtils.union(sem1.getRight(), sem2.getRight()));
 		}
 
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression ternary = (TernaryExpression) expression;
-			H sem1 = smallStepSemantics(ternary.getLeft(), pp, oracle);
-			if (sem1.isBottom())
+			Pair<L, List<HeapReplacement>> sem1 = smallStepSemantics(state, ternary.getLeft(), pp, oracle);
+			if (sem1.getLeft().isBottom())
 				return sem1;
-			H sem2 = sem1.smallStepSemantics(ternary.getMiddle(), pp, oracle);
-			if (sem2.isBottom())
-				return sem2;
-			return sem2.smallStepSemantics(ternary.getRight(), pp, oracle);
+			Pair<L, List<HeapReplacement>> sem2 = smallStepSemantics(sem1.getLeft(), ternary.getMiddle(), pp, oracle);
+			if (sem2.getLeft().isBottom())
+				return Pair.of(sem2.getLeft(), ListUtils.union(sem1.getRight(), sem2.getRight()));
+			Pair<L, List<HeapReplacement>> sem3 = smallStepSemantics(sem2.getLeft(), ternary.getRight(), pp, oracle);
+			return Pair
+					.of(
+							sem3.getLeft(),
+							ListUtils.union(sem1.getRight(), ListUtils.union(sem2.getRight(), sem3.getRight())));
 		}
 
 		if (expression instanceof ValueExpression)
-			return mk((H) this);
+			return Pair.of(state, List.of());
 
-		return top();
-	}
-
-	/**
-	 * Creates a new instance of this domain containing the same abstract
-	 * information of reference. The returned object is effectively a new
-	 * instance, meaning that all substitutions should be cleared. If this
-	 * domain does not apply substitutions, it is fine to return {@code this}.
-	 * 
-	 * @param reference the domain whose abstract information needs to be copied
-	 * 
-	 * @return a new instance of this domain
-	 */
-	H mk(
-			H reference);
-
-	/**
-	 * Creates a new instance of this domain containing the same abstract
-	 * information of reference. The returned object is effectively a new
-	 * instance, but with the given substitution. If this domain does not apply
-	 * substitutions, it is fine to return {@code this}.
-	 * 
-	 * @param reference    the domain whose abstract information needs to be
-	 *                         copied
-	 * @param replacements the heap replacements of this instance
-	 * 
-	 * @return the new instance
-	 */
-	H mk(
-			H reference,
-			List<HeapReplacement> replacements);
-
-	@Override
-	@SuppressWarnings("unchecked")
-	default H pushScope(
-			ScopeToken scope,
-			ProgramPoint pp)
-			throws SemanticException {
-		return (H) this;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	default H popScope(
-			ScopeToken scope,
-			ProgramPoint pp)
-			throws SemanticException {
-		return (H) this;
+		return Pair.of(state.top(), List.of());
 	}
 
 	/**
 	 * Yields a new instance of this domain, built by evaluating the semantics
 	 * of the given heap expression.
 	 * 
+	 * @param state      the current state of this domain
 	 * @param expression the expression to evaluate
 	 * @param pp         the program point that where this expression is being
 	 *                       evaluated
@@ -135,7 +98,8 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract H semanticsOf(
+	public abstract Pair<L, List<HeapReplacement>> semanticsOf(
+			L state,
 			HeapExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -148,7 +112,9 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public abstract static class Rewriter implements ExpressionVisitor<ExpressionSet> {
+	public abstract static class Rewriter
+			implements
+			ExpressionVisitor<ExpressionSet> {
 
 		@Override
 		public ExpressionSet visit(
@@ -158,7 +124,10 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 			for (SymbolicExpression expr : arg) {
-				UnaryExpression e = new UnaryExpression(expression.getStaticType(), expr, expression.getOperator(),
+				UnaryExpression e = new UnaryExpression(
+						expression.getStaticType(),
+						expr,
+						expression.getOperator(),
 						expression.getCodeLocation());
 				result.add(e);
 			}
@@ -175,7 +144,10 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 			Set<SymbolicExpression> result = new HashSet<>();
 			for (SymbolicExpression l : left)
 				for (SymbolicExpression r : right) {
-					BinaryExpression e = new BinaryExpression(expression.getStaticType(), l, r,
+					BinaryExpression e = new BinaryExpression(
+							expression.getStaticType(),
+							l,
+							r,
 							expression.getOperator(),
 							expression.getCodeLocation());
 					result.add(e);
@@ -195,7 +167,11 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 			for (SymbolicExpression l : left)
 				for (SymbolicExpression m : middle)
 					for (SymbolicExpression r : right) {
-						TernaryExpression e = new TernaryExpression(expression.getStaticType(), l, m, r,
+						TernaryExpression e = new TernaryExpression(
+								expression.getStaticType(),
+								l,
+								m,
+								r,
 								expression.getOperator(),
 								expression.getCodeLocation());
 						result.add(e);
@@ -262,5 +238,7 @@ public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice
 			throw new SemanticException(
 					"No rewriting rule for value expression of type " + expression.getClass().getName());
 		}
+
 	}
+
 }

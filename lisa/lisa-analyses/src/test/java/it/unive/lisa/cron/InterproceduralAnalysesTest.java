@@ -6,8 +6,6 @@ import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
-import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
@@ -20,16 +18,19 @@ import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
 import org.junit.Test;
 
-public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
+public class InterproceduralAnalysesTest
+		extends
+		AnalysisTestExecutor {
 
 	@Test
 	public void testWorstCaseCHA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Sign()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new Sign(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
 		conf.callGraph = new CHACallGraph();
 		conf.testDir = "interprocedural";
@@ -42,10 +43,11 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 	public void testWorstCaseRTA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Sign()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new Sign(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -58,10 +60,11 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 	public void testContextSensitiveRTA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Sign()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new Sign(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -74,10 +77,11 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 	public void testContextSensitiveRTAHelper() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Sign()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new Sign(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -90,10 +94,11 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 	public void testContextSensitiveRTAHelperFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Sign()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						new Sign(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -106,10 +111,8 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 	public void testContextSensitiveRTAArrayOpPP() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				new PointBasedHeap(),
-				new ValueEnvironment<>(new Interval()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -122,10 +125,8 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 	public void testContextSensitiveRTATwoArraysPP() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				new PointBasedHeap(),
-				new ValueEnvironment<>(new Interval()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -135,13 +136,13 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void issue324() throws ParsingException, AnalysisException {
+	public void issue324()
+			throws ParsingException,
+			AnalysisException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				new FieldSensitivePointBasedHeap(),
-				new ValueEnvironment<>(new IntegerConstantPropagation()),
-				new TypeEnvironment<>(new InferredTypes()));
+		conf.analysis = DefaultConfiguration
+				.simpleState(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(), new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "issues";
@@ -149,4 +150,5 @@ public class InterproceduralAnalysesTest extends AnalysisTestExecutor {
 		conf.programFile = "324.imp";
 		perform(conf);
 	}
+
 }

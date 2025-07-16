@@ -54,8 +54,11 @@ public class Antlr4Util {
 		StringBuilder completeMessage = new StringBuilder(message.toString());
 		dumpProblem(file, problem, completeMessage);
 
-		log.error("Error while parsing " + file + ":\n" + completeMessage.toString());
-		return new ParsingException("Error while parsing " + file + ":\n" + message.toString());
+		log
+				.error(
+						"Error while parsing " + file + ":\n" + completeMessage.toString());
+		return new ParsingException(
+				"Error while parsing " + file + ":\n" + message.toString());
 	}
 
 	private static void dumpProblem(
@@ -98,8 +101,12 @@ public class Antlr4Util {
 			RecognitionException e,
 			Token problem,
 			StringBuilder message) {
-		message.append("matched '").append(problem.getText()).append("' as <")
-				.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary())).append(">, expecting <")
+		message
+				.append("matched '")
+				.append(problem.getText())
+				.append("' as <")
+				.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary()))
+				.append(">, expecting <")
 				.append(tokenNames(((InputMismatchException) e).getExpectedTokens(), e.getRecognizer().getVocabulary()))
 				.append(">");
 	}
@@ -107,8 +114,13 @@ public class Antlr4Util {
 	private static StringBuilder errorHeader(
 			String file,
 			Token problem) {
-		return new StringBuilder().append(file).append(":").append(problem.getLine()).append(":")
-				.append(problem.getCharPositionInLine()).append(" - ");
+		return new StringBuilder()
+				.append(file)
+				.append(":")
+				.append(problem.getLine())
+				.append(":")
+				.append(problem.getCharPositionInLine())
+				.append(" - ");
 	}
 
 	private static String tokenName(
@@ -176,4 +188,5 @@ public class Antlr4Util {
 			Token tok) {
 		return tok.getCharPositionInLine();
 	}
+
 }

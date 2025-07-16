@@ -42,4 +42,5 @@ public interface CanRemoveReceiver {
 		System.arraycopy(parameters, 1, truncatedParams, 0, parameters.length - 1);
 		return truncatedParams;
 	}
+
 }

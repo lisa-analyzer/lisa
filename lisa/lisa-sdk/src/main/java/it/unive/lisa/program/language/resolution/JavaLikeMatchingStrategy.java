@@ -16,7 +16,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class JavaLikeMatchingStrategy extends FixedOrderMatchingStrategy {
+public class JavaLikeMatchingStrategy
+		extends
+		FixedOrderMatchingStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -37,4 +39,5 @@ public class JavaLikeMatchingStrategy extends FixedOrderMatchingStrategy {
 			return RuntimeTypesMatchingStrategy.INSTANCE.matches(call, pos, formal, actual, types);
 		return StaticTypesMatchingStrategy.INSTANCE.matches(call, pos, formal, actual, types);
 	}
+
 }

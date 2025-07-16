@@ -15,7 +15,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TernaryExpression extends ValueExpression {
+public class TernaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The left-hand side operand of this expression
@@ -109,7 +111,8 @@ public class TernaryExpression extends ValueExpression {
 				left.pushScope(token, pp),
 				middle.pushScope(token, pp),
 				right.pushScope(token, pp),
-				operator, getCodeLocation());
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 
@@ -210,12 +213,22 @@ public class TernaryExpression extends ValueExpression {
 		SymbolicExpression r = this.right.removeTypingExpressions();
 		if (l == left && m == middle && r == this.right)
 			return this;
-		return new TernaryExpression(
-				getStaticType(),
-				l,
-				m,
-				r,
-				operator,
-				getCodeLocation());
+		return new TernaryExpression(getStaticType(), l, m, r, operator, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression l = left.replace(source, target);
+		SymbolicExpression m = middle.replace(source, target);
+		SymbolicExpression r = right.replace(source, target);
+		if (l == left && m == middle && r == right)
+			return this;
+		return new TernaryExpression(getStaticType(), l, m, r, operator, getCodeLocation());
+	}
+
 }

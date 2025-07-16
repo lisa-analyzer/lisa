@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
@@ -26,10 +27,12 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state computed by the fixpoint
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public abstract class CFGFixpoint<A extends AbstractState<A>>
+public abstract class CFGFixpoint<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
 		implements
 		FixpointImplementation<Statement, Edge, CFGFixpoint.CompoundState<A>> {
 
@@ -41,7 +44,7 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 	/**
 	 * The {@link InterproceduralAnalysis} to use for semantics invocations.
 	 */
-	protected final InterproceduralAnalysis<A> interprocedural;
+	protected final InterproceduralAnalysis<A, D> interprocedural;
 
 	/**
 	 * Builds the fixpoint implementation.
@@ -52,7 +55,7 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 	 */
 	public CFGFixpoint(
 			CFG graph,
-			InterproceduralAnalysis<A> interprocedural) {
+			InterproceduralAnalysis<A, D> interprocedural) {
 		this.graph = graph;
 		this.interprocedural = interprocedural;
 	}
@@ -76,7 +79,7 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 			Edge edge,
 			CompoundState<A> entrystate)
 			throws SemanticException {
-		AnalysisState<A> approx = edge.traverseForward(entrystate.postState);
+		AnalysisState<A> approx = edge.traverseForward(entrystate.postState, interprocedural.getAnalysis());
 
 		// we remove out of scope variables here
 		List<VariableTableEntry> toRemove = new LinkedList<>();
@@ -87,7 +90,10 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 		Collection<Identifier> ids = new LinkedList<>();
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(graph).getVariable();
-			for (SymbolicExpression expr : approx.smallStepSemantics(v, edge.getSource()).getComputedExpressions())
+			for (SymbolicExpression expr : interprocedural
+					.getAnalysis()
+					.smallStepSemantics(approx, v, edge.getSource())
+					.getComputedExpressions())
 				ids.add((Identifier) expr);
 		}
 
@@ -112,22 +118,24 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 * 
-	 * @param <A> the type of {@link AbstractState} contained into the analysis
-	 *                state
+	 * @param <A> the type of {@link AbstractLattice} contained into the
+	 *                analysis state
 	 */
-	public static final class CompoundState<A extends AbstractState<A>> implements Lattice<CompoundState<A>> {
+	public static final class CompoundState<A extends AbstractLattice<A>>
+			implements
+			Lattice<CompoundState<A>> {
 
 		/**
 		 * Builds a compound state from the given post-states.
 		 * 
-		 * @param <A>                the type of {@link AbstractState} contained
-		 *                               into the analysis state
+		 * @param <A>                the type of {@link AbstractDomain}
+		 *                               contained into the analysis state
 		 * @param postState          the overall post-state of a statement
 		 * @param intermediateStates the post-state of intermediate expressions
 		 * 
 		 * @return the generated compound state
 		 */
-		public static <A extends AbstractState<A>> CompoundState<A> of(
+		public static <A extends AbstractLattice<A>> CompoundState<A> of(
 				AnalysisState<A> postState,
 				StatementStore<A> intermediateStates) {
 			return new CompoundState<>(postState, intermediateStates);
@@ -232,21 +240,23 @@ public abstract class CFGFixpoint<A extends AbstractState<A>>
 		public CompoundState<A> narrowing(
 				CompoundState<A> other)
 				throws SemanticException {
-			return CompoundState.of(postState.narrowing(other.postState),
-					intermediateStates.narrowing(other.intermediateStates));
+			return CompoundState
+					.of(postState.narrowing(other.postState), intermediateStates.narrowing(other.intermediateStates));
 		}
 
 		@Override
 		public CompoundState<A> widening(
 				CompoundState<A> other)
 				throws SemanticException {
-			return CompoundState.of(postState.widening(other.postState),
-					intermediateStates.widening(other.intermediateStates));
+			return CompoundState
+					.of(postState.widening(other.postState), intermediateStates.widening(other.intermediateStates));
 		}
 
 		@Override
 		public StructuredRepresentation representation() {
 			return new ListRepresentation(postState.representation(), intermediateStates.representation());
 		}
+
 	}
+
 }

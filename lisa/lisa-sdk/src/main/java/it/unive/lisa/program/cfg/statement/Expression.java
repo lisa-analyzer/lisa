@@ -18,7 +18,9 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Expression extends Statement {
+public abstract class Expression
+		extends
+		Statement {
 
 	private static final Logger LOG = LogManager.getLogger(Expression.class);
 
@@ -141,7 +143,9 @@ public abstract class Expression extends Statement {
 			// or when constructing resolved calls or similar constructs
 			// inside semantic functions. Either way, the syntactic structure
 			// of the code should not change once set
-			LOG.trace("Attempt to change the parent of " + this + " ignored");
+			LOG
+					.trace(
+							"Attempt to change the parent of " + this + " ignored");
 	}
 
 	/**
@@ -225,4 +229,5 @@ public abstract class Expression extends Statement {
 
 		return parent.getStatementEvaluatedAfter(this);
 	}
+
 }

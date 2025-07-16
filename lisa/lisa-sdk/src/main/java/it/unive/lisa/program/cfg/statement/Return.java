@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -18,7 +19,11 @@ import it.unive.lisa.symbolic.value.Variable;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Return extends UnaryStatement implements MetaVariableCreator {
+public class Return
+		extends
+		UnaryStatement
+		implements
+		MetaVariableCreator {
 
 	/**
 	 * Builds the return, returning {@code expression} to the caller CFG,
@@ -56,13 +61,15 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			SymbolicExpression expr,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					SymbolicExpression expr,
+					StatementStore<A> expressions)
+					throws SemanticException {
 		Identifier meta = getMetaVariable();
-		return state.assign(meta, expr, this);
+		return interprocedural.getAnalysis().assign(state, meta, expr, this);
 	}
+
 }

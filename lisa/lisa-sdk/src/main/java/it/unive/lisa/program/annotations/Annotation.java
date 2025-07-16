@@ -7,9 +7,11 @@ import java.util.List;
 /**
  * A single annotation.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Annotation implements Comparable<Annotation> {
+public class Annotation
+		implements
+		Comparable<Annotation> {
 
 	private final String annotationName;
 
@@ -148,9 +150,10 @@ public class Annotation implements Comparable<Annotation> {
 			return cmp;
 		if ((cmp = annotationMembers.size() - o.annotationMembers.size()) != 0)
 			return cmp;
-		CollectionsDiffBuilder<
-				AnnotationMember> builder = new CollectionsDiffBuilder<>(AnnotationMember.class, annotationMembers,
-						o.annotationMembers);
+		CollectionsDiffBuilder<AnnotationMember> builder = new CollectionsDiffBuilder<>(
+				AnnotationMember.class,
+				annotationMembers,
+				o.annotationMembers);
 		builder.compute(AnnotationMember::compareTo);
 
 		if (builder.sameContent())
@@ -159,4 +162,5 @@ public class Annotation implements Comparable<Annotation> {
 
 		return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
 	}
+
 }

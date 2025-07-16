@@ -17,4 +17,5 @@ public interface ResolvedCall {
 	 * @return the targets
 	 */
 	Collection<CodeMember> getTargets();
+
 }

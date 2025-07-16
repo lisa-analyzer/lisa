@@ -21,7 +21,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TypeCheck implements TypeOperator, BinaryOperator {
+public class TypeCheck
+		implements
+		TypeOperator,
+		BinaryOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -50,4 +53,5 @@ public class TypeCheck implements TypeOperator, BinaryOperator {
 			return Collections.emptySet();
 		return Collections.singleton(types.getBooleanType());
 	}
+
 }

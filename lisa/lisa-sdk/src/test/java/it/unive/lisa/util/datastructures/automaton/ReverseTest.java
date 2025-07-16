@@ -88,7 +88,8 @@ public class ReverseTest {
 	}
 
 	@Test
-	public void test01() throws CyclicAutomatonException {
+	public void test01()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(0, true, false);
@@ -110,7 +111,8 @@ public class ReverseTest {
 	}
 
 	@Test
-	public void test02() throws CyclicAutomatonException {
+	public void test02()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(0, true, false);
@@ -135,7 +137,8 @@ public class ReverseTest {
 	}
 
 	@Test
-	public void test03() throws CyclicAutomatonException {
+	public void test03()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[7];
 		st[0] = new State(0, true, false);
@@ -164,4 +167,5 @@ public class ReverseTest {
 
 		assertEquals(a.reverse().getLanguage(), exp);
 	}
+
 }

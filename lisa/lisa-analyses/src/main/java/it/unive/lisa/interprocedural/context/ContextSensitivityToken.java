@@ -8,7 +8,9 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * sensitivity. This works as a mask over the call stack, keeping track only of
  * some of the calls appearing in it.
  */
-public interface ContextSensitivityToken extends ScopeId {
+public interface ContextSensitivityToken
+		extends
+		ScopeId {
 
 	// we redefine these just to give a more specific return type
 
@@ -18,4 +20,5 @@ public interface ContextSensitivityToken extends ScopeId {
 	@Override
 	ContextSensitivityToken push(
 			CFGCall c);
+
 }

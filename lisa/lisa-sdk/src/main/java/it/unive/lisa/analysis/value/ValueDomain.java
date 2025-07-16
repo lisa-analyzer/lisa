@@ -1,20 +1,18 @@
 package it.unive.lisa.analysis.value;
 
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.Variable;
 
 /**
- * A semantic domain that can evaluate the semantic of statements that operate
+ * A semantic domain that can evaluate the semantic of expressions that operate
  * on values, and not on memory locations. A value domain can handle instances
- * of {@link ValueExpression}s, and manage identifiers that are
- * {@link Variable}s.
+ * of {@link ValueExpression}s, and are associated to {@link ValueLattice}
+ * instances.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <D> the concrete type of the {@link ValueDomain}
+ * @param <L> the type of {@link ValueLattice} that this domain works with
  */
-public interface ValueDomain<D extends ValueDomain<D>>
+public interface ValueDomain<L extends ValueLattice<L>>
 		extends
-		ValueOracle,
-		ReplacementTarget<D, ValueExpression> {
+		DomainWithReplacement<L, ValueExpression> {
 }

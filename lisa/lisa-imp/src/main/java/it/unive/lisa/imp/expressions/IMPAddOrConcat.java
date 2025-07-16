@@ -1,7 +1,9 @@
 
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -35,7 +37,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class IMPAddOrConcat
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the addition.
@@ -64,19 +68,21 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdBinarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			SymbolicExpression left,
-			SymbolicExpression right,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					SymbolicExpression left,
+					SymbolicExpression right,
+					StatementStore<A> expressions)
+					throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 		BinaryOperator op;
 		TypeSystem types = getProgram().getTypes();
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
 
-		Set<Type> ltypes = state.getState().getRuntimeTypesOf(left, this, state.getState());
-		Set<Type> rtypes = state.getState().getRuntimeTypesOf(right, this, state.getState());
+		Set<Type> ltypes = analysis.getRuntimeTypesOf(state, left, this);
+		Set<Type> rtypes = analysis.getRuntimeTypesOf(state, right, this);
 
 		for (Type tleft : ltypes)
 			for (Type tright : rtypes) {
@@ -106,16 +112,14 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 					continue;
 
 				Type t = Type.commonSupertype(op.typeInference(types, ltypes, rtypes), Untyped.INSTANCE);
-				result = result.lub(state.smallStepSemantics(
-						new BinaryExpression(
-								t,
-								left,
-								right,
-								op,
-								getLocation()),
-						this));
+				result = result
+						.lub(
+								analysis
+										.smallStepSemantics(state,
+												new BinaryExpression(t, left, right, op, getLocation()), this));
 			}
 
 		return result;
 	}
+
 }

@@ -13,7 +13,9 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableEdge implements Comparable<SerializableEdge> {
+public class SerializableEdge
+		implements
+		Comparable<SerializableEdge> {
 
 	private final int sourceId;
 
@@ -155,9 +157,10 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 		if ((cmp = CollectionUtilities.nullSafeCompare(true, kind, o.kind, String::compareTo)) != 0)
 			return cmp;
 
-		CollectionsDiffBuilder<
-				String> builder = new CollectionsDiffBuilder<>(String.class, unknownFields.keySet(),
-						o.unknownFields.keySet());
+		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
+				String.class,
+				unknownFields.keySet(),
+				o.unknownFields.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())
@@ -174,4 +177,5 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 
 		return 0;
 	}
+
 }

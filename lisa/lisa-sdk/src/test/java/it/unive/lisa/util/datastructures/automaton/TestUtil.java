@@ -6,6 +6,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class TestUtil {
+
 	private static final Random random = new Random();
 
 	public static TestAutomaton build(
@@ -53,4 +54,5 @@ public class TestUtil {
 
 		return a;
 	}
+
 }

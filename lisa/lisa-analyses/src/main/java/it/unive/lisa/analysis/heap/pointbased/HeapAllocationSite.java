@@ -10,7 +10,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class HeapAllocationSite extends AllocationSite {
+public class HeapAllocationSite
+		extends
+		AllocationSite {
 
 	/**
 	 * Builds a heap allocation site.
@@ -72,13 +74,9 @@ public class HeapAllocationSite extends AllocationSite {
 
 	@Override
 	public HeapAllocationSite toWeak() {
-		return isWeak() ? this
-				: new HeapAllocationSite(
-						getStaticType(),
-						getLocationName(),
-						getField(),
-						true,
-						getCodeLocation());
+		return isWeak()
+				? this
+				: new HeapAllocationSite(getStaticType(), getLocationName(), getField(), true, getCodeLocation());
 	}
 
 	@Override
@@ -86,44 +84,27 @@ public class HeapAllocationSite extends AllocationSite {
 			SymbolicExpression field) {
 		if (getField() != null)
 			throw new IllegalStateException("Cannot add a field to an allocation site that already has one");
-		return new HeapAllocationSite(
-				getStaticType(),
-				getLocationName(),
-				field,
-				isWeak(),
-				getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());
 	}
 
 	@Override
 	public HeapAllocationSite withType(
 			Type type) {
-		return new HeapAllocationSite(
-				type,
-				getLocationName(),
-				getField(),
-				isWeak(),
-				getCodeLocation());
+		return new HeapAllocationSite(type, getLocationName(), getField(), isWeak(), getCodeLocation());
 	}
 
 	@Override
 	public HeapAllocationSite withoutField() {
 		if (getField() == null)
 			return this;
-		return new HeapAllocationSite(
-				getStaticType(),
-				getLocationName(),
-				isWeak(),
-				getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
 	}
 
 	@Override
 	public HeapAllocationSite asNonAllocation() {
 		if (!isAllocation())
 			return this;
-		return new HeapAllocationSite(
-				getStaticType(),
-				getLocationName(),
-				isWeak(),
-				getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
 	}
+
 }

@@ -1,9 +1,11 @@
 package it.unive.lisa.analysis.heap;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -18,60 +20,135 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.SetRepresentation;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
  * their types, i.e., all the heap locations with the same type are abstracted
  * into a single unique identifier.
  *
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
-
-	private static final TypeBasedHeap TOP = new TypeBasedHeap();
-
-	private static final TypeBasedHeap BOTTOM = new TypeBasedHeap();
-
-	private final Set<String> names;
+public class TypeBasedHeap
+		implements
+		BaseHeapDomain<TypeBasedHeap.Types> {
 
 	/**
-	 * Builds a new empty instance of {@link TypeBasedHeap}.
+	 * A heap lattice that contains the types of the heap locations. These are
+	 * modelled as a set of types that have been allocated in the heap.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public TypeBasedHeap() {
-		this(new HashSet<>());
+	public static class Types
+			extends
+			SetLattice<Types, String>
+			implements
+			HeapLattice<Types> {
+
+		/**
+		 * Builds an empty set of types.
+		 */
+		public Types() {
+			super(Collections.emptySet(), true);
+		}
+
+		private Types(
+				Set<String> elements) {
+			super(elements, true);
+		}
+
+		private Types(
+				Set<String> elements,
+				boolean isTop) {
+			super(elements, isTop);
+		}
+
+		@Override
+		public Types top() {
+			return new Types(Collections.emptySet(), true);
+		}
+
+		@Override
+		public Types bottom() {
+			return new Types(Collections.emptySet(), false);
+		}
+
+		@Override
+		public Pair<Types, List<HeapReplacement>> pushScope(
+				ScopeToken token,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public Pair<Types, List<HeapReplacement>> popScope(
+				ScopeToken token,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public boolean knowsIdentifier(
+				Identifier id) {
+			return false;
+		}
+
+		@Override
+		public Pair<Types, List<HeapReplacement>> forgetIdentifier(
+				Identifier id,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public Pair<Types, List<HeapReplacement>> forgetIdentifiers(
+				Iterable<Identifier> ids,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public Pair<Types, List<HeapReplacement>> forgetIdentifiersIf(
+				Predicate<Identifier> test,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Pair.of(this, Collections.emptyList());
+		}
+
+		@Override
+		public Types mk(
+				Set<String> set) {
+			return new Types(set);
+		}
+
+		@Override
+		public List<HeapReplacement> expand(
+				HeapReplacement base)
+				throws SemanticException {
+			return List.of(base);
+		}
+
 	}
 
-	/**
-	 * Builds a new instance of {@link TypeBasedHeap} knowing the given types.
-	 * 
-	 * @param names the name of the known types
-	 */
-	public TypeBasedHeap(
-			Set<String> names) {
-		this.names = names;
-	}
-
-	/**
-	 * Yields the name of the types known to this domain instance.
-	 * 
-	 * @return the names
-	 */
-	public Set<String> getKnownTypes() {
-		return names;
+	@Override
+	public Types makeLattice() {
+		return new Types();
 	}
 
 	@Override
 	public ExpressionSet rewrite(
+			Types state,
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -80,157 +157,57 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public TypeBasedHeap assign(
+	public Pair<Types, List<HeapReplacement>> assign(
+			Types state,
 			Identifier id,
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return this;
+		return Pair.of(state, Collections.emptyList());
 	}
 
 	@Override
-	public TypeBasedHeap assume(
+	public Pair<Types, List<HeapReplacement>> assume(
+			Types state,
 			SymbolicExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return this;
+		return Pair.of(state, Collections.emptyList());
 	}
 
 	@Override
-	public TypeBasedHeap forgetIdentifier(
-			Identifier id,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public TypeBasedHeap forgetIdentifiers(
-			Iterable<Identifier> ids,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public TypeBasedHeap forgetIdentifiersIf(
-			Predicate<Identifier> test,
-			ProgramPoint pp)
-			throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		return new SetRepresentation(names, StringRepresentation::new);
-	}
-
-	@Override
-	public TypeBasedHeap top() {
-		return TOP;
-	}
-
-	@Override
-	public TypeBasedHeap bottom() {
-		return BOTTOM;
-	}
-
-	@Override
-	public List<HeapReplacement> getSubstitution() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public TypeBasedHeap mk(
-			TypeBasedHeap reference) {
-		return new TypeBasedHeap(reference.names);
-	}
-
-	@Override
-	public TypeBasedHeap mk(
-			TypeBasedHeap reference,
-			List<HeapReplacement> replacements) {
-		return new TypeBasedHeap(reference.names);
-	}
-
-	@Override
-	public TypeBasedHeap semanticsOf(
+	public Pair<Types, List<HeapReplacement>> semanticsOf(
+			Types state,
 			HeapExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
-			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp, oracle);
-			return containerState.smallStepSemantics(access.getChild(), pp, oracle);
+			Pair<Types, List<HeapReplacement>> cont = smallStepSemantics(state, access.getContainer(), pp, oracle);
+			Pair<Types, List<HeapReplacement>> ch = smallStepSemantics(cont.getLeft(), access.getChild(), pp, oracle);
+			return Pair.of(ch.getLeft(), ListUtils.union(cont.getRight(), ch.getRight()));
 		}
 
 		if (expression instanceof MemoryAllocation) {
-			Set<String> names = new HashSet<>(this.names);
-			for (Type type : oracle.getRuntimeTypesOf(expression, pp, oracle))
+			Set<String> names = new HashSet<>(state.elements);
+			for (Type type : oracle.getRuntimeTypesOf(expression, pp))
 				if (type.isInMemoryType())
 					names.add(type.toString());
 
-			return new TypeBasedHeap(names);
+			return Pair.of(new Types(names), Collections.emptyList());
 		}
 
 		if (expression instanceof HeapReference)
-			return smallStepSemantics(((HeapReference) expression).getExpression(), pp, oracle);
+			return smallStepSemantics(state, ((HeapReference) expression).getExpression(), pp, oracle);
 
 		if (expression instanceof HeapDereference)
-			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp, oracle);
+			return smallStepSemantics(state, ((HeapDereference) expression).getExpression(), pp, oracle);
 
-		return top();
-	}
-
-	@Override
-	public TypeBasedHeap lubAux(
-			TypeBasedHeap other)
-			throws SemanticException {
-		return new TypeBasedHeap(SetUtils.union(names, other.names));
-	}
-
-	@Override
-	public TypeBasedHeap glbAux(
-			TypeBasedHeap other)
-			throws SemanticException {
-		return new TypeBasedHeap(SetUtils.intersection(names, other.names));
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			TypeBasedHeap other)
-			throws SemanticException {
-		return other.names.containsAll(names);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((names == null) ? 0 : names.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TypeBasedHeap other = (TypeBasedHeap) obj;
-		if (names == null) {
-			if (other.names != null)
-				return false;
-		} else if (!names.equals(other.names))
-			return false;
-		return true;
+		return Pair.of(state.top(), Collections.emptyList());
 	}
 
 	/**
@@ -239,7 +216,9 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class Rewriter extends BaseHeapDomain.Rewriter {
+	public static class Rewriter
+			extends
+			BaseHeapDomain.Rewriter {
 
 		/**
 		 * The singleton instance of this rewriter.
@@ -260,9 +239,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			SemanticOracle oracle = (SemanticOracle) params[1];
 
 			for (SymbolicExpression ch : child)
-				for (Type t : oracle.getRuntimeTypesOf(ch, pp, oracle)) {
-					HeapLocation e = new HeapLocation(t, t.toString(), true,
-							expression.getCodeLocation());
+				for (Type t : oracle.getRuntimeTypesOf(ch, pp)) {
+					HeapLocation e = new HeapLocation(t, t.toString(), true, expression.getCodeLocation());
 					result.add(e);
 				}
 			return new ExpressionSet(result);
@@ -297,7 +275,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			for (SymbolicExpression refExp : ref) {
 				refExp = refExp.removeTypingExpressions();
 				if (refExp instanceof HeapLocation) {
-					Set<Type> rt = oracle.getRuntimeTypesOf(refExp, pp, oracle);
+					Set<Type> rt = oracle.getRuntimeTypesOf(refExp, pp);
 					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
 					MemoryPointer e = new MemoryPointer(
 							new ReferenceType(sup),
@@ -324,11 +302,10 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 				derefExp = derefExp.removeTypingExpressions();
 				if (derefExp instanceof Variable) {
 					Variable var = (Variable) derefExp;
-					for (Type t : oracle.getRuntimeTypesOf(var, pp, oracle))
+					for (Type t : oracle.getRuntimeTypesOf(var, pp))
 						if (t.isPointerType()) {
 							Type inner = t.asPointerType().getInnerType();
-							HeapLocation loc = new HeapLocation(inner, inner.toString(), true,
-									var.getCodeLocation());
+							HeapLocation loc = new HeapLocation(inner, inner.toString(), true, var.getCodeLocation());
 							MemoryPointer pointer = new MemoryPointer(t, loc, var.getCodeLocation());
 							result.add(pointer);
 						}
@@ -337,32 +314,28 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 
 			return new ExpressionSet(result);
 		}
-	}
 
-	@Override
-	public boolean knowsIdentifier(
-			Identifier id) {
-		return false;
 	}
 
 	@Override
 	public Satisfiability alias(
+			Types state,
 			SymbolicExpression x,
 			SymbolicExpression y,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (isTop())
+		if (state.isTop())
 			return Satisfiability.UNKNOWN;
-		if (isBottom())
+		if (state.isBottom())
 			return Satisfiability.BOTTOM;
 
 		Set<Type> ltypes = new HashSet<>();
-		for (SymbolicExpression e : rewrite(x, pp, oracle))
-			ltypes.addAll(oracle.getRuntimeTypesOf(e, pp, oracle));
+		for (SymbolicExpression e : rewrite(state, x, pp, oracle))
+			ltypes.addAll(oracle.getRuntimeTypesOf(e, pp));
 		Set<Type> rtypes = new HashSet<>();
-		for (SymbolicExpression e : rewrite(y, pp, oracle))
-			rtypes.addAll(oracle.getRuntimeTypesOf(e, pp, oracle));
+		for (SymbolicExpression e : rewrite(state, y, pp, oracle))
+			rtypes.addAll(oracle.getRuntimeTypesOf(e, pp));
 		if (CollectionUtils.intersection(ltypes, rtypes).isEmpty())
 			// no common types -> they cannot be "smashed" to the same location
 			return Satisfiability.NOT_SATISFIED;
@@ -372,6 +345,7 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	public Satisfiability isReachableFrom(
+			Types state,
 			SymbolicExpression x,
 			SymbolicExpression y,
 			ProgramPoint pp,
@@ -379,4 +353,5 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
+
 }

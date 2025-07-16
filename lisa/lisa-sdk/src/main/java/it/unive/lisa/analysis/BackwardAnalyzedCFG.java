@@ -19,10 +19,10 @@ import java.util.Map;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
+ * @param <A> the type of {@link AbstractLattice} contained into the analysis
  *                state
  */
-public class BackwardAnalyzedCFG<A extends AbstractState<A>>
+public class BackwardAnalyzedCFG<A extends AbstractLattice<A>>
 		extends
 		CFG
 		implements
@@ -211,7 +211,8 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public AnalysisState<A> getEntryState() throws SemanticException {
+	public AnalysisState<A> getEntryState()
+			throws SemanticException {
 		return lub(this.getEntrypoints(), true);
 	}
 
@@ -222,7 +223,8 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public AnalysisState<A> getExitState() throws SemanticException {
+	public AnalysisState<A> getExitState()
+			throws SemanticException {
 		return lub(this.getNormalExitpoints(), false);
 	}
 
@@ -243,11 +245,7 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
-		return new BackwardAnalyzedCFG<>(
-				this,
-				id,
-				exitStates.lub(other.exitStates),
-				results.lub(other.results));
+		return new BackwardAnalyzedCFG<>(this, id, exitStates.lub(other.exitStates), results.lub(other.results));
 	}
 
 	@Override
@@ -257,11 +255,7 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_GLB_ERROR);
 
-		return new BackwardAnalyzedCFG<>(
-				this,
-				id,
-				exitStates.glb(other.exitStates),
-				results.glb(other.results));
+		return new BackwardAnalyzedCFG<>(this, id, exitStates.glb(other.exitStates), results.glb(other.results));
 	}
 
 	@Override
@@ -384,4 +378,5 @@ public class BackwardAnalyzedCFG<A extends AbstractState<A>>
 	public StructuredRepresentation representation() {
 		throw new UnsupportedOperationException();
 	}
+
 }

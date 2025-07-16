@@ -9,7 +9,9 @@ package it.unive.lisa.util.datastructures.graph;
  * @param <N> the type of this node
  * @param <E> the type of {@link Edge} that this node can be connected to
  */
-public interface Node<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
+public interface Node<G extends Graph<G, N, E>,
+		N extends Node<G, N, E>,
+		E extends Edge<G, N, E>> {
 
 	/**
 	 * Accepts the given {@link GraphVisitor}. Implementors of this method are
@@ -29,4 +31,5 @@ public interface Node<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	<V> boolean accept(
 			GraphVisitor<G, N, E, V> visitor,
 			V tool);
+
 }

@@ -14,7 +14,7 @@ import java.util.Set;
  * unique and implemented following the singleton design pattern (see for
  * instance {@link Untyped} class).
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public interface Type {
 
@@ -395,4 +395,5 @@ public interface Type {
 				result = result.commonSupertype(t);
 		return result;
 	}
+
 }

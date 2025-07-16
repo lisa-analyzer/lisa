@@ -11,7 +11,9 @@ import it.unive.lisa.program.type.UInt8Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UInt8Literal extends Literal<Byte> {
+public class UInt8Literal
+		extends
+		Literal<Byte> {
 
 	/**
 	 * Builds the literal.
@@ -26,4 +28,5 @@ public class UInt8Literal extends Literal<Byte> {
 			byte value) {
 		super(cfg, location, value, UInt8Type.INSTANCE);
 	}
+
 }

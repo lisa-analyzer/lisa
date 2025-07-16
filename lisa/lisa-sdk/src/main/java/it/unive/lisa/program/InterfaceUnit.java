@@ -13,7 +13,9 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class InterfaceUnit extends CompilationUnit {
+public class InterfaceUnit
+		extends
+		CompilationUnit {
 
 	/**
 	 * The collection of interface units this unit directly inherits from.
@@ -66,8 +68,9 @@ public class InterfaceUnit extends CompilationUnit {
 			Unit unit)
 			throws ProgramValidationException {
 		if (superinterfaces.contains(unit))
-			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
-					+ " is both a super unit and an instance of " + this);
+			throw new ProgramValidationException(
+					"Found loop in compilation units hierarchy: " + unit + " is both a super unit and an instance of "
+							+ this);
 		instances.add(unit);
 
 		for (InterfaceUnit sup : superinterfaces)
@@ -77,7 +80,8 @@ public class InterfaceUnit extends CompilationUnit {
 	@Override
 	public boolean isInstanceOf(
 			CompilationUnit unit) {
-		return this == unit || unit.instances.contains(this)
+		return this == unit
+				|| unit.instances.contains(this)
 				|| superinterfaces.stream().anyMatch(u -> u.isInstanceOf(unit));
 	}
 
@@ -89,4 +93,5 @@ public class InterfaceUnit extends CompilationUnit {
 		else
 			return false;
 	}
+
 }

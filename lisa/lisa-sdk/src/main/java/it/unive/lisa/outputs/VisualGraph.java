@@ -52,4 +52,5 @@ public abstract class VisualGraph {
 	public abstract void dump(
 			Writer writer)
 			throws IOException;
+
 }

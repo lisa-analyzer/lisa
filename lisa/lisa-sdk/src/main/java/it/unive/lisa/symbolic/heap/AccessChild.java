@@ -12,7 +12,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessChild extends HeapExpression {
+public class AccessChild
+		extends
+		HeapExpression {
 
 	/**
 	 * The expression representing the parent memory location
@@ -114,10 +116,21 @@ public class AccessChild extends HeapExpression {
 		SymbolicExpression ch = child.removeTypingExpressions();
 		if (cont == container && ch == child)
 			return this;
-		return new AccessChild(
-				getStaticType(),
-				cont,
-				ch,
-				getCodeLocation());
+		return new AccessChild(getStaticType(), cont, ch, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression cont = container.replace(source, target);
+		SymbolicExpression ch = child.replace(source, target);
+		if (cont == container && ch == child)
+			return this;
+		return new AccessChild(getStaticType(), cont, ch, getCodeLocation());
+	}
+
 }

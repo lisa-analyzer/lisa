@@ -2,8 +2,11 @@ package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.combination.ValueCartesianProduct;
+import it.unive.lisa.analysis.combination.ValueLatticeProduct;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.string.StringConstantPropagation.SCP;
+import it.unive.lisa.analysis.string.SubstringDomain.Subs;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -16,9 +19,9 @@ import java.util.Map.Entry;
 
 /**
  * The substring relational abstract domain (see {@link SubstringDomain})
- * enriched with string constant propagation. This domain is defined as the
- * Cartesian product between {@link SubstringDomain} and
- * {@link StringConstantPropagation}. This domain follows the one defined
+ * enriched with string constant propagation. This domain tracks the Cartesian
+ * product between {@link SubstringDomain.Subs} and
+ * {@link StringConstantPropagation.SCP}. This domain follows the one defined
  * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
  * this paper</a>.
  * 
@@ -27,30 +30,21 @@ import java.util.Map.Entry;
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class SubstringDomainWithConstants
-		extends
-		ValueCartesianProduct<ValueEnvironment<StringConstantPropagation>, SubstringDomain> {
+		implements
+		ValueDomain<ValueLatticeProduct<ValueEnvironment<SCP>, Subs>> {
 
-	/**
-	 * Builds the abstract value starting from components.
-	 * 
-	 * @param left  the string constant propagation environment
-	 * @param right the substring domain abstract value
-	 */
-	public SubstringDomainWithConstants(
-			ValueEnvironment<StringConstantPropagation> left,
-			SubstringDomain right) {
-		super(left, right);
-	}
+	private final StringConstantPropagation scp = new StringConstantPropagation();
 
-	/**
-	 * Builds the top abstract value.
-	 */
-	public SubstringDomainWithConstants() {
-		this(new ValueEnvironment<StringConstantPropagation>(new StringConstantPropagation()), new SubstringDomain());
+	private final SubstringDomain subs = new SubstringDomain();
+
+	@Override
+	public ValueLatticeProduct<ValueEnvironment<SCP>, Subs> makeLattice() {
+		return new ValueLatticeProduct<>(scp.makeLattice(), subs.makeLattice());
 	}
 
 	@Override
-	public SubstringDomainWithConstants assign(
+	public ValueLatticeProduct<ValueEnvironment<SCP>, Subs> assign(
+			ValueLatticeProduct<ValueEnvironment<SCP>, Subs> state,
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
@@ -58,17 +52,18 @@ public class SubstringDomainWithConstants
 			throws SemanticException {
 
 		// expresson must be a string expression
-		if (oracle != null && pp != null && oracle.getRuntimeTypesOf(expression, pp, oracle).stream()
-				.allMatch(t -> !t.isStringType() && !t.isUntyped()))
-			return this;
+		if (oracle != null
+				&& pp != null
+				&& oracle.getRuntimeTypesOf(expression, pp).stream().allMatch(t -> !t.isStringType() && !t.isUntyped()))
+			return state;
 
-		ValueEnvironment<StringConstantPropagation> a = this.left.assign(id, expression, pp, oracle);
-		SubstringDomain b = this.right.assign(id, expression, pp, oracle);
+		ValueEnvironment<SCP> a = scp.assign(state.first, id, expression, pp, oracle);
+		Subs b = subs.assign(state.second, id, expression, pp, oracle);
 
-		StringConstantPropagation constantValue = a.getState(id);
+		SCP constantValue = a.getState(id);
 
 		if (!constantValue.isTop() && !constantValue.isBottom()) {
-			for (Entry<Identifier, StringConstantPropagation> elem : a) {
+			for (Entry<Identifier, SCP> elem : a) {
 				if (elem.getKey().equals(id))
 					continue;
 
@@ -82,18 +77,37 @@ public class SubstringDomainWithConstants
 
 			String stringConstantValue = constantValue.getValue();
 			Constant constant = new Constant(strType, stringConstantValue, SyntheticLocation.INSTANCE);
-			ValueExpression newExpression = new BinaryExpression(boolType, id, constant, StringEquals.INSTANCE,
+			ValueExpression newExpression = new BinaryExpression(
+					boolType,
+					id,
+					constant,
+					StringEquals.INSTANCE,
 					SyntheticLocation.INSTANCE);
-			b = b.assume(newExpression, pp, pp, oracle);
+			b = subs.assume(b, newExpression, pp, pp, oracle);
 		}
 
-		return mk(a, b);
+		return new ValueLatticeProduct<>(a, b);
 	}
 
 	@Override
-	public SubstringDomainWithConstants mk(
-			ValueEnvironment<StringConstantPropagation> left,
-			SubstringDomain right) {
-		return new SubstringDomainWithConstants(left, right);
+	public ValueLatticeProduct<ValueEnvironment<SCP>, Subs> smallStepSemantics(
+			ValueLatticeProduct<ValueEnvironment<SCP>, Subs> state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return state;
 	}
+
+	@Override
+	public ValueLatticeProduct<ValueEnvironment<SCP>, Subs> assume(
+			ValueLatticeProduct<ValueEnvironment<SCP>, Subs> state,
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return state;
+	}
+
 }

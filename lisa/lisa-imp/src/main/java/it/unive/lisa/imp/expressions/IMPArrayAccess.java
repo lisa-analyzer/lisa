@@ -1,6 +1,8 @@
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -25,7 +27,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPArrayAccess extends BinaryExpression {
+public class IMPArrayAccess
+		extends
+		BinaryExpression {
 
 	/**
 	 * Builds the array access.
@@ -55,15 +59,17 @@ public class IMPArrayAccess extends BinaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdBinarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
-			AnalysisState<A> state,
-			SymbolicExpression left,
-			SymbolicExpression right,
-			StatementStore<A> expressions)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+					InterproceduralAnalysis<A, D> interprocedural,
+					AnalysisState<A> state,
+					SymbolicExpression left,
+					SymbolicExpression right,
+					StatementStore<A> expressions)
+					throws SemanticException {
 		Set<Type> arraytypes = new HashSet<>();
-		for (Type t : state.getState().getRuntimeTypesOf(left, this, state.getState()))
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		for (Type t : analysis.getRuntimeTypesOf(state, left, this))
 			if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
 				arraytypes.add(t.asPointerType().getInnerType());
 
@@ -73,12 +79,9 @@ public class IMPArrayAccess extends BinaryExpression {
 		Type cst = Type.commonSupertype(arraytypes, getStaticType());
 		Type inner = cst.isArrayType() ? cst.asArrayType().getInnerType() : Untyped.INSTANCE;
 		HeapDereference container = new HeapDereference(cst, left, getLocation());
-		AccessChild elem = new AccessChild(
-				inner,
-				container,
-				right,
-				getLocation());
+		AccessChild elem = new AccessChild(inner, container, right, getLocation());
 
-		return state.smallStepSemantics(elem, this);
+		return analysis.smallStepSemantics(state, elem, this);
 	}
+
 }

@@ -2,10 +2,8 @@ package it.unive.lisa.analysis.taint;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.analysis.taint.BaseTaint.TaintLattice;
+import it.unive.lisa.analysis.taint.ThreeLevelsTaint.ThreeTaint;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
@@ -16,148 +14,166 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ThreeLevelsTaint extends BaseTaint<ThreeLevelsTaint> {
-
-	private static final ThreeLevelsTaint TOP = new ThreeLevelsTaint((byte) 3);
-	private static final ThreeLevelsTaint TAINTED = new ThreeLevelsTaint((byte) 2);
-	private static final ThreeLevelsTaint CLEAN = new ThreeLevelsTaint((byte) 1);
-	private static final ThreeLevelsTaint BOTTOM = new ThreeLevelsTaint((byte) 0);
-
-	private final byte taint;
+public class ThreeLevelsTaint
+		extends
+		BaseTaint<ThreeTaint> {
 
 	/**
-	 * Builds a new instance of taint.
+	 * A three-level taint lattice with three levels: tainted, clean, and top
+	 * (i.e., possibly tainted).
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public ThreeLevelsTaint() {
-		this((byte) 3);
-	}
+	public static class ThreeTaint
+			implements
+			TaintLattice<ThreeTaint> {
 
-	private ThreeLevelsTaint(
-			byte v) {
-		this.taint = v;
-	}
+		private static final ThreeTaint TOP = new ThreeTaint((byte) 3);
 
-	@Override
-	protected ThreeLevelsTaint tainted() {
-		return TAINTED;
-	}
+		private static final ThreeTaint TAINTED = new ThreeTaint((byte) 2);
 
-	@Override
-	protected ThreeLevelsTaint clean() {
-		return CLEAN;
-	}
+		private static final ThreeTaint CLEAN = new ThreeTaint((byte) 1);
 
-	@Override
-	public boolean isAlwaysTainted() {
-		return this == TAINTED;
-	}
+		private static final ThreeTaint BOTTOM = new ThreeTaint((byte) 0);
 
-	@Override
-	public boolean isPossiblyTainted() {
-		return this == TOP;
-	}
+		private final byte taint;
 
-	@Override
-	public StructuredRepresentation representation() {
-		return this == BOTTOM ? Lattice.bottomRepresentation()
-				: this == CLEAN ? new StringRepresentation("_")
-						: this == TAINTED ? new StringRepresentation("#") : Lattice.topRepresentation();
-	}
+		/**
+		 * Builds a new instance of taint.
+		 */
+		public ThreeTaint() {
+			this((byte) 3);
+		}
 
-	@Override
-	public ThreeLevelsTaint top() {
-		return TOP;
-	}
+		private ThreeTaint(
+				byte v) {
+			this.taint = v;
+		}
 
-	@Override
-	public ThreeLevelsTaint bottom() {
-		return BOTTOM;
-	}
-
-	@Override
-	public ThreeLevelsTaint evalBinaryExpression(
-			BinaryExpression expression,
-			ThreeLevelsTaint left,
-			ThreeLevelsTaint right,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (left == TAINTED || right == TAINTED)
+		@Override
+		public ThreeTaint tainted() {
 			return TAINTED;
+		}
 
-		if (left == TOP || right == TOP)
+		@Override
+		public ThreeTaint clean() {
+			return CLEAN;
+		}
+
+		@Override
+		public boolean isAlwaysTainted() {
+			return this == TAINTED;
+		}
+
+		@Override
+		public boolean isPossiblyTainted() {
+			return this == TOP;
+		}
+
+		@Override
+		public StructuredRepresentation representation() {
+			return this == BOTTOM
+					? Lattice.bottomRepresentation()
+					: this == CLEAN
+							? new StringRepresentation("_")
+							: this == TAINTED ? new StringRepresentation("#") : Lattice.topRepresentation();
+		}
+
+		@Override
+		public ThreeTaint top() {
 			return TOP;
+		}
 
-		return CLEAN;
-	}
+		@Override
+		public ThreeTaint bottom() {
+			return BOTTOM;
+		}
 
-	@Override
-	public ThreeLevelsTaint evalTernaryExpression(
-			TernaryExpression expression,
-			ThreeLevelsTaint left,
-			ThreeLevelsTaint middle,
-			ThreeLevelsTaint right,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (left == TAINTED || right == TAINTED || middle == TAINTED)
-			return TAINTED;
-
-		if (left == TOP || right == TOP || middle == TOP)
+		@Override
+		public ThreeTaint lubAux(
+				ThreeTaint other)
+				throws SemanticException {
+			// only happens with clean and tainted, that are not comparable
 			return TOP;
+		}
 
-		return CLEAN;
-	}
+		@Override
+		public ThreeTaint wideningAux(
+				ThreeTaint other)
+				throws SemanticException {
+			// only happens with clean and tainted, that are not comparable
+			return TOP;
+		}
 
-	@Override
-	public ThreeLevelsTaint lubAux(
-			ThreeLevelsTaint other)
-			throws SemanticException {
-		// only happens with clean and tainted, that are not comparable
-		return TOP;
-	}
+		@Override
+		public boolean lessOrEqualAux(
+				ThreeTaint other)
+				throws SemanticException {
+			// only happens with clean and tainted, that are not comparable
+			return false;
+		}
 
-	@Override
-	public ThreeLevelsTaint wideningAux(
-			ThreeLevelsTaint other)
-			throws SemanticException {
-		// only happens with clean and tainted, that are not comparable
-		return TOP;
-	}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + taint;
+			return result;
+		}
 
-	@Override
-	public boolean lessOrEqualAux(
-			ThreeLevelsTaint other)
-			throws SemanticException {
-		// only happens with clean and tainted, that are not comparable
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + taint;
-		return result;
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
+		@Override
+		public boolean equals(
+				Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ThreeTaint other = (ThreeTaint) obj;
+			if (taint != other.taint)
+				return false;
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ThreeLevelsTaint other = (ThreeLevelsTaint) obj;
-		if (taint != other.taint)
-			return false;
-		return true;
+		}
+
+		@Override
+		public String toString() {
+			return representation().toString();
+		}
+
+		@Override
+		public ThreeTaint or(
+				ThreeTaint other)
+				throws SemanticException {
+			if (this == TAINTED || other == TAINTED)
+				return TAINTED;
+
+			if (this == TOP || other == TOP)
+				return TOP;
+
+			return CLEAN;
+		}
+
 	}
 
 	@Override
-	public String toString() {
-		return representation().toString();
+	public ThreeTaint top() {
+		return ThreeTaint.TOP;
 	}
+
+	@Override
+	public ThreeTaint bottom() {
+		return ThreeTaint.BOTTOM;
+	}
+
+	@Override
+	protected ThreeTaint tainted() {
+		return ThreeTaint.TAINTED;
+	}
+
+	@Override
+	protected ThreeTaint clean() {
+		return ThreeTaint.CLEAN;
+	}
+
 }

@@ -11,7 +11,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HeapReference extends HeapExpression {
+public class HeapReference
+		extends
+		HeapExpression {
 
 	/**
 	 * The expression referred by this expression
@@ -88,9 +90,20 @@ public class HeapReference extends HeapExpression {
 		SymbolicExpression e = expression.removeTypingExpressions();
 		if (e == expression)
 			return this;
-		return new HeapReference(
-				getStaticType(),
-				e,
-				getCodeLocation());
+		return new HeapReference(getStaticType(), e, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression e = expression.replace(source, target);
+		if (e == expression)
+			return this;
+		return new HeapReference(getStaticType(), e, getCodeLocation());
+	}
+
 }

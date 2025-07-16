@@ -1,20 +1,21 @@
 package it.unive.lisa.imp.types;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.DefaultParamInitialization;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.type.Int32Type;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.value.InstrumentedReceiver;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
@@ -37,7 +38,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class ArrayType implements it.unive.lisa.type.ArrayType {
+public final class ArrayType
+		implements
+		it.unive.lisa.type.ArrayType {
 
 	private static final Map<Pair<Type, Integer>, ArrayType> types = new HashMap<>();
 
@@ -174,52 +177,63 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 			CFG cfg,
 			CodeLocation location) {
 		return new DefaultParamInitialization(cfg, location, this) {
+
 			@Override
-			public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+			public <A extends AbstractLattice<A>,
+					D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+							AnalysisState<A> state,
+							InterproceduralAnalysis<A, D> interprocedural,
+							StatementStore<A> expressions)
+							throws SemanticException {
+				Analysis<A, D> analysis = interprocedural.getAnalysis();
 				Type type = getStaticType();
-				MemoryAllocation alloc = new MemoryAllocation(type, getLocation(), false);
-				AnalysisState<A> allocSt = entryState.smallStepSemantics(alloc, this);
-				ExpressionSet allocExps = allocSt.getComputedExpressions();
+				ReferenceType reftype = new ReferenceType(type);
+				MemoryAllocation creation = new MemoryAllocation(type, getLocation(), false);
+				HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
-				AnalysisState<A> initSt = entryState.bottom();
-				for (SymbolicExpression allocExp : allocExps) {
-					AccessChild len = new AccessChild(
-							Int32Type.INSTANCE,
-							allocExp,
-							new Variable(Untyped.INSTANCE, "len", getLocation()),
-							getLocation());
+				// we start by allocating the memory region
+				AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
 
-					AnalysisState<A> lenSt = entryState.bottom();
-					// TODO fix when we'll support multidimensional arrays
-					lenSt = lenSt.lub(allocSt.assign(len, new PushAny(Int32Type.INSTANCE, getLocation()), this));
-					initSt = initSt.lub(lenSt);
-				}
+				// we create the synthetic variable that will hold the reference
+				// to the
+				// newly allocated array until it is assigned to a variable
+				InstrumentedReceiver array = new InstrumentedReceiver(reftype, true, getLocation());
+				AnalysisState<A> tmp = analysis.assign(allocated, array, ref, this);
 
-				AnalysisState<A> refSt = entryState.bottom();
-				for (SymbolicExpression loc : allocSt.getComputedExpressions()) {
-					ReferenceType t = new ReferenceType(loc.getStaticType());
-					HeapReference ref = new HeapReference(t, loc, getLocation());
-					AnalysisState<A> refSem = initSt.smallStepSemantics(ref, this);
-					refSt = refSt.lub(refSem);
-				}
+				// we define the length of the array as a child element
+				AccessChild len = new AccessChild(
+						Int32Type.INSTANCE,
+						array,
+						new Variable(Untyped.INSTANCE, "len", getLocation()),
+						getLocation());
 
-				return refSt;
+				// TODO fix when we'll support multidimensional arrays
+				AnalysisState<
+						A> lenSt = analysis.assign(tmp, len, new PushAny(Int32Type.INSTANCE, getLocation()), this);
+
+				// we leave the synthetic array in the program variables
+				// until it is popped from the stack to keep a reference to the
+				// newly created array
+				getMetaVariables().add(array);
+
+				// finally, we leave a reference to the newly created array on
+				// the stack
+				return analysis.smallStepSemantics(lenSt, array, this);
 			}
 
 			@Override
-			public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
-					AnalysisState<A> exitState,
-					InterproceduralAnalysis<A> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+			public <A extends AbstractLattice<A>,
+					D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
+							AnalysisState<A> exitState,
+							InterproceduralAnalysis<A, D> interprocedural,
+							StatementStore<A> expressions)
+							throws SemanticException {
 				// TODO implement this when backward analysis will be out of
 				// beta
 				throw new UnsupportedOperationException();
 			}
+
 		};
 	}
+
 }

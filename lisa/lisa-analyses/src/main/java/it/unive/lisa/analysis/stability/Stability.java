@@ -1,19 +1,21 @@
 package it.unive.lisa.analysis.stability;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.ValueLatticeProduct;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
@@ -28,21 +30,19 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import it.unive.lisa.util.representation.ObjectRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
+import it.unive.lisa.type.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
- * Implementation of the stability abstract domain (yet to appear publicly).
- * This domain computes per-variable numerical trends to infer stability,
- * covariance and contravariance relations on program variables, exploiting an
- * auxiliary domain of choice. This is implemented as an open product where the
- * stability domain gathers information from the auxiliary one through boolean
+ * Implementation of the stability abstract domain (
+ * <a href="https://doi.org/10.1145/3689609.3689995">Stability paper</a>). This
+ * domain computes per-variable numerical trends to infer stability, covariance
+ * and contravariance relations on program variables, exploiting an auxiliary
+ * domain of choice. This is implemented as an open product where the stability
+ * domain gathers information from the auxiliary one through boolean
  * queries.<br>
  * <br>
  * Implementation-wise, this class is built as a product between a given
@@ -54,16 +54,14 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <V> the kind of auxiliary domain
+ * @param <L> the kind of lattice tracked by the auxiliary domain
  */
-public class Stability<V extends ValueDomain<V>>
+public class Stability<L extends ValueLattice<L>>
 		implements
-		BaseLattice<Stability<V>>,
-		ValueDomain<Stability<V>> {
+		ValueDomain<ValueLatticeProduct<ValueEnvironment<Trend>, L>>,
+		SemanticEvaluator {
 
-	private final V aux;
-
-	private final ValueEnvironment<Trend> trends;
+	private final ValueDomain<L> aux;
 
 	/**
 	 * Builds the top stability domain, using {@code aux} as auxiliary domain.
@@ -71,99 +69,8 @@ public class Stability<V extends ValueDomain<V>>
 	 * @param aux the auxiliary domain
 	 */
 	public Stability(
-			V aux) {
-		this.aux = aux.top();
-		this.trends = new ValueEnvironment<>(Trend.TOP);
-	}
-
-	/**
-	 * Builds a stability domain instance, using {@code aux} as auxiliary
-	 * domain.
-	 * 
-	 * @param aux    the auxiliary domain
-	 * @param trends the existing per-variable trend information
-	 */
-	public Stability(
-			V aux,
-			ValueEnvironment<Trend> trends) {
-		this.aux = trends.isBottom() ? aux.bottom() : aux;
-		this.trends = aux.isBottom() ? trends.bottom() : trends;
-	}
-
-	@Override
-	public Stability<V> lubAux(
-			Stability<V> other)
-			throws SemanticException {
-		V ad = aux.lub(other.aux);
-		ValueEnvironment<Trend> t = trends.lub(other.trends);
-		if (ad.isBottom() || t.isBottom())
-			return bottom();
-		return new Stability<>(ad, t);
-	}
-
-	@Override
-	public Stability<V> glbAux(
-			Stability<V> other)
-			throws SemanticException {
-		V ad = aux.glb(other.aux);
-		ValueEnvironment<Trend> t = trends.glb(other.trends);
-		if (ad.isBottom() || t.isBottom())
-			return bottom();
-		return new Stability<>(ad, t);
-	}
-
-	@Override
-	public Stability<V> wideningAux(
-			Stability<V> other)
-			throws SemanticException {
-		V ad = aux.widening(other.aux);
-		ValueEnvironment<Trend> t = trends.widening(other.trends);
-		if (ad.isBottom() || t.isBottom())
-			return bottom();
-		return new Stability<>(ad, t);
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			Stability<V> other)
-			throws SemanticException {
-		return aux.lessOrEqual(other.aux) && trends.lessOrEqual(other.trends);
-	}
-
-	@Override
-	public boolean isTop() {
-		return aux.isTop() && trends.isTop();
-	}
-
-	@Override
-	public boolean isBottom() {
-		return aux.isBottom() || trends.isBottom();
-	}
-
-	@Override
-	public Stability<V> top() {
-		return new Stability<>(aux.top(), trends.top());
-	}
-
-	@Override
-	public Stability<V> bottom() {
-		return new Stability<>(aux.bottom(), trends.bottom());
-	}
-
-	@Override
-	public Stability<V> pushScope(
-			ScopeToken token,
-			ProgramPoint pp)
-			throws SemanticException {
-		return new Stability<>(aux.pushScope(token, pp), trends.pushScope(token, pp));
-	}
-
-	@Override
-	public Stability<V> popScope(
-			ScopeToken token,
-			ProgramPoint pp)
-			throws SemanticException {
-		return new Stability<>(aux.popScope(token, pp), trends.popScope(token, pp));
+			ValueDomain<L> aux) {
+		this.aux = aux;
 	}
 
 	/**
@@ -179,11 +86,12 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private boolean query(
+			L state,
 			BinaryExpression query,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return aux.satisfies(query, pp, oracle) == Satisfiability.SATISFIED;
+		return aux.satisfies(state, query, pp, oracle) == Satisfiability.SATISFIED;
 	}
 
 	/**
@@ -221,10 +129,7 @@ public class Stability<V extends ValueDomain<V>>
 	private Constant constantInt(
 			int c,
 			ProgramPoint pp) {
-		return new Constant(
-				pp.getProgram().getTypes().getIntegerType(),
-				c,
-				SyntheticLocation.INSTANCE);
+		return new Constant(pp.getProgram().getTypes().getIntegerType(), c, SyntheticLocation.INSTANCE);
 	}
 
 	/**
@@ -241,22 +146,23 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend increasingIfGreater(
+			L state,
 			SymbolicExpression a,
 			SymbolicExpression b,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (query(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle))
+		if (query(state, binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.STABLE;
-		else if (query(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle))
+		else if (query(state, binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.INC;
-		else if (query(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
+		else if (query(state, binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.NON_DEC;
-		else if (query(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle))
+		else if (query(state, binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.DEC;
-		else if (query(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
+		else if (query(state, binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.NON_INC;
-		else if (query(binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle))
+		else if (query(state, binary(ComparisonNe.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.NON_STABLE;
 		else
 			return Trend.TOP;
@@ -276,12 +182,13 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend increasingIfLess(
+			L state,
 			SymbolicExpression a,
 			SymbolicExpression b,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return increasingIfGreater(a, b, pp, oracle).invert();
+		return increasingIfGreater(state, a, b, pp, oracle).invert();
 	}
 
 	/**
@@ -298,18 +205,19 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend nonDecreasingIfGreater(
+			L state,
 			SymbolicExpression a,
 			SymbolicExpression b,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (query(binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle))
+		if (query(state, binary(ComparisonEq.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.STABLE;
-		else if (query(binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle)
-				|| query(binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
+		else if (query(state, binary(ComparisonGt.INSTANCE, a, b, pp), pp, oracle)
+				|| query(state, binary(ComparisonGe.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.NON_DEC;
-		else if (query(binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle)
-				|| query(binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
+		else if (query(state, binary(ComparisonLt.INSTANCE, a, b, pp), pp, oracle)
+				|| query(state, binary(ComparisonLe.INSTANCE, a, b, pp), pp, oracle))
 			return Trend.NON_INC;
 		else
 			return Trend.TOP;
@@ -329,12 +237,13 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend nonDecreasingIfLess(
+			L state,
 			SymbolicExpression a,
 			SymbolicExpression b,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return nonDecreasingIfGreater(a, b, pp, oracle).invert();
+		return nonDecreasingIfGreater(state, a, b, pp, oracle).invert();
 	}
 
 	/**
@@ -350,6 +259,7 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend increasingIfBetweenZeroAndOne(
+			L state,
 			SymbolicExpression a,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -357,23 +267,23 @@ public class Stability<V extends ValueDomain<V>>
 		Constant zero = constantInt(0, pp);
 		Constant one = constantInt(1, pp);
 
-		if (query(binary(ComparisonEq.INSTANCE, a, zero, pp), pp, oracle)
-				|| query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle))
+		if (query(state, binary(ComparisonEq.INSTANCE, a, zero, pp), pp, oracle)
+				|| query(state, binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.STABLE;
-		else if (query(binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle)
-				&& query(binary(ComparisonLt.INSTANCE, a, one, pp), pp, oracle))
+		else if (query(state, binary(ComparisonGt.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(state, binary(ComparisonLt.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.INC;
-		else if (query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle)
-				&& query(binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle))
+		else if (query(state, binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(state, binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.NON_DEC;
-		else if (query(binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle)
-				&& query(binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle))
+		else if (query(state, binary(ComparisonLt.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(state, binary(ComparisonGt.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.DEC;
-		else if (query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle)
-				&& query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle))
+		else if (query(state, binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(state, binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.NON_INC;
-		else if (query(binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle)
-				&& query(binary(ComparisonNe.INSTANCE, a, one, pp), pp, oracle))
+		else if (query(state, binary(ComparisonNe.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(state, binary(ComparisonNe.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.NON_STABLE;
 		else
 			return Trend.TOP;
@@ -392,11 +302,12 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend increasingIfOutsideZeroAndOne(
+			L state,
 			SymbolicExpression a,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return increasingIfBetweenZeroAndOne(a, pp, oracle).invert();
+		return increasingIfBetweenZeroAndOne(state, a, pp, oracle).invert();
 	}
 
 	/**
@@ -412,6 +323,7 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend nonDecreasingIfBetweenZeroAndOne(
+			L state,
 			SymbolicExpression a,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -419,14 +331,14 @@ public class Stability<V extends ValueDomain<V>>
 		Constant zero = constantInt(0, pp);
 		Constant one = constantInt(1, pp);
 
-		if (query(binary(ComparisonEq.INSTANCE, a, zero, pp), pp, oracle)
-				|| query(binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle))
+		if (query(state, binary(ComparisonEq.INSTANCE, a, zero, pp), pp, oracle)
+				|| query(state, binary(ComparisonEq.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.STABLE;
-		else if (query(binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle)
-				&& query(binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle))
+		else if (query(state, binary(ComparisonGe.INSTANCE, a, zero, pp), pp, oracle)
+				&& query(state, binary(ComparisonLe.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.NON_DEC;
-		else if (query(binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle)
-				|| query(binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle))
+		else if (query(state, binary(ComparisonLe.INSTANCE, a, zero, pp), pp, oracle)
+				|| query(state, binary(ComparisonGe.INSTANCE, a, one, pp), pp, oracle))
 			return Trend.NON_INC;
 		else
 			return Trend.TOP;
@@ -445,41 +357,42 @@ public class Stability<V extends ValueDomain<V>>
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
 	private Trend nonDecreasingIfOutsideZeroAndOne(
+			L state,
 			SymbolicExpression a,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return nonDecreasingIfBetweenZeroAndOne(a, pp, oracle).invert();
+		return nonDecreasingIfBetweenZeroAndOne(state, a, pp, oracle).invert();
 	}
 
 	@Override
-	public Stability<V> assign(
+	public ValueLatticeProduct<ValueEnvironment<Trend>, L> assign(
+			ValueLatticeProduct<ValueEnvironment<Trend>, L> state,
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (isBottom())
-			return bottom();
+		if (state.isBottom())
+			return state;
 
-		V post = aux.assign(id, expression, pp, oracle);
+		L post = aux.assign(state.second, id, expression, pp, oracle);
 		if (post.isBottom())
-			return bottom();
+			return state.bottom();
 
-		if (!trends.lattice.canProcess(id, pp, oracle)
-				|| !trends.lattice.canProcess(expression, pp, oracle))
-			return new Stability<>(post, trends);
+		if (!canProcess(id, pp, oracle) || !canProcess(expression, pp, oracle))
+			return new ValueLatticeProduct<>(state.first, post);
 
-		if (!trends.knowsIdentifier(id))
-			return new Stability<>(post, trends.putState(id, Trend.STABLE));
+		if (!state.first.knowsIdentifier(id))
+			return new ValueLatticeProduct<>(state.first.putState(id, Trend.STABLE), post);
 
 		Trend t = Trend.TOP;
 
 		if ((expression instanceof Constant))
-			t = increasingIfLess(id, expression, pp, oracle);
-		else if (expression instanceof UnaryExpression &&
-				((UnaryExpression) expression).getOperator() instanceof NumericNegation)
-			t = increasingIfLess(id, expression, pp, oracle);
+			t = increasingIfLess(state.second, id, expression, pp, oracle);
+		else if (expression instanceof UnaryExpression
+				&& ((UnaryExpression) expression).getOperator() instanceof NumericNegation)
+			t = increasingIfLess(state.second, id, expression, pp, oracle);
 		else if (expression instanceof BinaryExpression) {
 			BinaryExpression be = (BinaryExpression) expression;
 			BinaryOperator op = be.getOperator();
@@ -491,230 +404,194 @@ public class Stability<V extends ValueDomain<V>>
 
 			// x = a / 0
 			if (op instanceof DivisionOperator
-					&& query(binary(ComparisonEq.INSTANCE, right, constantInt(0, pp), pp), pp, oracle))
-				return bottom();
+					&& query(state.second, binary(ComparisonEq.INSTANCE, right, constantInt(0, pp), pp), pp, oracle))
+				return state.bottom();
 
 			if (isLeft || isRight) {
 				SymbolicExpression other = isLeft ? right : left;
 				if (op instanceof AdditionOperator)
 					// x = x + other || x = other + x
-					t = increasingIfGreater(other, constantInt(0, pp), pp, oracle);
+					t = increasingIfGreater(state.second, other, constantInt(0, pp), pp, oracle);
 				else if (op instanceof SubtractionOperator) {
 					// x = x - other
 					if (isLeft)
-						t = increasingIfLess(other, constantInt(0, pp), pp, oracle);
+						t = increasingIfLess(state.second, other, constantInt(0, pp), pp, oracle);
 					else
-						t = increasingIfLess(id, expression, pp, oracle);
+						t = increasingIfLess(state.second, id, expression, pp, oracle);
 				} else if (op instanceof MultiplicationOperator) {
 					// x = x * other || x = other * x
-					if (query(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
-							|| query(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
+					if (query(state.second, binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
+							|| query(
+									state.second,
+									binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp),
+									pp,
+									oracle))
 						// id == 0 || other == 1
 						t = Trend.STABLE;
-					else if (query(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+					else if (query(state.second, binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
 						// id > 0
-						t = increasingIfGreater(other, constantInt(1, pp), pp, oracle);
-					else if (query(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+						t = increasingIfGreater(state.second, other, constantInt(1, pp), pp, oracle);
+					else if (query(state.second, binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
 						// id < 0
-						t = increasingIfLess(other, constantInt(1, pp), pp, oracle);
-					else if (query(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+						t = increasingIfLess(state.second, other, constantInt(1, pp), pp, oracle);
+					else if (query(state.second, binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
 						// id >= 0
-						t = nonDecreasingIfGreater(other, constantInt(1, pp), pp, oracle);
-					else if (query(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+						t = nonDecreasingIfGreater(state.second, other, constantInt(1, pp), pp, oracle);
+					else if (query(state.second, binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
 						// id <= 0
-						t = nonDecreasingIfLess(other, constantInt(1, pp), pp, oracle);
-					else if (query(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
-							&& query(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
+						t = nonDecreasingIfLess(state.second, other, constantInt(1, pp), pp, oracle);
+					else if (query(state.second, binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
+							&& query(
+									state.second,
+									binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp),
+									pp,
+									oracle))
 						// id != 0 && other != 1
 						t = Trend.NON_STABLE;
 				} else if (op instanceof DivisionOperator) {
 					// x = x / other
 					if (isLeft) {
-						if (query(binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
-								|| query(binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
+						if (query(state.second, binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
+								|| query(
+										state.second,
+										binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp),
+										pp,
+										oracle))
 							// id == 0 || other == 1
 							t = Trend.STABLE;
-						else if (query(binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+						else if (query(
+								state.second,
+								binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle))
 							// id > 0
-							t = increasingIfBetweenZeroAndOne(other, pp, oracle);
-						else if (query(binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+							t = increasingIfBetweenZeroAndOne(state.second, other, pp, oracle);
+						else if (query(
+								state.second,
+								binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle))
 							// id < 0
-							t = increasingIfOutsideZeroAndOne(other, pp, oracle);
-						else if (query(binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+							t = increasingIfOutsideZeroAndOne(state.second, other, pp, oracle);
+						else if (query(
+								state.second,
+								binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle))
 							// id >= 0
-							t = nonDecreasingIfBetweenZeroAndOne(other, pp, oracle);
-						else if (query(binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
+							t = nonDecreasingIfBetweenZeroAndOne(state.second, other, pp, oracle);
+						else if (query(
+								state.second,
+								binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle))
 							// id <= 0
-							t = nonDecreasingIfOutsideZeroAndOne(other, pp, oracle);
-						else if (query(binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
-								&& query(binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp), pp, oracle))
+							t = nonDecreasingIfOutsideZeroAndOne(state.second, other, pp, oracle);
+						else if (query(
+								state.second,
+								binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle)
+								&& query(
+										state.second,
+										binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp),
+										pp,
+										oracle))
 							// id != 0 && other != 1
 							t = Trend.NON_STABLE;
 					} else
-						t = increasingIfLess(id, expression, pp, oracle);
+						t = increasingIfLess(state.second, id, expression, pp, oracle);
 				}
 			} else
-				t = increasingIfLess(id, expression, pp, oracle);
+				t = increasingIfLess(state.second, id, expression, pp, oracle);
 		}
 
-		ValueEnvironment<Trend> trnd = stabilize(trends).putState(id, t);
+		ValueEnvironment<Trend> trnd = stabilize(state.first).putState(id, t);
 		if (trnd.isBottom())
-			return bottom();
-		return new Stability<>(post, trnd);
+			return state.bottom();
+		return new ValueLatticeProduct<>(trnd, post);
 	}
 
 	@Override
-	public Stability<V> smallStepSemantics(
+	public ValueLatticeProduct<ValueEnvironment<Trend>, L> smallStepSemantics(
+			ValueLatticeProduct<ValueEnvironment<Trend>, L> state,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		V post = aux.smallStepSemantics(expression, pp, oracle);
-		ValueEnvironment<Trend> sss = stabilize(trends).smallStepSemantics(expression, pp, oracle);
+		L post = aux.smallStepSemantics(state.second, expression, pp, oracle);
+		ValueEnvironment<Trend> sss = stabilize(state.first);
 		if (post.isBottom() || sss.isBottom())
-			return bottom();
-		return new Stability<>(post, sss);
+			return state.bottom();
+		return new ValueLatticeProduct<>(sss, post);
 	}
 
 	@Override
-	public Stability<V> assume(
+	public ValueLatticeProduct<ValueEnvironment<Trend>, L> assume(
+			ValueLatticeProduct<ValueEnvironment<Trend>, L> state,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		V post = aux.assume(expression, src, dest, oracle);
-		ValueEnvironment<Trend> assume = trends.assume(expression, src, dest, oracle);
-		if (post.isBottom() || assume.isBottom())
-			return bottom();
-		return new Stability<>(post, assume);
-	}
-
-	@Override
-	public boolean knowsIdentifier(
-			Identifier id) {
-		return aux.knowsIdentifier(id) || trends.knowsIdentifier(id);
-	}
-
-	@Override
-	public Stability<V> forgetIdentifier(
-			Identifier id,
-			ProgramPoint pp)
-			throws SemanticException {
-		return new Stability<>(aux.forgetIdentifier(id, pp), trends.forgetIdentifier(id, pp));
-	}
-
-	@Override
-	public Stability<V> forgetIdentifiers(
-			Iterable<Identifier> ids,
-			ProgramPoint pp)
-			throws SemanticException {
-		return new Stability<>(aux.forgetIdentifiers(ids, pp), trends.forgetIdentifiers(ids, pp));
-	}
-
-	@Override
-	public Stability<V> forgetIdentifiersIf(
-			Predicate<Identifier> test,
-			ProgramPoint pp)
-			throws SemanticException {
-		return new Stability<>(aux.forgetIdentifiersIf(test, pp), trends.forgetIdentifiersIf(test, pp));
+		L post = aux.assume(state.second, expression, src, dest, oracle);
+		if (post.isBottom() || state.first.isBottom())
+			return state.bottom();
+		return new ValueLatticeProduct<>(state.first, post);
 	}
 
 	@Override
 	public Satisfiability satisfies(
+			ValueLatticeProduct<ValueEnvironment<Trend>, L> state,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return aux.satisfies(expression, pp, oracle);
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		return new ObjectRepresentation(Map.of(
-				"aux", aux.representation(),
-				"trends", trends.representation()));
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Stability<?> other = (Stability<?>) obj;
-		return Objects.equals(aux, other.aux) && Objects.equals(trends, other.trends);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(aux, trends);
-	}
-
-	@Override
-	public String toString() {
-		return representation().toString();
+		return aux.satisfies(state.second, expression, pp, oracle);
 	}
 
 	/**
-	 * Yields the per-variable trends contained in this domain instance.
-	 * 
-	 * @return the trends
-	 */
-	public ValueEnvironment<Trend> getTrends() {
-		return trends;
-	}
-
-	/**
-	 * Yields the auxiliary domain contained in this domain instance.
-	 * 
-	 * @return the auxiliary domain
-	 */
-	public V getAuxiliaryDomain() {
-		return aux;
-	}
-
-	/**
-	 * Yields the combination of the trends in this stability instance with the
-	 * ones contained in the given one. This operation is to be interpreted as
-	 * the sequential concatenation of the two: if two (blocks of) instructions
-	 * are executed sequentially, a variable having {@code t1} trend in the
-	 * former and {@code t2} trend in the latter would have
+	 * Yields the combination of the given trends. This operation is to be
+	 * interpreted as the sequential concatenation of the two: if two (blocks
+	 * of) instructions are executed sequentially, a variable having {@code t1}
+	 * trend in the former and {@code t2} trend in the latter would have
 	 * {@code t1.combine(t2)} as an overall trend. This delegates to
 	 * {@link Trend#combine(Trend)} for single-trend combination.
 	 * 
-	 * @param other the other trends
+	 * @param first  the first trends
+	 * @param second the second trends
 	 * 
 	 * @return the combination of the two trends
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public Stability<V> combine(
-			Stability<V> other)
+	public ValueEnvironment<Trend> combine(
+			ValueEnvironment<Trend> first,
+			ValueEnvironment<Trend> second)
 			throws SemanticException {
-		ValueEnvironment<Trend> result = new ValueEnvironment<>(other.trends.lattice, other.trends.function);
+		ValueEnvironment<Trend> result = new ValueEnvironment<>(second.lattice, second.function);
 
-		for (Identifier id : other.trends.getKeys())
+		for (Identifier id : second.getKeys())
 			// we iterate only on the keys of post to remove the ones that went
 			// out of scope
-			if (trends.knowsIdentifier(id)) {
-				Trend tmp = trends.getState(id).combine(other.trends.getState(id));
+			if (first.knowsIdentifier(id)) {
+				Trend tmp = first.getState(id).combine(second.getState(id));
 				result = result.putState(id, tmp);
 			}
 
-		return new Stability<>(other.aux, result);
+		return result;
 	}
 
 	/**
 	 * Yields a mapping from {@link Trend}s to the {@link Identifier}s having
 	 * that trend.
 	 * 
+	 * @param trends the trends to be mapped
+	 * 
 	 * @return the mapping
 	 */
-	public Map<Trend, Set<Identifier>> getCovarianceClasses() {
+	public Map<Trend, Set<Identifier>> getCovarianceClasses(
+			ValueEnvironment<Trend> trends) {
 		Map<Trend, Set<Identifier>> map = new HashMap<>();
 
 		for (Identifier id : trends.getKeys()) {
@@ -734,4 +611,38 @@ public class Stability<V extends ValueDomain<V>>
 
 		return result;
 	}
+
+	@Override
+	public boolean canProcess(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		if (expression instanceof PushInv)
+			// the type approximation of a pushinv is bottom, so the below check
+			// will always fail regardless of the kind of value we are tracking
+			return expression.getStaticType().isNumericType();
+
+		Set<Type> rts = null;
+		try {
+			rts = oracle.getRuntimeTypesOf(expression, pp);
+		} catch (SemanticException e) {
+			return false;
+		}
+
+		if (rts == null || rts.isEmpty())
+			// if we have no runtime types, either the type domain has no type
+			// information for the given expression (thus it can be anything,
+			// also something that we can track) or the computation returned
+			// bottom (and the whole state is likely going to go to bottom
+			// anyway).
+			return true;
+
+		return rts.stream().anyMatch(Type::isNumericType);
+	}
+
+	@Override
+	public ValueLatticeProduct<ValueEnvironment<Trend>, L> makeLattice() {
+		return new ValueLatticeProduct<>(new ValueEnvironment<>(Trend.TOP), aux.makeLattice());
+	}
+
 }

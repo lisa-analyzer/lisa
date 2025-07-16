@@ -50,14 +50,18 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends BackwardAnalyzedCFG<A> {
+public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		extends
+		BackwardAnalyzedCFG<A> {
 
 	private static final Logger LOG = LogManager.getLogger(BackwardOptimizedAnalyzedCFG.class);
 
-	private final InterproceduralAnalysis<A> interprocedural;
+	private final InterproceduralAnalysis<A, D> interprocedural;
 
 	private StatementStore<A> expanded;
 
@@ -80,7 +84,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			CFG cfg,
 			ScopeId id,
 			AnalysisState<A> singleton,
-			InterproceduralAnalysis<A> interprocedural) {
+			InterproceduralAnalysis<A, D> interprocedural) {
 		super(cfg, id, singleton);
 		this.interprocedural = interprocedural;
 	}
@@ -108,7 +112,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> exitStates,
 			Map<Statement, AnalysisState<A>> results,
-			InterproceduralAnalysis<A> interprocedural) {
+			InterproceduralAnalysis<A, D> interprocedural) {
 		super(cfg, id, singleton, exitStates, results);
 		this.interprocedural = interprocedural;
 	}
@@ -131,7 +135,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			ScopeId id,
 			StatementStore<A> exitStates,
 			StatementStore<A> results,
-			InterproceduralAnalysis<A> interprocedural) {
+			InterproceduralAnalysis<A, D> interprocedural) {
 		super(cfg, id, exitStates, results);
 		this.interprocedural = interprocedural;
 	}
@@ -142,7 +146,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			StatementStore<A> exitStates,
 			StatementStore<A> results,
 			StatementStore<A> expanded,
-			InterproceduralAnalysis<A> interprocedural) {
+			InterproceduralAnalysis<A, D> interprocedural) {
 		super(cfg, id, exitStates, results);
 		this.interprocedural = interprocedural;
 		this.expanded = expanded;
@@ -201,31 +205,36 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 				existing.put(stmt, CompoundState.of(approx, def.intermediateStates));
 			else {
 				Expression e = (Expression) stmt;
-				CompoundState<A> val = existing.computeIfAbsent(e.getRootStatement(),
-						ex -> CompoundState.of(bottom, bot.bottom()));
+				CompoundState<A> val = existing
+						.computeIfAbsent(e.getRootStatement(), ex -> CompoundState.of(bottom, bot.bottom()));
 				val.intermediateStates.put(e, approx);
 			}
 		}
 
-		BackwardAscendingFixpoint<A> asc = new BackwardAscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
+		BackwardAscendingFixpoint<A, D> asc = new BackwardAscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
 		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new BackwardFixpoint<>(this, true);
-		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
-			try {
-				Map<Statement, CompoundState<A>> res = fix.fixpoint(
-						starting,
-						FIFOWorkingSet.mk(),
-						asc,
-						existing);
-				expanded = new StatementStore<>(bottom);
-				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
-					expanded.put(e.getKey(), e.getValue().postState);
-					for (Entry<Statement, AnalysisState<A>> ee : e.getValue().intermediateStates)
-						expanded.put(ee.getKey(), ee.getValue());
-				}
-			} catch (FixpointException e) {
-				LOG.error("Unable to unwind optimized results of " + this, e);
-			}
-		});
+		TimerLogger
+				.execAction(
+						LOG,
+						"Unwinding optimizied results of " + this,
+						() -> {
+							try {
+								Map<Statement,
+										CompoundState<A>> res = fix.fixpoint(starting, FIFOWorkingSet.mk(), asc,
+												existing);
+								expanded = new StatementStore<>(bottom);
+								for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
+									expanded.put(e.getKey(), e.getValue().postState);
+									for (Entry<Statement, AnalysisState<A>> ee : e.getValue().intermediateStates)
+										expanded.put(ee.getKey(), ee.getValue());
+								}
+							} catch (FixpointException e) {
+								LOG
+										.error(
+												"Unable to unwind optimized results of " + this,
+												e);
+							}
+						});
 	}
 
 	/**
@@ -254,13 +263,16 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 		results.put(st, prestate);
 	}
 
-	private class PrecomputedAnalysis implements InterproceduralAnalysis<A> {
+	private class PrecomputedAnalysis
+			implements
+			InterproceduralAnalysis<A, D> {
 
 		@Override
 		public void init(
 				Application app,
 				CallGraph callgraph,
-				OpenCallPolicy policy)
+				OpenCallPolicy policy,
+				Analysis<A, D> analysis)
 				throws InterproceduralAnalysisException {
 			throw new UnsupportedOperationException();
 		}
@@ -296,10 +308,13 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			AnalysisState<A> state = exitState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();
-				state = state.lub(call.getProgram()
-						.getFeatures()
-						.getScopingStrategy()
-						.unscope(call, scope, res));
+				state = state
+						.lub(
+								call
+										.getProgram()
+										.getFeatures()
+										.getScopingStrategy()
+										.unscope(call, scope, res, interprocedural.getAnalysis()));
 			}
 			return state;
 		}
@@ -333,18 +348,26 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 			// not really needed
 			return false;
 		}
+
+		@Override
+		public Analysis<A, D> getAnalysis() {
+			return interprocedural.getAnalysis();
+		}
+
 	}
 
 	@Override
-	public BackwardOptimizedAnalyzedCFG<A> lubAux(
+	public BackwardOptimizedAnalyzedCFG<A, D> lubAux(
 			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
-				|| !(other instanceof BackwardOptimizedAnalyzedCFG<?>))
+		if (!getDescriptor().equals(other.getDescriptor())
+				|| !sameIDs(other)
+				|| !(other instanceof BackwardOptimizedAnalyzedCFG<?, ?>))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
-		BackwardOptimizedAnalyzedCFG<A> o = (BackwardOptimizedAnalyzedCFG<A>) other;
-		return new BackwardOptimizedAnalyzedCFG<A>(
+		@SuppressWarnings("unchecked")
+		BackwardOptimizedAnalyzedCFG<A, D> o = (BackwardOptimizedAnalyzedCFG<A, D>) other;
+		return new BackwardOptimizedAnalyzedCFG<A, D>(
 				this,
 				id,
 				exitStates.lub(other.exitStates),
@@ -354,15 +377,17 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 	}
 
 	@Override
-	public BackwardOptimizedAnalyzedCFG<A> glbAux(
+	public BackwardOptimizedAnalyzedCFG<A, D> glbAux(
 			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
-				|| !(other instanceof BackwardOptimizedAnalyzedCFG<?>))
+		if (!getDescriptor().equals(other.getDescriptor())
+				|| !sameIDs(other)
+				|| !(other instanceof BackwardOptimizedAnalyzedCFG<?, ?>))
 			throw new SemanticException(CANNOT_GLB_ERROR);
 
-		BackwardOptimizedAnalyzedCFG<A> o = (BackwardOptimizedAnalyzedCFG<A>) other;
-		return new BackwardOptimizedAnalyzedCFG<A>(
+		@SuppressWarnings("unchecked")
+		BackwardOptimizedAnalyzedCFG<A, D> o = (BackwardOptimizedAnalyzedCFG<A, D>) other;
+		return new BackwardOptimizedAnalyzedCFG<A, D>(
 				this,
 				id,
 				exitStates.glb(other.exitStates),
@@ -372,15 +397,17 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 	}
 
 	@Override
-	public BackwardOptimizedAnalyzedCFG<A> wideningAux(
+	public BackwardOptimizedAnalyzedCFG<A, D> wideningAux(
 			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
-				|| !(other instanceof BackwardOptimizedAnalyzedCFG<?>))
+		if (!getDescriptor().equals(other.getDescriptor())
+				|| !sameIDs(other)
+				|| !(other instanceof BackwardOptimizedAnalyzedCFG<?, ?>))
 			throw new SemanticException(CANNOT_WIDEN_ERROR);
 
-		BackwardOptimizedAnalyzedCFG<A> o = (BackwardOptimizedAnalyzedCFG<A>) other;
-		return new BackwardOptimizedAnalyzedCFG<A>(
+		@SuppressWarnings("unchecked")
+		BackwardOptimizedAnalyzedCFG<A, D> o = (BackwardOptimizedAnalyzedCFG<A, D>) other;
+		return new BackwardOptimizedAnalyzedCFG<A, D>(
 				this,
 				id,
 				exitStates.widening(other.exitStates),
@@ -390,15 +417,17 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 	}
 
 	@Override
-	public BackwardOptimizedAnalyzedCFG<A> narrowingAux(
+	public BackwardOptimizedAnalyzedCFG<A, D> narrowingAux(
 			BackwardAnalyzedCFG<A> other)
 			throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
-				|| !(other instanceof BackwardOptimizedAnalyzedCFG<?>))
+		if (!getDescriptor().equals(other.getDescriptor())
+				|| !sameIDs(other)
+				|| !(other instanceof BackwardOptimizedAnalyzedCFG<?, ?>))
 			throw new SemanticException(CANNOT_NARROW_ERROR);
 
-		BackwardOptimizedAnalyzedCFG<A> o = (BackwardOptimizedAnalyzedCFG<A>) other;
-		return new BackwardOptimizedAnalyzedCFG<A>(
+		@SuppressWarnings("unchecked")
+		BackwardOptimizedAnalyzedCFG<A, D> o = (BackwardOptimizedAnalyzedCFG<A, D>) other;
+		return new BackwardOptimizedAnalyzedCFG<A, D>(
 				this,
 				id,
 				exitStates.narrowing(other.exitStates),
@@ -408,13 +437,19 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractState<A>> extends Ba
 	}
 
 	@Override
-	public BackwardOptimizedAnalyzedCFG<A> top() {
+	public BackwardOptimizedAnalyzedCFG<A, D> top() {
 		return new BackwardOptimizedAnalyzedCFG<>(this, id.startingId(), exitStates.top(), results.top(), null, null);
 	}
 
 	@Override
-	public BackwardOptimizedAnalyzedCFG<A> bottom() {
-		return new BackwardOptimizedAnalyzedCFG<>(this, id.startingId(), exitStates.bottom(), results.bottom(), null,
+	public BackwardOptimizedAnalyzedCFG<A, D> bottom() {
+		return new BackwardOptimizedAnalyzedCFG<>(
+				this,
+				id.startingId(),
+				exitStates.bottom(),
+				results.bottom(),
+				null,
 				null);
 	}
+
 }

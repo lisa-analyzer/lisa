@@ -74,4 +74,5 @@ public class NegationRemovalTest {
 		ValueExpression result = negated.removeNegations();
 		assertSame("Negated expression has been recreated", negated, result);
 	}
+
 }

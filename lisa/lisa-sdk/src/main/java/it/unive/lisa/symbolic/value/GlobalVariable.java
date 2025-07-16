@@ -15,7 +15,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class GlobalVariable extends Identifier {
+public class GlobalVariable
+		extends
+		Identifier {
 
 	/**
 	 * Builds the variable.
@@ -81,4 +83,14 @@ public class GlobalVariable extends Identifier {
 			throws SemanticException {
 		return visitor.visit(this, params);
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+		return this;
+	}
+
 }

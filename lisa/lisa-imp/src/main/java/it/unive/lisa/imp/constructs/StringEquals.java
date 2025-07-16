@@ -22,7 +22,9 @@ import it.unive.lisa.program.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringEquals extends NativeCFG {
+public class StringEquals
+		extends
+		NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -33,9 +35,15 @@ public class StringEquals extends NativeCFG {
 	public StringEquals(
 			CodeLocation location,
 			ClassUnit stringUnit) {
-		super(new CodeMemberDescriptor(location, stringUnit, true, "equals", BoolType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE),
-				new Parameter(location, "other", StringType.INSTANCE)),
+		super(
+				new CodeMemberDescriptor(
+						location,
+						stringUnit,
+						true,
+						"equals",
+						BoolType.INSTANCE,
+						new Parameter(location, "this", StringType.INSTANCE),
+						new Parameter(location, "other", StringType.INSTANCE)),
 				IMPStringEquals.class);
 	}
 
@@ -46,7 +54,11 @@ public class StringEquals extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringEquals extends Equals implements PluggableStatement {
+	public static class IMPStringEquals
+			extends
+			Equals
+			implements
+			PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the
@@ -107,5 +119,7 @@ public class StringEquals extends NativeCFG {
 				Expression right) {
 			super(cfg, location, left, right);
 		}
+
 	}
+
 }

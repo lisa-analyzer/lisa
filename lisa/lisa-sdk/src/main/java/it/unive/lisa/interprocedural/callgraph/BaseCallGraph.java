@@ -51,7 +51,9 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph extends CallGraph {
+public abstract class BaseCallGraph
+		extends
+		CallGraph {
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
@@ -144,8 +146,9 @@ public abstract class BaseCallGraph extends CallGraph {
 			resolveInstance(tempCall, types, targets, nativeTargets, aliasing);
 
 			if (!(params[0] instanceof VariableRef)) {
-				LOG.debug(call
-						+ ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
+				LOG
+						.debug(
+								call + ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
 				break;
 			}
 
@@ -214,8 +217,10 @@ public abstract class BaseCallGraph extends CallGraph {
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
 
-		LOG.trace(
-				call + " [" + call.getLocation() + "] has been resolved to: " + ((ResolvedCall) resolved).getTargets());
+		LOG
+				.trace(
+						call + " [" + call.getLocation() + "] has been resolved to: "
+								+ ((ResolvedCall) resolved).getTargets());
 		return resolved;
 	}
 
@@ -224,10 +229,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& !nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& !nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && !nativeTargets.isEmpty() && targetsNoRec.isEmpty() && !nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyCFGTargets(
@@ -235,10 +237,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return !targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& !targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return !targets.isEmpty() && nativeTargets.isEmpty() && !targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyRewritingTargets(
@@ -246,10 +245,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& !targetsNoRec.isEmpty()
-				&& !nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && nativeTargets.isEmpty() && !targetsNoRec.isEmpty() && !nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyRewritingNativeTargets(
@@ -257,10 +253,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& !nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && nativeTargets.isEmpty() && targetsNoRec.isEmpty() && !nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyRewritingCFGTargets(
@@ -268,10 +261,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& !targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && nativeTargets.isEmpty() && !targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyNonRewritingTargets(
@@ -279,10 +269,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return !targets.isEmpty()
-				&& !nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return !targets.isEmpty() && !nativeTargets.isEmpty() && targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyNonRewritingNativeTargets(
@@ -290,10 +277,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& !nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && !nativeTargets.isEmpty() && targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyNonRewritingCFGTargets(
@@ -301,10 +285,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return !targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return !targets.isEmpty() && nativeTargets.isEmpty() && targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean noTargets(
@@ -312,10 +293,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && nativeTargets.isEmpty() && targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	/**
@@ -516,4 +494,5 @@ public abstract class BaseCallGraph extends CallGraph {
 			CodeMember cm) {
 		return callsites.getOrDefault(cm, Collections.emptyList());
 	}
+
 }

@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
  * Numeric type interface. Any concrete numerical type or numerical
  * sub-interface should implement/extend this interface.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public interface NumericType extends Type {
+public interface NumericType
+		extends
+		Type {
 
 	/**
 	 * Returns {@code true} if this numeric type follows a 8-bits format
@@ -181,9 +183,13 @@ public interface NumericType extends Type {
 	public static Set<Type> commonNumericalType(
 			Set<Type> left,
 			Set<Type> right) {
-		Set<Type> lfiltered = left.stream().filter(type -> type.isNumericType() || type.isUntyped())
+		Set<Type> lfiltered = left
+				.stream()
+				.filter(type -> type.isNumericType() || type.isUntyped())
 				.collect(Collectors.toSet());
-		Set<Type> rfiltered = right.stream().filter(type -> type.isNumericType() || type.isUntyped())
+		Set<Type> rfiltered = right
+				.stream()
+				.filter(type -> type.isNumericType() || type.isUntyped())
 				.collect(Collectors.toSet());
 		if ((lfiltered.isEmpty() || lfiltered.stream().allMatch(Type::isUntyped))
 				&& (rfiltered.isEmpty() || rfiltered.stream().allMatch(Type::isUntyped)))
@@ -205,4 +211,5 @@ public interface NumericType extends Type {
 
 		return result;
 	}
+
 }

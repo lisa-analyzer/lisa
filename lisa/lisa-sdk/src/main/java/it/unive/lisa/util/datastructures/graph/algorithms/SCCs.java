@@ -32,7 +32,9 @@ import java.util.Set;
  *          "https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm">Tarjan
  *          strongly connected components algorithm</a>
  */
-public class SCCs<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
+public class SCCs<G extends Graph<G, N, E>,
+		N extends Node<G, N, E>,
+		E extends Edge<G, N, E>> {
 
 	private final Collection<Collection<N>> sccs;
 
@@ -136,4 +138,5 @@ public class SCCs<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends E
 
 		return index;
 	}
+
 }

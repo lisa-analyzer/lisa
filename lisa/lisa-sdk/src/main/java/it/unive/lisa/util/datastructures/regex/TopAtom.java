@@ -13,7 +13,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class TopAtom extends Atom {
+public final class TopAtom
+		extends
+		Atom {
 
 	/**
 	 * The string used to represent this regular expression.
@@ -167,6 +169,7 @@ public final class TopAtom extends Atom {
 					String s) {
 				return s.isEmpty(); // epsilon is contained everywhere
 			}
+
 		};
 	}
 
@@ -182,7 +185,9 @@ public final class TopAtom extends Atom {
 
 	@Override
 	public RegularExpression[] explode() {
-		return new RegularExpression[] { this };
+		return new RegularExpression[] {
+				this
+		};
 	}
 
 	@Override
@@ -190,4 +195,5 @@ public final class TopAtom extends Atom {
 			RegularExpression other) {
 		return 0;
 	}
+
 }

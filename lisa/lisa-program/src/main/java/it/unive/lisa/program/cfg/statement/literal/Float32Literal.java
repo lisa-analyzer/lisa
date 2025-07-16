@@ -11,7 +11,9 @@ import it.unive.lisa.program.type.Float32Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Float32Literal extends Literal<Float> {
+public class Float32Literal
+		extends
+		Literal<Float> {
 
 	/**
 	 * Builds the literal.
@@ -26,4 +28,5 @@ public class Float32Literal extends Literal<Float> {
 			float value) {
 		super(cfg, location, value, Float32Type.INSTANCE);
 	}
+
 }

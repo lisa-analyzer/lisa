@@ -12,9 +12,11 @@ import it.unive.lisa.type.Type;
 /**
  * A memory pointer to a heap location.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class MemoryPointer extends Identifier {
+public class MemoryPointer
+		extends
+		Identifier {
 
 	/**
 	 * The heap location memory pointed by this pointer.
@@ -96,4 +98,14 @@ public class MemoryPointer extends Identifier {
 	public String toString() {
 		return "&" + getName();
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+		return this;
+	}
+
 }

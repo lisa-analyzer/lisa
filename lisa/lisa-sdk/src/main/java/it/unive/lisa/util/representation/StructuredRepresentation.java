@@ -12,7 +12,9 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class StructuredRepresentation implements Comparable<StructuredRepresentation> {
+public abstract class StructuredRepresentation
+		implements
+		Comparable<StructuredRepresentation> {
 
 	private final SortedMap<String, String> properties = new TreeMap<>();
 
@@ -87,4 +89,5 @@ public abstract class StructuredRepresentation implements Comparable<StructuredR
 
 	@Override
 	public abstract String toString();
+
 }

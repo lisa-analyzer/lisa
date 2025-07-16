@@ -1,73 +1,84 @@
 package it.unive.lisa.analysis.combination.smash;
 
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.util.numeric.IntInterval;
 
 /**
- * Interface for a string analysis that exposes utility methods to compute
- * semantics operations.
+ * Interface for a {@link BaseNonRelationalValueDomain} for string values that
+ * can be used in the smashed-sum abstract domain.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
- * @param <S> the concrete type of the instances of this domain
+ * @param <L> the type of lattice produced by this domain
  */
-public interface SmashedSumStringDomain<S extends SmashedSumStringDomain<S>>
+public interface SmashedSumStringDomain<L extends Lattice<L>>
 		extends
-		BaseNonRelationalValueDomain<S> {
+		BaseNonRelationalValueDomain<L> {
 
 	/**
-	 * Simplified semantics of the string contains operator, checking a single
-	 * character is part of the string.
+	 * Simplified semantics of the string contains operator, checking if a
+	 * single character is part of the string.
 	 * 
-	 * @param c the character to check
+	 * @param current the lattice instance to check
+	 * @param c       the character to check
 	 * 
 	 * @return whether or not the character is part of the string
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	Satisfiability containsChar(
+			L current,
 			char c)
 			throws SemanticException;
 
 	/**
 	 * Yields the {@link IntInterval} containing the minimum and maximum length
-	 * of this abstract value.
+	 * of the given abstract value.
 	 * 
-	 * @return the minimum and maximum length of this abstract value
+	 * @param current the lattice instance
+	 * 
+	 * @return the minimum and maximum length of the given abstract value
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	IntInterval length()
+	IntInterval length(
+			L current)
 			throws SemanticException;
 
 	/**
 	 * Yields the {@link IntInterval} containing the minimum and maximum index
-	 * of {@code s} in {@code this}.
+	 * of {@code s} in {@code current}.
 	 *
-	 * @param s the string to be searched
+	 * @param current the lattice instance
+	 * @param s       the string to be searched
 	 * 
-	 * @return the minimum and maximum index of {@code s} in {@code this}
+	 * @return the minimum and maximum index of {@code s} in {@code current}
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	IntInterval indexOf(
-			S s)
+			L current,
+			L s)
 			throws SemanticException;
 
 	/**
-	 * Yields the the substring of this abstract value between two indexes.
+	 * Yields the the substring of the given abstract value between two indexes.
 	 * 
-	 * @param begin where the substring starts
-	 * @param end   where the substring ends
+	 * @param current the lattice instance
+	 * @param begin   where the substring starts
+	 * @param end     where the substring ends
 	 * 
-	 * @return the substring of this abstract value between two indexes
+	 * @return the substring of the given abstract value between two indexes
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	S substring(
+	L substring(
+			L current,
 			long begin,
 			long end)
 			throws SemanticException;
+
 }

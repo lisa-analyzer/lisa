@@ -33,7 +33,9 @@ public class AdditionalInfoTest {
 			false);
 
 	@Test
-	public void testNoInfo() throws FileNotFoundException, IOException {
+	public void testNoInfo()
+			throws FileNotFoundException,
+			IOException {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleIf"));
 		Ret ret = new Ret(cfg, SyntheticLocation.INSTANCE);
 		cfg.addNode(ret, true);
@@ -47,14 +49,17 @@ public class AdditionalInfoTest {
 		LiSAReport report = lisa.run(program);
 
 		assertEquals(0, report.getAdditionalInfo().size());
-		try (FileReader reader = new FileReader("tmp/" + LiSA.REPORT_NAME)) {
+		try (FileReader reader = new FileReader(
+				"tmp/" + LiSA.REPORT_NAME)) {
 			JsonReport jsonReport = JsonReport.read(reader);
 			assertEquals(0, jsonReport.getAdditionalInfo().getFields().size());
 		}
 	}
 
 	@Test
-	public void testInfo() throws FileNotFoundException, IOException {
+	public void testInfo()
+			throws FileNotFoundException,
+			IOException {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleIf"));
 		Ret ret = new Ret(cfg, SyntheticLocation.INSTANCE);
 		cfg.addNode(ret, true);
@@ -65,12 +70,12 @@ public class AdditionalInfoTest {
 		conf.workdir = "tmp";
 		conf.jsonOutput = true;
 		LiSA lisa = new LiSA(conf);
-		Consumer<LiSAReport> filler = r -> r.getAdditionalInfo()
-				.put("key", new StringRepresentation("value"));
+		Consumer<LiSAReport> filler = r -> r.getAdditionalInfo().put("key", new StringRepresentation("value"));
 		LiSAReport report = lisa.run(filler, program);
 
 		assertEquals(1, report.getAdditionalInfo().size());
-		try (FileReader reader = new FileReader("tmp/" + LiSA.REPORT_NAME)) {
+		try (FileReader reader = new FileReader(
+				"tmp/" + LiSA.REPORT_NAME)) {
 			JsonReport jsonReport = JsonReport.read(reader);
 			assertEquals(1, jsonReport.getAdditionalInfo().getFields().size());
 		}
@@ -78,7 +83,9 @@ public class AdditionalInfoTest {
 
 	@Before
 	@After
-	public void cleanUp() throws IOException {
+	public void cleanUp()
+			throws IOException {
 		FileManager.forceDeleteFolder("tmp");
 	}
+
 }

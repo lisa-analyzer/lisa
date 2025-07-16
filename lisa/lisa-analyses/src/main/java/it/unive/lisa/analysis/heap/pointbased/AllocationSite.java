@@ -10,9 +10,11 @@ import it.unive.lisa.type.Type;
  * allocated and a field (optional). This class is used in
  * {@link PointBasedHeap} and {@link FieldSensitivePointBasedHeap}.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public abstract class AllocationSite extends HeapLocation {
+public abstract class AllocationSite
+		extends
+		HeapLocation {
 
 	private final String locationName;
 
@@ -134,7 +136,13 @@ public abstract class AllocationSite extends HeapLocation {
 			String field,
 			boolean isWeak,
 			CodeLocation location) {
-		super(staticType, "pp@" + locationName + (field == null ? "" : "[" + field + "]"), isWeak, location);
+		super(
+				staticType,
+				"pp@" + locationName + (field == null
+						? ""
+						: "[" + field + "]"),
+				isWeak,
+				location);
 		this.locationName = locationName;
 		this.field = field != null ? field.toString() : null;
 	}
@@ -196,4 +204,5 @@ public abstract class AllocationSite extends HeapLocation {
 	 */
 	public abstract AllocationSite withType(
 			Type type);
+
 }

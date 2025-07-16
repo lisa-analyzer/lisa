@@ -6,16 +6,19 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import org.junit.Test;
 
-public class DescendingTest extends AnalysisTestExecutor {
+public class DescendingTest
+		extends
+		AnalysisTestExecutor {
 
 	@Test
 	public void testIntervalDescendingWidening() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				DefaultConfiguration.defaultValueDomain(),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						DefaultConfiguration.defaultValueDomain(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.descendingPhaseType = DescendingPhaseType.NARROWING;
 		conf.testDir = "descending";
 		conf.testSubDir = "widening";
@@ -27,10 +30,11 @@ public class DescendingTest extends AnalysisTestExecutor {
 	public void testIntervalDescendingMaxGlb() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				DefaultConfiguration.defaultValueDomain(),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						DefaultConfiguration.defaultValueDomain(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.descendingPhaseType = DescendingPhaseType.GLB;
 		conf.glbThreshold = 5;
 		conf.testDir = "descending";
@@ -38,4 +42,5 @@ public class DescendingTest extends AnalysisTestExecutor {
 		conf.programFile = "descending.imp";
 		perform(conf);
 	}
+
 }

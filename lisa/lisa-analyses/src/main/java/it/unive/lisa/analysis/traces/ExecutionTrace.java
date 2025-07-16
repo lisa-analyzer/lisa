@@ -14,12 +14,17 @@ public class ExecutionTrace {
 
 	private static final TraceToken[] EMPTY_TRACE = new TraceToken[0];
 
+	/**
+	 * An empty execution trace, with no tokens.
+	 */
+	public static final ExecutionTrace EMPTY = new ExecutionTrace();
+
 	private final TraceToken[] tokens;
 
 	/**
 	 * Builds a new empty execution trace.
 	 */
-	public ExecutionTrace() {
+	private ExecutionTrace() {
 		tokens = EMPTY_TRACE;
 	}
 
@@ -128,4 +133,5 @@ public class ExecutionTrace {
 	public String toString() {
 		return "<" + StringUtils.join(tokens, "::") + ">";
 	}
+
 }

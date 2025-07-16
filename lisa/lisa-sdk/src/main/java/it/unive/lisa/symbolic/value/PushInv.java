@@ -14,7 +14,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class PushInv extends ValueExpression {
+public class PushInv
+		extends
+		ValueExpression {
 
 	/**
 	 * Builds the push invalid.
@@ -83,4 +85,14 @@ public class PushInv extends ValueExpression {
 	public SymbolicExpression removeTypingExpressions() {
 		return this;
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+		return this;
+	}
+
 }

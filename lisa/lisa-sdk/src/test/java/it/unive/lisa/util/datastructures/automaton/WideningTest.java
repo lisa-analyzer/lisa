@@ -41,4 +41,5 @@ public class WideningTest {
 		assertEquals(exp, a.widening(2));
 		assertTrue(a.isEqualTo(a.widening(5)));
 	}
+
 }

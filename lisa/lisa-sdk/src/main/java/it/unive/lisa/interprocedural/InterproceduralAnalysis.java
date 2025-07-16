@@ -1,6 +1,8 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
@@ -28,10 +30,12 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public interface InterproceduralAnalysis<A extends AbstractState<A>> {
+public interface InterproceduralAnalysis<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>> {
 
 	/**
 	 * Yields {@code true} if this analysis needs a {@link CallGraph} instance
@@ -53,6 +57,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * @param app       the application to analyze
 	 * @param policy    the {@link OpenCallPolicy} to be used for computing the
 	 *                      result of {@link OpenCall}s
+	 * @param analysis  the {@link Analysis} that is being run
 	 *
 	 * @throws InterproceduralAnalysisException if an exception happens while
 	 *                                              performing the
@@ -61,8 +66,17 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	void init(
 			Application app,
 			CallGraph callgraph,
-			OpenCallPolicy policy)
+			OpenCallPolicy policy,
+			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException;
+
+	/**
+	 * Yields the {@link Analysis} that is being run by this
+	 * {@link InterproceduralAnalysis}.
+	 * 
+	 * @return the analysis being run
+	 */
+	Analysis<A, D> getAnalysis();
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
@@ -184,4 +198,5 @@ public interface InterproceduralAnalysis<A extends AbstractState<A>> {
 	 * @return the results of the fixpoint
 	 */
 	FixpointResults<A> getFixpointResults();
+
 }

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.taint;
 
+import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
@@ -20,13 +21,100 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * A taint analysis, that is, an information-flow analysis tracking only
- * explicit flows.
+ * explicit flows. This domain uses annotations to mark variables as tainted
+ * ({@link #TAINTED_ANNOTATION}) or clean ({@link #CLEAN_ANNOTATION}).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <T> the concrete type of the analysis
+ * @param <L> the concrete type of the lattice elements tracked by the analysis
  */
-public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelationalValueDomain<T> {
+public abstract class BaseTaint<L extends BaseTaint.TaintLattice<L>>
+		implements
+		BaseNonRelationalValueDomain<L> {
+
+	/**
+	 * An interface for lattices used in taint analyses. This interface extends
+	 * {@link BaseLattice} and provides methods to access the domain elements
+	 * that represent tainted and clean values, as well as methods to check
+	 * whether a value is always tainted, possibly tainted, always clean, or
+	 * possibly clean.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <L> the concrete type of the taint lattice
+	 */
+	public interface TaintLattice<L extends TaintLattice<L>>
+			extends
+			BaseLattice<L> {
+
+		/**
+		 * Yields the domain element that represents tainted values.
+		 * 
+		 * @return the tainted domain element
+		 */
+		L tainted();
+
+		/**
+		 * Yields the domain element that represents clean values.
+		 * 
+		 * @return the clean domain element
+		 */
+		L clean();
+
+		/**
+		 * Combines two taint lattices using the logical OR operation.
+		 * 
+		 * @param other the other lattice to combine with
+		 * 
+		 * @return the combined lattice
+		 * 
+		 * @throws SemanticException if an error occurs during the combination
+		 */
+		L or(
+				L other)
+				throws SemanticException;
+
+		/**
+		 * Yields {@code true} if this instance represents information that is
+		 * definitely tainted across all execution paths.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		boolean isAlwaysTainted();
+
+		/**
+		 * Yields {@code true} if this instance represents information that is
+		 * definitely tainted in at least one execution path.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		boolean isPossiblyTainted();
+
+		/**
+		 * Yields {@code true} if this instance represents information that is
+		 * definitely clean across all execution paths. By default, this method
+		 * returns {@code true} if this is not the bottom instance and
+		 * {@link #isPossiblyTainted()} returns {@code false}.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		default boolean isAlwaysClean() {
+			return !isPossiblyTainted() && !isBottom();
+		}
+
+		/**
+		 * Yields {@code true} if this instance represents information that is
+		 * definitely clean in at least one execution path. By default, this
+		 * method returns {@code true} if {@link #isAlwaysTainted()} returns
+		 * {@code false}.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		default boolean isPossiblyClean() {
+			return !isAlwaysTainted();
+		}
+
+	}
 
 	/**
 	 * The annotation used to mark tainted variables, that is, sources of
@@ -51,59 +139,6 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	public static final AnnotationMatcher CLEAN_MATCHER = new BasicAnnotationMatcher(CLEAN_ANNOTATION);
 
 	/**
-	 * Yields the domain element that represents tainted values.
-	 * 
-	 * @return the tainted domain element
-	 */
-	protected abstract T tainted();
-
-	/**
-	 * Yields the domain element that represents clean values.
-	 * 
-	 * @return the clean domain element
-	 */
-	protected abstract T clean();
-
-	/**
-	 * Yields {@code true} if this instance represents information that is
-	 * definitely tainted across all execution paths.
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	public abstract boolean isAlwaysTainted();
-
-	/**
-	 * Yields {@code true} if this instance represents information that is
-	 * definitely tainted in at least one execution path.
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	public abstract boolean isPossiblyTainted();
-
-	/**
-	 * Yields {@code true} if this instance represents information that is
-	 * definitely clean across all execution paths. By default, this method
-	 * returns {@code true} if this is not the bottom instance and
-	 * {@link #isPossiblyTainted()} returns {@code false}.
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	public boolean isAlwaysClean() {
-		return !isPossiblyTainted() && !isBottom();
-	}
-
-	/**
-	 * Yields {@code true} if this instance represents information that is
-	 * definitely clean in at least one execution path. By default, this method
-	 * returns {@code true} if {@link #isAlwaysTainted()} returns {@code false}.
-	 * 
-	 * @return {@code true} if that condition holds
-	 */
-	public boolean isPossiblyClean() {
-		return !isAlwaysTainted();
-	}
-
-	/**
 	 * Default approximation for {@link Identifier}s. This method returns the
 	 * same as
 	 * {@link BaseNonRelationalValueDomain#fixedVariable(Identifier, ProgramPoint, SemanticOracle)}
@@ -123,7 +158,7 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	 * 
 	 * @throws SemanticException if an exception happens during the evaluation
 	 */
-	protected T defaultApprox(
+	protected L defaultApprox(
 			Identifier id,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -142,32 +177,32 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public T fixedVariable(
+	public L fixedVariable(
 			Identifier id,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		T def = defaultApprox(id, pp, oracle);
+		L def = defaultApprox(id, pp, oracle);
 		if (!def.isBottom())
 			return def;
 		return BaseNonRelationalValueDomain.super.fixedVariable(id, pp, oracle);
 	}
 
 	@Override
-	public T evalIdentifier(
+	public L evalIdentifier(
 			Identifier id,
-			ValueEnvironment<T> environment,
+			ValueEnvironment<L> environment,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		T def = defaultApprox(id, pp, oracle);
+		L def = defaultApprox(id, pp, oracle);
 		if (!def.isBottom())
 			return def;
 		return BaseNonRelationalValueDomain.super.evalIdentifier(id, environment, pp, oracle);
 	}
 
 	@Override
-	public T evalPushAny(
+	public L evalPushAny(
 			PushAny pushAny,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -176,7 +211,7 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public T evalNullConstant(
+	public L evalNullConstant(
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -184,7 +219,7 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public T evalNonNullConstant(
+	public L evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -193,9 +228,9 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public T evalUnaryExpression(
+	public L evalUnaryExpression(
 			UnaryExpression expression,
-			T arg,
+			L arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -203,33 +238,33 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public T evalBinaryExpression(
+	public L evalBinaryExpression(
 			BinaryExpression expression,
-			T left,
-			T right,
+			L left,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return left.lub(right);
+		return left.or(right);
 	}
 
 	@Override
-	public T evalTernaryExpression(
+	public L evalTernaryExpression(
 			TernaryExpression expression,
-			T left,
-			T middle,
-			T right,
+			L left,
+			L middle,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return left.lub(middle).lub(right);
+		return left.or(middle).or(right);
 	}
 
 	@Override
-	public T evalTypeCast(
+	public L evalTypeCast(
 			BinaryExpression cast,
-			T left,
-			T right,
+			L left,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -237,10 +272,10 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public T evalTypeConv(
+	public L evalTypeConv(
 			BinaryExpression conv,
-			T left,
-			T right,
+			L left,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -249,8 +284,8 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 
 	@Override
 	public Satisfiability satisfies(
+			ValueEnvironment<L> environment,
 			ValueExpression expression,
-			ValueEnvironment<T> environment,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -259,8 +294,8 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public ValueEnvironment<T> assume(
-			ValueEnvironment<T> environment,
+	public ValueEnvironment<L> assume(
+			ValueEnvironment<L> environment,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
@@ -269,4 +304,19 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 		// quick answer: we cannot do anything
 		return environment;
 	}
+
+	/**
+	 * Yields the domain element that represents tainted values.
+	 * 
+	 * @return the tainted domain element
+	 */
+	protected abstract L tainted();
+
+	/**
+	 * Yields the domain element that represents clean values.
+	 * 
+	 * @return the clean domain element
+	 */
+	protected abstract L clean();
+
 }

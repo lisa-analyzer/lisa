@@ -33,7 +33,8 @@ public class AccessModifiers {
 			}
 
 		if (!failures.isEmpty())
-			fail("The following operators do not have a visible constructor: " + failures);
+			fail(
+					"The following operators do not have a visible constructor: " + failures);
 	}
 
 	@Test
@@ -55,6 +56,8 @@ public class AccessModifiers {
 			}
 
 		if (!failures.isEmpty())
-			fail("The following expressions do not have a visible constructor: " + failures);
+			fail(
+					"The following expressions do not have a visible constructor: " + failures);
 	}
+
 }

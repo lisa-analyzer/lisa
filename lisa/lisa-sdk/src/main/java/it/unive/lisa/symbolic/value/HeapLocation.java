@@ -15,7 +15,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HeapLocation extends Identifier {
+public class HeapLocation
+		extends
+		Identifier {
 
 	private boolean isAllocation = false;
 
@@ -76,8 +78,9 @@ public class HeapLocation extends Identifier {
 			Identifier other)
 			throws SemanticException {
 		if (!getName().equals(other.getName()))
-			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
-					+ "' and '" + other + "'");
+			throw new SemanticException(
+					"Cannot perform the least upper bound between different identifiers: '" + this + "' and '" + other
+							+ "'");
 		return isWeak() ? this : other;
 	}
 
@@ -145,4 +148,14 @@ public class HeapLocation extends Identifier {
 		else
 			return new HeapLocation(getStaticType(), getName(), isWeak(), getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+		return this;
+	}
+
 }

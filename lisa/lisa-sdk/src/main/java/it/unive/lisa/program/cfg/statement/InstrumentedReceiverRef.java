@@ -15,7 +15,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class InstrumentedReceiverRef extends VariableRef {
+public class InstrumentedReceiverRef
+		extends
+		VariableRef {
 
 	private final boolean isArray;
 
@@ -58,4 +60,5 @@ public class InstrumentedReceiverRef extends VariableRef {
 		InstrumentedReceiver v = new InstrumentedReceiver(getStaticType(), isArray, getAnnotations(), getLocation());
 		return v;
 	}
+
 }

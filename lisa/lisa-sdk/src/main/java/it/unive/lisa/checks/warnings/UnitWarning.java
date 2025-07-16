@@ -10,7 +10,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnitWarning extends WarningWithLocation {
+public class UnitWarning
+		extends
+		WarningWithLocation {
 
 	/**
 	 * The unit where this warning was reported on
@@ -26,8 +28,7 @@ public class UnitWarning extends WarningWithLocation {
 	public UnitWarning(
 			Unit unit,
 			String message) {
-		super(unit instanceof ClassUnit ? ((ClassUnit) unit).getLocation() : SyntheticLocation.INSTANCE,
-				message);
+		super(unit instanceof ClassUnit ? ((ClassUnit) unit).getLocation() : SyntheticLocation.INSTANCE, message);
 		this.unit = unit;
 	}
 
@@ -90,7 +91,7 @@ public class UnitWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + unit.getName() + "': "
-				+ getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + unit.getName() + "': " + getTaggedMessage();
 	}
+
 }

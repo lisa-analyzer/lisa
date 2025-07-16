@@ -31,4 +31,5 @@ public interface HierarcyTraversalStrategy {
 	Iterable<CompilationUnit> traverse(
 			Statement st,
 			CompilationUnit start);
+
 }

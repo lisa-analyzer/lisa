@@ -11,7 +11,9 @@ import it.unive.lisa.program.type.UInt32Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UInt32Literal extends Literal<Integer> {
+public class UInt32Literal
+		extends
+		Literal<Integer> {
 
 	/**
 	 * Builds the literal.
@@ -26,4 +28,5 @@ public class UInt32Literal extends Literal<Integer> {
 			int value) {
 		super(cfg, location, value, UInt32Type.INSTANCE);
 	}
+
 }

@@ -9,9 +9,11 @@ import java.util.Set;
  * pattern, that is the instances of this type are unique. The unique instance
  * of this type can be retrieved by {@link Untyped#INSTANCE}.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Untyped implements Type {
+public class Untyped
+		implements
+		Type {
 
 	/**
 	 * Unique instance of Untyped type.
@@ -59,4 +61,5 @@ public class Untyped implements Type {
 			TypeSystem types) {
 		return types.getTypes();
 	}
+
 }

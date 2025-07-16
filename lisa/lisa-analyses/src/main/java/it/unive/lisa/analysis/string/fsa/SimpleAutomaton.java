@@ -1,6 +1,8 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
@@ -10,6 +12,8 @@ import it.unive.lisa.util.datastructures.regex.RegularExpression;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +31,11 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymbol> {
+public final class SimpleAutomaton
+		extends
+		Automaton<SimpleAutomaton, StringSymbol>
+		implements
+		BaseLattice<SimpleAutomaton> {
 
 	@Override
 	public SimpleAutomaton singleString(
@@ -101,6 +109,13 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	}
 
 	/**
+	 * Builds an automaton recognizing the empty language.
+	 */
+	public SimpleAutomaton() {
+		super();
+	}
+
+	/**
 	 * Builds a new automaton that accepts a given string.
 	 * 
 	 * @param s the only string accepted by the automaton.
@@ -154,9 +169,11 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 			for (State s : currentStates) {
 
 				// stores all the states reached after char computation
-				Set<State> dest = transitions.stream()
+				Set<State> dest = transitions
+						.stream()
 						.filter(t -> t.getSource().equals(s) && t.getSymbol().getSymbol().equals(c))
-						.map(Transition::getDestination).collect(Collectors.toSet());
+						.map(Transition::getDestination)
+						.collect(Collectors.toSet());
 				if (!dest.isEmpty()) {
 					dest = epsilonClosure(dest);
 					newCurr.addAll(dest);
@@ -258,8 +275,9 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 				for (Transition<StringSymbol> t : result.getIngoingTransitionsFrom(qf))
 					if (t.getSymbol().getSymbol().equals(" ")) {
 						toRemove.add(t);
-						toAdd.add(
-								new Transition<StringSymbol>(t.getSource(), t.getDestination(), StringSymbol.EPSILON));
+						toAdd
+								.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(),
+										StringSymbol.EPSILON));
 					}
 			}
 
@@ -308,27 +326,37 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	 *                                           not finite
 	 */
 	public SimpleAutomaton repeat(
-			Interval i)
+			IntInterval i)
 			throws MathNumberConversionException {
 		if (equals(emptyString()))
 			return this;
 		else if (hasCycle())
 			return star();
 
-		MathNumber high = i.interval.getHigh();
-		MathNumber low = i.interval.getLow();
+		MathNumber high = i.getHigh();
+		MathNumber low = i.getLow();
 		SimpleAutomaton epsilon = emptyString();
 
 		if (low.isMinusInfinity()) {
 			if (high.isPlusInfinity())
-				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(),
-						new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));
+				return epsilon
+						.union(
+								auxRepeat(
+										new IntInterval(MathNumber.ONE, high),
+										getInitialState(),
+										new TreeSet<Transition<StringSymbol>>(),
+										emptyLanguage()));
 
 			if (high.isZero())
 				return emptyString();
 			else
-				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(),
-						new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));
+				return epsilon
+						.union(
+								auxRepeat(
+										new IntInterval(MathNumber.ONE, high),
+										getInitialState(),
+										new TreeSet<Transition<StringSymbol>>(),
+										emptyLanguage()));
 		}
 
 		long lowInt = low.toLong();
@@ -336,14 +364,25 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		if (high.isPlusInfinity()) {
 			// need exception
 			if (lowInt < 0)
-				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(),
-						new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));
+				return epsilon
+						.union(
+								auxRepeat(
+										new IntInterval(MathNumber.ONE, high),
+										getInitialState(),
+										new TreeSet<Transition<StringSymbol>>(),
+										emptyLanguage()));
 			if (low.isZero())
-				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(),
-						new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));
+				return epsilon
+						.union(
+								auxRepeat(
+										new IntInterval(MathNumber.ONE, high),
+										getInitialState(),
+										new TreeSet<Transition<StringSymbol>>(),
+										emptyLanguage()));
 			if (lowInt > 0)
-				return epsilon.union(auxRepeat(i.interval, getInitialState(), new TreeSet<Transition<StringSymbol>>(),
-						emptyLanguage()));
+				return epsilon
+						.union(auxRepeat(i, getInitialState(), new TreeSet<Transition<StringSymbol>>(),
+								emptyLanguage()));
 		}
 
 		long highInt = high.toLong();
@@ -355,8 +394,13 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 			if (high.isZero())
 				return emptyString();
 			else
-				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(),
-						new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));
+				return epsilon
+						.union(
+								auxRepeat(
+										new IntInterval(MathNumber.ONE, high),
+										getInitialState(),
+										new TreeSet<Transition<StringSymbol>>(),
+										emptyLanguage()));
 		}
 
 		if (low.isZero()) {
@@ -364,12 +408,17 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 				return emptyString();
 
 			if (highInt > 0)
-				return epsilon.union(auxRepeat(new IntInterval(MathNumber.ONE, high), getInitialState(),
-						new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));
+				return epsilon
+						.union(
+								auxRepeat(
+										new IntInterval(MathNumber.ONE, high),
+										getInitialState(),
+										new TreeSet<Transition<StringSymbol>>(),
+										emptyLanguage()));
 		}
 
 		if (lowInt > 0 && highInt > 0)
-			return auxRepeat(i.interval, getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage());
+			return auxRepeat(i, getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage());
 
 		return emptyLanguage();
 	}
@@ -453,8 +502,12 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		}
 
 		for (Transition<StringSymbol> t : getTransitions()) {
-			delta.add(new Transition<>(firstMapping.get(t.getSource()), firstMapping.get(t.getDestination()),
-					t.getSymbol()));
+			delta
+					.add(
+							new Transition<>(
+									firstMapping.get(t.getSource()),
+									firstMapping.get(t.getDestination()),
+									t.getSymbol()));
 		}
 
 		if (second.getStates().size() == 1 && second.getInitialState().isFinal()) {
@@ -480,30 +533,121 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 			for (Transition<StringSymbol> t : second.getTransitions()) {
 				if (t.getSource().equals(second.getInitialState())
 						|| t.getDestination().equals(second.getInitialState())
-						|| !secondMapping.containsKey(t.getSource()) || !secondMapping.containsKey(t.getDestination()))
+						|| !secondMapping.containsKey(t.getSource())
+						|| !secondMapping.containsKey(t.getDestination()))
 					continue;
 
 				if (!t.getSource().isInitial() && !t.getDestination().isInitial()) {
-					delta.add(new Transition<>(secondMapping.get(t.getSource()), secondMapping.get(t.getDestination()),
-							t.getSymbol()));
+					delta
+							.add(
+									new Transition<>(
+											secondMapping.get(t.getSource()),
+											secondMapping.get(t.getDestination()),
+											t.getSymbol()));
 				}
 				if (t.getSource().isInitial()) {
 					for (State s : connectOn) {
 						if (states.contains(secondMapping.get(t.getSource())))
-							delta.add(new Transition<>(secondMapping.get(t.getSource()), firstMapping.get(s),
-									t.getSymbol()));
+							delta
+									.add(
+											new Transition<>(
+													secondMapping.get(t.getSource()),
+													firstMapping.get(s),
+													t.getSymbol()));
 					}
 				}
 			}
 
 			for (Transition<StringSymbol> t : second.getOutgoingTransitionsFrom(second.getInitialState())) {
 				for (State s : connectOn) {
-					delta.add(new Transition<>(firstMapping.get(s), secondMapping.get(t.getDestination()),
-							t.getSymbol()));
+					delta
+							.add(
+									new Transition<>(
+											firstMapping.get(s),
+											secondMapping.get(t.getDestination()),
+											t.getSymbol()));
 				}
 			}
 		}
 
 		return new SimpleAutomaton(states, delta);
 	}
+
+	/**
+	 * Top element of the domain.
+	 */
+	public static final SimpleAutomaton TOP = new SimpleAutomaton("").unknownString();
+
+	/**
+	 * The parameter used for the widening operator.
+	 */
+	private static final int WIDENING_TH = 5;
+
+	@Override
+	public SimpleAutomaton lubAux(
+			SimpleAutomaton other)
+			throws SemanticException {
+		return this.union(other).minimize();
+	}
+
+	@Override
+	public SimpleAutomaton glbAux(
+			SimpleAutomaton other)
+			throws SemanticException {
+		return this.intersection(other).minimize();
+	}
+
+	@Override
+	public SimpleAutomaton wideningAux(
+			SimpleAutomaton other)
+			throws SemanticException {
+		return this.union(other).widening(getSizeDiffCapped(other));
+	}
+
+	private int getSizeDiffCapped(
+			SimpleAutomaton other) {
+		int size = getStates().size();
+		int otherSize = other.getStates().size();
+		if (size > otherSize)
+			return Math.min(size - otherSize, WIDENING_TH);
+		else if (size < otherSize)
+			return Math.min(otherSize - size, WIDENING_TH);
+		else
+			return WIDENING_TH;
+	}
+
+	@Override
+	public boolean lessOrEqualAux(
+			SimpleAutomaton other)
+			throws SemanticException {
+		return this.isContained(other);
+	}
+
+	@Override
+	public SimpleAutomaton top() {
+		return TOP;
+	}
+
+	@Override
+	public boolean isBottom() {
+		return !isTop() && this.acceptsEmptyLanguage();
+	}
+
+	@Override
+	public SimpleAutomaton bottom() {
+		SortedSet<State> states = new TreeSet<>();
+		states.add(new State(0, true, false));
+		return new SimpleAutomaton(states, new TreeSet<>());
+	}
+
+	@Override
+	public StructuredRepresentation representation() {
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+		else if (isTop())
+			return Lattice.topRepresentation();
+
+		return new StringRepresentation(this.toRegex().simplify());
+	}
+
 }

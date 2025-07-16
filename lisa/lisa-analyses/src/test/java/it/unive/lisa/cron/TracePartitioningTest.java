@@ -6,18 +6,18 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.traces.TracePartitioning;
 import org.junit.Test;
 
-public class TracePartitioningTest extends AnalysisTestExecutor {
+public class TracePartitioningTest
+		extends
+		AnalysisTestExecutor {
 
 	@Test
 	public void testTracePartitioning() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.abstractState = new TracePartitioning<>(DefaultConfiguration.defaultAbstractState());
+		conf.analysis = new TracePartitioning<>(3, 5, DefaultConfiguration.defaultAbstractDomain());
 		conf.serializeResults = true;
-		int prev = TracePartitioning.MAX_LOOP_ITERATIONS;
-		TracePartitioning.MAX_LOOP_ITERATIONS = 3;
 		conf.testDir = "traces";
 		conf.programFile = "traces.imp";
 		perform(conf);
-		TracePartitioning.MAX_LOOP_ITERATIONS = prev;
 	}
+
 }

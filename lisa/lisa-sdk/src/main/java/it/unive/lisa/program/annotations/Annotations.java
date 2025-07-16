@@ -11,9 +11,11 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * A collection of annotations.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Annotations implements Iterable<Annotation> {
+public class Annotations
+		implements
+		Iterable<Annotation> {
 
 	private final Set<Annotation> annotations;
 
@@ -89,7 +91,9 @@ public class Annotations implements Iterable<Annotation> {
 
 	@Override
 	public String toString() {
-		return annotations == null ? "[]" : "[" + StringUtils.join(annotations, ", ") + "]";
+		return annotations == null
+				? "[]"
+				: "[" + StringUtils.join(annotations, ", ") + "]";
 	}
 
 	/**
@@ -137,4 +141,5 @@ public class Annotations implements Iterable<Annotation> {
 	public final boolean isEmpty() {
 		return annotations.isEmpty();
 	}
+
 }

@@ -185,4 +185,5 @@ public class MinimizeTest {
 
 		assertSame(a, a.minimize());
 	}
+
 }

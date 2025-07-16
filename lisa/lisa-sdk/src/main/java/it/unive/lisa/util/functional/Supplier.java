@@ -11,7 +11,8 @@ package it.unive.lisa.util.functional;
  *                supplier
  */
 @FunctionalInterface
-public interface Supplier<T, E extends Exception> {
+public interface Supplier<T,
+		E extends Exception> {
 
 	/**
 	 * Gets a result.
@@ -20,5 +21,7 @@ public interface Supplier<T, E extends Exception> {
 	 * 
 	 * @throws E if the execution of this supplier raises an error
 	 */
-	T get() throws E;
+	T get()
+			throws E;
+
 }

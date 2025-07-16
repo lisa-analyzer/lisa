@@ -3,14 +3,16 @@ package it.unive.lisa.program.cfg;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import it.unive.lisa.DefaultConfiguration;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.SimpleAbstractDomain;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
+import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -32,6 +34,7 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import it.unive.lisa.util.numeric.IntInterval;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -49,29 +52,37 @@ public class CFGFixpointTest {
 		conf = new FixpointConfiguration(base);
 	}
 
-	private ModularWorstCaseAnalysis<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> mkAnalysis(
-					Program p)
-					throws InterproceduralAnalysisException,
-					CallGraphConstructionException {
-		ModularWorstCaseAnalysis<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
-						TypeEnvironment<InferredTypes>>> analysis = new ModularWorstCaseAnalysis<>();
+	private ModularWorstCaseAnalysis<SimpleAbstractState<MonolithicHeap.Monolith,
+			ValueEnvironment<IntInterval>,
+			TypeEnvironment<InferredTypes.TypeSet>>,
+			SimpleAbstractDomain<MonolithicHeap.Monolith,
+					ValueEnvironment<IntInterval>,
+					TypeEnvironment<InferredTypes.TypeSet>>> mkAnalysis(
+							Program p)
+							throws InterproceduralAnalysisException,
+							CallGraphConstructionException {
+		ModularWorstCaseAnalysis<SimpleAbstractState<MonolithicHeap.Monolith,
+				ValueEnvironment<IntInterval>,
+				TypeEnvironment<InferredTypes.TypeSet>>,
+				SimpleAbstractDomain<MonolithicHeap.Monolith,
+						ValueEnvironment<IntInterval>,
+						TypeEnvironment<InferredTypes.TypeSet>>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
 		Application app = new Application(p);
 		callgraph.init(app);
-		analysis.init(app, callgraph, WorstCasePolicy.INSTANCE);
+		analysis
+				.init(
+						app,
+						callgraph,
+						WorstCasePolicy.INSTANCE,
+						new Analysis<>(DefaultConfiguration.defaultAbstractDomain()));
 		return analysis;
 	}
 
-	private AnalysisState<
-			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>> mkState() {
-		return new AnalysisState<>(
-				new SimpleAbstractState<>(
-						new MonolithicHeap(),
-						new ValueEnvironment<>(new Sign()),
-						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet());
+	private AnalysisState<SimpleAbstractState<MonolithicHeap.Monolith,
+			ValueEnvironment<IntInterval>,
+			TypeEnvironment<InferredTypes.TypeSet>>> mkState() {
+		return new AnalysisState<>(DefaultConfiguration.defaultAbstractDomain().makeLattice(), new ExpressionSet());
 	}
 
 	@Test
@@ -129,14 +140,15 @@ public class CFGFixpointTest {
 		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");
 		cfg.addNode(call, true);
 
-		AnalysisState<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
-						TypeEnvironment<InferredTypes>>> domain = mkState();
-		AnalyzedCFG<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>,
-						TypeEnvironment<InferredTypes>>> result = cfg.fixpoint(domain,
-								mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
+		AnalysisState<SimpleAbstractState<MonolithicHeap.Monolith,
+				ValueEnvironment<IntInterval>,
+				TypeEnvironment<InferredTypes.TypeSet>>> domain = mkState();
+		AnalyzedCFG<SimpleAbstractState<MonolithicHeap.Monolith,
+				ValueEnvironment<IntInterval>,
+				TypeEnvironment<InferredTypes.TypeSet>>> result = cfg
+						.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
 
-		assertTrue(result.getAnalysisStateAfter(call).getState().getValueState().getKeys().isEmpty());
+		assertTrue(result.getAnalysisStateAfter(call).getState().valueState.getKeys().isEmpty());
 	}
+
 }

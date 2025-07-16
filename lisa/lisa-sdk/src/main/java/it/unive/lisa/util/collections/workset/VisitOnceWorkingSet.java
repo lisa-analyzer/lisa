@@ -9,7 +9,9 @@ import java.util.Collection;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public interface VisitOnceWorkingSet<E> extends WorkingSet<E> {
+public interface VisitOnceWorkingSet<E>
+		extends
+		WorkingSet<E> {
 
 	/**
 	 * Yields the elements visited (and thus no longer able to be added to this
@@ -18,4 +20,5 @@ public interface VisitOnceWorkingSet<E> extends WorkingSet<E> {
 	 * @return the collection of visited elements
 	 */
 	Collection<E> getSeen();
+
 }

@@ -325,4 +325,5 @@ public interface ExpressionVisitor<T> {
 			Identifier expression,
 			Object... params)
 			throws SemanticException;
+
 }

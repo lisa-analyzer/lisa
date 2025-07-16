@@ -7,7 +7,9 @@ import it.unive.lisa.outputs.serializableGraph.SerializableString;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringRepresentation extends StructuredRepresentation {
+public class StringRepresentation
+		extends
+		StructuredRepresentation {
 
 	/**
 	 * The textual representation.
@@ -71,4 +73,5 @@ public class StringRepresentation extends StructuredRepresentation {
 			return false;
 		return true;
 	}
+
 }

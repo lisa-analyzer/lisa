@@ -1,13 +1,10 @@
 package it.unive.lisa.analysis.traces;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -17,15 +14,10 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.representation.MapRepresentation;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to
@@ -38,142 +30,137 @@ import java.util.function.Predicate;
  * Traces are never merged: instead, we limit the size of the traces we can
  * track, and we leave the choice of when and where to compact traces to other
  * analysis components. Specifically, an {@link ExecutionTrace} will contain at
- * most {@link #MAX_CONDITIONS} {@link Branching} tokens, and will track at most
- * {@link #MAX_LOOP_ITERATIONS} iterations for each loop (through
+ * most {@link #max_conditions} {@link Branching} tokens, and will track at most
+ * {@link #max_loop_iterations} iterations for each loop (through
  * {@link LoopIteration} tokens) before summarizing the next ones with a
  * {@link LoopSummary} token. Both values are editable and customizable before
- * the analysis starts.<br>
- * <br>
- * As this class extends {@link FunctionalLattice}, one access individual traces
- * and their approximations using {@link #getKeys()}, {@link #getValues()},
- * {@link #getMap()} or by iterating over the instance itself. Approximations of
- * different traces can instead be collapsed and accessed by querying
- * {@link #collapse()}.
+ * the analysis starts.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} that this is being partitioned
+ * @param <A> the kind of {@link AbstractLattice} being partitioned, produced by
+ *                the domain {@code D}
+ * @param <D> the kind of {@link AbstractDomain} that manages the underlying
+ *                states
  * 
  * @see <a href=
  *          "https://doi.org/10.1145/1275497.1275501">https://doi.org/10.1145/1275497.1275501</a>
  */
-public class TracePartitioning<A extends AbstractState<A>>
-		extends
-		FunctionalLattice<TracePartitioning<A>, ExecutionTrace, A>
+public class TracePartitioning<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
 		implements
-		AbstractState<TracePartitioning<A>> {
+		AbstractDomain<TraceLattice<A>> {
 
 	/**
 	 * The maximum number of {@link LoopIteration} tokens that a trace can
 	 * contain for each loop appearing in it, before collapsing the next ones in
 	 * a single {@link LoopSummary} token.
 	 */
-	public static int MAX_LOOP_ITERATIONS = 5;
+	private final int max_loop_iterations;
 
 	/**
 	 * The maximum number of {@link Branching} tokens that a trace can contain.
 	 */
-	public static int MAX_CONDITIONS = 5;
+	private final int max_conditions;
 
 	/**
-	 * Builds a new instance of this domain.
+	 * The underlying domain managing the abstract states.
+	 */
+	public final D domain;
+
+	/**
+	 * Builds a new instance of this domain, with the default limits on the
+	 * number of loop iterations and conditions that can be tracked in a single
+	 * trace (i.e., 5 loops and 5 conditions).
 	 * 
-	 * @param lattice a singleton of the underlying abstract states
+	 * @param domain the underlying domain managing the abstract states
 	 */
 	public TracePartitioning(
-			A lattice) {
-		super(lattice);
+			D domain) {
+		this.max_loop_iterations = 5;
+		this.max_conditions = 5;
+		this.domain = domain;
 	}
 
-	private TracePartitioning(
-			A lattice,
-			Map<ExecutionTrace, A> function) {
-		super(lattice, function);
-	}
-
-	@Override
-	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(
-			Class<D> domain) {
-		Collection<D> result = AbstractState.super.getAllDomainInstances(domain);
-		if (isTop())
-			return lattice.top().getAllDomainInstances(domain);
-		else if (isBottom() || function == null)
-			return lattice.bottom().getAllDomainInstances(domain);
-
-		for (A dom : getValues())
-			result.addAll(dom.getAllDomainInstances(domain));
-		return result;
-	}
-
-	@Override
-	public TracePartitioning<A> top() {
-		return new TracePartitioning<>(lattice.top(), null);
+	/**
+	 * Builds a new instance of this domain, with the given limits on the number
+	 * of loop iterations and conditions that can be tracked in a single trace.
+	 * 
+	 * @param maxLoopIterations the maximum number of {@link LoopIteration}
+	 *                              tokens that a trace can contain
+	 * @param maxConditions     the maximum number of {@link Branching} tokens
+	 *                              that a trace can contain
+	 * @param domain            the underlying domain managing the abstract
+	 *                              states
+	 */
+	public TracePartitioning(
+			int maxLoopIterations,
+			int maxConditions,
+			D domain) {
+		this.max_loop_iterations = maxLoopIterations;
+		this.max_conditions = maxConditions;
+		this.domain = domain;
 	}
 
 	@Override
-	public TracePartitioning<A> bottom() {
-		return new TracePartitioning<>(lattice.bottom(), null);
-	}
-
-	@Override
-	public TracePartitioning<A> assign(
+	public TraceLattice<A> assign(
+			TraceLattice<A> state,
 			Identifier id,
 			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
+			ProgramPoint pp)
 			throws SemanticException {
-		if (isBottom())
-			return this;
+		if (state.isBottom())
+			return state;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		if (isTop() || function == null)
-			result.put(new ExecutionTrace(), lattice.assign(id, expression, pp, oracle));
+		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		if (state.isTop() || state.function == null)
+			result.put(ExecutionTrace.EMPTY, domain.assign(state.lattice.top(), id, expression, pp));
 		else
-			for (Entry<ExecutionTrace, A> trace : this)
-				result.put(trace.getKey(), trace.getValue().assign(id, expression, pp, oracle));
-		return new TracePartitioning<>(lattice, result);
+			for (Entry<ExecutionTrace, A> trace : state)
+				result.put(trace.getKey(), domain.assign(trace.getValue(), id, expression, pp));
+		return new TraceLattice<>(state.lattice, result);
 	}
 
 	@Override
-	public TracePartitioning<A> smallStepSemantics(
+	public TraceLattice<A> smallStepSemantics(
+			TraceLattice<A> state,
 			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
+			ProgramPoint pp)
 			throws SemanticException {
-		if (isBottom())
-			return this;
+		if (state.isBottom())
+			return state;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		if (isTop() || function == null)
-			result.put(new ExecutionTrace(), lattice.smallStepSemantics(expression, pp, oracle));
+		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		if (state.isTop() || state.function == null)
+			result.put(ExecutionTrace.EMPTY, domain.smallStepSemantics(state.lattice.top(), expression, pp));
 		else
-			for (Entry<ExecutionTrace, A> trace : this)
-				result.put(trace.getKey(), trace.getValue().smallStepSemantics(expression, pp, oracle));
-		return new TracePartitioning<>(lattice, result);
+			for (Entry<ExecutionTrace, A> trace : state)
+				result.put(trace.getKey(), domain.smallStepSemantics(trace.getValue(), expression, pp));
+		return new TraceLattice<>(state.lattice, result);
 	}
 
 	@Override
-	public TracePartitioning<A> assume(
+	public TraceLattice<A> assume(
+			TraceLattice<A> state,
 			SymbolicExpression expression,
 			ProgramPoint src,
-			ProgramPoint dest,
-			SemanticOracle oracle)
+			ProgramPoint dest)
 			throws SemanticException {
-		if (isBottom())
-			return this;
+		if (state.isBottom())
+			return state;
 
 		ControlFlowStructure struct = src.getCFG().getControlFlowStructureOf(src);
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
 
-		if (isTop() || function == null) {
-			ExecutionTrace trace = new ExecutionTrace();
+		if (state.isTop() || state.function == null) {
+			ExecutionTrace trace = ExecutionTrace.EMPTY;
 			ExecutionTrace nextTrace = generateTraceFor(trace, struct, src, dest);
-			result.put(nextTrace, lattice.top());
+			result.put(nextTrace, state.lattice.top());
 		} else
-			for (Entry<ExecutionTrace, A> trace : this) {
-				A state = trace.getValue();
+			for (Entry<ExecutionTrace, A> trace : state) {
+				A st = trace.getValue();
 				ExecutionTrace tokens = trace.getKey();
-				A assume = state.assume(expression, src, dest, oracle);
+				A assume = domain.assume(st, expression, src, dest);
 				if (assume.isBottom())
 					// we only keep traces that can escape the loop
 					continue;
@@ -187,12 +174,12 @@ public class TracePartitioning<A extends AbstractState<A>>
 
 		if (result.isEmpty())
 			// no traces pass the condition, so this branch is unreachable
-			return bottom();
+			return state.bottom();
 
-		return new TracePartitioning<>(lattice, result);
+		return new TraceLattice<>(state.lattice, result);
 	}
 
-	private static ExecutionTrace generateTraceFor(
+	private ExecutionTrace generateTraceFor(
 			ExecutionTrace trace,
 			ControlFlowStructure struct,
 			ProgramPoint src,
@@ -201,20 +188,20 @@ public class TracePartitioning<A extends AbstractState<A>>
 			// on loop exits we do not generate new traces
 			TraceToken prev = trace.lastLoopTokenFor(src);
 			if (prev == null)
-				if (MAX_LOOP_ITERATIONS > 0)
+				if (max_loop_iterations > 0)
 					return trace.push(new LoopIteration(src, 0));
 				else
 					return trace.push(new LoopSummary(src));
 			else if (prev instanceof LoopIteration) {
 				LoopIteration li = (LoopIteration) prev;
-				if (li.getIteration() < MAX_LOOP_ITERATIONS)
+				if (li.getIteration() < max_loop_iterations)
 					return trace.push(new LoopIteration(src, li.getIteration() + 1));
 				else
 					return trace.push(new LoopSummary(src));
 			}
 			// we do nothing on loop summaries as we already reached
 			// the maximum iterations for this loop
-		} else if (struct instanceof IfThenElse && trace.numberOfBranches() < MAX_CONDITIONS)
+		} else if (struct instanceof IfThenElse && trace.numberOfBranches() < max_conditions)
 			return trace.push(new Branching(src, ((IfThenElse) struct).getTrueBranch().contains(dest)));
 
 		// no known conditional structure, or no need to push new tokens
@@ -222,62 +209,20 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public TracePartitioning<A> forgetIdentifier(
-			Identifier id,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifier(id, pp));
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
-	public TracePartitioning<A> forgetIdentifiers(
-			Iterable<Identifier> ids,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifiers(ids, pp));
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
-	public TracePartitioning<A> forgetIdentifiersIf(
-			Predicate<Identifier> test,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifiersIf(test, pp));
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
 	public Satisfiability satisfies(
+			TraceLattice<A> state,
 			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
+			ProgramPoint pp)
 			throws SemanticException {
-		if (isTop())
+		if (state.isTop())
 			return Satisfiability.UNKNOWN;
 
-		if (isBottom() || function == null)
+		if (state.isBottom() || state.function == null)
 			return Satisfiability.BOTTOM;
 
 		Satisfiability result = Satisfiability.BOTTOM;
-		for (Entry<ExecutionTrace, A> trace : this) {
-			Satisfiability sat = trace.getValue().satisfies(expression, pp, oracle);
+		for (Entry<ExecutionTrace, A> trace : state) {
+			Satisfiability sat = domain.satisfies(trace.getValue(), expression, pp);
 			if (sat == Satisfiability.BOTTOM)
 				return sat;
 			result = result.lub(sat);
@@ -286,247 +231,176 @@ public class TracePartitioning<A extends AbstractState<A>>
 	}
 
 	@Override
-	public TracePartitioning<A> pushScope(
-			ScopeToken token,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().pushScope(token, pp));
-		return new TracePartitioning<>(lattice, result);
+	public SemanticOracle makeOracle(
+			TraceLattice<A> state) {
+		return new TraceOracle(state);
 	}
 
 	@Override
-	public TracePartitioning<A> popScope(
-			ScopeToken token,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().popScope(token, pp));
-		return new TracePartitioning<>(lattice, result);
+	public TraceLattice<A> makeLattice() {
+		return new TraceLattice<>(domain.makeLattice());
 	}
 
-	@Override
-	public StructuredRepresentation representation() {
-		if (isTop())
-			return Lattice.topRepresentation();
+	private class TraceOracle
+			implements
+			SemanticOracle {
 
-		if (isBottom())
-			return Lattice.bottomRepresentation();
+		private final TraceLattice<A> state;
 
-		if (function == null)
-			return new StringRepresentation("empty");
+		private TraceOracle(
+				TraceLattice<A> state) {
+			this.state = state;
+		}
 
-		return new MapRepresentation(function, StringRepresentation::new, AbstractState::representation);
-	}
+		@Override
+		public ExpressionSet rewrite(
+				SymbolicExpression expression,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (!expression.mightNeedRewriting())
+				return new ExpressionSet(expression);
 
-	@Override
-	public TracePartitioning<A> mk(
-			A lattice,
-			Map<ExecutionTrace, A> function) {
-		return new TracePartitioning<>(lattice, function);
-	}
+			if (state.isTop())
+				return domain.makeOracle(state.lattice.top()).rewrite(expression, pp);
+			else if (state.isBottom() || state.function == null)
+				return domain.makeOracle(state.lattice.bottom()).rewrite(expression, pp);
 
-	/**
-	 * Collapses all of the traces contained in this domain, returning a unique
-	 * abstract state that over-approximates all of them.
-	 * 
-	 * @return the collapsed state
-	 */
-	public A collapse() {
-		if (isTop())
-			return lattice.top();
+			Set<SymbolicExpression> result = new HashSet<>();
+			for (A st : state.getValues())
+				result.addAll(domain.makeOracle(st).rewrite(expression, pp).elements());
+			return new ExpressionSet(result);
+		}
 
-		A result = lattice.bottom();
-		if (isBottom() || function == null)
+		@Override
+		public ExpressionSet rewrite(
+				ExpressionSet expressions,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isTop())
+				return domain.makeOracle(state.lattice.top()).rewrite(expressions, pp);
+			else if (state.isBottom() || state.function == null)
+				return domain.makeOracle(state.lattice.bottom()).rewrite(expressions, pp);
+
+			Set<SymbolicExpression> result = new HashSet<>();
+			for (A st : state.getValues())
+				result.addAll(domain.makeOracle(st).rewrite(expressions, pp).elements());
+			return new ExpressionSet(result);
+		}
+
+		@Override
+		public Set<Type> getRuntimeTypesOf(
+				SymbolicExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isTop())
+				return domain.makeOracle(state.lattice.top()).getRuntimeTypesOf(e, pp);
+			else if (state.isBottom() || state.function == null)
+				return domain.makeOracle(state.lattice.bottom()).getRuntimeTypesOf(e, pp);
+
+			Set<Type> result = new HashSet<>();
+			for (A st : state.getValues())
+				result.addAll(domain.makeOracle(st).getRuntimeTypesOf(e, pp));
 			return result;
-
-		try {
-			for (Entry<ExecutionTrace, A> trace : this)
-				result = result.lub(trace.getValue());
-		} catch (SemanticException e) {
-			return result.bottom();
 		}
-		return result;
-	}
 
-	@Override
-	public String toString() {
-		return representation().toString();
-	}
+		@Override
+		public Type getDynamicTypeOf(
+				SymbolicExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isTop())
+				return domain.makeOracle(state.lattice.top()).getDynamicTypeOf(e, pp);
+			else if (state.isBottom() || state.function == null)
+				return domain.makeOracle(state.lattice.bottom()).getDynamicTypeOf(e, pp);
 
-	@Override
-	public ExpressionSet rewrite(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (!expression.mightNeedRewriting())
-			return new ExpressionSet(expression);
-
-		if (isTop())
-			return lattice.top().rewrite(expression, pp, oracle);
-		else if (isBottom() || function == null)
-			return lattice.bottom().rewrite(expression, pp, oracle);
-
-		Set<SymbolicExpression> result = new HashSet<>();
-		for (A dom : getValues())
-			result.addAll(dom.rewrite(expression, pp, oracle).elements());
-		return new ExpressionSet(result);
-	}
-
-	@Override
-	public ExpressionSet rewrite(
-			ExpressionSet expressions,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (isTop())
-			return lattice.top().rewrite(expressions, pp, oracle);
-		else if (isBottom() || function == null)
-			return lattice.bottom().rewrite(expressions, pp, oracle);
-
-		Set<SymbolicExpression> result = new HashSet<>();
-		for (A dom : getValues())
-			result.addAll(dom.rewrite(expressions, pp, oracle).elements());
-		return new ExpressionSet(result);
-	}
-
-	@Override
-	public Set<Type> getRuntimeTypesOf(
-			SymbolicExpression e,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (isTop())
-			return lattice.top().getRuntimeTypesOf(e, pp, oracle);
-		else if (isBottom() || function == null)
-			return lattice.bottom().getRuntimeTypesOf(e, pp, oracle);
-
-		Set<Type> result = new HashSet<>();
-		for (A dom : getValues())
-			result.addAll(dom.getRuntimeTypesOf(e, pp, oracle));
-		return result;
-	}
-
-	@Override
-	public Type getDynamicTypeOf(
-			SymbolicExpression e,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (isTop())
-			return lattice.top().getDynamicTypeOf(e, pp, oracle);
-		else if (isBottom() || function == null)
-			return lattice.bottom().getDynamicTypeOf(e, pp, oracle);
-
-		Set<Type> result = new HashSet<>();
-		for (A dom : getValues())
-			result.add(dom.getDynamicTypeOf(e, pp, oracle));
-		return Type.commonSupertype(result, Untyped.INSTANCE);
-	}
-
-	@Override
-	public A stateOfUnknown(
-			ExecutionTrace key) {
-		return lattice.bottom();
-	}
-
-	@Override
-	public boolean knowsIdentifier(
-			Identifier id) {
-		if (isTop() || isBottom() || function == null)
-			return false;
-
-		for (Entry<ExecutionTrace, A> trace : this)
-			if (trace.getValue().knowsIdentifier(id))
-				return true;
-		return false;
-	}
-
-	@Override
-	public TracePartitioning<A> withTopMemory() {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopMemory());
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
-	public TracePartitioning<A> withTopValues() {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopValues());
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
-	public TracePartitioning<A> withTopTypes() {
-		if (isTop() || isBottom() || function == null)
-			return this;
-
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopTypes());
-		return new TracePartitioning<>(lattice, result);
-	}
-
-	@Override
-	public Satisfiability alias(
-			SymbolicExpression x,
-			SymbolicExpression y,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (isTop())
-			return Satisfiability.UNKNOWN;
-
-		if (isBottom() || function == null)
-			return Satisfiability.BOTTOM;
-
-		Satisfiability result = Satisfiability.BOTTOM;
-		for (Entry<ExecutionTrace, A> trace : this) {
-			Satisfiability sat = trace.getValue().alias(x, y, pp, oracle);
-			if (sat == Satisfiability.BOTTOM)
-				return sat;
-			result = result.lub(sat);
+			Set<Type> result = new HashSet<>();
+			for (A st : state.getValues())
+				result.add(domain.makeOracle(st).getDynamicTypeOf(e, pp));
+			return Type.commonSupertype(result, Untyped.INSTANCE);
 		}
-		return result;
-	}
 
-	@Override
-	public Satisfiability isReachableFrom(
-			SymbolicExpression x,
-			SymbolicExpression y,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (isTop())
-			return Satisfiability.UNKNOWN;
+		@Override
+		public Satisfiability alias(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isTop())
+				return Satisfiability.UNKNOWN;
 
-		if (isBottom() || function == null)
-			return Satisfiability.BOTTOM;
+			if (state.isBottom() || state.function == null)
+				return Satisfiability.BOTTOM;
 
-		Satisfiability result = Satisfiability.BOTTOM;
-		for (Entry<ExecutionTrace, A> trace : this) {
-			Satisfiability sat = trace.getValue().isReachableFrom(x, y, pp, oracle);
-			if (sat == Satisfiability.BOTTOM)
-				return sat;
-			result = result.lub(sat);
+			Satisfiability result = Satisfiability.BOTTOM;
+			for (Entry<ExecutionTrace, A> trace : state) {
+				Satisfiability sat = domain.makeOracle(trace.getValue()).alias(x, y, pp);
+				if (sat == Satisfiability.BOTTOM)
+					return sat;
+				result = result.lub(sat);
+			}
+			return result;
 		}
-		return result;
+
+		@Override
+		public Satisfiability isReachableFrom(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isTop())
+				return Satisfiability.UNKNOWN;
+
+			if (state.isBottom() || state.function == null)
+				return Satisfiability.BOTTOM;
+
+			Satisfiability result = Satisfiability.BOTTOM;
+			for (Entry<ExecutionTrace, A> trace : state) {
+				Satisfiability sat = domain.makeOracle(trace.getValue()).isReachableFrom(x, y, pp);
+				if (sat == Satisfiability.BOTTOM)
+					return sat;
+				result = result.lub(sat);
+			}
+			return result;
+		}
+
+		@Override
+		public ExpressionSet reachableFrom(
+				SymbolicExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isTop())
+				return domain.makeOracle(state.lattice.top()).reachableFrom(e, pp);
+			else if (state.isBottom() || state.function == null)
+				return domain.makeOracle(state.lattice.bottom()).reachableFrom(e, pp);
+
+			Set<SymbolicExpression> result = new HashSet<>();
+			for (A st : state.getValues())
+				result.addAll(domain.makeOracle(st).reachableFrom(e, pp).elements());
+			return new ExpressionSet(result);
+		}
+
+		@Override
+		public Satisfiability areMutuallyReachable(
+				SymbolicExpression x,
+				SymbolicExpression y,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isTop())
+				return Satisfiability.UNKNOWN;
+
+			if (state.isBottom() || state.function == null)
+				return Satisfiability.BOTTOM;
+
+			Satisfiability result = Satisfiability.BOTTOM;
+			for (Entry<ExecutionTrace, A> trace : state) {
+				Satisfiability sat = domain.makeOracle(trace.getValue()).areMutuallyReachable(x, y, pp);
+				if (sat == Satisfiability.BOTTOM)
+					return sat;
+				result = result.lub(sat);
+			}
+			return result;
+		}
+
 	}
+
 }

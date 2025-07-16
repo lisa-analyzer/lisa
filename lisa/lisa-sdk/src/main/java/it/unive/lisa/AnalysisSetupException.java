@@ -5,7 +5,9 @@ package it.unive.lisa;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AnalysisSetupException extends AnalysisException {
+public class AnalysisSetupException
+		extends
+		AnalysisException {
 
 	private static final long serialVersionUID = 2005239836054799858L;
 
@@ -47,4 +49,5 @@ public class AnalysisSetupException extends AnalysisException {
 			Throwable cause) {
 		super(cause);
 	}
+
 }

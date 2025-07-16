@@ -80,4 +80,5 @@ public class IntersectionTest {
 
 		assertEquals(a2, a.intersection(a2));
 	}
+
 }

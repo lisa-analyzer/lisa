@@ -7,6 +7,51 @@ import org.junit.Test;
 
 public class IntIntervalTest {
 
+	private static void test(
+			IntInterval x,
+			IntInterval y,
+			IntInterval expected,
+			String symbol,
+			BiFunction<IntInterval, IntInterval, IntInterval> operator) {
+		IntInterval actual = operator.apply(x, y);
+		assertEquals(
+				x + " " + symbol + " " + y + " = " + expected + " (got " + actual + ")",
+				expected,
+				actual);
+	}
+
+	private static void test(
+			int x1,
+			int x2,
+			int y1,
+			int y2,
+			IntInterval expected,
+			String symbol,
+			BiFunction<IntInterval, IntInterval, IntInterval> operator) {
+		IntInterval x = new IntInterval(x1, x2);
+		IntInterval y = new IntInterval(y1, y2);
+		test(x, y, expected, symbol, operator);
+	}
+
+	private static void test(
+			int x1,
+			int x2,
+			int y1,
+			int y2,
+			int e1,
+			int e2,
+			String symbol,
+			BiFunction<IntInterval, IntInterval, IntInterval> operator) {
+		IntInterval x = new IntInterval(x1, x2);
+		IntInterval y = new IntInterval(y1, y2);
+		IntInterval expected = new IntInterval(e1, e2);
+		test(x, y, expected, symbol, operator);
+	}
+
+	private static final IntInterval MI_ZERO = new IntInterval(null, 0);
+
+	private static final IntInterval ZERO_PI = new IntInterval(0, null);
+
 	@Test
 	public void testBaseArithmetic() {
 		IntInterval x = new IntInterval(1, 1);
@@ -24,154 +69,98 @@ public class IntIntervalTest {
 		assertEquals(new IntInterval(0, 1), x.div(y, false, true));
 	}
 
-	private static void test(
-			Integer x1,
-			Integer x2,
-			Integer y1,
-			Integer y2,
-			Integer e1,
-			Integer e2,
-			String symbol,
-			BiFunction<IntInterval, IntInterval, IntInterval> operator,
-			boolean expectNaN) {
-		IntInterval x = new IntInterval(x1, x2);
-		IntInterval y = new IntInterval(y1, y2);
-		IntInterval actual = operator.apply(x, y);
-		IntInterval expected;
-		if (expectNaN)
-			expected = new IntInterval(MathNumber.NaN, MathNumber.NaN);
-		else
-			expected = new IntInterval(e1, e2);
-		assertEquals(x + " " + symbol + " " + y + " = " + expected + " (got " + actual + ")", expected, actual);
-	}
-
-	private static void mul(
-			Integer x1,
-			Integer x2,
-			Integer y1,
-			Integer y2,
-			Integer e1,
-			Integer e2) {
-		test(x1, x2, y1, y2, e1, e2, "*", IntInterval::mul, false);
-	}
-
-	private static void mul(
-			Integer x1,
-			Integer x2,
-			Integer y1,
-			Integer y2) {
-		test(x1, x2, y1, y2, null, null, "*", IntInterval::mul, true);
-	}
-
 	@Test
 	public void testMultiplication() {
-		mul(-2, -1, -2, -1, 1, 4);
-		mul(-2, -1, -2, 3, -6, 4);
-		mul(-2, -1, 1, 2, -4, -1);
-		mul(-2, 1, -2, -1, -2, 4);
-		mul(-2, 1, -2, 2, -4, 4);
-		mul(-2, 2, -1, 2, -4, 4);
-		mul(-2, 2, -2, 1, -4, 4);
-		mul(-1, 2, -2, 2, -4, 4);
-		mul(-2, 1, 1, 2, -4, 2);
-		mul(1, 2, -2, -1, -4, -1);
-		mul(1, 2, -2, 1, -4, 2);
-		mul(1, 2, 1, 2, 1, 4);
-		mul(null, 0, null, 0);
-		mul(null, 0, null, null);
-		mul(null, 0, 0, null);
-		mul(null, 0, 0, 0, 0, 0);
-		mul(null, null, null, 0);
-		mul(null, null, null, null, null, null);
-		mul(null, null, 0, null);
-		mul(null, null, 0, 0, 0, 0);
-		mul(0, null, null, 0);
-		mul(0, null, null, null);
-		mul(0, null, 0, null, 0, null);
-		mul(0, null, 0, 0, 0, 0);
-		mul(0, 0, null, 0, 0, 0);
-		mul(0, 0, null, null, 0, 0);
-		mul(0, 0, 0, null, 0, 0);
-		mul(0, 0, 0, 0, 0, 0);
-	}
-
-	private static void div(
-			Integer x1,
-			Integer x2,
-			Integer y1,
-			Integer y2,
-			Integer e1,
-			Integer e2,
-			boolean ignoreZero) {
-		test(x1, x2, y1, y2, e1, e2, "/", (
-				l,
-				r) -> l.div(r, ignoreZero, false), false);
-	}
-
-	private static void div(
-			Integer x1,
-			Integer x2,
-			Integer y1,
-			Integer y2,
-			boolean ignoreZero) {
-		test(x1, x2, y1, y2, null, null, "/", (
-				l,
-				r) -> l.div(r, ignoreZero, false), true);
+		test(-2, -1, -2, -1, 1, 4, "*", IntInterval::mul);
+		test(-2, -1, -2, 3, -6, 4, "*", IntInterval::mul);
+		test(-2, -1, 1, 2, -4, -1, "*", IntInterval::mul);
+		test(-2, 1, -2, -1, -2, 4, "*", IntInterval::mul);
+		test(-2, 1, -2, 2, -4, 4, "*", IntInterval::mul);
+		test(-2, 2, -1, 2, -4, 4, "*", IntInterval::mul);
+		test(-2, 2, -2, 1, -4, 4, "*", IntInterval::mul);
+		test(-1, 2, -2, 2, -4, 4, "*", IntInterval::mul);
+		test(-2, 1, 1, 2, -4, 2, "*", IntInterval::mul);
+		test(1, 2, -2, -1, -4, -1, "*", IntInterval::mul);
+		test(1, 2, -2, 1, -4, 2, "*", IntInterval::mul);
+		test(1, 2, 1, 2, 1, 4, "*", IntInterval::mul);
+		test(MI_ZERO, MI_ZERO, IntInterval.NaN, "*", IntInterval::mul);
+		test(MI_ZERO, IntInterval.TOP, IntInterval.TOP, "*", IntInterval::mul);
+		test(MI_ZERO, ZERO_PI, IntInterval.NaN, "*", IntInterval::mul);
+		test(MI_ZERO, IntInterval.ZERO, IntInterval.ZERO, "*", IntInterval::mul);
+		test(IntInterval.TOP, MI_ZERO, IntInterval.TOP, "*", IntInterval::mul);
+		test(IntInterval.TOP, IntInterval.TOP, IntInterval.TOP, "*", IntInterval::mul);
+		test(IntInterval.TOP, ZERO_PI, IntInterval.TOP, "*", IntInterval::mul);
+		test(IntInterval.TOP, IntInterval.ZERO, IntInterval.ZERO, "*", IntInterval::mul);
+		test(ZERO_PI, MI_ZERO, IntInterval.NaN, "*", IntInterval::mul);
+		test(ZERO_PI, IntInterval.TOP, IntInterval.TOP, "*", IntInterval::mul);
+		test(ZERO_PI, ZERO_PI, ZERO_PI, "*", IntInterval::mul);
+		test(ZERO_PI, IntInterval.ZERO, IntInterval.ZERO, "*", IntInterval::mul);
+		test(IntInterval.ZERO, MI_ZERO, IntInterval.ZERO, "*", IntInterval::mul);
+		test(IntInterval.ZERO, IntInterval.TOP, IntInterval.ZERO, "*", IntInterval::mul);
+		test(IntInterval.ZERO, ZERO_PI, IntInterval.ZERO, "*", IntInterval::mul);
+		test(IntInterval.ZERO, IntInterval.ZERO, IntInterval.ZERO, "*", IntInterval::mul);
 	}
 
 	@Test
 	public void testDivision() {
-		div(-2, -1, -2, -1, 0, 2, false);
-		div(-2, -1, -2, 3, null, null, false);
-		div(-2, -1, 1, 2, -2, 0, false);
-		div(-2, 1, -2, -1, -1, 2, false);
-		div(-2, 1, -2, 2, null, null, false);
-		div(-2, 2, -1, 2, null, null, false);
-		div(-2, 2, -2, 1, null, null, false);
-		div(-1, 2, -2, 2, null, null, false);
-		div(-2, 1, 1, 2, -2, 1, false);
-		div(1, 2, -2, -1, -2, 0, false);
-		div(1, 2, -2, 1, null, null, false);
-		div(1, 2, 1, 2, 0, 2, false);
-		div(null, 0, null, 0, false);
-		div(null, 0, null, null, false);
-		div(null, 0, 0, null, false);
-		div(null, null, null, 0, false);
-		div(null, null, null, null, false);
-		div(null, null, 0, null, false);
-		div(0, null, null, 0, false);
-		div(0, null, null, null, false);
-		div(0, null, 0, null, 0, null, false);
-		div(0, 0, null, 0, 0, 0, false);
-		div(0, 0, null, null, 0, 0, false);
-		div(0, 0, 0, null, 0, 0, false);
+		BiFunction<IntInterval, IntInterval, IntInterval> div = (
+				l,
+				r) -> l.div(r, false, false);
+		test(-2, -1, -2, -1, 0, 2, "/", div);
+		test(-2, -1, -2, 3, IntInterval.TOP, "/", div);
+		test(-2, -1, 1, 2, -2, 0, "/", div);
+		test(-2, 1, -2, -1, -1, 2, "/", div);
+		test(-2, 1, -2, 2, IntInterval.TOP, "/", div);
+		test(-2, 2, -1, 2, IntInterval.TOP, "/", div);
+		test(-2, 2, -2, 1, IntInterval.TOP, "/", div);
+		test(-1, 2, -2, 2, IntInterval.TOP, "/", div);
+		test(-2, 1, 1, 2, -2, 1, "/", div);
+		test(1, 2, -2, -1, -2, 0, "/", div);
+		test(1, 2, -2, 1, IntInterval.TOP, "/", div);
+		test(1, 2, 1, 2, 0, 2, "/", div);
+		test(MI_ZERO, MI_ZERO, IntInterval.NaN, "/", div);
+		test(MI_ZERO, IntInterval.TOP, IntInterval.NaN, "/", div);
+		test(MI_ZERO, ZERO_PI, IntInterval.NaN, "/", div);
+		test(IntInterval.TOP, MI_ZERO, IntInterval.TOP, "/", div);
+		test(IntInterval.TOP, IntInterval.TOP, IntInterval.TOP, "/", div);
+		test(IntInterval.TOP, ZERO_PI, IntInterval.TOP, "/", div);
+		test(ZERO_PI, MI_ZERO, IntInterval.NaN, "/", div);
+		test(ZERO_PI, IntInterval.TOP, IntInterval.NaN, "/", div);
+		test(ZERO_PI, ZERO_PI, ZERO_PI, "/", div);
+		test(IntInterval.ZERO, MI_ZERO, IntInterval.ZERO, "/", div);
+		test(IntInterval.ZERO, IntInterval.TOP, IntInterval.ZERO, "/", div);
+		test(IntInterval.ZERO, ZERO_PI, IntInterval.ZERO, "/", div);
 	}
 
 	@Test
 	public void testDivisionIgnoreZero() {
-		div(-2, -1, -2, -1, 0, 2, true);
-		div(-2, -1, -2, 3, -1, 1, true);
-		div(-2, -1, 1, 2, -2, 0, true);
-		div(-2, 1, -2, -1, -1, 2, true);
-		div(-2, 1, -2, 2, -1, 1, true);
-		div(-2, 2, -1, 2, -2, 2, true);
-		div(-2, 2, -2, 1, -2, 2, true);
-		div(-1, 2, -2, 2, -1, 1, true);
-		div(-2, 1, 1, 2, -2, 1, true);
-		div(1, 2, -2, -1, -2, 0, true);
-		div(1, 2, -2, 1, -1, 2, true);
-		div(1, 2, 1, 2, 0, 2, true);
-		div(null, 0, null, 0, true);
-		div(null, 0, null, null, 0, 0, true);
-		div(null, 0, 0, null, true);
-		div(null, null, null, 0, true);
-		div(null, null, null, null, 0, 0, true);
-		div(null, null, 0, null, true);
-		div(0, null, null, 0, true);
-		div(0, null, null, null, 0, 0, true);
-		div(0, null, 0, null, 0, null, true);
-		div(0, 0, null, 0, 0, 0, true);
-		div(0, 0, null, null, 0, 0, true);
-		div(0, 0, 0, null, 0, 0, true);
+		BiFunction<IntInterval, IntInterval, IntInterval> div = (
+				l,
+				r) -> l.div(r, true, false);
+		test(-2, -1, -2, -1, 0, 2, "/", div);
+		test(-2, -1, -2, 3, -1, 1, "/", div);
+		test(-2, -1, 1, 2, -2, 0, "/", div);
+		test(-2, 1, -2, -1, -1, 2, "/", div);
+		test(-2, 1, -2, 2, -1, 1, "/", div);
+		test(-2, 2, -1, 2, -2, 2, "/", div);
+		test(-2, 2, -2, 1, -2, 2, "/", div);
+		test(-1, 2, -2, 2, -1, 1, "/", div);
+		test(-2, 1, 1, 2, -2, 1, "/", div);
+		test(1, 2, -2, -1, -2, 0, "/", div);
+		test(1, 2, -2, 1, -1, 2, "/", div);
+		test(1, 2, 1, 2, 0, 2, "/", div);
+		test(MI_ZERO, MI_ZERO, IntInterval.NaN, "/", div);
+		test(MI_ZERO, IntInterval.TOP, IntInterval.ZERO, "/", div);
+		test(MI_ZERO, ZERO_PI, IntInterval.NaN, "/", div);
+		test(IntInterval.TOP, MI_ZERO, IntInterval.TOP, "/", div);
+		test(IntInterval.TOP, IntInterval.TOP, IntInterval.ZERO, "/", div);
+		test(IntInterval.TOP, ZERO_PI, IntInterval.TOP, "/", div);
+		test(ZERO_PI, MI_ZERO, IntInterval.NaN, "/", div);
+		test(ZERO_PI, IntInterval.TOP, IntInterval.ZERO, "/", div);
+		test(ZERO_PI, ZERO_PI, ZERO_PI, "/", div);
+		test(IntInterval.ZERO, MI_ZERO, IntInterval.ZERO, "/", div);
+		test(IntInterval.ZERO, IntInterval.TOP, IntInterval.ZERO, "/", div);
+		test(IntInterval.ZERO, ZERO_PI, IntInterval.ZERO, "/", div);
 	}
+
 }

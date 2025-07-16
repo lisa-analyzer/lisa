@@ -10,7 +10,9 @@ import java.math.RoundingMode;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MathNumber implements Comparable<MathNumber> {
+public class MathNumber
+		implements
+		Comparable<MathNumber> {
 
 	/**
 	 * The constant for plus infinity.
@@ -488,7 +490,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * @throws MathNumberConversionException when this math number is NaN or
 	 *                                           infinite
 	 */
-	public int toInt() throws MathNumberConversionException {
+	public int toInt()
+			throws MathNumberConversionException {
 		if (isNaN() || isInfinite())
 			throw new MathNumberConversionException(this);
 		return number.intValue();
@@ -502,7 +505,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * @throws MathNumberConversionException when this math number is NaN or
 	 *                                           infinite
 	 */
-	public double toDouble() throws MathNumberConversionException {
+	public double toDouble()
+			throws MathNumberConversionException {
 		if (isNaN() || isInfinite())
 			throw new MathNumberConversionException(this);
 		return number.doubleValue();
@@ -516,7 +520,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * @throws MathNumberConversionException when this math number is NaN or
 	 *                                           infinite
 	 */
-	public byte toByte() throws MathNumberConversionException {
+	public byte toByte()
+			throws MathNumberConversionException {
 		if (isNaN() || isInfinite())
 			throw new MathNumberConversionException(this);
 		return number.byteValue();
@@ -530,7 +535,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * @throws MathNumberConversionException when this math number is NaN or
 	 *                                           infinite
 	 */
-	public short toShort() throws MathNumberConversionException {
+	public short toShort()
+			throws MathNumberConversionException {
 		if (isNaN() || isInfinite())
 			throw new MathNumberConversionException(this);
 		return number.shortValue();
@@ -544,7 +550,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * @throws MathNumberConversionException when this math number is NaN or
 	 *                                           infinite
 	 */
-	public float toFloat() throws MathNumberConversionException {
+	public float toFloat()
+			throws MathNumberConversionException {
 		if (isNaN() || isInfinite())
 			throw new MathNumberConversionException(this);
 		return number.floatValue();
@@ -558,7 +565,8 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * @throws MathNumberConversionException when this math number is NaN or
 	 *                                           infinite
 	 */
-	public long toLong() throws MathNumberConversionException {
+	public long toLong()
+			throws MathNumberConversionException {
 		if (isNaN() || isInfinite())
 			throw new MathNumberConversionException(this);
 		return number.longValue();
@@ -624,4 +632,5 @@ public class MathNumber implements Comparable<MathNumber> {
 
 		return number;
 	}
+
 }

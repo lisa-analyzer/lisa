@@ -1,11 +1,12 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticComponent;
 import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -13,31 +14,33 @@ import it.unive.lisa.symbolic.value.Identifier;
 /**
  * A non-relational domain, that is able to compute the value of a
  * {@link SymbolicExpression}s of type {@code E} by knowing the values of all
- * program variables. Instances of this class can be wrapped inside an
- * {@link FunctionalLattice} to represent abstract values of individual
- * {@link Identifier}s.
+ * program variables. States managed by this domain are instances of
+ * {@link FunctionalLattice}, containing a mapping from {@link Identifier}s to
+ * instances of the type {@code L}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <T> the concrete type of the domain
- * @param <E> the type of expressions that this domain can evaluate
- * @param <F> the type of functional lattice that is used in conjuntion with
- *                this domain
+ * @param <L> the type of {@link DomainLattice} that this domain works with
+ * @param <T> the type of values returned by the transformers of this domain
+ * @param <M> the type of {@link FunctionalLattice} that this domain works with
+ * @param <E> the type of {@link SymbolicExpression}s that this domain can
+ *                evaluate
  */
-public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
-		E extends SymbolicExpression,
-		F extends Environment<F, E, T>>
+public interface NonRelationalDomain<L extends Lattice<L>,
+		T,
+		M extends FunctionalLattice<M, Identifier, L> & DomainLattice<M, T>,
+		E extends SymbolicExpression>
 		extends
-		Lattice<T>,
+		SemanticComponent<M, T, E, Identifier>,
 		SemanticEvaluator {
 
 	/**
 	 * Evaluates a {@link SymbolicExpression}, assuming that the values of
 	 * program variables are the ones stored in {@code environment}.
 	 * 
-	 * @param expression  the expression to evaluate
 	 * @param environment the environment containing the values of program
 	 *                        variables for the evaluation
+	 * @param expression  the expression to evaluate
 	 * @param pp          the program point that where this operation is being
 	 *                        evaluated
 	 * @param oracle      the oracle for inter-domain communication
@@ -47,71 +50,10 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	T eval(
+	L eval(
+			M environment,
 			E expression,
-			F environment,
 			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException;
-
-	/**
-	 * Checks whether {@code expression} is satisfied in {@code environment},
-	 * assuming that the values of program variables are the ones stored in
-	 * {@code environment} and returning an instance of {@link Satisfiability}.
-	 * The default implementation of this method always returns
-	 * {@link Satisfiability#UNKNOWN}.
-	 * 
-	 * @param expression  the expression whose satisfiability is to be evaluated
-	 * @param environment the environment containing the values of program
-	 *                        variables for the satisfiability
-	 * @param pp          the program point that where this operation is being
-	 *                        evaluated
-	 * @param oracle      the oracle for inter-domain communication
-	 * 
-	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
-	 *             by the environment, {@link Satisfiability#NOT_SATISFIED} if
-	 *             it is not satisfied, or {@link Satisfiability#UNKNOWN} if it
-	 *             is either impossible to determine if it satisfied, or if it
-	 *             is satisfied by some values and not by some others (this is
-	 *             equivalent to a TOP boolean value)
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	default Satisfiability satisfies(
-			E expression,
-			F environment,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return Satisfiability.UNKNOWN;
-	}
-
-	/**
-	 * Yields the environment {@code environment} on which the expression
-	 * {@code expression} is assumed to hold by this domain. The returned
-	 * environment must be an updated version of the given one, where the
-	 * relevant abstractions have been (optionally) updated. Returning the given
-	 * environment as-is is always a sound implementation.
-	 * 
-	 * @param environment the environment
-	 * @param expression  the expression to be assumed
-	 * @param src         the program point that where this operation is being
-	 *                        evaluated, corresponding to the one that generated
-	 *                        the given expression
-	 * @param dest        the program point where the execution will move after
-	 *                        the expression has been assumed
-	 * @param oracle      the oracle for inter-domain communication
-	 * 
-	 * @return the environment {@code environment} where {@code expression} is
-	 *             assumed to hold
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	F assume(
-			F environment,
-			E expression,
-			ProgramPoint src,
-			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException;
 
@@ -120,9 +62,8 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * not depend on the abstract values that get assigned to the variable, but
 	 * is instead fixed among all possible execution paths. If this method does
 	 * not return the bottom element (as the default implementation does), then
-	 * {@link Environment#assign(Identifier, SymbolicExpression, ProgramPoint, SemanticOracle)}
-	 * will store that abstract element instead of the one computed starting
-	 * from the expression.
+	 * assignments to the identifier {@code id} should store that abstract
+	 * element instead of the one computed starting from the expression.
 	 * 
 	 * @param id     The identifier representing the variable being assigned
 	 * @param pp     the program point that where this operation is being
@@ -133,28 +74,24 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T fixedVariable(
+	L fixedVariable(
 			Identifier id,
 			ProgramPoint pp,
 			SemanticOracle oracle)
-			throws SemanticException {
-		return bottom();
-	}
+			throws SemanticException;
 
 	/**
 	 * Yields the default abstraction returned whenever a functional lattice
 	 * using this element as values is queried for the state of a variable not
 	 * currently part of its mapping. Abstraction for such a variable might have
 	 * been lost, for instance, due to a call to {@link Lattice#top()} on the
-	 * function itself. The default implementation of this method returns
-	 * {@link Lattice#top()}.
+	 * function itself.
 	 * 
 	 * @param id the variable that is missing from the mapping
 	 * 
 	 * @return a default abstraction for the variable
 	 */
-	default T unknownVariable(
-			Identifier id) {
-		return top();
-	}
+	L unknownValue(
+			Identifier id);
+
 }

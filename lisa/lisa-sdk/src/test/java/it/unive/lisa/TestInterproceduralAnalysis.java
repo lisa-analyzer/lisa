@@ -1,6 +1,8 @@
 package it.unive.lisa;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
@@ -25,7 +27,10 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Set;
 
-public class TestInterproceduralAnalysis<A extends AbstractState<A>> implements InterproceduralAnalysis<A> {
+public class TestInterproceduralAnalysis<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		implements
+		InterproceduralAnalysis<A, D> {
 
 	@Override
 	public boolean needsCallGraph() {
@@ -33,10 +38,16 @@ public class TestInterproceduralAnalysis<A extends AbstractState<A>> implements 
 	}
 
 	@Override
+	public Analysis<A, D> getAnalysis() {
+		return null;
+	}
+
+	@Override
 	public void init(
 			Application app,
 			CallGraph callgraph,
-			OpenCallPolicy policy)
+			OpenCallPolicy policy,
+			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 	}
 
@@ -86,4 +97,5 @@ public class TestInterproceduralAnalysis<A extends AbstractState<A>> implements 
 	public FixpointResults<A> getFixpointResults() {
 		return null;
 	}
+
 }

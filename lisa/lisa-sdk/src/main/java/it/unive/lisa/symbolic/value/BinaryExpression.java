@@ -17,7 +17,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BinaryExpression extends ValueExpression {
+public class BinaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The left-hand side operand of this expression
@@ -188,11 +190,21 @@ public class BinaryExpression extends ValueExpression {
 		SymbolicExpression r = right.removeTypingExpressions();
 		if (l == left && r == right)
 			return this;
-		return new BinaryExpression(
-				getStaticType(),
-				l,
-				r,
-				operator,
-				getCodeLocation());
+		return new BinaryExpression(getStaticType(), l, r, operator, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression l = left.replace(source, target);
+		SymbolicExpression r = right.replace(source, target);
+		if (l == left && r == right)
+			return this;
+		return new BinaryExpression(getStaticType(), l, r, operator, getCodeLocation());
+	}
+
 }

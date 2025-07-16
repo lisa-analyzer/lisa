@@ -16,7 +16,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class StringOperation implements StringOperator, BinaryOperator {
+public abstract class StringOperation
+		implements
+		StringOperator,
+		BinaryOperator {
 
 	@Override
 	public Set<Type> typeInference(
@@ -38,4 +41,5 @@ public abstract class StringOperation implements StringOperator, BinaryOperator 
 	 */
 	protected abstract Type resultType(
 			TypeSystem types);
+
 }

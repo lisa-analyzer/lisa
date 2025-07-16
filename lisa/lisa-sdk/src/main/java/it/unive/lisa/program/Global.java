@@ -15,7 +15,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Global implements CodeElement {
+public class Global
+		implements
+		CodeElement {
 
 	/**
 	 * The name of this global variable
@@ -235,4 +237,5 @@ public class Global implements CodeElement {
 			CodeLocation where) {
 		return new GlobalVariable(staticType, name, annotations, where);
 	}
+
 }

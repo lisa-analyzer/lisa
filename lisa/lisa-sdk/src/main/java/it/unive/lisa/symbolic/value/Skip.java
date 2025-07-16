@@ -13,7 +13,9 @@ import it.unive.lisa.type.VoidType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Skip extends ValueExpression {
+public class Skip
+		extends
+		ValueExpression {
 
 	/**
 	 * Builds the skip.
@@ -80,4 +82,14 @@ public class Skip extends ValueExpression {
 	public SymbolicExpression removeTypingExpressions() {
 		return this;
 	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+		return this;
+	}
+
 }
