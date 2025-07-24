@@ -44,10 +44,13 @@ public class HeapLatticeProduct<T1 extends HeapLattice<T1>,
 	protected Pair<HeapLatticeProduct<T1, T2>, List<HeapReplacement>> mk(
 			Pair<T1, List<HeapReplacement>> first,
 			Pair<T2, List<HeapReplacement>> second) {
+		List<HeapReplacement> replacements = new LinkedList<>();
+		replacements.addAll(first.getRight());
+		replacements.addAll(second.getRight());
 		return Pair
 				.of(
 						new HeapLatticeProduct<>(first.getLeft(), second.getLeft()),
-						List.of(first.getRight(), second.getRight()).stream().flatMap(List::stream).toList());
+						replacements);
 	}
 
 	@Override
