@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.string.fsa;
 
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
 import org.junit.Test;
 
 public class TrimTest {

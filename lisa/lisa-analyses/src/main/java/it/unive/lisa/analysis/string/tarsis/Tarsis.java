@@ -5,6 +5,8 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.string.tarsis.IndexFinder;
+import it.unive.lisa.lattices.string.tarsis.RegexAutomaton;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;

@@ -1,11 +1,10 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.lattices.string.StringConstant;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -20,8 +19,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * The string constant propagation abstract domain, tracking if a certain string
@@ -36,200 +33,77 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  */
 public class StringConstantPropagation
 		implements
-		BaseNonRelationalValueDomain<StringConstantPropagation.SCP> {
-
-	/**
-	 * A lattice structure for string constants, that is, elements of the
-	 * integer set Sigma* extended with a top and bottom element.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static class SCP
-			implements
-			BaseLattice<SCP> {
-
-		private static final SCP TOP = new SCP(null, true);
-
-		private static final SCP BOTTOM = new SCP(null, false);
-
-		private final boolean isTop;
-
-		private final String value;
-
-		/**
-		 * Builds the top abstract value.
-		 */
-		public SCP() {
-			this(null, true);
-		}
-
-		private SCP(
-				String value,
-				boolean isTop) {
-			this.value = value;
-			this.isTop = isTop;
-		}
-
-		/**
-		 * Builds the abstract value for the given constant.
-		 * 
-		 * @param value the constant
-		 */
-		public SCP(
-				String value) {
-			this(value, true);
-		}
-
-		@Override
-		public SCP lubAux(
-				SCP other)
-				throws SemanticException {
-			return SCP.TOP;
-		}
-
-		@Override
-		public boolean lessOrEqualAux(
-				SCP other)
-				throws SemanticException {
-			return false;
-		}
-
-		@Override
-		public SCP top() {
-			return TOP;
-		}
-
-		@Override
-		public SCP bottom() {
-			return BOTTOM;
-		}
-
-		@Override
-		public StructuredRepresentation representation() {
-			if (isBottom())
-				return Lattice.bottomRepresentation();
-			if (isTop())
-				return Lattice.topRepresentation();
-
-			return new StringRepresentation(value);
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + (isTop ? 1231 : 1237);
-			result = prime * result + ((value == null) ? 0 : value.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(
-				Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			SCP other = (SCP) obj;
-			if (isTop != other.isTop)
-				return false;
-			if (value == null) {
-				if (other.value != null)
-					return false;
-			} else if (!value.equals(other.value))
-				return false;
-			return true;
-		}
-
-		/**
-		 * Returns the abstract value of the domain.
-		 * 
-		 * @return the string representing the constant value
-		 * 
-		 * @throws SemanticException if the method is called on a top or bottom
-		 *                               element
-		 */
-		protected String getValue()
-				throws SemanticException {
-			if (isTop() || isBottom())
-				throw new SemanticException("The abstract domain is top or bottom; can't get the constant value");
-
-			return value;
-		}
-
-	}
+		BaseNonRelationalValueDomain<StringConstant> {
 
 	@Override
-	public SCP evalNullConstant(
+	public StringConstant evalNullConstant(
 			ProgramPoint pp,
 			SemanticOracle oracle) {
-		return top();
+		return StringConstant.TOP;
 	}
 
 	@Override
-	public SCP evalNonNullConstant(
+	public StringConstant evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (constant.getValue() instanceof String)
-			return new SCP((String) constant.getValue());
+			return new StringConstant((String) constant.getValue());
 
-		return top();
+		return StringConstant.TOP;
 	}
 
 	@Override
-	public SCP evalUnaryExpression(
+	public StringConstant evalUnaryExpression(
 			UnaryExpression expression,
-			SCP arg,
+			StringConstant arg,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 
-		return top();
+		return StringConstant.TOP;
 	}
 
 	@Override
-	public SCP evalBinaryExpression(
+	public StringConstant evalBinaryExpression(
 			BinaryExpression expression,
-			SCP left,
-			SCP right,
+			StringConstant left,
+			StringConstant right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (expression.getOperator() instanceof StringConcat)
-			return left.isTop() || right.isTop() ? top() : new SCP(left.value + right.value);
+			return left.isTop() || right.isTop() ? StringConstant.TOP : new StringConstant(left.value + right.value);
 
-		return top();
+		return StringConstant.TOP;
 	}
 
 	@Override
-	public SCP evalTernaryExpression(
+	public StringConstant evalTernaryExpression(
 			TernaryExpression expression,
-			SCP left,
-			SCP middle,
-			SCP right,
+			StringConstant left,
+			StringConstant middle,
+			StringConstant right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 
 		if (expression.getOperator() instanceof StringReplace) {
 			if (left.isTop() || right.isTop() || middle.isTop())
-				return top();
+				return StringConstant.TOP;
 
 			String replaced = left.value;
 			replaced = replaced.replace(middle.value, right.value);
 
-			return new SCP(replaced);
+			return new StringConstant(replaced);
 		}
 
-		return top();
+		return StringConstant.TOP;
 
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			SCP left,
-			SCP right,
+			StringConstant left,
+			StringConstant right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 
@@ -255,13 +129,13 @@ public class StringConstantPropagation
 	}
 
 	@Override
-	public SCP top() {
-		return SCP.TOP;
+	public StringConstant top() {
+		return StringConstant.TOP;
 	}
 
 	@Override
-	public SCP bottom() {
-		return SCP.BOTTOM;
+	public StringConstant bottom() {
+		return StringConstant.BOTTOM;
 	}
 
 }

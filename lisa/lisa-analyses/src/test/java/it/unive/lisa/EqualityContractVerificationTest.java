@@ -15,25 +15,16 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.MonolithicHeap.Monolith;
+import it.unive.lisa.analysis.informationFlow.NonInterference;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.lattices.SingleHeapLattice;
 import it.unive.lisa.analysis.lattices.SingleTypeLattice;
 import it.unive.lisa.analysis.lattices.SingleValueLattice;
-import it.unive.lisa.analysis.nonInterference.NIEnv;
-import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.numeric.NonRedundantIntervals;
 import it.unive.lisa.analysis.numeric.Sign;
-import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
-import it.unive.lisa.analysis.string.fsa.StringSymbol;
-import it.unive.lisa.analysis.string.tarsis.RegexAutomaton;
 import it.unive.lisa.analysis.symbols.Symbol;
-import it.unive.lisa.analysis.traces.ExecutionTrace;
-import it.unive.lisa.analysis.traces.TraceToken;
-import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.IMPFeatures;
@@ -46,6 +37,15 @@ import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
+import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
+import it.unive.lisa.lattices.numeric.NonRedundantIntervalSet;
+import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
+import it.unive.lisa.lattices.string.fsa.StringSymbol;
+import it.unive.lisa.lattices.string.tarsis.RegexAutomaton;
+import it.unive.lisa.lattices.traces.ExecutionTrace;
+import it.unive.lisa.lattices.traces.TraceToken;
+import it.unive.lisa.lattices.types.Supertype;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
@@ -321,7 +321,8 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(StructuredRepresentation.class, dr1, dr2)
 				.withPrefabValues(RegularExpression.class, re1, re2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
-				.withPrefabValues(NIEnv.NI.class, new NonInterference().top(), new NonInterference().bottom())
+				.withPrefabValues(NonInterferenceValue.class, new NonInterference().top(),
+						new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(Set.class, s1, s2)
 				.withPrefabValues(
@@ -525,9 +526,9 @@ public class EqualityContractVerificationTest {
 					|| FixpointInfo.class == subject)
 				// fields function and elements and guards can be null
 				verify(subject, Warning.NONFINAL_FIELDS);
-			else if (subject == StaticTypes.Supertype.class)
+			else if (subject == Supertype.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("types"));
-			else if (subject == NonRedundantIntervals.NonRedIntvLattice.class)
+			else if (subject == NonRedundantIntervalSet.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("singleton"));
 			else if (subject == RegexAutomaton.class || subject == SimpleAutomaton.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("deterministic", "minimized"));

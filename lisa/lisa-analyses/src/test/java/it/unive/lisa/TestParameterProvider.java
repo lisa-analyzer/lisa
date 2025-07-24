@@ -11,7 +11,6 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
-import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
@@ -24,7 +23,6 @@ import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.lattices.SingleHeapLattice;
 import it.unive.lisa.analysis.lattices.SingleTypeLattice;
 import it.unive.lisa.analysis.lattices.SingleValueLattice;
-import it.unive.lisa.analysis.nonInterference.NIEnv;
 import it.unive.lisa.analysis.nonRedundantPowerset.NonRedundantSetDomainLattice;
 import it.unive.lisa.analysis.nonRedundantPowerset.NonRedundantSetLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -34,13 +32,10 @@ import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.numeric.NonRedundantIntervals;
 import it.unive.lisa.analysis.numeric.Sign;
-import it.unive.lisa.analysis.numeric.UpperBounds.IdSet;
 import it.unive.lisa.analysis.string.BoundedStringSet;
 import it.unive.lisa.analysis.string.Bricks;
 import it.unive.lisa.analysis.string.Prefix;
-import it.unive.lisa.analysis.taint.TwoLevelsTaint.SimpleTaint;
 import it.unive.lisa.analysis.traces.TracePartitioning;
 import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.types.InferredTypes;
@@ -58,6 +53,14 @@ import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.lattices.SimpleAbstractState;
+import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
+import it.unive.lisa.lattices.informationFlow.SimpleTaint;
+import it.unive.lisa.lattices.numeric.NonRedundantIntervalSet;
+import it.unive.lisa.lattices.numeric.SignLattice;
+import it.unive.lisa.lattices.symbolic.DefiniteIdSet;
+import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
@@ -411,20 +414,20 @@ public class TestParameterProvider {
 
 	public static final CallGraph cg;
 
-	public static final InterproceduralAnalysis<SimpleAbstractState<MonolithicHeap.Monolith,
-			ValueEnvironment<Sign.SignLattice>,
-			TypeEnvironment<InferredTypes.TypeSet>>,
-			SimpleAbstractDomain<MonolithicHeap.Monolith,
-					ValueEnvironment<Sign.SignLattice>,
-					TypeEnvironment<InferredTypes.TypeSet>>> interprocedural;
+	public static final InterproceduralAnalysis<SimpleAbstractState<Monolith,
+			ValueEnvironment<SignLattice>,
+			TypeEnvironment<TypeSet>>,
+			SimpleAbstractDomain<Monolith,
+					ValueEnvironment<SignLattice>,
+					TypeEnvironment<TypeSet>>> interprocedural;
 
-	public static final AnalysisState<SimpleAbstractState<MonolithicHeap.Monolith,
-			ValueEnvironment<Sign.SignLattice>,
-			TypeEnvironment<InferredTypes.TypeSet>>> as;
+	public static final AnalysisState<SimpleAbstractState<Monolith,
+			ValueEnvironment<SignLattice>,
+			TypeEnvironment<TypeSet>>> as;
 
-	public static final StatementStore<SimpleAbstractState<MonolithicHeap.Monolith,
-			ValueEnvironment<Sign.SignLattice>,
-			TypeEnvironment<InferredTypes.TypeSet>>> store;
+	public static final StatementStore<SimpleAbstractState<Monolith,
+			ValueEnvironment<SignLattice>,
+			TypeEnvironment<TypeSet>>> store;
 
 	public static final Expression expr;
 
@@ -454,9 +457,9 @@ public class TestParameterProvider {
 
 		as = new AnalysisState<>(
 				new SimpleAbstractState<>(
-						MonolithicHeap.Monolith.SINGLETON,
-						new ValueEnvironment<>(new Sign.SignLattice()),
-						new TypeEnvironment<>(new InferredTypes.TypeSet())),
+						Monolith.SINGLETON,
+						new ValueEnvironment<>(new SignLattice()),
+						new TypeEnvironment<>(new TypeSet())),
 				new ExpressionSet());
 		store = new StatementStore<>(as);
 		expr = new Expression(cfg, unknownLocation) {
@@ -649,10 +652,10 @@ public class TestParameterProvider {
 			return (R) IntInterval.TOP;
 		if (clazz == SimpleTaint.class)
 			return (R) SimpleTaint.TAINTED;
-		if (clazz == MonolithicHeap.Monolith.class)
-			return (R) MonolithicHeap.Monolith.SINGLETON;
-		if (clazz == NIEnv.NI.class)
-			return (R) NIEnv.NI.HIGH_LOW;
+		if (clazz == Monolith.class)
+			return (R) Monolith.SINGLETON;
+		if (clazz == NonInterferenceValue.class)
+			return (R) NonInterferenceValue.HIGH_LOW;
 		if (clazz == SingleHeapLattice.class)
 			return (R) SingleHeapLattice.SINGLETON;
 		if (clazz == SingleTypeLattice.class)
@@ -689,21 +692,21 @@ public class TestParameterProvider {
 			return (R) SingleTypeLattice.SINGLETON;
 		if (param == AbstractLattice.class)
 			return (R) new SimpleAbstractState<>(
-					MonolithicHeap.Monolith.SINGLETON,
+					Monolith.SINGLETON,
 					new ValueEnvironment<>(IntInterval.TOP),
-					new TypeEnvironment<>(new InferredTypes.TypeSet()));
+					new TypeEnvironment<>(new TypeSet()));
 		if (param == SymbolicExpression.class)
 			return (R) new Skip(SyntheticLocation.INSTANCE);
 		if (param == AnalysisState.class)
 			return (R) as;
 		if (param == Lattice.class)
 			return (R) IntInterval.TOP;
-		if (root == IdSet.class && param == Set.class)
+		if (root == DefiniteIdSet.class && param == Set.class)
 			return (R) Collections.emptySet();
 		if (param == Satisfiability.class || param == WholeValueElement.class)
 			return (R) Satisfiability.UNKNOWN;
 		if (param == NonRedundantSetLattice.class)
-			return (R) new NonRedundantIntervals.NonRedIntvLattice();
+			return (R) new NonRedundantIntervalSet();
 		if (param == NonRedundantSetDomainLattice.class)
 			return (R) new SimpleNRSDL();
 		if (param == BaseNonRelationalValueDomain.class

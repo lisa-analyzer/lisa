@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.string.fsa;
 
 import static org.junit.Assert.assertEquals;
 
+import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import org.junit.Test;

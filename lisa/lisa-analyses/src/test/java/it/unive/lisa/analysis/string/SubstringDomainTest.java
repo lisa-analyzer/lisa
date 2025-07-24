@@ -7,11 +7,8 @@ import static org.junit.Assert.assertTrue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.string.SubstringDomain.Subs;
+import it.unive.lisa.lattices.string.Substrings;
 import it.unive.lisa.program.SyntheticLocation;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int16Type;
 import it.unive.lisa.program.type.StringType;
@@ -39,192 +36,146 @@ import org.junit.Test;
 
 public class SubstringDomainTest {
 
-	Identifier y = new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE);
+	private final Identifier y = new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE);
 
-	Identifier x = new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE);
+	private final Identifier x = new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE);
 
-	Identifier z = new Variable(StringType.INSTANCE, "z", SyntheticLocation.INSTANCE);
+	private final Identifier z = new Variable(StringType.INSTANCE, "z", SyntheticLocation.INSTANCE);
 
-	Identifier w = new Variable(StringType.INSTANCE, "w", SyntheticLocation.INSTANCE);
+	private final Identifier w = new Variable(StringType.INSTANCE, "w", SyntheticLocation.INSTANCE);
 
-	ValueExpression a = new Constant(StringType.INSTANCE, "a", SyntheticLocation.INSTANCE);
+	private final ValueExpression a = new Constant(StringType.INSTANCE, "a", SyntheticLocation.INSTANCE);
 
-	ValueExpression b = new Constant(StringType.INSTANCE, "b", SyntheticLocation.INSTANCE);
+	private final ValueExpression b = new Constant(StringType.INSTANCE, "b", SyntheticLocation.INSTANCE);
 
-	ValueExpression c = new Constant(StringType.INSTANCE, "c", SyntheticLocation.INSTANCE);
+	private final ValueExpression c = new Constant(StringType.INSTANCE, "c", SyntheticLocation.INSTANCE);
 
-	ValueExpression ab = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
+	private final ValueExpression ab = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
 
-	ValueExpression bc = new Constant(StringType.INSTANCE, "bc", SyntheticLocation.INSTANCE);
+	private final ValueExpression bc = new Constant(StringType.INSTANCE, "bc", SyntheticLocation.INSTANCE);
 
-	ValueExpression abc = new Constant(StringType.INSTANCE, "abc", SyntheticLocation.INSTANCE);
+	private final ValueExpression abc = new Constant(StringType.INSTANCE, "abc", SyntheticLocation.INSTANCE);
 
-	SubstringDomain domain = new SubstringDomain();
+	private final SubstringDomain domain = new SubstringDomain();
 
-	Subs empty;
+	private final Substrings empty;
 
-	Subs valA;
+	private final Substrings valA;
 
-	Subs valB;
+	private final Substrings valB;
 
-	Subs valC;
+	private final Substrings valD;
 
-	Subs valD;
+	private final Substrings valE;
 
-	Subs valE;
+	private final Substrings valF;
 
-	Subs valF;
+	private final Substrings BOTTOM;
 
-	Subs TOP;
-
-	Subs BOTTOM;
-
-	ValueExpression XEqualsY = new BinaryExpression(
+	private final ValueExpression XEqualsY = new BinaryExpression(
 			BoolType.INSTANCE,
 			x,
 			y,
 			StringEquals.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XEqualsW = new BinaryExpression(
+	private final ValueExpression XEqualsW = new BinaryExpression(
 			BoolType.INSTANCE,
 			x,
 			w,
 			StringEquals.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression YSubstringOfX = new BinaryExpression(
+	private final ValueExpression YSubstringOfX = new BinaryExpression(
 			BoolType.INSTANCE,
 			x,
 			y,
 			StringContains.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression WSubstringOfX = new BinaryExpression(
+	private final ValueExpression WSubstringOfX = new BinaryExpression(
 			BoolType.INSTANCE,
 			x,
 			w,
 			StringContains.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XStartsWithY = new BinaryExpression(
+	private final ValueExpression XStartsWithY = new BinaryExpression(
 			BoolType.INSTANCE,
 			x,
 			y,
 			StringStartsWith.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XStartsWithW = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			w,
-			StringStartsWith.INSTANCE,
-			SyntheticLocation.INSTANCE);
-
-	ValueExpression XEndsWithY = new BinaryExpression(
+	private final ValueExpression XEndsWithY = new BinaryExpression(
 			BoolType.INSTANCE,
 			x,
 			y,
 			StringEndsWith.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XEndsWithW = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			w,
-			StringEndsWith.INSTANCE,
-			SyntheticLocation.INSTANCE);
-
-	ValueExpression invalid = new BinaryExpression(
-			StringType.INSTANCE,
-			x,
-			XEqualsY,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
-
-	ValueExpression XConcatY = new BinaryExpression(
+	private final ValueExpression XConcatY = new BinaryExpression(
 			StringType.INSTANCE,
 			x,
 			y,
 			StringConcat.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression ZConcatX = new BinaryExpression(
+	private final ValueExpression ZConcatX = new BinaryExpression(
 			StringType.INSTANCE,
 			z,
 			x,
 			StringConcat.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression ZConcatXConcatY = new BinaryExpression(
+	private final ValueExpression ZConcatXConcatY = new BinaryExpression(
 			StringType.INSTANCE,
 			z,
 			XConcatY,
 			StringConcat.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XConcatAB = new BinaryExpression(
+	private final ValueExpression XConcatAB = new BinaryExpression(
 			StringType.INSTANCE,
 			x,
 			ab,
 			StringConcat.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XConcatA = new BinaryExpression(
+	private final ValueExpression XConcatA = new BinaryExpression(
 			StringType.INSTANCE,
 			x,
 			a,
 			StringConcat.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XConcatBC = new BinaryExpression(
+	private final ValueExpression XConcatBC = new BinaryExpression(
 			StringType.INSTANCE,
 			x,
 			bc,
 			StringConcat.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XConcatABC = new BinaryExpression(
+	private final ValueExpression XConcatABC = new BinaryExpression(
 			StringType.INSTANCE,
 			x,
 			abc,
 			StringConcat.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XConcatABCConcatY = new BinaryExpression(
-			StringType.INSTANCE,
-			XConcatABC,
-			y,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
-
-	ValueExpression CSubstringOfX = new BinaryExpression(
+	private final ValueExpression CSubstringOfX = new BinaryExpression(
 			BoolType.INSTANCE,
 			x,
 			c,
 			StringContains.INSTANCE,
 			SyntheticLocation.INSTANCE);
 
-	ValueExpression XSubstringOfC = new BinaryExpression(
+	private final ValueExpression XSubstringOfC = new BinaryExpression(
 			BoolType.INSTANCE,
 			c,
 			x,
 			StringContains.INSTANCE,
 			SyntheticLocation.INSTANCE);
-
-	private final ProgramPoint pp = new ProgramPoint() {
-
-		@Override
-		public CodeLocation getLocation() {
-			return SyntheticLocation.INSTANCE;
-		}
-
-		@Override
-		public CFG getCFG() {
-			return null;
-		}
-
-	};
 
 	public SubstringDomainTest() {
 		Map<Identifier, ExpressionInverseSet> mapA = new HashMap<>();
@@ -268,22 +219,20 @@ public class SubstringDomainTest {
 		mapF.put(x, new ExpressionInverseSet(setF1));
 		mapF.put(w, new ExpressionInverseSet(setF2));
 
-		empty = new Subs();
-		valA = new Subs(new ExpressionInverseSet(), mapA);
-		valB = new Subs(new ExpressionInverseSet(), mapB);
-		valC = new Subs(new ExpressionInverseSet(), mapC);
-		valD = new Subs(new ExpressionInverseSet(), mapD);
-		valE = new Subs(new ExpressionInverseSet(), mapE);
-		valF = new Subs(new ExpressionInverseSet(), mapF);
+		empty = new Substrings();
+		valA = new Substrings(new ExpressionInverseSet(), mapA);
+		valB = new Substrings(new ExpressionInverseSet(), mapB);
+		valD = new Substrings(new ExpressionInverseSet(), mapD);
+		valE = new Substrings(new ExpressionInverseSet(), mapE);
+		valF = new Substrings(new ExpressionInverseSet(), mapF);
 
-		TOP = new Subs().top();
-		BOTTOM = new Subs().bottom();
+		BOTTOM = new Substrings().bottom();
 	}
 
 	@Test
 	public void testAssumeEmpty()
 			throws SemanticException {
-		Subs assumed = domain.assume(empty, XEqualsY, null, null, null);
+		Substrings assumed = domain.assume(empty, XEqualsY, null, null, null);
 		assertTrue(assumed.getState(x).contains(y));
 		assertTrue(assumed.getState(y).contains(x));
 		assertFalse(assumed.getState(y).contains(y));
@@ -293,7 +242,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssumeEmpty2()
 			throws SemanticException {
-		Subs assumed = domain.assume(empty, XEndsWithY, null, null, null);
+		Substrings assumed = domain.assume(empty, XEndsWithY, null, null, null);
 		assertTrue(assumed.getState(x).contains(y));
 		assertFalse(assumed.getState(y).contains(x));
 		assertFalse(assumed.getState(y).contains(y));
@@ -303,7 +252,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssumeEmpty3()
 			throws SemanticException {
-		Subs assumed = domain.assume(empty, XStartsWithY, null, null, null);
+		Substrings assumed = domain.assume(empty, XStartsWithY, null, null, null);
 		assertTrue(assumed.getState(x).contains(y));
 		assertFalse(assumed.getState(y).contains(x));
 		assertFalse(assumed.getState(y).contains(y));
@@ -313,7 +262,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssumeEmpty4()
 			throws SemanticException {
-		Subs assumed = domain.assume(empty, YSubstringOfX, null, null, null);
+		Substrings assumed = domain.assume(empty, YSubstringOfX, null, null, null);
 		assertTrue(assumed.getState(x).contains(y));
 		assertFalse(assumed.getState(y).contains(x));
 		assertFalse(assumed.getState(y).contains(y));
@@ -329,7 +278,7 @@ public class SubstringDomainTest {
 				YSubstringOfX,
 				LogicalOr.INSTANCE,
 				SyntheticLocation.INSTANCE);
-		Subs assumed = domain.assume(empty, orOperation, null, null, null);
+		Substrings assumed = domain.assume(empty, orOperation, null, null, null);
 		assertFalse(assumed.getState(x).contains(y));
 		assertFalse(assumed.getState(y).contains(x));
 		assertFalse(assumed.getState(y).contains(y));
@@ -347,7 +296,7 @@ public class SubstringDomainTest {
 				YSubstringOfX,
 				LogicalAnd.INSTANCE,
 				SyntheticLocation.INSTANCE);
-		Subs assumed = domain.assume(empty, andOperation, null, null, null);
+		Substrings assumed = domain.assume(empty, andOperation, null, null, null);
 		assertTrue(assumed.getState(x).contains(y));
 		assertFalse(assumed.getState(y).contains(x));
 		assertFalse(assumed.getState(y).contains(w));
@@ -357,7 +306,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssumeEmpty7()
 			throws SemanticException {
-		Subs assumed = domain.assume(empty, XEqualsY, null, null, null);
+		Substrings assumed = domain.assume(empty, XEqualsY, null, null, null);
 		assertTrue(assumed.getState(x).contains(y));
 		assertTrue(assumed.getState(y).contains(x));
 	}
@@ -365,9 +314,9 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssume1()
 			throws SemanticException {
-		Subs assume1 = domain.assume(valB, YSubstringOfX, null, null, null);
-		Subs assume2 = domain.assume(valB, XEndsWithY, null, null, null);
-		Subs assume3 = domain.assume(valB, XStartsWithY, null, null, null);
+		Substrings assume1 = domain.assume(valB, YSubstringOfX, null, null, null);
+		Substrings assume2 = domain.assume(valB, XEndsWithY, null, null, null);
+		Substrings assume3 = domain.assume(valB, XStartsWithY, null, null, null);
 
 		assertEquals(assume1, assume2);
 		assertEquals(assume1, assume3);
@@ -380,7 +329,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssume2()
 			throws SemanticException {
-		Subs assume = domain.assume(valB, XEqualsY, null, null, null);
+		Substrings assume = domain.assume(valB, XEqualsY, null, null, null);
 
 		assertTrue(assume.getState(x).contains(y));
 		assertTrue(assume.getState(x).contains(w));
@@ -407,7 +356,7 @@ public class SubstringDomainTest {
 				YSubstringOfX,
 				LogicalAnd.INSTANCE,
 				SyntheticLocation.INSTANCE);
-		Subs assume = domain.assume(valB, andOperation, null, null, null);
+		Substrings assume = domain.assume(valB, andOperation, null, null, null);
 
 		assertTrue(assume.getState(x).contains(w));
 		assertTrue(assume.getState(x).contains(y));
@@ -437,7 +386,7 @@ public class SubstringDomainTest {
 				YSubstringOfX,
 				LogicalOr.INSTANCE,
 				SyntheticLocation.INSTANCE);
-		Subs assume = domain.assume(valB, orOperation, null, null, null);
+		Substrings assume = domain.assume(valB, orOperation, null, null, null);
 
 		assertTrue(assume.getState(x).contains(w));
 		assertFalse(assume.getState(x).contains(y));
@@ -453,7 +402,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssume5()
 			throws SemanticException {
-		Subs assume = domain.assume(valB, CSubstringOfX, null, null, null);
+		Substrings assume = domain.assume(valB, CSubstringOfX, null, null, null);
 
 		assertTrue(assume.getState(x).contains(c));
 		assertTrue(assume.getState(x).contains(w));
@@ -463,7 +412,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssume6()
 			throws SemanticException {
-		Subs assume = domain.assume(valF, XSubstringOfC, null, null, null);
+		Substrings assume = domain.assume(valF, XSubstringOfC, null, null, null);
 
 		assertEquals(assume, valF);
 	}
@@ -518,14 +467,14 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssignEmptyDomain1()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, x, y, null, null);
+		Substrings assigned = domain.assign(empty, x, y, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 	}
 
 	@Test
 	public void testAssignEmptyDomain2()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, x, XConcatY, null, null);
+		Substrings assigned = domain.assign(empty, x, XConcatY, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 		assertFalse(assigned.getState(x).contains(x));
 	}
@@ -533,7 +482,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssignEmptyDomain3()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, x, ZConcatXConcatY, null, null);
+		Substrings assigned = domain.assign(empty, x, ZConcatXConcatY, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 		assertFalse(assigned.getState(x).contains(x));
 		assertTrue(assigned.getState(x).contains(z));
@@ -542,7 +491,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssignEmptyDomain4()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, x, c, null, null);
+		Substrings assigned = domain.assign(empty, x, c, null, null);
 		assertTrue(assigned.getState(x).contains(c));
 	}
 
@@ -551,7 +500,7 @@ public class SubstringDomainTest {
 			throws SemanticException {
 		Identifier j = new Variable(StringType.INSTANCE, "j", SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, j, c, null, null);
+		Substrings assigned = domain.assign(empty, j, c, null, null);
 		assigned = domain.assign(assigned, w, j, null, null);
 		assigned = domain.assign(assigned, y, x, null, null);
 
@@ -581,7 +530,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, AConcatB, null, null);
+		Substrings assigned = domain.assign(empty, x, AConcatB, null, null);
 		assigned = domain.assign(assigned, y, a, null, null);
 
 		assertTrue(assigned.getState(x).contains(y));
@@ -605,7 +554,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, AConcatB, null, null);
+		Substrings assigned = domain.assign(empty, x, AConcatB, null, null);
 		assigned = domain.assign(assigned, y, x, null, null);
 		assigned = domain.assign(assigned, x, c, null, null);
 
@@ -634,7 +583,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, AConcatB, null, null);
+		Substrings assigned = domain.assign(empty, x, AConcatB, null, null);
 		assigned = domain.assign(assigned, y, x, null, null);
 		assigned = domain.assign(assigned, x, XConcatC, null, null);
 
@@ -648,7 +597,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssignEmptyDomain9()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, x, c, null, null);
+		Substrings assigned = domain.assign(empty, x, c, null, null);
 		assigned = domain.assign(assigned, y, x, null, null);
 
 	}
@@ -656,7 +605,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssign1()
 			throws SemanticException {
-		Subs assigned = domain.assign(valA, x, z, null, null);
+		Substrings assigned = domain.assign(valA, x, z, null, null);
 		assertTrue(assigned.getState(x).contains(z));
 		assertFalse(assigned.getState(x).contains(y));
 	}
@@ -664,7 +613,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssign2()
 			throws SemanticException {
-		Subs assigned = domain.assign(valA, x, XConcatY, null, null);
+		Substrings assigned = domain.assign(valA, x, XConcatY, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 		assertFalse(assigned.getState(x).contains(x));
 		assertTrue(assigned.getState(x).contains(w));
@@ -680,7 +629,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(valA, x, XConcatZ, null, null);
+		Substrings assigned = domain.assign(valA, x, XConcatZ, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 		assertFalse(assigned.getState(x).contains(x));
 		assertTrue(assigned.getState(x).contains(w));
@@ -690,7 +639,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssign4()
 			throws SemanticException {
-		Subs assigned = domain.assign(valA, x, y, null, null);
+		Substrings assigned = domain.assign(valA, x, y, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 		assertFalse(assigned.getState(x).contains(w));
 	}
@@ -698,7 +647,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssign5()
 			throws SemanticException {
-		Subs assigned = domain.assign(valD, x, XConcatY, null, null);
+		Substrings assigned = domain.assign(valD, x, XConcatY, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 		assertTrue(assigned.getState(x).contains(w));
 		assertTrue(assigned.getState(y).contains(w));
@@ -713,7 +662,7 @@ public class SubstringDomainTest {
 				y,
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
-		Subs assigned = domain.assign(valA, z, WConcatY, null, null);
+		Substrings assigned = domain.assign(valA, z, WConcatY, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 		assertTrue(assigned.getState(x).contains(w));
 		assertTrue(assigned.getState(z).contains(w));
@@ -724,7 +673,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssign7()
 			throws SemanticException {
-		Subs assigned = domain.assign(valE, y, z, null, null);
+		Substrings assigned = domain.assign(valE, y, z, null, null);
 		assertFalse(assigned.getState(x).contains(y));
 		assertFalse(assigned.getState(y).contains(x));
 		assertTrue(assigned.getState(y).contains(z));
@@ -740,7 +689,7 @@ public class SubstringDomainTest {
 				z,
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
-		Subs assigned = domain.assign(valA, x, XConcatZ, null, null);
+		Substrings assigned = domain.assign(valA, x, XConcatZ, null, null);
 		assigned = domain.assign(assigned, w, x, null, null);
 		assertFalse(assigned.getState(x).contains(w));
 		assertTrue(assigned.getState(x).contains(y));
@@ -753,7 +702,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssign9()
 			throws SemanticException {
-		Subs assigned = domain.assign(valA, x, w, null, null);
+		Substrings assigned = domain.assign(valA, x, w, null, null);
 		assigned = domain.assign(assigned, y, x, null, null);
 		assigned = domain.assign(assigned, x, ZConcatXConcatY, null, null);
 		assertTrue(assigned.getState(x).contains(y));
@@ -768,7 +717,7 @@ public class SubstringDomainTest {
 			throws SemanticException {
 		Identifier j = new Variable(StringType.INSTANCE, "j", SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(valF, j, x, null, null);
+		Substrings assigned = domain.assign(valF, j, x, null, null);
 
 		assertTrue(assigned.getState(x).contains(c));
 		assertTrue(assigned.getState(x).contains(y));
@@ -781,7 +730,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssign11()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, y, c, null, null);
+		Substrings assigned = domain.assign(empty, y, c, null, null);
 		assigned = domain.assign(assigned, x, y, null, null);
 
 		assertTrue(assigned.getState(x).contains(y));
@@ -792,7 +741,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testAssign12()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, y, c, null, null);
+		Substrings assigned = domain.assign(empty, y, c, null, null);
 		assigned = domain.assign(assigned, x, c, null, null);
 
 		assertTrue(assigned.getState(y).contains(x));
@@ -808,7 +757,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, w, ZConcatXConcatY, null, null);
+		Substrings assigned = domain.assign(empty, w, ZConcatXConcatY, null, null);
 
 		assertTrue(assigned.getState(w).contains(ZConcatX));
 		assertTrue(assigned.getState(w).contains(XConcatY));
@@ -822,7 +771,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testEmptyAssignComplex2()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, w, XConcatABC, null, null);
+		Substrings assigned = domain.assign(empty, w, XConcatABC, null, null);
 
 		assertTrue(assigned.getState(w).contains(XConcatABC));
 		assertTrue(assigned.getState(w).contains(x));
@@ -850,8 +799,8 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned1 = domain.assign(empty, x, abcd, null, null);
-		Subs assigned2 = domain.assign(empty, x, ABConcatCD, null, null);
+		Substrings assigned1 = domain.assign(empty, x, abcd, null, null);
+		Substrings assigned2 = domain.assign(empty, x, ABConcatCD, null, null);
 
 		assertEquals(assigned1, assigned2);
 	}
@@ -874,7 +823,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, ABConcatYConcatCD, null, null);
+		Substrings assigned = domain.assign(empty, x, ABConcatYConcatCD, null, null);
 
 		assertTrue(assigned.getState(x).size() == 15);
 	}
@@ -902,7 +851,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, YConcatWConcatAB, null, null);
+		Substrings assigned = domain.assign(empty, x, YConcatWConcatAB, null, null);
 
 		assertTrue(assigned.getState(x).contains(y));
 		assertTrue(assigned.getState(x).contains(w));
@@ -916,7 +865,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testEmptyAssignComplex6()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, x, c, null, null);
+		Substrings assigned = domain.assign(empty, x, c, null, null);
 		assigned = domain.assign(assigned, x, ZConcatX, null, null);
 
 		assertTrue(assigned.getState(x).contains(c));
@@ -929,7 +878,7 @@ public class SubstringDomainTest {
 	@Test
 	public void testEmptyAssignComplex7()
 			throws SemanticException {
-		Subs assigned = domain.assign(empty, y, ZConcatX, null, null);
+		Substrings assigned = domain.assign(empty, y, ZConcatX, null, null);
 		assigned = domain.assign(assigned, x, c, null, null);
 
 		assertFalse(assigned.getState(y).contains(x));
@@ -960,7 +909,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, YConcatWConcatAB, null, null);
+		Substrings assigned = domain.assign(empty, x, YConcatWConcatAB, null, null);
 		assigned = domain.assign(assigned, y, WConcatA, null, null);
 
 		assertTrue(assigned.getState(x).contains(y));
@@ -976,7 +925,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, WConcatC, null, null);
+		Substrings assigned = domain.assign(empty, x, WConcatC, null, null);
 		assigned = domain.assign(assigned, x, ZConcatX, null, null);
 		assigned = domain.assign(assigned, y, ZConcatX, null, null);
 
@@ -1001,7 +950,7 @@ public class SubstringDomainTest {
 				StringContains.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, YConcatW, null, null);
+		Substrings assigned = domain.assign(empty, x, YConcatW, null, null);
 		assigned = domain.assume(assigned, XSubstringOfY, null, null, null);
 
 		assertTrue(assigned.getState(y).contains(x));
@@ -1025,7 +974,7 @@ public class SubstringDomainTest {
 				StringContains.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, z, YConcatW, null, null);
+		Substrings assigned = domain.assign(empty, z, YConcatW, null, null);
 		assigned = domain.assume(assigned, YConcatWSubstringOfX, null, null, null);
 
 		assertEquals(assigned.getState(x), assigned.getState(z));
@@ -1042,176 +991,13 @@ public class SubstringDomainTest {
 				StringContains.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs assigned = domain.assign(empty, x, abc, null, null);
+		Substrings assigned = domain.assign(empty, x, abc, null, null);
 		assigned = domain.assume(assigned, XSubstringOfY, null, null, null);
 
 		assertTrue(assigned.getState(y).contains(abc));
 		assertTrue(assigned.getState(y).contains(x));
 		assertFalse(assigned.getState(x).contains(y));
 
-	}
-
-	@Test
-	public void testConstructor() {
-		Subs first = new Subs();
-
-		Map<Identifier, ExpressionInverseSet> f = new HashMap<>();
-
-		Set<SymbolicExpression> set = new HashSet<>();
-
-		set.add(y);
-		ExpressionInverseSet eis = new ExpressionInverseSet(set);
-
-		f.put(x, eis);
-
-		Subs second = new Subs(new ExpressionInverseSet(), f);
-
-		assertTrue(first.isBottom());
-		assertTrue(second.getState(x).contains(y));
-
-		assertTrue(new Subs().top().isTop());
-		assertTrue(new Subs().bottom().isBottom());
-	}
-
-	@Test
-	public void testForgetIdentifier()
-			throws SemanticException {
-		Map<Identifier, ExpressionInverseSet> f = new HashMap<>();
-
-		Set<SymbolicExpression> set = new HashSet<>();
-		Identifier y = new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE);
-		Identifier x = new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE);
-
-		set.add(y);
-		ExpressionInverseSet eis = new ExpressionInverseSet(set);
-
-		f.put(x, eis);
-
-		Subs domain = new Subs(new ExpressionInverseSet(), f);
-
-		assertFalse(domain.forgetIdentifier(x, pp).knowsIdentifier(x));
-	}
-
-	@Test
-	public void testForgetIdentifier2()
-			throws SemanticException {
-		Subs s = domain.assign(valA, y, XConcatA, null, null);
-		s = s.forgetIdentifier(x, pp);
-		assertEquals(s.getState(x), new ExpressionInverseSet().top());
-		assertFalse(s.getState(y).contains(x));
-		assertFalse(s.getState(y).contains(XConcatA));
-		assertFalse(s.knowsIdentifier(x));
-	}
-
-	@Test
-	public void testForgetIdentifier3()
-			throws SemanticException {
-		Subs s = domain.assign(valD, y, XConcatA, null, null);
-		s = s.forgetIdentifier(x, pp);
-		assertEquals(s.getState(x), new ExpressionInverseSet().top());
-		assertFalse(s.getState(y).contains(x));
-		assertFalse(s.getState(y).contains(XConcatA));
-		assertFalse(s.knowsIdentifier(x));
-	}
-
-	@Test
-	public void testForgetIdentifiersIf()
-			throws SemanticException {
-		Subs s = valF
-				.forgetIdentifiersIf(
-						(
-								id) -> id.getName().equals("w") || id.getName().equals("y"),
-						pp);
-		assertEquals(s.getState(w), new ExpressionInverseSet().top());
-		assertFalse(s.getState(x).contains(y));
-	}
-
-	@Test
-	public void testKnowsIdentifier()
-			throws SemanticException {
-		assertTrue(valA.knowsIdentifier(x));
-		assertTrue(valA.knowsIdentifier(y));
-		assertFalse(valA.knowsIdentifier(z));
-	}
-
-	@Test
-	public void testGlb1()
-			throws SemanticException {
-		Subs glb = valA.glb(valB);
-
-		assertTrue(glb.getState(x).contains(y));
-		assertTrue(glb.getState(y).contains(z));
-		assertTrue(glb.getState(x).contains(w));
-		assertTrue(glb.getState(x).contains(z));
-
-	}
-
-	@Test
-	public void testGlb2()
-			throws SemanticException {
-		Subs glb = valA.glb(TOP);
-
-		assertEquals(glb, valA);
-	}
-
-	@Test
-	public void testGlb3()
-			throws SemanticException {
-		Subs glb = BOTTOM.glb(valA);
-
-		assertEquals(glb, BOTTOM);
-	}
-
-	@Test
-	public void testGlb4()
-			throws SemanticException {
-		Subs glb = valC.glb(valD);
-
-		assertTrue(glb.getState(x).contains(z));
-		assertTrue(glb.getState(y).contains(w));
-	}
-
-	@Test
-	public void testLub1()
-			throws SemanticException {
-		Subs lub = valA.lub(valB);
-
-		assertFalse(lub.getState(x).contains(y));
-		assertFalse(lub.getState(y).contains(z));
-		assertEquals(lub.getState(y), lub.stateOfUnknown(y));
-		assertTrue(lub.getState(x).contains(w));
-	}
-
-	@Test
-	public void testLub2()
-			throws SemanticException {
-		Subs lub = TOP.lub(valA);
-
-		assertEquals(lub, TOP);
-	}
-
-	@Test
-	public void testLub3()
-			throws SemanticException {
-		Subs lub = BOTTOM.lub(valA);
-
-		assertEquals(lub, valA);
-	}
-
-	@Test
-	public void testLub4()
-			throws SemanticException {
-		Subs lub = valC.lub(valD);
-
-		assertEquals(lub, BOTTOM);
-	}
-
-	@Test
-	public void testLub5()
-			throws SemanticException {
-		Subs lub = valA.lub(valC);
-
-		assertEquals(lub, BOTTOM);
 	}
 
 	@Test
@@ -1245,7 +1031,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs result = domain.assign(valE, z, assignExpr, null, null);
+		Substrings result = domain.assign(valE, z, assignExpr, null, null);
 
 		assertTrue(result.getState(z).contains(ABConcatX));
 		assertTrue(result.getState(z).contains(BConcatX));
@@ -1271,7 +1057,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs result = domain.assign(empty, x, assignExpr, null, null);
+		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
 		assertTrue(result.getState(x).contains(abc));
 	}
@@ -1296,7 +1082,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs result = domain.assign(empty, x, assignExpr, null, null);
+		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
 		assertTrue(result.getState(x).contains(abc));
 	}
@@ -1319,7 +1105,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs result = domain.assign(empty, x, assignExpr, null, null);
+		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
 		assertTrue(result.getState(x).contains(c));
 	}
@@ -1344,7 +1130,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs result = domain.assign(empty, x, assignExpr, null, null);
+		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
 		assertTrue(result.getState(x).contains(c));
 	}
@@ -1378,7 +1164,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs result = domain.assign(empty, x, assignExpr, null, null);
+		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
 		Constant BCC = new Constant(StringType.INSTANCE, "bcc", SyntheticLocation.INSTANCE);
 
@@ -1406,7 +1192,7 @@ public class SubstringDomainTest {
 				StringSubstring.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs result = domain.assign(empty, x, assignExpr, null, null);
+		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
 		assertTrue(result.isBottom());
 	}
@@ -1436,7 +1222,7 @@ public class SubstringDomainTest {
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
 
-		Subs result = domain.assign(valE, z, assignExpr, null, null);
+		Substrings result = domain.assign(valE, z, assignExpr, null, null);
 
 		Constant CBAB = new Constant(StringType.INSTANCE, "cbab", SyntheticLocation.INSTANCE);
 		assertTrue(result.getState(z).contains(CBAB));

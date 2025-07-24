@@ -1,34 +1,24 @@
 package it.unive.lisa.analysis.string;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.string.StrPrefix;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
-import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -44,216 +34,41 @@ import java.util.Set;
  */
 public class Prefix
 		implements
-		SmashedSumStringDomain<Prefix.Pref>,
-		WholeValueStringDomain<Prefix.Pref> {
-
-	/**
-	 * A lattice structure tracking prefixes of strings.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static class Pref
-			implements
-			BaseLattice<Pref>,
-			WholeValueElement<Pref> {
-
-		private final static Pref TOP = new Pref();
-
-		private final static Pref BOTTOM = new Pref(null);
-
-		private final String prefix;
-
-		/**
-		 * Builds the top prefix abstract element.
-		 */
-		public Pref() {
-			this("");
-		}
-
-		/**
-		 * Builds a prefix abstract element.
-		 * 
-		 * @param prefix the prefix
-		 */
-		public Pref(
-				String prefix) {
-			this.prefix = prefix;
-		}
-
-		@Override
-		public Pref lubAux(
-				Pref other)
-				throws SemanticException {
-			String otherPrefixString = other.prefix;
-			StringBuilder result = new StringBuilder();
-
-			int i = 0;
-			while (i <= prefix.length() - 1
-					&& i <= otherPrefixString.length() - 1
-					&& prefix.charAt(i) == otherPrefixString.charAt(i)) {
-				result.append(prefix.charAt(i++));
-			}
-
-			if (result.length() != 0)
-				return new Pref(result.toString());
-
-			else
-				return TOP;
-		}
-
-		@Override
-		public boolean lessOrEqualAux(
-				Pref other)
-				throws SemanticException {
-			if (other.prefix.length() <= this.prefix.length()) {
-				Pref lub = this.lubAux(other);
-
-				return lub.prefix.length() == other.prefix.length();
-			}
-
-			return false;
-		}
-
-		@Override
-		public boolean equals(
-				Object o) {
-			if (this == o)
-				return true;
-			if (o == null || getClass() != o.getClass())
-				return false;
-			Pref prefix1 = (Pref) o;
-			return Objects.equals(prefix, prefix1.prefix);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(prefix);
-		}
-
-		@Override
-		public Pref top() {
-			return TOP;
-		}
-
-		@Override
-		public Pref bottom() {
-			return BOTTOM;
-		}
-
-		@Override
-		public StructuredRepresentation representation() {
-			if (isBottom())
-				return Lattice.bottomRepresentation();
-			if (isTop())
-				return Lattice.topRepresentation();
-
-			return new StringRepresentation(prefix + '*');
-		}
-
-		/**
-		 * Yields the prefix of this abstract value.
-		 * 
-		 * @return the prefix of this abstract value.
-		 */
-		public String getPrefix() {
-			return this.prefix;
-		}
-
-		@Override
-		public Set<BinaryExpression> constraints(
-				ValueExpression e,
-				ProgramPoint pp)
-				throws SemanticException {
-			if (isBottom())
-				return null;
-
-			BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
-			UnaryExpression strlen = new UnaryExpression(
-					pp.getProgram().getTypes().getIntegerType(),
-					e,
-					StringLength.INSTANCE,
-					pp.getLocation());
-
-			if (isTop())
-				return Collections
-						.singleton(
-								new BinaryExpression(
-										booleanType,
-										new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-										strlen,
-										ComparisonLe.INSTANCE,
-										e.getCodeLocation()));
-
-			return Set
-					.of(
-							new BinaryExpression(
-									booleanType,
-									new Constant(
-											pp.getProgram().getTypes().getIntegerType(),
-											prefix.length(),
-											pp.getLocation()),
-									strlen,
-									ComparisonLe.INSTANCE,
-									e.getCodeLocation()),
-							new BinaryExpression(
-									booleanType,
-									new Constant(pp.getProgram().getTypes().getStringType(), prefix, pp.getLocation()),
-									e,
-									StringStartsWith.INSTANCE,
-									e.getCodeLocation()));
-		}
-
-		@Override
-		public Pref generate(
-				Set<BinaryExpression> constraints,
-				ProgramPoint pp)
-				throws SemanticException {
-			if (constraints == null)
-				return bottom();
-
-			for (BinaryExpression expr : constraints)
-				if ((expr.getOperator() instanceof ComparisonEq || expr.getOperator() instanceof StringStartsWith)
-						&& expr.getLeft() instanceof Constant
-						&& ((Constant) expr.getLeft()).getValue() instanceof String)
-					return new Pref(((Constant) expr.getLeft()).getValue().toString());
-
-			return TOP;
-		}
-
-	}
+		SmashedSumStringDomain<StrPrefix>,
+		WholeValueStringDomain<StrPrefix> {
 
 	@Override
-	public Pref evalNonNullConstant(
+	public StrPrefix evalNonNullConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (constant.getValue() instanceof String) {
 			String str = (String) constant.getValue();
 			if (!str.isEmpty())
-				return new Pref(str);
+				return new StrPrefix(str);
 
 		}
 
-		return Pref.TOP;
+		return StrPrefix.TOP;
 	}
 
 	@Override
-	public Pref evalBinaryExpression(
+	public StrPrefix evalBinaryExpression(
 			BinaryExpression expression,
-			Pref left,
-			Pref right,
+			StrPrefix left,
+			StrPrefix right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (expression.getOperator() == StringConcat.INSTANCE)
 			return left;
-		return Pref.TOP;
+		return StrPrefix.TOP;
 	}
 
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			Pref left,
-			Pref right,
+			StrPrefix left,
+			StrPrefix right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -263,48 +78,48 @@ public class Prefix
 	}
 
 	@Override
-	public Pref substring(
-			Pref s,
+	public StrPrefix substring(
+			StrPrefix s,
 			long begin,
 			long end) {
 		if (s.isTop() || s.isBottom())
 			return s;
 
-		if (end <= s.getPrefix().length())
-			return new Pref(s.getPrefix().substring((int) begin, (int) end));
-		else if (begin < s.getPrefix().length())
-			return new Pref(s.getPrefix().substring((int) begin));
+		if (end <= s.prefix.length())
+			return new StrPrefix(s.prefix.substring((int) begin, (int) end));
+		else if (begin < s.prefix.length())
+			return new StrPrefix(s.prefix.substring((int) begin));
 
-		return new Pref("");
+		return new StrPrefix("");
 	}
 
 	@Override
 	public IntInterval length(
-			Pref s) {
-		return new IntInterval(new MathNumber(s.getPrefix().length()), MathNumber.PLUS_INFINITY);
+			StrPrefix s) {
+		return new IntInterval(new MathNumber(s.prefix.length()), MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
 	public IntInterval indexOf(
-			Pref current,
-			Pref other) {
+			StrPrefix current,
+			StrPrefix other) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
 	@Override
 	public Satisfiability containsChar(
-			Pref current,
+			StrPrefix current,
 			char c) {
 		if (current.isTop())
 			return Satisfiability.UNKNOWN;
 		if (current.isBottom())
 			return Satisfiability.BOTTOM;
-		return current.getPrefix().contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
+		return current.prefix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public Pref substring(
-			Pref prefix,
+	public StrPrefix substring(
+			StrPrefix prefix,
 			Set<BinaryExpression> a1,
 			Set<BinaryExpression> a2,
 			ProgramPoint pp)
@@ -338,18 +153,18 @@ public class Prefix
 
 		// minI is always >= 0
 		// minJ is null (infinity) or >= minI
-		if (minJ != null && minJ <= prefix.getPrefix().length())
-			return new Pref(prefix.getPrefix().substring(minI, minJ));
-		if (minI <= prefix.getPrefix().length())
-			return new Pref(prefix.getPrefix().substring(minI));
-		return Pref.TOP;
+		if (minJ != null && minJ <= prefix.prefix.length())
+			return new StrPrefix(prefix.prefix.substring(minI, minJ));
+		if (minI <= prefix.prefix.length())
+			return new StrPrefix(prefix.prefix.substring(minI));
+		return StrPrefix.TOP;
 	}
 
 	@Override
 	public Set<BinaryExpression> indexOf_constr(
 			BinaryExpression expression,
-			Pref current,
-			Pref other,
+			StrPrefix current,
+			StrPrefix other,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (current.isBottom() || other.isBottom())
@@ -390,13 +205,13 @@ public class Prefix
 	}
 
 	@Override
-	public Pref top() {
-		return Pref.TOP;
+	public StrPrefix top() {
+		return StrPrefix.TOP;
 	}
 
 	@Override
-	public Pref bottom() {
-		return Pref.BOTTOM;
+	public StrPrefix bottom() {
+		return StrPrefix.BOTTOM;
 	}
 
 }

@@ -6,11 +6,10 @@ import static org.apache.commons.collections4.SetUtils.intersection;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonrelational.type.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.type.NonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
-import it.unive.lisa.analysis.nonrelational.type.TypeValue;
+import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -34,7 +33,6 @@ import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -47,7 +45,7 @@ import java.util.stream.Collectors;
  */
 public class InferredTypes
 		implements
-		BaseNonRelationalTypeDomain<InferredTypes.TypeSet> {
+		BaseNonRelationalTypeDomain<TypeSet> {
 
 	@Override
 	public TypeSet evalIdentifier(
@@ -422,108 +420,6 @@ public class InferredTypes
 	@Override
 	public TypeSet bottom() {
 		return TypeSet.BOTTOM;
-	}
-
-	/**
-	 * A set of {@link Type}s, representing the inferred runtime types of an
-	 * {@link Expression}.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static class TypeSet
-			extends
-			SetLattice<TypeSet, Type>
-			implements
-			TypeValue<TypeSet> {
-
-		private static final TypeSet TOP = new TypeSet(true, Collections.emptySet());
-
-		private static final TypeSet BOTTOM = new TypeSet(false, Collections.emptySet());
-
-		/**
-		 * Builds the inferred types. The object built through this constructor
-		 * represents an empty set of types.
-		 */
-		public TypeSet() {
-			this(true, Collections.emptySet());
-		}
-
-		/**
-		 * Builds the inferred types, representing only the given {@link Type}.
-		 * 
-		 * @param typeSystem the type system knowing about the types of the
-		 *                       program where this element is created
-		 * @param type       the type to be included in the set of inferred
-		 *                       types
-		 */
-		public TypeSet(
-				TypeSystem typeSystem,
-				Type type) {
-			this(typeSystem, Collections.singleton(type));
-		}
-
-		/**
-		 * Builds the inferred types, representing only the given set of
-		 * {@link Type}s.
-		 * 
-		 * @param typeSystem the type system knowing about the types of the
-		 *                       program where this element is created
-		 * @param types      the types to be included in the set of inferred
-		 *                       types
-		 */
-		public TypeSet(
-				TypeSystem typeSystem,
-				Set<Type> types) {
-			this(true, typeSystem != null && types.equals(typeSystem.getTypes()) ? Collections.emptySet() : types);
-		}
-
-		/**
-		 * Builds the inferred types, representing only the given set of
-		 * {@link Type}s.
-		 * 
-		 * @param isTop whether or not the set of types represents all possible
-		 *                  types
-		 * @param types the types to be included in the set of inferred types
-		 */
-		public TypeSet(
-				boolean isTop,
-				Set<Type> types) {
-			super(types, isTop);
-		}
-
-		@Override
-		public Set<Type> getRuntimeTypes() {
-			if (elements == null)
-				Collections.emptySet();
-			return elements;
-		}
-
-		@Override
-		public TypeSet top() {
-			return TOP;
-		}
-
-		@Override
-		public boolean isTop() {
-			return this == TOP || super.isTop();
-		}
-
-		@Override
-		public TypeSet bottom() {
-			return BOTTOM;
-		}
-
-		@Override
-		public boolean isBottom() {
-			return this == BOTTOM || super.isBottom();
-		}
-
-		@Override
-		public TypeSet mk(
-				Set<Type> set) {
-			return new TypeSet(true, set);
-		}
-
 	}
 
 }

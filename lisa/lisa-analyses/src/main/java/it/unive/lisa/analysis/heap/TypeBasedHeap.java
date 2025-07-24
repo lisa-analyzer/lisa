@@ -1,11 +1,10 @@
 package it.unive.lisa.analysis.heap;
 
-import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.lattices.SetLattice;
+import it.unive.lisa.lattices.heap.AllocatedTypes;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -24,7 +23,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -38,117 +36,16 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class TypeBasedHeap
 		implements
-		BaseHeapDomain<TypeBasedHeap.Types> {
-
-	/**
-	 * A heap lattice that contains the types of the heap locations. These are
-	 * modelled as a set of types that have been allocated in the heap.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static class Types
-			extends
-			SetLattice<Types, String>
-			implements
-			HeapLattice<Types> {
-
-		/**
-		 * Builds an empty set of types.
-		 */
-		public Types() {
-			super(Collections.emptySet(), true);
-		}
-
-		private Types(
-				Set<String> elements) {
-			super(elements, true);
-		}
-
-		private Types(
-				Set<String> elements,
-				boolean isTop) {
-			super(elements, isTop);
-		}
-
-		@Override
-		public Types top() {
-			return new Types(Collections.emptySet(), true);
-		}
-
-		@Override
-		public Types bottom() {
-			return new Types(Collections.emptySet(), false);
-		}
-
-		@Override
-		public Pair<Types, List<HeapReplacement>> pushScope(
-				ScopeToken token,
-				ProgramPoint pp)
-				throws SemanticException {
-			return Pair.of(this, Collections.emptyList());
-		}
-
-		@Override
-		public Pair<Types, List<HeapReplacement>> popScope(
-				ScopeToken token,
-				ProgramPoint pp)
-				throws SemanticException {
-			return Pair.of(this, Collections.emptyList());
-		}
-
-		@Override
-		public boolean knowsIdentifier(
-				Identifier id) {
-			return false;
-		}
-
-		@Override
-		public Pair<Types, List<HeapReplacement>> forgetIdentifier(
-				Identifier id,
-				ProgramPoint pp)
-				throws SemanticException {
-			return Pair.of(this, Collections.emptyList());
-		}
-
-		@Override
-		public Pair<Types, List<HeapReplacement>> forgetIdentifiers(
-				Iterable<Identifier> ids,
-				ProgramPoint pp)
-				throws SemanticException {
-			return Pair.of(this, Collections.emptyList());
-		}
-
-		@Override
-		public Pair<Types, List<HeapReplacement>> forgetIdentifiersIf(
-				Predicate<Identifier> test,
-				ProgramPoint pp)
-				throws SemanticException {
-			return Pair.of(this, Collections.emptyList());
-		}
-
-		@Override
-		public Types mk(
-				Set<String> set) {
-			return new Types(set);
-		}
-
-		@Override
-		public List<HeapReplacement> expand(
-				HeapReplacement base)
-				throws SemanticException {
-			return List.of(base);
-		}
-
-	}
+		BaseHeapDomain<AllocatedTypes> {
 
 	@Override
-	public Types makeLattice() {
-		return new Types();
+	public AllocatedTypes makeLattice() {
+		return new AllocatedTypes();
 	}
 
 	@Override
 	public ExpressionSet rewrite(
-			Types state,
+			AllocatedTypes state,
 			SymbolicExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -157,8 +54,8 @@ public class TypeBasedHeap
 	}
 
 	@Override
-	public Pair<Types, List<HeapReplacement>> assign(
-			Types state,
+	public Pair<AllocatedTypes, List<HeapReplacement>> assign(
+			AllocatedTypes state,
 			Identifier id,
 			SymbolicExpression expression,
 			ProgramPoint pp,
@@ -168,8 +65,8 @@ public class TypeBasedHeap
 	}
 
 	@Override
-	public Pair<Types, List<HeapReplacement>> assume(
-			Types state,
+	public Pair<AllocatedTypes, List<HeapReplacement>> assume(
+			AllocatedTypes state,
 			SymbolicExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
@@ -179,16 +76,18 @@ public class TypeBasedHeap
 	}
 
 	@Override
-	public Pair<Types, List<HeapReplacement>> semanticsOf(
-			Types state,
+	public Pair<AllocatedTypes, List<HeapReplacement>> semanticsOf(
+			AllocatedTypes state,
 			HeapExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
-			Pair<Types, List<HeapReplacement>> cont = smallStepSemantics(state, access.getContainer(), pp, oracle);
-			Pair<Types, List<HeapReplacement>> ch = smallStepSemantics(cont.getLeft(), access.getChild(), pp, oracle);
+			Pair<AllocatedTypes,
+					List<HeapReplacement>> cont = smallStepSemantics(state, access.getContainer(), pp, oracle);
+			Pair<AllocatedTypes,
+					List<HeapReplacement>> ch = smallStepSemantics(cont.getLeft(), access.getChild(), pp, oracle);
 			return Pair.of(ch.getLeft(), ListUtils.union(cont.getRight(), ch.getRight()));
 		}
 
@@ -198,7 +97,7 @@ public class TypeBasedHeap
 				if (type.isInMemoryType())
 					names.add(type.toString());
 
-			return Pair.of(new Types(names), Collections.emptyList());
+			return Pair.of(new AllocatedTypes(names), Collections.emptyList());
 		}
 
 		if (expression instanceof HeapReference)
@@ -319,7 +218,7 @@ public class TypeBasedHeap
 
 	@Override
 	public Satisfiability alias(
-			Types state,
+			AllocatedTypes state,
 			SymbolicExpression x,
 			SymbolicExpression y,
 			ProgramPoint pp,
@@ -345,7 +244,7 @@ public class TypeBasedHeap
 
 	@Override
 	public Satisfiability isReachableFrom(
-			Types state,
+			AllocatedTypes state,
 			SymbolicExpression x,
 			SymbolicExpression y,
 			ProgramPoint pp,

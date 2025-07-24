@@ -3,7 +3,6 @@ package it.unive.lisa;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
-import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapLattice;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
@@ -20,6 +19,9 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.lattices.SimpleAbstractState;
+import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.util.numeric.IntInterval;
 
 /**
@@ -117,9 +119,9 @@ public class DefaultConfiguration
 	 * 
 	 * @return the abstract state
 	 */
-	public static SimpleAbstractDomain<MonolithicHeap.Monolith,
+	public static SimpleAbstractDomain<Monolith,
 			ValueEnvironment<IntInterval>,
-			TypeEnvironment<InferredTypes.TypeSet>> defaultAbstractDomain() {
+			TypeEnvironment<TypeSet>> defaultAbstractDomain() {
 		return simpleState(defaultHeapDomain(), defaultValueDomain(), defaultTypeDomain());
 	}
 

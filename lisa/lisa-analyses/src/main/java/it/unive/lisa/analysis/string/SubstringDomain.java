@@ -1,13 +1,10 @@
 package it.unive.lisa.analysis.string;
 
-import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.lattices.string.Substrings;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -31,10 +28,7 @@ import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * The substring relational abstract domain, tracking relation between string
@@ -48,470 +42,16 @@ import java.util.stream.Collectors;
  */
 public class SubstringDomain
 		implements
-		ValueDomain<SubstringDomain.Subs> {
-
-	/**
-	 * A lattice structure for substring relations. The domain is implemented as
-	 * a {@link FunctionalLattice}, mapping identifiers to string expressions,
-	 * tracking which string expressions are <i>definitely</i> substring of an
-	 * identifier.
-	 * 
-	 * @author <a href="mailto:vincenzo.arceri@unipr.it>">Vincenzo Arceri</a>
-	 */
-	public static class Subs
-			extends
-			FunctionalLattice<Subs, Identifier, ExpressionInverseSet>
-			implements
-			ValueLattice<Subs> {
-
-		private static final Subs TOP = new Subs(new ExpressionInverseSet().top());
-
-		private static final Subs BOTTOM = new Subs(new ExpressionInverseSet().bottom());
-
-		/**
-		 * Builds the top abstract value.
-		 */
-		public Subs() {
-			this(new ExpressionInverseSet());
-		}
-
-		/**
-		 * Builds the abstract value by cloning the given function.
-		 * 
-		 * @param lattice  the underlying lattice
-		 * @param function the function to clone
-		 */
-		protected Subs(
-				ExpressionInverseSet lattice,
-				Map<Identifier, ExpressionInverseSet> function) {
-			super(lattice, function);
-		}
-
-		private Subs(
-				ExpressionInverseSet lattice) {
-			super(lattice);
-		}
-
-		@Override
-		public Subs lubAux(
-				Subs other)
-				throws SemanticException {
-			return functionalLift(
-					other,
-					lattice.top(),
-					this::glbKeys,
-					(
-							o1,
-							o2) -> o1.lub(o2))
-									.clear();
-		}
-
-		@Override
-		public Subs glbAux(
-				Subs other)
-				throws SemanticException {
-			return functionalLift(
-					other,
-					lattice.top(),
-					this::lubKeys,
-					(
-							o1,
-							o2) -> o1.glb(o2))
-									.closure();
-		}
-
-		@Override
-		public Subs top() {
-			return isTop() ? this : TOP;
-		}
-
-		@Override
-		public Subs bottom() {
-			return isBottom() ? this : BOTTOM;
-		}
-
-		@Override
-		public ExpressionInverseSet stateOfUnknown(
-				Identifier key) {
-			return lattice.top();
-		}
-
-		@Override
-		public Subs mk(
-				ExpressionInverseSet lattice,
-				Map<Identifier, ExpressionInverseSet> function) {
-			return new Subs(lattice.isBottom() ? lattice.bottom() : lattice.top(), function);
-		}
-
-		@Override
-		public boolean knowsIdentifier(
-				Identifier id) {
-			if (id == null || function == null)
-				return false;
-
-			if (function.containsKey(id))
-				return true;
-
-			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function.entrySet()) {
-				for (SymbolicExpression expr : entry.getValue().elements) {
-					if (appears(id, expr))
-						return true;
-				}
-			}
-
-			return false;
-		}
-
-		@Override
-		public Subs forgetIdentifier(
-				Identifier id,
-				ProgramPoint pp)
-				throws SemanticException {
-			if (!knowsIdentifier(id))
-				return this;
-
-			Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-			newFunction.remove(id);
-			newFunction
-					.replaceAll(
-							(
-									key,
-									value) -> removeFromSet(value, id));
-
-			return mk(lattice, newFunction);
-		}
-
-		@Override
-		public Subs forgetIdentifiers(
-				Iterable<Identifier> ids,
-				ProgramPoint pp)
-				throws SemanticException {
-			if (function == null || function.keySet().isEmpty())
-				return this;
-
-			Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-			ids.forEach(id -> {
-				newFunction.remove(id);
-				newFunction
-						.replaceAll(
-								(
-										key,
-										value) -> removeFromSet(value, id));
-			});
-
-			return mk(lattice, newFunction);
-		}
-
-		@Override
-		public Subs forgetIdentifiersIf(
-				Predicate<Identifier> test,
-				ProgramPoint pp)
-				throws SemanticException {
-			if (function == null || function.keySet().isEmpty())
-				return this;
-
-			// Get all identifiers
-			Set<Identifier> ids = new HashSet<>();
-			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function.entrySet()) {
-				ids.add(entry.getKey());
-				for (SymbolicExpression s : entry.getValue().elements()) {
-					if (s instanceof Identifier) {
-						Identifier id = (Identifier) s;
-						ids.add(id);
-					}
-				}
-			}
-
-			Subs result = mk(lattice, mkNewFunction(function, false));
-
-			for (Identifier id : ids) {
-				// Test each identifier
-				if (test.test(id)) {
-					result = result.forgetIdentifier(id, pp);
-				}
-			}
-
-			return result;
-		}
-
-		@Override
-		public Subs pushScope(
-				ScopeToken token,
-				ProgramPoint pp)
-				throws SemanticException {
-			return new Subs(lattice.pushScope(token, pp), mkNewFunction(function, true));
-		}
-
-		@Override
-		public Subs popScope(
-				ScopeToken token,
-				ProgramPoint pp)
-				throws SemanticException {
-			return new Subs(lattice.popScope(token, pp), mkNewFunction(function, true));
-		}
-
-		/**
-		 * Adds a set of expressions ({@code exprs}) for {@code id} to the this
-		 * abstract value.
-		 * 
-		 * @param exprs the set of symbolic expressions
-		 * @param id    the identifier
-		 * 
-		 * @return a new abstract value with the added expressions
-		 * 
-		 * @throws SemanticException if an error occurs during the computation
-		 */
-		protected Subs add(
-				Set<SymbolicExpression> exprs,
-				Identifier id)
-				throws SemanticException {
-
-			Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-
-			// Don't add the expressions that contain the key variable (ex: x ->
-			// x,
-			// x -> x + y will not be added)
-			Set<SymbolicExpression> expressionsToAdd = new HashSet<>();
-			for (SymbolicExpression se : exprs) {
-				if (!appears(id, se))
-					expressionsToAdd.add(se);
-			}
-
-			if (expressionsToAdd.isEmpty())
-				return this;
-
-			ExpressionInverseSet newSet = new ExpressionInverseSet(expressionsToAdd);
-
-			if (!(newFunction.get(id) == null))
-				newSet = newSet.glb(newFunction.get(id));
-
-			newFunction.put(id, newSet);
-
-			return mk(lattice, newFunction);
-		}
-
-		/**
-		 * Adds a single expression ({@code expr}) for {@code id} to the this
-		 * abstract value.
-		 * 
-		 * @param expr the symbolic expression
-		 * @param id   the identifier
-		 * 
-		 * @return a new abstract value with the added expression
-		 * 
-		 * @throws SemanticException if an error occurs during the computation
-		 */
-		protected Subs add(
-				SymbolicExpression expr,
-				Identifier id)
-				throws SemanticException {
-			Set<SymbolicExpression> expression = new HashSet<>();
-			expression.add(expr);
-
-			return add(expression, id);
-		}
-
-		/*
-		 * First step of assignment, removing obsolete relations.
-		 * @param extracted Expression assigned
-		 * @param id Expression getting assigned
-		 * @return Copy of the domain, with the holding relations after the
-		 * assignment.
-		 * @throws SemanticException if an error occurs during the computation
-		 */
-		private Subs remove(
-				Set<SymbolicExpression> extracted,
-				Identifier id) {
-			Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-
-			// If assignment is similar to x = x + ..., then we keep current
-			// relations to x, otherwise we remove them.
-			if (!extracted.contains(id)) {
-				newFunction.remove(id);
-			}
-
-			// Remove relations containing id from the other entries
-			for (Map.Entry<Identifier, ExpressionInverseSet> entry : newFunction.entrySet()) {
-				ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
-
-				entry.setValue(newSet);
-			}
-
-			return mk(lattice, newFunction);
-		}
-
-		/*
-		 * Returns a set without expressions containing id starting from source
-		 */
-		private static ExpressionInverseSet removeFromSet(
-				ExpressionInverseSet source,
-				Identifier id) {
-			Set<SymbolicExpression> newSet = source.elements
-					.stream()
-					.filter(element -> !appears(id, element))
-					.collect(Collectors.toSet());
-
-			return newSet.isEmpty() ? new ExpressionInverseSet().top() : new ExpressionInverseSet(newSet);
-		}
-
-		/**
-		 * Performs the inter-assignment phase
-		 * 
-		 * @param assignedId         Variable getting assigned
-		 * @param assignedExpression Expression assigned
-		 * 
-		 * @return Copy of the domain with new relations following the
-		 *             inter-assignment phase
-		 * 
-		 * @throws SemanticException if an error occurs during the computation
-		 */
-		private Subs interasg(
-				Identifier assignedId,
-				SymbolicExpression assignedExpression)
-				throws SemanticException {
-			Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-
-			if (!knowsIdentifier(assignedId))
-				return this;
-
-			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function.entrySet()) {
-				// skip same entry
-				if (entry.getKey().equals(assignedId))
-					continue;
-
-				if (entry.getValue().contains(assignedExpression)) {
-					Set<SymbolicExpression> newRelation = new HashSet<>();
-					newRelation.add(assignedId);
-
-					ExpressionInverseSet newSet = newFunction
-							.get(entry.getKey())
-							.glb(new ExpressionInverseSet(newRelation));
-					newFunction.put(entry.getKey(), newSet);
-				}
-
-			}
-
-			return mk(lattice, newFunction);
-		}
-
-		/**
-		 * Performs the closure over an identifier. The method adds to
-		 * {@code id} the expressions found in the variables mapped to
-		 * {@code id}
-		 * 
-		 * @return A copy of the domain with the added relations
-		 * 
-		 * @throws SemanticException if an error occurs during the computation
-		 */
-		private Subs closure(
-				Identifier id)
-				throws SemanticException {
-			if (isTop() || isBottom())
-				return this;
-
-			Subs result = mk(lattice, mkNewFunction(function, false));
-
-			ExpressionInverseSet set = result.getState(id);
-
-			for (SymbolicExpression se : set) {
-				if (se instanceof Variable) {
-					Variable variable = (Variable) se;
-
-					// Variable found --> add the relations of variable to id
-
-					if (result.knowsIdentifier(variable)) {
-						Set<SymbolicExpression> add = new HashSet<>(result.getState(variable).elements);
-						result = result.add(add, id);
-					}
-				}
-			}
-
-			return result;
-		}
-
-		/**
-		 * Performs the closure over the domain.
-		 * 
-		 * @return A copy of the domain with the added relations
-		 * 
-		 * @throws SemanticException if an error occurs during the computation
-		 */
-		protected Subs closure()
-				throws SemanticException {
-			if (isTop() || isBottom())
-				return this;
-
-			Subs prev;
-			Subs result = mk(lattice, mkNewFunction(function, false));
-
-			do {
-				prev = mk(lattice, mkNewFunction(result.function, false));
-				Set<Identifier> set = prev.function.keySet();
-
-				for (Identifier id : set) {
-					// Perform the closure on every identifier of the domain
-					result = result.closure(id);
-				}
-
-				result = result.clear();
-
-				// Some relations may be added; check that close is applied
-				// correctly to the added relations
-			} while (!prev.equals(result));
-
-			return result;
-
-		}
-
-		private Subs clear()
-				throws SemanticException {
-			Map<Identifier, ExpressionInverseSet> newMap = mkNewFunction(function, false);
-
-			newMap.entrySet().removeIf(entry -> entry.getValue().isTop());
-
-			return new Subs(lattice, newMap);
-		}
-
-		private static boolean appears(
-				Identifier id,
-				SymbolicExpression expr) {
-			if (expr instanceof Identifier)
-				return id.equals(expr);
-
-			if (expr instanceof Constant)
-				return false;
-
-			if (expr instanceof BinaryExpression) {
-				BinaryExpression expression = (BinaryExpression) expr;
-				SymbolicExpression left = expression.getLeft();
-				SymbolicExpression right = expression.getRight();
-
-				return appears(id, left) || appears(id, right);
-			}
-
-			return false;
-		}
-
-		@Override
-		public Subs store(
-				Identifier target,
-				Identifier source)
-				throws SemanticException {
-			if (isTop() || isBottom() || function == null || !function.containsKey(source))
-				return this;
-			return putState(target, getState(source));
-		}
-
+		ValueDomain<Substrings> {
+
+	@Override
+	public Substrings makeLattice() {
+		return new Substrings();
 	}
 
 	@Override
-	public Subs makeLattice() {
-		return new Subs();
-	}
-
-	@Override
-	public Subs assign(
-			Subs state,
+	public Substrings assign(
+			Substrings state,
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
@@ -538,7 +78,7 @@ public class SubstringDomain
 			strType = expression.getStaticType();
 
 		Set<SymbolicExpression> expressions = extrPlus(expression, pp, oracle, strType);
-		Subs result = state.mk(state.lattice, state.mkNewFunction(state.function, false));
+		Substrings result = state.mk(state.lattice, state.mkNewFunction(state.function, false));
 
 		result = result.remove(expressions, id);
 		result = result.add(expressions, id);
@@ -548,8 +88,8 @@ public class SubstringDomain
 	}
 
 	@Override
-	public Subs smallStepSemantics(
-			Subs state,
+	public Substrings smallStepSemantics(
+			Substrings state,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -558,8 +98,8 @@ public class SubstringDomain
 	}
 
 	@Override
-	public Subs assume(
-			Subs state,
+	public Substrings assume(
+			Substrings state,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
@@ -604,7 +144,7 @@ public class SubstringDomain
 					throw new SemanticException("instanceof right");
 
 				Set<SymbolicExpression> extracted = extrPlus((ValueExpression) right, src, oracle, strType);
-				Subs result = state.mk(state.lattice, state.mkNewFunction(state.function, false));
+				Substrings result = state.mk(state.lattice, state.mkNewFunction(state.function, false));
 
 				result = result.add(extracted, (Identifier) left);
 				result = result.closure();
@@ -614,7 +154,7 @@ public class SubstringDomain
 
 				// case both operands are identifiers
 				if ((left instanceof Identifier) && (right instanceof Identifier)) {
-					Subs result = state.mk(state.lattice, state.mkNewFunction(state.function, false));
+					Substrings result = state.mk(state.lattice, state.mkNewFunction(state.function, false));
 					result = result.add(left, (Identifier) right);
 					result = result.add(right, (Identifier) left);
 					result = result.closure();
@@ -634,7 +174,7 @@ public class SubstringDomain
 
 					Set<SymbolicExpression> add = extrPlus((ValueExpression) right, src, oracle, strType);
 
-					Subs result = state.mk(state.lattice, state.mkNewFunction(state.function, false));
+					Substrings result = state.mk(state.lattice, state.mkNewFunction(state.function, false));
 
 					result = result.add(add, (Identifier) left);
 					result = result.closure();
@@ -649,8 +189,8 @@ public class SubstringDomain
 
 				ValueExpression rightValueExpression = (ValueExpression) right;
 				ValueExpression leftValueExpression = (ValueExpression) left;
-				Subs leftDomain = assume(state, leftValueExpression, src, dest, oracle);
-				Subs rightDomain = assume(state, rightValueExpression, src, dest, oracle);
+				Substrings leftDomain = assume(state, leftValueExpression, src, dest, oracle);
+				Substrings rightDomain = assume(state, rightValueExpression, src, dest, oracle);
 
 				if (binaryOperator instanceof LogicalOr) {
 					return leftDomain.lub(rightDomain).clear();
@@ -666,7 +206,7 @@ public class SubstringDomain
 
 	@Override
 	public Satisfiability satisfies(
-			Subs state,
+			Substrings state,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)

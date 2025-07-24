@@ -7,21 +7,21 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
-import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.combination.ValueLatticeProduct;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.stability.Stability;
-import it.unive.lisa.analysis.stability.Trend;
-import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.analysis.numeric.Stability;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.lattices.SimpleAbstractState;
+import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.numeric.Trend;
+import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -62,12 +62,12 @@ public class StabilityTest
 
 	private static class CoContraVarianceCheck
 			implements
-			SemanticCheck<SimpleAbstractState<MonolithicHeap.Monolith,
+			SemanticCheck<SimpleAbstractState<Monolith,
 					ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
-					TypeEnvironment<InferredTypes.TypeSet>>,
-					SimpleAbstractDomain<MonolithicHeap.Monolith,
+					TypeEnvironment<TypeSet>>,
+					SimpleAbstractDomain<Monolith,
 							ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
-							TypeEnvironment<InferredTypes.TypeSet>>> {
+							TypeEnvironment<TypeSet>>> {
 
 		private final Interval aux;
 
@@ -82,12 +82,12 @@ public class StabilityTest
 
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap.Monolith,
+				CheckToolWithAnalysisResults<SimpleAbstractState<Monolith,
 						ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
-						TypeEnvironment<InferredTypes.TypeSet>>,
-						SimpleAbstractDomain<MonolithicHeap.Monolith,
+						TypeEnvironment<TypeSet>>,
+						SimpleAbstractDomain<Monolith,
 								ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
-								TypeEnvironment<InferredTypes.TypeSet>>> tool,
+								TypeEnvironment<TypeSet>>> tool,
 				CFG graph) {
 			Fixpoint<CFG, Statement, Edge, ValueEnvironment<Trend>> fix = new Fixpoint<>(graph, false);
 			// we start at bottom to have the empty state at the beginning
@@ -98,9 +98,9 @@ public class StabilityTest
 			for (Statement entry : graph.getEntrypoints())
 				entrypoints.put(entry, beginning);
 
-			for (AnalyzedCFG<SimpleAbstractState<MonolithicHeap.Monolith,
+			for (AnalyzedCFG<SimpleAbstractState<Monolith,
 					ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
-					TypeEnvironment<InferredTypes.TypeSet>>> result : tool.getResultOf(graph))
+					TypeEnvironment<TypeSet>>> result : tool.getResultOf(graph))
 				try {
 					Map<Statement,
 							ValueEnvironment<Trend>> fixpoint = fix
@@ -144,15 +144,15 @@ public class StabilityTest
 													ValueEnvironment<Trend> post;
 													if (result instanceof OptimizedAnalyzedCFG)
 														post = ((OptimizedAnalyzedCFG<
-																SimpleAbstractState<MonolithicHeap.Monolith,
+																SimpleAbstractState<Monolith,
 																		ValueLatticeProduct<ValueEnvironment<Trend>,
 																				ValueEnvironment<IntInterval>>,
-																		TypeEnvironment<InferredTypes.TypeSet>>,
-																SimpleAbstractDomain<MonolithicHeap.Monolith,
+																		TypeEnvironment<TypeSet>>,
+																SimpleAbstractDomain<Monolith,
 																		ValueLatticeProduct<ValueEnvironment<Trend>,
 																				ValueEnvironment<IntInterval>>,
 																		TypeEnvironment<
-																				InferredTypes.TypeSet>>>) result)
+																				TypeSet>>>) result)
 																						.getUnwindedAnalysisStateAfter(
 																								node, conf)
 																						.getState().valueState.first;

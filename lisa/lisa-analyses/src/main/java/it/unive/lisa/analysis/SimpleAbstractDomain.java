@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;

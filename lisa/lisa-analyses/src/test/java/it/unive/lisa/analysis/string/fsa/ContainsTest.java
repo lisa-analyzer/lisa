@@ -6,6 +6,8 @@ import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
+import it.unive.lisa.lattices.string.fsa.StringSymbol;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.StringType;

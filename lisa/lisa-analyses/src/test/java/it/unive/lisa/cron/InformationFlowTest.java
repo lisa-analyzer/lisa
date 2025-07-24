@@ -8,17 +8,13 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
-import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.nonInterference.NIEnv;
-import it.unive.lisa.analysis.nonInterference.NIEnv.NI;
-import it.unive.lisa.analysis.nonInterference.NonInterference;
+import it.unive.lisa.analysis.informationFlow.BaseTaint;
+import it.unive.lisa.analysis.informationFlow.NonInterference;
+import it.unive.lisa.analysis.informationFlow.ThreeLevelsTaint;
+import it.unive.lisa.analysis.informationFlow.TwoLevelsTaint;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.taint.BaseTaint;
-import it.unive.lisa.analysis.taint.BaseTaint.TaintLattice;
-import it.unive.lisa.analysis.taint.ThreeLevelsTaint;
-import it.unive.lisa.analysis.taint.TwoLevelsTaint;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -26,6 +22,12 @@ import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
+import it.unive.lisa.lattices.SimpleAbstractState;
+import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.informationFlow.NonInterferenceEnvironment;
+import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
+import it.unive.lisa.lattices.informationFlow.TaintLattice;
+import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
@@ -85,21 +87,21 @@ public class InformationFlowTest
 
 	private static class TaintCheck<L extends TaintLattice<L>>
 			implements
-			SemanticCheck<SimpleAbstractState<MonolithicHeap.Monolith,
+			SemanticCheck<SimpleAbstractState<Monolith,
 					ValueEnvironment<L>,
-					TypeEnvironment<InferredTypes.TypeSet>>,
-					SimpleAbstractDomain<MonolithicHeap.Monolith,
+					TypeEnvironment<TypeSet>>,
+					SimpleAbstractDomain<Monolith,
 							ValueEnvironment<L>,
-							TypeEnvironment<InferredTypes.TypeSet>>> {
+							TypeEnvironment<TypeSet>>> {
 
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap.Monolith,
+				CheckToolWithAnalysisResults<SimpleAbstractState<Monolith,
 						ValueEnvironment<L>,
-						TypeEnvironment<InferredTypes.TypeSet>>,
-						SimpleAbstractDomain<MonolithicHeap.Monolith,
+						TypeEnvironment<TypeSet>>,
+						SimpleAbstractDomain<Monolith,
 								ValueEnvironment<L>,
-								TypeEnvironment<InferredTypes.TypeSet>>> tool,
+								TypeEnvironment<TypeSet>>> tool,
 				CFG graph,
 				Statement node) {
 			if (!(node instanceof UnresolvedCall))
@@ -109,9 +111,9 @@ public class InformationFlowTest
 			BaseTaint<L> domain = (BaseTaint<L>) tool.getAnalysis().domain.valueDomain;
 
 			try {
-				for (AnalyzedCFG<SimpleAbstractState<MonolithicHeap.Monolith,
+				for (AnalyzedCFG<SimpleAbstractState<Monolith,
 						ValueEnvironment<L>,
-						TypeEnvironment<InferredTypes.TypeSet>>> result : tool.getResultOf(call.getCFG())) {
+						TypeEnvironment<TypeSet>>> result : tool.getResultOf(call.getCFG())) {
 					Call resolved = (Call) tool.getResolvedVersion(call, result);
 
 					if (resolved instanceof CFGCall) {
@@ -120,9 +122,9 @@ public class InformationFlowTest
 							Parameter[] parameters = n.getDescriptor().getFormals();
 							for (int i = 0; i < parameters.length; i++)
 								if (parameters[i].getAnnotations().contains(BaseTaint.CLEAN_MATCHER)) {
-									AnalysisState<SimpleAbstractState<MonolithicHeap.Monolith,
+									AnalysisState<SimpleAbstractState<Monolith,
 											ValueEnvironment<L>,
-											TypeEnvironment<InferredTypes.TypeSet>>> post = result
+											TypeEnvironment<TypeSet>>> post = result
 													.getAnalysisStateAfter(call.getParameters()[i]);
 									SemanticOracle oracle = tool.getAnalysis().domain.makeOracle(post.getState());
 
@@ -199,16 +201,16 @@ public class InformationFlowTest
 
 	private static class NICheck
 			implements
-			SemanticCheck<SimpleAbstractState<MonolithicHeap.Monolith, NIEnv, TypeEnvironment<InferredTypes.TypeSet>>,
-					SimpleAbstractDomain<MonolithicHeap.Monolith, NIEnv, TypeEnvironment<InferredTypes.TypeSet>>> {
+			SemanticCheck<SimpleAbstractState<Monolith, NonInterferenceEnvironment, TypeEnvironment<TypeSet>>,
+					SimpleAbstractDomain<Monolith, NonInterferenceEnvironment, TypeEnvironment<TypeSet>>> {
 
 		@Override
 		public boolean visit(
 				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap.Monolith, NIEnv, TypeEnvironment<InferredTypes.TypeSet>>,
-						SimpleAbstractDomain<MonolithicHeap.Monolith,
-								NIEnv,
-								TypeEnvironment<InferredTypes.TypeSet>>> tool,
+						SimpleAbstractState<Monolith, NonInterferenceEnvironment, TypeEnvironment<TypeSet>>,
+						SimpleAbstractDomain<Monolith,
+								NonInterferenceEnvironment,
+								TypeEnvironment<TypeSet>>> tool,
 				CFG graph,
 				Statement node) {
 			if (!(node instanceof Assignment))
@@ -220,7 +222,8 @@ public class InformationFlowTest
 			for (var result : results)
 				try {
 					var post = result.getAnalysisStateAfter(assign);
-					NIEnv state = post.getState().getLatticeInstance(NIEnv.class);
+					NonInterferenceEnvironment state = post.getState()
+							.getLatticeInstance(NonInterferenceEnvironment.class);
 					var postL = result.getAnalysisStateAfter(assign.getLeft());
 					var postR = result.getAnalysisStateAfter(assign.getRight());
 					NonInterference domain = (NonInterference) tool.getAnalysis().domain.valueDomain;
@@ -233,9 +236,9 @@ public class InformationFlowTest
 						for (SymbolicExpression r : tool
 								.getAnalysis()
 								.rewrite(postR, postR.getComputedExpressions(), assign)) {
-							NI ll = domain
+							NonInterferenceValue ll = domain
 									.eval(postL.getState().valueState, (ValueExpression) l, assign.getLeft(), oracleL);
-							NI rr = domain
+							NonInterferenceValue rr = domain
 									.eval(
 											postR.getState().valueState,
 											(ValueExpression) r,

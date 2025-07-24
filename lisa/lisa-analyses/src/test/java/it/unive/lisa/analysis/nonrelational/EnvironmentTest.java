@@ -6,7 +6,7 @@ import static org.junit.Assert.assertSame;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.lattices.numeric.SignLattice;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.SyntheticLocation;
@@ -24,8 +24,7 @@ public class EnvironmentTest {
 
 	// we use a value environment as candidate since it is the simpler
 	// implementation possible
-	private static final ValueEnvironment<
-			Sign.SignLattice> env = new ValueEnvironment<>(new Sign.SignLattice().bottom());
+	private static final ValueEnvironment<SignLattice> env = new ValueEnvironment<>(SignLattice.BOTTOM);
 
 	private static final Identifier varA = new Variable(Untyped.INSTANCE, "a", SyntheticLocation.INSTANCE);
 
@@ -74,11 +73,11 @@ public class EnvironmentTest {
 	@Test
 	public void testForgetIdentifier()
 			throws SemanticException {
-		ValueEnvironment<Sign.SignLattice> tmp = env.top();
+		ValueEnvironment<SignLattice> tmp = env.top();
 		assertSame(tmp, tmp.forgetIdentifier(varA, pp));
 		tmp = env.bottom();
 		assertSame(tmp, tmp.forgetIdentifier(varA, pp));
-		tmp = env.putState(varA, new Sign.SignLattice());
+		tmp = env.putState(varA, SignLattice.TOP);
 		assertEquals(env, tmp.forgetIdentifier(varA, pp));
 		assertEquals(tmp, tmp.forgetIdentifier(varB, pp));
 	}
@@ -86,7 +85,7 @@ public class EnvironmentTest {
 	@Test
 	public void testScopes()
 			throws SemanticException {
-		Sign.SignLattice state = new Sign.SignLattice();
+		SignLattice state = SignLattice.TOP;
 		ScopeToken scoper = new ScopeToken(new CodeElement() {
 
 			@Override
@@ -95,17 +94,17 @@ public class EnvironmentTest {
 			}
 
 		});
-		ValueEnvironment<Sign.SignLattice> tmp = env.top();
-		ValueEnvironment<Sign.SignLattice> onlyA = tmp.putState(varA, state);
+		ValueEnvironment<SignLattice> tmp = env.top();
+		ValueEnvironment<SignLattice> onlyA = tmp.putState(varA, state);
 
-		ValueEnvironment<Sign.SignLattice> onlyAscoped = tmp.putState((Identifier) varA.pushScope(scoper, pp), state);
-		ValueEnvironment<Sign.SignLattice> actual = onlyA.pushScope(scoper, pp);
+		ValueEnvironment<SignLattice> onlyAscoped = tmp.putState((Identifier) varA.pushScope(scoper, pp), state);
+		ValueEnvironment<SignLattice> actual = onlyA.pushScope(scoper, pp);
 		assertEquals(onlyAscoped, actual);
 		assertEquals(onlyA, actual.popScope(scoper, pp));
 
-		ValueEnvironment<Sign.SignLattice> AandB = onlyA.putState(heapB, state);
-		ValueEnvironment<
-				Sign.SignLattice> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper, pp), state);
+		ValueEnvironment<SignLattice> AandB = onlyA.putState(heapB, state);
+		ValueEnvironment<SignLattice> AandBscoped = onlyAscoped
+				.putState((Identifier) heapB.pushScope(scoper, pp), state);
 		assertEquals(AandBscoped, AandB.pushScope(scoper, pp));
 	}
 

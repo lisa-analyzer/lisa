@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.lattices.heap.allocations.AllocationSites;
 
 /**
  * A field-insensitive program point-based {@link AllocationSiteBasedAnalysis}.

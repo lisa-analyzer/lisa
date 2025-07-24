@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.lattices.IntegerConstant;
+import it.unive.lisa.lattices.numeric.IntegerConstant;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;

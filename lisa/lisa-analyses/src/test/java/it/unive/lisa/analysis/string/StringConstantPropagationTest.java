@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import static org.junit.Assert.assertEquals;
 
-import it.unive.lisa.analysis.string.StringConstantPropagation.SCP;
+import it.unive.lisa.lattices.string.StringConstant;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -15,22 +15,12 @@ import org.junit.Test;
 public class StringConstantPropagationTest {
 
 	@Test
-	public void testConstructor() {
-		new SCP();
-	}
-
-	@Test
-	public void testConstructor1() {
-		new SCP("Hello World!");
-	}
-
-	@Test
 	public void testEvalBinary() {
 		StringConstantPropagation domain = new StringConstantPropagation();
-		SCP s1 = new SCP("abc");
-		SCP s2 = new SCP("def");
+		StringConstant s1 = new StringConstant("abc");
+		StringConstant s2 = new StringConstant("def");
 
-		SCP res = domain
+		StringConstant res = domain
 				.evalBinaryExpression(
 						new BinaryExpression(
 								StringType.INSTANCE,
@@ -43,17 +33,17 @@ public class StringConstantPropagationTest {
 						null,
 						null);
 
-		assertEquals(res, new SCP("abcdef"));
+		assertEquals(res, new StringConstant("abcdef"));
 	}
 
 	@Test
 	public void testEvalTernary() {
 		StringConstantPropagation domain = new StringConstantPropagation();
-		SCP s1 = new SCP("aaa");
-		SCP s2 = new SCP("aa");
-		SCP s3 = new SCP("b");
+		StringConstant s1 = new StringConstant("aaa");
+		StringConstant s2 = new StringConstant("aa");
+		StringConstant s3 = new StringConstant("b");
 
-		SCP res = domain
+		StringConstant res = domain
 				.evalTernaryExpression(
 						new TernaryExpression(
 								StringType.INSTANCE,
@@ -68,7 +58,7 @@ public class StringConstantPropagationTest {
 						null,
 						null);
 
-		assertEquals(res, new SCP("ba"));
+		assertEquals(res, new StringConstant("ba"));
 	}
 
 }

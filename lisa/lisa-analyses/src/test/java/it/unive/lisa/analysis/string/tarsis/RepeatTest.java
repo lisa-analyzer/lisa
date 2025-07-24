@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.string.tarsis;
 
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.lattices.string.tarsis.RegexAutomaton;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.Or;
 import it.unive.lisa.util.numeric.IntInterval;
