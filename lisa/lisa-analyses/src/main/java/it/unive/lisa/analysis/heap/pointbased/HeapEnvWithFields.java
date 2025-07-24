@@ -97,7 +97,7 @@ public class HeapEnvWithFields
 			return result;
 
 		// the last substitution contains the removed ids
-		HeapReplacement base = result.getRight().getLast();
+		HeapReplacement base = result.getRight().get(result.getRight().size() - 1);
 		Set<AllocationSite> sites = new HashSet<>();
 		for (Identifier id : base.getSources())
 			if (id instanceof AllocationSite)
@@ -132,7 +132,7 @@ public class HeapEnvWithFields
 			return result;
 
 		// the last substitution contains the removed ids
-		HeapReplacement base = result.getRight().getLast();
+		HeapReplacement base = result.getRight().get(result.getRight().size() - 1);
 		Set<AllocationSite> sites = new HashSet<>();
 		for (Identifier id : base.getSources())
 			if (id instanceof AllocationSite)
