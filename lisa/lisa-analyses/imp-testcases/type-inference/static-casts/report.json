@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_sub.sub(sub__this)_938376017.json", "untyped_typing.main(typing__this).json", "untyped_typing.typing(typing__this)_938378869.json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "103ms",
+    "end" : "2025-07-25T13:05:17.098+02:00",
+    "expressions" : "46",
+    "files" : "3",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2025-07-25T13:05:16.995+02:00",
+    "statements" : "24",
+    "units" : "2",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/type-inference/static-casts"
+  }
+}

@@ -133,7 +133,7 @@ public interface NumericType
 		if (other.is32Bits() && is64Bits())
 			return this;
 
-		// both 64 bits
+		// both have same number of bits
 
 		if (isIntegral() && !other.isIntegral())
 			return other;
@@ -145,7 +145,7 @@ public interface NumericType
 		if (isSigned() && other.isUnsigned())
 			return this;
 
-		return this; // they are both 64-bit signed non-integral types
+		return this; // they are both same-bit signed non-integral types
 	}
 
 	/**
