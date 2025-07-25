@@ -39,12 +39,12 @@ import java.util.Set;
  * Base implementation for {@link NonRelationalDomain}s that can evaluate
  * {@link ValueExpression}s, and whose transformers simply return functional
  * lattices. This class implements
- * {@link #eval(SymbolicExpression, Environment, ProgramPoint, SemanticOracle)}
+ * {@link #eval(FunctionalLattice, ValueExpression, ProgramPoint, SemanticOracle)}
  * by taking care of the recursive computation of inner expressions evaluation.
  * It also defines
  * {@link #assign(FunctionalLattice, Identifier, ValueExpression, ProgramPoint, SemanticOracle)},
  * {@link #smallStepSemantics(FunctionalLattice, ValueExpression, ProgramPoint, SemanticOracle)},
- * {@link #assume(FunctionalLattice, ValueExpression, ProgramPoint, SemanticOracle)}
+ * {@link #assume(FunctionalLattice, ValueExpression, ProgramPoint, ProgramPoint, SemanticOracle)}
  * and
  * {@link #satisfies(FunctionalLattice, ValueExpression, ProgramPoint, SemanticOracle)}
  * by exploiting eval. Callbacks for customizing the evaluation, assumption, and

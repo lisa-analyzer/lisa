@@ -26,9 +26,10 @@ public interface ScopingStrategy {
 	 * entry state for one of its targets. Specifically, the state returned by
 	 * this method corresponds to the given {@code state} modified by (i)
 	 * pushing the scope that is introduced when the call happens (and that can
-	 * be popped with {@link #unscope(CFGCall, ScopeToken, AnalysisState)}), and
-	 * (ii) generating the expressions for the actual parameters by pushing the
-	 * same scope to the ones of the actual parameters, starting from
+	 * be popped with
+	 * {@link #unscope(CFGCall, ScopeToken, AnalysisState, Analysis)}), and (ii)
+	 * generating the expressions for the actual parameters by pushing the same
+	 * scope to the ones of the actual parameters, starting from
 	 * {@code actuals}.
 	 * 
 	 * @param <A>      the kind of {@link AbstractLattice} produced by the
@@ -61,9 +62,9 @@ public interface ScopingStrategy {
 	 * valid post-state of {@code call}. Specifically, the state returned by
 	 * this method corresponds to the parameter {@code state} modified by (i)
 	 * popping the scope introduced before the call happened (see
-	 * {@link #scope(CFGCall, ScopeToken, AnalysisState, ExpressionSet[])}), and
-	 * (ii) storing the returned value on the meta-variable left on the stack,
-	 * if any.
+	 * {@link #scope(CFGCall, ScopeToken, AnalysisState, Analysis, ExpressionSet[])}),
+	 * and (ii) storing the returned value on the meta-variable left on the
+	 * stack, if any.
 	 * 
 	 * @param <A>      the kind of {@link AbstractLattice} produced by the
 	 *                     domain {@code D}

@@ -1,13 +1,14 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
  * A token that can be used for pushing and popping scopes on local variables
- * through {@link SemanticDomain#pushScope(ScopeToken)} and
- * {@link SemanticDomain#popScope(ScopeToken)}. The token is identified by a
- * {@link CodeElement}.
+ * through {@link DomainLattice#pushScope(ScopeToken, ProgramPoint)} and
+ * {@link DomainLattice#popScope(ScopeToken, ProgramPoint)}. The token is
+ * identified by a {@link CodeElement}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

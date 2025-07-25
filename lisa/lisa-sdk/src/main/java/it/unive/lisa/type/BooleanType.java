@@ -10,4 +10,8 @@ public interface BooleanType
 		extends
 		Type {
 
+	@Override
+	default boolean castIsConversion() {
+		return true;
+	}
 }

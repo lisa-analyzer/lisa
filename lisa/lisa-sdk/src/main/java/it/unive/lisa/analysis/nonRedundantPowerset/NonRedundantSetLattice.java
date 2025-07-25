@@ -157,9 +157,9 @@ public abstract class NonRedundantSetLattice<S extends NonRedundantSetLattice<S,
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub> iff: ( S<sub>1</sub>
 	 * &le;<sub>S</sub> S<sub>2</sub> ) AND ( &forall; s<sub>2</sub> &ni;
 	 * S<sub>2</sub>, &exist; s<sub>1</sub> &ni; S<sub>1</sub> : s<sub>1</sub>
-	 * &le; s<sub>2</sub> ). Where {@link #lessOrEqualAux(NonRedundantPowerset)
-	 * &le;<sub>S</sub>} is the less or equal relation between sets. This
-	 * operation is not commutative.
+	 * &le; s<sub>2</sub> ). Where
+	 * {@link #lessOrEqualAux(NonRedundantSetLattice) &le;<sub>S</sub>} is the
+	 * less or equal relation between sets. This operation is not commutative.
 	 * 
 	 * @param other the other concrete element
 	 * 
@@ -223,8 +223,8 @@ public abstract class NonRedundantSetLattice<S extends NonRedundantSetLattice<S,
 	 * <li>S<sub>1</sub> +<sub>EM</sub> S<sub>2</sub> &ensp; otherwise</li>
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
-	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation}
-	 * and +<sub>EM</sub> is an Egli-Milner connector.
+	 * {@link #lessOrEqualEgliMilner(NonRedundantSetLattice) Egli-Milner
+	 * relation} and +<sub>EM</sub> is an Egli-Milner connector.
 	 */
 	@Override
 	public S wideningAux(
@@ -236,8 +236,8 @@ public abstract class NonRedundantSetLattice<S extends NonRedundantSetLattice<S,
 
 	/**
 	 * An Egli-Milner connector is an upper bound operator for the
-	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation
-	 * &le;<sub>EM</sub>}. An Egli-Milner connector is represented as
+	 * {@link #lessOrEqualEgliMilner(NonRedundantSetLattice) Egli-Milner
+	 * relation &le;<sub>EM</sub>}. An Egli-Milner connector is represented as
 	 * +<sub>EM</sub>. Given two subsets S<sub>1</sub> and S<sub>2</sub> of a
 	 * domain of a lattice S<sub>1</sub> +<sub>EM</sub> S<sub>2</sub> =
 	 * S<sub>3</sub> such that ( S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub> )
@@ -286,7 +286,7 @@ public abstract class NonRedundantSetLattice<S extends NonRedundantSetLattice<S,
 	 * <li>&nabla; is the widening operator of the underlying lattice,</li>
 	 * <li>&lt; is the strict partial order relation of the underlying
 	 * lattice,</li>
-	 * <li>LUB is the {@link #lubAux(NonRedundantPowerset) least upper bound}
+	 * <li>LUB is the {@link #lubAux(NonRedundantSetLattice) least upper bound}
 	 * operator between non redundant subsets of the domain of the underlying
 	 * lattice.</li>
 	 * </ul>

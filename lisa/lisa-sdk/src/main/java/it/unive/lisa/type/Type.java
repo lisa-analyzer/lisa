@@ -1,11 +1,14 @@
 package it.unive.lisa.type;
 
+import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.DefaultParamInitialization;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
 import java.util.Set;
 
@@ -322,7 +325,7 @@ public interface Type {
 	 * default value. The returned expression's semantics function should leave
 	 * a {@link SymbolicExpression} on the stack that can be used as second
 	 * parameter in a
-	 * {@link SemanticDomain#assign(it.unive.lisa.symbolic.value.Identifier, SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint, it.unive.lisa.analysis.SemanticOracle)}
+	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, ProgramPoint)}
 	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
 	 * for instance, define fields or second-level memory regions initialized
 	 * together with the main target of the returned expression (e.g., if the
@@ -350,7 +353,7 @@ public interface Type {
 	 * statically unknown value. The returned expression's semantics function
 	 * should leave a {@link SymbolicExpression} on the stack that can be used
 	 * as second parameter in a
-	 * {@link SemanticDomain#assign(it.unive.lisa.symbolic.value.Identifier, SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint, it.unive.lisa.analysis.SemanticOracle)}
+	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, ProgramPoint)}
 	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
 	 * for instance, define fields or second-level memory regions initialized
 	 * together with the main target of the returned expression (e.g., if the
@@ -394,6 +397,21 @@ public interface Type {
 			else
 				result = result.commonSupertype(t);
 		return result;
+	}
+
+	/**
+	 * Yields whether casting a value towards this type entails a conversion of
+	 * the value to this type. This is different from casting, which just
+	 * changes the static type of the value without modifying its runtime type.
+	 * Instead, when a conversion happens, the value is converted to a value of
+	 * this type. This is the case, for instance, when casting a Java integer to
+	 * a Java double.
+	 * 
+	 * @return whether casting a value towards this type entails a conversion of
+	 *             the value to this type
+	 */
+	default boolean castIsConversion() {
+		return false;
 	}
 
 }

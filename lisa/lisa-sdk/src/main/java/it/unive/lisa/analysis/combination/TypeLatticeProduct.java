@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.symbolic.value.Identifier;
 
 /**
- * A {@link HeapCartesianCombination} of two arbitrary {@link HeapLattice}s,
+ * A {@link TypeCartesianCombination} of two arbitrary {@link TypeLattice}s,
  * with no reduction.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

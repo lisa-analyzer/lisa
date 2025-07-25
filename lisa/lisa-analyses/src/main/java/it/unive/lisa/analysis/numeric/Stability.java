@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.numeric;
 
+import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
@@ -50,7 +51,7 @@ import java.util.Set;
  * {@link ValueDomain} {@code aux} and a {@link ValueEnvironment} {@code trends}
  * of {@link Trend} instances, representing per-variable trends. Queries are
  * carried over by the
- * {@link SemanticDomain#satisfies(SymbolicExpression, ProgramPoint, SemanticOracle)}
+ * {@link SemanticDomain#satisfies(DomainLattice, SymbolicExpression, ProgramPoint)}
  * operator invoked on {@code aux}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

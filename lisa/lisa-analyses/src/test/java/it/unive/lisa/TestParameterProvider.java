@@ -80,6 +80,7 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
+import it.unive.lisa.program.cfg.statement.literal.TypeLiteral;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.program.type.Int32Type;
@@ -559,6 +560,8 @@ public class TestParameterProvider {
 			};
 		if (param == UnresolvedCall.class || param == Call.class)
 			return (R) new UnresolvedCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "fake", "fake");
+		if (param == TypeLiteral.class)
+			return (R) new TypeLiteral(cfg, SyntheticLocation.INSTANCE, StringType.INSTANCE);
 
 		// features
 		if (param == ParameterMatchingStrategy.class)

@@ -402,7 +402,7 @@ public interface Lattice<L extends Lattice<L>>
 	 * <br>
 	 * The default implementation of this method lubs together (using
 	 * {@link Lattice#lub(Lattice)}) all instances returned by
-	 * {@link #getAllDomainInstances(Class)}, defaulting to {@code null} if no
+	 * {@link #getAllLatticeInstances(Class)}, defaulting to {@code null} if no
 	 * instance is returned.
 	 * 
 	 * @param <D>    the type of lattice to retrieve

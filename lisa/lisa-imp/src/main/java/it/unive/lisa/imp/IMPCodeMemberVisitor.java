@@ -47,7 +47,9 @@ import it.unive.lisa.imp.expressions.IMPArrayAccess;
 import it.unive.lisa.imp.expressions.IMPAssert;
 import it.unive.lisa.imp.expressions.IMPNewArray;
 import it.unive.lisa.imp.expressions.IMPNewObj;
+import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.ClassType;
+import it.unive.lisa.imp.types.InterfaceType;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
@@ -85,6 +87,7 @@ import it.unive.lisa.program.cfg.statement.literal.Literal;
 import it.unive.lisa.program.cfg.statement.literal.NullLiteral;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
+import it.unive.lisa.program.cfg.statement.literal.TypeLiteral;
 import it.unive.lisa.program.cfg.statement.logic.And;
 import it.unive.lisa.program.cfg.statement.logic.Not;
 import it.unive.lisa.program.cfg.statement.logic.Or;
@@ -93,9 +96,12 @@ import it.unive.lisa.program.cfg.statement.numeric.Multiplication;
 import it.unive.lisa.program.cfg.statement.numeric.Negation;
 import it.unive.lisa.program.cfg.statement.numeric.Remainder;
 import it.unive.lisa.program.cfg.statement.numeric.Subtraction;
+import it.unive.lisa.program.cfg.statement.types.Cast;
+import it.unive.lisa.program.cfg.statement.types.IsInstance;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
@@ -621,6 +627,25 @@ class IMPCodeMemberVisitor
 						new SourceCodeLocation(file, line, col),
 						visitExpression(ctx.left),
 						visitExpression(ctx.right));
+		else if (ctx.left != null && ctx.type != null)
+			if (ctx.IS() != null)
+				return new IsInstance(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						new TypeLiteral(
+								cfg,
+								new SourceCodeLocation(file, line, col),
+								makeType(ctx.type.toString())));
+			else
+				return new Cast(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						new TypeLiteral(
+								cfg,
+								new SourceCodeLocation(file, line, col),
+								makeType(ctx.type.toString())));
 		else if (ctx.NEW() != null)
 			if (ctx.newBasicArrayExpr() != null)
 				return visitNewBasicArrayExpr(ctx.newBasicArrayExpr());
@@ -644,6 +669,33 @@ class IMPCodeMemberVisitor
 
 		throw new UnsupportedOperationException(
 				"Type of expression not supported: " + ctx);
+	}
+
+	private Type makeType(
+			String name) {
+		switch (name) {
+		case "int":
+			return Int32Type.INSTANCE;
+		case "float":
+			return Float32Type.INSTANCE;
+		case "bool":
+			return BoolType.INSTANCE;
+		case "string":
+			return StringType.INSTANCE;
+		default:
+			Type t = ClassType.lookup(name);
+			if (t != null)
+				return t;
+			t = InterfaceType.lookup(name);
+			if (t != null)
+				return t;
+			if (name.contains("[")) {
+				t = ArrayType.lookup(makeType(name.substring(0, name.indexOf("["))), 1);
+				if (t != null)
+					return t;
+			}
+			throw new IMPSyntaxException("Type '" + name + "' not found");
+		}
 	}
 
 	@Override
@@ -813,7 +865,7 @@ class IMPCodeMemberVisitor
 			NewReferenceTypeContext ctx) {
 		// null since we do not want to create a new one, class types should
 		// have been created during the preprocessing
-		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
+		Type base = ClassType.lookup(ctx.IDENTIFIER().getText());
 		if (ctx.arrayCreatorRest() != null)
 			return new IMPNewArray(
 					cfg,
@@ -832,7 +884,7 @@ class IMPCodeMemberVisitor
 			NewReferenceTypeContext ctx) {
 		// null since we do not want to create a new one, class types should
 		// have been created during the preprocessing
-		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
+		Type base = ClassType.lookup(ctx.IDENTIFIER().getText());
 		if (ctx.arrayCreatorRest() != null)
 			return new IMPNewArray(
 					cfg,

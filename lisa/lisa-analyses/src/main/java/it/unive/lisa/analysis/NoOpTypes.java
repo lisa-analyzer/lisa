@@ -15,9 +15,9 @@ import java.util.Set;
  * This is useful in analyses where type information is not relevant or when a
  * placeholder is needed. Note that this domain cannot produce typing
  * information:
- * {@link #getRuntimeTypesOf(SymbolicExpression, ProgramPoint, SemanticOracle)}
+ * {@link #getRuntimeTypesOf(SingleTypeLattice, SymbolicExpression, ProgramPoint, SemanticOracle)}
  * always returns all possible types, and
- * {@link #getDynamicTypeOf(SymbolicExpression, ProgramPoint, SemanticOracle)}
+ * {@link #getDynamicTypeOf(SingleTypeLattice, SymbolicExpression, ProgramPoint, SemanticOracle)}
  * always returns {@link Untyped#INSTANCE}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

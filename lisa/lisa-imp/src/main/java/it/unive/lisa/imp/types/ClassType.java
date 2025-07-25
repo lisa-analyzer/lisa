@@ -20,8 +20,8 @@ import java.util.Set;
  * A type representing an IMP class defined in an IMP program. ClassTypes are
  * instances of {@link PointerType} and {@link UnitType}, and are identified by
  * their name. To ensure uniqueness of ClassType objects,
- * {@link #lookup(String, CompilationUnit)} must be used to retrieve existing
- * instances (or automatically create one if no matching instance exists).
+ * {@link #register(String, CompilationUnit)} must be used to create new
+ * instances and {@link #lookup(String)} to retrieve existing instances.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -48,9 +48,23 @@ public final class ClassType
 	}
 
 	/**
-	 * Yields a unique instance (either an existing one or a fresh one) of
-	 * {@link ClassType} representing a class with the given {@code name},
-	 * representing the given {@code unit}.
+	 * Yields a unique existing instance of {@link ClassType} representing a
+	 * class with the given {@code name}.
+	 * 
+	 * @param name the name of the class
+	 * 
+	 * @return the unique instance of {@link ClassType} representing the class
+	 *             with the given name
+	 */
+	public static ClassType lookup(
+			String name) {
+		return types.get(name);
+	}
+
+	/**
+	 * Yields a fresh unique instance of {@link ClassType} representing a class
+	 * with the given {@code name}, representing the given {@code unit}, and
+	 * stores it in the internal cache.
 	 * 
 	 * @param name the name of the class
 	 * @param unit the unit underlying this type
@@ -58,10 +72,14 @@ public final class ClassType
 	 * @return the unique instance of {@link ClassType} representing the class
 	 *             with the given name
 	 */
-	public static ClassType lookup(
+	public static ClassType register(
 			String name,
 			CompilationUnit unit) {
-		return types.computeIfAbsent(name, x -> new ClassType(name, unit));
+		if (types.containsKey(name))
+			return types.get(name);
+		ClassType ct = new ClassType(name, unit);
+		types.put(name, ct);
+		return ct;
 	}
 
 	private final String name;
@@ -137,7 +155,7 @@ public final class ClassType
 				return current;
 
 			// null since we do not want to create new types here
-			current.unit.getImmediateAncestors().forEach(u -> ws.push(lookup(u.getName(), null)));
+			current.unit.getImmediateAncestors().forEach(u -> ws.push(lookup(u.getName())));
 		}
 
 		return Untyped.INSTANCE;
@@ -185,7 +203,7 @@ public final class ClassType
 			TypeSystem types) {
 		Set<Type> instances = new HashSet<>();
 		for (Unit in : unit.getInstances())
-			instances.add(lookup(in.getName(), null));
+			instances.add(lookup(in.getName()));
 		return instances;
 	}
 

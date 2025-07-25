@@ -65,7 +65,7 @@ public class IMPNewArray
 				cfg,
 				new SourceCodeLocation(sourceFile, line, col),
 				(staticallyAllocated ? "" : "new ") + type + "[]",
-				ArrayType.lookup(type, dimensions.length),
+				ArrayType.register(type, dimensions.length),
 				dimensions);
 		if (dimensions.length != 1)
 			throw new UnsupportedOperationException("Multidimensional arrays are not yet supported");

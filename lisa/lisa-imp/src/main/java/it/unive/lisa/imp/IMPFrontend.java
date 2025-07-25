@@ -238,12 +238,13 @@ public class IMPFrontend
 
 			// add as possible types all arrays of the legal types (including
 			// user defined ones)
-			ArrayType.lookup(BoolType.INSTANCE, 1);
-			ArrayType.lookup(Float32Type.INSTANCE, 1);
-			ArrayType.lookup(Int32Type.INSTANCE, 1);
-			ArrayType.lookup(StringType.INSTANCE, 1);
-			ClassType.all().forEach(t -> ArrayType.lookup(t, 1));
-			InterfaceType.all().forEach(t -> ArrayType.lookup(t, 1));
+			// TODO multidimensional arrays?
+			ArrayType.register(BoolType.INSTANCE, 1);
+			ArrayType.register(Float32Type.INSTANCE, 1);
+			ArrayType.register(Int32Type.INSTANCE, 1);
+			ArrayType.register(StringType.INSTANCE, 1);
+			ClassType.all().forEach(t -> ArrayType.register(t, 1));
+			InterfaceType.all().forEach(t -> ArrayType.register(t, 1));
 
 			// register all possible types
 			p.getTypes().registerType(BoolType.INSTANCE);
@@ -310,13 +311,13 @@ public class IMPFrontend
 				else
 					u = new AbstractClassUnit(loc, program, name, false);
 				program.addUnit(u);
-				ClassType.lookup(u.getName(), u);
+				ClassType.register(u.getName(), u);
 
 				implementedInterfaces.put(name, new HashSet<>());
 			} else if (unit.interfaceUnit() != null) {
 				InterfaceUnit i = new InterfaceUnit(loc, program, unit.interfaceUnit().name.getText(), false);
 				program.addUnit(i);
-				InterfaceType.lookup(i.getName(), i);
+				InterfaceType.register(i.getName(), i);
 
 				implementedInterfaces.put(unit.interfaceUnit().name.getText(), new HashSet<>());
 			}
@@ -556,7 +557,7 @@ public class IMPFrontend
 		formals[0] = new Parameter(
 				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				"this",
-				new ReferenceType(ClassType.lookup(this.currentUnit.getName(), this.currentUnit)));
+				new ReferenceType(ClassType.register(this.currentUnit.getName(), this.currentUnit)));
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);

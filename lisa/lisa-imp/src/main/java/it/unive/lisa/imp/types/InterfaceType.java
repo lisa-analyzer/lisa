@@ -19,8 +19,8 @@ import java.util.Set;
  * A type representing an IMP interface defined in an IMP program. Interface
  * type are instances of {@link UnitType}, and are identified by their name. To
  * ensure uniqueness of InterfaceType objects,
- * {@link #lookup(String, InterfaceUnit)} must be used to retrieve existing
- * instances (or automatically create one if no matching instance exists).
+ * {@link #register(String, InterfaceUnit)} must be used to create new instances
+ * and {@link #lookup(String)} to retrieve existing instances.
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
@@ -47,9 +47,23 @@ public final class InterfaceType
 	}
 
 	/**
-	 * Yields a unique instance (either an existing one or a fresh one) of
-	 * {@link InterfaceType} representing an interface with the given
-	 * {@code name}, representing the given {@code unit}.
+	 * Yields a unique existing instance of {@link InterfaceType} representing
+	 * an interface with the given {@code name}.
+	 * 
+	 * @param name the name of the interface
+	 * 
+	 * @return the unique instance of {@link InterfaceType} representing the
+	 *             interface with the given name
+	 */
+	public static InterfaceType lookup(
+			String name) {
+		return types.get(name);
+	}
+
+	/**
+	 * Yields a fresh unique instance of {@link InterfaceType} representing an
+	 * interface with the given {@code name}, representing the given
+	 * {@code unit}, and stores it in the internal cache.
 	 * 
 	 * @param name the name of the interface
 	 * @param unit the unit underlying this type
@@ -57,10 +71,14 @@ public final class InterfaceType
 	 * @return the unique instance of {@link InterfaceType} representing the
 	 *             interface with the given name
 	 */
-	public static InterfaceType lookup(
+	public static InterfaceType register(
 			String name,
 			InterfaceUnit unit) {
-		return types.computeIfAbsent(name, x -> new InterfaceType(name, unit));
+		if (types.containsKey(name))
+			return types.get(name);
+		InterfaceType it = new InterfaceType(name, unit);
+		types.put(name, it);
+		return it;
 	}
 
 	private final String name;
@@ -125,7 +143,7 @@ public final class InterfaceType
 				return current;
 
 			// null since we do not want to create new types here
-			current.unit.getImmediateAncestors().forEach(u -> ws.push(lookup(u.getName(), null)));
+			current.unit.getImmediateAncestors().forEach(u -> ws.push(lookup(u.getName())));
 		}
 
 		return Untyped.INSTANCE;
@@ -174,9 +192,9 @@ public final class InterfaceType
 		Set<Type> instances = new HashSet<>();
 		for (Unit un : unit.getInstances())
 			if (un instanceof InterfaceUnit)
-				instances.add(lookup(un.getName(), null));
+				instances.add(lookup(un.getName()));
 			else
-				instances.add(ClassType.lookup(un.getName(), null));
+				instances.add(ClassType.lookup(un.getName()));
 		return instances;
 	}
 

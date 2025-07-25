@@ -61,9 +61,8 @@ public final class ArrayType
 	}
 
 	/**
-	 * Yields a unique instance (either an existing one or a fresh one) of
-	 * {@link ArrayType} representing an array with the given {@code base} type
-	 * and the given {@code dimensions}.
+	 * Yields a unique existing instance of {@link ArrayType} representing an
+	 * array with the given {@code base} type and the given {@code dimensions}.
 	 * 
 	 * @param base       the base type of the array
 	 * @param dimensions the number of dimensions of this array
@@ -74,7 +73,29 @@ public final class ArrayType
 	public static ArrayType lookup(
 			Type base,
 			int dimensions) {
-		return types.computeIfAbsent(Pair.of(base, dimensions), x -> new ArrayType(base, dimensions));
+		return types.get(Pair.of(base, dimensions));
+	}
+
+	/**
+	 * Yields a fresh unique instance of {@link ArrayType} representing an array
+	 * with the given {@code base} type and the given {@code dimensions}, and
+	 * stores it in the internal cache.
+	 * 
+	 * @param base       the base type of the array
+	 * @param dimensions the number of dimensions of this array
+	 * 
+	 * @return the unique instance of {@link ArrayType} representing the class
+	 *             with the given name
+	 */
+	public static ArrayType register(
+			Type base,
+			int dimensions) {
+		Pair<Type, Integer> key = Pair.of(base, dimensions);
+		if (types.containsKey(key))
+			return types.get(key);
+		ArrayType at = new ArrayType(base, dimensions);
+		types.put(key, at);
+		return at;
 	}
 
 	private final Type base;
@@ -85,8 +106,8 @@ public final class ArrayType
 			Type base,
 			int dimensions) {
 		this.base = base;
-		if (dimensions < 1)
-			throw new IllegalArgumentException("Cannot create an array type with less then 1 dimensions");
+		if (dimensions != 1)
+			throw new IllegalArgumentException("Can only create an array type with 1 dimension");
 		this.dimensions = dimensions;
 	}
 

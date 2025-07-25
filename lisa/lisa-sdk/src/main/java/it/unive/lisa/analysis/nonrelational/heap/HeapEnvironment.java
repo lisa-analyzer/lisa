@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
 import it.unive.lisa.analysis.heap.HeapLattice;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;

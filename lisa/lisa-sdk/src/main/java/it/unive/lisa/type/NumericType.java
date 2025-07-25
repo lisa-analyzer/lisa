@@ -212,4 +212,9 @@ public interface NumericType
 		return result;
 	}
 
+	@Override
+	default boolean castIsConversion() {
+		return true;
+	}
+
 }

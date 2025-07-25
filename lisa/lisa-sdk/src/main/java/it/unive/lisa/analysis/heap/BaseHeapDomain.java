@@ -25,7 +25,7 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
  * cases of
- * {@link #smallStepSemantics(SymbolicExpression, ProgramPoint, SemanticOracle)}
+ * {@link #smallStepSemantics(HeapLattice, SymbolicExpression, ProgramPoint, SemanticOracle)}
  * and providing a base expression rewriting strategy as an
  * {@link ExpressionVisitor}. All implementers of {@link HeapDomain} should
  * inherit from this class for ensuring a consistent behavior on the base cases,

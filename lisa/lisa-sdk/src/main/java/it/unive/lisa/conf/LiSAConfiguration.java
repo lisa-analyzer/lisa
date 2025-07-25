@@ -127,7 +127,7 @@ public class LiSAConfiguration
 	 * The collection of {@link SemanticCheck}s to execute. These will be
 	 * executed after the fixpoint iteration has been completed, and will be
 	 * provided with the computed fixpoint results (customizable through
-	 * {@link #abstractState}) and the {@link CallGraph} (that can be customized
+	 * {@link #analysis}) and the {@link CallGraph} (that can be customized
 	 * through {@link #callGraph}) that has been built. Defaults to an empty
 	 * set.
 	 */
@@ -337,7 +337,7 @@ public class LiSAConfiguration
 
 	/**
 	 * Converts this configuration to a property bag, that is, a map from keys
-	 * (fields of this class) to values (their values). {@link #abstractState},
+	 * (fields of this class) to values (their values). {@link #analysis},
 	 * {@link #callGraph}, and {@link #interproceduralAnalysis} are omitted.
 	 * 
 	 * @return the property bag

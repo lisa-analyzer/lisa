@@ -20,9 +20,8 @@ import java.util.Map.Entry;
 /**
  * The substring relational abstract domain (see {@link SubstringDomain})
  * enriched with string constant propagation. This domain tracks the Cartesian
- * product between {@link SubstringDomain.Substrings} and
- * {@link StringConstantPropagation.StringConstant}. This domain follows the one
- * defined
+ * product between {@link Substrings} and {@link StringConstant}. This domain
+ * follows the one defined
  * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
  * this paper</a>.
  * 

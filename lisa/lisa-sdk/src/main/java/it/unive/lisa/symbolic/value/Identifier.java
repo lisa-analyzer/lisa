@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
@@ -90,12 +91,14 @@ public abstract class Identifier
 	}
 
 	/**
-	 * Yields {@code true} if a call to {@link #pushScope(ScopeToken)} on this
-	 * identifier yields a new {@link OutOfScopeIdentifier} associated with the
-	 * given scope, that can then be removed by {@link #popScope(ScopeToken)}.
-	 * If this method returns {@code false}, then {@link #pushScope(ScopeToken)}
-	 * and {@link #popScope(ScopeToken)} will always return this identifier
-	 * instead.
+	 * Yields {@code true} if a call to
+	 * {@link #pushScope(ScopeToken, ProgramPoint)} on this identifier yields a
+	 * new {@link OutOfScopeIdentifier} associated with the given scope, that
+	 * can then be removed by {@link #popScope(ScopeToken, ProgramPoint)}. If
+	 * this method returns {@code false}, then
+	 * {@link #pushScope(ScopeToken, ProgramPoint)} and
+	 * {@link #popScope(ScopeToken, ProgramPoint)} will always return this
+	 * identifier instead.
 	 * 
 	 * @return {@code true} if that condition holds
 	 */

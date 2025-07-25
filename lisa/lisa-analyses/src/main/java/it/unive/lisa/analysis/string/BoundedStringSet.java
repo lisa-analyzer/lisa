@@ -37,7 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * A domain computing bounded set of strings, where the maximum number of
- * elements is defined by {@link #MAX_SIZE}. If the number of elements exceeds
+ * elements is defined by {@link #max_size}. If the number of elements exceeds
  * this limit, the set is considered to be top. The domain is defined
  * <a href="https://link.springer.com/chapter/10.1007/978-3-642-54807-9_12">in
  * this paper</a>.

@@ -4,7 +4,6 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.combination.ValueCartesianCombination;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.UpperBounds;
 import it.unive.lisa.lattices.symbolic.DefiniteIdSet;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.numeric.IntInterval;
@@ -22,9 +21,9 @@ import org.apache.commons.collections4.CollectionUtils;
 /**
  * The lattice structure of the pentagons analysis, which is a cartesian product
  * of two lattices: a map from identifiers to {@link IntInterval}s, and a map
- * from identifiers to {@link UpperBounds.DefiniteIdSet}s (representing upper
- * bounds information). This class also implements the necessary reductions to
- * refine the bounds based on the intervals.
+ * from identifiers to {@link DefiniteIdSet}s (representing upper bounds
+ * information). This class also implements the necessary reductions to refine
+ * the bounds based on the intervals.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
