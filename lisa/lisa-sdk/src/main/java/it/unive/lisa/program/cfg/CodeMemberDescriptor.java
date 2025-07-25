@@ -4,6 +4,8 @@ import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Arrays;
@@ -484,6 +486,56 @@ public class CodeMemberDescriptor
 	public void addAnnotation(
 			Annotation ann) {
 		annotations.addAnnotation(ann);
+	}
+
+	/**
+	 * Yields the annotations of the variable with the given name, retrieved
+	 * from the variable table.
+	 * 
+	 * @param variableName the name of the variable whose annotations are to be
+	 *                         retrieved
+	 * @param st           the statement where the variable is being referenced,
+	 *                         to retrieve the annotations of the right variable
+	 *                         in case more with the same name are defined in
+	 *                         different scopes
+	 * 
+	 * @return the annotations of the variable
+	 */
+	public Annotations getAnnotationsOf(
+			String variableName,
+			Statement st) {
+		for (VariableTableEntry entry : variables)
+			if (entry.getName().equals(variableName) && within(st, entry.getScopeStart(), entry.getScopeEnd()))
+				return entry.getAnnotations();
+		return new Annotations();
+	}
+
+	private boolean within(
+			Statement s,
+			Statement start,
+			Statement end) {
+		if (start == null && end == null)
+			return true;
+
+		if (start != null)
+			if (start.getLocation().compareTo(s.getLocation()) > 0
+					&& !(s instanceof Expression && ((Expression) s).getRootStatement() == start))
+				// if s appears before the start of the scope
+				// and if its not nested within the start of the scope
+				// we return false
+				return false;
+
+		if (end != null && !end.getLocation().equals(getLocation()))
+			// the end node might be instrumented to the cfg itself if
+			// the return is implicit
+			if (end.getLocation().compareTo(s.getLocation()) < 0
+					&& !(s instanceof Expression && ((Expression) s).getRootStatement() == end))
+				// if s appears after the end of the scope
+				// and if its not nested within the end of the scope
+				// we return false
+				return false;
+
+		return true;
 	}
 
 }

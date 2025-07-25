@@ -10,7 +10,6 @@ import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Variable;
@@ -151,11 +150,7 @@ public class VariableRef
 	 * @return the annotations of this variable.
 	 */
 	public Annotations getAnnotations() {
-		// FIXME the iteration should be performed inside the descriptor
-		for (VariableTableEntry entry : getCFG().getDescriptor().getVariables())
-			if (entry.getName().equals(getName()))
-				return entry.getAnnotations();
-		return new Annotations();
+		return getCFG().getDescriptor().getAnnotationsOf(getName(), this);
 	}
 
 }
