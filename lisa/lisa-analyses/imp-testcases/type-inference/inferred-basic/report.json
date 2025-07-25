@@ -33,6 +33,6 @@
     "syntacticChecks" : "",
     "useWideningPoints" : "true",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs/type-inference/basic"
+    "workdir" : "test-outputs/type-inference/inferred-basic"
   }
 }

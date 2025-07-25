@@ -9,7 +9,7 @@ import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
 import org.junit.Test;
 
-public class TypesCollectionTest
+public class TypeInferenceTest
 		extends
 		AnalysisTestExecutor {
 
@@ -23,8 +23,24 @@ public class TypesCollectionTest
 						DefaultConfiguration.defaultValueDomain(),
 						new InferredTypes());
 		conf.testDir = "type-inference";
-		conf.testSubDir = "basic";
+		conf.testSubDir = "inferred-basic";
 		conf.programFile = "inference.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testCasts() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.analysis = DefaultConfiguration
+				.simpleState(
+						DefaultConfiguration.defaultHeapDomain(),
+						DefaultConfiguration.defaultValueDomain(),
+						new InferredTypes());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.testDir = "type-inference";
+		conf.testSubDir = "inferred-casts";
+		conf.programFile = "casts.imp";
 		perform(conf);
 	}
 
@@ -39,7 +55,7 @@ public class TypesCollectionTest
 						new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "type-inference";
-		conf.testSubDir = "objects";
+		conf.testSubDir = "inferred-objects";
 		conf.programFile = "objects.imp";
 		perform(conf);
 	}

@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.statement.types;
 
+import java.util.Collections;
+
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -16,7 +18,9 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeTokenType;
 
 /**
  * An expression that yields its first operand, but casted or converted
@@ -65,6 +69,10 @@ public class Cast
 			return state.bottom();
 
 		Type target = (Type) ((Constant) right).getValue();
+		if (target.isInMemoryType()) {
+			ReferenceType ref = new ReferenceType(target);
+			right = new Constant(new TypeTokenType(Collections.singleton(ref)), ref, right.getCodeLocation());
+		}
 		return interprocedural.getAnalysis().smallStepSemantics(
 				state,
 				new BinaryExpression(

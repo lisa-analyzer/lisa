@@ -1,17 +1,17 @@
 {
   "warnings" : [ ],
-  "files" : [ "report.json", "untyped_typing.typing(typing__this)_-1083205046.json", "untyped_typing2.main(typing2__this).json", "untyped_typing2.typing2(typing2__this)_-1083204054.json" ],
+  "files" : [ "report.json", "untyped_sub.sub(sub__this)_938376017.json", "untyped_typing.main(typing__this).json", "untyped_typing.typing(typing__this)_938378869.json" ],
   "info" : {
     "cfgs" : "3",
-    "duration" : "638ms",
-    "end" : "2025-07-09T13:02:56.945+02:00",
-    "expressions" : "10",
+    "duration" : "529ms",
+    "end" : "2025-07-25T12:54:11.323+02:00",
+    "expressions" : "46",
     "files" : "3",
-    "globals" : "1",
+    "globals" : "0",
     "members" : "3",
     "programs" : "1",
-    "start" : "2025-07-09T13:02:56.307+02:00",
-    "statements" : "7",
+    "start" : "2025-07-25T12:54:10.794+02:00",
+    "statements" : "24",
     "units" : "2",
     "version" : "0.1",
     "warnings" : "0"
@@ -33,6 +33,6 @@
     "syntacticChecks" : "",
     "useWideningPoints" : "true",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs/type-inference/objects"
+    "workdir" : "test-outputs/type-inference/inferred-casts"
   }
 }
