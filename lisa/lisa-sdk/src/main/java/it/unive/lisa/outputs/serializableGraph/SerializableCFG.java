@@ -73,12 +73,11 @@ public class SerializableCFG {
 			process(source, nodes, descrs, node, descriptionGenerator, gen.result);
 
 		for (Edge edge : source.getEdges())
-			edges
-					.add(
-							new SerializableEdge(
-									gen.result.get(edge.getSource()).getLeft(),
-									gen.result.get(edge.getDestination()).getLeft(),
-									edge.getClass().getSimpleName()));
+			edges.add(new SerializableEdge(
+				gen.result.get(edge.getSource()).getLeft(),
+				gen.result.get(edge.getDestination()).getLeft(),
+				edge.getClass().getSimpleName(),
+				edge.getLabel()));
 
 		return new SerializableGraph(name, desc, nodes, edges, descrs);
 	}

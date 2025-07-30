@@ -65,6 +65,11 @@ public class TrueEdge
 	}
 
 	@Override
+	public boolean isErrorHandling() {
+		return false;
+	}
+
+	@Override
 	public TrueEdge newInstance(
 			Statement source,
 			Statement destination) {

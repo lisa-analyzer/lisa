@@ -4,6 +4,9 @@ import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
@@ -60,6 +63,13 @@ public class CodeMemberDescriptor
 	 * Whether or not the cfg can be overridden
 	 */
 	private boolean overridable;
+
+	/**
+	 * The control flow structures of this cfg
+	 */
+	private final Collection<ControlFlowStructure> cfStructs;
+
+	private final Collection<ProtectionBlock> protectionBlocks;
 
 	private final Collection<CodeMember> overriddenBy;
 
@@ -167,7 +177,10 @@ public class CodeMemberDescriptor
 		overriddenBy = new HashSet<>();
 		overrides = new HashSet<>();
 
+		this.cfStructs = new LinkedList<>();
+		this.protectionBlocks = new LinkedList<>();
 		this.variables = new LinkedList<>();
+
 		int i = 0;
 		for (Parameter formal : formals)
 			addVariable(
@@ -298,6 +311,61 @@ public class CodeMemberDescriptor
 	}
 
 	/**
+	 * Adds the given {@link ControlFlowStructure} to the ones contained in this
+	 * cfg.
+	 * 
+	 * @param cf the control flow structure to add
+	 * 
+	 * @throws IllegalArgumentException if a control flow structure for the same
+	 *                                      condition already exists
+	 */
+	public void addControlFlowStructure(
+			ControlFlowStructure cf) {
+		if (cfStructs.stream().anyMatch(c -> c.getCondition().equals(cf.getCondition())))
+			throw new IllegalArgumentException(
+					"Cannot have more than one conditional structure happening on the same condition: "
+							+ cf.getCondition());
+		cfStructs.add(cf);
+	}
+
+	/**
+	 * Yields the collection of {@link ControlFlowStructure}s contained in this
+	 * cfg.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, this will yield an
+	 * empty collection. You can apply heuristics to extract control flow structures
+	 * by invoking {@link CFG#extractControlFlowStructures(ControlFlowExtractor)}.
+	 * 
+	 * @return the collection, either provided by frontends or extracted, of the
+	 *             control flow structures of this cfg
+	 */
+	public Collection<ControlFlowStructure> getControlFlowStructures() {
+		return cfStructs;
+	}
+
+	/**
+	 * Adds the given {@link ProtectionBlock} to the ones contained in this
+	 * cfg.
+	 * 
+	 * @param pb the protection block to add
+	 */
+	public void addProtectionBlock(
+			ProtectionBlock pb) {
+		protectionBlocks.add(pb);
+	}
+
+	/**
+	 * Yields the collection of {@link ProtectionBlock}s contained in this
+	 * cfg.
+	 * 
+	 * @return the the protection blocks of this cfg
+	 */
+	public Collection<ProtectionBlock> getProtectionBlocks() {
+		return protectionBlocks;
+	}
+
+	/**
 	 * Yields {@code true} if and only if the cfg associated to this descriptor
 	 * is can be overridden by cfgs in {@link Unit}s that inherit for the cfg's
 	 * unit.
@@ -363,6 +431,8 @@ public class CodeMemberDescriptor
 		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
 		result = prime * result + ((unit == null) ? 0 : unit.hashCode());
 		result = prime * result + ((variables == null) ? 0 : variables.hashCode());
+		result = prime * result + ((cfStructs == null) ? 0 : cfStructs.hashCode());
+		result = prime * result + ((protectionBlocks == null) ? 0 : protectionBlocks.hashCode());
 		return result;
 	}
 
@@ -421,6 +491,16 @@ public class CodeMemberDescriptor
 			if (other.variables != null)
 				return false;
 		} else if (!variables.equals(other.variables))
+			return false;
+		if (cfStructs == null) {
+			if (other.cfStructs != null)
+				return false;
+		} else if (!cfStructs.equals(other.cfStructs))
+			return false;
+		if (protectionBlocks == null) {
+			if (other.protectionBlocks != null)
+				return false;
+		} else if (!protectionBlocks.equals(other.protectionBlocks))
 			return false;
 		return true;
 	}

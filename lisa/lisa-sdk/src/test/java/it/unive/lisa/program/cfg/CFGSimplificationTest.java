@@ -147,7 +147,8 @@ public class CFGSimplificationTest {
 		tbranch.add(print);
 		Collection<Statement> fbranch = new HashSet<>();
 		tbranch.add(noop1);
-		first.addControlFlowStructure(new IfThenElse(first.getNodeList(), gt, noop2, tbranch, fbranch));
+		first.getDescriptor().addControlFlowStructure(
+			new IfThenElse(first.getNodeList(), gt, noop2, tbranch, fbranch));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
 		assign = new Assignment(
@@ -172,12 +173,13 @@ public class CFGSimplificationTest {
 		tbranch = new HashSet<>();
 		tbranch.add(print);
 		fbranch = new HashSet<>();
-		second.addControlFlowStructure(new IfThenElse(second.getNodeList(), gt, ret, tbranch, fbranch));
+		second.getDescriptor().addControlFlowStructure(
+			new IfThenElse(second.getNodeList(), gt, ret, tbranch, fbranch));
 
 		first.simplify();
 		assertTrue("Different CFGs", second.isEqualTo(first));
-		ControlFlowStructure exp = second.getControlFlowStructures().iterator().next();
-		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();
+		ControlFlowStructure exp = second.getDescriptor().getControlFlowStructures().iterator().next();
+		ControlFlowStructure act = first.getDescriptor().getControlFlowStructures().iterator().next();
 		assertEquals("Simplification did not update control flow structures", exp, act);
 	}
 
@@ -348,7 +350,8 @@ public class CFGSimplificationTest {
 		tbranch.add(assign2);
 		Collection<Statement> fbranch = new HashSet<>();
 		fbranch.add(assign3);
-		first.addControlFlowStructure(new IfThenElse(first.getNodeList(), assign1, end, tbranch, fbranch));
+		first.getDescriptor().addControlFlowStructure(
+			new IfThenElse(first.getNodeList(), assign1, end, tbranch, fbranch));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
 		assign1 = new Assignment(
@@ -376,12 +379,13 @@ public class CFGSimplificationTest {
 		tbranch.add(assign2);
 		fbranch = new HashSet<>();
 		fbranch.add(assign3);
-		second.addControlFlowStructure(new IfThenElse(second.getNodeList(), assign1, null, tbranch, fbranch));
+		second.getDescriptor().addControlFlowStructure(
+			new IfThenElse(second.getNodeList(), assign1, null, tbranch, fbranch));
 
 		first.simplify();
 		assertTrue("Different CFGs", second.isEqualTo(first));
-		ControlFlowStructure exp = second.getControlFlowStructures().iterator().next();
-		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();
+		ControlFlowStructure exp = second.getDescriptor().getControlFlowStructures().iterator().next();
+		ControlFlowStructure act = first.getDescriptor().getControlFlowStructures().iterator().next();
 		assertEquals("Simplification did not update control flow structures", exp, act);
 	}
 

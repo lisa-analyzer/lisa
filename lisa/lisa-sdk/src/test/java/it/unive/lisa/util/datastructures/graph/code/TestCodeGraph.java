@@ -100,6 +100,11 @@ public class TestCodeGraph
 		}
 
 		@Override
+		public boolean isErrorHandling() {
+			return false;
+		}
+
+		@Override
 		public TestCodeEdge newInstance(
 				TestCodeNode source,
 				TestCodeNode destination) {

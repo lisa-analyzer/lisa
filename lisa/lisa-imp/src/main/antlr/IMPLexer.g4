@@ -106,6 +106,18 @@ NEW
 ASSERT
    : 'assert'
    ;
+
+TRY
+   : 'try'
+   ;
+
+CATCH
+   : 'catch'
+   ;
+
+FINALLY
+   : 'finally'
+   ;
    // =========================== STRING FUNCTIONS =========================== 
    
 STRCAT

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -27,6 +28,7 @@ import it.unive.lisa.imp.antlr.IMPParser.BasicExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.BinaryStringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.BlockContext;
 import it.unive.lisa.imp.antlr.IMPParser.BlockOrStatementContext;
+import it.unive.lisa.imp.antlr.IMPParser.CatchBlockContext;
 import it.unive.lisa.imp.antlr.IMPParser.ExpressionContext;
 import it.unive.lisa.imp.antlr.IMPParser.FieldAccessContext;
 import it.unive.lisa.imp.antlr.IMPParser.ForLoopContext;
@@ -43,7 +45,9 @@ import it.unive.lisa.imp.antlr.IMPParser.ReceiverContext;
 import it.unive.lisa.imp.antlr.IMPParser.StatementContext;
 import it.unive.lisa.imp.antlr.IMPParser.StringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.TernaryStringExprContext;
+import it.unive.lisa.imp.antlr.IMPParser.TryContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnaryStringExprContext;
+import it.unive.lisa.imp.antlr.IMPParser.UnitNameContext;
 import it.unive.lisa.imp.antlr.IMPParser.WhileLoopContext;
 import it.unive.lisa.imp.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.imp.constructs.ArrayLength;
@@ -69,13 +73,17 @@ import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.VariableTableEntry;
-import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
+import it.unive.lisa.program.cfg.edge.BeginFinallyEdge;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.EndFinallyEdge;
+import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
@@ -136,13 +144,13 @@ class IMPCodeMemberVisitor
 
 	private final Collection<Statement> entrypoints;
 
-	private final Collection<ControlFlowStructure> cfs;
-
 	private final Map<String, Pair<VariableRef, Annotations>> visibleIds;
 
 	private final CFG cfg;
 
 	private final CodeMemberDescriptor descriptor;
+
+	private int varIndex;
 
 	/**
 	 * Builds the visitor of an IMP method or constructor.
@@ -158,13 +166,13 @@ class IMPCodeMemberVisitor
 		this.descriptor = descriptor;
 		list = new NodeList<>(new SequentialEdge());
 		entrypoints = new HashSet<>();
-		cfs = new LinkedList<>();
 		// side effects on entrypoints and matrix will affect the cfg
 		cfg = new CFG(descriptor, entrypoints, list);
 
 		visibleIds = new HashMap<>();
 		for (VariableTableEntry par : descriptor.getVariables())
 			visibleIds.put(par.getName(), Pair.of(par.createReference(cfg), par.getAnnotations()));
+		varIndex = descriptor.getVariables().size();
 	}
 
 	/**
@@ -180,7 +188,6 @@ class IMPCodeMemberVisitor
 		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visited = visitBlock(ctx);
 		entrypoints.add(visited.getLeft());
 		list.mergeWith(visited.getMiddle());
-		cfs.forEach(cf -> cfg.addControlFlowStructure(cf));
 
 		if (cfg.getAllExitpoints().isEmpty()) {
 			Ret ret = new Ret(cfg, descriptor.getLocation());
@@ -203,7 +210,20 @@ class IMPCodeMemberVisitor
 					if (preExits.contains(entry.getScopeEnd()))
 						entry.setScopeEnd(ret);
 			}
+		} else if (!visited.getRight().stopsExecution()) {
+			// if the other returns do return a value, we cannot add
+			// a ret as we should return a value as well
+			for (Statement st : cfg.getNormalExitpoints())
+				if (st instanceof Return)
+					throw new IMPSyntaxException("Missing return statement at " + st.getLocation());
+
+
+			// if the last statement does not stop execution, we add a ret
+			Ret ret = new Ret(cfg, descriptor.getLocation());
+			list.addNode(ret);
+			list.addEdge(new SequentialEdge(visited.getRight(), ret));
 		}
+
 
 		cfg.simplify();
 		return cfg;
@@ -217,6 +237,8 @@ class IMPCodeMemberVisitor
 
 		Statement first = null, last = null;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
+			if (last != null && last.stopsExecution())
+				throw new IMPSyntaxException("Statement '" + last.toString() + "' at " + last.getLocation() + " stops execution, so it cannot be followed by another statement in the same block");
 			Triple<Statement,
 					NodeList<CFG, Statement, Edge>,
 					Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
@@ -232,16 +254,14 @@ class IMPCodeMemberVisitor
 		for (Entry<String, Pair<VariableRef, Annotations>> id : visibleIds.entrySet())
 			if (!backup.containsKey(id.getKey())) {
 				VariableRef ref = id.getValue().getLeft();
-				descriptor
-						.addVariable(
-								new VariableTableEntry(
-										ref.getLocation(),
-										0,
-										ref.getRootStatement(),
-										last,
-										id.getKey(),
-										Untyped.INSTANCE,
-										id.getValue().getRight()));
+				descriptor.addVariable(new VariableTableEntry(
+						ref.getLocation(),
+						varIndex++,
+						ref.getRootStatement(),
+						last,
+						id.getKey(),
+						Untyped.INSTANCE,
+						id.getValue().getRight()));
 				toRemove.add(id.getKey());
 			}
 
@@ -294,6 +314,8 @@ class IMPCodeMemberVisitor
 			return visitIf(ctx);
 		else if (ctx.loop() != null)
 			return visitLoop(ctx.loop());
+		else if (ctx.try_() != null)
+			return visitTry(ctx.try_());
 		else if (ctx.command != null)
 			st = visitExpression(ctx.command);
 		else
@@ -331,14 +353,12 @@ class IMPCodeMemberVisitor
 		else
 			ite.addEdge(new FalseEdge(condition, noop));
 
-		cfs
-				.add(
-						new IfThenElse(
-								list,
-								condition,
-								noop,
-								then.getMiddle().getNodes(),
-								otherwise == null ? Collections.emptyList() : otherwise.getMiddle().getNodes()));
+		descriptor.addControlFlowStructure(new IfThenElse(
+				list,
+				condition,
+				noop,
+				then.getMiddle().getNodes(),
+				otherwise == null ? Collections.emptyList() : otherwise.getMiddle().getNodes()));
 
 		return Triple.of(condition, ite, noop);
 	}
@@ -393,7 +413,7 @@ class IMPCodeMemberVisitor
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
-		cfs.add(new Loop(list, condition, noop, body.getMiddle().getNodes()));
+		descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getMiddle().getNodes()));
 
 		return Triple.of(condition, loop, noop);
 	}
@@ -450,12 +470,12 @@ class IMPCodeMemberVisitor
 		loop.addEdge(new FalseEdge(condition, noop));
 
 		if (post == null)
-			cfs.add(new Loop(list, condition, noop, body.getMiddle().getNodes()));
+			descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getMiddle().getNodes()));
 		else {
 			NodeList<CFG, Statement, Edge> tmp = new NodeList<>(body.getMiddle());
 			tmp.addNode(last);
 			loop.addEdge(new SequentialEdge(body.getRight(), last));
-			cfs.add(new Loop(list, condition, noop, tmp.getNodes()));
+			descriptor.addControlFlowStructure(new Loop(list, condition, noop, tmp.getNodes()));
 		}
 
 		return Triple.of(first, loop, noop);
@@ -1012,6 +1032,230 @@ class IMPCodeMemberVisitor
 		if (text.startsWith("\"") && text.endsWith("\""))
 			return text.substring(1, text.length() - 1);
 		return text;
+	}
+
+	@Override
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitTry(TryContext ctx) {
+		NodeList<CFG, Statement, Edge> trycatch = new NodeList<>(new SequentialEdge());
+
+		// TODO break/continue should still cause the execution of the finally
+		// TODO in case of return in finally, we should use that as function return
+		// instead of going back to the pre-finally context
+
+		// TODO: 'return expr' should be broken into 'tmp = expr; return tmp' in 
+		// try, catches, else??, finally??, such that the error edges don't go out of the
+		// execution-stopping nodes. this applies to throw statements as well.
+
+
+		// normal exit points of the try-catch in case there is no finally block:
+		// in this case, we have to add a noop at the end of the whole try-catch
+		// to use it as unique exit point in the returned triple
+		Collection<Statement> normalExits = new LinkedList<>();
+
+		// we parse the body of the try block normally
+		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> body = visitBlock(ctx.body);
+		trycatch.mergeWith(body.getMiddle());
+
+		// if there is an else block, we parse it immediately and connect it
+		// to the end of the try block *only* if it does not end with a return/throw
+		// (as it would be deadcode)
+		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> elseBlock = null;
+		if (!body.getRight().stopsExecution())
+			if (ctx.else_ == null)
+				// non-stopping last statement with no else
+				normalExits.add(body.getRight());
+			else {
+				elseBlock = visitBlock(ctx.else_);
+				trycatch.mergeWith(elseBlock.getMiddle());
+				trycatch.addEdge(new SequentialEdge(body.getRight(), elseBlock.getLeft()));
+				if (!elseBlock.getRight().stopsExecution())
+					// non-stopping last statement
+					normalExits.add(elseBlock.getRight());
+			} 
+		else if (ctx.else_ != null)
+			// the else is deadcode
+			throw new IMPSyntaxException("Statement '" + body.getRight().toString() + "' at " + body.getRight().getLocation() + " stops execution, so it cannot be followed by an else block");
+
+		// we then parse each catch block, and we connect *every* instruction
+		// in the body of the try to the beginning of each catch block
+		List<CatchBlock> catches = new LinkedList<>();
+		List<Triple<Statement, NodeList<CFG, Statement, Edge>, Statement>> catchBodies = new LinkedList<>();
+		for (CatchBlockContext ex : ctx.catchBlock()) {
+			var tmp = visitCatchBlock(ex);
+			CatchBlock block = tmp.getLeft();
+			Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visit = tmp.getRight();
+			catches.add(block);
+			catchBodies.add(visit);
+			trycatch.mergeWith(visit.getMiddle());
+			for (Statement st : body.getMiddle().getNodes())
+				trycatch.addEdge(new ErrorEdge(st, visit.getLeft(), block.getIdentifier(), block.getExceptions()));
+			if (!visit.getRight().stopsExecution())
+				// non-stopping last statement
+				normalExits.add(visit.getRight());
+		}
+
+		// this is the noop closing the whole try-catch, only if there is at least one path that does 
+		// not return/throw anything
+		Statement noop = new NoOp(cfg, body.getLeft().getLocation());
+		trycatch.addNode(noop);
+		boolean usedNoop = false;
+
+		// lastly, we parse the finally block
+		// we connect it with the body (or the else block if it exists) and with each catch block
+		// by either (i) connecting it 
+		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> finalBlock = null;
+		if (ctx.final_ != null) {
+			finalBlock = visitBlock(ctx.final_);
+			trycatch.mergeWith(finalBlock.getMiddle());
+
+			Collection<Edge> toRemove = new LinkedList<>();
+			usedNoop |= connectFinallyTo(
+				trycatch, 
+				body.getMiddle(), 
+				body.getLeft(), 
+				finalBlock.getLeft(), 
+				finalBlock.getRight(), 
+				toRemove, 
+				noop,
+				elseBlock == null);
+			
+			if (elseBlock != null) 
+				usedNoop |= connectFinallyTo(
+					trycatch, 
+					elseBlock.getMiddle(), 
+					elseBlock.getLeft(), 
+					finalBlock.getLeft(), 
+					finalBlock.getRight(), 
+					toRemove, 
+					noop);
+
+			for (Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> catchBody : catchBodies) 
+				usedNoop |= connectFinallyTo(
+					trycatch, 
+					catchBody.getMiddle(), 
+					catchBody.getLeft(), 
+					finalBlock.getLeft(), 
+					finalBlock.getRight(), 
+					toRemove, 
+					noop);
+
+			toRemove.forEach(trycatch::removeEdge);
+		}
+
+		if (finalBlock != null && !usedNoop) 
+			trycatch.removeNode(noop);
+		else if (finalBlock == null && !normalExits.isEmpty()) {
+			for (Statement st : normalExits)
+				trycatch.addEdge(new SequentialEdge(st, noop));
+			usedNoop = true;
+		}
+
+		// build protection block
+		descriptor.addProtectionBlock(new ProtectionBlock(
+			body.getMiddle().getNodes(), 
+			catches,
+			elseBlock == null ? List.of() : elseBlock.getMiddle().getNodes(), 
+			finalBlock == null ? List.of() : finalBlock.getMiddle().getNodes()));
+
+		return Triple.of(body.getLeft(), trycatch, usedNoop ? noop : body.getRight());
+	}
+
+	private boolean connectFinallyTo(
+		NodeList<CFG, Statement, Edge> trycatch,
+		NodeList<CFG, Statement, Edge> block,
+		Statement endBlock,
+		Statement beginFinally,
+		Statement endFinally,
+		Collection<Edge> extraEdges,
+		Statement closing) {
+		return connectFinallyTo(
+			trycatch,
+			block,
+			endBlock,
+			beginFinally,
+			endFinally,
+			extraEdges,
+			closing,
+			true);
+	}
+
+	private boolean connectFinallyTo(
+		NodeList<CFG, Statement, Edge> trycatch,
+		NodeList<CFG, Statement, Edge> block,
+		Statement endBlock,
+		Statement beginFinally,
+		Statement endFinally,
+		Collection<Edge> extraEdges,
+		Statement closing,
+		boolean extraCond) {
+		if (endBlock.stopsExecution()) {
+			for (Statement pred : block.predecessorsOf(endBlock)) {
+				trycatch.addEdge(new BeginFinallyEdge(pred, beginFinally, pred));
+				trycatch.addEdge(new EndFinallyEdge(endFinally, endBlock, pred));
+				extraEdges.addAll(block.getEdgesConnecting(pred, endBlock));
+			}
+			return false;
+		} else if (extraCond) {
+			trycatch.addEdge(new BeginFinallyEdge(endBlock, beginFinally, endBlock));
+			trycatch.addEdge(new EndFinallyEdge(endFinally, closing, endBlock));
+			return true;
+		} else
+			return false;
+	}
+
+	@Override
+	public Pair<
+			CatchBlock, 
+			Triple<Statement, NodeList<CFG, Statement, Edge>, Statement>
+			> visitCatchBlock(CatchBlockContext ctx) {
+		List<Type> exceptions = new LinkedList<>();
+		for (UnitNameContext name : ctx.unitNames().unitName()) {
+			Type t = ClassType.lookup(name.getText());
+			if (t == null)
+				throw new IMPSyntaxException(
+						"Type '" + name.getText() + "' not found at " + new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
+			exceptions.add(t);
+		}
+
+		VariableRef variable = null;
+		Map<String, Pair<VariableRef, Annotations>> backup = new HashMap<>(visibleIds);
+		if (ctx.IDENTIFIER() != null) {
+			variable = visitVar(ctx.IDENTIFIER(), false);
+			visibleIds.put(variable.getName(), Pair.of(variable, new Annotations()));
+		}
+
+
+		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> body = visitBlock(ctx.body);
+		Statement last = body.getRight();
+
+		Collection<String> toRemove = new HashSet<>();
+		for (Entry<String, Pair<VariableRef, Annotations>> id : visibleIds.entrySet())
+			if (!backup.containsKey(id.getKey())) {
+				VariableRef ref = id.getValue().getLeft();
+				descriptor.addVariable(new VariableTableEntry(
+						ref.getLocation(),
+						varIndex++,
+						ref.getRootStatement(),
+						last,
+						id.getKey(),
+						Untyped.INSTANCE,
+						id.getValue().getRight()));
+				toRemove.add(id.getKey());
+			}
+
+		if (!toRemove.isEmpty())
+			toRemove.forEach(visibleIds::remove);
+		
+		CatchBlock catchBlock = new CatchBlock(
+				variable,
+				body.getMiddle().getNodes(),
+				exceptions.toArray(Type[]::new));
+
+		Pair<
+			CatchBlock, 
+			Triple<Statement, NodeList<CFG, Statement, Edge>, Statement>
+		> result = Pair.of(catchBlock, body);
+		return result;
 	}
 
 }

@@ -176,6 +176,7 @@ statement
    | ASSERT expression SEMI
    | IF condition = parExpr then = blockOrStatement (ELSE otherwise = blockOrStatement)?
    | loop
+   | try
    | RETURN expression? SEMI
    | THROW expression SEMI
    | skip = SEMI
@@ -209,6 +210,14 @@ whileLoop
 
 forDeclaration
    : (initDecl = localDeclaration | initExpr = expression)? SEMI condition = expression? SEMI post = expression?
+   ;
+
+try
+   : TRY body = block catchBlock catchBlock* (ELSE else = block)? (FINALLY final = block)?
+   ;
+
+catchBlock
+   : CATCH LPAREN exceptions = unitNames IDENTIFIER? RPAREN body = block
    ;
 /*
  * ANNOTATIONS

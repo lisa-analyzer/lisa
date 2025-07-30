@@ -1,5 +1,7 @@
 package it.unive.lisa.util.datastructures.graph.code;
 
+import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.util.datastructures.graph.Edge;
 
 /**
@@ -28,6 +30,16 @@ public interface CodeEdge<G extends CodeGraph<G, N, E>,
 	 * @return whether or not this edge can be simplified
 	 */
 	boolean isUnconditional();
+
+	/**
+	 * Yields {@code true} if and only if this edge is used to handle errors.
+	 * This includes edges leaving statements of a {@link ProtectionBlock}'s body
+	 * and going into one of the {@link CatchBlock}s, or ones connecting it to a finally
+	 * block.
+	 * 
+	 * @return whether or not this edge is used for error handling
+	 */
+	boolean isErrorHandling();
 
 	/**
 	 * Builds a new instance of this edge, connecting the given nodes.

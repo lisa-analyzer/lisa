@@ -252,6 +252,7 @@ public class SerializableGraph {
 
 		for (SerializableNode n : nodes)
 			if (!inners.contains(n.getId()))
+				// TODO should use stopsExecution
 				graph.addNode(n, !hasPreds.contains(n.getId()), !hasFollows.contains(n.getId()), labels.get(n.getId()));
 
 		for (SerializableEdge e : edges)

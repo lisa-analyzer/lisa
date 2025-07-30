@@ -64,6 +64,11 @@ public class SequentialEdge
 	}
 
 	@Override
+	public boolean isErrorHandling() {
+		return false;
+	}
+
+	@Override
 	public SequentialEdge newInstance(
 			Statement source,
 			Statement destination) {

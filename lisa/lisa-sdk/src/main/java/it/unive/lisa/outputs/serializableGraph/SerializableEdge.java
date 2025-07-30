@@ -23,6 +23,8 @@ public class SerializableEdge
 
 	private final String kind;
 
+	private final String label;
+
 	// Capture all other fields that Jackson does not match during
 	// deserialization
 	private final Map<String, String> unknownFields;
@@ -31,7 +33,7 @@ public class SerializableEdge
 	 * Builds an empty (invalid) edge.
 	 */
 	public SerializableEdge() {
-		this(-1, -1, null);
+		this(-1, -1, null, null);
 	}
 
 	/**
@@ -40,14 +42,17 @@ public class SerializableEdge
 	 * @param sourceId the id of the source {@link SerializableNode}
 	 * @param destId   the id of the destination {@link SerializableNode}
 	 * @param kind     the kind of this edge
+	 * @param label    the label of this edge
 	 */
 	public SerializableEdge(
 			int sourceId,
 			int destId,
-			String kind) {
+			String kind,
+			String label) {
 		this.sourceId = sourceId;
 		this.destId = destId;
 		this.kind = kind;
+		this.label = label;
 		unknownFields = new TreeMap<>();
 	}
 
@@ -79,6 +84,15 @@ public class SerializableEdge
 	}
 
 	/**
+	 * Yields the label of this edge.
+	 * 
+	 * @return the label
+	 */
+	public String getLabel() {
+		return label;
+	}
+
+	/**
 	 * Yields all fields that were unrecognized during deserialization.
 	 * 
 	 * @return the other fields
@@ -107,6 +121,7 @@ public class SerializableEdge
 		int result = 1;
 		result = prime * result + destId;
 		result = prime * result + ((kind == null) ? 0 : kind.hashCode());
+		result = prime * result + ((label == null) ? 0 : label.hashCode());
 		result = prime * result + sourceId;
 		result = prime * result + ((unknownFields == null) ? 0 : unknownFields.hashCode());
 		return result;
@@ -129,6 +144,11 @@ public class SerializableEdge
 				return false;
 		} else if (!kind.equals(other.kind))
 			return false;
+		if (label == null) {
+			if (other.label != null)
+				return false;
+		} else if (!label.equals(other.label))
+			return false;
 		if (sourceId != other.sourceId)
 			return false;
 		if (unknownFields == null) {
@@ -141,6 +161,8 @@ public class SerializableEdge
 
 	@Override
 	public String toString() {
+		if (label != null && !label.isEmpty())
+			return sourceId + "-" + kind + "-" + label + "->" + destId;
 		return sourceId + "-" + kind + "->" + destId;
 	}
 
@@ -155,6 +177,8 @@ public class SerializableEdge
 		if ((cmp = Integer.compare(unknownFields.keySet().size(), o.unknownFields.keySet().size())) != 0)
 			return cmp;
 		if ((cmp = CollectionUtilities.nullSafeCompare(true, kind, o.kind, String::compareTo)) != 0)
+			return cmp;
+		if ((cmp = CollectionUtilities.nullSafeCompare(true, label, o.label, String::compareTo)) != 0)
 			return cmp;
 
 		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(

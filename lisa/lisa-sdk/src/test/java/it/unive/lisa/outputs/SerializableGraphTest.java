@@ -52,7 +52,7 @@ public class SerializableGraphTest {
 			Edge e,
 			int src,
 			int dest) {
-		edges.add(new SerializableEdge(src, dest, e.getClass().getSimpleName()));
+		edges.add(new SerializableEdge(src, dest, e.getClass().getSimpleName(), null));
 	}
 
 	@Test

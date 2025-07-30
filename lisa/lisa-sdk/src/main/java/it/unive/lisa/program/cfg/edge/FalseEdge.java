@@ -74,6 +74,11 @@ public class FalseEdge
 	}
 
 	@Override
+	public boolean isErrorHandling() {
+		return false;
+	}
+
+	@Override
 	public FalseEdge newInstance(
 			Statement source,
 			Statement destination) {
