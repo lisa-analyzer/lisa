@@ -1,22 +1,9 @@
-package it.unive.lisa;
+package it.unive.lisa.util.testing;
 
 import static java.nio.file.Files.copy;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.delete;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.imp.IMPFrontend;
-import it.unive.lisa.imp.ParsingException;
-import it.unive.lisa.outputs.compare.JsonReportComparer;
-import it.unive.lisa.outputs.compare.JsonReportComparer.BaseDiffAlgorithm;
-import it.unive.lisa.outputs.compare.JsonReportComparer.DiffAlgorithm;
-import it.unive.lisa.outputs.compare.JsonReportComparer.REPORTED_COMPONENT;
-import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
-import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.util.file.FileManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -28,35 +15,23 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
+import it.unive.lisa.AnalysisException;
+import it.unive.lisa.LiSA;
+import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.outputs.compare.JsonReportComparer.BaseDiffAlgorithm;
+import it.unive.lisa.outputs.compare.JsonReportComparer.DiffAlgorithm;
+import it.unive.lisa.outputs.compare.JsonReportComparer.REPORTED_COMPONENT;
+import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
+import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.util.file.FileManager;
+
 public abstract class AnalysisTestExecutor {
 
 	public static final String EXPECTED_RESULTS_DIR = "imp-testcases";
 
 	public static final String ACTUAL_RESULTS_DIR = "test-outputs";
-
-	/**
-	 * Performs a test, running an analysis. The test will fail if:
-	 * <ul>
-	 * <li>The imp file cannot be parsed (i.e. a {@link ParsingException} is
-	 * thrown)</li>
-	 * <li>The previous working directory using for the test execution cannot be
-	 * deleted</li>
-	 * <li>The analysis run terminates with an {@link AnalysisException}</li>
-	 * <li>One of the json reports (either the one generated during the test
-	 * execution or the one used as baseline) cannot be found or cannot be
-	 * opened</li>
-	 * <li>The two json reports are different</li>
-	 * <li>The external files mentioned in the reports are different</li>
-	 * </ul>
-	 * 
-	 * @param conf the configuration of the test to run (note that the workdir
-	 *                 present into the configuration will be ignored, as it
-	 *                 will be overwritten by the computed workdir)
-	 */
-	public void perform(
-			CronConfiguration conf) {
-		perform(conf, false);
-	}
 
 	/**
 	 * Performs a test, running an analysis. The test will fail if:
@@ -81,19 +56,18 @@ public abstract class AnalysisTestExecutor {
 	 *                       entrypoints
 	 */
 	public void perform(
-			CronConfiguration conf,
-			boolean allMethods) {
+			TestConfiguration conf) {
 		Objects.requireNonNull(conf);
 		Objects.requireNonNull(conf.testDir);
 		Objects.requireNonNull(conf.programFile);
 		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, conf.testDir);
 		Path target = Paths.get(expectedPath.toString(), conf.programFile);
-		Program program = readProgram(target, allMethods);
+		Program program = readProgram(conf, target);
 		perform(conf, program);
 	}
 
 	public void perform(
-			CronConfiguration conf,
+			TestConfiguration conf,
 			Program program) {
 		String testMethod = getCaller();
 		System.out.println("### Testing " + testMethod);
@@ -153,7 +127,7 @@ public abstract class AnalysisTestExecutor {
 	}
 
 	private void compare(
-			CronConfiguration conf,
+			TestConfiguration conf,
 			Path expectedPath,
 			Path actualPath,
 			File expFile,
@@ -164,30 +138,45 @@ public abstract class AnalysisTestExecutor {
 			JsonReport expected = JsonReport.read(l);
 			JsonReport actual = JsonReport.read(r);
 			Accumulator acc = new Accumulator(expectedPath);
-			if (optimized)
-				assertTrue(
-						"Optimized results are different",
-						JsonReportComparer.compare(
-							expected, 
-							actual, 
-							expectedPath.toFile(), 
-							actualPath.toFile(),
-							new OptimizedRunDiff()));
-			else if (!update)
-				assertTrue(
-						"Results are different",
-						JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
-			else if (!JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile(), acc)) {
-				System.err.println("Results are different, regenerating differences");
-				regen(expectedPath, actualPath, expFile, actFile, acc);
-			}
+			if (optimized) 
+				failIf(
+					"Optimized results are different",
+					!JsonReportComparer.compare(
+						expected, 
+						actual, 
+						expectedPath.toFile(), 
+						actualPath.toFile(),
+						new OptimizedRunDiff()));
+			else if (update) {
+				if (!JsonReportComparer.compare(
+						expected, 
+						actual, 
+						expectedPath.toFile(), 
+						actualPath.toFile(), 
+						acc)) {
+					System.err.println("Results are different, regenerating differences");
+					regen(expectedPath, actualPath, expFile, actFile, acc);
+				}
+			} else 
+				failIf(
+					"Results are different",
+					!JsonReportComparer.compare(
+						expected, 
+						actual, 
+						expectedPath.toFile(), 
+						actualPath.toFile()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
-			fail("File not found: " + e.getMessage());
+			throw new TestException("File not found", e);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			fail("Unable to compare reports: " + e.getMessage());
+			throw new TestException("Unable to compare reports", e);
 		}
+	}
+
+	private void failIf(String message, boolean condition) {
+		if (condition)
+			throw new TestException(message);
 	}
 
 	private void copyFiles(
@@ -215,10 +204,10 @@ public abstract class AnalysisTestExecutor {
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
-			fail("File not found: " + e.getMessage());
+			throw new TestException("File not found", e);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			fail("Unable to compare reports: " + e.getMessage());
+			throw new TestException("Unable to compare reports", e);
 		}
 	}
 
@@ -257,18 +246,9 @@ public abstract class AnalysisTestExecutor {
 		}
 	}
 
-	private Program readProgram(
-			Path target,
-			boolean allMethods) {
-		Program program = null;
-		try {
-			program = IMPFrontend.processFile(target.toString(), !allMethods);
-		} catch (ParsingException e) {
-			e.printStackTrace(System.err);
-			fail("Exception while parsing '" + target + "': " + e.getMessage());
-		}
-		return program;
-	}
+	public abstract Program readProgram(
+			TestConfiguration conf,
+			Path target);
 
 	private void run(
 			LiSAConfiguration configuration,
@@ -277,8 +257,7 @@ public abstract class AnalysisTestExecutor {
 		try {
 			lisa.run(program);
 		} catch (AnalysisException e) {
-			e.printStackTrace(System.err);
-			fail("Analysis terminated with errors");
+			throw new TestException("Analysis terminated with errors", e);
 		}
 	}
 
@@ -289,8 +268,7 @@ public abstract class AnalysisTestExecutor {
 		try {
 			FileManager.forceDeleteFolder(workdir.toString());
 		} catch (IOException e) {
-			e.printStackTrace(System.err);
-			fail("Cannot delete working directory '" + workdir + "': " + e.getMessage());
+			throw new TestException("Cannot delete working directory '" + workdir + "'", e);
 		}
 		configuration.workdir = workdir.toString();
 	}
@@ -416,7 +394,8 @@ public abstract class AnalysisTestExecutor {
 		// 3: it.unive.lisa.test.AnalysisTest.perform()
 		// 4: caller
 		for (StackTraceElement e : trace) {
-			if (!e.getClassName().equals("java.lang.Thread") && !e.getClassName().equals(getClass().getName()))
+			if (!e.getClassName().equals("java.lang.Thread") 
+					&& !e.getClassName().equals(AnalysisTestExecutor.class.getName()))
 				return e.getClassName() + "::" + e.getMethodName();
 		}
 

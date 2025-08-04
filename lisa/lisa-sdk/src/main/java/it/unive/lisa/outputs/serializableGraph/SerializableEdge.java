@@ -7,6 +7,7 @@ import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * An edge of a {@link SerializableGraph}.
@@ -88,6 +89,7 @@ public class SerializableEdge
 	 * 
 	 * @return the label
 	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	public String getLabel() {
 		return label;
 	}

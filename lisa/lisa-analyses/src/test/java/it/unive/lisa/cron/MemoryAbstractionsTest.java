@@ -1,18 +1,17 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
+import org.junit.Test;
+
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.heap.TypeBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
-import org.junit.Test;
 
 public class MemoryAbstractionsTest
 		extends
-		AnalysisTestExecutor {
+		IMPCronExecutor {
 
 	@Test
 	public void testTypeBasedHeap() {
@@ -27,7 +26,8 @@ public class MemoryAbstractionsTest
 		conf.testDir = "heap";
 		conf.testSubDir = "types";
 		conf.programFile = "heap-type.imp";
-		perform(conf, true);
+		conf.allMethods = true;
+		perform(conf);
 	}
 
 	@Test
@@ -43,7 +43,8 @@ public class MemoryAbstractionsTest
 		conf.testDir = "heap";
 		conf.testSubDir = "pp";
 		conf.programFile = "heap-pp.imp";
-		perform(conf, true);
+		conf.allMethods = true;
+		perform(conf);
 	}
 
 	@Test
@@ -59,7 +60,8 @@ public class MemoryAbstractionsTest
 		conf.testDir = "heap";
 		conf.testSubDir = "pp-field";
 		conf.programFile = "heap-pp-field.imp";
-		perform(conf, true);
+		conf.allMethods = true;
+		perform(conf);
 	}
 
 	@Test

@@ -27,6 +27,7 @@ import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.cron.CronConfiguration;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -77,6 +78,8 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.InstrumentedReceiverRef;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
@@ -128,6 +131,8 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import it.unive.lisa.util.testing.TestConfiguration;
+
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
@@ -259,9 +264,7 @@ public class EqualityContractVerificationTest {
 		}
 
 		if (!notTested.isEmpty())
-			System.err
-					.println(
-							"The following equals/hashcode implementations have not been tested: " + notTested);
+			System.err.println("The following equals/hashcode implementations have not been tested: " + notTested);
 
 		assertTrue("Not all equals/hashcode have been tested", notTested.isEmpty());
 	}
@@ -354,6 +357,7 @@ public class EqualityContractVerificationTest {
 		verify(LiSAConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(DefaultConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(FixpointConfiguration.class);
+		verify(TestConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(CronConfiguration.class, Warning.NONFINAL_FIELDS);
 	}
 
@@ -625,6 +629,8 @@ public class EqualityContractVerificationTest {
 		for (Class<? extends ControlFlowStructure> struct : scanner.getSubTypesOf(ControlFlowStructure.class))
 			// first follower is mutable
 			verify(struct, Warning.NONFINAL_FIELDS);
+		verify(CatchBlock.class);
+		verify(ProtectionBlock.class);
 		for (Class<? extends Unit> unit : scanner.getSubTypesOf(Unit.class))
 			verify(unit, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		for (Class<? extends CodeMember> cm : scanner.getSubTypesOf(CodeMember.class))

@@ -1,5 +1,21 @@
 package it.unive.lisa.program.cfg;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -31,6 +47,8 @@ import it.unive.lisa.program.cfg.fixpoints.DescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.DescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
+import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -43,20 +61,6 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -219,6 +223,7 @@ public class CFG
 	public void simplify() {
 		super.simplify(NoOp.class, new LinkedList<>(), new HashMap<>());
 		descriptor.getControlFlowStructures().forEach(ControlFlowStructure::simplify);
+		descriptor.getProtectionBlocks().forEach(ProtectionBlock::simplify);
 	}
 
 	/**
@@ -1111,6 +1116,15 @@ public class CFG
 		leaders.addAll(entrypoints);
 		for (ControlFlowStructure struct : descriptor.getControlFlowStructures())
 			leaders.addAll(struct.getTargetedStatements());
+		for (ProtectionBlock block : descriptor.getProtectionBlocks()) {
+			leaders.add(block.getTryHead());
+			if (block.getElseHead() != null)
+				leaders.add(block.getElseHead());
+			if (block.getFinallyHead() != null)
+				leaders.add(block.getFinallyHead());
+			for (CatchBlock cb : block.getCatchBlocks()) 
+				leaders.add(cb.getHead());
+		}
 
 		basicBlocks = new IdentityHashMap<>(leaders.size());
 		for (Statement leader : leaders) {

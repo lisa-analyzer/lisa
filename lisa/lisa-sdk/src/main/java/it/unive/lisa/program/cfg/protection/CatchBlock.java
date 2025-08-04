@@ -1,9 +1,11 @@
 package it.unive.lisa.program.cfg.protection;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
@@ -16,10 +18,13 @@ public class CatchBlock {
 
     private final Collection<Statement> body;
 
-    public CatchBlock(VariableRef identifier, Collection<Statement> body, Type... exceptions) {
+    private final Statement head;
+
+    public CatchBlock(VariableRef identifier, Statement head, Collection<Statement> body, Type... exceptions) {
         this.exceptions = exceptions;
         this.identifier = identifier;
         this.body = body;
+        this.head = head;
     }
 
     public Type[] getExceptions() {
@@ -34,13 +39,22 @@ public class CatchBlock {
         return body;
     }
 
+    public Statement getHead() {
+        return head;
+    }
+
+    public void simplify() {
+        body.removeIf(NoOp.class::isInstance);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((exceptions == null) ? 0 : exceptions.hashCode());
+        result = prime * result + ((exceptions == null) ? 0 : Arrays.hashCode(exceptions));
         result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
         result = prime * result + ((body == null) ? 0 : body.hashCode());
+        result = prime * result + ((head == null) ? 0 : head.hashCode());
         return result;
     }
 
@@ -56,7 +70,7 @@ public class CatchBlock {
         if (exceptions == null) {
             if (other.exceptions != null)
                 return false;
-        } else if (!exceptions.equals(other.exceptions))
+        } else if (!Arrays.equals(exceptions, other.exceptions))
             return false;
         if (identifier == null) {
             if (other.identifier != null)
@@ -67,6 +81,11 @@ public class CatchBlock {
             if (other.body != null)
                 return false;
         } else if (!body.equals(other.body))
+            return false;
+        if (head == null) {
+            if (other.head != null)
+                return false;
+        } else if (!head.equals(other.head))
             return false;
         return true;
     }

@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -137,32 +138,11 @@ public class SerializableGraph {
 		if (getClass() != obj.getClass())
 			return false;
 		SerializableGraph other = (SerializableGraph) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (description == null) {
-			if (other.description != null)
-				return false;
-		} else if (!description.equals(other.description))
-			return false;
-		if (descriptions == null) {
-			if (other.descriptions != null)
-				return false;
-		} else if (!descriptions.equals(other.descriptions))
-			return false;
-		if (edges == null) {
-			if (other.edges != null)
-				return false;
-		} else if (!edges.equals(other.edges))
-			return false;
-		if (nodes == null) {
-			if (other.nodes != null)
-				return false;
-		} else if (!nodes.equals(other.nodes))
-			return false;
-		return true;
+		return Objects.equals(name, other.name) 
+				&& Objects.equals(description, other.description) 
+				&& Objects.equals(nodes, other.nodes) 
+				&& Objects.equals(edges, other.edges)
+				&& Objects.equals(descriptions, other.descriptions);
 	}
 
 	@Override
@@ -316,27 +296,10 @@ public class SerializableGraph {
 	 */
 	public boolean sameStructure(
 			SerializableGraph other) {
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (description == null) {
-			if (other.description != null)
-				return false;
-		} else if (!description.equals(other.description))
-			return false;
-		if (edges == null) {
-			if (other.edges != null)
-				return false;
-		} else if (!edges.equals(other.edges))
-			return false;
-		if (nodes == null) {
-			if (other.nodes != null)
-				return false;
-		} else if (!nodes.equals(other.nodes))
-			return false;
-		return true;
+		return Objects.equals(name, other.name) &&
+				Objects.equals(description, other.description) &&
+				Objects.equals(nodes, other.nodes) &&
+				Objects.equals(edges, other.edges);
 	}
 
 }

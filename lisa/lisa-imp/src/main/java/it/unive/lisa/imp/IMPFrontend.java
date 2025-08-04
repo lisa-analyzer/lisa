@@ -202,9 +202,7 @@ public class IMPFrontend
 		InterfaceType.clearAll();
 
 		try {
-			log
-					.info(
-							"Reading file... " + file);
+			log.info("Reading file... " + file);
 			IMPLexer lexer;
 			if (inputStream == null)
 				try (InputStream stream = new FileInputStream(file)) {
@@ -257,42 +255,22 @@ public class IMPFrontend
 
 			return p;
 		} catch (FileNotFoundException e) {
-			log
-					.fatal(
-							file + " does not exist",
-							e);
-			throw new ParsingException(
-					"Target file '" + file + "' does not exist",
-					e);
+			log.fatal(file + " does not exist", e);
+			throw new ParsingException("Target file '" + file + "' does not exist", e);
 		} catch (IOException e) {
-			log
-					.fatal(
-							"Unable to open " + file,
-							e);
-			throw new ParsingException(
-					"Unable to open " + file,
-					e);
+			log.fatal("Unable to open " + file, e);
+			throw new ParsingException("Unable to open " + file, e);
 		} catch (IMPSyntaxException e) {
-			log
-					.fatal(
-							file + " is not well-formed",
-							e);
-			throw new ParsingException(
-					"Incorrect IMP file: " + file,
-					e);
+			log.fatal(file + " is not well-formed", e);
+			throw new ParsingException("Incorrect IMP file: " + file, e);
 		} catch (RecognitionException e) {
 			throw Antlr4Util.handleRecognitionException(file, e);
 		} catch (Exception e) {
 			if (e.getCause() instanceof RecognitionException)
 				throw Antlr4Util.handleRecognitionException(file, (RecognitionException) e.getCause());
 			else {
-				log
-						.error(
-								"Parser thrown an exception while parsing " + file,
-								e);
-				throw new ParsingException(
-						"Parser thrown an exception while parsing " + file,
-						e);
+				log.error("Parser thrown an exception while parsing " + file, e);
+				throw new ParsingException("Parser thrown an exception while parsing " + file, e);
 			}
 		}
 	}

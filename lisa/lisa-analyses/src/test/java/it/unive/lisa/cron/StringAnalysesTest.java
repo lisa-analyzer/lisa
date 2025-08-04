@@ -1,7 +1,7 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
+import org.junit.Test;
+
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.string.BoundedStringSet;
 import it.unive.lisa.analysis.string.Bricks;
@@ -12,11 +12,10 @@ import it.unive.lisa.analysis.string.SubstringDomainWithConstants;
 import it.unive.lisa.analysis.string.Suffix;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.tarsis.Tarsis;
-import org.junit.Test;
 
 public class StringAnalysesTest
 		extends
-		AnalysisTestExecutor {
+		IMPCronExecutor {
 
 	@Test
 	public void testPrefix() {

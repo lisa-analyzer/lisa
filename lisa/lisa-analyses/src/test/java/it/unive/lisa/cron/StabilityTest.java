@@ -1,8 +1,11 @@
 package it.unive.lisa.cron;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisExecutionException;
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
@@ -34,13 +37,10 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Test;
 
 public class StabilityTest
 		extends
-		AnalysisTestExecutor {
+		IMPCronExecutor {
 
 	@Test
 	public void testStability()
@@ -57,7 +57,8 @@ public class StabilityTest
 		conf.testDir = "stability";
 		conf.programFile = "stability.imp";
 		conf.semanticChecks.add(new CoContraVarianceCheck(aux, conf));
-		perform(conf, true);
+		conf.allMethods = true;
+		perform(conf);
 	}
 
 	private static class CoContraVarianceCheck

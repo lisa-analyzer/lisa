@@ -1,14 +1,13 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
+import org.junit.Test;
+
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
-import org.junit.Test;
 
 public class DescendingTest
 		extends
-		AnalysisTestExecutor {
+		IMPCronExecutor {
 
 	@Test
 	public void testIntervalDescendingWidening() {

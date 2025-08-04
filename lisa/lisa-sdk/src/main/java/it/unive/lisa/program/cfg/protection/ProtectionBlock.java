@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 
 public class ProtectionBlock {
@@ -18,12 +19,27 @@ public class ProtectionBlock {
 
     private final Collection<Statement> finallyBlock;
 
-    public ProtectionBlock(Collection<Statement> tryBlock, List<CatchBlock> catchBlocks,
-            Collection<Statement> elseBlock, Collection<Statement> finallyBlock) {
+    private final Statement tryHead;
+    
+    private final Statement elseHead;
+    
+    private final Statement finallyHead;
+
+    public ProtectionBlock(
+            Statement tryHead, 
+            Collection<Statement> tryBlock, 
+            List<CatchBlock> catchBlocks,
+            Statement elseHead,
+            Collection<Statement> elseBlock, 
+            Statement finallyHead,
+            Collection<Statement> finallyBlock) {
         this.tryBlock = tryBlock;
         this.catchBlocks = catchBlocks;
         this.elseBlock = elseBlock;
         this.finallyBlock = finallyBlock;
+        this.tryHead = tryHead;
+        this.elseHead = elseHead;
+        this.finallyHead = finallyHead;
     }
 
     public Collection<Statement> getTryBlock() {
@@ -42,6 +58,28 @@ public class ProtectionBlock {
         return finallyBlock;
     }
 
+    public Statement getTryHead() {
+        return tryHead;
+    }
+
+    public Statement getElseHead() {
+        return elseHead;
+    }
+
+    public Statement getFinallyHead() {
+        return finallyHead;
+    }
+
+    public void simplify() {
+        tryBlock.removeIf(NoOp.class::isInstance);
+        for (CatchBlock cb : catchBlocks)
+            cb.simplify();
+        if (elseBlock != null && !elseBlock.isEmpty())
+            elseBlock.removeIf(NoOp.class::isInstance);
+        if (finallyBlock != null && !finallyBlock.isEmpty())
+            finallyBlock.removeIf(NoOp.class::isInstance);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -50,6 +88,9 @@ public class ProtectionBlock {
         result = prime * result + ((catchBlocks == null) ? 0 : catchBlocks.hashCode());
         result = prime * result + ((elseBlock == null) ? 0 : elseBlock.hashCode());
         result = prime * result + ((finallyBlock == null) ? 0 : finallyBlock.hashCode());
+        result = prime * result + ((tryHead == null) ? 0 : tryHead.hashCode());
+        result = prime * result + ((elseHead == null) ? 0 : elseHead.hashCode());
+        result = prime * result + ((finallyHead == null) ? 0 : finallyHead.hashCode());
         return result;
     }
 
@@ -81,6 +122,21 @@ public class ProtectionBlock {
             if (other.finallyBlock != null)
                 return false;
         } else if (!finallyBlock.equals(other.finallyBlock))
+            return false;
+        if (tryHead == null) {
+            if (other.tryHead != null)
+                return false;
+        } else if (!tryHead.equals(other.tryHead))
+            return false;
+        if (elseHead == null) {
+            if (other.elseHead != null)
+                return false;
+        } else if (!elseHead.equals(other.elseHead))
+            return false;
+        if (finallyHead == null) {
+            if (other.finallyHead != null)
+                return false;
+        } else if (!finallyHead.equals(other.finallyHead))
             return false;
         return true;
     }

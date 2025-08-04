@@ -4,6 +4,8 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.util.file.FileManager;
+import it.unive.lisa.util.testing.AnalysisTestExecutor;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

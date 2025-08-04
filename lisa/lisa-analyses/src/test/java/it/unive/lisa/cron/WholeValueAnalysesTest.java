@@ -1,9 +1,15 @@
 package it.unive.lisa.cron;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -53,16 +59,11 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import org.junit.AfterClass;
-import org.junit.Test;
+import it.unive.lisa.util.testing.TestConfiguration;
 
 public class WholeValueAnalysesTest
 		extends
-		AnalysisTestExecutor {
+		IMPCronExecutor {
 
 	private static class AssertionCheck<A extends AbstractLattice<A>,
 			D extends AbstractDomain<A>>
@@ -196,7 +197,7 @@ public class WholeValueAnalysesTest
 
 	}
 
-	private static CronConfiguration mkConf()
+	private static TestConfiguration mkConf()
 			throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.jsonOutput = true;
@@ -216,7 +217,7 @@ public class WholeValueAnalysesTest
 			String dir,
 			String subDir,
 			String program,
-			CronConfiguration conf) {
+			TestConfiguration conf) {
 		conf.testDir = dir;
 		conf.testSubDir = subDir;
 		conf.programFile = program;
@@ -255,7 +256,7 @@ public class WholeValueAnalysesTest
 		for (Map.Entry<String, NonRelationalValueDomain<?>> intDomain : INT_DOMAINS.entrySet())
 			for (Map.Entry<String, NonRelationalValueDomain<?>> strDomain : STRING_DOMAINS.entrySet())
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
-					CronConfiguration conf = mkConf();
+					TestConfiguration conf = mkConf();
 					conf.analysis = new SimpleAbstractDomain<>(
 							new MonolithicHeap(),
 							new SmashedSum<>(
@@ -297,7 +298,7 @@ public class WholeValueAnalysesTest
 		for (Map.Entry<String, NonRelationalValueDomain<?>> intDomain : INT_DOMAINS.entrySet())
 			for (Map.Entry<String, NonRelationalValueDomain<?>> strDomain : STRING_DOMAINS.entrySet())
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
-					CronConfiguration conf = mkConf();
+					TestConfiguration conf = mkConf();
 					conf.analysis = new SimpleAbstractDomain<>(
 							new MonolithicHeap(),
 							new WholeValueAnalysis(

@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this)_cfg.json", "untyped_B.B(B__this)_cfg.json", "untyped_C.C(C__this)_cfg.json", "untyped_D.D(D__this)_cfg.json", "untyped_E.E(E__this)_cfg.json", "untyped_errors.tryCatch(errors__this)_cfg.json", "untyped_errors.tryCatchElse(errors__this)_cfg.json", "untyped_errors.tryCatchElseFinally(errors__this)_cfg.json", "untyped_errors.tryCatchElseFinallyWithReturn(errors__this)_cfg.json", "untyped_errors.tryCatchElseWithReturn(errors__this)_cfg.json", "untyped_errors.tryCatchFinally(errors__this)_cfg.json", "untyped_errors.tryCatchFinallyWithReturn(errors__this)_cfg.json", "untyped_errors.tryCatchMultiInstructions(errors__this)_cfg.json", "untyped_errors.tryCatchWithReturn(errors__this)_cfg.json", "untyped_errors.tryCatchWithVariable(errors__this)_cfg.json", "untyped_errors.tryMoreSpecificCatch(errors__this)_cfg.json", "untyped_errors.tryMultiCatch(errors__this)_cfg.json", "untyped_errors.tryMultipleCatches(errors__this)_cfg.json", "untyped_errors.tryMultipleCatchesElse(errors__this)_cfg.json", "untyped_errors.tryMultipleCatchesElseFinally(errors__this)_cfg.json", "untyped_errors.tryMultipleCatchesElseFinallyWithReturn(errors__this)_cfg.json", "untyped_errors.tryMultipleCatchesElseWithReturn(errors__this)_cfg.json", "untyped_errors.tryMultipleCatchesFinally(errors__this)_cfg.json", "untyped_errors.tryMultipleCatchesFinallyWithReturn(errors__this)_cfg.json", "untyped_errors.tryMultipleCatchesWithReturn(errors__this)_cfg.json" ],
+  "info" : {
+    "cfgs" : "25",
+    "duration" : "455ms",
+    "end" : "2025-08-04T10:44:54.762+02:00",
+    "expressions" : "197",
+    "files" : "25",
+    "globals" : "0",
+    "members" : "25",
+    "programs" : "1",
+    "start" : "2025-08-04T10:44:54.307+02:00",
+    "statements" : "126",
+    "units" : "6",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "true",
+    "serializeResults" : "false",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/errors"
+  }
+}

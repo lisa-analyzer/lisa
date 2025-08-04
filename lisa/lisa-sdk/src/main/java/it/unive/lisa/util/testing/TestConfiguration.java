@@ -1,4 +1,4 @@
-package it.unive.lisa;
+package it.unive.lisa.util.testing;
 
 import it.unive.lisa.conf.LiSAConfiguration;
 
@@ -9,9 +9,9 @@ import it.unive.lisa.conf.LiSAConfiguration;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CronConfiguration
+public class TestConfiguration
 		extends
-		DefaultConfiguration {
+		LiSAConfiguration {
 
 	/**
 	 * The name of the test folder; this is used for searching expected results

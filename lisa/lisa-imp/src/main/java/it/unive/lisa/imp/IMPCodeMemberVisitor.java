@@ -189,43 +189,48 @@ class IMPCodeMemberVisitor
 		entrypoints.add(visited.getLeft());
 		list.mergeWith(visited.getMiddle());
 
-		if (cfg.getAllExitpoints().isEmpty()) {
-			Ret ret = new Ret(cfg, descriptor.getLocation());
-			if (cfg.getNodesCount() == 0) {
-				// empty method, so the ret is also the entrypoint
-				list.addNode(ret);
-				entrypoints.add(ret);
-			} else {
-				// every non-throwing instruction that does not have a follower
-				// is ending the method
-				Collection<Statement> preExits = new LinkedList<>();
-				for (Statement st : list.getNodes())
-					if (!st.stopsExecution() && list.followersOf(st).isEmpty())
-						preExits.add(st);
-				list.addNode(ret);
-				for (Statement st : preExits)
-					list.addEdge(new SequentialEdge(st, ret));
+		Ret ret = new Ret(cfg, descriptor.getLocation());
 
-				for (VariableTableEntry entry : descriptor.getVariables())
-					if (preExits.contains(entry.getScopeEnd()))
-						entry.setScopeEnd(ret);
-			}
-		} else if (!visited.getRight().stopsExecution()) {
-			// if the other returns do return a value, we cannot add
-			// a ret as we should return a value as well
-			for (Statement st : cfg.getNormalExitpoints())
-				if (st instanceof Return)
-					throw new IMPSyntaxException("Missing return statement at " + st.getLocation());
-
-
-			// if the last statement does not stop execution, we add a ret
-			Ret ret = new Ret(cfg, descriptor.getLocation());
+		if (cfg.getNodesCount() == 0) {
+			// empty method, so the ret is also the entrypoint
 			list.addNode(ret);
-			list.addEdge(new SequentialEdge(visited.getRight(), ret));
+			entrypoints.add(ret);
 		}
 
+		// every non-throwing instruction that does not have a follower
+		// is ending the method
+		Collection<Statement> preExits = new LinkedList<>();
+		for (Statement st : list.getNodes())
+			if (!st.stopsExecution() && list.followersOf(st).isEmpty())
+				preExits.add(st);
+		if (preExits.isEmpty()) {
+			cfg.simplify();
+			return cfg;
+		}
+
+		// if the other returns do return a value, we cannot add
+		// a ret as we should return a value as well
+		boolean returnsValue = false;
+		for (Statement st : cfg.getNormalExitpoints())
+			if (st instanceof Return)
+				returnsValue = true;
+			else if (returnsValue)
+				throw new IMPSyntaxException("Return statement at " + st.getLocation() + " should return something, since other returns do it");
+				
+		list.addNode(ret);
+		for (Statement st : preExits) {
+			if (returnsValue)
+				throw new IMPSyntaxException("Missing return statement at " + st.getLocation());
+			list.addEdge(new SequentialEdge(st, ret));
+		}
+
+		// adjust scopes
+		for (VariableTableEntry entry : descriptor.getVariables())
+			if (preExits.contains(entry.getScopeEnd()))
+				entry.setScopeEnd(ret);
 
 		cfg.simplify();
+
 		return cfg;
 	}
 
@@ -236,8 +241,9 @@ class IMPCodeMemberVisitor
 		NodeList<CFG, Statement, Edge> block = new NodeList<>(new SequentialEdge());
 
 		Statement first = null, last = null;
+		boolean justBegan = true;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
-			if (last != null && last.stopsExecution())
+			if (!justBegan && (last == null || last.stopsExecution()))
 				throw new IMPSyntaxException("Statement '" + last.toString() + "' at " + last.getLocation() + " stops execution, so it cannot be followed by another statement in the same block");
 			Triple<Statement,
 					NodeList<CFG, Statement, Edge>,
@@ -245,8 +251,10 @@ class IMPCodeMemberVisitor
 			block.mergeWith(st.getMiddle());
 			if (first == null)
 				first = st.getLeft();
-			if (last != null)
+			if (!justBegan)
 				block.addEdge(new SequentialEdge(last, st.getLeft()));
+			else
+				justBegan = false;
 			last = st.getRight();
 		}
 
@@ -345,22 +353,29 @@ class IMPCodeMemberVisitor
 			ite.addEdge(new FalseEdge(condition, otherwise.getLeft()));
 		}
 
+		boolean needsNoop = (then.getRight() != null && !then.getRight().stopsExecution()) 
+			|| otherwise == null
+			|| (otherwise.getRight() != null && !otherwise.getRight().stopsExecution());
 		Statement noop = new NoOp(cfg, condition.getLocation());
-		ite.addNode(noop);
-		ite.addEdge(new SequentialEdge(then.getRight(), noop));
-		if (otherwise != null)
-			ite.addEdge(new SequentialEdge(otherwise.getRight(), noop));
-		else
+		if (needsNoop)
+			ite.addNode(noop);
+
+		if (then.getRight() != null && !then.getRight().stopsExecution())
+			ite.addEdge(new SequentialEdge(then.getRight(), noop));
+		if (otherwise != null) {
+			if (otherwise.getRight() != null && !otherwise.getRight().stopsExecution())
+				ite.addEdge(new SequentialEdge(otherwise.getRight(), noop));
+		} else
 			ite.addEdge(new FalseEdge(condition, noop));
 
 		descriptor.addControlFlowStructure(new IfThenElse(
 				list,
 				condition,
-				noop,
+				needsNoop ? noop : null,
 				then.getMiddle().getNodes(),
 				otherwise == null ? Collections.emptyList() : otherwise.getMiddle().getNodes()));
 
-		return Triple.of(condition, ite, noop);
+		return Triple.of(condition, ite, needsNoop ? noop : null);
 	}
 
 	@Override
@@ -407,7 +422,8 @@ class IMPCodeMemberVisitor
 				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
 		loop.mergeWith(body.getMiddle());
 		loop.addEdge(new TrueEdge(condition, body.getLeft()));
-		loop.addEdge(new SequentialEdge(body.getRight(), condition));
+		if (body.getRight() != null && !body.getRight().stopsExecution())
+			loop.addEdge(new SequentialEdge(body.getRight(), condition));
 
 		Statement noop = new NoOp(cfg, condition.getLocation());
 		loop.addNode(noop);
@@ -459,11 +475,13 @@ class IMPCodeMemberVisitor
 		if (post != null) {
 			Statement inc = visitExpression(post);
 			loop.addNode(inc);
-			loop.addEdge(new SequentialEdge(body.getRight(), inc));
+			if (body.getRight() != null && !body.getRight().stopsExecution())
+				loop.addEdge(new SequentialEdge(body.getRight(), inc));
 			last = inc;
 		}
 
-		loop.addEdge(new SequentialEdge(last, condition));
+		if (last != null && !last.stopsExecution())
+			loop.addEdge(new SequentialEdge(last, condition));
 
 		Statement noop = new NoOp(cfg, condition.getLocation());
 		loop.addNode(noop);
@@ -473,8 +491,11 @@ class IMPCodeMemberVisitor
 			descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getMiddle().getNodes()));
 		else {
 			NodeList<CFG, Statement, Edge> tmp = new NodeList<>(body.getMiddle());
-			tmp.addNode(last);
-			loop.addEdge(new SequentialEdge(body.getRight(), last));
+			if (last != null) {
+				tmp.addNode(last);
+				if (body.getRight() != null && !body.getRight().stopsExecution())
+					loop.addEdge(new SequentialEdge(body.getRight(), last));
+			}
 			descriptor.addControlFlowStructure(new Loop(list, condition, noop, tmp.getNodes()));
 		}
 
@@ -1060,7 +1081,7 @@ class IMPCodeMemberVisitor
 		// to the end of the try block *only* if it does not end with a return/throw
 		// (as it would be deadcode)
 		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> elseBlock = null;
-		if (!body.getRight().stopsExecution())
+		if (body.getRight() != null && !body.getRight().stopsExecution())
 			if (ctx.else_ == null)
 				// non-stopping last statement with no else
 				normalExits.add(body.getRight());
@@ -1068,7 +1089,7 @@ class IMPCodeMemberVisitor
 				elseBlock = visitBlock(ctx.else_);
 				trycatch.mergeWith(elseBlock.getMiddle());
 				trycatch.addEdge(new SequentialEdge(body.getRight(), elseBlock.getLeft()));
-				if (!elseBlock.getRight().stopsExecution())
+				if (elseBlock.getRight() != null && !elseBlock.getRight().stopsExecution())
 					// non-stopping last statement
 					normalExits.add(elseBlock.getRight());
 			} 
@@ -1089,7 +1110,7 @@ class IMPCodeMemberVisitor
 			trycatch.mergeWith(visit.getMiddle());
 			for (Statement st : body.getMiddle().getNodes())
 				trycatch.addEdge(new ErrorEdge(st, visit.getLeft(), block.getIdentifier(), block.getExceptions()));
-			if (!visit.getRight().stopsExecution())
+			if (visit.getRight() != null && !visit.getRight().stopsExecution())
 				// non-stopping last statement
 				normalExits.add(visit.getRight());
 		}
@@ -1152,12 +1173,15 @@ class IMPCodeMemberVisitor
 
 		// build protection block
 		descriptor.addProtectionBlock(new ProtectionBlock(
-			body.getMiddle().getNodes(), 
+			body.getLeft(),
+			body.getMiddle().getNodes(),
 			catches,
+			elseBlock == null ? null : elseBlock.getLeft(),
 			elseBlock == null ? List.of() : elseBlock.getMiddle().getNodes(), 
+			finalBlock == null ? null : finalBlock.getLeft(),
 			finalBlock == null ? List.of() : finalBlock.getMiddle().getNodes()));
 
-		return Triple.of(body.getLeft(), trycatch, usedNoop ? noop : body.getRight());
+		return Triple.of(body.getLeft(), trycatch, usedNoop ? noop : body.getRight() != null && !body.getRight().stopsExecution() ? body.getRight() : null);
 	}
 
 	private boolean connectFinallyTo(
@@ -1191,13 +1215,17 @@ class IMPCodeMemberVisitor
 		if (endBlock.stopsExecution()) {
 			for (Statement pred : block.predecessorsOf(endBlock)) {
 				trycatch.addEdge(new BeginFinallyEdge(pred, beginFinally, pred));
-				trycatch.addEdge(new EndFinallyEdge(endFinally, endBlock, pred));
+				if (endFinally != null && !endFinally.stopsExecution())
+					// TODO need to smash the continuation into the normal one at returns
+					trycatch.addEdge(new EndFinallyEdge(endFinally, endBlock, pred));
 				extraEdges.addAll(block.getEdgesConnecting(pred, endBlock));
 			}
 			return false;
 		} else if (extraCond) {
 			trycatch.addEdge(new BeginFinallyEdge(endBlock, beginFinally, endBlock));
-			trycatch.addEdge(new EndFinallyEdge(endFinally, closing, endBlock));
+			if (endFinally != null && !endFinally.stopsExecution())
+				// TODO need to smash the continuation into the normal one at returns
+				trycatch.addEdge(new EndFinallyEdge(endFinally, closing, endBlock));
 			return true;
 		} else
 			return false;
@@ -1248,6 +1276,7 @@ class IMPCodeMemberVisitor
 		
 		CatchBlock catchBlock = new CatchBlock(
 				variable,
+				body.getLeft(),
 				body.getMiddle().getNodes(),
 				exceptions.toArray(Type[]::new));
 

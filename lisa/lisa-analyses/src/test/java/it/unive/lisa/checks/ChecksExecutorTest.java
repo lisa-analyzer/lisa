@@ -1,19 +1,21 @@
 package it.unive.lisa.checks;
 
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
+import java.io.IOException;
+
+import org.junit.Test;
+
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
+import it.unive.lisa.cron.CronConfiguration;
+import it.unive.lisa.cron.IMPCronExecutor;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import java.io.IOException;
-import org.junit.Test;
 
 public class ChecksExecutorTest
 		extends
-		AnalysisTestExecutor {
+		IMPCronExecutor {
 
 	private static class VariableI
 			implements

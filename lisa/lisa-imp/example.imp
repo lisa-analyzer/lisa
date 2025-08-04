@@ -203,12 +203,12 @@ class example {
 		for (def i = 0; i < 20; i = i + 1)
 			y = y % 5;
 		
-		// you can throw any object to raise errors
-		throw new example();
-		def ex = new example();
-		throw ex;
-		
 		// you can write assertions
 		assert y == 10;
+		
+		// you can throw any object to raise errors
+		// throw new example();
+		def ex = new example();
+		throw ex;
 	}
 }

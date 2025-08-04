@@ -2,13 +2,15 @@ package it.unive.lisa.imp;
 
 import static org.junit.Assert.fail;
 
+import java.nio.file.Path;
+
 import org.junit.Test;
 
-import it.unive.lisa.LiSA;
-import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.util.testing.AnalysisTestExecutor;
+import it.unive.lisa.util.testing.TestConfiguration;
 
-public class IMPFrontendTest {
+public class IMPFrontendTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testExampleProgram() {
@@ -21,18 +23,24 @@ public class IMPFrontendTest {
 
 	@Test
 	public void testErrors() {
+		TestConfiguration conf = new TestConfiguration();
+		conf.testDir = "errors";
+		conf.programFile = "try-catch.imp";
+		conf.jsonOutput = true;
+		conf.serializeInputs = true;
+		perform(conf);
+	}
+
+	@Override
+	public Program readProgram(TestConfiguration conf, Path target) {
+		Program program = null;
 		try {
-			Program program = IMPFrontend.processFile("imp-testcases/try-catch.imp", false);
-			LiSAConfiguration conf = new LiSAConfiguration();
-			conf.workdir = "target/test-home/errors";
-			conf.jsonOutput = true;
-			conf.serializeInputs = true;
-			conf.analysisGraphs = LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
-			LiSA l = new LiSA(conf);
-			l.run(program);
+			program = IMPFrontend.processFile(target.toString(), false);
 		} catch (ParsingException e) {
-			fail("Processing the try-catch file thrown an exception: " + e);
+			e.printStackTrace(System.err);
+			fail("Exception while parsing '" + target + "': " + e.getMessage());
 		}
+		return program;
 	}
 
 }
