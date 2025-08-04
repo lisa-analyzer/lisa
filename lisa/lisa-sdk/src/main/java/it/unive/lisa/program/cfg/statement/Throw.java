@@ -19,7 +19,9 @@ import it.unive.lisa.symbolic.value.Skip;
  */
 public class Throw
 		extends
-		UnaryStatement {
+		UnaryStatement
+		implements
+		YieldsValue {
 
 	/**
 	 * Builds the throw, raising {@code expression} as error, happening at the
@@ -51,6 +53,16 @@ public class Throw
 	@Override
 	public boolean throwsError() {
 		return true;
+	}
+
+	@Override
+	public Expression yieldedValue() {
+		return getSubExpression();
+	}
+
+	@Override
+	public Statement withValue(Expression value) {
+		return new Throw(getCFG(), getLocation(), value);
 	}
 
 	@Override

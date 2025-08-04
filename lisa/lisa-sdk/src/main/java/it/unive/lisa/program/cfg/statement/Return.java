@@ -23,7 +23,8 @@ public class Return
 		extends
 		UnaryStatement
 		implements
-		MetaVariableCreator {
+		MetaVariableCreator,
+		YieldsValue {
 
 	/**
 	 * Builds the return, returning {@code expression} to the caller CFG,
@@ -58,6 +59,16 @@ public class Return
 		String name = "ret_value@" + getCFG().getDescriptor().getName();
 		Variable var = new Variable(e.getStaticType(), name, getLocation());
 		return var;
+	}
+
+	@Override
+	public Expression yieldedValue() {
+		return getSubExpression();
+	}
+
+	@Override
+	public Statement withValue(Expression value) {
+		return new Return(getCFG(), getLocation(), value);
 	}
 
 	@Override

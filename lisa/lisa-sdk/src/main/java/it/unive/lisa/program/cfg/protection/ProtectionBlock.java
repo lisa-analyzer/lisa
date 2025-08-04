@@ -25,6 +25,8 @@ public class ProtectionBlock {
     
     private final Statement finallyHead;
 
+    private Statement closing;
+
     public ProtectionBlock(
             Statement tryHead, 
             Collection<Statement> tryBlock, 
@@ -32,7 +34,8 @@ public class ProtectionBlock {
             Statement elseHead,
             Collection<Statement> elseBlock, 
             Statement finallyHead,
-            Collection<Statement> finallyBlock) {
+            Collection<Statement> finallyBlock,
+            Statement closing) {
         this.tryBlock = tryBlock;
         this.catchBlocks = catchBlocks;
         this.elseBlock = elseBlock;
@@ -40,6 +43,7 @@ public class ProtectionBlock {
         this.tryHead = tryHead;
         this.elseHead = elseHead;
         this.finallyHead = finallyHead;
+        this.closing = closing;
     }
 
     public Collection<Statement> getTryBlock() {
@@ -68,6 +72,24 @@ public class ProtectionBlock {
 
     public Statement getFinallyHead() {
         return finallyHead;
+    }
+
+    public Statement getClosing() {
+        return closing;
+    }
+
+    public void setClosing(Statement closing) {
+        this.closing = closing;
+    }
+
+    public Collection<Statement> getFullBody(boolean includeFinally) {
+        Collection<Statement> all = new LinkedList<>(tryBlock);
+        all.addAll(catchBlocks.stream().flatMap(cb -> cb.getBody().stream()).toList());
+        if (elseBlock != null)
+            all.addAll(elseBlock);
+        if (finallyBlock != null && includeFinally)
+            all.addAll(finallyBlock);
+        return all;
     }
 
     public void simplify() {

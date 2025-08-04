@@ -644,6 +644,7 @@ public class CFG
 			Statement node) {
 		shiftVariableScopes(node);
 		shiftControlFlowStructuresEnd(node);
+		shiftProtectionBlocks(node);
 	}
 
 	private void shiftControlFlowStructuresEnd(
@@ -661,11 +662,32 @@ public class CFG
 					else
 						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
 				else {
-					LOG
-							.warn(
-									"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
-									node);
+					LOG.warn(
+						"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
+						node);
 					cfs.setFirstFollower(null);
+				}
+	}
+
+	private void shiftProtectionBlocks(
+			Statement node) {
+		Collection<Statement> followers = followersOf(node);
+
+		Statement candidate;
+		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
+			if (node == pb.getClosing())
+				if (followers.isEmpty())
+					pb.setClosing(null);
+				else if (followers.size() == 1)
+					if (!((candidate = followers.iterator().next()) instanceof NoOp))
+						pb.setClosing(candidate);
+					else
+						pb.setClosing(firstNonNoOpDeterministicFollower(candidate));
+				else {
+					LOG.warn(
+						"{} is the closing of a protection block, it is being simplified but has multiple followers: the closing of the protection block will be lost",
+						node);
+					pb.setClosing(null);
 				}
 	}
 

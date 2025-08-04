@@ -116,6 +116,13 @@ public class SerializableGraph {
 		return descriptions;
 	}
 
+	public SerializableNode getNodeById(int id) {
+		return nodes.stream()
+				.filter(n -> n.getId() == id)
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("No node with id " + id + " in the graph"));
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
