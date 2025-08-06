@@ -1,13 +1,5 @@
 package it.unive.lisa.cron;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.junit.AfterClass;
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractDomain;
@@ -60,6 +52,12 @@ import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.testing.TestConfiguration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 public class WholeValueAnalysesTest
 		extends

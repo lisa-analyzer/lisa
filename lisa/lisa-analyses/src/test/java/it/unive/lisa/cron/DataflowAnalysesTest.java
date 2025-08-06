@@ -1,9 +1,5 @@
 package it.unive.lisa.cron;
 
-import java.util.Arrays;
-
-import org.junit.Test;
-
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.dataflow.AvailableExpressions;
 import it.unive.lisa.analysis.dataflow.ConstantPropagation;
@@ -29,6 +25,8 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.global.AccessGlobal;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import java.util.Arrays;
+import org.junit.Test;
 
 public class DataflowAnalysesTest
 		extends

@@ -67,7 +67,8 @@ public class Return
 	}
 
 	@Override
-	public Statement withValue(Expression value) {
+	public Statement withValue(
+			Expression value) {
 		return new Return(getCFG(), getLocation(), value);
 	}
 
@@ -79,6 +80,7 @@ public class Return
 					SymbolicExpression expr,
 					StatementStore<A> expressions)
 					throws SemanticException {
+		// TODO need to smash the continuation into the normal one at returns
 		Identifier meta = getMetaVariable();
 		return interprocedural.getAnalysis().assign(state, meta, expr, this);
 	}

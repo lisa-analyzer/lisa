@@ -1,21 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -39,6 +23,7 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.EndFinallyEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
@@ -48,6 +33,7 @@ import it.unive.lisa.program.cfg.fixpoints.DescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
@@ -61,6 +47,22 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -221,9 +223,182 @@ public class CFG
 	 *                                           non-sequential edge.
 	 */
 	public void simplify() {
-		super.simplify(NoOp.class, new LinkedList<>(), new HashMap<>());
+		Set<Statement> targets = getNodes()
+				.stream()
+				.filter(k -> k instanceof NoOp)
+				// removing the only node in a protected block
+				// would mean removing the whole block from the
+				// cfg, but that would make it different w.r.t.
+				// the source code, so we keep it. It is also
+				// problematic to remove if it is a noop-return
+				.filter(k -> !isNotSimplifiableInProtectedBlock(k))
+				.collect(Collectors.toSet());
+		targets.forEach(this::preSimplify);
+		list.simplify(targets, entrypoints, new LinkedList<>(), new HashMap<>());
 		descriptor.getControlFlowStructures().forEach(ControlFlowStructure::simplify);
 		descriptor.getProtectionBlocks().forEach(ProtectionBlock::simplify);
+	}
+
+	private boolean isNotSimplifiableInProtectedBlock(
+			Statement st) {
+		BiPredicate<ProtectedBlock, Statement> single = (
+				pb,
+				s) -> pb.getBody().size() == 1 && pb.getStart() == s;
+		BiPredicate<ProtectedBlock, Statement> preRet = (
+				pb,
+				s) -> pb.getBody().size() == 2 && pb.getStart() == s && pb.getEnd().stopsExecution();
+		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
+			if (single.test(pb.getTryBlock(), st) || preRet.test(pb.getTryBlock(), st))
+				return true;
+			else if (pb.getElseBlock() != null
+					&& (single.test(pb.getElseBlock(), st) || preRet.test(pb.getElseBlock(), st)))
+				return true;
+			else if (pb.getFinallyBlock() != null
+					&& (single.test(pb.getFinallyBlock(), st) || preRet.test(pb.getFinallyBlock(), st)))
+				return true;
+			else
+				for (CatchBlock cb : pb.getCatchBlocks())
+					if (single.test(cb.getBody(), st) || preRet.test(cb.getBody(), st))
+						return true;
+		return false;
+	}
+
+	private void preSimplify(
+			Statement node) {
+		shiftVariableScopes(node);
+		shiftControlFlowStructuresEnd(node);
+		shiftProtectionBlocks(node);
+	}
+
+	private void shiftControlFlowStructuresEnd(
+			Statement node) {
+		Collection<Statement> followers = followersOf(node);
+
+		Statement candidate;
+		for (ControlFlowStructure cfs : descriptor.getControlFlowStructures())
+			if (node == cfs.getFirstFollower())
+				if (followers.isEmpty())
+					cfs.setFirstFollower(null);
+				else if (followers.size() == 1)
+					if (!((candidate = followers.iterator().next()) instanceof NoOp))
+						cfs.setFirstFollower(candidate);
+					else
+						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
+				else {
+					LOG.warn(
+							"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
+							node);
+					cfs.setFirstFollower(null);
+				}
+	}
+
+	private void shiftProtectionBlocks(
+			Statement node) {
+		Collection<Statement> followers = followersOf(node);
+
+		Statement candidate;
+		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
+			if (node == pb.getClosing())
+				if (followers.isEmpty())
+					pb.setClosing(null);
+				else if (followers.size() == 1)
+					if (!((candidate = followers.iterator().next()) instanceof NoOp))
+						pb.setClosing(candidate);
+					else
+						pb.setClosing(firstNonNoOpDeterministicFollower(candidate));
+				else {
+					LOG.warn(
+							"{} is the closing of a protection block, it is being simplified but has multiple followers: the closing of the protection block will be lost",
+							node);
+					pb.setClosing(null);
+				}
+	}
+
+	private Statement firstNonNoOpDeterministicFollower(
+			Statement st) {
+		Statement current = st;
+		while (current instanceof NoOp) {
+			Collection<Statement> followers = followersOf(current);
+			if (followers.isEmpty() || followers.size() > 1)
+				// we reached the end or we have more than one follower
+				return null;
+			current = followers.iterator().next();
+		}
+
+		return current;
+	}
+
+	private void shiftVariableScopes(
+			Statement node) {
+		Collection<VariableTableEntry> starting = descriptor
+				.getVariables()
+				.stream()
+				.filter(v -> v.getScopeStart() == node)
+				.collect(Collectors.toList());
+		Collection<VariableTableEntry> ending = descriptor
+				.getVariables()
+				.stream()
+				.filter(v -> v.getScopeEnd() == node)
+				.collect(Collectors.toList());
+		if (ending.isEmpty() && starting.isEmpty())
+			return;
+
+		Collection<Statement> predecessors = predecessorsOf(node);
+		Collection<Statement> followers = followersOf(node);
+
+		if (predecessors.isEmpty() && followers.isEmpty()) {
+			LOG
+					.warn(
+							"Simplifying the only statement of '{}': all variables will be made visible for the entire cfg",
+							this);
+			starting.forEach(v -> v.setScopeStart(null));
+			ending.forEach(v -> v.setScopeEnd(null));
+			return;
+		}
+
+		String format = "Simplifying the scope-{} statement of a variable with {} "
+				+ "is not supported: {} will be made visible {} of '" + this + "'";
+		if (!starting.isEmpty())
+			if (predecessors.isEmpty()) {
+				// no predecessors: move the starting scope forward
+				Statement follow;
+				if (followers.size() > 1) {
+					LOG.warn(format, "starting", "no predecessors and multiple followers", starting, "from the start");
+					follow = null;
+				} else
+					follow = followers.iterator().next();
+				starting.forEach(v -> v.setScopeStart(follow));
+			} else {
+				// move the starting scope backward
+				Statement pred;
+				if (predecessors.size() > 1) {
+					LOG.warn(format, "starting", "multiple predecessors", starting, "from the start");
+					pred = null;
+				} else
+					pred = predecessors.iterator().next();
+				starting.forEach(v -> v.setScopeStart(pred));
+			}
+
+		if (!ending.isEmpty())
+			if (followers.isEmpty()) {
+				// no followers: move the ending scope backward
+				Statement pred;
+				if (predecessors.size() > 1) {
+					LOG.warn(format, "ending", "no followers and multiple predecessors", ending, "until the end");
+					pred = null;
+				} else
+					pred = predecessors.iterator().next();
+				ending.forEach(v -> v.setScopeEnd(pred));
+			} else {
+				// move the ending scope forward
+				Statement follow;
+				if (followers.size() > 1) {
+					LOG.warn(format, "ending", "multiple followers", ending, "until the end");
+					follow = null;
+				} else
+					follow = followers.iterator().next();
+				ending.forEach(v -> v.setScopeEnd(follow));
+			}
 	}
 
 	/**
@@ -639,145 +814,6 @@ public class CFG
 		return SerializableCFG.fromCFG(this, descriptionGenerator);
 	}
 
-	@Override
-	public void preSimplify(
-			Statement node) {
-		shiftVariableScopes(node);
-		shiftControlFlowStructuresEnd(node);
-		shiftProtectionBlocks(node);
-	}
-
-	private void shiftControlFlowStructuresEnd(
-			Statement node) {
-		Collection<Statement> followers = followersOf(node);
-
-		Statement candidate;
-		for (ControlFlowStructure cfs : descriptor.getControlFlowStructures())
-			if (node == cfs.getFirstFollower())
-				if (followers.isEmpty())
-					cfs.setFirstFollower(null);
-				else if (followers.size() == 1)
-					if (!((candidate = followers.iterator().next()) instanceof NoOp))
-						cfs.setFirstFollower(candidate);
-					else
-						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
-				else {
-					LOG.warn(
-						"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
-						node);
-					cfs.setFirstFollower(null);
-				}
-	}
-
-	private void shiftProtectionBlocks(
-			Statement node) {
-		Collection<Statement> followers = followersOf(node);
-
-		Statement candidate;
-		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
-			if (node == pb.getClosing())
-				if (followers.isEmpty())
-					pb.setClosing(null);
-				else if (followers.size() == 1)
-					if (!((candidate = followers.iterator().next()) instanceof NoOp))
-						pb.setClosing(candidate);
-					else
-						pb.setClosing(firstNonNoOpDeterministicFollower(candidate));
-				else {
-					LOG.warn(
-						"{} is the closing of a protection block, it is being simplified but has multiple followers: the closing of the protection block will be lost",
-						node);
-					pb.setClosing(null);
-				}
-	}
-
-	private Statement firstNonNoOpDeterministicFollower(
-			Statement st) {
-		Statement current = st;
-		while (current instanceof NoOp) {
-			Collection<Statement> followers = followersOf(current);
-			if (followers.isEmpty() || followers.size() > 1)
-				// we reached the end or we have more than one follower
-				return null;
-			current = followers.iterator().next();
-		}
-
-		return current;
-	}
-
-	private void shiftVariableScopes(
-			Statement node) {
-		Collection<VariableTableEntry> starting = descriptor
-				.getVariables()
-				.stream()
-				.filter(v -> v.getScopeStart() == node)
-				.collect(Collectors.toList());
-		Collection<VariableTableEntry> ending = descriptor
-				.getVariables()
-				.stream()
-				.filter(v -> v.getScopeEnd() == node)
-				.collect(Collectors.toList());
-		if (ending.isEmpty() && starting.isEmpty())
-			return;
-
-		Collection<Statement> predecessors = predecessorsOf(node);
-		Collection<Statement> followers = followersOf(node);
-
-		if (predecessors.isEmpty() && followers.isEmpty()) {
-			LOG
-					.warn(
-							"Simplifying the only statement of '{}': all variables will be made visible for the entire cfg",
-							this);
-			starting.forEach(v -> v.setScopeStart(null));
-			ending.forEach(v -> v.setScopeEnd(null));
-			return;
-		}
-
-		String format = "Simplifying the scope-{} statement of a variable with {} "
-				+ "is not supported: {} will be made visible {} of '" + this + "'";
-		if (!starting.isEmpty())
-			if (predecessors.isEmpty()) {
-				// no predecessors: move the starting scope forward
-				Statement follow;
-				if (followers.size() > 1) {
-					LOG.warn(format, "starting", "no predecessors and multiple followers", starting, "from the start");
-					follow = null;
-				} else
-					follow = followers.iterator().next();
-				starting.forEach(v -> v.setScopeStart(follow));
-			} else {
-				// move the starting scope backward
-				Statement pred;
-				if (predecessors.size() > 1) {
-					LOG.warn(format, "starting", "multiple predecessors", starting, "from the start");
-					pred = null;
-				} else
-					pred = predecessors.iterator().next();
-				starting.forEach(v -> v.setScopeStart(pred));
-			}
-
-		if (!ending.isEmpty())
-			if (followers.isEmpty()) {
-				// no followers: move the ending scope backward
-				Statement pred;
-				if (predecessors.size() > 1) {
-					LOG.warn(format, "ending", "no followers and multiple predecessors", ending, "until the end");
-					pred = null;
-				} else
-					pred = predecessors.iterator().next();
-				ending.forEach(v -> v.setScopeEnd(pred));
-			} else {
-				// move the ending scope forward
-				Statement follow;
-				if (followers.size() > 1) {
-					LOG.warn(format, "ending", "multiple followers", ending, "until the end");
-					follow = null;
-				} else
-					follow = followers.iterator().next();
-				ending.forEach(v -> v.setScopeEnd(follow));
-			}
-	}
-
 	/**
 	 * Yields a generic {@link ProgramPoint} happening inside this cfg. A
 	 * generic program point can be used for semantic evaluations of
@@ -845,8 +881,7 @@ public class CFG
 			// no outgoing edges in execution-terminating statements
 			// unless they are error-handling ones
 			Collection<Edge> outs = list.getOutgoingEdges(st);
-			if (st.stopsExecution() 
-					&& outs.stream().filter(Predicate.not(Edge::isErrorHandling)).findAny().isPresent())
+			if (st.stopsExecution() && !outs.isEmpty())
 				throw new ProgramValidationException(
 						this + " contains an execution-stopping node that has followers: " + st);
 			if (outs.isEmpty() && !st.stopsExecution() && !st.throwsError())
@@ -1139,13 +1174,17 @@ public class CFG
 		for (ControlFlowStructure struct : descriptor.getControlFlowStructures())
 			leaders.addAll(struct.getTargetedStatements());
 		for (ProtectionBlock block : descriptor.getProtectionBlocks()) {
-			leaders.add(block.getTryHead());
-			if (block.getElseHead() != null)
-				leaders.add(block.getElseHead());
-			if (block.getFinallyHead() != null)
-				leaders.add(block.getFinallyHead());
-			for (CatchBlock cb : block.getCatchBlocks()) 
-				leaders.add(cb.getHead());
+			leaders.add(block.getTryBlock().getStart());
+			if (block.getElseBlock() != null)
+				leaders.add(block.getElseBlock().getStart());
+			if (block.getFinallyBlock() != null) {
+				leaders.add(block.getFinallyBlock().getStart());
+				for (Edge e : getEdges())
+					if (e instanceof EndFinallyEdge)
+						leaders.add(e.getDestination());
+			}
+			for (CatchBlock cb : block.getCatchBlocks())
+				leaders.add(cb.getBody().getStart());
 		}
 
 		basicBlocks = new IdentityHashMap<>(leaders.size());

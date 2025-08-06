@@ -69,6 +69,11 @@ public class SequentialEdge
 	}
 
 	@Override
+	public boolean isFinallyRelated() {
+		return false;
+	}
+
+	@Override
 	public SequentialEdge newInstance(
 			Statement source,
 			Statement destination) {

@@ -61,7 +61,8 @@ public class Throw
 	}
 
 	@Override
-	public Statement withValue(Expression value) {
+	public Statement withValue(
+			Expression value) {
 		return new Throw(getCFG(), getLocation(), value);
 	}
 
@@ -73,6 +74,7 @@ public class Throw
 					SymbolicExpression expr,
 					StatementStore<A> expressions)
 					throws SemanticException {
+		// TODO need to smash the continuation into the normal one at returns
 		// only temporary
 		return interprocedural.getAnalysis().smallStepSemantics(state, new Skip(getLocation()), this);
 	}

@@ -2,15 +2,15 @@ package it.unive.lisa.imp;
 
 import static org.junit.Assert.fail;
 
-import java.nio.file.Path;
-
-import org.junit.Test;
-
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.testing.AnalysisTestExecutor;
 import it.unive.lisa.util.testing.TestConfiguration;
+import java.nio.file.Path;
+import org.junit.Test;
 
-public class IMPFrontendTest extends AnalysisTestExecutor {
+public class IMPFrontendTest
+		extends
+		AnalysisTestExecutor {
 
 	@Test
 	public void testExampleProgram() {
@@ -31,8 +31,30 @@ public class IMPFrontendTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
+	@Test
+	public void testErrorsWithEmptyBodies() {
+		TestConfiguration conf = new TestConfiguration();
+		conf.testDir = "errors-empty";
+		conf.programFile = "try-catch-empty.imp";
+		conf.jsonOutput = true;
+		conf.serializeInputs = true;
+		perform(conf);
+	}
+
+	@Test
+	public void testErrorsWithReturns() {
+		TestConfiguration conf = new TestConfiguration();
+		conf.testDir = "errors-returns";
+		conf.programFile = "try-catch-returns.imp";
+		conf.jsonOutput = true;
+		conf.serializeInputs = true;
+		perform(conf);
+	}
+
 	@Override
-	public Program readProgram(TestConfiguration conf, Path target) {
+	public Program readProgram(
+			TestConfiguration conf,
+			Path target) {
 		Program program = null;
 		try {
 			program = IMPFrontend.processFile(target.toString(), false);

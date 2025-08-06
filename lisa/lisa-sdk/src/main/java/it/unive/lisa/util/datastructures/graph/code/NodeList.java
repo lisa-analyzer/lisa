@@ -394,8 +394,7 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 			N node) {
 		int src = nodes.indexOf(node);
 		if (src == -1)
-			throw new IllegalArgumentException(
-					"'" + node + "' is not in the graph");
+			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
 		Set<N> result = new HashSet<>();
 		if (src != nodes.size() - 1 && !cutoff.contains(src))
@@ -500,13 +499,19 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 				// normal intermediate edge
 				for (E in : ingoing)
 					for (E out : outgoing) {
-						if (!out.isUnconditional())
+						// if (out.isErrorHandling())
+						// continue;
+						if (!out.isUnconditional() && !out.isErrorHandling() && !out.isFinallyRelated())
 							throw new UnsupportedOperationException(
 									EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
 
+						E _new;
 						// replicate the edge from ingoing.source to
 						// outgoing.dest
-						E _new = in.newInstance(in.getSource(), out.getDestination());
+						if (out.isFinallyRelated() || out.isErrorHandling())
+							_new = out.newInstance(in.getSource(), out.getDestination());
+						else
+							_new = in.newInstance(in.getSource(), out.getDestination());
 						replacedEdges.put(Pair.of(in, out), _new);
 						addEdge(_new);
 					}

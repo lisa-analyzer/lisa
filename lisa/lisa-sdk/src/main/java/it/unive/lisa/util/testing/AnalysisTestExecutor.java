@@ -4,17 +4,6 @@ import static java.nio.file.Files.copy;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.delete;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -26,6 +15,16 @@ import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
 
 public abstract class AnalysisTestExecutor {
 
@@ -138,33 +137,33 @@ public abstract class AnalysisTestExecutor {
 			JsonReport expected = JsonReport.read(l);
 			JsonReport actual = JsonReport.read(r);
 			Accumulator acc = new Accumulator(expectedPath);
-			if (optimized) 
+			if (optimized)
 				failIf(
-					"Optimized results are different",
-					!JsonReportComparer.compare(
-						expected, 
-						actual, 
-						expectedPath.toFile(), 
-						actualPath.toFile(),
-						new OptimizedRunDiff()));
+						"Optimized results are different",
+						!JsonReportComparer.compare(
+								expected,
+								actual,
+								expectedPath.toFile(),
+								actualPath.toFile(),
+								new OptimizedRunDiff()));
 			else if (update) {
 				if (!JsonReportComparer.compare(
-						expected, 
-						actual, 
-						expectedPath.toFile(), 
-						actualPath.toFile(), 
+						expected,
+						actual,
+						expectedPath.toFile(),
+						actualPath.toFile(),
 						acc)) {
 					System.err.println("Results are different, regenerating differences");
 					regen(expectedPath, actualPath, expFile, actFile, acc);
 				}
-			} else 
+			} else
 				failIf(
-					"Results are different",
-					!JsonReportComparer.compare(
-						expected, 
-						actual, 
-						expectedPath.toFile(), 
-						actualPath.toFile()));
+						"Results are different",
+						!JsonReportComparer.compare(
+								expected,
+								actual,
+								expectedPath.toFile(),
+								actualPath.toFile()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
 			throw new TestException("File not found", e);
@@ -174,7 +173,9 @@ public abstract class AnalysisTestExecutor {
 		}
 	}
 
-	private void failIf(String message, boolean condition) {
+	private void failIf(
+			String message,
+			boolean condition) {
 		if (condition)
 			throw new TestException(message);
 	}
@@ -394,7 +395,7 @@ public abstract class AnalysisTestExecutor {
 		// 3: it.unive.lisa.test.AnalysisTest.perform()
 		// 4: caller
 		for (StackTraceElement e : trace) {
-			if (!e.getClassName().equals("java.lang.Thread") 
+			if (!e.getClassName().equals("java.lang.Thread")
 					&& !e.getClassName().equals(AnalysisTestExecutor.class.getName()))
 				return e.getClassName() + "::" + e.getMethodName();
 		}

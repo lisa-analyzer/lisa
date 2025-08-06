@@ -3,17 +3,6 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.imp.antlr.IMPParser.ArgContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArgumentsContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArrayAccessContext;
@@ -70,14 +59,13 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
-import it.unive.lisa.program.cfg.edge.BeginFinallyEdge;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.edge.EndFinallyEdge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -125,6 +113,15 @@ import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import it.unive.lisa.util.frontend.CFGTweaker;
 import it.unive.lisa.util.frontend.LocalVariableTracker;
 import it.unive.lisa.util.frontend.ParsedBlock;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or
@@ -180,12 +177,10 @@ class IMPCodeMemberVisitor
 		ParsedBlock visited = visitBlock(ctx);
 		entrypoints.add(visited.getBegin());
 		list.mergeWith(visited.getBody());
-
+		CFGTweaker.splitProtectedYields(cfg, IMPSyntaxException::new);
+		CFGTweaker.addFinallyEdges(cfg, IMPSyntaxException::new);
 		CFGTweaker.addReturns(cfg, IMPSyntaxException::new);
-		CFGTweaker.fixFinallyEdges(cfg, IMPSyntaxException::new);
-
 		cfg.simplify();
-
 		return cfg;
 	}
 
@@ -199,7 +194,8 @@ class IMPCodeMemberVisitor
 		boolean canProceed = true;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
 			if (!canProceed)
-				throw new IMPSyntaxException("Statement '" + last.toString() + "' at " + last.getLocation() + " stops execution, so it cannot be followed by another statement in the same block");
+				throw new IMPSyntaxException("Deadcode detected at " + new SourceCodeLocation(file,
+						getLine(ctx.blockOrStatement(i)), getCol(ctx.blockOrStatement(i))));
 			ParsedBlock st = visitBlockOrStatement(ctx.blockOrStatement(i));
 			block.mergeWith(st.getBody());
 			if (first == null)
@@ -214,7 +210,8 @@ class IMPCodeMemberVisitor
 
 		if (first == null && last == null) {
 			// empty block: instrument it with a noop
-			NoOp instrumented = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
+			NoOp instrumented = new NoOp(cfg,
+					new SourceCodeLocation(file, getLine(ctx.LBRACE()), getCol(ctx.LBRACE())));
 			first = last = instrumented;
 			block.addNode(instrumented);
 		}
@@ -290,8 +287,8 @@ class IMPCodeMemberVisitor
 		}
 
 		boolean needsNoop = then.canBeContinued()
-			|| otherwise == null
-			|| otherwise.canBeContinued();
+				|| otherwise == null
+				|| otherwise.canBeContinued();
 		Statement noop = new NoOp(cfg, condition.getLocation());
 		if (needsNoop)
 			ite.addNode(noop);
@@ -649,7 +646,7 @@ class IMPCodeMemberVisitor
 	}
 
 	private Type makeType(
-			String name, 
+			String name,
 			ParserRuleContext ctx) {
 		SourceCodeLocation location = new SourceCodeLocation(file, getLine(ctx), getCol(ctx));
 		switch (name) {
@@ -989,10 +986,12 @@ class IMPCodeMemberVisitor
 	}
 
 	@Override
-	public ParsedBlock visitTry(TryContext ctx) {
+	public ParsedBlock visitTry(
+			TryContext ctx) {
 		NodeList<CFG, Statement, Edge> trycatch = new NodeList<>(new SequentialEdge());
 
-		// normal exit points of the try-catch in case there is no finally block:
+		// normal exit points of the try-catch in case there is no finally
+		// block:
 		// in this case, we have to add a noop at the end of the whole try-catch
 		// to use it as unique exit point in the returned triple
 		Collection<Statement> normalExits = new LinkedList<>();
@@ -1002,7 +1001,8 @@ class IMPCodeMemberVisitor
 		trycatch.mergeWith(body.getBody());
 
 		// if there is an else block, we parse it immediately and connect it
-		// to the end of the try block *only* if it does not end with a return/throw
+		// to the end of the try block *only* if it does not end with a
+		// return/throw
 		// (as it would be deadcode)
 		ParsedBlock elseBlock = null;
 		if (body.canBeContinued())
@@ -1016,13 +1016,14 @@ class IMPCodeMemberVisitor
 				if (elseBlock.canBeContinued())
 					// non-stopping last statement
 					normalExits.add(elseBlock.getEnd());
-			} 
+			}
 		else if (ctx.else_ != null)
 			// the else is deadcode
-			throw new IMPSyntaxException("Statement '" + body.getEnd().toString() + "' at " + body.getEnd().getLocation() + " stops execution, so it cannot be followed by an else block");
+			throw new IMPSyntaxException("Statement '" + body.getEnd().toString() + "' at "
+					+ body.getEnd().getLocation() + " stops execution, so it cannot be followed by an else block");
 
 		// we then parse each catch block, and we connect *every* instruction
-		// in the body of the try to the beginning of each catch block
+		// that can end the try block to the beginning of each catch block
 		List<CatchBlock> catches = new LinkedList<>();
 		List<ParsedBlock> catchBodies = new LinkedList<>();
 		for (CatchBlockContext ex : ctx.catchBlock()) {
@@ -1032,85 +1033,68 @@ class IMPCodeMemberVisitor
 			catches.add(block);
 			catchBodies.add(visit);
 			trycatch.mergeWith(visit.getBody());
+			if (body.canBeContinued())
+				trycatch.addEdge(
+						new ErrorEdge(body.getEnd(), visit.getBegin(), block.getIdentifier(), block.getExceptions()));
 			for (Statement st : body.getBody().getNodes())
-				trycatch.addEdge(new ErrorEdge(st, visit.getBegin(), block.getIdentifier(), block.getExceptions()));
+				if (st.stopsExecution() && st != body.getEnd())
+					trycatch.addEdge(new ErrorEdge(st, visit.getBegin(), block.getIdentifier(), block.getExceptions()));
 			if (visit.canBeContinued())
 				// non-stopping last statement
 				normalExits.add(visit.getEnd());
 		}
 
-		// this is the noop closing the whole try-catch, only if there is at least one path that does 
-		// not return/throw anything
-		Statement noop = new NoOp(cfg, body.getBegin().getLocation());
-		trycatch.addNode(noop);
-		boolean usedNoop = false;
-
 		// lastly, we parse the finally block and
-		// we connect it with the body (or the else block if it exists) and with each catch block
+		// we connect it with the body (or the else block if it exists) and with
+		// each catch block
 		ParsedBlock finalBlock = null;
 		if (ctx.final_ != null) {
 			finalBlock = visitBlock(ctx.final_);
 			trycatch.mergeWith(finalBlock.getBody());
-
-			if (elseBlock == null) {
-				trycatch.addEdge(new BeginFinallyEdge(body.getEnd(), finalBlock.getBegin(), body.getEnd()));
-				if (finalBlock.canBeContinued()) {
-					// TODO need to smash the continuation into the normal one at returns
-					trycatch.addEdge(new EndFinallyEdge(finalBlock.getEnd(), noop, body.getEnd()));
-					usedNoop = true;
-				}
-			} else {
-				trycatch.addEdge(new BeginFinallyEdge(elseBlock.getEnd(), finalBlock.getBegin(), elseBlock.getEnd()));
-				if (finalBlock.canBeContinued()) {
-					// TODO need to smash the continuation into the normal one at returns
-					trycatch.addEdge(new EndFinallyEdge(finalBlock.getEnd(), noop, elseBlock.getEnd()));
-					usedNoop = true;
-				}
-			}
-
-			for (ParsedBlock catchBody : catchBodies) {
-				trycatch.addEdge(new BeginFinallyEdge(catchBody.getEnd(), finalBlock.getBegin(), catchBody.getEnd()));
-				if (finalBlock.canBeContinued()) {
-					// TODO need to smash the continuation into the normal one at returns
-					trycatch.addEdge(new EndFinallyEdge(finalBlock.getEnd(), noop, catchBody.getEnd()));
-					usedNoop = true;
-				}
-			}
 		}
 
-		if (finalBlock != null && !usedNoop) 
-			trycatch.removeNode(noop);
-		else if (finalBlock == null && !normalExits.isEmpty()) {
-			for (Statement st : normalExits)
-				trycatch.addEdge(new SequentialEdge(st, noop));
-			usedNoop = true;
+		// this is the noop closing the whole try-catch, only if there is at
+		// least one path that does
+		// not return/throw anything
+		Statement noop = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx.TRY()), getCol(ctx.TRY())));
+		boolean usedNoop = !normalExits.isEmpty();
+		if (usedNoop) {
+			trycatch.addNode(noop);
+			if (finalBlock == null)
+				// if there is no finally block, we connect the noop to the
+				// end of all non-terminating inner blocks. otherwise,
+				// the CFGTweaker will add the edges to the finally block
+				// and back to the noop
+				for (Statement st : normalExits)
+					trycatch.addEdge(new SequentialEdge(st, noop));
 		}
 
 		// build protection block
 		descriptor.addProtectionBlock(new ProtectionBlock(
-			body.getBegin(),
-			body.getBody().getNodes(),
-			catches,
-			elseBlock == null ? null : elseBlock.getBegin(),
-			elseBlock == null ? List.of() : elseBlock.getBody().getNodes(), 
-			finalBlock == null ? null : finalBlock.getBegin(),
-			finalBlock == null ? List.of() : finalBlock.getBody().getNodes(),
-			usedNoop ? noop : null));
+				new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes()),
+				catches,
+				elseBlock == null ? null
+						: new ProtectedBlock(elseBlock.getBegin(), elseBlock.getEnd(), elseBlock.getBody().getNodes()),
+				finalBlock == null ? null
+						: new ProtectedBlock(finalBlock.getBegin(), finalBlock.getEnd(),
+								finalBlock.getBody().getNodes()),
+				usedNoop ? noop : null));
 
 		return new ParsedBlock(body.getBegin(), trycatch, usedNoop ? noop : null);
 	}
 
 	@Override
 	public Pair<
-			CatchBlock, 
-			ParsedBlock
-			> visitCatchBlock(CatchBlockContext ctx) {
+			CatchBlock,
+			ParsedBlock> visitCatchBlock(
+					CatchBlockContext ctx) {
 		List<Type> exceptions = new LinkedList<>();
 		for (UnitNameContext name : ctx.unitNames().unitName()) {
 			Type t = ClassType.lookup(name.getText());
 			if (t == null)
 				throw new IMPSyntaxException(
-						"Type '" + name.getText() + "' not found at " + new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
+						"Type '" + name.getText() + "' not found at "
+								+ new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 			exceptions.add(t);
 		}
 
@@ -1121,16 +1105,14 @@ class IMPCodeMemberVisitor
 			tracker.addVariable(variable.getName(), variable, new Annotations());
 		}
 
-
 		ParsedBlock body = visitBlock(ctx.body);
 		Statement last = body.getEnd();
 
 		tracker.exitScope(last);
-		
+
 		CatchBlock catchBlock = new CatchBlock(
 				variable,
-				body.getBegin(),
-				body.getBody().getNodes(),
+				new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes()),
 				exceptions.toArray(Type[]::new));
 
 		Pair<CatchBlock, ParsedBlock> result = Pair.of(catchBlock, body);

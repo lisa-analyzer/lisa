@@ -1,0 +1,279 @@
+class A { ~A() {} }
+class B extends A { ~B() {} }
+class C extends A { ~C() {} }
+class D extends B { ~D() {} }
+class E extends B { ~E() {} }
+
+class errors {
+
+    returnInTry() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+            return;
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } finally {
+            x = 12;
+            x = 13;
+        }
+    }
+
+    returnInCatch() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+            return x;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    returnInAllCatches() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+            return x + 3;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+            return x;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+            return x;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    returnInElse() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+            x = 10;
+            x = 11;
+            throw x;
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    returnInAllExceptFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+            return x;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+            return x;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+            return x;
+        } else {
+            x = 10;
+            x = 11;
+            return x;
+        } finally {
+            x = 12;
+            x = 13;
+        }
+    }
+
+    returnInFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+            x = 12;
+            x = 13;
+            throw x + x;
+        }
+        return x;
+    }
+
+    returnInCatchFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+            return x + 1;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+            x = 12;
+            x = 13;
+            return x;
+        }
+        return x;
+    }
+
+    returnInAllCatchesFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+            return x;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+            return x + 1;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+            throw x;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+            x = 12;
+            x = 13;
+            return x + 3;
+        }
+        return x;
+    }
+
+    returnInAll() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+            return x + 1;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+            return x + 2;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+            throw x;
+        } else {
+            x = 10;
+            x = 11;
+            throw x + 6;
+        } finally {
+            x = 12;
+            x = 13;
+            return x;
+        }
+    }
+
+    tryCatchElseFinallyWithComplexControlFlow(b) {
+        def x = 0;
+        try {
+            if (b)
+                x = 1;
+            else 
+                x = 2;
+        } catch (E) {
+            x = 4;
+            if (b)
+                x = 5;
+        } catch (D e) {
+            while (b)
+                x = 6;
+            return x + 1;
+        } catch (A, B e) {
+            while (b)
+                x = 9;
+        } else {
+            x = 10;
+            x = 11;
+            return x;
+        } finally {
+            if (b)
+                x = 13;
+            throw x + 2;
+        }
+        return x;
+    }
+}

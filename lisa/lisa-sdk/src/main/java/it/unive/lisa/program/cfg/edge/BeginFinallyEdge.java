@@ -11,9 +11,9 @@ public class BeginFinallyEdge
 		extends
 		Edge {
 
-    private final Statement starter;
+	private final int pathIdx;
 
-    /**
+	/**
 	 * Builds the edge.
 	 * 
 	 * @param source      the source statement
@@ -22,50 +22,48 @@ public class BeginFinallyEdge
 	public BeginFinallyEdge(
 			Statement source,
 			Statement destination,
-            Statement starter) {
+			int pathIdx) {
 		super(source, destination);
-        this.starter = starter;
+		this.pathIdx = pathIdx;
 	}
 
 	@Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((starter == null) ? 0 : starter.hashCode());
-        return result;
-    }
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + pathIdx;
+		return result;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        BeginFinallyEdge other = (BeginFinallyEdge) obj;
-        if (starter == null) {
-            if (other.starter != null)
-                return false;
-        } else if (!starter.equals(other.starter))
-            return false;
-        return true;
-    }
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BeginFinallyEdge other = (BeginFinallyEdge) obj;
+		if (pathIdx != other.pathIdx)
+			return false;
+		return true;
+	}
 
-    @Override
+	@Override
 	public String toString() {
-		return "[ " 
-            + getSource() 
-            + " ] -(begin at " 
-            + starter.toString()
-            + ")-> [ " 
-            + getDestination() 
-            + " ]";
+		return "[ "
+				+ getSource()
+				+ " ] -("
+				+ pathIdx
+				+ ")-> [ "
+				+ getDestination()
+				+ " ]";
 	}
 
 	@Override
 	public String getLabel() {
-		return "Begin finally started at " + starter.toString();
+		return "Finally[" + pathIdx + "]";
 	}
 
 	@Override
@@ -94,6 +92,11 @@ public class BeginFinallyEdge
 
 	@Override
 	public boolean isErrorHandling() {
+		return false;
+	}
+
+	@Override
+	public boolean isFinallyRelated() {
 		return true;
 	}
 
@@ -101,7 +104,7 @@ public class BeginFinallyEdge
 	public BeginFinallyEdge newInstance(
 			Statement source,
 			Statement destination) {
-		return new BeginFinallyEdge(source, destination, starter);
+		return new BeginFinallyEdge(source, destination, pathIdx);
 	}
 
 }

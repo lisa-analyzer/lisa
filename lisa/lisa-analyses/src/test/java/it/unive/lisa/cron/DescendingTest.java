@@ -1,9 +1,8 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+import org.junit.Test;
 
 public class DescendingTest
 		extends

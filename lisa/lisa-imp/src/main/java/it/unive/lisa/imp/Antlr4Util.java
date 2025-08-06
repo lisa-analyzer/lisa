@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Vocabulary;
 import org.antlr.v4.runtime.misc.IntervalSet;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +37,7 @@ public class Antlr4Util {
 	 * @return a {@link ParsingException} contained more detailed information
 	 *             about the one thrown by ANTLR4
 	 */
-	static ParsingException handleRecognitionException(
+	public static ParsingException handleRecognitionException(
 			String file,
 			RecognitionException e) {
 		Token problem = e.getOffendingToken();
@@ -54,9 +55,7 @@ public class Antlr4Util {
 		StringBuilder completeMessage = new StringBuilder(message.toString());
 		dumpProblem(file, problem, completeMessage);
 
-		log
-				.error(
-						"Error while parsing " + file + ":\n" + completeMessage.toString());
+		log.error("Error while parsing " + file + ":\n" + completeMessage.toString());
 		return new ParsingException(
 				"Error while parsing " + file + ":\n" + message.toString());
 	}
@@ -148,7 +147,7 @@ public class Antlr4Util {
 	 * 
 	 * @return the line number where the context appears
 	 */
-	static int getLine(
+	public static int getLine(
 			ParserRuleContext ctx) {
 		return ctx.getStart().getLine();
 	}
@@ -160,7 +159,7 @@ public class Antlr4Util {
 	 * 
 	 * @return the column number where the context appears
 	 */
-	static int getCol(
+	public static int getCol(
 			ParserRuleContext ctx) {
 		return ctx.getStop().getCharPositionInLine();
 	}
@@ -172,7 +171,7 @@ public class Antlr4Util {
 	 * 
 	 * @return the line number where the token appears
 	 */
-	static int getLine(
+	public static int getLine(
 			Token tok) {
 		return tok.getLine();
 	}
@@ -184,9 +183,19 @@ public class Antlr4Util {
 	 * 
 	 * @return the column number where the token appears
 	 */
-	static int getCol(
+	public static int getCol(
 			Token tok) {
 		return tok.getCharPositionInLine();
+	}
+
+	public static int getCol(
+			TerminalNode node) {
+		return getCol(node.getSymbol());
+	}
+
+	public static int getLine(
+			TerminalNode node) {
+		return getLine(node.getSymbol());
 	}
 
 }

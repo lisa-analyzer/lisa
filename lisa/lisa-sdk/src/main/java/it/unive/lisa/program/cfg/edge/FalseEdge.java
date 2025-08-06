@@ -79,6 +79,11 @@ public class FalseEdge
 	}
 
 	@Override
+	public boolean isFinallyRelated() {
+		return false;
+	}
+
+	@Override
 	public FalseEdge newInstance(
 			Statement source,
 			Statement destination) {

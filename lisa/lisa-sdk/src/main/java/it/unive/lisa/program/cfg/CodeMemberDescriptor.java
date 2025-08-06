@@ -334,8 +334,9 @@ public class CodeMemberDescriptor
 	 * <br>
 	 * Note that if no control flow structures have been provided by frontends,
 	 * and no attempt at extracting them has been made yet, this will yield an
-	 * empty collection. You can apply heuristics to extract control flow structures
-	 * by invoking {@link CFG#extractControlFlowStructures(ControlFlowExtractor)}.
+	 * empty collection. You can apply heuristics to extract control flow
+	 * structures by invoking
+	 * {@link CFG#extractControlFlowStructures(ControlFlowExtractor)}.
 	 * 
 	 * @return the collection, either provided by frontends or extracted, of the
 	 *             control flow structures of this cfg
@@ -345,8 +346,7 @@ public class CodeMemberDescriptor
 	}
 
 	/**
-	 * Adds the given {@link ProtectionBlock} to the ones contained in this
-	 * cfg.
+	 * Adds the given {@link ProtectionBlock} to the ones contained in this cfg.
 	 * 
 	 * @param pb the protection block to add
 	 */
@@ -356,8 +356,7 @@ public class CodeMemberDescriptor
 	}
 
 	/**
-	 * Yields the collection of {@link ProtectionBlock}s contained in this
-	 * cfg.
+	 * Yields the collection of {@link ProtectionBlock}s contained in this cfg.
 	 * 
 	 * @return the the protection blocks of this cfg
 	 */

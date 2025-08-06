@@ -1,9 +1,5 @@
 package it.unive.lisa.util.frontend;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.function.Function;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.BeginFinallyEdge;
@@ -11,24 +7,33 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.EndFinallyEdge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
+import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.YieldsValue;
 import it.unive.lisa.program.cfg.statement.literal.Literal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.function.Function;
 
 public class CFGTweaker {
 
-    private CFGTweaker() {
-        // utility class, no instances allowed
-    }
+	private CFGTweaker() {
+		// utility class, no instances allowed
+	}
 
-    public static <E extends RuntimeException> void addReturns(CFG cfg, Function<String, E> exceptionFactory) {
-        Ret ret = new Ret(cfg, cfg.getDescriptor().getLocation());
+	public static <E extends RuntimeException> void addReturns(
+			CFG cfg,
+			Function<String, E> exceptionFactory) {
+		Ret ret = new Ret(cfg, cfg.getDescriptor().getLocation());
 
 		if (cfg.getNodesCount() == 0) {
 			// empty method, so the ret is also the entrypoint
@@ -42,7 +47,7 @@ public class CFGTweaker {
 		for (Statement st : cfg.getNodes())
 			if (!st.stopsExecution() && cfg.followersOf(st).isEmpty())
 				preExits.add(st);
-		if (preExits.isEmpty()) 
+		if (preExits.isEmpty())
 			return;
 
 		// if the other returns do return a value, we cannot add
@@ -52,7 +57,8 @@ public class CFGTweaker {
 			if (st instanceof Return)
 				returnsValue = true;
 			else if (returnsValue)
-				throw exceptionFactory.apply("Return statement at " + st.getLocation() + " should return something, since other returns do it");
+				throw exceptionFactory.apply("Return statement at " + st.getLocation()
+						+ " should return something, since other returns do it");
 
 		cfg.addNode(ret);
 		for (Statement st : preExits) {
@@ -65,154 +71,198 @@ public class CFGTweaker {
 		for (VariableTableEntry entry : cfg.getDescriptor().getVariables())
 			if (preExits.contains(entry.getScopeEnd()))
 				entry.setScopeEnd(ret);
-    }
+	}
 
-    public static <E extends RuntimeException> void fixFinallyEdges(CFG cfg, Function<String, E> exceptionFactory) {
-        for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
-            Collection<Edge> goingOutside = new LinkedList<>();
-            Collection<Statement> terminating = new LinkedList<>();
+	public static <E extends RuntimeException> void addFinallyEdges(
+			CFG cfg,
+			Function<String, E> exceptionFactory) {
+		int pathIdx = 0;
+		for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
+			if (pb.getFinallyBlock() == null || pb.getFinallyBlock().getBody().isEmpty())
+				continue;
 
-            Collection<Statement> protectedBody = pb.getFullBody(false);
-            Collection<Statement> fullBody = pb.getFullBody(true);
+			if (pb.getElseBlock() == null)
+				addFinallyEdges(cfg, pb.getTryBlock(), pb.getFinallyBlock(), pb.getClosing(), pathIdx++);
+			else
+				addFinallyEdges(cfg, pb.getElseBlock(), pb.getFinallyBlock(), pb.getClosing(), pathIdx++);
 
-            for (Statement st : protectedBody) {
-                cfg.getOutgoingEdges(st).stream()
-                    .filter(e -> !fullBody.contains(e.getDestination()))
-                    .forEach(goingOutside::add);
-                if (st.stopsExecution())
-                    terminating.add(st);
-            }
+			for (CatchBlock catchBody : pb.getCatchBlocks())
+				addFinallyEdges(cfg, catchBody.getBody(), pb.getFinallyBlock(), pb.getClosing(), pathIdx++);
+		}
+	}
 
-            // TODO: what if we have nested protection blocks?
-            
-            for (Statement st : terminating) 
-                if (st instanceof YieldsValue)
-                    fixYielding(cfg, exceptionFactory, st);
-                else
-                    fixNonYielding(cfg, exceptionFactory, st);
+	private static void addFinallyEdges(
+			CFG cfg,
+			ProtectedBlock pb,
+			ProtectedBlock fin,
+			Statement normalExit,
+			int pathIdx) {
+		// the edges are added as follows (BF: BeginFinallyEdge, EF:
+		// EndFinallyEdge):
+		// - if a block can be continued, a BF is added from the end of the
+		// block
+		// to the start of the finally
+		// - if a block cannot be continued, a BF is added from the pre-end of
+		// the
+		// block to the start of the finally
+		// - if a block and the finally block can be continued, an EF is added
+		// from
+		// the end of the finally block to the closing
+		// - if a block cannot be continued and the finally block can be
+		// continued,
+		// an EF is added from the end of the finally block to the statement(s)
+		// returning
 
-            if (pb.getFinallyBlock() == null || pb.getFinallyBlock().isEmpty()) 
-                // no finally block, edges going outside are fine
-                return;
+		if (pb.canBeContinued()) {
+			cfg.addEdge(new BeginFinallyEdge(pb.getEnd(), fin.getStart(), pathIdx));
+			if (fin.canBeContinued())
+				cfg.addEdge(new EndFinallyEdge(fin.getEnd(), normalExit, pathIdx));
+		} else
+			for (Statement st : pb.getBody())
+				if (st.stopsExecution()) {
+					for (Edge preEnd : cfg.getIngoingEdges(pb.getEnd())) {
+						cfg.addEdge(new BeginFinallyEdge(preEnd.getSource(), fin.getStart(), pathIdx));
+						cfg.getNodeList().removeEdge(preEnd);
+					}
+					if (fin.canBeContinued())
+						cfg.addEdge(new EndFinallyEdge(fin.getEnd(), st, pathIdx));
+				}
+	}
 
-            for (Edge e : goingOutside) 
-                if (e instanceof SequentialEdge) {
-                    // - SequentialEdge: we direct it to the assign
-                    cfg.addEdge(new BeginFinallyEdge(e.getSource(), pb.getFinallyHead(), e.getSource()));
-                    if (pb.getClosing() != null)
-                        cfg.addEdge(new EndFinallyEdge(pb.getClosing(), e.getDestination(), e.getSource()));
-                    cfg.getNodeList().removeEdge(e);
-                } else
-                    // - EndFinallyEdge: we direct it to the new yielder
-                    // - BeginFinallyEdge: they should not happen (only outgoing)
-                    // - ErrorEdge: we direct it to the assign
-                    // - TrueEdge: we direct it to the assign
-                    // - FalseEdge: we direct it to the assign
-                    exceptionFactory.apply(e.getSource() + " has an outgoing edge going outside of the protection block that cannot be redirected");
-        }
-    }
+	public static <E extends RuntimeException> void splitProtectedYields(
+			CFG cfg,
+			Function<String, E> exceptionFactory) {
+		for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
+			// we make copies of the bodies since we are modifying them
+			// while iterating over them, and we want to (i) avoid exceptions
+			// and (ii) iterate only on the original statements
+			for (Statement st : new ArrayList<>(pb.getTryBlock().getBody()))
+				if (st.stopsExecution())
+					splitProtectedYield(
+							cfg,
+							st,
+							pb.getTryBlock().getBody().size() == 1,
+							true,
+							pb.getFinallyBlock() != null,
+							pb.getTryBlock(),
+							pb.getCatchBlocks());
 
-    private static <E extends RuntimeException> void fixYielding(CFG cfg, Function<String, E> exceptionFactory, Statement st) {
-        // we make terminating statements that yield an expression
-        // into ones that yield a variable, so that the execution
-        // of the finally block can happen after the expression
-        // to yield has been computed
-        
-        YieldsValue yielder = (YieldsValue) st;
-        Expression value = yielder.yieldedValue();
-        if (value instanceof VariableRef 
-            || value instanceof Literal)
-            // no need to fix this, as it is already a variable
-            return; 
+			if (pb.getElseBlock() != null)
+				for (Statement st : new ArrayList<>(pb.getElseBlock().getBody()))
+					if (st.stopsExecution())
+						splitProtectedYield(
+								cfg,
+								st,
+								pb.getElseBlock().getBody().size() == 1,
+								false,
+								pb.getFinallyBlock() != null,
+								pb.getElseBlock(),
+								pb.getCatchBlocks());
 
-        VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), "$yielded", value.getStaticType());
-        VariableRef tmpVar2 = new VariableRef(cfg, st.getLocation(), "$yielded", value.getStaticType());
-        Assignment assign = new Assignment(
-                cfg,
-                st.getLocation(),
-                tmpVar1,
-                value);
-        Statement newYielder = yielder.withValue(tmpVar2);
+			for (CatchBlock catchBody : pb.getCatchBlocks())
+				for (Statement st : new ArrayList<>(catchBody.getBody().getBody()))
+					if (st.stopsExecution())
+						splitProtectedYield(
+								cfg,
+								st,
+								catchBody.getBody().getBody().size() == 1,
+								false,
+								pb.getFinallyBlock() != null,
+								catchBody.getBody(),
+								pb.getCatchBlocks());
+		}
+	}
 
-        cfg.addNode(assign);
-        cfg.addNode(newYielder);
-        cfg.addEdge(new SequentialEdge(assign, newYielder));
+	private static <E extends RuntimeException> void splitProtectedYield(
+			CFG cfg,
+			Statement yielder,
+			boolean isOnlyNode,
+			boolean needsErrors,
+			boolean hasFinally,
+			ProtectedBlock pb,
+			Collection<CatchBlock> catches) {
+		// ret -> noop; ret
+		// ret 0 -> noop; ret 0
+		// A; ret -> A; ret
+		// A; ret 0 -> A; ret 0
+		// ret x+2 -> t=x+2; ret t
+		// A; ret x+2 -> A; t=x+2; ret t
 
-        for (Edge e : cfg.getIngoingEdges(st))
-            if (e instanceof EndFinallyEdge)
-                // - EndFinallyEdge: we direct it to the new yielder
-                cfg.addEdge(new EndFinallyEdge(e.getSource(), newYielder, assign));
-            else if (e instanceof BeginFinallyEdge)
-                // - BeginFinallyEdge: they should not happen (only outgoing)
-                exceptionFactory.apply(st + " has an ingoing BeginFinallyEdge while not being in a finally block");
-            else
-                // - ErrorEdge: we direct it to the assign
-                // - SequentialEdge: we direct it to the assign
-                // - TrueEdge: we direct it to the assign
-                // - FalseEdge: we direct it to the assign
-                cfg.addEdge(e.newInstance(e.getSource(), assign));
+		Collection<Edge> ingoing = cfg.getIngoingEdges(yielder);
+		boolean needsRewriting = yielder instanceof YieldsValue && !((YieldsValue) yielder).isAtomic();
+		if ((isOnlyNode && !needsRewriting)) {
+			// first two cases
+			NoOp noop = new NoOp(cfg, yielder.getLocation());
+			cfg.addNode(noop);
+			cfg.addEdge(new SequentialEdge(noop, yielder));
+			for (Edge in : ingoing) {
+				cfg.addEdge(in.newInstance(in.getSource(), noop));
+				cfg.getNodeList().removeEdge(in);
+			}
+			if (cfg.getEntrypoints().contains(yielder)) {
+				cfg.getEntrypoints().remove(yielder);
+				cfg.getEntrypoints().add(noop);
+			}
+			if (needsErrors) {
+				for (CatchBlock cb : catches)
+					cfg.addEdge(new ErrorEdge(noop, cb.getBody().getStart(), cb.getIdentifier(), cb.getExceptions()));
+				for (Edge out : cfg.getOutgoingEdges(yielder))
+					if (out.isErrorHandling())
+						cfg.getNodeList().removeEdge(out);
+			}
+			pb.getBody().add(noop);
+			pb.setStart(noop);
+		} else if (!isOnlyNode && !needsRewriting) {
+			// third and fourth cases
+			if (needsErrors) {
+				for (Edge in : ingoing)
+					for (CatchBlock cb : catches)
+						cfg.addEdge(new ErrorEdge(in.getSource(), cb.getBody().getStart(), cb.getIdentifier(),
+								cb.getExceptions()));
+				for (Edge out : cfg.getOutgoingEdges(yielder))
+					if (out.isErrorHandling())
+						cfg.getNodeList().removeEdge(out);
+			}
+		} else {
+			YieldsValue vyielder = (YieldsValue) yielder;
+			Expression value = vyielder.yieldedValue();
+			needsRewriting = !(value instanceof VariableRef || value instanceof Literal);
+			VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), "$val_to_yield", value.getStaticType());
+			VariableRef tmpVar2 = new VariableRef(cfg, yielder.getLocation(), "$val_to_yield", value.getStaticType());
+			Assignment assign = new Assignment(
+					cfg,
+					yielder.getLocation(),
+					tmpVar1,
+					value);
+			Statement newYielder = vyielder.withValue(tmpVar2);
 
-        for (Edge e : cfg.getOutgoingEdges(st))
-            if (e instanceof ErrorEdge)
-                // - ErrorEdge: we make it start from the assign
-                cfg.addEdge(e.newInstance(assign, e.getDestination()));
-            else if (e instanceof BeginFinallyEdge)
-                // - BeginFinallyEdge: we make it start from the assign
-                cfg.addEdge(new BeginFinallyEdge(assign, e.getDestination(), assign));
-            else if (e instanceof EndFinallyEdge)
-                // - EndFinallyEdge: they should not happen (only ingoing)
-                exceptionFactory.apply(st + " has an outgoing EndFinallyEdge while not being in a finally block");
-            else
-                // - SequentialEdge: they should not happen (deadcode)
-                // - TrueEdge: they should not happen (deadcode)
-                // - FalseEdge: they should not happen (deadcode)
-                exceptionFactory.apply("Execution-terminating statement " + st + " has non-error outgoing edges");
+			cfg.addNode(assign);
+			cfg.addNode(newYielder);
+			cfg.addEdge(new SequentialEdge(assign, newYielder));
+			for (Edge in : ingoing) {
+				cfg.addEdge(in.newInstance(in.getSource(), assign));
+				cfg.getNodeList().removeEdge(in);
+			}
+			if (cfg.getEntrypoints().contains(yielder)) {
+				cfg.getEntrypoints().remove(yielder);
+				cfg.getEntrypoints().add(assign);
+			}
+			if (needsErrors) {
+				for (CatchBlock cb : catches)
+					cfg.addEdge(new ErrorEdge(assign, cb.getBody().getStart(), cb.getIdentifier(), cb.getExceptions()));
+				for (Edge out : cfg.getOutgoingEdges(yielder))
+					if (out.isErrorHandling())
+						cfg.getNodeList().removeEdge(out);
+			}
+			pb.getBody().add(assign);
+			pb.getBody().add(newYielder);
+			pb.getBody().remove(yielder);
+			if (pb.getStart() == yielder)
+				pb.setStart(assign);
+			if (pb.getEnd() == yielder)
+				pb.setEnd(newYielder);
 
-        cfg.getNodeList().removeNode(st);
-    }
-
-    private static <E extends RuntimeException> void fixNonYielding(CFG cfg, Function<String, E> exceptionFactory,
-            Statement st) {
-        // for terminating statements that do not yield an expression
-        // we just ensure that the edges going from/to the finally block
-        // and the ones going to the catch blocks are correct
-        
-        Collection<Edge> toRemove = new LinkedList<>();
-
-        for (Edge e : cfg.getIngoingEdges(st))
-            if (e instanceof BeginFinallyEdge)
-                // - BeginFinallyEdge: they should not happen (only outgoing)
-                exceptionFactory.apply(st + " has an ingoing BeginFinallyEdge while not being in a finally block");
-            else if (e instanceof BeginFinallyEdge) {
-                // - EndFinallyEdge: we make them start from the predecessors
-                for (Statement pred : cfg.predecessorsOf(st)) 
-                    cfg.addEdge(new EndFinallyEdge(e.getSource(), e.getDestination(), pred));
-                toRemove.add(e);
-            } else
-                // - ErrorEdge: we keep them
-                // - SequentialEdge: we keep them
-                // - TrueEdge: we keep them
-                // - FalseEdge: we keep them
-                continue;
-
-        for (Edge e : cfg.getOutgoingEdges(st))
-            if (e instanceof ErrorEdge)
-                // - ErrorEdge: we remove it
-                toRemove.add(e);
-            else if (e instanceof BeginFinallyEdge) {
-                // - BeginFinallyEdge: we make them start from the predecessors
-                for (Statement pred : cfg.predecessorsOf(st)) 
-                    cfg.addEdge(new BeginFinallyEdge(pred, e.getDestination(), pred));
-                toRemove.add(e);
-            } else if (e instanceof EndFinallyEdge)
-                // - EndFinallyEdge: they should not happen (only ingoing)
-                exceptionFactory.apply(st + " has an outgoing EndFinallyEdge while not being in a finally block");
-            else
-                // - SequentialEdge: they should not happen (deadcode)
-                // - TrueEdge: they should not happen (deadcode)
-                // - FalseEdge: they should not happen (deadcode)
-                exceptionFactory.apply("Execution-terminating statement " + st + " has non-error outgoing edges");
-        
-        toRemove.forEach(cfg.getNodeList()::removeEdge);
-    }
+			cfg.getNodeList().removeNode(yielder);
+		}
+	}
 }

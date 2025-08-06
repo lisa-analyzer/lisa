@@ -163,7 +163,7 @@ public abstract class Edge
 		return getClass().getName().compareTo(o.getClass().getName());
 	}
 
-    public String getLabel() {
+	public String getLabel() {
 		return null;
 	}
 

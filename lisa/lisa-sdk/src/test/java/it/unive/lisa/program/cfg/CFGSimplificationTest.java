@@ -148,7 +148,7 @@ public class CFGSimplificationTest {
 		Collection<Statement> fbranch = new HashSet<>();
 		tbranch.add(noop1);
 		first.getDescriptor().addControlFlowStructure(
-			new IfThenElse(first.getNodeList(), gt, noop2, tbranch, fbranch));
+				new IfThenElse(first.getNodeList(), gt, noop2, tbranch, fbranch));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
 		assign = new Assignment(
@@ -174,7 +174,7 @@ public class CFGSimplificationTest {
 		tbranch.add(print);
 		fbranch = new HashSet<>();
 		second.getDescriptor().addControlFlowStructure(
-			new IfThenElse(second.getNodeList(), gt, ret, tbranch, fbranch));
+				new IfThenElse(second.getNodeList(), gt, ret, tbranch, fbranch));
 
 		first.simplify();
 		assertTrue("Different CFGs", second.isEqualTo(first));
@@ -351,7 +351,7 @@ public class CFGSimplificationTest {
 		Collection<Statement> fbranch = new HashSet<>();
 		fbranch.add(assign3);
 		first.getDescriptor().addControlFlowStructure(
-			new IfThenElse(first.getNodeList(), assign1, end, tbranch, fbranch));
+				new IfThenElse(first.getNodeList(), assign1, end, tbranch, fbranch));
 
 		CFG second = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
 		assign1 = new Assignment(
@@ -380,7 +380,7 @@ public class CFGSimplificationTest {
 		fbranch = new HashSet<>();
 		fbranch.add(assign3);
 		second.getDescriptor().addControlFlowStructure(
-			new IfThenElse(second.getNodeList(), assign1, null, tbranch, fbranch));
+				new IfThenElse(second.getNodeList(), assign1, null, tbranch, fbranch));
 
 		first.simplify();
 		assertTrue("Different CFGs", second.isEqualTo(first));

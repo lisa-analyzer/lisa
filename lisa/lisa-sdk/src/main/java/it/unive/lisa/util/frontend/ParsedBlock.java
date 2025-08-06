@@ -7,36 +7,39 @@ import it.unive.lisa.util.datastructures.graph.code.NodeList;
 
 public class ParsedBlock {
 
-    private final Statement begin;
+	private final Statement begin;
 
-    private final NodeList<CFG, Statement, Edge> body;
+	private final NodeList<CFG, Statement, Edge> body;
 
-    private final Statement end;
+	private final Statement end;
 
-    public ParsedBlock(Statement begin, NodeList<CFG, Statement, Edge> body, Statement end) {
-        this.begin = begin;
-        this.body = body;
-        this.end = end;
-    }
+	public ParsedBlock(
+			Statement begin,
+			NodeList<CFG, Statement, Edge> body,
+			Statement end) {
+		this.begin = begin;
+		this.body = body;
+		this.end = end;
+	}
 
-    public Statement getBegin() {
-        return begin;
-    }
+	public Statement getBegin() {
+		return begin;
+	}
 
-    public NodeList<CFG, Statement, Edge> getBody() {
-        return body;
-    }
+	public NodeList<CFG, Statement, Edge> getBody() {
+		return body;
+	}
 
-    public Statement getEnd() {
-        return end;
-    }
+	public Statement getEnd() {
+		return end;
+	}
 
-    public boolean canBeContinued() {
-        return end != null && !end.stopsExecution();
-    }
+	public boolean canBeContinued() {
+		return end != null && !end.stopsExecution();
+	}
 
-    @Override
-    public String toString() {
-        return body.toString() + " (begin: " + begin + ", end: " + end + ")";
-    }
+	@Override
+	public String toString() {
+		return body.toString() + " (begin: " + begin + ", end: " + end + ")";
+	}
 }

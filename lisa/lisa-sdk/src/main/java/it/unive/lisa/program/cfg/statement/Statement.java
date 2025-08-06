@@ -77,6 +77,10 @@ public abstract class Statement
 		return false;
 	}
 
+	public boolean altersControlFlow() {
+		return false;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

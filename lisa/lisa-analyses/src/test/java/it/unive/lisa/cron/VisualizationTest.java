@@ -2,18 +2,16 @@ package it.unive.lisa.cron;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.junit.AfterClass;
-import org.junit.Test;
-
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
 import it.unive.lisa.util.testing.TestConfiguration;
+import java.util.Collection;
+import java.util.HashSet;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 public class VisualizationTest
 		extends

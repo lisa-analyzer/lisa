@@ -2,12 +2,12 @@ package it.unive.lisa.outputs.serializableGraph;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * An edge of a {@link SerializableGraph}.

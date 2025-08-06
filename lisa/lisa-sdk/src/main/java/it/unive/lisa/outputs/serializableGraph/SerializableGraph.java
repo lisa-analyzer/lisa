@@ -116,7 +116,8 @@ public class SerializableGraph {
 		return descriptions;
 	}
 
-	public SerializableNode getNodeById(int id) {
+	public SerializableNode getNodeById(
+			int id) {
 		return nodes.stream()
 				.filter(n -> n.getId() == id)
 				.findFirst()
@@ -145,9 +146,9 @@ public class SerializableGraph {
 		if (getClass() != obj.getClass())
 			return false;
 		SerializableGraph other = (SerializableGraph) obj;
-		return Objects.equals(name, other.name) 
-				&& Objects.equals(description, other.description) 
-				&& Objects.equals(nodes, other.nodes) 
+		return Objects.equals(name, other.name)
+				&& Objects.equals(description, other.description)
+				&& Objects.equals(nodes, other.nodes)
 				&& Objects.equals(edges, other.edges)
 				&& Objects.equals(descriptions, other.descriptions);
 	}

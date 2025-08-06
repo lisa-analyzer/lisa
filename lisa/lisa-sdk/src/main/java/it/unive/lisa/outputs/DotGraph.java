@@ -2,14 +2,6 @@ package it.unive.lisa.outputs;
 
 import static guru.nidi.graphviz.model.Factory.mutNode;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Map.Entry;
-import java.util.function.Function;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Shape;
@@ -26,6 +18,12 @@ import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * A graph that can be dumped into Dot format.
@@ -193,36 +191,36 @@ public class DotGraph
 		MutableNode dest = mutNode(nodeName(id1));
 
 		Link link = src.linkTo(dest);
-		
+
 		switch (edge.getKind()) {
-			case "TrueEdge":
-				link = link.with(Style.DASHED);
-				link = link.with(Color.BLUE);
-				break;
-			case "FalseEdge":
-				link = link.with(Style.DASHED);
-				link = link.with(Color.RED);
-				break;
-			case "ErrorEdge":
-				link = link.with(Label.of(edge.getLabel()));
-				link = link.with(Style.DASHED);
-				link = link.with(Color.ORANGE);
-				break;
-				case "BeginFinallyEdge":
-				link = link.with(Label.of(edge.getLabel()));
-				link = link.with(Style.DASHED);
-				link = link.with(Color.GREEN);
-				break;
-				case "EndFinallyEdge":
-				link = link.with(Label.of(edge.getLabel()));
-				link = link.with(Style.DASHED);
-				link = link.with(Color.PURPLE);
-				break;
+		case "TrueEdge":
+			link = link.with(Style.DASHED);
+			link = link.with(Color.BLUE);
+			break;
+		case "FalseEdge":
+			link = link.with(Style.DASHED);
+			link = link.with(Color.RED);
+			break;
+		case "ErrorEdge":
+			link = link.with(Label.of(edge.getLabel()));
+			link = link.with(Style.DASHED);
+			link = link.with(Color.ORANGE);
+			break;
+		case "BeginFinallyEdge":
+			link = link.with(Label.of(edge.getLabel()));
+			link = link.with(Style.DASHED);
+			link = link.with(Color.GREEN);
+			break;
+		case "EndFinallyEdge":
+			link = link.with(Label.of(edge.getLabel()));
+			link = link.with(Style.DASHED);
+			link = link.with(Color.PURPLE);
+			break;
 		case "SequentialEdge":
 		default:
-				// black is the default
-				// link = link.with(Color.BLACK);
-				break;
+			// black is the default
+			// link = link.with(Color.BLACK);
+			break;
 		}
 
 		src.links().add(link);

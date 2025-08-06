@@ -132,7 +132,6 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.testing.TestConfiguration;
-
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;

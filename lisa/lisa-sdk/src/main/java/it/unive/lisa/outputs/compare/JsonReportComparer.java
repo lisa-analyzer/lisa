@@ -2,6 +2,18 @@ package it.unive.lisa.outputs.compare;
 
 import static java.lang.String.format;
 
+import it.unive.lisa.LiSA;
+import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,26 +32,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.function.Predicate;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.TriConsumer;
-
-import it.unive.lisa.LiSA;
-import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableNode;
-import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 /**
  * A class providing capabilities for finding differences between two
@@ -460,9 +458,9 @@ public class JsonReportComparer {
 			JsonReport second,
 			DiffAlgorithm diff) {
 		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(
-			String.class, 
-			first.getFiles(), 
-			second.getFiles());
+				String.class,
+				first.getFiles(),
+				second.getFiles());
 		files.compute(String::compareTo);
 
 		if (!files.getCommons().isEmpty())
@@ -483,7 +481,10 @@ public class JsonReportComparer {
 				first.getConfiguration(),
 				second.getConfiguration(),
 				diff,
-				(key, fvalue, svalue) -> diff.configurationDiff(key, fvalue, svalue),
+				(
+						key,
+						fvalue,
+						svalue) -> diff.configurationDiff(key, fvalue, svalue),
 				key -> false);
 	}
 
@@ -498,7 +499,10 @@ public class JsonReportComparer {
 				first.getInfo(),
 				second.getInfo(),
 				diff,
-				(key, fvalue, svalue) -> diff.infoDiff(key, fvalue, svalue),
+				(
+						key,
+						fvalue,
+						svalue) -> diff.infoDiff(key, fvalue, svalue),
 				// we are really only interested in code metrics here,
 				// information like timestamps and version are not useful - we
 				// still use a blacklist approach to ensure that new fields are
@@ -514,9 +518,9 @@ public class JsonReportComparer {
 			TriConsumer<String, String, String> reporter,
 			Predicate<String> ignore) {
 		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
-			String.class, 
-			first.keySet(), 
-			second.keySet());
+				String.class,
+				first.keySet(),
+				second.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.getOnlyFirst().isEmpty())
@@ -603,51 +607,53 @@ public class JsonReportComparer {
 	}
 
 	private static void structuralDiff(
-			DiffAlgorithm diff, 
-			SerializableGraph leftGraph, 
+			DiffAlgorithm diff,
+			SerializableGraph leftGraph,
 			SerializableGraph rightGraph,
-			String leftpath, 
+			String leftpath,
 			String rightpath) {
 		CollectionsDiffBuilder<SerializableNode> nodeBuilder = new CollectionsDiffBuilder<>(
-			SerializableNode.class, 
-			leftGraph.getNodes(), 
-			rightGraph.getNodes());
+				SerializableNode.class,
+				leftGraph.getNodes(),
+				rightGraph.getNodes());
 		nodeBuilder.compute(SerializableNode::compareTo);
 
 		if (!nodeBuilder.getOnlyFirst().isEmpty())
-			diff.fileDiff(leftpath, rightpath, "Nodes only in first graph:\n\t" 
-				+ StringUtils.join(nodeBuilder.getOnlyFirst(), "\n\t"));
+			diff.fileDiff(leftpath, rightpath, "Nodes only in first graph:\n\t"
+					+ StringUtils.join(nodeBuilder.getOnlyFirst(), "\n\t"));
 		if (!nodeBuilder.getOnlySecond().isEmpty())
-			diff.fileDiff(leftpath, rightpath, "Nodes only in second graph:\n\t" 
-				+ StringUtils.join(nodeBuilder.getOnlySecond(), "\n\t"));
+			diff.fileDiff(leftpath, rightpath, "Nodes only in second graph:\n\t"
+					+ StringUtils.join(nodeBuilder.getOnlySecond(), "\n\t"));
 
 		CollectionsDiffBuilder<SerializableEdge> edgeBuilder = new CollectionsDiffBuilder<>(
-			SerializableEdge.class, 
-			leftGraph.getEdges(), 
-			rightGraph.getEdges());
+				SerializableEdge.class,
+				leftGraph.getEdges(),
+				rightGraph.getEdges());
 		edgeBuilder.compute(SerializableEdge::compareTo);
 
 		if (!edgeBuilder.getOnlyFirst().isEmpty())
-			diff.fileDiff(leftpath, rightpath, "Edges only in first graph:\n\t" 
-				+ StringUtils.join(enrich(edgeBuilder.getOnlyFirst(), leftGraph), "\n\t"));
+			diff.fileDiff(leftpath, rightpath, "Edges only in first graph:\n\t"
+					+ StringUtils.join(enrich(edgeBuilder.getOnlyFirst(), leftGraph), "\n\t"));
 		if (!edgeBuilder.getOnlySecond().isEmpty())
-			diff.fileDiff(leftpath, rightpath, "Edges only in second graph:\n\t" 
-				+ StringUtils.join(enrich(edgeBuilder.getOnlySecond(), rightGraph), "\n\t"));
+			diff.fileDiff(leftpath, rightpath, "Edges only in second graph:\n\t"
+					+ StringUtils.join(enrich(edgeBuilder.getOnlySecond(), rightGraph), "\n\t"));
 	}
 
-	private static Collection<String> enrich(Collection<SerializableEdge> edges, SerializableGraph graph) {
+	private static Collection<String> enrich(
+			Collection<SerializableEdge> edges,
+			SerializableGraph graph) {
 		Collection<String> result = new ArrayList<>(edges.size());
 		for (SerializableEdge edge : edges) {
 			SerializableNode source = graph.getNodeById(edge.getSourceId());
 			SerializableNode target = graph.getNodeById(edge.getDestId());
 			result.add(
-				source.getText() 
-				+ " ---(" 
-				+ edge.getKind() 
-				+ ")" 
-				+ (edge.getLabel() != null ? edge.getLabel() : "") 
-				+ "---> " 
-				+ target.getText());
+					source.getText()
+							+ " ---("
+							+ edge.getKind()
+							+ ")"
+							+ (edge.getLabel() != null ? edge.getLabel() : "")
+							+ "---> "
+							+ target.getText());
 		}
 		return result;
 	}
@@ -681,17 +687,17 @@ public class JsonReportComparer {
 					break;
 				else {
 					diff.fileDiff(
-						leftpath,
-						rightpath,
-						format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
+							leftpath,
+							rightpath,
+							format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
 					currentS = null;
 					continue;
 				}
 			else if (currentS == null) {
 				diff.fileDiff(
-					leftpath,
-					rightpath,
-					format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
+						leftpath,
+						rightpath,
+						format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 				continue;
 			}
@@ -701,31 +707,31 @@ public class JsonReportComparer {
 			if (fid == sid) {
 				if (diff.verboseLabelDiff())
 					diff.fileDiff(
-						leftpath,
-						rightpath,
-						format(
-							DESC_DIFF_VERBOSE,
-							currentF.getNodeId(),
-							llabels.get(currentF.getNodeId()),
-							diff(currentF.getDescription(), currentS.getDescription())));
+							leftpath,
+							rightpath,
+							format(
+									DESC_DIFF_VERBOSE,
+									currentF.getNodeId(),
+									llabels.get(currentF.getNodeId()),
+									diff(currentF.getDescription(), currentS.getDescription())));
 				else
 					diff.fileDiff(
-						leftpath,
-						rightpath,
-						format(DESC_DIFF, currentF.getNodeId(), llabels.get(currentF.getNodeId())));
+							leftpath,
+							rightpath,
+							format(DESC_DIFF, currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 				currentS = null;
 			} else if (fid < sid) {
 				diff.fileDiff(
-					leftpath,
-					rightpath,
-					format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
+						leftpath,
+						rightpath,
+						format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 			} else {
 				diff.fileDiff(
-					leftpath,
-					rightpath,
-					format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
+						leftpath,
+						rightpath,
+						format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
 				currentS = null;
 			}
 		}

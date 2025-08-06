@@ -1,7 +1,5 @@
 package it.unive.lisa.program.cfg.statement.types;
 
-import java.util.Collections;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -20,6 +18,7 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
+import java.util.Collections;
 
 /**
  * An expression that yields a boolean value indicating whether the left operand

@@ -1,11 +1,5 @@
 package it.unive.lisa.program.cfg.edge;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
@@ -14,16 +8,20 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
 
 public class ErrorEdge
 		extends
 		Edge {
 
-    private final VariableRef variable;
+	private final VariableRef variable;
 
 	private final Type[] types;
 
-    /**
+	/**
 	 * Builds the edge.
 	 * 
 	 * @param source      the source statement
@@ -32,11 +30,11 @@ public class ErrorEdge
 	public ErrorEdge(
 			Statement source,
 			Statement destination,
-            VariableRef variable,
-            Type... types) {
+			VariableRef variable,
+			Type... types) {
 		super(source, destination);
-        this.variable = variable;
-        this.types = types;
+		this.variable = variable;
+		this.types = types;
 	}
 
 	@Override
@@ -49,7 +47,8 @@ public class ErrorEdge
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(
+			Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -69,27 +68,27 @@ public class ErrorEdge
 
 	@Override
 	public String toString() {
-        Set<String> typeNames = new TreeSet<>();
-        for (Type type : types)
-            typeNames.add(type.toString());
-		return "[ " 
-            + getSource() 
-            + " ] -(" 
-            + StringUtils.join(typeNames, ", ") 
-            + " = " 
-            + (variable == null ? "<no-var>" : variable.getName())
-            + ")-> [ " 
-            + getDestination() 
-            + " ]";
+		Set<String> typeNames = new TreeSet<>();
+		for (Type type : types)
+			typeNames.add(type.toString());
+		return "[ "
+				+ getSource()
+				+ " ] -("
+				+ StringUtils.join(typeNames, ", ")
+				+ " = "
+				+ (variable == null ? "<no-var>" : variable.getName())
+				+ ")-> [ "
+				+ getDestination()
+				+ " ]";
 	}
 
 	@Override
 	public String getLabel() {
-        Set<String> typeNames = new TreeSet<>();
-        for (Type type : types)
-            typeNames.add(type.toString());
-		return StringUtils.join(typeNames, ", ") 
-            + (variable == null ? "" : ", variable: " + variable.getName());
+		Set<String> typeNames = new TreeSet<>();
+		for (Type type : types)
+			typeNames.add(type.toString());
+		return StringUtils.join(typeNames, ", ")
+				+ (variable == null ? "" : ", variable: " + variable.getName());
 	}
 
 	@Override
@@ -98,8 +97,8 @@ public class ErrorEdge
 					AnalysisState<A> state,
 					Analysis<A, D> analysis)
 					throws SemanticException {
-		// TODO implement the semantics 
-		// TODO take into account also other error edges from the same source, 
+		// TODO implement the semantics
+		// TODO take into account also other error edges from the same source,
 		// to ensure that an error is caught only by the most specific catch
 		return state;
 	}
@@ -121,6 +120,11 @@ public class ErrorEdge
 	@Override
 	public boolean isErrorHandling() {
 		return true;
+	}
+
+	@Override
+	public boolean isFinallyRelated() {
+		return false;
 	}
 
 	@Override
