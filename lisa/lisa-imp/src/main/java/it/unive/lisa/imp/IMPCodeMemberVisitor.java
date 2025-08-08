@@ -56,6 +56,7 @@ import it.unive.lisa.imp.types.InterfaceType;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
@@ -68,6 +69,8 @@ import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.Break;
+import it.unive.lisa.program.cfg.statement.Continue;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
@@ -111,6 +114,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import it.unive.lisa.util.frontend.CFGTweaker;
+import it.unive.lisa.util.frontend.ControlFlowTracker;
 import it.unive.lisa.util.frontend.LocalVariableTracker;
 import it.unive.lisa.util.frontend.ParsedBlock;
 import java.util.Collection;
@@ -118,6 +122,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.ArrayUtils;
@@ -141,6 +146,8 @@ class IMPCodeMemberVisitor
 
 	private final LocalVariableTracker tracker;
 
+	private final ControlFlowTracker control;
+
 	private final CFG cfg;
 
 	private final CodeMemberDescriptor descriptor;
@@ -162,6 +169,7 @@ class IMPCodeMemberVisitor
 		// side effects on entrypoints and matrix will affect the cfg
 		cfg = new CFG(descriptor, entrypoints, list);
 		tracker = new LocalVariableTracker(cfg, descriptor);
+		control = new ControlFlowTracker();
 	}
 
 	/**
@@ -175,6 +183,16 @@ class IMPCodeMemberVisitor
 	CFG visitCodeMember(
 			BlockContext ctx) {
 		ParsedBlock visited = visitBlock(ctx);
+
+		if (!control.getModifiers().isEmpty())
+			throw new IMPSyntaxException("Unclosed control flow statements detected: " + String.join(
+					", ",
+					control.getModifiers().stream()
+							.map(Pair::getLeft)
+							.map(Statement::getLocation)
+							.map(CodeLocation::toString)
+							.collect(Collectors.toList())));
+
 		entrypoints.add(visited.getBegin());
 		list.mergeWith(visited.getBody());
 		CFGTweaker.splitProtectedYields(cfg, IMPSyntaxException::new);
@@ -257,6 +275,10 @@ class IMPCodeMemberVisitor
 			return visitLoop(ctx.loop());
 		else if (ctx.try_() != null)
 			return visitTry(ctx.try_());
+		else if (ctx.BREAK() != null)
+			st = visitBreak(ctx);
+		else if (ctx.CONTINUE() != null)
+			st = visitContinue(ctx);
 		else if (ctx.command != null)
 			st = visitExpression(ctx.command);
 		else
@@ -335,18 +357,40 @@ class IMPCodeMemberVisitor
 		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ref, expression);
 	}
 
+	public Statement visitBreak(
+			StatementContext ctx) {
+		String label = ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText();
+		Break br = new Break(
+				cfg,
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				label);
+		control.addModifier(br, label);
+		return br;
+	}
+
+	public Statement visitContinue(
+			StatementContext ctx) {
+		String label = ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText();
+		Continue c = new Continue(
+				cfg,
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				label);
+		control.addModifier(c, label);
+		return c;
+	}
+
 	@Override
 	public ParsedBlock visitLoop(
 			LoopContext ctx) {
 		if (ctx.whileLoop() != null)
-			return visitWhileLoop(ctx.whileLoop());
+			return visitWhileLoop(ctx.whileLoop(), ctx.IDENTIFIER());
 		else
-			return visitForLoop(ctx.forLoop());
+			return visitForLoop(ctx.forLoop(), ctx.IDENTIFIER());
 	}
 
-	@Override
 	public ParsedBlock visitWhileLoop(
-			WhileLoopContext ctx) {
+			WhileLoopContext ctx,
+			TerminalNode label) {
 		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		Statement condition = visitParExpr(ctx.parExpr());
 		loop.addNode(condition);
@@ -361,14 +405,15 @@ class IMPCodeMemberVisitor
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
+		control.endControlFlowOf(loop, condition, noop, label == null ? null : label.getText(), true);
 		descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getBody().getNodes()));
 
 		return new ParsedBlock(condition, loop, noop);
 	}
 
-	@Override
 	public ParsedBlock visitForLoop(
-			ForLoopContext ctx) {
+			ForLoopContext ctx,
+			TerminalNode label) {
 		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		LocalDeclarationContext initDecl = ctx.forDeclaration().initDecl;
 		ExpressionContext initExpr = ctx.forDeclaration().initExpr;
@@ -417,15 +462,12 @@ class IMPCodeMemberVisitor
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
+		control.endControlFlowOf(loop, condition, noop, label == null ? null : label.getText(), true);
 		if (post == null)
 			descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getBody().getNodes()));
 		else {
 			NodeList<CFG, Statement, Edge> tmp = new NodeList<>(body.getBody());
-			if (last != null) {
-				tmp.addNode(last);
-				if (body.canBeContinued())
-					loop.addEdge(new SequentialEdge(body.getEnd(), last));
-			}
+			tmp.addNode(last);
 			descriptor.addControlFlowStructure(new Loop(list, condition, noop, tmp.getNodes()));
 		}
 

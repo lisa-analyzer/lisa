@@ -77,7 +77,11 @@ public abstract class Statement
 		return false;
 	}
 
-	public boolean altersControlFlow() {
+	public boolean breaksControlFlow() {
+		return false;
+	}
+
+	public boolean continuesControlFlow() {
 		return false;
 	}
 

@@ -47,28 +47,20 @@ spotless {
         targetExclude '**/target/generated-sources/**/*.java'
         targetExclude '**/VersionInfo.java'
     }
-    antlr4 {
-        target 'src/*/antlr/**/*.g4'
-        antlr4Formatter() 
-    }
 }
 
 spotlessJava {
 	// declaring explicit dependencies
-	dependsOn 'compileJava', 'compileTestJava', 'processTestResources', 'spotlessAntlr4'
+	dependsOn 'compileJava', 'compileTestJava', 'processTestResources'
 }
 
 spotlessJavaCheck { 
     finalizedBy 'spotlessErrorMessage'
 }
 
-spotlessAntlr4Check { 
-    finalizedBy 'spotlessErrorMessage'
-}
-
 task spotlessErrorMessage {
     onlyIf {
-        spotlessJavaCheck.state.failure != null || spotlessAntlr4Check.state.failure != null
+        spotlessJavaCheck.state.failure != null
     }
     doLast {
         logger.error('Spotless plugin thrown an error. This means that the code is not correctly formatted.')

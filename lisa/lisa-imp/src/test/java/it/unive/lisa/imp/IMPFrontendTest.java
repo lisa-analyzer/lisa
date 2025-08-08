@@ -51,6 +51,16 @@ public class IMPFrontendTest
 		perform(conf);
 	}
 
+	@Test
+	public void testBreakContinue() {
+		TestConfiguration conf = new TestConfiguration();
+		conf.testDir = "break-continue";
+		conf.programFile = "break-continue.imp";
+		conf.jsonOutput = true;
+		conf.serializeInputs = true;
+		perform(conf);
+	}
+
 	@Override
 	public Program readProgram(
 			TestConfiguration conf,

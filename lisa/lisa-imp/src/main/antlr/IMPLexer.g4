@@ -5,333 +5,201 @@
  */
 lexer grammar IMPLexer;
 
-@ lexer :: header
-{package it.unive.lisa.imp.antlr;}
+@lexer::header {package it.unive.lisa.imp.antlr;}
+
 // =========================== KEYWORDS ===========================  
 
 // basic types
 
-BOOLEAN
-   : 'boolean'
-   ;
+BOOLEAN: 'boolean';
 
-STRING
-   : 'string'
-   ;
+STRING: 'string';
 
-FLOAT
-   : 'float'
-   ;
+FLOAT: 'float';
 
-INT
-   : 'int'
-   ;
-   // branching
-   
-IF
-   : 'if'
-   ;
+INT: 'int';
 
-ELSE
-   : 'else'
-   ;
-   // loop
-   
-FOR
-   : 'for'
-   ;
+// branching
 
-WHILE
-   : 'while'
-   ;
-   // class declaration
-   
-CLASS
-   : 'class'
-   ;
+IF: 'if';
 
-INTERFACE
-   : 'interface'
-   ;
+ELSE: 'else';
 
-IMPLEMENTS
-   : 'implements'
-   ;
+// loop
 
-ABSTRACT
-   : 'abstract'
-   ;
+FOR: 'for';
 
-EXTENDS
-   : 'extends'
-   ;
-   // method body    
-   
-DEFINE
-   : 'def'
-   ;
+WHILE: 'while';
 
-CONSTANT
-   : 'const'
-   ;
+BREAK: 'break';
 
-FINAL
-   : 'final'
-   ;
+CONTINUE: 'continue';
 
-RETURN
-   : 'return'
-   ;
+// error handling
 
-THROW
-   : 'throw'
-   ;
+TRY: 'try';
 
-THIS
-   : 'this'
-   ;
+CATCH: 'catch';
 
-SUPER
-   : 'super'
-   ;
+FINALLY: 'finally';
 
-BUMP
-   : 'bump'
-   ;
+// class declaration
 
-NEW
-   : 'new'
-   ;
+CLASS: 'class';
 
-ASSERT
-   : 'assert'
-   ;
+INTERFACE: 'interface';
 
-TRY
-   : 'try'
-   ;
+IMPLEMENTS: 'implements';
 
-CATCH
-   : 'catch'
-   ;
+ABSTRACT: 'abstract';
 
-FINALLY
-   : 'finally'
-   ;
-   // =========================== STRING FUNCTIONS =========================== 
-   
-STRCAT
-   : 'strcat'
-   ;
+EXTENDS: 'extends';
 
-STRCONTAINS
-   : 'strcon'
-   ;
+// method body    
 
-STRENDS
-   : 'strends'
-   ;
+DEFINE: 'def';
 
-STREQ
-   : 'streq'
-   ;
+CONSTANT: 'const';
 
-STRINDEXOF
-   : 'strindex'
-   ;
+FINAL: 'final';
 
-STRLEN
-   : 'strlen'
-   ;
+RETURN: 'return';
 
-STRREPLACE
-   : 'strrep'
-   ;
+THROW: 'throw';
 
-STRSTARTS
-   : 'strstarts'
-   ;
+THIS: 'this';
 
-STRSUB
-   : 'strsub'
-   ;
-   // =========================== ARRAY FUNCTIONS =========================== 
-   
-ARRAYLEN
-   : 'arraylen'
-   ;
-   // =========================== LITERALS ===========================  
-   
-LITERAL_DECIMAL
-   : '0'
-   | [1-9] Digits?
-   ;
+SUPER: 'super';
 
-LITERAL_FLOAT
-   : (Digits '.' Digits? | '.' Digits) [fF]?
-   ;
+BUMP: 'bump';
 
-LITERAL_BOOL
-   : 'true'
-   | 'false'
-   ;
+NEW: 'new';
 
-LITERAL_STRING
-   : '"' (~ ["\\\r\n] | EscapeSequence)* '"'
-   ;
+ASSERT: 'assert';
 
-LITERAL_NULL
-   : 'null'
-   ;
-   // =========================== SYMBOLS ===========================  
-   
-   // parenthesis
-   
-LPAREN
-   : '('
-   ;
+// =========================== STRING FUNCTIONS =========================== 
 
-RPAREN
-   : ')'
-   ;
+STRCAT: 'strcat';
 
-LBRACE
-   : '{'
-   ;
+STRCONTAINS: 'strcon';
 
-RBRACE
-   : '}'
-   ;
+STRENDS: 'strends';
 
-LBRACK
-   : '['
-   ;
+STREQ: 'streq';
 
-RBRACK
-   : ']'
-   ;
-   // separators
-   
-TILDE
-   : '~'
-   ;
+STRINDEXOF: 'strindex';
 
-SEMI
-   : ';'
-   ;
+STRLEN: 'strlen';
 
-COMMA
-   : ','
-   ;
+STRREPLACE: 'strrep';
 
-DOT
-   : '.'
-   ;
-   // operators
-   
-ASSIGN
-   : '='
-   ;
+STRSTARTS: 'strstarts';
 
-GT
-   : '>'
-   ;
+STRSUB: 'strsub';
 
-LT
-   : '<'
-   ;
+// =========================== ARRAY FUNCTIONS =========================== 
 
-NOT
-   : '!'
-   ;
+ARRAYLEN: 'arraylen';
 
-EQUAL
-   : '=='
-   ;
+// =========================== LITERALS ===========================  
 
-LE
-   : '<='
-   ;
+LITERAL_DECIMAL: '0' | [1-9] Digits?;
 
-GE
-   : '>='
-   ;
+LITERAL_FLOAT: (Digits '.' Digits? | '.' Digits) [fF]?;
 
-NOTEQUAL
-   : '!='
-   ;
+LITERAL_BOOL: 'true' | 'false';
 
-AND
-   : '&&'
-   ;
+LITERAL_STRING: '"' (~ ["\\\r\n] | EscapeSequence)* '"';
 
-OR
-   : '||'
-   ;
+LITERAL_NULL: 'null';
 
-ADD
-   : '+'
-   ;
+// =========================== SYMBOLS ===========================  
 
-SUB
-   : '-'
-   ;
+// parenthesis
 
-MUL
-   : '*'
-   ;
+LPAREN: '(';
 
-DIV
-   : '/'
-   ;
+RPAREN: ')';
 
-MOD
-   : '%'
-   ;
+LBRACE: '{';
 
-IS
-   : 'is'
-   ;
+RBRACE: '}';
 
-AS
-   : 'as'
-   ;
-   // =========================== WHITESPACE ===========================  
-   
-WS
-   : [ \t\r\n\u000C]+ -> channel (HIDDEN)
-   ;
-   // =========================== COMMENTS ===========================  
-   
-COMMENT
-   : '/*' .*? '*/' -> channel (HIDDEN)
-   ;
+LBRACK: '[';
 
-LINE_COMMENT
-   : '//' ~ [\r\n]* -> channel (HIDDEN)
-   ;
-   // =========================== IDENTIFIERS ===========================  
-   
-IDENTIFIER
-   : Letter LetterOrDigit*
-   ;
-   // =========================== RULES ===========================  
-   
+RBRACK: ']';
+
+// separators
+
+TILDE: '~';
+
+SEMI: ';';
+
+COLON: ':';
+
+COMMA: ',';
+
+DOT: '.';
+
+// operators
+
+ASSIGN: '=';
+
+GT: '>';
+
+LT: '<';
+
+NOT: '!';
+
+EQUAL: '==';
+
+LE: '<=';
+
+GE: '>=';
+
+NOTEQUAL: '!=';
+
+AND: '&&';
+
+OR: '||';
+
+ADD: '+';
+
+SUB: '-';
+
+MUL: '*';
+
+DIV: '/';
+
+MOD: '%';
+
+IS: 'is';
+
+AS: 'as';
+
+// =========================== WHITESPACE ===========================  
+
+WS: [ \t\r\n\u000C]+ -> channel (HIDDEN);
+
+// =========================== COMMENTS ===========================  
+
+COMMENT: '/*' .*? '*/' -> channel (HIDDEN);
+
+LINE_COMMENT: '//' ~ [\r\n]* -> channel (HIDDEN);
+
+// =========================== IDENTIFIERS ===========================  
+
+IDENTIFIER: Letter LetterOrDigit*;
+
+// =========================== RULES ===========================  
+
 fragment EscapeSequence
-   : '\\' [btnfr"'\\]
-   | '\\' ([0-3]? [0-7])? [0-7]
-   ;
+	: '\\' [btnfr"'\\]
+	| '\\' ([0-3]? [0-7])? [0-7]
+;
 
-fragment Digits
-   : [0-9]+
-   ;
+fragment Digits: [0-9]+;
 
-fragment LetterOrDigit
-   : Letter
-   | [0-9]
-   ;
+fragment LetterOrDigit: Letter | [0-9];
 
-fragment Letter
-   : [a-zA-Z$_]
-   ;
-
+fragment Letter: [a-zA-Z$_];
