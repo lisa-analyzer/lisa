@@ -61,6 +61,28 @@ public class IMPFrontendTest
 		perform(conf);
 	}
 
+	@Test
+	public void testErrorsWithBreakAndContinue() {
+		TestConfiguration conf = new TestConfiguration();
+		conf.testDir = "errors-break-continue";
+		conf.programFile = "errors-break-continue.imp";
+		conf.jsonOutput = true;
+		conf.serializeInputs = true;
+		perform(conf);
+	}
+
+	@Test
+	public void testNestedErrors() {
+		TestConfiguration conf = new TestConfiguration();
+		conf.testDir = "nested-errors";
+		conf.programFile = "nested-errors.imp";
+		conf.jsonOutput = true;
+		conf.serializeInputs = true;
+		// conf.forceUpdate = true;
+		// conf.analysisGraphs = TestConfiguration.GraphType.HTML;
+		perform(conf);
+	}
+
 	@Override
 	public Program readProgram(
 			TestConfiguration conf,

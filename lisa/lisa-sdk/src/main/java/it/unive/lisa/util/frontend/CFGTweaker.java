@@ -1,5 +1,12 @@
 package it.unive.lisa.util.frontend;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.function.Function;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.BeginFinallyEdge;
@@ -19,10 +26,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.YieldsValue;
 import it.unive.lisa.program.cfg.statement.literal.Literal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.function.Function;
 
 public class CFGTweaker {
 
@@ -78,16 +81,46 @@ public class CFGTweaker {
 			Function<String, E> exceptionFactory) {
 		int pathIdx = 0;
 		for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
-			if (pb.getFinallyBlock() == null || pb.getFinallyBlock().getBody().isEmpty())
+			ProtectedBlock fin = pb.getFinallyBlock();
+			if (fin == null || fin.getBody().isEmpty())
 				continue;
 
 			if (pb.getElseBlock() == null)
-				addFinallyEdges(cfg, pb.getTryBlock(), pb.getFinallyBlock(), pb.getClosing(), pathIdx++);
+				addFinallyEdges(cfg, pb.getTryBlock(), fin, pb.getClosing(), pathIdx++);
 			else
-				addFinallyEdges(cfg, pb.getElseBlock(), pb.getFinallyBlock(), pb.getClosing(), pathIdx++);
+				addFinallyEdges(cfg, pb.getElseBlock(), fin, pb.getClosing(), pathIdx++);
 
 			for (CatchBlock catchBody : pb.getCatchBlocks())
-				addFinallyEdges(cfg, catchBody.getBody(), pb.getFinallyBlock(), pb.getClosing(), pathIdx++);
+				addFinallyEdges(cfg, catchBody.getBody(), fin, pb.getClosing(), pathIdx++);
+			
+
+			Map<Statement, ProtectedBlock> alterer = new HashMap<>();
+			pb.getTryBlock().getBody().stream()
+				.filter(s -> s.breaksControlFlow() || s.continuesControlFlow())
+				.forEach(s -> alterer.put(s, pb.getTryBlock()));
+			if (pb.getElseBlock() != null)
+				pb.getElseBlock().getBody().stream()
+					.filter(s -> s.breaksControlFlow() || s.continuesControlFlow())
+					.forEach(s -> alterer.put(s, pb.getElseBlock()));
+			for (CatchBlock catchBody : pb.getCatchBlocks())
+				catchBody.getBody().getBody().stream()
+					.filter(s -> s.breaksControlFlow() || s.continuesControlFlow())
+					.forEach(s -> alterer.put(s, catchBody.getBody()));
+
+			for (Map.Entry<Statement, ProtectedBlock> entry : alterer.entrySet()) {
+				Statement st = entry.getKey();
+				ProtectedBlock block = entry.getValue();
+				for (Edge out : cfg.getOutgoingEdges(st)) {
+					if (!block.getBody().contains(out.getDestination())) {
+						// the destination is outside the protected block,
+						// so we must execute the finally before going there
+						cfg.getNodeList().removeEdge(out);
+						cfg.addEdge(new BeginFinallyEdge(st, fin.getStart(), pathIdx++));
+						if (fin.canBeContinued())
+							cfg.addEdge(new EndFinallyEdge(fin.getEnd(), out.getDestination(), pathIdx - 1));
+					}
+				}
+			}
 		}
 	}
 
@@ -100,18 +133,14 @@ public class CFGTweaker {
 		// the edges are added as follows (BF: BeginFinallyEdge, EF:
 		// EndFinallyEdge):
 		// - if a block can be continued, a BF is added from the end of the
-		// block
-		// to the start of the finally
-		// - if a block cannot be continued, a BF is added from the pre-end of
-		// the
 		// block to the start of the finally
+		// - if a block cannot be continued, a BF is added from the pre-end of
+		// the block to the start of the finally
 		// - if a block and the finally block can be continued, an EF is added
-		// from
-		// the end of the finally block to the closing
+		// from the end of the finally block to the closing
 		// - if a block cannot be continued and the finally block can be
-		// continued,
-		// an EF is added from the end of the finally block to the statement(s)
-		// returning
+		// continued, an EF is added from the end of the finally block to the
+		// statement(s) returning
 
 		if (pb.canBeContinued()) {
 			cfg.addEdge(new BeginFinallyEdge(pb.getEnd(), fin.getStart(), pathIdx));

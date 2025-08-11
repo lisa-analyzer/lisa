@@ -1,0 +1,76 @@
+class A { ~A() {} }
+
+class program {
+
+    loopInTry(b) {
+        def x = 0;
+        try {
+            x = 1;
+            while (b) {
+                x = x + 1;
+                if (x > 10)
+                    break;
+                x = x - 1;
+                if (x < 7)
+                    continue;
+            }
+        } catch (A e) {
+            x = 1;
+        } else {
+            x = 2;
+        } finally {
+            x = 3;
+        }
+        
+        return x;
+    }
+
+    tryInLoop(b) {
+        def x = 0;
+        while (b) {
+            try {
+                x = x + 1;
+                if (x > 10)
+                    break;
+                x = x - 1;
+                if (x < 7)
+                    continue;
+            } catch (A e) {
+                x = 1;
+            } else {
+                x = 2;
+            } finally {
+                x = 3;
+            }
+        }
+        
+        return x;
+    }
+
+    tryInLoopWithLabel(b) {
+        def x = 0;
+        loop: while (b) {
+            x = x * 2;
+            while (b) {
+                try {
+                    x = x + 1;
+                    if (x > 10)
+                        break loop;
+                    x = x - 1;
+                    if (x < 7)
+                        continue;
+                } catch (A e) {
+                    x = 1;
+                } else {
+                    x = 2;
+                } finally {
+                    x = 3;
+                }
+            }
+        }
+        
+        return x;
+    }
+
+    
+}
