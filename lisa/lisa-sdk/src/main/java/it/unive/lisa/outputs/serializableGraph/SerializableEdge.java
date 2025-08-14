@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -204,4 +206,49 @@ public class SerializableEdge
 		return 0;
 	}
 
+	public boolean equalsUpToIds(
+			SerializableEdge other,
+			Collection<SerializableNode> nodesInThisGraph,
+			Collection<SerializableNode> nodesInOtherGraph) {
+		if (this == other)
+			return true;
+		if (other == null)
+			return false;
+		if (getClass() != other.getClass())
+			return false;
+
+		if (!Objects.equals(kind, other.kind))
+			return false;
+		if (!Objects.equals(label, other.label))
+			return false;
+		if (!Objects.equals(unknownFields, other.unknownFields))
+			return false;
+
+		SerializableNode thisSource = nodesInThisGraph.stream()
+				.filter(n -> n.getId() == sourceId)
+				.findFirst()
+				.orElse(null);
+		SerializableNode otherSource = nodesInOtherGraph.stream()
+				.filter(n -> n.getId() == other.sourceId)
+				.findFirst()
+				.orElse(null);
+		SerializableNode thisDest = nodesInThisGraph.stream()
+				.filter(n -> n.getId() == destId)
+				.findFirst()
+				.orElse(null);
+		SerializableNode otherDest = nodesInOtherGraph.stream()
+				.filter(n -> n.getId() == other.destId)
+				.findFirst()
+				.orElse(null);
+		if (thisSource == null || otherSource == null)
+			return false;
+		if (thisDest == null || otherDest == null)
+			return false;
+		if (!thisSource.equalsUpToIds(otherSource, nodesInThisGraph, nodesInOtherGraph))
+			return false;
+		if (!thisDest.equalsUpToIds(otherDest, nodesInThisGraph, nodesInOtherGraph))
+			return false;
+
+		return true;
+	}
 }

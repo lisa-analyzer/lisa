@@ -58,7 +58,7 @@ class program {
                         break loop;
                     x = x - 1;
                     if (x < 7)
-                        continue;
+                        continue loop;
                 } catch (A e) {
                     x = 1;
                 } else {
@@ -72,5 +72,4 @@ class program {
         return x;
     }
 
-    
 }

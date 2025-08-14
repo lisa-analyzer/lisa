@@ -212,8 +212,11 @@ class IMPCodeMemberVisitor
 		boolean canProceed = true;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
 			if (!canProceed)
-				throw new IMPSyntaxException("Deadcode detected at " + new SourceCodeLocation(file,
-						getLine(ctx.blockOrStatement(i)), getCol(ctx.blockOrStatement(i))));
+				throw new IMPSyntaxException("Deadcode detected at " +
+						new SourceCodeLocation(
+								file,
+								getLine(ctx.blockOrStatement(i)),
+								getCol(ctx.blockOrStatement(i))));
 			ParsedBlock st = visitBlockOrStatement(ctx.blockOrStatement(i));
 			block.mergeWith(st.getBody());
 			if (first == null)
@@ -405,7 +408,7 @@ class IMPCodeMemberVisitor
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
-		control.endControlFlowOf(loop, condition, noop, label == null ? null : label.getText(), true);
+		control.endControlFlowOf(loop, condition, noop, condition, label == null ? null : label.getText());
 		descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getBody().getNodes()));
 
 		return new ParsedBlock(condition, loop, noop);
@@ -462,7 +465,8 @@ class IMPCodeMemberVisitor
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
-		control.endControlFlowOf(loop, condition, noop, label == null ? null : label.getText(), true);
+		control.endControlFlowOf(loop, condition, noop, post == null ? condition : last,
+				label == null ? null : label.getText());
 		if (post == null)
 			descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getBody().getNodes()));
 		else {
@@ -1061,8 +1065,11 @@ class IMPCodeMemberVisitor
 			}
 		else if (ctx.else_ != null)
 			// the else is deadcode
-			throw new IMPSyntaxException("Statement '" + body.getEnd().toString() + "' at "
-					+ body.getEnd().getLocation() + " stops execution, so it cannot be followed by an else block");
+			throw new IMPSyntaxException("Deadcode detected at " +
+					new SourceCodeLocation(
+							file,
+							getLine(ctx.else_),
+							getCol(ctx.else_)));
 
 		// we then parse each catch block, and we connect *every* instruction
 		// that can end the try block to the beginning of each catch block
@@ -1079,7 +1086,7 @@ class IMPCodeMemberVisitor
 				trycatch.addEdge(
 						new ErrorEdge(body.getEnd(), visit.getBegin(), block.getIdentifier(), block.getExceptions()));
 			for (Statement st : body.getBody().getNodes())
-				if (st.stopsExecution() && st != body.getEnd())
+				if (st.stopsExecution())
 					trycatch.addEdge(new ErrorEdge(st, visit.getBegin(), block.getIdentifier(), block.getExceptions()));
 			if (visit.canBeContinued())
 				// non-stopping last statement

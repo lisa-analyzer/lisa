@@ -1,12 +1,5 @@
 package it.unive.lisa.util.frontend;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.function.Function;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.BeginFinallyEdge;
@@ -26,6 +19,14 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.YieldsValue;
 import it.unive.lisa.program.cfg.statement.literal.Literal;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class CFGTweaker {
 
@@ -86,45 +87,88 @@ public class CFGTweaker {
 				continue;
 
 			if (pb.getElseBlock() == null)
-				addFinallyEdges(cfg, pb.getTryBlock(), fin, pb.getClosing(), pathIdx++);
+				pathIdx = addNormalFinallyEdges(cfg, pb.getTryBlock(), fin, pb.getClosing(), pathIdx);
 			else
-				addFinallyEdges(cfg, pb.getElseBlock(), fin, pb.getClosing(), pathIdx++);
+				pathIdx = addNormalFinallyEdges(cfg, pb.getElseBlock(), fin, pb.getClosing(), pathIdx);
 
 			for (CatchBlock catchBody : pb.getCatchBlocks())
-				addFinallyEdges(cfg, catchBody.getBody(), fin, pb.getClosing(), pathIdx++);
-			
+				pathIdx = addNormalFinallyEdges(cfg, catchBody.getBody(), fin, pb.getClosing(), pathIdx);
+		}
 
-			Map<Statement, ProtectedBlock> alterer = new HashMap<>();
-			pb.getTryBlock().getBody().stream()
-				.filter(s -> s.breaksControlFlow() || s.continuesControlFlow())
-				.forEach(s -> alterer.put(s, pb.getTryBlock()));
-			if (pb.getElseBlock() != null)
-				pb.getElseBlock().getBody().stream()
-					.filter(s -> s.breaksControlFlow() || s.continuesControlFlow())
-					.forEach(s -> alterer.put(s, pb.getElseBlock()));
-			for (CatchBlock catchBody : pb.getCatchBlocks())
-				catchBody.getBody().getBody().stream()
-					.filter(s -> s.breaksControlFlow() || s.continuesControlFlow())
-					.forEach(s -> alterer.put(s, catchBody.getBody()));
+		// we sort them for deterministic processing
+		for (Statement yield : new TreeSet<>(cfg.getAllExitpoints())) {
+			List<ProtectedBlock> fins = new LinkedList<>();
+			for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
+				if (pb.getFinallyBlock() != null
+						&& !pb.getFinallyBlock().getBody().isEmpty()
+						&& pb.getFullBody(false).contains(yield))
+					fins.add(pb.getFinallyBlock());
+			}
+			if (fins.isEmpty())
+				continue;
 
-			for (Map.Entry<Statement, ProtectedBlock> entry : alterer.entrySet()) {
-				Statement st = entry.getKey();
-				ProtectedBlock block = entry.getValue();
-				for (Edge out : cfg.getOutgoingEdges(st)) {
-					if (!block.getBody().contains(out.getDestination())) {
-						// the destination is outside the protected block,
-						// so we must execute the finally before going there
-						cfg.getNodeList().removeEdge(out);
-						cfg.addEdge(new BeginFinallyEdge(st, fin.getStart(), pathIdx++));
-						if (fin.canBeContinued())
-							cfg.addEdge(new EndFinallyEdge(fin.getEnd(), out.getDestination(), pathIdx - 1));
-					}
-				}
+			fins.sort((
+					a,
+					b) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
+			for (Edge preEnd : cfg.getIngoingEdges(yield)) {
+				cfg.getNodeList().removeEdge(preEnd);
+				pathIdx = addFinallyPathInBetween(cfg, preEnd.getSource(), yield, fins, pathIdx);
 			}
 		}
+
+		// we sort them for deterministic processing
+		for (Statement st : new TreeSet<>(cfg.getNodes()))
+			if (st.breaksControlFlow() || st.continuesControlFlow()) {
+				List<ProtectedBlock> fins = new LinkedList<>();
+				Collection<Edge> outs = cfg.getOutgoingEdges(st);
+				Collection<Edge> toReplace = new TreeSet<>();
+				for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
+					if (pb.getFinallyBlock() == null
+							|| pb.getFinallyBlock().getBody().isEmpty())
+						continue;
+
+					AtomicBoolean found = new AtomicBoolean(false);
+
+					if (pb.getTryBlock().getBody().contains(st))
+						outs.stream()
+								.filter(e -> !pb.getTryBlock().getBody().contains(e.getDestination()))
+								.forEach(e -> {
+									found.set(true);
+									toReplace.add(e);
+								});
+					if (pb.getElseBlock() != null && pb.getElseBlock().getBody().contains(st))
+						outs.stream()
+								.filter(e -> !pb.getElseBlock().getBody().contains(e.getDestination()))
+								.forEach(e -> {
+									found.set(true);
+									toReplace.add(e);
+								});
+					for (CatchBlock catchBody : pb.getCatchBlocks())
+						if (catchBody.getBody().getBody().contains(st))
+							outs.stream()
+									.filter(e -> !catchBody.getBody().getBody().contains(e.getDestination()))
+									.forEach(e -> {
+										found.set(true);
+										toReplace.add(e);
+									});
+
+					if (found.get())
+						fins.add(pb.getFinallyBlock());
+				}
+				if (fins.isEmpty())
+					continue;
+
+				fins.sort((
+						a,
+						b) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
+				for (Edge entry : toReplace) {
+					cfg.getNodeList().removeEdge(entry);
+					pathIdx = addFinallyPathInBetween(cfg, st, entry.getDestination(), fins, pathIdx);
+				}
+			}
 	}
 
-	private static void addFinallyEdges(
+	private static int addNormalFinallyEdges(
 			CFG cfg,
 			ProtectedBlock pb,
 			ProtectedBlock fin,
@@ -132,73 +176,130 @@ public class CFGTweaker {
 			int pathIdx) {
 		// the edges are added as follows (BF: BeginFinallyEdge, EF:
 		// EndFinallyEdge):
-		// - if a block can be continued, a BF is added from the end of the
+		// - if the block can be continued, a BF is added from the end of the
 		// block to the start of the finally
-		// - if a block cannot be continued, a BF is added from the pre-end of
-		// the block to the start of the finally
-		// - if a block and the finally block can be continued, an EF is added
+		// - if both the block and the finally block can be continued, an EF is
+		// added
 		// from the end of the finally block to the closing
-		// - if a block cannot be continued and the finally block can be
-		// continued, an EF is added from the end of the finally block to the
-		// statement(s) returning
+		if (!pb.canBeContinued())
+			return pathIdx;
+		cfg.addEdge(new BeginFinallyEdge(pb.getEnd(), fin.getStart(), pathIdx));
+		if (fin.canBeContinued())
+			cfg.addEdge(new EndFinallyEdge(fin.getEnd(), normalExit, pathIdx));
+		return pathIdx + 1;
+	}
 
-		if (pb.canBeContinued()) {
-			cfg.addEdge(new BeginFinallyEdge(pb.getEnd(), fin.getStart(), pathIdx));
-			if (fin.canBeContinued())
-				cfg.addEdge(new EndFinallyEdge(fin.getEnd(), normalExit, pathIdx));
-		} else
-			for (Statement st : pb.getBody())
-				if (st.stopsExecution()) {
-					for (Edge preEnd : cfg.getIngoingEdges(pb.getEnd())) {
-						cfg.addEdge(new BeginFinallyEdge(preEnd.getSource(), fin.getStart(), pathIdx));
-						cfg.getNodeList().removeEdge(preEnd);
-					}
-					if (fin.canBeContinued())
-						cfg.addEdge(new EndFinallyEdge(fin.getEnd(), st, pathIdx));
+	private static int addFinallyPathInBetween(
+			CFG cfg,
+			Statement start,
+			Statement end,
+			List<ProtectedBlock> fins,
+			int pathIdx) {
+		// we add:
+		// - a BeginFinallyEdge from the predecessors of the yield to the
+		// start of the first finally block
+		// - a BeginFinallyEdge from the end each finally block to the beginning
+		// of the next one
+		// - an EndFinallyEdge from the end of the last finally block to the
+		// yield if no yielders were found in the finally blocks
+		// - an EndFinallyEdge from the end of the last finally block to the
+		// last yielders found in the finally blocks otherwise
+		if (fins.isEmpty())
+			return pathIdx;
+
+		int idx = 0;
+		ProtectedBlock current = null;
+		ProtectedBlock next = fins.get(idx++);
+		Collection<Statement> lastYielders = Set.of(end);
+		boolean yieldersInCurrentBlock = false;
+
+		while (next != null) {
+			yieldersInCurrentBlock = false;
+			if (current == null)
+				cfg.addEdge(new BeginFinallyEdge(start, next.getStart(), pathIdx));
+			else {
+				if (current.alwaysContinues())
+					cfg.addEdge(new BeginFinallyEdge(current.getEnd(), next.getStart(), pathIdx));
+				else
+					for (Statement st : current.getBody())
+						if (st.stopsExecution())
+							for (Edge preEnd : cfg.getIngoingEdges(st)) {
+								cfg.addEdge(new BeginFinallyEdge(preEnd.getSource(), next.getStart(), pathIdx));
+								cfg.getNodeList().removeEdge(preEnd);
+							}
+			}
+
+			if (!next.alwaysContinues())
+				if (!next.canBeContinued()) {
+					lastYielders = next.getBody().stream()
+							.filter(Statement::stopsExecution)
+							.toList();
+					yieldersInCurrentBlock = true;
+				} else {
+					lastYielders = new LinkedList<>(lastYielders);
+					next.getBody().stream()
+							.filter(Statement::stopsExecution)
+							.forEach(lastYielders::add);
 				}
+
+			current = next;
+			next = idx < fins.size() ? fins.get(idx++) : null;
+		}
+
+		// current now holds the last finally block traversed:
+		// all we have to do is connect it to the last yielding
+		// block we found on our way there
+		if (!yieldersInCurrentBlock)
+			for (Statement st : lastYielders)
+				cfg.addEdge(new EndFinallyEdge(current.getEnd(), st, pathIdx));
+		return pathIdx + 1;
 	}
 
 	public static <E extends RuntimeException> void splitProtectedYields(
 			CFG cfg,
 			Function<String, E> exceptionFactory) {
-		for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
-			// we make copies of the bodies since we are modifying them
-			// while iterating over them, and we want to (i) avoid exceptions
-			// and (ii) iterate only on the original statements
-			for (Statement st : new ArrayList<>(pb.getTryBlock().getBody()))
-				if (st.stopsExecution())
-					splitProtectedYield(
-							cfg,
-							st,
-							pb.getTryBlock().getBody().size() == 1,
-							true,
-							pb.getFinallyBlock() != null,
-							pb.getTryBlock(),
-							pb.getCatchBlocks());
+		// we sort them for deterministic processing
+		for (Statement yield : new TreeSet<>(cfg.getAllExitpoints())) {
+			// the inner-most block containing the yield
+			ProtectedBlock block = null;
+			// all blocks containing the yield, to be updated if we add nodes
+			List<ProtectedBlock> blocks = new LinkedList<>();
+			// the catches that must be executed in case an error happens
+			List<CatchBlock> catches = new LinkedList<>();
 
-			if (pb.getElseBlock() != null)
-				for (Statement st : new ArrayList<>(pb.getElseBlock().getBody()))
-					if (st.stopsExecution())
-						splitProtectedYield(
-								cfg,
-								st,
-								pb.getElseBlock().getBody().size() == 1,
-								false,
-								pb.getFinallyBlock() != null,
-								pb.getElseBlock(),
-								pb.getCatchBlocks());
+			// here we find the inner-most protected block that contains the
+			// yield
+			// to decide whether to add a noop before it or not; we collect all
+			// catches
+			// that the yield or the possible noop should be connected to, and
+			// we
+			// collect all protected blocks that contain the yield to update
+			// them
+			for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
+				if (pb.getTryBlock().getBody().contains(yield)) {
+					blocks.add(pb.getTryBlock());
+					catches.addAll(pb.getCatchBlocks());
+					if (block == null || block.getBody().containsAll(pb.getTryBlock().getBody()))
+						block = pb.getTryBlock();
+				}
 
-			for (CatchBlock catchBody : pb.getCatchBlocks())
-				for (Statement st : new ArrayList<>(catchBody.getBody().getBody()))
-					if (st.stopsExecution())
-						splitProtectedYield(
-								cfg,
-								st,
-								catchBody.getBody().getBody().size() == 1,
-								false,
-								pb.getFinallyBlock() != null,
-								catchBody.getBody(),
-								pb.getCatchBlocks());
+				if (pb.getFinallyBlock() != null) {
+					if (pb.getElseBlock() != null && pb.getElseBlock().getBody().contains(yield)) {
+						blocks.add(pb.getElseBlock());
+						if (block == null || block.getBody().containsAll(pb.getElseBlock().getBody()))
+							block = pb.getElseBlock();
+					}
+					for (CatchBlock catchBody : pb.getCatchBlocks())
+						if (catchBody.getBody().getBody().contains(yield)) {
+							blocks.add(catchBody.getBody());
+							if (block == null || block.getBody().containsAll(catchBody.getBody().getBody()))
+								block = catchBody.getBody();
+						}
+				}
+			}
+
+			if (block != null)
+				splitProtectedYield(cfg, yield, block.getBody().size() == 1, blocks, catches);
 		}
 	}
 
@@ -206,53 +307,34 @@ public class CFGTweaker {
 			CFG cfg,
 			Statement yielder,
 			boolean isOnlyNode,
-			boolean needsErrors,
-			boolean hasFinally,
-			ProtectedBlock pb,
+			List<ProtectedBlock> blocks,
 			Collection<CatchBlock> catches) {
 		// ret -> noop; ret
 		// ret 0 -> noop; ret 0
+		// if (b) { ret } -> if (b) { noop; ret }
+		// if (b) { ret 0 } -> if (b) { noop; ret 0 }
 		// A; ret -> A; ret
 		// A; ret 0 -> A; ret 0
 		// ret x+2 -> t=x+2; ret t
 		// A; ret x+2 -> A; t=x+2; ret t
 
 		Collection<Edge> ingoing = cfg.getIngoingEdges(yielder);
+		boolean isBeginningOfBranch = ingoing.stream().anyMatch(Predicate.not(Edge::isUnconditional));
 		boolean needsRewriting = yielder instanceof YieldsValue && !((YieldsValue) yielder).isAtomic();
-		if ((isOnlyNode && !needsRewriting)) {
-			// first two cases
-			NoOp noop = new NoOp(cfg, yielder.getLocation());
-			cfg.addNode(noop);
-			cfg.addEdge(new SequentialEdge(noop, yielder));
-			for (Edge in : ingoing) {
-				cfg.addEdge(in.newInstance(in.getSource(), noop));
-				cfg.getNodeList().removeEdge(in);
-			}
-			if (cfg.getEntrypoints().contains(yielder)) {
-				cfg.getEntrypoints().remove(yielder);
-				cfg.getEntrypoints().add(noop);
-			}
-			if (needsErrors) {
-				for (CatchBlock cb : catches)
-					cfg.addEdge(new ErrorEdge(noop, cb.getBody().getStart(), cb.getIdentifier(), cb.getExceptions()));
-				for (Edge out : cfg.getOutgoingEdges(yielder))
-					if (out.isErrorHandling())
-						cfg.getNodeList().removeEdge(out);
-			}
-			pb.getBody().add(noop);
-			pb.setStart(noop);
-		} else if (!isOnlyNode && !needsRewriting) {
+		if (!needsRewriting && (isOnlyNode || isBeginningOfBranch)) {
+			// first and second cases
 			// third and fourth cases
-			if (needsErrors) {
-				for (Edge in : ingoing)
-					for (CatchBlock cb : catches)
-						cfg.addEdge(new ErrorEdge(in.getSource(), cb.getBody().getStart(), cb.getIdentifier(),
-								cb.getExceptions()));
-				for (Edge out : cfg.getOutgoingEdges(yielder))
-					if (out.isErrorHandling())
-						cfg.getNodeList().removeEdge(out);
-			}
+			NoOp noop = addNoOp(cfg, yielder, ingoing);
+			connectToCatches(cfg, noop, catches);
+			removeOutgoingErrorEdges(cfg, yielder);
+			updateBlocks(cfg, yielder, noop, null, blocks, false);
+		} else if (!isOnlyNode && !needsRewriting && !isBeginningOfBranch) {
+			// fifth and sixth cases
+			for (Edge in : ingoing)
+				connectToCatches(cfg, in.getSource(), catches);
+			removeOutgoingErrorEdges(cfg, yielder);
 		} else {
+			// seventh and eighth cases
 			YieldsValue vyielder = (YieldsValue) yielder;
 			Expression value = vyielder.yieldedValue();
 			needsRewriting = !(value instanceof VariableRef || value instanceof Literal);
@@ -272,26 +354,68 @@ public class CFGTweaker {
 				cfg.addEdge(in.newInstance(in.getSource(), assign));
 				cfg.getNodeList().removeEdge(in);
 			}
-			if (cfg.getEntrypoints().contains(yielder)) {
-				cfg.getEntrypoints().remove(yielder);
-				cfg.getEntrypoints().add(assign);
-			}
-			if (needsErrors) {
-				for (CatchBlock cb : catches)
-					cfg.addEdge(new ErrorEdge(assign, cb.getBody().getStart(), cb.getIdentifier(), cb.getExceptions()));
-				for (Edge out : cfg.getOutgoingEdges(yielder))
-					if (out.isErrorHandling())
-						cfg.getNodeList().removeEdge(out);
-			}
-			pb.getBody().add(assign);
-			pb.getBody().add(newYielder);
-			pb.getBody().remove(yielder);
-			if (pb.getStart() == yielder)
-				pb.setStart(assign);
-			if (pb.getEnd() == yielder)
-				pb.setEnd(newYielder);
+
+			connectToCatches(cfg, assign, catches);
+			removeOutgoingErrorEdges(cfg, yielder);
+			updateBlocks(cfg, yielder, assign, newYielder, blocks, true);
 
 			cfg.getNodeList().removeNode(yielder);
 		}
+	}
+
+	private static void updateBlocks(
+			CFG cfg,
+			Statement yielder,
+			Statement first,
+			Statement second,
+			List<ProtectedBlock> blocks,
+			boolean removeYielder) {
+		if (cfg.getEntrypoints().contains(yielder)) {
+			cfg.getEntrypoints().remove(yielder);
+			cfg.getEntrypoints().add(first);
+		}
+		for (ProtectedBlock block : blocks) {
+			block.getBody().add(first);
+			if (second != null)
+				block.getBody().add(second);
+			if (removeYielder)
+				block.getBody().remove(yielder);
+			if (block.getStart() == yielder)
+				block.setStart(first);
+			if (second != null && block.getEnd() == yielder)
+				block.setEnd(second);
+		}
+	}
+
+	private static NoOp addNoOp(
+			CFG cfg,
+			Statement yielder,
+			Collection<Edge> ingoing) {
+		NoOp noop = new NoOp(cfg, yielder.getLocation());
+		cfg.addNode(noop);
+		cfg.addEdge(new SequentialEdge(noop, yielder));
+		for (Edge in : ingoing) {
+			cfg.addEdge(in.newInstance(in.getSource(), noop));
+			cfg.getNodeList().removeEdge(in);
+		}
+		return noop;
+	}
+
+	private static void connectToCatches(
+			CFG cfg,
+			Statement target,
+			Collection<CatchBlock> catches) {
+		if (catches.isEmpty())
+			return;
+		for (CatchBlock cb : catches)
+			cfg.addEdge(new ErrorEdge(target, cb.getBody().getStart(), cb.getIdentifier(), cb.getExceptions()));
+	}
+
+	private static void removeOutgoingErrorEdges(
+			CFG cfg,
+			Statement yielder) {
+		for (Edge out : cfg.getOutgoingEdges(yielder))
+			if (out.isErrorHandling())
+				cfg.getNodeList().removeEdge(out);
 	}
 }

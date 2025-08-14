@@ -38,6 +38,10 @@ public class ParsedBlock {
 		return end != null && !end.stopsExecution();
 	}
 
+	public boolean alwaysContinues() {
+		return canBeContinued() && body.getNodes().stream().noneMatch(Statement::stopsExecution);
+	}
+
 	@Override
 	public String toString() {
 		return body.toString() + " (begin: " + begin + ", end: " + end + ")";

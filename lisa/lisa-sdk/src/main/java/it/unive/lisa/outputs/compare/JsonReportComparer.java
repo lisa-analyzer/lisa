@@ -31,7 +31,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -618,12 +621,28 @@ public class JsonReportComparer {
 				rightGraph.getNodes());
 		nodeBuilder.compute(SerializableNode::compareTo);
 
-		if (!nodeBuilder.getOnlyFirst().isEmpty())
+		Collection<SerializableNode> onlyFirst = new TreeSet<>();
+		Collection<SerializableNode> onlySecond = new TreeSet<>();
+		Map<SerializableNode, SerializableNode> renamings = new TreeMap<>();
+		findRenamings(
+				leftGraph,
+				rightGraph,
+				nodeBuilder,
+				onlyFirst,
+				onlySecond,
+				renamings);
+
+		if (!renamings.isEmpty())
+			diff.fileDiff(leftpath, rightpath, "Nodes that changed offsets:\n\t"
+					+ StringUtils.join(
+							renamings.keySet().stream().map(SerializableNode::getText).collect(Collectors.toList()),
+							"\n\t"));
+		if (!onlyFirst.isEmpty())
 			diff.fileDiff(leftpath, rightpath, "Nodes only in first graph:\n\t"
-					+ StringUtils.join(nodeBuilder.getOnlyFirst(), "\n\t"));
-		if (!nodeBuilder.getOnlySecond().isEmpty())
+					+ StringUtils.join(onlyFirst.stream().map(n -> enrich(n)).collect(Collectors.toList()), "\n\t"));
+		if (!onlySecond.isEmpty())
 			diff.fileDiff(leftpath, rightpath, "Nodes only in second graph:\n\t"
-					+ StringUtils.join(nodeBuilder.getOnlySecond(), "\n\t"));
+					+ StringUtils.join(onlySecond.stream().map(n -> enrich(n)).collect(Collectors.toList()), "\n\t"));
 
 		CollectionsDiffBuilder<SerializableEdge> edgeBuilder = new CollectionsDiffBuilder<>(
 				SerializableEdge.class,
@@ -631,31 +650,117 @@ public class JsonReportComparer {
 				rightGraph.getEdges());
 		edgeBuilder.compute(SerializableEdge::compareTo);
 
-		if (!edgeBuilder.getOnlyFirst().isEmpty())
+		Collection<SerializableEdge> onlyFirstEdges = new TreeSet<>();
+		Collection<SerializableEdge> onlySecondEdges = new TreeSet<>();
+		Map<SerializableEdge, SerializableEdge> renamingsEdges = new TreeMap<>();
+
+		for (SerializableEdge edge : edgeBuilder.getOnlyFirst())
+			for (SerializableEdge other : edgeBuilder.getOnlySecond())
+				if (edge.equalsUpToIds(other, leftGraph.getNodes(), rightGraph.getNodes()))
+					renamingsEdges.put(edge, other);
+		edgeBuilder.getOnlyFirst().stream().filter(e -> !renamingsEdges.containsKey(e)).forEach(onlyFirstEdges::add);
+		edgeBuilder.getOnlySecond().stream().filter(e -> !renamingsEdges.containsValue(e))
+				.forEach(onlySecondEdges::add);
+
+		if (!renamingsEdges.isEmpty())
+			diff.fileDiff(leftpath, rightpath, "Edges whose endpoints changed offsets:\n\t"
+					+ StringUtils.join(renamingsEdges.keySet().stream().map(e -> enrich(e, leftGraph))
+							.collect(Collectors.toList()), "\n\t"));
+		if (!onlyFirstEdges.isEmpty())
 			diff.fileDiff(leftpath, rightpath, "Edges only in first graph:\n\t"
-					+ StringUtils.join(enrich(edgeBuilder.getOnlyFirst(), leftGraph), "\n\t"));
-		if (!edgeBuilder.getOnlySecond().isEmpty())
+					+ StringUtils.join(
+							onlyFirstEdges.stream().map(e -> enrich(e, leftGraph)).collect(Collectors.toList()),
+							"\n\t"));
+		if (!onlySecondEdges.isEmpty())
 			diff.fileDiff(leftpath, rightpath, "Edges only in second graph:\n\t"
-					+ StringUtils.join(enrich(edgeBuilder.getOnlySecond(), rightGraph), "\n\t"));
+					+ StringUtils.join(
+							onlySecondEdges.stream().map(e -> enrich(e, rightGraph)).collect(Collectors.toList()),
+							"\n\t"));
 	}
 
-	private static Collection<String> enrich(
-			Collection<SerializableEdge> edges,
-			SerializableGraph graph) {
-		Collection<String> result = new ArrayList<>(edges.size());
-		for (SerializableEdge edge : edges) {
-			SerializableNode source = graph.getNodeById(edge.getSourceId());
-			SerializableNode target = graph.getNodeById(edge.getDestId());
-			result.add(
-					source.getText()
-							+ " ---("
-							+ edge.getKind()
-							+ ")"
-							+ (edge.getLabel() != null ? edge.getLabel() : "")
-							+ "---> "
-							+ target.getText());
+	private static void findRenamings(
+			SerializableGraph leftGraph,
+			SerializableGraph rightGraph,
+			CollectionsDiffBuilder<SerializableNode> builder,
+			Collection<SerializableNode> onlyFirst,
+			Collection<SerializableNode> onlySecond,
+			Map<SerializableNode, SerializableNode> renamings) {
+		List<SerializableNode> firstSorted = new ArrayList<>(builder.getOnlyFirst());
+		firstSorted.sort((
+				f,
+				s) -> f.getText().compareTo(s.getText()));
+		Iterator<SerializableNode> ol = firstSorted.iterator();
+		List<SerializableNode> secondSorted = new ArrayList<>(builder.getOnlySecond());
+		secondSorted.sort((
+				f,
+				s) -> f.getText().compareTo(s.getText()));
+		Iterator<SerializableNode> or = secondSorted.iterator();
+
+		SerializableNode currentF = null;
+		SerializableNode currentS = null;
+
+		while (ol.hasNext() && or.hasNext()) {
+			if (ol.hasNext() && currentF == null)
+				currentF = ol.next();
+			if (or.hasNext() && currentS == null)
+				currentS = or.next();
+
+			if (currentF == null)
+				if (currentS == null)
+					break;
+				else {
+					onlySecond.add(currentS);
+					currentS = null;
+					continue;
+				}
+			else if (currentS == null) {
+				onlyFirst.add(currentF);
+				currentF = null;
+				continue;
+			}
+
+			int cmp = currentF.getText().compareTo(currentS.getText());
+			if (currentF.equalsUpToIds(currentS, leftGraph.getNodes(), rightGraph.getNodes())) {
+				renamings.put(currentF, currentS);
+				currentF = null;
+				currentS = null;
+			} else if (cmp == 0) {
+				onlyFirst.add(currentF);
+				onlySecond.add(currentS);
+				currentF = null;
+				currentS = null;
+			} else if (cmp < 0) {
+				onlyFirst.add(currentF);
+				currentF = null;
+			} else {
+				onlySecond.add(currentS);
+				currentS = null;
+			}
 		}
-		return result;
+	}
+
+	private static String enrich(
+			SerializableNode node) {
+		return node.getText()
+				+ "\t(id: "
+				+ node.getId()
+				+ (node.getSubNodes() == null || node.getSubNodes().isEmpty() ? ""
+						: ", subnodes: " + node.getSubNodes())
+				+ ")";
+	}
+
+	private static String enrich(
+			SerializableEdge edge,
+			SerializableGraph graph) {
+		SerializableNode source = graph.getNodeById(edge.getSourceId());
+		SerializableNode target = graph.getNodeById(edge.getDestId());
+		return source.getText()
+				+ " ---("
+				+ edge.getKind()
+				+ ")"
+				+ (edge.getLabel() != null ? edge.getLabel() : "")
+				+ "---> "
+				+ target.getText();
 	}
 
 	private static void compareLabels(

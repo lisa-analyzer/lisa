@@ -43,7 +43,12 @@ public class ProtectedBlock {
 	}
 
 	public boolean canBeContinued() {
-		return end != null && !end.stopsExecution();
+		return end != null && !end.stopsExecution() && !end.breaksControlFlow() && !end.continuesControlFlow();
+	}
+
+	public boolean alwaysContinues() {
+		return canBeContinued() && body.stream()
+				.noneMatch(st -> st.stopsExecution() || st.breaksControlFlow() || st.continuesControlFlow());
 	}
 
 	@Override

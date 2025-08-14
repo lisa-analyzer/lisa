@@ -6,10 +6,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -194,4 +196,42 @@ public class SerializableNode
 		return id + "(" + subNodes + "):" + text;
 	}
 
+	public boolean equalsUpToIds(
+			SerializableNode other,
+			Collection<SerializableNode> nodesInThisGraph,
+			Collection<SerializableNode> nodesInOtherGraph) {
+		if (this == other)
+			return true;
+		if (other == null)
+			return false;
+		if (getClass() != other.getClass())
+			return false;
+
+		if (!Objects.equals(text, other.text))
+			return false;
+		if (!Objects.equals(unknownFields, other.unknownFields))
+			return false;
+
+		if (Objects.equals(subNodes, other.subNodes))
+			return true;
+		if (subNodes.size() != other.subNodes.size())
+			return false;
+		for (int i = 0; i < subNodes.size(); i++) {
+			Integer thisSubNodeId = subNodes.get(i);
+			Integer otherSubNodeId = other.subNodes.get(i);
+			SerializableNode thisSubNode = nodesInThisGraph.stream()
+					.filter(n -> n.id == thisSubNodeId)
+					.findFirst()
+					.orElse(null);
+			SerializableNode otherSubNode = nodesInOtherGraph.stream()
+					.filter(n -> n.id == otherSubNodeId)
+					.findFirst()
+					.orElse(null);
+			if (thisSubNode == null || otherSubNode == null)
+				return false;
+			if (!thisSubNode.equalsUpToIds(otherSubNode, nodesInThisGraph, nodesInOtherGraph))
+				return false;
+		}
+		return true;
+	}
 }

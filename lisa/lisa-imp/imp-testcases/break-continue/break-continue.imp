@@ -82,7 +82,7 @@ class program {
 
     nestedBreak(b) {
         def x = 0;
-        loop: while (b) {
+        loop: for (def i = 0; i < 10; i = i + 1) {
             x = x + 1;
             while (x < 10) {
                 x = x * 2;
@@ -100,7 +100,7 @@ class program {
 
     nestedContinue(b) {
         def x = 0;
-        loop: while (b) {
+        loop: for (def i = 0; i < 10; i = i + 1) {
             x = x + 1;
             while (x < 10) {
                 x = x * 2;

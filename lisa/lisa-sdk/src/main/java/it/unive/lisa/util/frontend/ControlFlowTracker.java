@@ -36,18 +36,18 @@ public class ControlFlowTracker {
 	public void endControlFlowOf(
 			NodeList<CFG, Statement, Edge> list,
 			Statement condition,
-			Statement closing,
-			String label,
-			boolean continueEnabled) {
+			Statement targetForBreaking,
+			Statement targetForContinuing,
+			String label) {
 		Iterator<Pair<Statement, String>> it = modifiers.iterator();
 		while (it.hasNext()) {
 			Pair<Statement, String> modifier = it.next();
 			if (modifier.getRight() == null || modifier.getRight().equals(label)) {
 				list.getOutgoingEdges(modifier.getLeft()).forEach(list::removeEdge);
-				if (modifier.getLeft().breaksControlFlow())
-					list.addEdge(new SequentialEdge(modifier.getLeft(), closing));
-				else if (modifier.getLeft().continuesControlFlow() && continueEnabled)
-					list.addEdge(new SequentialEdge(modifier.getLeft(), condition));
+				if (targetForBreaking != null && modifier.getLeft().breaksControlFlow())
+					list.addEdge(new SequentialEdge(modifier.getLeft(), targetForBreaking));
+				else if (targetForContinuing != null && modifier.getLeft().continuesControlFlow())
+					list.addEdge(new SequentialEdge(modifier.getLeft(), targetForContinuing));
 				else
 					throw new IllegalStateException(
 							"Statement " + modifier.getLeft() + " not supported at " + condition.getLocation());

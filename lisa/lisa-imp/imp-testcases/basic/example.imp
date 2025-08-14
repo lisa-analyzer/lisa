@@ -207,8 +207,6 @@ class example {
 		assert y == 10;
 		
 		// you can throw any object to raise errors
-		// throw new example();
-		def ex = new example();
-		throw ex;
+		throw new example();
 	}
 }

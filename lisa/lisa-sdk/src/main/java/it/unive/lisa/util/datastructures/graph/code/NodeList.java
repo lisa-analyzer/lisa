@@ -162,23 +162,23 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 		cutoff.removeAll(interesting);
 		interesting.forEach(i -> cutoff.add(i - 1));
 
-		if (target != 0)
-			if (target != nodes.size()) { // we don't remove 1 since we want to
-											// compare wrt the 'old' position
-				N pred = nodes.get(target - 1);
-				N succ = nodes.get(target); // before was at target+1
-				NodeEdges<G, N, E> predEdges = extraEdges.get(pred);
-				if (predEdges != null) {
-					E seq = sequentialSingleton.newInstance(pred, succ);
-					if (predEdges.outgoing.contains(seq)) {
-						// sequential edge can be encoded in the list
-						removeEdge(seq);
-						cutoff.remove(target - 1);
-					} else
-						cutoff.add(target - 1);
+		if (target != 0 && target != nodes.size()) {
+			// in the second condition we don't remove 1 since we want to
+			// compare wrt the 'old' position
+			N pred = nodes.get(target - 1);
+			N succ = nodes.get(target); // before was at target+1
+			NodeEdges<G, N, E> predEdges = extraEdges.get(pred);
+			if (predEdges != null) {
+				E seq = sequentialSingleton.newInstance(pred, succ);
+				if (predEdges.outgoing.contains(seq)) {
+					// sequential edge can be encoded in the list
+					removeEdge(seq);
+					cutoff.remove(target - 1);
 				} else
 					cutoff.add(target - 1);
-			}
+			} else
+				cutoff.add(target - 1);
+		}
 	}
 
 	/**
@@ -499,8 +499,6 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 				// normal intermediate edge
 				for (E in : ingoing)
 					for (E out : outgoing) {
-						// if (out.isErrorHandling())
-						// continue;
 						if (!out.isUnconditional() && !out.isErrorHandling() && !out.isFinallyRelated())
 							throw new UnsupportedOperationException(
 									EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());

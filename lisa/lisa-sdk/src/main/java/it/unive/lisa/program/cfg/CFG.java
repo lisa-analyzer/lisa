@@ -241,24 +241,34 @@ public class CFG
 
 	private boolean isNotSimplifiableInProtectedBlock(
 			Statement st) {
-		BiPredicate<ProtectedBlock, Statement> single = (
+		List<BiPredicate<ProtectedBlock, Statement>> exclusions = new LinkedList<>();
+		// single node in protected block
+		exclusions.add((
 				pb,
-				s) -> pb.getBody().size() == 1 && pb.getStart() == s;
-		BiPredicate<ProtectedBlock, Statement> preRet = (
+				s) -> pb.getBody().size() == 1 && pb.getStart() == s);
+		// pre-exit in protected block
+		exclusions.add((
 				pb,
-				s) -> pb.getBody().size() == 2 && pb.getStart() == s && pb.getEnd().stopsExecution();
+				s) -> pb.getBody().size() == 2 && pb.getStart() == s && pb.getEnd().stopsExecution());
+		// branch target followed by finally execution
+		exclusions.add((
+				pb,
+				s) -> getIngoingEdges(s).size() == 1
+						&& getIngoingEdges(s).stream().anyMatch(Predicate.not(Edge::isUnconditional))
+						&& getOutgoingEdges(s).stream().allMatch(e -> e.isFinallyRelated() || e.isErrorHandling()));
+
 		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
-			if (single.test(pb.getTryBlock(), st) || preRet.test(pb.getTryBlock(), st))
+			if (exclusions.stream().anyMatch(e -> e.test(pb.getTryBlock(), st)))
 				return true;
 			else if (pb.getElseBlock() != null
-					&& (single.test(pb.getElseBlock(), st) || preRet.test(pb.getElseBlock(), st)))
+					&& (exclusions.stream().anyMatch(e -> e.test(pb.getElseBlock(), st))))
 				return true;
 			else if (pb.getFinallyBlock() != null
-					&& (single.test(pb.getFinallyBlock(), st) || preRet.test(pb.getFinallyBlock(), st)))
+					&& (exclusions.stream().anyMatch(e -> e.test(pb.getFinallyBlock(), st))))
 				return true;
 			else
 				for (CatchBlock cb : pb.getCatchBlocks())
-					if (single.test(cb.getBody(), st) || preRet.test(cb.getBody(), st))
+					if (exclusions.stream().anyMatch(e -> e.test(cb.getBody(), st)))
 						return true;
 		return false;
 	}

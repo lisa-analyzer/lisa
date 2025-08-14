@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this)_cfg.json", "untyped_program.nestedWithBreaks(program__this,_untyped_b)_cfg.json", "untyped_program.nestedWithComplexBreaks(program__this,_untyped_b)_cfg.json", "untyped_program.nestedWithFinally(program__this)_cfg.json", "untyped_program.nestedWithFinallyAndReturns(program__this)_cfg.json", "untyped_program.nestedWithTerminatingFinally(program__this)_cfg.json", "untyped_program.nestedWithoutFinally(program__this)_cfg.json" ],
+  "info" : {
+    "cfgs" : "7",
+    "duration" : "373ms",
+    "end" : "2025-08-18T12:25:04.117+02:00",
+    "expressions" : "212",
+    "files" : "7",
+    "globals" : "0",
+    "members" : "7",
+    "programs" : "1",
+    "start" : "2025-08-18T12:25:03.744+02:00",
+    "statements" : "116",
+    "units" : "2",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "true",
+    "serializeResults" : "false",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/nested-errors"
+  }
+}
