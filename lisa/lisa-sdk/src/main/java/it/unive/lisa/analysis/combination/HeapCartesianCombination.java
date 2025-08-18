@@ -26,11 +26,7 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public abstract class HeapCartesianCombination<C extends HeapCartesianCombination<C, T1, T2>,
 		T1 extends HeapLattice<T1>,
-		T2 extends HeapLattice<T2>>
-		extends
-		CartesianCombination<C, T1, T2>
-		implements
-		HeapLattice<C> {
+		T2 extends HeapLattice<T2>> extends CartesianCombination<C, T1, T2> implements HeapLattice<C> {
 
 	/**
 	 * Creates a new cartesian combination of two heap lattices.

@@ -73,109 +73,109 @@ public class SubstringDomainTest {
 	private final Substrings BOTTOM;
 
 	private final ValueExpression XEqualsY = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			y,
-			StringEquals.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		BoolType.INSTANCE,
+		x,
+		y,
+		StringEquals.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XEqualsW = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			w,
-			StringEquals.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		BoolType.INSTANCE,
+		x,
+		w,
+		StringEquals.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression YSubstringOfX = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			y,
-			StringContains.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		BoolType.INSTANCE,
+		x,
+		y,
+		StringContains.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression WSubstringOfX = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			w,
-			StringContains.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		BoolType.INSTANCE,
+		x,
+		w,
+		StringContains.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XStartsWithY = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			y,
-			StringStartsWith.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		BoolType.INSTANCE,
+		x,
+		y,
+		StringStartsWith.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XEndsWithY = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			y,
-			StringEndsWith.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		BoolType.INSTANCE,
+		x,
+		y,
+		StringEndsWith.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XConcatY = new BinaryExpression(
-			StringType.INSTANCE,
-			x,
-			y,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		StringType.INSTANCE,
+		x,
+		y,
+		StringConcat.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression ZConcatX = new BinaryExpression(
-			StringType.INSTANCE,
-			z,
-			x,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		StringType.INSTANCE,
+		z,
+		x,
+		StringConcat.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression ZConcatXConcatY = new BinaryExpression(
-			StringType.INSTANCE,
-			z,
-			XConcatY,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		StringType.INSTANCE,
+		z,
+		XConcatY,
+		StringConcat.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XConcatAB = new BinaryExpression(
-			StringType.INSTANCE,
-			x,
-			ab,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		StringType.INSTANCE,
+		x,
+		ab,
+		StringConcat.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XConcatA = new BinaryExpression(
-			StringType.INSTANCE,
-			x,
-			a,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		StringType.INSTANCE,
+		x,
+		a,
+		StringConcat.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XConcatBC = new BinaryExpression(
-			StringType.INSTANCE,
-			x,
-			bc,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		StringType.INSTANCE,
+		x,
+		bc,
+		StringConcat.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XConcatABC = new BinaryExpression(
-			StringType.INSTANCE,
-			x,
-			abc,
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		StringType.INSTANCE,
+		x,
+		abc,
+		StringConcat.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression CSubstringOfX = new BinaryExpression(
-			BoolType.INSTANCE,
-			x,
-			c,
-			StringContains.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		BoolType.INSTANCE,
+		x,
+		c,
+		StringContains.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	private final ValueExpression XSubstringOfC = new BinaryExpression(
-			BoolType.INSTANCE,
-			c,
-			x,
-			StringContains.INSTANCE,
-			SyntheticLocation.INSTANCE);
+		BoolType.INSTANCE,
+		c,
+		x,
+		StringContains.INSTANCE,
+		SyntheticLocation.INSTANCE);
 
 	public SubstringDomainTest() {
 		Map<Identifier, ExpressionInverseSet> mapA = new HashMap<>();
@@ -273,11 +273,11 @@ public class SubstringDomainTest {
 	public void testAssumeEmpty5()
 			throws SemanticException {
 		ValueExpression orOperation = new BinaryExpression(
-				BoolType.INSTANCE,
-				WSubstringOfX,
-				YSubstringOfX,
-				LogicalOr.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			WSubstringOfX,
+			YSubstringOfX,
+			LogicalOr.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		Substrings assumed = domain.assume(empty, orOperation, null, null, null);
 		assertFalse(assumed.getState(x).contains(y));
 		assertFalse(assumed.getState(y).contains(x));
@@ -291,11 +291,11 @@ public class SubstringDomainTest {
 	public void testAssumeEmpty6()
 			throws SemanticException {
 		ValueExpression andOperation = new BinaryExpression(
-				BoolType.INSTANCE,
-				WSubstringOfX,
-				YSubstringOfX,
-				LogicalAnd.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			WSubstringOfX,
+			YSubstringOfX,
+			LogicalAnd.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		Substrings assumed = domain.assume(empty, andOperation, null, null, null);
 		assertTrue(assumed.getState(x).contains(y));
 		assertFalse(assumed.getState(y).contains(x));
@@ -344,18 +344,18 @@ public class SubstringDomainTest {
 			throws SemanticException {
 		Identifier j = new Variable(StringType.INSTANCE, "j", SyntheticLocation.INSTANCE);
 		ValueExpression JSubstringOfY = new BinaryExpression(
-				BoolType.INSTANCE,
-				y,
-				j,
-				StringContains.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			y,
+			j,
+			StringContains.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression andOperation = new BinaryExpression(
-				BoolType.INSTANCE,
-				JSubstringOfY,
-				YSubstringOfX,
-				LogicalAnd.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			JSubstringOfY,
+			YSubstringOfX,
+			LogicalAnd.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		Substrings assume = domain.assume(valB, andOperation, null, null, null);
 
 		assertTrue(assume.getState(x).contains(w));
@@ -374,18 +374,18 @@ public class SubstringDomainTest {
 			throws SemanticException {
 		Identifier j = new Variable(StringType.INSTANCE, "j", SyntheticLocation.INSTANCE);
 		ValueExpression JSubstringOfY = new BinaryExpression(
-				BoolType.INSTANCE,
-				y,
-				j,
-				StringContains.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			y,
+			j,
+			StringContains.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression orOperation = new BinaryExpression(
-				BoolType.INSTANCE,
-				JSubstringOfY,
-				YSubstringOfX,
-				LogicalOr.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			JSubstringOfY,
+			YSubstringOfX,
+			LogicalOr.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		Substrings assume = domain.assume(valB, orOperation, null, null, null);
 
 		assertTrue(assume.getState(x).contains(w));
@@ -432,23 +432,23 @@ public class SubstringDomainTest {
 		assertEquals(Satisfiability.UNKNOWN, domain.satisfies(valA, XEndsWithY, null, null));
 
 		ValueExpression andOperation = new BinaryExpression(
-				BoolType.INSTANCE,
-				WSubstringOfX,
-				YSubstringOfX,
-				LogicalAnd.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			WSubstringOfX,
+			YSubstringOfX,
+			LogicalAnd.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression orOperation1 = new BinaryExpression(
-				BoolType.INSTANCE,
-				WSubstringOfX,
-				YSubstringOfX,
-				LogicalOr.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			WSubstringOfX,
+			YSubstringOfX,
+			LogicalOr.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression orOperation2 = new BinaryExpression(
-				BoolType.INSTANCE,
-				YSubstringOfX,
-				WSubstringOfX,
-				LogicalOr.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			YSubstringOfX,
+			WSubstringOfX,
+			LogicalOr.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		assertEquals(Satisfiability.SATISFIED, domain.satisfies(valA, andOperation, null, null));
 		assertEquals(Satisfiability.SATISFIED, domain.satisfies(valE, orOperation1, null, null));
@@ -457,8 +457,8 @@ public class SubstringDomainTest {
 		assertEquals(Satisfiability.UNKNOWN, domain.satisfies(valD, orOperation1, null, null));
 
 		assertEquals(
-				domain.satisfies(valE, orOperation2, null, null),
-				domain.satisfies(valE, orOperation1, null, null));
+			domain.satisfies(valE, orOperation2, null, null),
+			domain.satisfies(valE, orOperation1, null, null));
 
 		assertEquals(Satisfiability.SATISFIED, domain.satisfies(valF, CSubstringOfX, null, null));
 		assertEquals(Satisfiability.UNKNOWN, domain.satisfies(valF, XSubstringOfC, null, null));
@@ -524,11 +524,11 @@ public class SubstringDomainTest {
 		ValueExpression a = new Constant(StringType.INSTANCE, "a", SyntheticLocation.INSTANCE);
 		ValueExpression b = new Constant(StringType.INSTANCE, "b", SyntheticLocation.INSTANCE);
 		ValueExpression AConcatB = new BinaryExpression(
-				StringType.INSTANCE,
-				a,
-				b,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			a,
+			b,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, AConcatB, null, null);
 		assigned = domain.assign(assigned, y, a, null, null);
@@ -548,11 +548,11 @@ public class SubstringDomainTest {
 		ValueExpression a = new Constant(StringType.INSTANCE, "a", SyntheticLocation.INSTANCE);
 		ValueExpression b = new Constant(StringType.INSTANCE, "b", SyntheticLocation.INSTANCE);
 		ValueExpression AConcatB = new BinaryExpression(
-				StringType.INSTANCE,
-				a,
-				b,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			a,
+			b,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, AConcatB, null, null);
 		assigned = domain.assign(assigned, y, x, null, null);
@@ -571,17 +571,17 @@ public class SubstringDomainTest {
 		ValueExpression a = new Constant(StringType.INSTANCE, "a", SyntheticLocation.INSTANCE);
 		ValueExpression b = new Constant(StringType.INSTANCE, "b", SyntheticLocation.INSTANCE);
 		ValueExpression AConcatB = new BinaryExpression(
-				StringType.INSTANCE,
-				a,
-				b,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			a,
+			b,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression XConcatC = new BinaryExpression(
-				StringType.INSTANCE,
-				x,
-				c,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			x,
+			c,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, AConcatB, null, null);
 		assigned = domain.assign(assigned, y, x, null, null);
@@ -623,11 +623,11 @@ public class SubstringDomainTest {
 	public void testAssign3()
 			throws SemanticException {
 		ValueExpression XConcatZ = new BinaryExpression(
-				StringType.INSTANCE,
-				x,
-				z,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			x,
+			z,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(valA, x, XConcatZ, null, null);
 		assertTrue(assigned.getState(x).contains(y));
@@ -657,11 +657,11 @@ public class SubstringDomainTest {
 	public void testAssign6()
 			throws SemanticException {
 		ValueExpression WConcatY = new BinaryExpression(
-				StringType.INSTANCE,
-				w,
-				y,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			w,
+			y,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		Substrings assigned = domain.assign(valA, z, WConcatY, null, null);
 		assertTrue(assigned.getState(x).contains(y));
 		assertTrue(assigned.getState(x).contains(w));
@@ -684,11 +684,11 @@ public class SubstringDomainTest {
 	public void testAssign8()
 			throws SemanticException {
 		ValueExpression XConcatZ = new BinaryExpression(
-				StringType.INSTANCE,
-				x,
-				z,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			x,
+			z,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		Substrings assigned = domain.assign(valA, x, XConcatZ, null, null);
 		assigned = domain.assign(assigned, w, x, null, null);
 		assertFalse(assigned.getState(x).contains(w));
@@ -751,11 +751,11 @@ public class SubstringDomainTest {
 	public void testEmptyAssignComplex1()
 			throws SemanticException {
 		ValueExpression ZConcatY = new BinaryExpression(
-				StringType.INSTANCE,
-				z,
-				y,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			z,
+			y,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, w, ZConcatXConcatY, null, null);
 
@@ -793,11 +793,11 @@ public class SubstringDomainTest {
 		ValueExpression ab = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
 		ValueExpression cd = new Constant(StringType.INSTANCE, "cd", SyntheticLocation.INSTANCE);
 		ValueExpression ABConcatCD = new BinaryExpression(
-				StringType.INSTANCE,
-				ab,
-				cd,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			ab,
+			cd,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned1 = domain.assign(empty, x, abcd, null, null);
 		Substrings assigned2 = domain.assign(empty, x, ABConcatCD, null, null);
@@ -811,17 +811,17 @@ public class SubstringDomainTest {
 		ValueExpression ab = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
 		ValueExpression cd = new Constant(StringType.INSTANCE, "cd", SyntheticLocation.INSTANCE);
 		ValueExpression ABConcatY = new BinaryExpression(
-				StringType.INSTANCE,
-				ab,
-				y,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			ab,
+			y,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression ABConcatYConcatCD = new BinaryExpression(
-				StringType.INSTANCE,
-				ABConcatY,
-				cd,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			ABConcatY,
+			cd,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, ABConcatYConcatCD, null, null);
 
@@ -832,24 +832,24 @@ public class SubstringDomainTest {
 	public void testEmptyAssignComplex5()
 			throws SemanticException {
 		ValueExpression YConcatW = new BinaryExpression(
-				StringType.INSTANCE,
-				y,
-				w,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			y,
+			w,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression YConcatWConcatAB = new BinaryExpression(
-				StringType.INSTANCE,
-				YConcatW,
-				ab,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			YConcatW,
+			ab,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression WConcatA = new BinaryExpression(
-				StringType.INSTANCE,
-				w,
-				a,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			w,
+			a,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, YConcatWConcatAB, null, null);
 
@@ -890,24 +890,24 @@ public class SubstringDomainTest {
 	public void testEmptyInterAssignComplex()
 			throws SemanticException {
 		ValueExpression YConcatW = new BinaryExpression(
-				StringType.INSTANCE,
-				y,
-				w,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			y,
+			w,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression YConcatWConcatAB = new BinaryExpression(
-				StringType.INSTANCE,
-				YConcatW,
-				ab,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			YConcatW,
+			ab,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression WConcatA = new BinaryExpression(
-				StringType.INSTANCE,
-				w,
-				a,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			w,
+			a,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, YConcatWConcatAB, null, null);
 		assigned = domain.assign(assigned, y, WConcatA, null, null);
@@ -919,11 +919,11 @@ public class SubstringDomainTest {
 	public void testEmptyInterAssignComplex2()
 			throws SemanticException {
 		ValueExpression WConcatC = new BinaryExpression(
-				StringType.INSTANCE,
-				w,
-				c,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			w,
+			c,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, WConcatC, null, null);
 		assigned = domain.assign(assigned, x, ZConcatX, null, null);
@@ -938,17 +938,17 @@ public class SubstringDomainTest {
 	public void testAssumeComplex1()
 			throws SemanticException {
 		ValueExpression YConcatW = new BinaryExpression(
-				StringType.INSTANCE,
-				y,
-				w,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			y,
+			w,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression XSubstringOfY = new BinaryExpression(
-				BoolType.INSTANCE,
-				y,
-				x,
-				StringContains.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			y,
+			x,
+			StringContains.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, YConcatW, null, null);
 		assigned = domain.assume(assigned, XSubstringOfY, null, null, null);
@@ -962,17 +962,17 @@ public class SubstringDomainTest {
 	public void testAssumeComplex2()
 			throws SemanticException {
 		ValueExpression YConcatW = new BinaryExpression(
-				StringType.INSTANCE,
-				y,
-				w,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			y,
+			w,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression YConcatWSubstringOfX = new BinaryExpression(
-				BoolType.INSTANCE,
-				x,
-				YConcatW,
-				StringContains.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			x,
+			YConcatW,
+			StringContains.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, z, YConcatW, null, null);
 		assigned = domain.assume(assigned, YConcatWSubstringOfX, null, null, null);
@@ -985,11 +985,11 @@ public class SubstringDomainTest {
 	public void testAssumeComplex3()
 			throws SemanticException {
 		ValueExpression XSubstringOfY = new BinaryExpression(
-				BoolType.INSTANCE,
-				y,
-				x,
-				StringContains.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			y,
+			x,
+			StringContains.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings assigned = domain.assign(empty, x, abc, null, null);
 		assigned = domain.assume(assigned, XSubstringOfY, null, null, null);
@@ -1004,32 +1004,32 @@ public class SubstringDomainTest {
 	public void testExtr1()
 			throws SemanticException {
 		ValueExpression replaceYAC = new TernaryExpression(
-				StringType.INSTANCE,
-				y,
-				a,
-				c,
-				StringReplace.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			y,
+			a,
+			c,
+			StringReplace.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression ABConcatX = new BinaryExpression(
-				StringType.INSTANCE,
-				ab,
-				x,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			ab,
+			x,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 		ValueExpression BConcatX = new BinaryExpression(
-				StringType.INSTANCE,
-				b,
-				x,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			b,
+			x,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression assignExpr = new BinaryExpression(
-				StringType.INSTANCE,
-				replaceYAC,
-				ABConcatX,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			replaceYAC,
+			ABConcatX,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings result = domain.assign(valE, z, assignExpr, null, null);
 
@@ -1043,19 +1043,19 @@ public class SubstringDomainTest {
 		ValueExpression cb = new Constant(StringType.INSTANCE, "cb", SyntheticLocation.INSTANCE);
 
 		ValueExpression replaceCbCA = new TernaryExpression(
-				StringType.INSTANCE,
-				cb,
-				c,
-				a,
-				StringReplace.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			cb,
+			c,
+			a,
+			StringReplace.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression assignExpr = new BinaryExpression(
-				StringType.INSTANCE,
-				replaceCbCA,
-				c,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			replaceCbCA,
+			c,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
@@ -1068,19 +1068,19 @@ public class SubstringDomainTest {
 		ValueExpression zero = new Constant(Int16Type.INSTANCE, 0, SyntheticLocation.INSTANCE);
 		ValueExpression two = new Constant(Int16Type.INSTANCE, 2, SyntheticLocation.INSTANCE);
 		ValueExpression substringAbc02 = new TernaryExpression(
-				StringType.INSTANCE,
-				abc,
-				zero,
-				two,
-				StringSubstring.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			abc,
+			zero,
+			two,
+			StringSubstring.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression assignExpr = new BinaryExpression(
-				StringType.INSTANCE,
-				substringAbc02,
-				c,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			substringAbc02,
+			c,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
@@ -1091,19 +1091,19 @@ public class SubstringDomainTest {
 	public void testExtr4()
 			throws SemanticException {
 		ValueExpression replaceXCA = new TernaryExpression(
-				StringType.INSTANCE,
-				x,
-				c,
-				a,
-				StringReplace.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			x,
+			c,
+			a,
+			StringReplace.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression assignExpr = new BinaryExpression(
-				StringType.INSTANCE,
-				replaceXCA,
-				c,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			replaceXCA,
+			c,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
@@ -1116,19 +1116,19 @@ public class SubstringDomainTest {
 		ValueExpression zero = new Constant(Int16Type.INSTANCE, 0, SyntheticLocation.INSTANCE);
 		ValueExpression two = new Constant(Int16Type.INSTANCE, 2, SyntheticLocation.INSTANCE);
 		ValueExpression substringY02 = new TernaryExpression(
-				StringType.INSTANCE,
-				y,
-				zero,
-				two,
-				StringSubstring.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			y,
+			zero,
+			two,
+			StringSubstring.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression assignExpr = new BinaryExpression(
-				StringType.INSTANCE,
-				substringY02,
-				c,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			substringY02,
+			c,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
@@ -1141,28 +1141,28 @@ public class SubstringDomainTest {
 		Constant AB = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
 		Constant CD = new Constant(StringType.INSTANCE, "cd", SyntheticLocation.INSTANCE);
 		ValueExpression ABConcatCD = new BinaryExpression(
-				StringType.INSTANCE,
-				AB,
-				CD,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			AB,
+			CD,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression one = new Constant(Int16Type.INSTANCE, 1, SyntheticLocation.INSTANCE);
 		ValueExpression three = new Constant(Int16Type.INSTANCE, 3, SyntheticLocation.INSTANCE);
 		ValueExpression substringABCD13 = new TernaryExpression(
-				StringType.INSTANCE,
-				ABConcatCD,
-				one,
-				three,
-				StringSubstring.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			ABConcatCD,
+			one,
+			three,
+			StringSubstring.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression assignExpr = new BinaryExpression(
-				StringType.INSTANCE,
-				substringABCD13,
-				c,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			substringABCD13,
+			c,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
@@ -1176,21 +1176,21 @@ public class SubstringDomainTest {
 			throws SemanticException {
 		Constant AB = new Constant(StringType.INSTANCE, "ab", SyntheticLocation.INSTANCE);
 		ValueExpression ABConcatY = new BinaryExpression(
-				StringType.INSTANCE,
-				AB,
-				y,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			AB,
+			y,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression one = new Constant(Int16Type.INSTANCE, 1, SyntheticLocation.INSTANCE);
 		ValueExpression three = new Constant(Int16Type.INSTANCE, 3, SyntheticLocation.INSTANCE);
 		ValueExpression assignExpr = new TernaryExpression(
-				StringType.INSTANCE,
-				ABConcatY,
-				one,
-				three,
-				StringSubstring.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			ABConcatY,
+			one,
+			three,
+			StringSubstring.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings result = domain.assign(empty, x, assignExpr, null, null);
 
@@ -1201,26 +1201,26 @@ public class SubstringDomainTest {
 	public void testExtr8()
 			throws SemanticException {
 		ValueExpression replaceABAC = new TernaryExpression(
-				StringType.INSTANCE,
-				ab,
-				a,
-				c,
-				StringReplace.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			ab,
+			a,
+			c,
+			StringReplace.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression ABConcatX = new BinaryExpression(
-				StringType.INSTANCE,
-				ab,
-				x,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			ab,
+			x,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression assignExpr = new BinaryExpression(
-				StringType.INSTANCE,
-				replaceABAC,
-				ABConcatX,
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			replaceABAC,
+			ABConcatX,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		Substrings result = domain.assign(valE, z, assignExpr, null, null);
 

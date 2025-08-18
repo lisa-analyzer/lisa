@@ -15,11 +15,8 @@ import java.util.Map;
  * @param <L> the type of the lattice used to represent the types stored in this
  *                environment
  */
-public class TypeEnvironment<L extends TypeValue<L>>
-		extends
-		Environment<L, TypeEnvironment<L>>
-		implements
-		TypeLattice<TypeEnvironment<L>> {
+public class TypeEnvironment<
+		L extends TypeValue<L>> extends Environment<L, TypeEnvironment<L>> implements TypeLattice<TypeEnvironment<L>> {
 
 	/**
 	 * Builds an empty environment.

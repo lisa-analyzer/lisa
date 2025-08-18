@@ -20,10 +20,7 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <I> the type of variable {@link Identifier} that this domain can
  *                handle
  */
-public interface SemanticDomain<L extends DomainLattice<L, T>,
-		T,
-		E extends SymbolicExpression,
-		I extends Identifier> {
+public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends SymbolicExpression, I extends Identifier> {
 
 	/**
 	 * Yields a copy of this domain, where {@code id} has been assigned to

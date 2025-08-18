@@ -27,9 +27,7 @@ import org.apache.commons.lang3.StringUtils;
  * @param <N> the type of the {@link Node}s in this matrix
  * @param <E> the type of the {@link Edge}s in this matrix
  */
-public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
-		N extends Node<G, N, E>,
-		E extends Edge<G, N, E>>
+public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>>
 		implements
 		Iterable<Entry<N, AdjacencyMatrix.NodeEdges<G, N, E>>> {
 
@@ -210,12 +208,11 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
 	 * @return the collection of edges
 	 */
 	public Collection<E> getEdges() {
-		return matrix
-				.values()
-				.stream()
-				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
-				.distinct()
-				.collect(Collectors.toSet());
+		return matrix.values()
+			.stream()
+			.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
+			.distinct()
+			.collect(Collectors.toSet());
 	}
 
 	/**
@@ -232,8 +229,7 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
 	public Collection<N> followersOf(
 			N node) {
 		if (!matrix.containsKey(node))
-			throw new IllegalArgumentException(
-					"'" + node + "' is not in the graph");
+			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
 		return matrix.get(node).outgoing.stream().map(Edge::getDestination).collect(Collectors.toSet());
 	}
@@ -252,8 +248,7 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
 	public Collection<N> predecessorsOf(
 			N node) {
 		if (!matrix.containsKey(node))
-			throw new IllegalArgumentException(
-					"'" + node + "' is not in the graph");
+			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
 		return matrix.get(node).ingoing.stream().map(Edge::getSource).collect(Collectors.toSet());
 	}
@@ -338,12 +333,11 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
 	 * @return the entries nodes
 	 */
 	public Collection<N> getEntries() {
-		return matrix
-				.entrySet()
-				.stream()
-				.filter(e -> e.getValue().ingoing.isEmpty())
-				.map(Entry::getKey)
-				.collect(Collectors.toSet());
+		return matrix.entrySet()
+			.stream()
+			.filter(e -> e.getValue().ingoing.isEmpty())
+			.map(Entry::getKey)
+			.collect(Collectors.toSet());
 	}
 
 	/**
@@ -353,12 +347,11 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
 	 * @return the exit nodes
 	 */
 	public Collection<N> getExits() {
-		return matrix
-				.entrySet()
-				.stream()
-				.filter(e -> e.getValue().outgoing.isEmpty())
-				.map(Entry::getKey)
-				.collect(Collectors.toSet());
+		return matrix.entrySet()
+			.stream()
+			.filter(e -> e.getValue().outgoing.isEmpty())
+			.map(Entry::getKey)
+			.collect(Collectors.toSet());
 	}
 
 	/**
@@ -450,7 +443,7 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
 			// no deadcode
 			if (st.getValue().ingoing.isEmpty() && !entrypoints.contains(st.getKey()))
 				throw new ProgramValidationException(
-						"Unreachable node that is not marked as entrypoint: " + st.getKey());
+					"Unreachable node that is not marked as entrypoint: " + st.getKey());
 		}
 	}
 
@@ -460,10 +453,10 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
 			throws ProgramValidationException {
 		if (!nodes.contains(edge.getSource()))
 			throw new ProgramValidationException(
-					"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
+				"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
 		else if (!nodes.contains(edge.getDestination()))
 			throw new ProgramValidationException(
-					"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
+				"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
 	}
 
 	/**
@@ -477,9 +470,7 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>,
 	 * @param <N> the type of the {@link Node}s in the containing matrix
 	 * @param <E> the type of the {@link Edge}s in the containing matrix
 	 */
-	public static class NodeEdges<G extends BaseGraph<G, N, E>,
-			N extends Node<G, N, E>,
-			E extends Edge<G, N, E>> {
+	public static class NodeEdges<G extends BaseGraph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
 
 		private final Set<E> ingoing;
 

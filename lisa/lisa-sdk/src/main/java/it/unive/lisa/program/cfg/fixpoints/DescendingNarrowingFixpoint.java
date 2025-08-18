@@ -21,9 +21,7 @@ import java.util.Collection;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public class DescendingNarrowingFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
-		extends
-		CFGFixpoint<A, D> {
+		D extends AbstractDomain<A>> extends CFGFixpoint<A, D> {
 
 	private final FixpointConfiguration config;
 

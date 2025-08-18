@@ -16,11 +16,8 @@ import java.util.Map;
  * @param <L> the type of the lattice used to represent the values stored in
  *                this environment
  */
-public class ValueEnvironment<L extends Lattice<L>>
-		extends
-		Environment<L, ValueEnvironment<L>>
-		implements
-		ValueLattice<ValueEnvironment<L>> {
+public class ValueEnvironment<
+		L extends Lattice<L>> extends Environment<L, ValueEnvironment<L>> implements ValueLattice<ValueEnvironment<L>> {
 
 	/**
 	 * Builds an empty environment.

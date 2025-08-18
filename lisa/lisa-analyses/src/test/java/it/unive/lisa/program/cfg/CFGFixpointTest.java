@@ -52,36 +52,28 @@ public class CFGFixpointTest {
 		conf = new FixpointConfiguration(base);
 	}
 
-	private ModularWorstCaseAnalysis<SimpleAbstractState<Monolith,
-			ValueEnvironment<IntInterval>,
-			TypeEnvironment<TypeSet>>,
-			SimpleAbstractDomain<Monolith,
-					ValueEnvironment<IntInterval>,
-					TypeEnvironment<TypeSet>>> mkAnalysis(
-							Program p)
-							throws InterproceduralAnalysisException,
-							CallGraphConstructionException {
-		ModularWorstCaseAnalysis<SimpleAbstractState<Monolith,
-				ValueEnvironment<IntInterval>,
-				TypeEnvironment<TypeSet>>,
-				SimpleAbstractDomain<Monolith,
-						ValueEnvironment<IntInterval>,
+	private ModularWorstCaseAnalysis<
+			SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
+			SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> mkAnalysis(
+					Program p)
+					throws InterproceduralAnalysisException,
+					CallGraphConstructionException {
+		ModularWorstCaseAnalysis<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
+				SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>,
 						TypeEnvironment<TypeSet>>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
 		Application app = new Application(p);
 		callgraph.init(app);
-		analysis
-				.init(
-						app,
-						callgraph,
-						WorstCasePolicy.INSTANCE,
-						new Analysis<>(DefaultConfiguration.defaultAbstractDomain()));
+		analysis.init(
+			app,
+			callgraph,
+			WorstCasePolicy.INSTANCE,
+			new Analysis<>(DefaultConfiguration.defaultAbstractDomain()));
 		return analysis;
 	}
 
-	private AnalysisState<SimpleAbstractState<Monolith,
-			ValueEnvironment<IntInterval>,
-			TypeEnvironment<TypeSet>>> mkState() {
+	private AnalysisState<
+			SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> mkState() {
 		return new AnalysisState<>(DefaultConfiguration.defaultAbstractDomain().makeLattice(), new ExpressionSet());
 	}
 
@@ -140,13 +132,10 @@ public class CFGFixpointTest {
 		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");
 		cfg.addNode(call, true);
 
-		AnalysisState<SimpleAbstractState<Monolith,
-				ValueEnvironment<IntInterval>,
+		AnalysisState<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>,
 				TypeEnvironment<TypeSet>>> domain = mkState();
-		AnalyzedCFG<SimpleAbstractState<Monolith,
-				ValueEnvironment<IntInterval>,
-				TypeEnvironment<TypeSet>>> result = cfg
-						.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
+		AnalyzedCFG<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = cfg
+			.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
 
 		assertTrue(result.getAnalysisStateAfter(call).getState().valueState.getKeys().isEmpty());
 	}

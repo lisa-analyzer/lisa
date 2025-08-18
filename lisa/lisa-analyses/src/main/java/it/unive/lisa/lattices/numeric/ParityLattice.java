@@ -12,9 +12,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ParityLattice
-		implements
-		BaseLattice<ParityLattice> {
+public class ParityLattice implements BaseLattice<ParityLattice> {
 
 	/**
 	 * The abstract even element.

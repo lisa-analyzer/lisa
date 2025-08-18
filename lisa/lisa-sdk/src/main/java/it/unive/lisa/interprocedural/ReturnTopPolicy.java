@@ -19,9 +19,7 @@ import it.unive.lisa.symbolic.value.Skip;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ReturnTopPolicy
-		implements
-		OpenCallPolicy {
+public class ReturnTopPolicy implements OpenCallPolicy {
 
 	/**
 	 * The singleton instance of this class.
@@ -32,13 +30,12 @@ public class ReturnTopPolicy
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> apply(
-					OpenCall call,
-					AnalysisState<A> entryState,
-					Analysis<A, D> analysis,
-					ExpressionSet[] params)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> apply(
+			OpenCall call,
+			AnalysisState<A> entryState,
+			Analysis<A, D> analysis,
+			ExpressionSet[] params)
+			throws SemanticException {
 
 		if (call.getStaticType().isVoidType())
 			return analysis.smallStepSemantics(entryState, new Skip(call.getLocation()), call);

@@ -15,9 +15,7 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LogicalOr
-		extends
-		LogicalOperation {
+public class LogicalOr extends LogicalOperation {
 
 	/**
 	 * The singleton instance of this class.

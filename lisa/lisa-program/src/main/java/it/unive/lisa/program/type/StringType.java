@@ -16,9 +16,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringType
-		implements
-		it.unive.lisa.type.StringType {
+public class StringType implements it.unive.lisa.type.StringType {
 
 	/**
 	 * The singleton instance of this class.

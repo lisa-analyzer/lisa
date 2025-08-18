@@ -43,9 +43,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <V> the type of {@link ValueLattice} embedded in this state
  * @param <T> the type of {@link TypeLattice} embedded in this state
  */
-public class SimpleAbstractState<H extends HeapLattice<H>,
-		V extends ValueLattice<V>,
-		T extends TypeLattice<T>>
+public class SimpleAbstractState<H extends HeapLattice<H>, V extends ValueLattice<V>, T extends TypeLattice<T>>
 		implements
 		BaseLattice<SimpleAbstractState<H, V, T>>,
 		AbstractLattice<SimpleAbstractState<H, V, T>> {
@@ -251,9 +249,9 @@ public class SimpleAbstractState<H extends HeapLattice<H>,
 		// as we are not deleting variables and the heap locations
 		// won't be masked by the scope
 		return new SimpleAbstractState<>(
-				heapState.pushScope(scope, pp).getLeft(),
-				valueState.pushScope(scope, pp),
-				typeState.pushScope(scope, pp));
+			heapState.pushScope(scope, pp).getLeft(),
+			valueState.pushScope(scope, pp),
+			typeState.pushScope(scope, pp));
 	}
 
 	@Override
@@ -273,9 +271,9 @@ public class SimpleAbstractState<H extends HeapLattice<H>,
 			SimpleAbstractState<H, V, T> other)
 			throws SemanticException {
 		return new SimpleAbstractState<>(
-				heapState.lub(other.heapState),
-				valueState.lub(other.valueState),
-				typeState.lub(other.typeState));
+			heapState.lub(other.heapState),
+			valueState.lub(other.valueState),
+			typeState.lub(other.typeState));
 	}
 
 	@Override
@@ -283,9 +281,9 @@ public class SimpleAbstractState<H extends HeapLattice<H>,
 			SimpleAbstractState<H, V, T> other)
 			throws SemanticException {
 		return new SimpleAbstractState<>(
-				heapState.glb(other.heapState),
-				valueState.glb(other.valueState),
-				typeState.glb(other.typeState));
+			heapState.glb(other.heapState),
+			valueState.glb(other.valueState),
+			typeState.glb(other.typeState));
 	}
 
 	@Override
@@ -293,9 +291,9 @@ public class SimpleAbstractState<H extends HeapLattice<H>,
 			SimpleAbstractState<H, V, T> other)
 			throws SemanticException {
 		return new SimpleAbstractState<>(
-				heapState.widening(other.heapState),
-				valueState.widening(other.valueState),
-				typeState.widening(other.typeState));
+			heapState.widening(other.heapState),
+			valueState.widening(other.valueState),
+			typeState.widening(other.typeState));
 	}
 
 	@Override
@@ -303,9 +301,9 @@ public class SimpleAbstractState<H extends HeapLattice<H>,
 			SimpleAbstractState<H, V, T> other)
 			throws SemanticException {
 		return new SimpleAbstractState<>(
-				heapState.narrowing(other.heapState),
-				valueState.narrowing(other.valueState),
-				typeState.narrowing(other.typeState));
+			heapState.narrowing(other.heapState),
+			valueState.narrowing(other.valueState),
+			typeState.narrowing(other.typeState));
 	}
 
 	@Override
@@ -422,7 +420,7 @@ public class SimpleAbstractState<H extends HeapLattice<H>,
 		StructuredRepresentation t = typeState.representation();
 		StructuredRepresentation v = valueState.representation();
 		return new ObjectRepresentation(
-				Map.of(HEAP_REPRESENTATION_KEY, h, TYPE_REPRESENTATION_KEY, t, VALUE_REPRESENTATION_KEY, v));
+			Map.of(HEAP_REPRESENTATION_KEY, h, TYPE_REPRESENTATION_KEY, t, VALUE_REPRESENTATION_KEY, v));
 	}
 
 	@Override

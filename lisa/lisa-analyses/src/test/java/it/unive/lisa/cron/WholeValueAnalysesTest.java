@@ -59,14 +59,10 @@ import java.util.TreeSet;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-public class WholeValueAnalysesTest
-		extends
-		IMPCronExecutor {
+public class WholeValueAnalysesTest extends IMPCronExecutor {
 
 	private static class AssertionCheck<A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>>
-			implements
-			SemanticCheck<A, D> {
+			D extends AbstractDomain<A>> implements SemanticCheck<A, D> {
 
 		private boolean first = true;
 
@@ -74,9 +70,7 @@ public class WholeValueAnalysesTest
 
 		private Lattice<?> valuesAtFirstAssertion;
 
-		@SuppressWarnings({
-				"unchecked", "rawtypes"
-		})
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public boolean visit(
 				CheckToolWithAnalysisResults<A, D> tool,
@@ -130,9 +124,7 @@ public class WholeValueAnalysesTest
 			return true;
 		}
 
-		@SuppressWarnings({
-				"unchecked", "rawtypes"
-		})
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void containsCharAssertion(
 				CheckToolWithAnalysisResults<A, D> tool,
 				Statement node,
@@ -223,21 +215,20 @@ public class WholeValueAnalysesTest
 	}
 
 	private static Map<String, NonRelationalValueDomain<?>> INT_DOMAINS = Map
-			.of("intv", new Interval(), "cp", new IntegerConstantPropagation());
+		.of("intv", new Interval(), "cp", new IntegerConstantPropagation());
 
 	private static Map<String,
-			NonRelationalValueDomain<?>> STRING_DOMAINS = Map
-					.of(
-							"prefix",
-							new Prefix(),
-							"suffix",
-							new Suffix(),
-							"ci",
-							new CharInclusion(),
-							"tarsis",
-							new Tarsis(),
-							"bss",
-							new BoundedStringSet(5));
+			NonRelationalValueDomain<?>> STRING_DOMAINS = Map.of(
+				"prefix",
+				new Prefix(),
+				"suffix",
+				new Suffix(),
+				"ci",
+				new CharInclusion(),
+				"tarsis",
+				new Tarsis(),
+				"bss",
+				new BoundedStringSet(5));
 
 	private static Map<String,
 			Boolean> TESTFILES = Map.of("toString.imp", false, "subs.imp", false, "loop.imp", false, "count.imp", true);
@@ -247,96 +238,78 @@ public class WholeValueAnalysesTest
 	private static Map<String, Map<String, Map<CodeLocation, String>>> MESSAGES = new HashMap<>();
 
 	@Test
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testSmashedSum() {
 		for (Map.Entry<String, NonRelationalValueDomain<?>> intDomain : INT_DOMAINS.entrySet())
 			for (Map.Entry<String, NonRelationalValueDomain<?>> strDomain : STRING_DOMAINS.entrySet())
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
 					TestConfiguration conf = mkConf();
 					conf.analysis = new SimpleAbstractDomain<>(
-							new MonolithicHeap(),
-							new SmashedSum<>(
-									(SmashedSumIntDomain) intDomain.getValue(),
-									(SmashedSumStringDomain) strDomain.getValue()),
-							new InferredTypes());
+						new MonolithicHeap(),
+						new SmashedSum<>(
+							(SmashedSumIntDomain) intDomain.getValue(),
+							(SmashedSumStringDomain) strDomain.getValue()),
+						new InferredTypes());
 					if (test.getValue())
 						conf.analysis = new TracePartitioning(conf.analysis);
 					// conf.analysisGraphs =
 					// it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
 					String testKey = intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey();
-					System.out
-							.println(
-									"\n\n###Running test " + testKey);
-					perform(
-							"whole-value",
-							"smashed/" + testKey.replace(".imp", ""),
-							test.getKey(),
-							conf);
+					System.out.println("\n\n###Running test " + testKey);
+					perform("whole-value", "smashed/" + testKey.replace(".imp", ""), test.getKey(), conf);
 					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
 					STATES
-							.computeIfAbsent(
-									"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
-									k -> new HashMap<>())
-							.put(test.getKey(), check.valuesAtFirstAssertion);
+						.computeIfAbsent(
+							"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
+							k -> new HashMap<>())
+						.put(test.getKey(), check.valuesAtFirstAssertion);
 					MESSAGES
-							.computeIfAbsent(
-									"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
-									k -> new HashMap<>())
-							.put(test.getKey(), check.assertions);
+						.computeIfAbsent(
+							"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
+							k -> new HashMap<>())
+						.put(test.getKey(), check.assertions);
 				}
 	}
 
 	@Test
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testConstraints() {
 		for (Map.Entry<String, NonRelationalValueDomain<?>> intDomain : INT_DOMAINS.entrySet())
 			for (Map.Entry<String, NonRelationalValueDomain<?>> strDomain : STRING_DOMAINS.entrySet())
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
 					TestConfiguration conf = mkConf();
 					conf.analysis = new SimpleAbstractDomain<>(
-							new MonolithicHeap(),
-							new WholeValueAnalysis(
-									(BaseNonRelationalValueDomain<?>) intDomain.getValue(),
-									(WholeValueStringDomain<?>) strDomain.getValue(),
-									new BooleanPowerset()),
-							new InferredTypes());
+						new MonolithicHeap(),
+						new WholeValueAnalysis(
+							(BaseNonRelationalValueDomain<?>) intDomain.getValue(),
+							(WholeValueStringDomain<?>) strDomain.getValue(),
+							new BooleanPowerset()),
+						new InferredTypes());
 					if (test.getValue())
 						conf.analysis = new TracePartitioning(conf.analysis);
 					// conf.analysisGraphs =
 					// it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
 					String testKey = intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey();
-					System.out
-							.println(
-									"\n\n###Running test " + testKey);
-					perform(
-							"whole-value",
-							"constr/" + testKey.replace(".imp", ""),
-							test.getKey(),
-							conf);
+					System.out.println("\n\n###Running test " + testKey);
+					perform("whole-value", "constr/" + testKey.replace(".imp", ""), test.getKey(), conf);
 					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
 					STATES
-							.computeIfAbsent(
-									"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
-									k -> new HashMap<>())
-							.put(test.getKey(), check.valuesAtFirstAssertion);
+						.computeIfAbsent(
+							"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
+							k -> new HashMap<>())
+						.put(test.getKey(), check.valuesAtFirstAssertion);
 					MESSAGES
-							.computeIfAbsent(
-									"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
-									k -> new HashMap<>())
-							.put(test.getKey(), check.assertions);
+						.computeIfAbsent(
+							"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
+							k -> new HashMap<>())
+						.put(test.getKey(), check.assertions);
 				}
 	}
 
 	@AfterClass
 	public static void summary() {
 		for (String testFile : TESTFILES.keySet()) {
-			System.out
-					.println(
-							"\n\n### Test file: " + testFile);
+			System.out.println("\n\n### Test file: " + testFile);
 
 			Set<CodeLocation> assertionLocs = new TreeSet<>(MESSAGES.values().iterator().next().get(testFile).keySet());
 			String[][] table = new String[STATES.size() + 1][2 + assertionLocs.size()];
@@ -349,12 +322,8 @@ public class WholeValueAnalysesTest
 			Set<String> sortedDoms = new TreeSet<>();
 			for (String strDom : STRING_DOMAINS.keySet())
 				for (String intDom : INT_DOMAINS.keySet()) {
-					sortedDoms
-							.add(
-									"smashed-" + intDom + "-" + strDom);
-					sortedDoms
-							.add(
-									"constr-" + intDom + "-" + strDom);
+					sortedDoms.add("smashed-" + intDom + "-" + strDom);
+					sortedDoms.add("constr-" + intDom + "-" + strDom);
 				}
 			i = 1;
 			for (String domain : sortedDoms) {
@@ -414,10 +383,7 @@ public class WholeValueAnalysesTest
 	private static String padRight(
 			String s,
 			int n) {
-		return String
-				.format(
-						"%-" + n + "s",
-						s);
+		return String.format("%-" + n + "s", s);
 	}
 
 }

@@ -22,9 +22,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAssert
-		extends
-		UnaryStatement {
+public class IMPAssert extends UnaryStatement {
 
 	/**
 	 * Builds the assertion.
@@ -51,13 +49,12 @@ public class IMPAssert
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression expr,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression expr,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
 		if (types.stream().noneMatch(Type::isBooleanType))

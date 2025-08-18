@@ -19,9 +19,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Ret
-		extends
-		Statement {
+public class Ret extends Statement {
 
 	/**
 	 * Builds the return, happening at the given location in the program.
@@ -70,12 +68,11 @@ public class Ret
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		// TODO need to smash the continuation into the normal one at returns
 		return interprocedural.getAnalysis().smallStepSemantics(entryState, new Skip(getLocation()), this);
 	}

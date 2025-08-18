@@ -13,9 +13,7 @@ import java.util.Collection;
  * 
  * @param <L> the concrete type of the heap value
  */
-public interface HeapValue<L extends HeapValue<L>>
-		extends
-		Lattice<L> {
+public interface HeapValue<L extends HeapValue<L>> extends Lattice<L> {
 
 	/**
 	 * Yields the set of {@link Identifier}s that are reachable only from the

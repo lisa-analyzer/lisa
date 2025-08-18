@@ -77,11 +77,10 @@ public final class CollectionUtilities {
 	 * @return {@code true} only if the collections contain exactly the same set
 	 *             of elements (order-insensitive)
 	 */
-	public static <T,
-			C extends Collection<T>> boolean equals(
-					C first,
-					C second,
-					BiPredicate<T, T> equalityTest) {
+	public static <T, C extends Collection<T>> boolean equals(
+			C first,
+			C second,
+			BiPredicate<T, T> equalityTest) {
 		// the following keeps track of the unmatched nodes in second
 		Collection<T> copy = new HashSet<>(second);
 		boolean found;
@@ -124,13 +123,12 @@ public final class CollectionUtilities {
 	 * @param joiner       the function that computes the join of two equal
 	 *                         elements
 	 */
-	public static <T,
-			C extends Collection<T>> void join(
-					C first,
-					C second,
-					C result,
-					BiPredicate<T, T> equalityTest,
-					BinaryOperator<T> joiner) {
+	public static <T, C extends Collection<T>> void join(
+			C first,
+			C second,
+			C result,
+			BiPredicate<T, T> equalityTest,
+			BinaryOperator<T> joiner) {
 		// the following keeps track of the unmatched nodes in second
 		Collection<T> copy = new HashSet<>(second);
 		boolean found;
@@ -171,13 +169,12 @@ public final class CollectionUtilities {
 	 * @param meet         the function that computes the meet of two equal
 	 *                         elements
 	 */
-	public static <T,
-			C extends Collection<T>> void meet(
-					C first,
-					C second,
-					C result,
-					BiPredicate<T, T> equalityTest,
-					BinaryOperator<T> meet) {
+	public static <T, C extends Collection<T>> void meet(
+			C first,
+			C second,
+			C result,
+			BiPredicate<T, T> equalityTest,
+			BinaryOperator<T> meet) {
 		// the following keeps track of the unmatched nodes in second
 		Collection<T> copy = new HashSet<>(second);
 		for (T t1 : first)
@@ -213,9 +210,7 @@ public final class CollectionUtilities {
 	 * 
 	 * @param <E> the type of the elements to be sorted
 	 */
-	public static class SortedSetCollector<E>
-			implements
-			Collector<E, SortedSet<E>, SortedSet<E>> {
+	public static class SortedSetCollector<E> implements Collector<E, SortedSet<E>, SortedSet<E>> {
 
 		@Override
 		public Supplier<SortedSet<E>> supplier() {
@@ -226,14 +221,17 @@ public final class CollectionUtilities {
 		public BiConsumer<SortedSet<E>, E> accumulator() {
 			return (
 					set,
-					e) -> set.add(e);
+					e
+			) -> set.add(e);
 		}
 
 		@Override
 		public BinaryOperator<SortedSet<E>> combiner() {
 			return (
 					result,
-					partial) -> {
+					partial
+			) ->
+			{
 				result.addAll(partial);
 				return result;
 			};
@@ -260,9 +258,7 @@ public final class CollectionUtilities {
 	 * 
 	 * @param <E> the type of the elements to be sorted
 	 */
-	public static class StringCollector<E>
-			implements
-			Collector<E, StringBuilder, String> {
+	public static class StringCollector<E> implements Collector<E, StringBuilder, String> {
 
 		private final String separator;
 
@@ -285,7 +281,9 @@ public final class CollectionUtilities {
 		public BiConsumer<StringBuilder, E> accumulator() {
 			return (
 					builder,
-					e) -> {
+					e
+			) ->
+			{
 				if (builder.length() == 0)
 					builder.append(e);
 				else
@@ -297,7 +295,8 @@ public final class CollectionUtilities {
 		public BinaryOperator<StringBuilder> combiner() {
 			return (
 					result,
-					partial) -> result.append(partial);
+					partial
+			) -> result.append(partial);
 		}
 
 		@Override

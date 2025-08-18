@@ -48,14 +48,13 @@ public interface ScopingStrategy {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> scope(
-					CFGCall call,
-					ScopeToken scope,
-					AnalysisState<A> state,
-					Analysis<A, D> analysis,
-					ExpressionSet[] actuals)
-					throws SemanticException;
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> scope(
+			CFGCall call,
+			ScopeToken scope,
+			AnalysisState<A> state,
+			Analysis<A, D> analysis,
+			ExpressionSet[] actuals)
+			throws SemanticException;
 
 	/**
 	 * Converts the exit state of a cfg that was invoked by {@code call} to a
@@ -80,12 +79,11 @@ public interface ScopingStrategy {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> unscope(
-					CFGCall call,
-					ScopeToken scope,
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException;
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> unscope(
+			CFGCall call,
+			ScopeToken scope,
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException;
 
 }

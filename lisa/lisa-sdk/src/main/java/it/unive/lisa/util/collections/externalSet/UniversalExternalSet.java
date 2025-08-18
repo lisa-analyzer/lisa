@@ -11,9 +11,7 @@ import java.util.Iterator;
  * 
  * @param <T> the type of elements inside this set
  */
-public final class UniversalExternalSet<T>
-		implements
-		ExternalSet<T> {
+public final class UniversalExternalSet<T> implements ExternalSet<T> {
 
 	private static final String CANNOT_PERFORM_ERROR = "Cannot remove elements from a universal view of an external set";
 

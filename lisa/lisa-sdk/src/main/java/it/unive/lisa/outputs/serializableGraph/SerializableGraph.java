@@ -116,12 +116,22 @@ public class SerializableGraph {
 		return descriptions;
 	}
 
+	/**
+	 * Yields the node with the given id.
+	 * 
+	 * @param id the id of the node to retrieve
+	 * 
+	 * @return the node with the given id
+	 * 
+	 * @throws IllegalArgumentException if no node with the given id exists in
+	 *                                      this graph
+	 */
 	public SerializableNode getNodeById(
 			int id) {
 		return nodes.stream()
-				.filter(n -> n.getId() == id)
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("No node with id " + id + " in the graph"));
+			.filter(n -> n.getId() == id)
+			.findFirst()
+			.orElseThrow(() -> new IllegalArgumentException("No node with id " + id + " in the graph"));
 	}
 
 	@Override
@@ -186,8 +196,7 @@ public class SerializableGraph {
 	public void addNode(
 			SerializableNode node) {
 		if (nodes.stream().map(n -> n.getId()).anyMatch(i -> i == node.getId()))
-			throw new IllegalArgumentException(
-					"A node with the same id " + node.getId() + " is already in the graph");
+			throw new IllegalArgumentException("A node with the same id " + node.getId() + " is already in the graph");
 		nodes.add(node);
 	}
 
@@ -203,7 +212,7 @@ public class SerializableGraph {
 			SerializableNodeDescription desc) {
 		if (descriptions.stream().map(d -> d.getNodeId()).anyMatch(i -> i == desc.getNodeId()))
 			throw new IllegalArgumentException(
-					"A description for node " + desc.getNodeId() + " is already in the graph");
+				"A description for node " + desc.getNodeId() + " is already in the graph");
 		descriptions.add(desc);
 	}
 
@@ -304,10 +313,10 @@ public class SerializableGraph {
 	 */
 	public boolean sameStructure(
 			SerializableGraph other) {
-		return Objects.equals(name, other.name) &&
-				Objects.equals(description, other.description) &&
-				Objects.equals(nodes, other.nodes) &&
-				Objects.equals(edges, other.edges);
+		return Objects.equals(name, other.name)
+				&& Objects.equals(description, other.description)
+				&& Objects.equals(nodes, other.nodes)
+				&& Objects.equals(edges, other.edges);
 	}
 
 }

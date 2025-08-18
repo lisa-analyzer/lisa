@@ -21,10 +21,7 @@ import org.apache.commons.collections4.SetUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class FixpointInfo
-		implements
-		BaseLattice<FixpointInfo>,
-		Iterable<Map.Entry<String, Lattice<?>>> {
+public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Entry<String, Lattice<?>>> {
 
 	/**
 	 * The unique bottom instance of this class.
@@ -138,9 +135,7 @@ public class FixpointInfo
 	 * 
 	 * @throws SemanticException if something goes wrong during the lub
 	 */
-	@SuppressWarnings({
-			"unchecked", "rawtypes"
-	})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public FixpointInfo putWeak(
 			String key,
 			Lattice<?> info)
@@ -151,17 +146,17 @@ public class FixpointInfo
 		Lattice prev = get(key);
 		if (prev.getClass() != info.getClass())
 			throw new IllegalArgumentException(
-					"The given lattice instance has a different type (" + info.getClass().getName()
-							+ ") from the one already associated with the given key (" + prev.getClass().getName()
-							+ ")");
+				"The given lattice instance has a different type ("
+					+ info.getClass().getName()
+					+ ") from the one already associated with the given key ("
+					+ prev.getClass().getName()
+					+ ")");
 		result.put(key, prev != null ? prev.lub(info) : info);
 		return new FixpointInfo(result);
 	}
 
 	@Override
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public FixpointInfo lubAux(
 			FixpointInfo other)
 			throws SemanticException {
@@ -180,17 +175,13 @@ public class FixpointInfo
 				else
 					function.put(key, o);
 			} catch (SemanticException e) {
-				throw new SemanticException(
-						"Exception while operating on '" + key + "'",
-						e);
+				throw new SemanticException("Exception while operating on '" + key + "'", e);
 			}
 		return new FixpointInfo(function);
 	}
 
 	@Override
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public FixpointInfo glbAux(
 			FixpointInfo other)
 			throws SemanticException {
@@ -205,17 +196,13 @@ public class FixpointInfo
 				if (v != null && o != null)
 					function.put(key, v.glb(o));
 			} catch (SemanticException e) {
-				throw new SemanticException(
-						"Exception while operating on '" + key + "'",
-						e);
+				throw new SemanticException("Exception while operating on '" + key + "'", e);
 			}
 		return new FixpointInfo(function);
 	}
 
 	@Override
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public FixpointInfo wideningAux(
 			FixpointInfo other)
 			throws SemanticException {
@@ -234,17 +221,13 @@ public class FixpointInfo
 				else
 					function.put(key, o);
 			} catch (SemanticException e) {
-				throw new SemanticException(
-						"Exception while operating on '" + key + "'",
-						e);
+				throw new SemanticException("Exception while operating on '" + key + "'", e);
 			}
 		return new FixpointInfo(function);
 	}
 
 	@Override
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public FixpointInfo narrowingAux(
 			FixpointInfo other)
 			throws SemanticException {
@@ -259,17 +242,13 @@ public class FixpointInfo
 				if (v != null && o != null)
 					function.put(key, v.narrowing(o));
 			} catch (SemanticException e) {
-				throw new SemanticException(
-						"Exception while operating on '" + key + "'",
-						e);
+				throw new SemanticException("Exception while operating on '" + key + "'", e);
 			}
 		return new FixpointInfo(function);
 	}
 
 	@Override
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public boolean lessOrEqualAux(
 			FixpointInfo other)
 			throws SemanticException {

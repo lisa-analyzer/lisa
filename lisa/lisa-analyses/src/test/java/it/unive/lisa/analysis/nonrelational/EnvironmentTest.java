@@ -35,16 +35,16 @@ public class EnvironmentTest {
 	private static final Identifier heapB = new HeapLocation(Untyped.INSTANCE, "b", false, SyntheticLocation.INSTANCE);
 
 	private static final Identifier heapAweak = new HeapLocation(
-			Untyped.INSTANCE,
-			"a",
-			true,
-			SyntheticLocation.INSTANCE);
+		Untyped.INSTANCE,
+		"a",
+		true,
+		SyntheticLocation.INSTANCE);
 
 	private static final Identifier heapBweak = new HeapLocation(
-			Untyped.INSTANCE,
-			"b",
-			true,
-			SyntheticLocation.INSTANCE);
+		Untyped.INSTANCE,
+		"b",
+		true,
+		SyntheticLocation.INSTANCE);
 
 	private final ProgramPoint pp = new ProgramPoint() {
 
@@ -103,8 +103,8 @@ public class EnvironmentTest {
 		assertEquals(onlyA, actual.popScope(scoper, pp));
 
 		ValueEnvironment<SignLattice> AandB = onlyA.putState(heapB, state);
-		ValueEnvironment<SignLattice> AandBscoped = onlyAscoped
-				.putState((Identifier) heapB.pushScope(scoper, pp), state);
+		ValueEnvironment<
+				SignLattice> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper, pp), state);
 		assertEquals(AandBscoped, AandB.pushScope(scoper, pp));
 	}
 

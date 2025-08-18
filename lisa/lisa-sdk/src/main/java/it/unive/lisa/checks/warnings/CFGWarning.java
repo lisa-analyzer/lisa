@@ -8,9 +8,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGWarning
-		extends
-		WarningWithLocation {
+public class CFGWarning extends WarningWithLocation {
 
 	/**
 	 * The cfg where this warning was reported on
@@ -89,8 +87,11 @@ public class CFGWarning
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + cfg.getDescriptor().getFullSignatureWithParNames() + "': "
-				+ getTaggedMessage();
+		return getLocationWithBrackets()
+			+ " on '"
+			+ cfg.getDescriptor().getFullSignatureWithParNames()
+			+ "': "
+			+ getTaggedMessage();
 	}
 
 }

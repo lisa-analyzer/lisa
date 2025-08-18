@@ -25,9 +25,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OpenCall
-		extends
-		CallWithResult {
+public class OpenCall extends CallWithResult {
 
 	/**
 	 * Builds the open call, happening at the given location in the program.
@@ -50,14 +48,14 @@ public class OpenCall
 			String targetName,
 			Expression... parameters) {
 		super(
-				cfg,
-				location,
-				callType,
-				qualifier,
-				targetName,
-				LeftToRightEvaluation.INSTANCE,
-				Untyped.INSTANCE,
-				parameters);
+			cfg,
+			location,
+			callType,
+			qualifier,
+			targetName,
+			LeftToRightEvaluation.INSTANCE,
+			Untyped.INSTANCE,
+			parameters);
 	}
 
 	/**
@@ -150,14 +148,14 @@ public class OpenCall
 	public OpenCall(
 			UnresolvedCall source) {
 		this(
-				source.getCFG(),
-				source.getLocation(),
-				source.getCallType(),
-				source.getQualifier(),
-				source.getTargetName(),
-				source.getOrder(),
-				source.getStaticType(),
-				source.getParameters());
+			source.getCFG(),
+			source.getLocation(),
+			source.getCallType(),
+			source.getQualifier(),
+			source.getTargetName(),
+			source.getOrder(),
+			source.getStaticType(),
+			source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);
@@ -176,20 +174,16 @@ public class OpenCall
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new Variable(
-				getStaticType(),
-				"open_call_ret_value@" + getLocation(),
-				getLocation());
+		return new Variable(getStaticType(), "open_call_ret_value@" + getLocation(), getLocation());
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> compute(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					ExpressionSet[] parameters)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> compute(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] parameters)
+			throws SemanticException {
 		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
 	}
 

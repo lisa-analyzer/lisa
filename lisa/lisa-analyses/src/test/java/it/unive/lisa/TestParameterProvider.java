@@ -121,9 +121,7 @@ public class TestParameterProvider {
 	private TestParameterProvider() {
 	}
 
-	public static class SampleNRVD
-			implements
-			BaseNonRelationalValueDomain<SingleValueLattice> {
+	public static class SampleNRVD implements BaseNonRelationalValueDomain<SingleValueLattice> {
 
 		@Override
 		public SingleValueLattice top() {
@@ -137,9 +135,7 @@ public class TestParameterProvider {
 
 	}
 
-	public static class SampleNRTD
-			implements
-			BaseNonRelationalTypeDomain<SingleTypeLattice> {
+	public static class SampleNRTD implements BaseNonRelationalTypeDomain<SingleTypeLattice> {
 
 		@Override
 		public SingleTypeLattice top() {
@@ -153,9 +149,7 @@ public class TestParameterProvider {
 
 	}
 
-	public static class SampleNRHD
-			implements
-			NonRelationalHeapDomain<SingleHeapLattice> {
+	public static class SampleNRHD implements NonRelationalHeapDomain<SingleHeapLattice> {
 
 		@Override
 		public ExpressionSet rewrite(
@@ -261,9 +255,7 @@ public class TestParameterProvider {
 
 	}
 
-	public static class FakePP
-			implements
-			ProgramPoint {
+	public static class FakePP implements ProgramPoint {
 
 		@Override
 		public CodeLocation getLocation() {
@@ -282,9 +274,7 @@ public class TestParameterProvider {
 
 	}
 
-	public static class FakeOracle
-			implements
-			SemanticOracle {
+	public static class FakeOracle implements SemanticOracle {
 
 		@Override
 		public Set<Type> getRuntimeTypesOf(
@@ -355,9 +345,7 @@ public class TestParameterProvider {
 
 	};
 
-	public static class SimpleNRSDL
-			extends
-			NonRedundantSetDomainLattice<SimpleNRSDL, ValueEnvironment<IntInterval>>
+	public static class SimpleNRSDL extends NonRedundantSetDomainLattice<SimpleNRSDL, ValueEnvironment<IntInterval>>
 			implements
 			ValueLattice<SimpleNRSDL> {
 
@@ -415,20 +403,15 @@ public class TestParameterProvider {
 
 	public static final CallGraph cg;
 
-	public static final InterproceduralAnalysis<SimpleAbstractState<Monolith,
-			ValueEnvironment<SignLattice>,
-			TypeEnvironment<TypeSet>>,
-			SimpleAbstractDomain<Monolith,
-					ValueEnvironment<SignLattice>,
-					TypeEnvironment<TypeSet>>> interprocedural;
+	public static final InterproceduralAnalysis<
+			SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>,
+			SimpleAbstractDomain<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> interprocedural;
 
-	public static final AnalysisState<SimpleAbstractState<Monolith,
-			ValueEnvironment<SignLattice>,
-			TypeEnvironment<TypeSet>>> as;
+	public static final AnalysisState<
+			SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> as;
 
-	public static final StatementStore<SimpleAbstractState<Monolith,
-			ValueEnvironment<SignLattice>,
-			TypeEnvironment<TypeSet>>> store;
+	public static final StatementStore<
+			SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> store;
 
 	public static final Expression expr;
 
@@ -444,24 +427,21 @@ public class TestParameterProvider {
 		interprocedural = new ModularWorstCaseAnalysis<>();
 		try {
 			cg.init(app);
-			interprocedural
-					.init(
-							app,
-							cg,
-							WorstCasePolicy.INSTANCE,
-							new Analysis<>(
-									new SimpleAbstractDomain<>(new MonolithicHeap(), new Sign(), new InferredTypes())));
+			interprocedural.init(
+				app,
+				cg,
+				WorstCasePolicy.INSTANCE,
+				new Analysis<>(new SimpleAbstractDomain<>(new MonolithicHeap(), new Sign(), new InferredTypes())));
 		} catch (CallGraphConstructionException | InterproceduralAnalysisException e) {
-			fail(
-					"Unable to instantiate test parameters: " + e.getMessage());
+			fail("Unable to instantiate test parameters: " + e.getMessage());
 		}
 
 		as = new AnalysisState<>(
-				new SimpleAbstractState<>(
-						Monolith.SINGLETON,
-						new ValueEnvironment<>(new SignLattice()),
-						new TypeEnvironment<>(new TypeSet())),
-				new ExpressionSet());
+			new SimpleAbstractState<>(
+				Monolith.SINGLETON,
+				new ValueEnvironment<>(new SignLattice()),
+				new TypeEnvironment<>(new TypeSet())),
+			new ExpressionSet());
 		store = new StatementStore<>(as);
 		expr = new Expression(cfg, unknownLocation) {
 
@@ -484,18 +464,16 @@ public class TestParameterProvider {
 			}
 
 			@Override
-			public <A extends AbstractLattice<A>,
-					D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-							AnalysisState<A> entryState,
-							InterproceduralAnalysis<A, D> interprocedural,
-							StatementStore<A> expressions)
-							throws SemanticException {
-				return interprocedural
-						.getAnalysis()
-						.smallStepSemantics(
-								entryState,
-								new Variable(Untyped.INSTANCE, "fake", new SourceCodeLocation("unknown", 0, 0)),
-								expr);
+			public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+					AnalysisState<A> entryState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException {
+				return interprocedural.getAnalysis()
+					.smallStepSemantics(
+						entryState,
+						new Variable(Untyped.INSTANCE, "fake", new SourceCodeLocation("unknown", 0, 0)),
+						expr);
 			}
 
 		};
@@ -555,9 +533,7 @@ public class TestParameterProvider {
 		if (param == Expression.class)
 			return (R) expr;
 		if (param == Expression[].class)
-			return (R) new Expression[] {
-					expr
-			};
+			return (R) new Expression[] { expr };
 		if (param == UnresolvedCall.class || param == Call.class)
 			return (R) new UnresolvedCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "fake", "fake");
 		if (param == TypeLiteral.class)
@@ -588,25 +564,25 @@ public class TestParameterProvider {
 			return (R) new Skip(SyntheticLocation.INSTANCE);
 		if (param == UnaryExpression.class)
 			return (R) new UnaryExpression(
-					provideParam(mtd, Type.class),
-					provideParam(mtd, Constant.class),
-					provideParam(mtd, UnaryOperator.class),
-					SyntheticLocation.INSTANCE);
+				provideParam(mtd, Type.class),
+				provideParam(mtd, Constant.class),
+				provideParam(mtd, UnaryOperator.class),
+				SyntheticLocation.INSTANCE);
 		if (param == BinaryExpression.class)
 			return (R) new BinaryExpression(
-					provideParam(mtd, Type.class),
-					provideParam(mtd, Constant.class),
-					provideParam(mtd, Constant.class),
-					provideParam(mtd, BinaryOperator.class),
-					SyntheticLocation.INSTANCE);
+				provideParam(mtd, Type.class),
+				provideParam(mtd, Constant.class),
+				provideParam(mtd, Constant.class),
+				provideParam(mtd, BinaryOperator.class),
+				SyntheticLocation.INSTANCE);
 		if (param == TernaryExpression.class)
 			return (R) new TernaryExpression(
-					provideParam(mtd, Type.class),
-					provideParam(mtd, Constant.class),
-					provideParam(mtd, Constant.class),
-					provideParam(mtd, Constant.class),
-					provideParam(mtd, TernaryOperator.class),
-					SyntheticLocation.INSTANCE);
+				provideParam(mtd, Type.class),
+				provideParam(mtd, Constant.class),
+				provideParam(mtd, Constant.class),
+				provideParam(mtd, Constant.class),
+				provideParam(mtd, TernaryOperator.class),
+				SyntheticLocation.INSTANCE);
 
 		// operators
 		if (param == TernaryOperator.class)
@@ -644,8 +620,7 @@ public class TestParameterProvider {
 		if (param == ProgramPoint.class)
 			return (R) new FakePP();
 
-		throw new UnsupportedOperationException(
-				mtd + ": No default value for type " + param.getName());
+		throw new UnsupportedOperationException(mtd + ": No default value for type " + param.getName());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -695,9 +670,9 @@ public class TestParameterProvider {
 			return (R) SingleTypeLattice.SINGLETON;
 		if (param == AbstractLattice.class)
 			return (R) new SimpleAbstractState<>(
-					Monolith.SINGLETON,
-					new ValueEnvironment<>(IntInterval.TOP),
-					new TypeEnvironment<>(new TypeSet()));
+				Monolith.SINGLETON,
+				new ValueEnvironment<>(IntInterval.TOP),
+				new TypeEnvironment<>(new TypeSet()));
 		if (param == SymbolicExpression.class)
 			return (R) new Skip(SyntheticLocation.INSTANCE);
 		if (param == AnalysisState.class)
@@ -728,7 +703,7 @@ public class TestParameterProvider {
 			return (R) DefaultConfiguration.defaultAbstractDomain();
 
 		throw new UnsupportedOperationException(
-				"No default domain for domain " + root + " and parameter of type " + param);
+			"No default domain for domain " + root + " and parameter of type " + param);
 	}
 
 }

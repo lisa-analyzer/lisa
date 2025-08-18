@@ -54,32 +54,25 @@ public class Log4jConfig {
 		builder.setStatusLevel(Level.WARN);
 		builder.setConfigurationName("LiSADefaultConfig");
 
-		AppenderComponentBuilder appenderBuilder = builder
-				.newAppender("Console", "CONSOLE")
-				.addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+		AppenderComponentBuilder appenderBuilder = builder.newAppender("Console", "CONSOLE")
+			.addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
 		appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", "%d [%5level] %m %ex%n"));
 		builder.add(appenderBuilder);
 		builder.add(builder.newRootLogger(Level.DEBUG).add(builder.newAppenderRef("Console")));
 
 		// Set level for specific loggers
-		builder
-				.add(
-						builder
-								.newLogger("it.unive.lisa", Level.DEBUG)
-								.add(builder.newAppenderRef("Console"))
-								.addAttribute("additivity", false));
-		builder
-				.add(
-						builder
-								.newLogger("org.reflections", Level.ERROR)
-								.add(builder.newAppenderRef("Console"))
-								.addAttribute("additivity", false));
-		builder
-				.add(
-						builder
-								.newLogger("org.thymeleaf", Level.WARN)
-								.add(builder.newAppenderRef("Console"))
-								.addAttribute("additivity", false));
+		builder.add(
+			builder.newLogger("it.unive.lisa", Level.DEBUG)
+				.add(builder.newAppenderRef("Console"))
+				.addAttribute("additivity", false));
+		builder.add(
+			builder.newLogger("org.reflections", Level.ERROR)
+				.add(builder.newAppenderRef("Console"))
+				.addAttribute("additivity", false));
+		builder.add(
+			builder.newLogger("org.thymeleaf", Level.WARN)
+				.add(builder.newAppenderRef("Console"))
+				.addAttribute("additivity", false));
 
 		context.start(builder.build());
 

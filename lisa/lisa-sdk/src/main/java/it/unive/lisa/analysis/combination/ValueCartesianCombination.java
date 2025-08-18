@@ -22,11 +22,7 @@ import java.util.function.Predicate;
  */
 public abstract class ValueCartesianCombination<C extends ValueCartesianCombination<C, T1, T2>,
 		T1 extends ValueLattice<T1>,
-		T2 extends ValueLattice<T2>>
-		extends
-		CartesianCombination<C, T1, T2>
-		implements
-		ValueLattice<C> {
+		T2 extends ValueLattice<T2>> extends CartesianCombination<C, T1, T2> implements ValueLattice<C> {
 
 	/**
 	 * Creates a new cartesian combination of two value lattices.

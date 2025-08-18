@@ -36,10 +36,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Tarsis
-		implements
-		SmashedSumStringDomain<RegexAutomaton>,
-		WholeValueStringDomain<RegexAutomaton> {
+public class Tarsis implements SmashedSumStringDomain<RegexAutomaton>, WholeValueStringDomain<RegexAutomaton> {
 
 	@Override
 	public RegexAutomaton evalNonNullConstant(
@@ -148,10 +145,9 @@ public class Tarsis
 		if (a0 == b0 && a0 != top)
 			return eq(a.substring(1), b.substring(1));
 		if (a0 == top || b0 == top)
-			return Satisfiability.NOT_SATISFIED
-					.lub(eq(a.substring(1), b.substring(1)))
-					.lub(eq(a.substring(1), b))
-					.lub(eq(a, b.substring(1)));
+			return Satisfiability.NOT_SATISFIED.lub(eq(a.substring(1), b.substring(1)))
+				.lub(eq(a.substring(1), b))
+				.lub(eq(a, b.substring(1)));
 		// this should be unreachable
 		return Satisfiability.UNKNOWN;
 	}
@@ -246,12 +242,11 @@ public class Tarsis
 		if (current.isTop() || current.isBottom())
 			return current;
 
-		RegexAutomaton[] array = current
-				.toRegex()
-				.substring((int) begin, (int) end)
-				.parallelStream()
-				.map(s -> RegexAutomaton.string(s))
-				.toArray(RegexAutomaton[]::new);
+		RegexAutomaton[] array = current.toRegex()
+			.substring((int) begin, (int) end)
+			.parallelStream()
+			.map(s -> RegexAutomaton.string(s))
+			.toArray(RegexAutomaton[]::new);
 
 		RegexAutomaton result = RegexAutomaton.emptyLang();
 
@@ -472,29 +467,27 @@ public class Tarsis
 
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
-			constr
-					.add(
-							new BinaryExpression(
-									booleanType,
-									new Constant(
-											pp.getProgram().getTypes().getIntegerType(),
-											indexes.getLow().toInt(),
-											pp.getLocation()),
-									expression,
-									ComparisonLe.INSTANCE,
-									pp.getLocation()));
+			constr.add(
+				new BinaryExpression(
+					booleanType,
+					new Constant(
+						pp.getProgram().getTypes().getIntegerType(),
+						indexes.getLow().toInt(),
+						pp.getLocation()),
+					expression,
+					ComparisonLe.INSTANCE,
+					pp.getLocation()));
 			if (indexes.getHigh().isFinite())
-				constr
-						.add(
-								new BinaryExpression(
-										booleanType,
-										new Constant(
-												pp.getProgram().getTypes().getIntegerType(),
-												indexes.getHigh().toInt(),
-												pp.getLocation()),
-										expression,
-										ComparisonGe.INSTANCE,
-										pp.getLocation()));
+				constr.add(
+					new BinaryExpression(
+						booleanType,
+						new Constant(
+							pp.getProgram().getTypes().getIntegerType(),
+							indexes.getHigh().toInt(),
+							pp.getLocation()),
+						expression,
+						ComparisonGe.INSTANCE,
+						pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}

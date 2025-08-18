@@ -925,10 +925,10 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			BinaryOperator op = binary.getOperator();
 			if (op == LogicalAnd.INSTANCE)
 				return assume(environment, eleft, src, dest, oracle)
-						.glb(assume(environment, eright, src, dest, oracle));
+					.glb(assume(environment, eright, src, dest, oracle));
 			else if (op == LogicalOr.INSTANCE)
 				return assume(environment, eleft, src, dest, oracle)
-						.lub(assume(environment, eright, src, dest, oracle));
+					.lub(assume(environment, eright, src, dest, oracle));
 			else
 				return assumeBinaryExpression(environment, binary, src, dest, oracle);
 		}

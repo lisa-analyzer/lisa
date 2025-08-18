@@ -18,12 +18,7 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric16BitMod
-		extends
-		NumericOperation
-		implements
-		ModuloOperator,
-		OverflowingOperator {
+public class Numeric16BitMod extends NumericOperation implements ModuloOperator, OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.

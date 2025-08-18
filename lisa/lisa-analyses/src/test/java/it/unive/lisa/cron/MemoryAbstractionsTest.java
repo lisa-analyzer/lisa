@@ -8,19 +8,16 @@ import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
 import org.junit.Test;
 
-public class MemoryAbstractionsTest
-		extends
-		IMPCronExecutor {
+public class MemoryAbstractionsTest extends IMPCronExecutor {
 
 	@Test
 	public void testTypeBasedHeap() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						new TypeBasedHeap(),
-						DefaultConfiguration.defaultValueDomain(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			new TypeBasedHeap(),
+			DefaultConfiguration.defaultValueDomain(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "heap";
 		conf.testSubDir = "types";
@@ -33,11 +30,10 @@ public class MemoryAbstractionsTest
 	public void fieldInsensitivePointBasedHeapTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						new PointBasedHeap(),
-						DefaultConfiguration.defaultValueDomain(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			new PointBasedHeap(),
+			DefaultConfiguration.defaultValueDomain(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "heap";
 		conf.testSubDir = "pp";
@@ -50,11 +46,10 @@ public class MemoryAbstractionsTest
 	public void fieldSensitivePointBasedHeapTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						new FieldSensitivePointBasedHeap(),
-						DefaultConfiguration.defaultValueDomain(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			new FieldSensitivePointBasedHeap(),
+			DefaultConfiguration.defaultValueDomain(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "heap";
 		conf.testSubDir = "pp-field";
@@ -67,11 +62,10 @@ public class MemoryAbstractionsTest
 	public void fieldInsensitiveGCTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						new PointBasedHeap(),
-						DefaultConfiguration.defaultValueDomain(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			new PointBasedHeap(),
+			DefaultConfiguration.defaultValueDomain(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "heap";
 		conf.testSubDir = "pp-gc";
@@ -83,11 +77,10 @@ public class MemoryAbstractionsTest
 	public void fieldSensitiveGCTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						new FieldSensitivePointBasedHeap(),
-						DefaultConfiguration.defaultValueDomain(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			new FieldSensitivePointBasedHeap(),
+			DefaultConfiguration.defaultValueDomain(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "heap";
 		conf.testSubDir = "pp-field-gc";

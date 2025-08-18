@@ -19,9 +19,7 @@ import java.util.function.BiFunction;
  * @param <N> the type of {@link Node}s in this graph
  * @param <E> the type of {@link Edge}s in this graph
  */
-public interface Graph<G extends Graph<G, N, E>,
-		N extends Node<G, N, E>,
-		E extends Edge<G, N, E>> {
+public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
 
 	/**
 	 * Yields the nodes of this graph that are entrypoints, that is, roots of

@@ -5,9 +5,7 @@ package it.unive.lisa.program.annotations.values;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ByteAnnotationValue
-		implements
-		BasicAnnotationValue {
+public class ByteAnnotationValue implements BasicAnnotationValue {
 
 	private final byte b;
 

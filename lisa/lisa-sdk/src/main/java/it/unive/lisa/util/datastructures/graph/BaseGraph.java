@@ -20,9 +20,7 @@ import java.util.function.BiFunction;
  * @param <N> the type of {@link Node}s in this graph
  * @param <E> the type of {@link Edge}s in this graph
  */
-public abstract class BaseGraph<G extends BaseGraph<G, N, E>,
-		N extends Node<G, N, E>,
-		E extends Edge<G, N, E>>
+public abstract class BaseGraph<G extends BaseGraph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>>
 		implements
 		Graph<G, N, E> {
 
@@ -180,8 +178,7 @@ public abstract class BaseGraph<G extends BaseGraph<G, N, E>,
 	@Override
 	public SerializableGraph toSerializableGraph(
 			BiFunction<G, N, SerializableValue> descriptionGenerator) {
-		throw new UnsupportedOperationException(
-				getClass().getName() + " does not provide a serialization logic");
+		throw new UnsupportedOperationException(getClass().getName() + " does not provide a serialization logic");
 	}
 
 	@Override

@@ -15,9 +15,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Trend
-		implements
-		BaseLattice<Trend> {
+public class Trend implements BaseLattice<Trend> {
 
 	/**
 	 * The abstract top element.
@@ -152,8 +150,7 @@ public class Trend
 	 * @return whether this trend is possibly growing.
 	 */
 	public Satisfiability isPossiblyGrowing() {
-		return isInc() || isNonDec()
-				? Satisfiability.SATISFIED
+		return isInc() || isNonDec() ? Satisfiability.SATISFIED
 				: (isDec() || isNonInc() ? Satisfiability.NOT_SATISFIED : Satisfiability.UNKNOWN);
 	}
 

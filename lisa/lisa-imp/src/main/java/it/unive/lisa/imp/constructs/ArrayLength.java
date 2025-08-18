@@ -35,9 +35,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ArrayLength
-		extends
-		NativeCFG {
+public class ArrayLength extends NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -49,14 +47,14 @@ public class ArrayLength
 			CodeLocation location,
 			Program program) {
 		super(
-				new CodeMemberDescriptor(
-						location,
-						program,
-						false,
-						"arraylen",
-						Int32Type.INSTANCE,
-						new Parameter(location, "a", Untyped.INSTANCE)),
-				IMPArrayLength.class);
+			new CodeMemberDescriptor(
+				location,
+				program,
+				false,
+				"arraylen",
+				Int32Type.INSTANCE,
+				new Parameter(location, "a", Untyped.INSTANCE)),
+			IMPArrayLength.class);
 	}
 
 	/**
@@ -66,11 +64,7 @@ public class ArrayLength
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPArrayLength
-			extends
-			UnaryExpression
-			implements
-			PluggableStatement {
+	public static class IMPArrayLength extends UnaryExpression implements PluggableStatement {
 
 		/**
 		 * The statement that originated this one.
@@ -140,13 +134,12 @@ public class ArrayLength
 		}
 
 		@Override
-		public <A extends AbstractLattice<A>,
-				D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
-						InterproceduralAnalysis<A, D> interprocedural,
-						AnalysisState<A> state,
-						SymbolicExpression expr,
-						StatementStore<A> expressions)
-						throws SemanticException {
+		public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+				InterproceduralAnalysis<A, D> interprocedural,
+				AnalysisState<A> state,
+				SymbolicExpression expr,
+				StatementStore<A> expressions)
+				throws SemanticException {
 			Set<Type> arraytypes = new HashSet<>();
 			Analysis<A, D> analysis = interprocedural.getAnalysis();
 			Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
@@ -160,10 +153,10 @@ public class ArrayLength
 			Type cst = Type.commonSupertype(arraytypes, getStaticType());
 			HeapDereference container = new HeapDereference(cst, expr, getLocation());
 			AccessChild len = new AccessChild(
-					Int32Type.INSTANCE,
-					container,
-					new Variable(Untyped.INSTANCE, "len", getLocation()),
-					getLocation());
+				Int32Type.INSTANCE,
+				container,
+				new Variable(Untyped.INSTANCE, "len", getLocation()),
+				getLocation());
 
 			return analysis.smallStepSemantics(state, len, this);
 		}

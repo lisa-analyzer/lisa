@@ -13,9 +13,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class RegularExpression
-		implements
-		TransitionSymbol<RegularExpression> {
+public abstract class RegularExpression implements TransitionSymbol<RegularExpression> {
 
 	@Override
 	public final int compareTo(
@@ -61,9 +59,8 @@ public abstract class RegularExpression
 	 * 
 	 * @return the automaton
 	 */
-	public abstract <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory);
+	public abstract <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory);
 
 	/**
 	 * Casts this regular expression to an {@link Atom} if this regular
@@ -179,11 +176,10 @@ public abstract class RegularExpression
 	public final Set<SymbolicString> substring(
 			int start,
 			int end) {
-		return substringAux(start, end - start)
-				.stream()
-				.filter(ps -> ps.missingChars == 0)
-				.map(t -> t.getSubstring())
-				.collect(Collectors.toSet());
+		return substringAux(start, end - start).stream()
+			.filter(ps -> ps.missingChars == 0)
+			.map(t -> t.getSubstring())
+			.collect(Collectors.toSet());
 	}
 
 	/**

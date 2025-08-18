@@ -37,9 +37,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Substring
-		extends
-		it.unive.lisa.program.cfg.statement.TernaryExpression {
+public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -66,13 +64,13 @@ public class Substring
 			Expression middle,
 			Expression right) {
 		super(
-				cfg,
-				location,
-				"substring",
-				cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
-				left,
-				middle,
-				right);
+			cfg,
+			location,
+			"substring",
+			cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
+			left,
+			middle,
+			right);
 	}
 
 	@Override
@@ -82,15 +80,14 @@ public class Substring
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdTernarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression left,
-					SymbolicExpression middle,
-					SymbolicExpression right,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdTernarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression middle,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (analysis.getRuntimeTypesOf(state, left, this).stream().noneMatch(Type::isStringType))
 			return state.bottom();
@@ -99,12 +96,10 @@ public class Substring
 		if (analysis.getRuntimeTypesOf(state, right, this).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
 
-		return analysis
-				.smallStepSemantics(
-						state,
-						new TernaryExpression(getStaticType(), left, middle, right, StringSubstring.INSTANCE,
-								getLocation()),
-						originating == null ? this : originating);
+		return analysis.smallStepSemantics(
+			state,
+			new TernaryExpression(getStaticType(), left, middle, right, StringSubstring.INSTANCE, getLocation()),
+			originating == null ? this : originating);
 	}
 
 }

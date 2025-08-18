@@ -19,12 +19,7 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric32BitRem
-		extends
-		NumericOperation
-		implements
-		RemainderOperator,
-		OverflowingOperator {
+public class Numeric32BitRem extends NumericOperation implements RemainderOperator, OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.

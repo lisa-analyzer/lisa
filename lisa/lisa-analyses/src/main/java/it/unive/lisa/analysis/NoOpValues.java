@@ -13,9 +13,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NoOpValues
-		implements
-		ValueDomain<SingleValueLattice> {
+public class NoOpValues implements ValueDomain<SingleValueLattice> {
 
 	@Override
 	public SingleValueLattice makeLattice() {

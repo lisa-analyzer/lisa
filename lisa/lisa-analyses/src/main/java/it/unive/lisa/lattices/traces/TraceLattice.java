@@ -26,9 +26,7 @@ import java.util.function.Predicate;
  * 
  * @param <A> the type of the abstract states associated to traces
  */
-public class TraceLattice<A extends AbstractLattice<A>>
-		extends
-		FunctionalLattice<TraceLattice<A>, ExecutionTrace, A>
+public class TraceLattice<A extends AbstractLattice<A>> extends FunctionalLattice<TraceLattice<A>, ExecutionTrace, A>
 		implements
 		AbstractLattice<TraceLattice<A>> {
 

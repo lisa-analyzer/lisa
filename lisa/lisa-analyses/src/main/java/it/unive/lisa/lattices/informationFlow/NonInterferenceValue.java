@@ -13,9 +13,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NonInterferenceValue
-		implements
-		BaseLattice<NonInterferenceValue> {
+public class NonInterferenceValue implements BaseLattice<NonInterferenceValue> {
 
 	/**
 	 * The value to use for bottom non interference levels.

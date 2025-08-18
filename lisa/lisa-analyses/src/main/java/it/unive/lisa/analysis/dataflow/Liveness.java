@@ -20,9 +20,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Liveness
-		extends
-		DataflowDomain<PossibleSet<Liveness.Liv>, Liveness.Liv> {
+public class Liveness extends DataflowDomain<PossibleSet<Liveness.Liv>, Liveness.Liv> {
 
 	@Override
 	public PossibleSet<Liv> makeLattice() {
@@ -75,9 +73,7 @@ public class Liveness
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class Liv
-			implements
-			DataflowElement<Liv> {
+	public static class Liv implements DataflowElement<Liv> {
 
 		private final Identifier id;
 

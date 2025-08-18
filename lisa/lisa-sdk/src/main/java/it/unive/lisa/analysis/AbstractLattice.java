@@ -10,9 +10,7 @@ package it.unive.lisa.analysis;
  * 
  * @param <L> the concrete type of {@link AbstractLattice}
  */
-public interface AbstractLattice<L extends AbstractLattice<L>>
-		extends
-		DomainLattice<L, L> {
+public interface AbstractLattice<L extends AbstractLattice<L>> extends DomainLattice<L, L> {
 
 	/**
 	 * Yields a copy of this state, but with its memory abstraction set to top.

@@ -231,28 +231,27 @@ public class TypeSetTest {
 			TypeSet operand)
 			throws SemanticException {
 		for (Entry<String, TypeSet> first : combos.entrySet()) {
-			TypeSet eval = domain
-					.evalUnaryExpression(
-							new UnaryExpression(
-									Untyped.INSTANCE,
-									new NullConstant(SyntheticLocation.INSTANCE),
-									op,
-									SyntheticLocation.INSTANCE),
-							first.getValue(),
-							fake,
-							oracle);
+			TypeSet eval = domain.evalUnaryExpression(
+				new UnaryExpression(
+					Untyped.INSTANCE,
+					new NullConstant(SyntheticLocation.INSTANCE),
+					op,
+					SyntheticLocation.INSTANCE),
+				first.getValue(),
+				fake,
+				oracle);
 			if (operand.lessOrEqual(first.getValue())) {
 				assertFalse(
-						String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
-						eval.isBottom());
+					String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
+					eval.isBottom());
 				assertEquals(
-						String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()),
-						expected.getRuntimeTypes(),
-						eval.getRuntimeTypes());
+					String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()),
+					expected.getRuntimeTypes(),
+					eval.getRuntimeTypes());
 			} else
 				assertTrue(
-						String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
-						eval.isBottom());
+					String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
+					eval.isBottom());
 		}
 	}
 
@@ -261,28 +260,27 @@ public class TypeSetTest {
 			Map<TypeSet, TypeSet> expected)
 			throws SemanticException {
 		for (Entry<String, TypeSet> first : combos.entrySet()) {
-			TypeSet eval = domain
-					.evalUnaryExpression(
-							new UnaryExpression(
-									Untyped.INSTANCE,
-									new NullConstant(SyntheticLocation.INSTANCE),
-									op,
-									SyntheticLocation.INSTANCE),
-							first.getValue(),
-							fake,
-							oracle);
+			TypeSet eval = domain.evalUnaryExpression(
+				new UnaryExpression(
+					Untyped.INSTANCE,
+					new NullConstant(SyntheticLocation.INSTANCE),
+					op,
+					SyntheticLocation.INSTANCE),
+				first.getValue(),
+				fake,
+				oracle);
 			if (expected.containsKey(first.getValue())) {
 				assertFalse(
-						String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
-						eval.isBottom());
+					String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
+					eval.isBottom());
 				assertEquals(
-						String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()),
-						expected.get(first.getValue()).getRuntimeTypes(),
-						eval.getRuntimeTypes());
+					String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()),
+					expected.get(first.getValue()).getRuntimeTypes(),
+					eval.getRuntimeTypes());
 			} else
 				assertTrue(
-						String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
-						eval.isBottom());
+					String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
+					eval.isBottom());
 		}
 	}
 
@@ -293,26 +291,25 @@ public class TypeSetTest {
 		unaryLE(StringLength.INSTANCE, integer, string);
 
 		unaryMapping(
-				NumericNegation.INSTANCE,
-				Map.of(integer, integer, floating, floating, numeric, numeric, all, numeric));
+			NumericNegation.INSTANCE,
+			Map.of(integer, integer, floating, floating, numeric, numeric, all, numeric));
 		unaryMapping(
-				TypeOf.INSTANCE,
-				Map
-						.of(
-								bool,
-								new TypeSet(types, new TypeTokenType(bool.getRuntimeTypes())),
-								string,
-								new TypeSet(types, new TypeTokenType(string.getRuntimeTypes())),
-								integer,
-								new TypeSet(types, new TypeTokenType(integer.getRuntimeTypes())),
-								floating,
-								new TypeSet(types, new TypeTokenType(floating.getRuntimeTypes())),
-								numeric,
-								new TypeSet(types, new TypeTokenType(numeric.getRuntimeTypes())),
-								all,
-								new TypeSet(types, new TypeTokenType(all.getRuntimeTypes())),
-								bool_or_string,
-								new TypeSet(types, new TypeTokenType(bool_or_string.getRuntimeTypes()))));
+			TypeOf.INSTANCE,
+			Map.of(
+				bool,
+				new TypeSet(types, new TypeTokenType(bool.getRuntimeTypes())),
+				string,
+				new TypeSet(types, new TypeTokenType(string.getRuntimeTypes())),
+				integer,
+				new TypeSet(types, new TypeTokenType(integer.getRuntimeTypes())),
+				floating,
+				new TypeSet(types, new TypeTokenType(floating.getRuntimeTypes())),
+				numeric,
+				new TypeSet(types, new TypeTokenType(numeric.getRuntimeTypes())),
+				all,
+				new TypeSet(types, new TypeTokenType(all.getRuntimeTypes())),
+				bool_or_string,
+				new TypeSet(types, new TypeTokenType(bool_or_string.getRuntimeTypes()))));
 	}
 
 	private void binaryLE(
@@ -323,42 +320,38 @@ public class TypeSetTest {
 			throws SemanticException {
 		for (Entry<String, TypeSet> first : combos.entrySet())
 			for (Entry<String, TypeSet> second : combos.entrySet()) {
-				TypeSet eval = domain
-						.evalBinaryExpression(
-								new BinaryExpression(
-										Untyped.INSTANCE,
-										new NullConstant(SyntheticLocation.INSTANCE),
-										new NullConstant(SyntheticLocation.INSTANCE),
-										op,
-										SyntheticLocation.INSTANCE),
-								first.getValue(),
-								second.getValue(),
-								fake,
-								oracle);
+				TypeSet eval = domain.evalBinaryExpression(
+					new BinaryExpression(
+						Untyped.INSTANCE,
+						new NullConstant(SyntheticLocation.INSTANCE),
+						new NullConstant(SyntheticLocation.INSTANCE),
+						op,
+						SyntheticLocation.INSTANCE),
+					first.getValue(),
+					second.getValue(),
+					fake,
+					oracle);
 				if (left.lessOrEqual(first.getValue()) && right.lessOrEqual(second.getValue())) {
 					assertFalse(
-							String
-									.format(
-											UNEXPECTED_BOTTOM,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+						String.format(
+							UNEXPECTED_BOTTOM,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						eval.isBottom());
 					assertEquals(
-							String
-									.format(
-											WRONG_RESULT,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							expected.getRuntimeTypes(),
-							eval.getRuntimeTypes());
+						String.format(
+							WRONG_RESULT,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						expected.getRuntimeTypes(),
+						eval.getRuntimeTypes());
 				} else
 					assertTrue(
-							String
-									.format(
-											RESULT_NOT_BOTTOM,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+						String.format(
+							RESULT_NOT_BOTTOM,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						eval.isBottom());
 			}
 	}
 
@@ -369,42 +362,38 @@ public class TypeSetTest {
 			throws SemanticException {
 		for (Entry<String, TypeSet> first : combos.entrySet())
 			for (Entry<String, TypeSet> second : combos.entrySet()) {
-				TypeSet eval = domain
-						.evalBinaryExpression(
-								new BinaryExpression(
-										Untyped.INSTANCE,
-										new NullConstant(SyntheticLocation.INSTANCE),
-										new NullConstant(SyntheticLocation.INSTANCE),
-										op,
-										SyntheticLocation.INSTANCE),
-								first.getValue(),
-								second.getValue(),
-								fake,
-								oracle);
+				TypeSet eval = domain.evalBinaryExpression(
+					new BinaryExpression(
+						Untyped.INSTANCE,
+						new NullConstant(SyntheticLocation.INSTANCE),
+						new NullConstant(SyntheticLocation.INSTANCE),
+						op,
+						SyntheticLocation.INSTANCE),
+					first.getValue(),
+					second.getValue(),
+					fake,
+					oracle);
 				if (notExcluded(exclusions, first, second)) {
 					assertFalse(
-							String
-									.format(
-											UNEXPECTED_BOTTOM,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+						String.format(
+							UNEXPECTED_BOTTOM,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						eval.isBottom());
 					assertEquals(
-							String
-									.format(
-											WRONG_RESULT,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							expected.getRuntimeTypes(),
-							eval.getRuntimeTypes());
+						String.format(
+							WRONG_RESULT,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						expected.getRuntimeTypes(),
+						eval.getRuntimeTypes());
 				} else
 					assertTrue(
-							String
-									.format(
-											RESULT_NOT_BOTTOM,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+						String.format(
+							RESULT_NOT_BOTTOM,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						eval.isBottom());
 			}
 	}
 
@@ -426,42 +415,38 @@ public class TypeSetTest {
 			throws SemanticException {
 		for (Entry<String, TypeSet> first : combos.entrySet())
 			for (Entry<String, TypeSet> second : combos.entrySet()) {
-				TypeSet eval = domain
-						.evalBinaryExpression(
-								new BinaryExpression(
-										Untyped.INSTANCE,
-										new NullConstant(SyntheticLocation.INSTANCE),
-										new NullConstant(SyntheticLocation.INSTANCE),
-										op,
-										SyntheticLocation.INSTANCE),
-								first.getValue(),
-								second.getValue(),
-								fake,
-								oracle);
+				TypeSet eval = domain.evalBinaryExpression(
+					new BinaryExpression(
+						Untyped.INSTANCE,
+						new NullConstant(SyntheticLocation.INSTANCE),
+						new NullConstant(SyntheticLocation.INSTANCE),
+						op,
+						SyntheticLocation.INSTANCE),
+					first.getValue(),
+					second.getValue(),
+					fake,
+					oracle);
 				if (notExcluded(exclusions, first, second)) {
 					assertFalse(
-							String
-									.format(
-											UNEXPECTED_BOTTOM,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+						String.format(
+							UNEXPECTED_BOTTOM,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						eval.isBottom());
 					assertEquals(
-							String
-									.format(
-											WRONG_RESULT,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							expected.apply(first.getValue(), second.getValue()).getRuntimeTypes(),
-							eval.getRuntimeTypes());
+						String.format(
+							WRONG_RESULT,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						expected.apply(first.getValue(), second.getValue()).getRuntimeTypes(),
+						eval.getRuntimeTypes());
 				} else
 					assertTrue(
-							String
-									.format(
-											RESULT_NOT_BOTTOM,
-											op.getClass().getSimpleName(),
-											first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+						String.format(
+							RESULT_NOT_BOTTOM,
+							op.getClass().getSimpleName(),
+							first.getKey() + "," + second.getKey()),
+						eval.isBottom());
 			}
 	}
 
@@ -473,46 +458,42 @@ public class TypeSetTest {
 		for (Entry<String, TypeSet> first : combos.entrySet())
 			for (Entry<String, TypeSet> second : combos.entrySet()) {
 				TypeSet st = transformer.apply(second.getValue());
-				TypeSet eval = domain
-						.evalBinaryExpression(
-								new BinaryExpression(
-										Untyped.INSTANCE,
-										new NullConstant(SyntheticLocation.INSTANCE),
-										new NullConstant(SyntheticLocation.INSTANCE),
-										op,
-										SyntheticLocation.INSTANCE),
-								first.getValue(),
-								second.getValue(),
-								fake,
-								oracle);
-				TypeSet evalT = domain
-						.evalBinaryExpression(
-								new BinaryExpression(
-										Untyped.INSTANCE,
-										new NullConstant(SyntheticLocation.INSTANCE),
-										new NullConstant(SyntheticLocation.INSTANCE),
-										op,
-										SyntheticLocation.INSTANCE),
-								first.getValue(),
-								st,
-								fake,
-								oracle);
+				TypeSet eval = domain.evalBinaryExpression(
+					new BinaryExpression(
+						Untyped.INSTANCE,
+						new NullConstant(SyntheticLocation.INSTANCE),
+						new NullConstant(SyntheticLocation.INSTANCE),
+						op,
+						SyntheticLocation.INSTANCE),
+					first.getValue(),
+					second.getValue(),
+					fake,
+					oracle);
+				TypeSet evalT = domain.evalBinaryExpression(
+					new BinaryExpression(
+						Untyped.INSTANCE,
+						new NullConstant(SyntheticLocation.INSTANCE),
+						new NullConstant(SyntheticLocation.INSTANCE),
+						op,
+						SyntheticLocation.INSTANCE),
+					first.getValue(),
+					st,
+					fake,
+					oracle);
 				assertTrue(
-						String
-								.format(
-										RESULT_NOT_BOTTOM,
-										op.getClass().getSimpleName(),
-										first.getKey() + "," + second.getKey()),
-						eval.isBottom());
+					String.format(
+						RESULT_NOT_BOTTOM,
+						op.getClass().getSimpleName(),
+						first.getKey() + "," + second.getKey()),
+					eval.isBottom());
 				// we don't check for bottom: it might be the right result...
 				assertEquals(
-						String
-								.format(
-										WRONG_RESULT,
-										op.getClass().getSimpleName(),
-										first.getKey() + "," + second.getKey() + "[transformed to " + st + "]"),
-						expected.apply(first.getValue(), st).getRuntimeTypes(),
-						evalT.getRuntimeTypes());
+					String.format(
+						WRONG_RESULT,
+						op.getClass().getSimpleName(),
+						first.getKey() + "," + second.getKey() + "[transformed to " + st + "]"),
+					expected.apply(first.getValue(), st).getRuntimeTypes(),
+					evalT.getRuntimeTypes());
 			}
 	}
 
@@ -521,14 +502,13 @@ public class TypeSetTest {
 			throws SemanticException {
 		binaryFixed(ComparisonEq.INSTANCE, bool, Collections.emptyList());
 		binaryFixed(ComparisonNe.INSTANCE, bool, Collections.emptyList());
-		List<Pair<TypeSet, TypeSet>> excluded = List
-				.of(
-						Pair.of(bool, null),
-						Pair.of(null, bool),
-						Pair.of(string, null),
-						Pair.of(null, string),
-						Pair.of(bool_or_string, null),
-						Pair.of(null, bool_or_string));
+		List<Pair<TypeSet, TypeSet>> excluded = List.of(
+			Pair.of(bool, null),
+			Pair.of(null, bool),
+			Pair.of(string, null),
+			Pair.of(null, string),
+			Pair.of(bool_or_string, null),
+			Pair.of(null, bool_or_string));
 		binaryFixed(ComparisonGe.INSTANCE, bool, excluded);
 		binaryFixed(ComparisonGt.INSTANCE, bool, excluded);
 		binaryFixed(ComparisonLe.INSTANCE, bool, excluded);
@@ -546,7 +526,9 @@ public class TypeSetTest {
 
 		java.util.function.BinaryOperator<TypeSet> commonNumbers = (
 				l,
-				r) -> {
+				r
+		) ->
+		{
 			Set<Type> set = NumericType.commonNumericalType(l.getRuntimeTypes(), r.getRuntimeTypes());
 			if (set.isEmpty())
 				return domain.bottom();
@@ -559,35 +541,40 @@ public class TypeSetTest {
 		binaryTransform(NumericNonOverflowingMod.INSTANCE, commonNumbers, excluded);
 
 		binaryTransformSecond(
-				TypeCast.INSTANCE,
-				(
-						l,
-						r) -> {
-					Set<Type> set = types.cast(l.getRuntimeTypes(), r.getRuntimeTypes(), null);
-					if (set.isEmpty())
-						return domain.bottom();
-					return new TypeSet(types, set);
-				},
-				it -> new TypeSet(types, new TypeTokenType(it.getRuntimeTypes())));
+			TypeCast.INSTANCE,
+			(
+					l,
+					r
+			) ->
+			{
+				Set<Type> set = types.cast(l.getRuntimeTypes(), r.getRuntimeTypes(), null);
+				if (set.isEmpty())
+					return domain.bottom();
+				return new TypeSet(types, set);
+			},
+			it -> new TypeSet(types, new TypeTokenType(it.getRuntimeTypes())));
 
 		binaryTransformSecond(
-				TypeConv.INSTANCE,
-				(
-						l,
-						r) -> {
-					Set<Type> set = types.convert(l.getRuntimeTypes(), r.getRuntimeTypes());
-					if (set.isEmpty())
-						return domain.bottom();
-					return new TypeSet(types, set);
-				},
-				it -> new TypeSet(types, new TypeTokenType(it.getRuntimeTypes())));
+			TypeConv.INSTANCE,
+			(
+					l,
+					r
+			) ->
+			{
+				Set<Type> set = types.convert(l.getRuntimeTypes(), r.getRuntimeTypes());
+				if (set.isEmpty())
+					return domain.bottom();
+				return new TypeSet(types, set);
+			},
+			it -> new TypeSet(types, new TypeTokenType(it.getRuntimeTypes())));
 
 		binaryTransformSecond(
-				TypeCheck.INSTANCE,
-				(
-						l,
-						r) -> bool,
-				it -> new TypeSet(types, new TypeTokenType(it.getRuntimeTypes())));
+			TypeCheck.INSTANCE,
+			(
+					l,
+					r
+			) -> bool,
+			it -> new TypeSet(types, new TypeTokenType(it.getRuntimeTypes())));
 	}
 
 	private void ternaryLE(
@@ -600,46 +587,42 @@ public class TypeSetTest {
 		for (Entry<String, TypeSet> first : combos.entrySet())
 			for (Entry<String, TypeSet> second : combos.entrySet())
 				for (Entry<String, TypeSet> third : combos.entrySet()) {
-					TypeSet eval = domain
-							.evalTernaryExpression(
-									new TernaryExpression(
-											Untyped.INSTANCE,
-											new NullConstant(SyntheticLocation.INSTANCE),
-											new NullConstant(SyntheticLocation.INSTANCE),
-											new NullConstant(SyntheticLocation.INSTANCE),
-											op,
-											SyntheticLocation.INSTANCE),
-									first.getValue(),
-									second.getValue(),
-									third.getValue(),
-									fake,
-									oracle);
+					TypeSet eval = domain.evalTernaryExpression(
+						new TernaryExpression(
+							Untyped.INSTANCE,
+							new NullConstant(SyntheticLocation.INSTANCE),
+							new NullConstant(SyntheticLocation.INSTANCE),
+							new NullConstant(SyntheticLocation.INSTANCE),
+							op,
+							SyntheticLocation.INSTANCE),
+						first.getValue(),
+						second.getValue(),
+						third.getValue(),
+						fake,
+						oracle);
 					if (left.lessOrEqual(first.getValue())
 							&& middle.lessOrEqual(second.getValue())
 							&& right.lessOrEqual(third.getValue())) {
 						assertFalse(
-								String
-										.format(
-												UNEXPECTED_BOTTOM,
-												op.getClass().getSimpleName(),
-												first.getKey() + "," + second.getKey() + "," + third.getKey()),
-								eval.isBottom());
+							String.format(
+								UNEXPECTED_BOTTOM,
+								op.getClass().getSimpleName(),
+								first.getKey() + "," + second.getKey() + "," + third.getKey()),
+							eval.isBottom());
 						assertEquals(
-								String
-										.format(
-												WRONG_RESULT,
-												op.getClass().getSimpleName(),
-												first.getKey() + "," + second.getKey() + "," + third.getKey()),
-								expected.getRuntimeTypes(),
-								eval.getRuntimeTypes());
+							String.format(
+								WRONG_RESULT,
+								op.getClass().getSimpleName(),
+								first.getKey() + "," + second.getKey() + "," + third.getKey()),
+							expected.getRuntimeTypes(),
+							eval.getRuntimeTypes());
 					} else
 						assertTrue(
-								String
-										.format(
-												RESULT_NOT_BOTTOM,
-												op.getClass().getSimpleName(),
-												first.getKey() + "," + second.getKey() + "," + third.getKey()),
-								eval.isBottom());
+							String.format(
+								RESULT_NOT_BOTTOM,
+								op.getClass().getSimpleName(),
+								first.getKey() + "," + second.getKey() + "," + third.getKey()),
+							eval.isBottom());
 				}
 	}
 
@@ -656,20 +639,19 @@ public class TypeSetTest {
 			TypeSet right,
 			Satisfiability expected) {
 		assertEquals(
-				"Satisfies(" + left + " " + op + " " + right + ") returned wrong result",
-				expected,
-				domain
-						.satisfiesBinaryExpression(
-								new BinaryExpression(
-										Untyped.INSTANCE,
-										new NullConstant(SyntheticLocation.INSTANCE),
-										new NullConstant(SyntheticLocation.INSTANCE),
-										op,
-										SyntheticLocation.INSTANCE),
-								left,
-								right,
-								fake,
-								oracle));
+			"Satisfies(" + left + " " + op + " " + right + ") returned wrong result",
+			expected,
+			domain.satisfiesBinaryExpression(
+				new BinaryExpression(
+					Untyped.INSTANCE,
+					new NullConstant(SyntheticLocation.INSTANCE),
+					new NullConstant(SyntheticLocation.INSTANCE),
+					op,
+					SyntheticLocation.INSTANCE),
+				left,
+				right,
+				fake,
+				oracle));
 	}
 
 	@Test
@@ -702,11 +684,10 @@ public class TypeSetTest {
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 
 		right = new TypeSet(
-				types,
-				Set
-						.of(
-								new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
-								new TypeTokenType(Collections.singleton(StringType.INSTANCE))));
+			types,
+			Set.of(
+				new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
+				new TypeTokenType(Collections.singleton(StringType.INSTANCE))));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);
@@ -725,88 +706,84 @@ public class TypeSetTest {
 			ValueExpression expr,
 			TypeSet expected)
 			throws SemanticException {
-		TypeEnvironment<TypeSet> act = domain
-				.assumeBinaryExpression(
-						env,
-						new BinaryExpression(BoolType.INSTANCE, variable, expr, op, fake.getLocation()),
-						fake,
-						fake,
-						oracle);
+		TypeEnvironment<TypeSet> act = domain.assumeBinaryExpression(
+			env,
+			new BinaryExpression(BoolType.INSTANCE, variable, expr, op, fake.getLocation()),
+			fake,
+			fake,
+			oracle);
 
-		assertEquals(
-				"Assume(x " + op + " " + expr + ") returned wrong result",
-				expected,
-				act.getState(variable));
+		assertEquals("Assume(x " + op + " " + expr + ") returned wrong result", expected, act.getState(variable));
 	}
 
 	@Test
 	public void testAssume()
 			throws SemanticException {
 		assume(
-				ComparisonEq.INSTANCE,
-				new Constant(
-						new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
-						"bool or string",
-						fake.getLocation()),
-				bool_or_string);
+			ComparisonEq.INSTANCE,
+			new Constant(
+				new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
+				"bool or string",
+				fake.getLocation()),
+			bool_or_string);
 		assume(
-				ComparisonEq.INSTANCE,
-				new Constant(
-						new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
-						BoolType.INSTANCE,
-						fake.getLocation()),
-				bool);
+			ComparisonEq.INSTANCE,
+			new Constant(
+				new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
+				BoolType.INSTANCE,
+				fake.getLocation()),
+			bool);
 		assume(
-				ComparisonEq.INSTANCE,
-				new Constant(
-						new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
-						Int32Type.INSTANCE,
-						fake.getLocation()),
-				domain.bottom());
+			ComparisonEq.INSTANCE,
+			new Constant(
+				new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
+				Int32Type.INSTANCE,
+				fake.getLocation()),
+			domain.bottom());
 
 		assume(
-				ComparisonNe.INSTANCE,
-				new Constant(
-						new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
-						"bool or string",
-						fake.getLocation()),
-				domain.bottom());
+			ComparisonNe.INSTANCE,
+			new Constant(
+				new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
+				"bool or string",
+				fake.getLocation()),
+			domain.bottom());
 		assume(
-				ComparisonNe.INSTANCE,
-				new Constant(
-						new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
-						BoolType.INSTANCE,
-						fake.getLocation()),
-				string);
+			ComparisonNe.INSTANCE,
+			new Constant(
+				new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
+				BoolType.INSTANCE,
+				fake.getLocation()),
+			string);
 		assume(
-				ComparisonNe.INSTANCE,
-				new Constant(
-						new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
-						Int32Type.INSTANCE,
-						fake.getLocation()),
-				bool_or_string);
+			ComparisonNe.INSTANCE,
+			new Constant(
+				new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
+				Int32Type.INSTANCE,
+				fake.getLocation()),
+			bool_or_string);
 
 		assume(
-				TypeCheck.INSTANCE,
-				new Constant(
-						new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
-						"bool or string",
-						fake.getLocation()),
-				bool_or_string);
+			TypeCheck.INSTANCE,
+			new Constant(
+				new TypeTokenType(Set.of(StringType.INSTANCE, BoolType.INSTANCE)),
+				"bool or string",
+				fake.getLocation()),
+			bool_or_string);
 		assume(
-				TypeCheck.INSTANCE,
-				new Constant(
-						new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
-						BoolType.INSTANCE,
-						fake.getLocation()),
-				bool);
+			TypeCheck.INSTANCE,
+			new Constant(
+				new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
+				BoolType.INSTANCE,
+				fake.getLocation()),
+			bool);
 		assume(
-				TypeCheck.INSTANCE,
-				new Constant(
-						new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
-						Int32Type.INSTANCE,
-						fake.getLocation()),
-				domain.bottom());
+			TypeCheck.INSTANCE,
+			new Constant(
+				new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
+				Int32Type.INSTANCE,
+				fake.getLocation()),
+			domain.bottom());
 	}
 
 }

@@ -73,11 +73,7 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFG
-		extends
-		CodeGraph<CFG, Statement, Edge>
-		implements
-		CodeMember {
+public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	private static final Logger LOG = LogManager.getLogger(CFG.class);
 
@@ -169,11 +165,10 @@ public class CFG
 	 * @return the normal exitpoints of this cfg.
 	 */
 	public Collection<Statement> getNormalExitpoints() {
-		return list
-				.getNodes()
-				.stream()
-				.filter(st -> st.stopsExecution() && !st.throwsError())
-				.collect(Collectors.toList());
+		return list.getNodes()
+			.stream()
+			.filter(st -> st.stopsExecution() && !st.throwsError())
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -186,11 +181,10 @@ public class CFG
 	 * @return the exitpoints of this cfg.
 	 */
 	public Collection<Statement> getAllExitpoints() {
-		return list
-				.getNodes()
-				.stream()
-				.filter(st -> st.stopsExecution() || st.throwsError())
-				.collect(Collectors.toList());
+		return list.getNodes()
+			.stream()
+			.filter(st -> st.stopsExecution() || st.throwsError())
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -223,16 +217,15 @@ public class CFG
 	 *                                           non-sequential edge.
 	 */
 	public void simplify() {
-		Set<Statement> targets = getNodes()
-				.stream()
-				.filter(k -> k instanceof NoOp)
-				// removing the only node in a protected block
-				// would mean removing the whole block from the
-				// cfg, but that would make it different w.r.t.
-				// the source code, so we keep it. It is also
-				// problematic to remove if it is a noop-return
-				.filter(k -> !isNotSimplifiableInProtectedBlock(k))
-				.collect(Collectors.toSet());
+		Set<Statement> targets = getNodes().stream()
+			.filter(k -> k instanceof NoOp)
+			// removing the only node in a protected block
+			// would mean removing the whole block from the
+			// cfg, but that would make it different w.r.t.
+			// the source code, so we keep it. It is also
+			// problematic to remove if it is a noop-return
+			.filter(k -> !isNotSimplifiableInProtectedBlock(k))
+			.collect(Collectors.toSet());
 		targets.forEach(this::preSimplify);
 		list.simplify(targets, entrypoints, new LinkedList<>(), new HashMap<>());
 		descriptor.getControlFlowStructures().forEach(ControlFlowStructure::simplify);
@@ -243,25 +236,30 @@ public class CFG
 			Statement st) {
 		List<BiPredicate<ProtectedBlock, Statement>> exclusions = new LinkedList<>();
 		// single node in protected block
-		exclusions.add((
-				pb,
-				s) -> pb.getBody().size() == 1 && pb.getStart() == s);
+		exclusions.add(
+			(
+					pb,
+					s
+			) -> pb.getBody().size() == 1 && pb.getStart() == s);
 		// pre-exit in protected block
-		exclusions.add((
-				pb,
-				s) -> pb.getBody().size() == 2 && pb.getStart() == s && pb.getEnd().stopsExecution());
+		exclusions.add(
+			(
+					pb,
+					s
+			) -> pb.getBody().size() == 2 && pb.getStart() == s && pb.getEnd().stopsExecution());
 		// branch target followed by finally execution
-		exclusions.add((
-				pb,
-				s) -> getIngoingEdges(s).size() == 1
-						&& getIngoingEdges(s).stream().anyMatch(Predicate.not(Edge::isUnconditional))
-						&& getOutgoingEdges(s).stream().allMatch(e -> e.isFinallyRelated() || e.isErrorHandling()));
+		exclusions.add(
+			(
+					pb,
+					s
+			) -> getIngoingEdges(s).size() == 1
+					&& getIngoingEdges(s).stream().anyMatch(Predicate.not(Edge::isUnconditional))
+					&& getOutgoingEdges(s).stream().allMatch(e -> e.isFinallyRelated() || e.isErrorHandling()));
 
 		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
 			if (exclusions.stream().anyMatch(e -> e.test(pb.getTryBlock(), st)))
 				return true;
-			else if (pb.getElseBlock() != null
-					&& (exclusions.stream().anyMatch(e -> e.test(pb.getElseBlock(), st))))
+			else if (pb.getElseBlock() != null && (exclusions.stream().anyMatch(e -> e.test(pb.getElseBlock(), st))))
 				return true;
 			else if (pb.getFinallyBlock() != null
 					&& (exclusions.stream().anyMatch(e -> e.test(pb.getFinallyBlock(), st))))
@@ -296,8 +294,8 @@ public class CFG
 						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
 				else {
 					LOG.warn(
-							"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
-							node);
+						"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
+						node);
 					cfs.setFirstFollower(null);
 				}
 	}
@@ -318,8 +316,8 @@ public class CFG
 						pb.setClosing(firstNonNoOpDeterministicFollower(candidate));
 				else {
 					LOG.warn(
-							"{} is the closing of a protection block, it is being simplified but has multiple followers: the closing of the protection block will be lost",
-							node);
+						"{} is the closing of a protection block, it is being simplified but has multiple followers: the closing of the protection block will be lost",
+						node);
 					pb.setClosing(null);
 				}
 	}
@@ -340,16 +338,14 @@ public class CFG
 
 	private void shiftVariableScopes(
 			Statement node) {
-		Collection<VariableTableEntry> starting = descriptor
-				.getVariables()
-				.stream()
-				.filter(v -> v.getScopeStart() == node)
-				.collect(Collectors.toList());
-		Collection<VariableTableEntry> ending = descriptor
-				.getVariables()
-				.stream()
-				.filter(v -> v.getScopeEnd() == node)
-				.collect(Collectors.toList());
+		Collection<VariableTableEntry> starting = descriptor.getVariables()
+			.stream()
+			.filter(v -> v.getScopeStart() == node)
+			.collect(Collectors.toList());
+		Collection<VariableTableEntry> ending = descriptor.getVariables()
+			.stream()
+			.filter(v -> v.getScopeEnd() == node)
+			.collect(Collectors.toList());
 		if (ending.isEmpty() && starting.isEmpty())
 			return;
 
@@ -357,17 +353,18 @@ public class CFG
 		Collection<Statement> followers = followersOf(node);
 
 		if (predecessors.isEmpty() && followers.isEmpty()) {
-			LOG
-					.warn(
-							"Simplifying the only statement of '{}': all variables will be made visible for the entire cfg",
-							this);
+			LOG.warn(
+				"Simplifying the only statement of '{}': all variables will be made visible for the entire cfg",
+				this);
 			starting.forEach(v -> v.setScopeStart(null));
 			ending.forEach(v -> v.setScopeEnd(null));
 			return;
 		}
 
 		String format = "Simplifying the scope-{} statement of a variable with {} "
-				+ "is not supported: {} will be made visible {} of '" + this + "'";
+			+ "is not supported: {} will be made visible {} of '"
+			+ this
+			+ "'";
 		if (!starting.isEmpty())
 			if (predecessors.isEmpty()) {
 				// no predecessors: move the starting scope forward
@@ -448,14 +445,13 @@ public class CFG
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id)
-					throws FixpointException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, conf, id);
@@ -499,15 +495,14 @@ public class CFG
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
-					Collection<Statement> entrypoints,
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id)
-					throws FixpointException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
+			Collection<Statement> entrypoints,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, conf, id);
@@ -553,31 +548,30 @@ public class CFG
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
-					AnalysisState<A> singleton,
-					Map<Statement, AnalysisState<A>> startingPoints,
-					InterproceduralAnalysis<A, D> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id)
-					throws FixpointException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
+			AnalysisState<A> singleton,
+			Map<Statement, AnalysisState<A>> startingPoints,
+			InterproceduralAnalysis<A, D> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
 		// we disable optimizations for ascending phases if there is a
 		// descending one: the latter will need full results to start applying
 		// glbs/narrowings from a post-fixpoint
 		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
-		Fixpoint<CFG, Statement, Edge, CompoundState<A>> fix = isOptimized
-				? new OptimizedFixpoint<>(this, false, conf.hotspots)
-				: new Fixpoint<>(this, false);
+		Fixpoint<CFG, Statement, Edge,
+				CompoundState<A>> fix = isOptimized ? new OptimizedFixpoint<>(this, false, conf.hotspots)
+						: new Fixpoint<>(this, false);
 		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, interprocedural, conf);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
-		startingPoints
-				.forEach(
-						(
-								st,
-								state) -> starting.put(st, CompoundState.of(state, bot)));
+		startingPoints.forEach(
+			(
+					st,
+					state
+			) -> starting.put(st, CompoundState.of(state, bot)));
 		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
 
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
@@ -604,14 +598,13 @@ public class CFG
 		return flatten(conf.optimize, singleton, startingPoints, interprocedural, id, descending);
 	}
 
-	private <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalyzedCFG<A> flatten(
-					boolean isOptimized,
-					AnalysisState<A> singleton,
-					Map<Statement, AnalysisState<A>> startingPoints,
-					InterproceduralAnalysis<A, D> interprocedural,
-					ScopeId id,
-					Map<Statement, CompoundState<A>> fixpointResults) {
+	private <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> flatten(
+			boolean isOptimized,
+			AnalysisState<A> singleton,
+			Map<Statement, AnalysisState<A>> startingPoints,
+			InterproceduralAnalysis<A, D> interprocedural,
+			ScopeId id,
+			Map<Statement, CompoundState<A>> fixpointResults) {
 		Map<Statement, AnalysisState<A>> finalResults = new HashMap<>(fixpointResults.size());
 		for (Entry<Statement, CompoundState<A>> e : fixpointResults.entrySet()) {
 			finalResults.put(e.getKey(), e.getValue().postState);
@@ -660,14 +653,13 @@ public class CFG
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
-					AnalysisState<A> exitState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id)
-					throws FixpointException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		getAllExitpoints().forEach(e -> start.put(e, exitState));
 		return backwardFixpoint(exitState, start, interprocedural, ws, conf, id);
@@ -711,15 +703,14 @@ public class CFG
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
-					Collection<Statement> exitpoints,
-					AnalysisState<A> exitState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id)
-					throws FixpointException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
+			Collection<Statement> exitpoints,
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		exitpoints.forEach(e -> start.put(e, exitState));
 		return backwardFixpoint(exitState, start, interprocedural, ws, conf, id);
@@ -765,38 +756,36 @@ public class CFG
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
-					AnalysisState<A> singleton,
-					Map<Statement, AnalysisState<A>> startingPoints,
-					InterproceduralAnalysis<A, D> interprocedural,
-					WorkingSet<Statement> ws,
-					FixpointConfiguration conf,
-					ScopeId id)
-					throws FixpointException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
+			AnalysisState<A> singleton,
+			Map<Statement, AnalysisState<A>> startingPoints,
+			InterproceduralAnalysis<A, D> interprocedural,
+			WorkingSet<Statement> ws,
+			FixpointConfiguration conf,
+			ScopeId id)
+			throws FixpointException {
 		// we disable optimizations for ascending phases if there is a
 		// descending one: the latter will need full results to start applying
 		// glbs/narrowings from a post-fixpoint
 		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
-		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = isOptimized
-				? new OptimizedBackwardFixpoint<>(this, false, conf.hotspots)
-				: new BackwardFixpoint<>(this, false);
+		BackwardFixpoint<CFG, Statement, Edge,
+				CompoundState<A>> fix = isOptimized ? new OptimizedBackwardFixpoint<>(this, false, conf.hotspots)
+						: new BackwardFixpoint<>(this, false);
 		BackwardAscendingFixpoint<A, D> asc = new BackwardAscendingFixpoint<>(this, interprocedural, conf);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
-		startingPoints
-				.forEach(
-						(
-								st,
-								state) -> starting.put(st, CompoundState.of(state, bot)));
+		startingPoints.forEach(
+			(
+					st,
+					state
+			) -> starting.put(st, CompoundState.of(state, bot)));
 		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
 
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
 			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
 
-		fix = conf.optimize
-				? new OptimizedBackwardFixpoint<>(this, true, conf.hotspots)
+		fix = conf.optimize ? new OptimizedBackwardFixpoint<>(this, true, conf.hotspots)
 				: new BackwardFixpoint<>(this, true);
 		Map<Statement, CompoundState<A>> descending;
 		switch (conf.descendingPhaseType) {
@@ -873,9 +862,7 @@ public class CFG
 		try {
 			list.validate(entrypoints);
 		} catch (ProgramValidationException e) {
-			throw new ProgramValidationException(
-					"The matrix behind " + this + " is invalid",
-					e);
+			throw new ProgramValidationException("The matrix behind " + this + " is invalid", e);
 		}
 
 		for (ControlFlowStructure struct : descriptor.getControlFlowStructures()) {
@@ -883,8 +870,11 @@ public class CFG
 				// we tolerate null values only if its the follower
 				if ((st == null && struct.getFirstFollower() != null) || (st != null && !list.containsNode(st)))
 					throw new ProgramValidationException(
-							this + " has a conditional structure (" + struct
-									+ ") that contains a node not in the graph: " + st);
+						this
+							+ " has a conditional structure ("
+							+ struct
+							+ ") that contains a node not in the graph: "
+							+ st);
 		}
 
 		for (Statement st : list) {
@@ -893,17 +883,18 @@ public class CFG
 			Collection<Edge> outs = list.getOutgoingEdges(st);
 			if (st.stopsExecution() && !outs.isEmpty())
 				throw new ProgramValidationException(
-						this + " contains an execution-stopping node that has followers: " + st);
+					this + " contains an execution-stopping node that has followers: " + st);
 			if (outs.isEmpty() && !st.stopsExecution() && !st.throwsError())
 				throw new ProgramValidationException(
-						this + " contains a node with no followers that is not execution-stopping: " + st);
+					this + " contains a node with no followers that is not execution-stopping: " + st);
 		}
 
 		// all entrypoints should be within the cfg
 		if (!list.getNodes().containsAll(entrypoints))
 			throw new ProgramValidationException(
-					this + " has entrypoints that are not part of the graph: "
-							+ new HashSet<>(entrypoints).retainAll(list.getNodes()));
+				this
+					+ " has entrypoints that are not part of the graph: "
+					+ new HashSet<>(entrypoints).retainAll(list.getNodes()));
 	}
 
 	private Collection<ControlFlowStructure> getControlFlowsContaining(
@@ -999,10 +990,9 @@ public class CFG
 	 */
 	public Collection<Statement> getGuards(
 			ProgramPoint pp) {
-		return getControlFlowsContaining(pp)
-				.stream()
-				.map(ControlFlowStructure::getCondition)
-				.collect(Collectors.toList());
+		return getControlFlowsContaining(pp).stream()
+			.map(ControlFlowStructure::getCondition)
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -1020,11 +1010,10 @@ public class CFG
 	 */
 	public Collection<Statement> getLoopGuards(
 			ProgramPoint pp) {
-		return getControlFlowsContaining(pp)
-				.stream()
-				.filter(Loop.class::isInstance)
-				.map(ControlFlowStructure::getCondition)
-				.collect(Collectors.toList());
+		return getControlFlowsContaining(pp).stream()
+			.filter(Loop.class::isInstance)
+			.map(ControlFlowStructure::getCondition)
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -1043,11 +1032,10 @@ public class CFG
 	 */
 	public Collection<Statement> getIfThenElseGuards(
 			ProgramPoint pp) {
-		return getControlFlowsContaining(pp)
-				.stream()
-				.filter(IfThenElse.class::isInstance)
-				.map(ControlFlowStructure::getCondition)
-				.collect(Collectors.toList());
+		return getControlFlowsContaining(pp).stream()
+			.filter(IfThenElse.class::isInstance)
+			.map(ControlFlowStructure::getCondition)
+			.collect(Collectors.toList());
 	}
 
 	private Statement getRecent(
@@ -1073,8 +1061,9 @@ public class CFG
 
 		if (min == -1)
 			throw new IllegalStateException(
-					"Conditional flow structures containing " + pp
-							+ " could not evaluate the distance from the root of the structure to the statement itself");
+				"Conditional flow structures containing "
+					+ pp
+					+ " could not evaluate the distance from the root of the structure to the statement itself");
 
 		return recent;
 	}
@@ -1212,7 +1201,7 @@ public class CFG
 						continue;
 					else if (pushed)
 						throw new IllegalStateException(
-								"Cannot have statements with more than one follower inside a basic block");
+							"Cannot have statements with more than one follower inside a basic block");
 					else {
 						ws.push(follower);
 						pushed = true;

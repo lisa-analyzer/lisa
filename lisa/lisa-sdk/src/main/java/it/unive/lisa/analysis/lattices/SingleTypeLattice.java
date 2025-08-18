@@ -21,10 +21,7 @@ import java.util.function.Predicate;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SingleTypeLattice
-		implements
-		TypeLattice<SingleTypeLattice>,
-		TypeValue<SingleTypeLattice> {
+public class SingleTypeLattice implements TypeLattice<SingleTypeLattice>, TypeValue<SingleTypeLattice> {
 
 	/**
 	 * The singleton instance of this lattice, which is the only non-bottom

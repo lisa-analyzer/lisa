@@ -34,8 +34,7 @@ import java.util.Set;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public interface InterproceduralAnalysis<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> {
+public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>> {
 
 	/**
 	 * Yields {@code true} if this analysis needs a {@link CallGraph} instance

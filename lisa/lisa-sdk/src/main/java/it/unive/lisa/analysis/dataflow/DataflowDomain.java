@@ -26,10 +26,7 @@ import java.util.function.BooleanSupplier;
  *                domain
  */
 public abstract class DataflowDomain<L extends DataflowDomainLattice<L, E>,
-		E extends DataflowElement<E>>
-		implements
-		ValueDomain<L>,
-		SemanticEvaluator {
+		E extends DataflowElement<E>> implements ValueDomain<L>, SemanticEvaluator {
 
 	@Override
 	public L assign(
@@ -40,10 +37,10 @@ public abstract class DataflowDomain<L extends DataflowDomainLattice<L, E>,
 			SemanticOracle oracle)
 			throws SemanticException {
 		return update(
-				state,
-				() -> !canProcess(expression, pp, oracle),
-				() -> gen(state, id, expression, pp),
-				() -> kill(state, id, expression, pp));
+			state,
+			() -> !canProcess(expression, pp, oracle),
+			() -> gen(state, id, expression, pp),
+			() -> kill(state, id, expression, pp));
 	}
 
 	@Override
@@ -54,10 +51,10 @@ public abstract class DataflowDomain<L extends DataflowDomainLattice<L, E>,
 			SemanticOracle oracle)
 			throws SemanticException {
 		return update(
-				state,
-				() -> !canProcess(expression, pp, oracle),
-				() -> gen(state, expression, pp),
-				() -> kill(state, expression, pp));
+			state,
+			() -> !canProcess(expression, pp, oracle),
+			() -> gen(state, expression, pp),
+			() -> kill(state, expression, pp));
 	}
 
 	private L update(

@@ -18,9 +18,7 @@ import java.util.HashSet;
  * 
  * @param <L> the concrete {@link Lattice} instance
  */
-public interface Lattice<L extends Lattice<L>>
-		extends
-		StructuredObject {
+public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 
 	/**
 	 * A string constant that can be used to represent top values.
@@ -97,11 +95,12 @@ public interface Lattice<L extends Lattice<L>>
 			L... others)
 			throws SemanticException {
 		return compress(
-				(L) this,
-				new IterableArray<>(others),
-				(
-						l1,
-						l2) -> l1.lub(l2));
+			(L) this,
+			new IterableArray<>(others),
+			(
+					l1,
+					l2
+			) -> l1.lub(l2));
 	}
 
 	/**
@@ -120,11 +119,12 @@ public interface Lattice<L extends Lattice<L>>
 			Iterable<L> others)
 			throws SemanticException {
 		return compress(
-				(L) this,
-				others,
-				(
-						l1,
-						l2) -> l1.lub(l2));
+			(L) this,
+			others,
+			(
+					l1,
+					l2
+			) -> l1.lub(l2));
 	}
 
 	/**
@@ -159,11 +159,12 @@ public interface Lattice<L extends Lattice<L>>
 			L... others)
 			throws SemanticException {
 		return compress(
-				(L) this,
-				new IterableArray<>(others),
-				(
-						l1,
-						l2) -> l1.glb(l2));
+			(L) this,
+			new IterableArray<>(others),
+			(
+					l1,
+					l2
+			) -> l1.glb(l2));
 	}
 
 	/**
@@ -182,11 +183,12 @@ public interface Lattice<L extends Lattice<L>>
 			Iterable<L> others)
 			throws SemanticException {
 		return compress(
-				(L) this,
-				others,
-				(
-						l1,
-						l2) -> l1.glb(l2));
+			(L) this,
+			others,
+			(
+					l1,
+					l2
+			) -> l1.glb(l2));
 	}
 
 	/**
@@ -272,11 +274,12 @@ public interface Lattice<L extends Lattice<L>>
 			L... others)
 			throws SemanticException {
 		return compress(
-				(L) this,
-				new IterableArray<>(others),
-				(
-						l1,
-						l2) -> l1.widening(l2));
+			(L) this,
+			new IterableArray<>(others),
+			(
+					l1,
+					l2
+			) -> l1.widening(l2));
 	}
 
 	/**
@@ -295,11 +298,12 @@ public interface Lattice<L extends Lattice<L>>
 			Iterable<L> others)
 			throws SemanticException {
 		return compress(
-				(L) this,
-				others,
-				(
-						l1,
-						l2) -> l1.widening(l2));
+			(L) this,
+			others,
+			(
+					l1,
+					l2
+			) -> l1.widening(l2));
 	}
 
 	/**
@@ -336,11 +340,12 @@ public interface Lattice<L extends Lattice<L>>
 			L... others)
 			throws SemanticException {
 		return compress(
-				(L) this,
-				new IterableArray<>(others),
-				(
-						l1,
-						l2) -> l1.narrowing(l2));
+			(L) this,
+			new IterableArray<>(others),
+			(
+					l1,
+					l2
+			) -> l1.narrowing(l2));
 	}
 
 	/**
@@ -359,11 +364,12 @@ public interface Lattice<L extends Lattice<L>>
 			Iterable<L> others)
 			throws SemanticException {
 		return compress(
-				(L) this,
-				others,
-				(
-						l1,
-						l2) -> l1.narrowing(l2));
+			(L) this,
+			others,
+			(
+					l1,
+					l2
+			) -> l1.narrowing(l2));
 	}
 
 	private static <L extends Lattice<L>> L compress(

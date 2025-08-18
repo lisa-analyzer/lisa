@@ -22,11 +22,7 @@ import java.util.Map;
  * @param <A> the type of {@link AbstractLattice} contained into the analysis
  *                state
  */
-public class AnalyzedCFG<A extends AbstractLattice<A>>
-		extends
-		CFG
-		implements
-		BaseLattice<AnalyzedCFG<A>> {
+public class AnalyzedCFG<A extends AbstractLattice<A>> extends CFG implements BaseLattice<AnalyzedCFG<A>> {
 
 	/**
 	 * Error message for the inability to lub two graphs.

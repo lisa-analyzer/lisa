@@ -8,9 +8,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CodeUnit
-		extends
-		ProgramUnit {
+public class CodeUnit extends ProgramUnit {
 
 	/**
 	 * Builds a unit, defined at the given location.

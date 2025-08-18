@@ -80,9 +80,9 @@ public class WorksetTest {
 			assertSame("pop() did not return the same element of peek()", peeked, popped);
 			if (lifo)
 				assertSame(
-						"pop() did not return the top-most element",
-						processed.get(processed.size() - i - 1),
-						popped);
+					"pop() did not return the top-most element",
+					processed.get(processed.size() - i - 1),
+					popped);
 			else
 				assertSame("pop() did not return the bottom-most element", processed.get(i), popped);
 
@@ -149,145 +149,153 @@ public class WorksetTest {
 		});
 		assertEquals("Set of seen elements contains duplicates", set.size(), list.size());
 		assertTrue(
-				"Set of seen elements does not contain all elements",
-				elementsSet.containsAll(set) && set.containsAll(elementsSet));
+			"Set of seen elements does not contain all elements",
+			elementsSet.containsAll(set) && set.containsAll(elementsSet));
 	}
 
 	@Test
 	public void VisitOnceWsTest() {
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
-				false,
-				(
-						ws,
-						lifo,
-						el) -> linear(ws, lifo, false, el),
-				"a",
-				"b",
-				"c",
-				"d",
-				"d",
-				"f",
-				"a",
-				"b",
-				"i");
+			VisitOnceFIFOWorkingSet.mk(),
+			false,
+			(
+					ws,
+					lifo,
+					el
+			) -> linear(ws, lifo, false, el),
+			"a",
+			"b",
+			"c",
+			"d",
+			"d",
+			"f",
+			"a",
+			"b",
+			"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
-				false,
-				(
-						ws,
-						lifo,
-						el) -> linear(ws, lifo, false, el),
-				"a",
-				null,
-				"c",
-				"d",
-				"d",
-				"f",
-				"a",
-				"b",
-				null,
-				"i");
+			VisitOnceFIFOWorkingSet.mk(),
+			false,
+			(
+					ws,
+					lifo,
+					el
+			) -> linear(ws, lifo, false, el),
+			"a",
+			null,
+			"c",
+			"d",
+			"d",
+			"f",
+			"a",
+			"b",
+			null,
+			"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
-				false,
-				(
-						ws,
-						lifo,
-						el) -> random(ws, lifo, false, el),
-				"a",
-				"b",
-				"c",
-				"d",
-				"d",
-				"f",
-				"a",
-				"b",
-				"i");
+			VisitOnceFIFOWorkingSet.mk(),
+			false,
+			(
+					ws,
+					lifo,
+					el
+			) -> random(ws, lifo, false, el),
+			"a",
+			"b",
+			"c",
+			"d",
+			"d",
+			"f",
+			"a",
+			"b",
+			"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
-				false,
-				(
-						ws,
-						lifo,
-						el) -> random(ws, lifo, false, el),
-				"a",
-				null,
-				"c",
-				"d",
-				"d",
-				"f",
-				"a",
-				"b",
-				null,
-				"i");
+			VisitOnceFIFOWorkingSet.mk(),
+			false,
+			(
+					ws,
+					lifo,
+					el
+			) -> random(ws, lifo, false, el),
+			"a",
+			null,
+			"c",
+			"d",
+			"d",
+			"f",
+			"a",
+			"b",
+			null,
+			"i");
 
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
-				true,
-				(
-						ws,
-						lifo,
-						el) -> linear(ws, lifo, false, el),
-				"a",
-				"b",
-				"c",
-				"d",
-				"d",
-				"f",
-				"a",
-				"b",
-				"i");
+			VisitOnceLIFOWorkingSet.mk(),
+			true,
+			(
+					ws,
+					lifo,
+					el
+			) -> linear(ws, lifo, false, el),
+			"a",
+			"b",
+			"c",
+			"d",
+			"d",
+			"f",
+			"a",
+			"b",
+			"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
-				true,
-				(
-						ws,
-						lifo,
-						el) -> linear(ws, lifo, false, el),
-				"a",
-				null,
-				"c",
-				"d",
-				"d",
-				"f",
-				"a",
-				"b",
-				null,
-				"i");
+			VisitOnceLIFOWorkingSet.mk(),
+			true,
+			(
+					ws,
+					lifo,
+					el
+			) -> linear(ws, lifo, false, el),
+			"a",
+			null,
+			"c",
+			"d",
+			"d",
+			"f",
+			"a",
+			"b",
+			null,
+			"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
-				true,
-				(
-						ws,
-						lifo,
-						el) -> random(ws, lifo, false, el),
-				"a",
-				"b",
-				"c",
-				"d",
-				"d",
-				"f",
-				"a",
-				"b",
-				"i");
+			VisitOnceLIFOWorkingSet.mk(),
+			true,
+			(
+					ws,
+					lifo,
+					el
+			) -> random(ws, lifo, false, el),
+			"a",
+			"b",
+			"c",
+			"d",
+			"d",
+			"f",
+			"a",
+			"b",
+			"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
-				true,
-				(
-						ws,
-						lifo,
-						el) -> random(ws, lifo, false, el),
-				"a",
-				null,
-				"c",
-				"d",
-				"d",
-				"f",
-				"a",
-				"b",
-				null,
-				"i");
+			VisitOnceLIFOWorkingSet.mk(),
+			true,
+			(
+					ws,
+					lifo,
+					el
+			) -> random(ws, lifo, false, el),
+			"a",
+			null,
+			"c",
+			"d",
+			"d",
+			"f",
+			"a",
+			"b",
+			null,
+			"i");
 	}
 
 }

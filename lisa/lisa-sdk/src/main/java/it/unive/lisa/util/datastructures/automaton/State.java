@@ -6,9 +6,7 @@ package it.unive.lisa.util.datastructures.automaton;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public final class State
-		implements
-		Comparable<State> {
+public final class State implements Comparable<State> {
 
 	/**
 	 * Whether this state is final.

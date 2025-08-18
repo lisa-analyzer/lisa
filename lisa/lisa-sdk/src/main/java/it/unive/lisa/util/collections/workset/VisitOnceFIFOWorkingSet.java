@@ -15,9 +15,7 @@ import java.util.LinkedList;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class VisitOnceFIFOWorkingSet<E>
-		implements
-		VisitOnceWorkingSet<E> {
+public class VisitOnceFIFOWorkingSet<E> implements VisitOnceWorkingSet<E> {
 
 	private final Deque<E> ws;
 

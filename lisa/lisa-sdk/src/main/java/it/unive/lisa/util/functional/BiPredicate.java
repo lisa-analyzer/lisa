@@ -12,9 +12,7 @@ package it.unive.lisa.util.functional;
  *                predicate
  */
 @FunctionalInterface
-public interface BiPredicate<T,
-		U,
-		E extends Exception> {
+public interface BiPredicate<T, U, E extends Exception> {
 
 	/**
 	 * Evaluates this predicate on the given arguments.

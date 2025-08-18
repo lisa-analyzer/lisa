@@ -18,9 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OrderPreservingAssigningStrategy
-		implements
-		ParameterAssigningStrategy {
+public class OrderPreservingAssigningStrategy implements ParameterAssigningStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -31,23 +29,21 @@ public class OrderPreservingAssigningStrategy
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
-					Call call,
-					AnalysisState<A> callState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					Parameter[] formals,
-					ExpressionSet[] parameters)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
+			Call call,
+			AnalysisState<A> callState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			Parameter[] formals,
+			ExpressionSet[] parameters)
+			throws SemanticException {
 		// prepare the state for the call: assign the value to each parameter
 		AnalysisState<A> prepared = callState;
 		for (int i = 0; i < formals.length; i++) {
 			AnalysisState<A> temp = prepared.bottom();
 			for (SymbolicExpression exp : parameters[i])
 				temp = temp
-						.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp,
-								call));
+					.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp, call));
 			prepared = temp;
 		}
 

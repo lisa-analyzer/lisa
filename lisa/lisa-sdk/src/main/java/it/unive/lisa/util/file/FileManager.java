@@ -120,10 +120,7 @@ public class FileManager {
 			String name,
 			WriteAction filler)
 			throws IOException {
-		mkOutputFile(
-				cleanupCFGName(name) + ".dot",
-				false,
-				filler);
+		mkOutputFile(cleanupCFGName(name) + ".dot", false, filler);
 	}
 
 	/**
@@ -144,10 +141,7 @@ public class FileManager {
 			String name,
 			WriteAction filler)
 			throws IOException {
-		mkOutputFile(
-				cleanupCFGName(name) + ".json",
-				false,
-				filler);
+		mkOutputFile(cleanupCFGName(name) + ".json", false, filler);
 	}
 
 	/**
@@ -168,10 +162,7 @@ public class FileManager {
 			String name,
 			WriteAction filler)
 			throws IOException {
-		mkOutputFile(
-				cleanupCFGName(name) + ".graphml",
-				false,
-				filler);
+		mkOutputFile(cleanupCFGName(name) + ".graphml", false, filler);
 	}
 
 	/**
@@ -191,10 +182,7 @@ public class FileManager {
 			String name,
 			WriteAction filler)
 			throws IOException {
-		mkOutputFile(
-				cleanupCFGName(name) + ".html",
-				false,
-				filler);
+		mkOutputFile(cleanupCFGName(name) + ".html", false, filler);
 	}
 
 	/**
@@ -271,8 +259,7 @@ public class FileManager {
 		File file = new File(parent, cleanFileName(name, false));
 
 		if (!parent.exists() && !parent.mkdirs())
-			throw new IOException(
-					"Unable to create directory structure for " + file);
+			throw new IOException("Unable to create directory structure for " + file);
 
 		createdFiles.add(FilenameUtils.separatorsToUnix(workdir.toPath().relativize(file.toPath()).toString()));
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8.newEncoder())) {
@@ -282,11 +269,8 @@ public class FileManager {
 		}
 	}
 
-	private final static int[] illegalChars = {
-			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
-			29,
-			30, 31, 34, 42, 47, 58, 60, 62, 63, 92, 124
-	};
+	private final static int[] illegalChars = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+			20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 34, 42, 47, 58, 60, 62, 63, 92, 124 };
 
 	private static String cleanFileName(
 			String name,
@@ -345,20 +329,17 @@ public class FileManager {
 		}
 
 		for (String file : files)
-			try (InputStream stream = getClass()
-					.getClassLoader()
-					.getResourceAsStream(
-							"html-graph/" + file)) {
+			try (InputStream stream = getClass().getClassLoader().getResourceAsStream("html-graph/" + file)) {
 				String content = IOUtils.toString(stream, StandardCharsets.UTF_8);
 				int pos = file.lastIndexOf("/");
 				if (pos == -1)
 					mkOutputFile(file, false, writer -> writer.write(content));
 				else
 					mkOutputFile(
-							file.substring(0, pos),
-							file.substring(pos + 1),
-							false,
-							writer -> writer.write(content));
+						file.substring(0, pos),
+						file.substring(pos + 1),
+						false,
+						writer -> writer.write(content));
 			}
 	}
 

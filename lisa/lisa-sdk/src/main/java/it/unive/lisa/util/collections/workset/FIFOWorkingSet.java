@@ -12,9 +12,7 @@ import java.util.LinkedList;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public final class FIFOWorkingSet<E>
-		implements
-		WorkingSet<E> {
+public final class FIFOWorkingSet<E> implements WorkingSet<E> {
 
 	private final Deque<E> ws;
 

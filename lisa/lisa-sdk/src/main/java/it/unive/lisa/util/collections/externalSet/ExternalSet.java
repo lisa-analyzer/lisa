@@ -21,9 +21,7 @@ import java.util.function.UnaryOperator;
  * 
  * @param <T> the type of elements inside this set
  */
-public interface ExternalSet<T>
-		extends
-		Set<T> {
+public interface ExternalSet<T> extends Set<T> {
 
 	/**
 	 * Yields the cache that this set is connected to.

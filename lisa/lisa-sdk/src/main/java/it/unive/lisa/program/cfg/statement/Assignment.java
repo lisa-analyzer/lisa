@@ -20,9 +20,7 @@ import it.unive.lisa.type.Untyped;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Assignment
-		extends
-		BinaryExpression {
+public class Assignment extends BinaryExpression {
 
 	/**
 	 * Builds the assignment, assigning {@code expression} to {@code target},
@@ -120,14 +118,13 @@ public class Assignment
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		return interprocedural.getAnalysis().assign(state, left, right, this);
 	}
 

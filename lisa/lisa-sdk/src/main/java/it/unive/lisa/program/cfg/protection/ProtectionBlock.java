@@ -5,8 +5,16 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * A protection block, which is used to handle errors that might occur during
+ * the execution of a program. It consists of a try block, one or more catch
+ * blocks, an optional else block, and an optional finally block.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ProtectionBlock {
 
 	private final ProtectedBlock tryBlock;
@@ -19,12 +27,27 @@ public class ProtectionBlock {
 
 	private Statement closing;
 
+	/**
+	 * Builds the protection block.
+	 * 
+	 * @param tryBlock     the try block of this protection block
+	 * @param catchBlocks  the list of catch blocks of this protection block
+	 * @param elseBlock    the else block of this protection block, if any
+	 * @param finallyBlock the finally block of this protection block, if any
+	 * @param closing      the closing statement of this protection block, if it
+	 *                         is unique; if this protection block can end in
+	 *                         multiple statements, this should be {@code null}
+	 */
 	public ProtectionBlock(
 			ProtectedBlock tryBlock,
 			List<CatchBlock> catchBlocks,
 			ProtectedBlock elseBlock,
 			ProtectedBlock finallyBlock,
 			Statement closing) {
+		Objects.requireNonNull(tryBlock, "The try block of a protection block cannot be null");
+		Objects.requireNonNull(catchBlocks, "The list of catch blocks of a protection block cannot be null");
+		if (catchBlocks.isEmpty())
+			throw new IllegalArgumentException("A protection block must have at least one catch block");
 		this.tryBlock = tryBlock;
 		this.catchBlocks = catchBlocks;
 		this.elseBlock = elseBlock;
@@ -32,31 +55,83 @@ public class ProtectionBlock {
 		this.closing = closing;
 	}
 
+	/**
+	 * Yields the try block of this protection block.
+	 * 
+	 * @return the try block
+	 */
 	public ProtectedBlock getTryBlock() {
 		return tryBlock;
 	}
 
+	/**
+	 * Yields the list of {@link CatchBlock}s of this protection block.
+	 * 
+	 * @return the list of catch blocks
+	 */
 	public List<CatchBlock> getCatchBlocks() {
 		return catchBlocks;
 	}
 
+	/**
+	 * Yields the else block of this protection block, if any. If this
+	 * protection block does not have an else block, this method returns
+	 * {@code null}.
+	 * 
+	 * @return the else block, or {@code null} if there is no else block
+	 */
 	public ProtectedBlock getElseBlock() {
 		return elseBlock;
 	}
 
+	/**
+	 * Yields the finally block of this protection block, if any. If this
+	 * protection block does not have a finally block, this method returns
+	 * {@code null}.
+	 * 
+	 * @return the finally block, or {@code null} if there is no finally block
+	 */
 	public ProtectedBlock getFinallyBlock() {
 		return finallyBlock;
 	}
 
+	/**
+	 * Yields the last statement to be executed as part of this protection
+	 * block, if it is unique. If this protection block can end in multiple
+	 * statements (e.g., returns, throws, breaks, continues), this method
+	 * returns {@code null}.
+	 * 
+	 * @return the closing statement, or {@code null} if there is no unique
+	 *             closing statement
+	 */
 	public Statement getClosing() {
 		return closing;
 	}
 
+	/**
+	 * Sets the last statement to be executed as part of this protection block,
+	 * if it is unique. If this protection block can end in multiple statements
+	 * (e.g., returns, throws, breaks, continues), this method should be invoked
+	 * with {@code null} to indicate that there is no unique closing statement.
+	 * 
+	 * @param closing the closing statement, or {@code null} if there is no
+	 *                    unique closing statement
+	 */
 	public void setClosing(
 			Statement closing) {
 		this.closing = closing;
 	}
 
+	/**
+	 * Yields the full body of this protection block, that is, the body of the
+	 * try block, the catch blocks, the else block (if any), and the finally
+	 * block (if any and if requested).
+	 * 
+	 * @param includeFinally whether to include the body of the finally block,
+	 *                           if present
+	 * 
+	 * @return the full body of this protection block
+	 */
 	public Collection<Statement> getFullBody(
 			boolean includeFinally) {
 		Collection<Statement> all = new LinkedList<>(tryBlock.getBody());
@@ -68,6 +143,9 @@ public class ProtectionBlock {
 		return all;
 	}
 
+	/**
+	 * Simplifies this block, removing all {@link NoOp}s from its body.
+	 */
 	public void simplify() {
 		tryBlock.getBody().removeIf(NoOp.class::isInstance);
 		for (CatchBlock cb : catchBlocks)
@@ -86,6 +164,7 @@ public class ProtectionBlock {
 		result = prime * result + ((catchBlocks == null) ? 0 : catchBlocks.hashCode());
 		result = prime * result + ((elseBlock == null) ? 0 : elseBlock.hashCode());
 		result = prime * result + ((finallyBlock == null) ? 0 : finallyBlock.hashCode());
+		result = prime * result + ((closing == null) ? 0 : closing.hashCode());
 		return result;
 	}
 
@@ -118,6 +197,11 @@ public class ProtectionBlock {
 			if (other.finallyBlock != null)
 				return false;
 		} else if (!finallyBlock.equals(other.finallyBlock))
+			return false;
+		if (closing == null) {
+			if (other.closing != null)
+				return false;
+		} else if (!closing.equals(other.closing))
 			return false;
 		return true;
 	}

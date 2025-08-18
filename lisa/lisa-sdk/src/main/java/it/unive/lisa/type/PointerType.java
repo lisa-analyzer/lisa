@@ -6,9 +6,7 @@ package it.unive.lisa.type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface PointerType
-		extends
-		Type {
+public interface PointerType extends Type {
 
 	/**
 	 * Yields the inner type, that is, the type of the memory region that

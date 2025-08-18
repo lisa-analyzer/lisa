@@ -16,9 +16,7 @@ import java.util.Set;
  *                lattice
  */
 public interface DataflowDomainLattice<L extends DataflowDomainLattice<L, E>,
-		E extends DataflowElement<E>>
-		extends
-		ValueLattice<L> {
+		E extends DataflowElement<E>> extends ValueLattice<L> {
 
 	/**
 	 * Yields the {@link DataflowElement}s contained in this domain instance.

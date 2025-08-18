@@ -13,9 +13,7 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableObject
-		extends
-		SerializableValue {
+public class SerializableObject extends SerializableValue {
 
 	private final SortedMap<String, SerializableValue> fields;
 

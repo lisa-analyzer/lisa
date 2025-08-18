@@ -14,9 +14,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class PushAny
-		extends
-		ValueExpression {
+public class PushAny extends ValueExpression {
 
 	/**
 	 * Builds the push any.

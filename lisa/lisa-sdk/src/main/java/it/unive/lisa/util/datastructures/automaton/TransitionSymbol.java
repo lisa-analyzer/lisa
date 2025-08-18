@@ -7,9 +7,7 @@ package it.unive.lisa.util.datastructures.automaton;
  * 
  * @param <T> the concrete type of the symbol
  */
-public interface TransitionSymbol<T>
-		extends
-		Comparable<T> {
+public interface TransitionSymbol<T> extends Comparable<T> {
 
 	/**
 	 * The string used to represent an unknown transaction symbol, that can take

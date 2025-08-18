@@ -24,9 +24,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Not
-		extends
-		it.unive.lisa.program.cfg.statement.UnaryExpression {
+public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 
 	/**
 	 * Builds the logical negation.
@@ -49,22 +47,20 @@ public class Not
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression expr,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression expr,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (analysis.getRuntimeTypesOf(state, expr, this).stream().noneMatch(Type::isBooleanType))
 			return state.bottom();
 
-		return analysis
-				.smallStepSemantics(
-						state,
-						new UnaryExpression(getStaticType(), expr, LogicalNegation.INSTANCE, getLocation()),
-						this);
+		return analysis.smallStepSemantics(
+			state,
+			new UnaryExpression(getStaticType(), expr, LogicalNegation.INSTANCE, getLocation()),
+			this);
 	}
 
 }

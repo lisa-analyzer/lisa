@@ -9,7 +9,5 @@ import it.unive.lisa.checks.Check;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface SyntacticCheck
-		extends
-		Check<CheckTool> {
+public interface SyntacticCheck extends Check<CheckTool> {
 }

@@ -35,9 +35,7 @@ import java.util.function.Predicate;
  * @param <A> the type of {@link AbstractDomain} contained into the analysis
  *                state
  */
-public class OptimizedFixpoint<A extends AbstractLattice<A>>
-		extends
-		Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
+public class OptimizedFixpoint<A extends AbstractLattice<A>> extends Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
 
 	private final Predicate<Statement> hotspots;
 
@@ -67,10 +65,8 @@ public class OptimizedFixpoint<A extends AbstractLattice<A>>
 			FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
 			Map<Statement, CompoundState<A>> initialResult)
 			throws FixpointException {
-		Map<Statement,
-				CompoundState<A>> result = initialResult == null
-						? new HashMap<>(graph.getNodesCount())
-						: new HashMap<>(initialResult);
+		Map<Statement, CompoundState<A>> result = initialResult == null ? new HashMap<>(graph.getNodesCount())
+				: new HashMap<>(initialResult);
 
 		Map<Statement, Statement[]> bbs = graph.getBasicBlocks();
 		startingPoints.keySet().forEach(ws::push);
@@ -84,21 +80,17 @@ public class OptimizedFixpoint<A extends AbstractLattice<A>>
 			Statement current = ws.pop();
 
 			if (current == null)
-				throw new FixpointException(
-						"null node encountered during fixpoint in '" + graph + "'");
+				throw new FixpointException("null node encountered during fixpoint in '" + graph + "'");
 			if (!graph.containsNode(current))
-				throw new FixpointException(
-						"'" + current + "' is not part of '" + graph + "'");
+				throw new FixpointException("'" + current + "' is not part of '" + graph + "'");
 
 			Statement[] bb = bbs.get(current);
 			if (bb == null)
-				throw new FixpointException(
-						"'" + current + "' is not the leader of a basic block of '" + graph + "'");
+				throw new FixpointException("'" + current + "' is not the leader of a basic block of '" + graph + "'");
 
 			CompoundState<A> entrystate = getEntryState(current, startingPoints.get(current), implementation, result);
 			if (entrystate == null)
-				throw new FixpointException(
-						"'" + current + "' does not have an entry state");
+				throw new FixpointException("'" + current + "' does not have an entry state");
 
 			newApprox = analyze(result, implementation, entrystate, bb);
 

@@ -11,9 +11,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ThreeTaint
-		implements
-		TaintLattice<ThreeTaint> {
+public class ThreeTaint implements TaintLattice<ThreeTaint> {
 
 	/**
 	 * The top instance of this taint lattice, representing values that are
@@ -74,10 +72,8 @@ public class ThreeTaint
 
 	@Override
 	public StructuredRepresentation representation() {
-		return this == BOTTOM
-				? Lattice.bottomRepresentation()
-				: this == CLEAN
-						? new StringRepresentation("_")
+		return this == BOTTOM ? Lattice.bottomRepresentation()
+				: this == CLEAN ? new StringRepresentation("_")
 						: this == TAINTED ? new StringRepresentation("#") : Lattice.topRepresentation();
 	}
 

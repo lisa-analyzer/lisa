@@ -22,9 +22,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class NaryStatement
-		extends
-		Statement {
+public abstract class NaryStatement extends Statement {
 
 	/**
 	 * The sub-expressions of this statement
@@ -80,10 +78,7 @@ public abstract class NaryStatement
 		super(cfg, location);
 		Objects.requireNonNull(subExpressions, "The array of sub-expressions of a statement cannot be null");
 		for (int i = 0; i < subExpressions.length; i++)
-			Objects
-					.requireNonNull(
-							subExpressions[i],
-							"The " + i + "-th sub-expression of a statement cannot be null");
+			Objects.requireNonNull(subExpressions[i], "The " + i + "-th sub-expression of a statement cannot be null");
 		Objects.requireNonNull(constructName, "The name of the native construct of a statement cannot be null");
 		Objects.requireNonNull(order, "The evaluation order of a statement cannot be null");
 		this.constructName = constructName;
@@ -243,12 +238,11 @@ public abstract class NaryStatement
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
@@ -286,13 +280,12 @@ public abstract class NaryStatement
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException;
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException;
 
 	/**
 	 * Semantics of an n-ary statements is evaluated by computing the semantics
@@ -303,12 +296,11 @@ public abstract class NaryStatement
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
-					AnalysisState<A> exitState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		// TODO this evaluation should also happen backward, but the current
@@ -353,13 +345,12 @@ public abstract class NaryStatement
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		return forwardSemanticsAux(interprocedural, state, params, expressions);
 	}
 

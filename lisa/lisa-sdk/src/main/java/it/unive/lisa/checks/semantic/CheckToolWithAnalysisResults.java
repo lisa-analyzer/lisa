@@ -29,10 +29,7 @@ import java.util.Map;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} ran during the analysis
  */
-public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
-		extends
-		CheckTool {
+public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>, D extends AbstractDomain<A>> extends CheckTool {
 
 	private final Map<CFG, Collection<AnalyzedCFG<A>>> results;
 
@@ -177,9 +174,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>,
 			store.put(e, result.getAnalysisStateAfter(e));
 
 		try {
-			@SuppressWarnings({
-					"rawtypes", "unchecked"
-			})
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			Analysis<A, D> analysis = new Analysis(getConfiguration().analysis);
 			return callgraph.resolve(call, call.parameterTypes(store, analysis), null);
 		} catch (CallResolutionException e) {

@@ -37,9 +37,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAddOrConcat
-		extends
-		it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the addition.
@@ -68,14 +66,13 @@ public class IMPAddOrConcat
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 		BinaryOperator op;
 		TypeSystem types = getProgram().getTypes();
@@ -112,11 +109,8 @@ public class IMPAddOrConcat
 					continue;
 
 				Type t = Type.commonSupertype(op.typeInference(types, ltypes, rtypes), Untyped.INSTANCE);
-				result = result
-						.lub(
-								analysis
-										.smallStepSemantics(state,
-												new BinaryExpression(t, left, right, op, getLocation()), this));
+				result = result.lub(
+					analysis.smallStepSemantics(state, new BinaryExpression(t, left, right, op, getLocation()), this));
 			}
 
 		return result;

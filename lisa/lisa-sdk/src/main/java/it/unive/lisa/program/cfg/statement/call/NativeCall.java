@@ -30,12 +30,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NativeCall
-		extends
-		Call
-		implements
-		CanRemoveReceiver,
-		ResolvedCall {
+public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall {
 
 	/**
 	 * The native targets of this call
@@ -116,13 +111,13 @@ public class NativeCall
 			UnresolvedCall source,
 			Collection<NativeCFG> targets) {
 		this(
-				source.getCFG(),
-				source.getLocation(),
-				source.getCallType(),
-				source.getQualifier(),
-				source.getTargetName(),
-				targets,
-				source.getParameters());
+			source.getCFG(),
+			source.getLocation(),
+			source.getCallType(),
+			source.getQualifier(),
+			source.getTargetName(),
+			targets,
+			source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);
@@ -202,13 +197,12 @@ public class NativeCall
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 
 		Expression[] parameters = getSubExpressions();
@@ -216,16 +210,14 @@ public class NativeCall
 		for (NativeCFG nat : targets)
 			try {
 				Pair<AnalysisState<A>, ExpressionSet[]> prepared = strategy
-						.prepare(this, state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
+					.prepare(this, state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
 
 				NaryExpression rewritten = nat.rewrite(this, parameters);
 				result = result
-						.lub(rewritten.forwardSemanticsAux(interprocedural, state, prepared.getRight(), expressions));
+					.lub(rewritten.forwardSemanticsAux(interprocedural, state, prepared.getRight(), expressions));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
-				throw new SemanticException(
-						"Unable to resolve call " + this,
-						e);
+				throw new SemanticException("Unable to resolve call " + this, e);
 			}
 
 		return result;
@@ -234,15 +226,15 @@ public class NativeCall
 	@Override
 	public TruncatedParamsCall removeFirstParameter() {
 		return new TruncatedParamsCall(
-				new NativeCall(
-						getCFG(),
-						getLocation(),
-						getCallType(),
-						getQualifier(),
-						getFullTargetName(),
-						getOrder(),
-						targets,
-						CanRemoveReceiver.truncate(getParameters())));
+			new NativeCall(
+				getCFG(),
+				getLocation(),
+				getCallType(),
+				getQualifier(),
+				getFullTargetName(),
+				getOrder(),
+				targets,
+				CanRemoveReceiver.truncate(getParameters())));
 	}
 
 }

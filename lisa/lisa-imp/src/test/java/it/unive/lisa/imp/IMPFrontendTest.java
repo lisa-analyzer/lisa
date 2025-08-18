@@ -8,9 +8,7 @@ import it.unive.lisa.util.testing.TestConfiguration;
 import java.nio.file.Path;
 import org.junit.Test;
 
-public class IMPFrontendTest
-		extends
-		AnalysisTestExecutor {
+public class IMPFrontendTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testExampleProgram() {

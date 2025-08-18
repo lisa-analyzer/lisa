@@ -28,9 +28,7 @@ import java.util.Set;
  *          "https://en.wikipedia.org/wiki/Dominator_(graph_theory)">Dominators
  *          (graph theory)</a>
  */
-public class Dominators<G extends Graph<G, N, E>,
-		N extends Node<G, N, E>,
-		E extends Edge<G, N, E>> {
+public class Dominators<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
 
 	private final Map<N, Set<N>> dominators;
 

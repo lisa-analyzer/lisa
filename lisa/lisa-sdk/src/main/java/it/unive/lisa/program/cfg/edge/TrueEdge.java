@@ -16,9 +16,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TrueEdge
-		extends
-		Edge {
+public class TrueEdge extends Edge {
 
 	/**
 	 * Builds the edge.
@@ -38,11 +36,10 @@ public class TrueEdge
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		ExpressionSet exprs = state.getComputedExpressions();
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : exprs)
@@ -51,11 +48,10 @@ public class TrueEdge
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		return traverseForward(state, analysis);
 	}
 

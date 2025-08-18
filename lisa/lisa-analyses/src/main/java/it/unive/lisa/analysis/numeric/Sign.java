@@ -34,9 +34,7 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Sign
-		implements
-		BaseNonRelationalValueDomain<SignLattice> {
+public class Sign implements BaseNonRelationalValueDomain<SignLattice> {
 
 	@Override
 	public SignLattice evalNullConstant(
@@ -207,9 +205,7 @@ public class Sign
 			// - if `eval op start`, `update = U { start n v | eval op v, v in {
 			// +, 0, -} }`
 
-			SignLattice[] all = new SignLattice[] {
-					SignLattice.NEG, SignLattice.ZERO, SignLattice.POS
-			};
+			SignLattice[] all = new SignLattice[] { SignLattice.NEG, SignLattice.ZERO, SignLattice.POS };
 			if (operator == ComparisonGe.INSTANCE)
 				if (rightIsExpr) {
 					for (SignLattice s : all)

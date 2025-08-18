@@ -119,11 +119,10 @@ public abstract class Unit {
 	 */
 	public final Collection<CodeMember> getCodeMembersByName(
 			String name) {
-		return codeMembers
-				.values()
-				.stream()
-				.filter(c -> c.getDescriptor().getName().equals(name))
-				.collect(Collectors.toList());
+		return codeMembers.values()
+			.stream()
+			.filter(c -> c.getDescriptor().getName().equals(name))
+			.collect(Collectors.toList());
 	}
 
 	/**

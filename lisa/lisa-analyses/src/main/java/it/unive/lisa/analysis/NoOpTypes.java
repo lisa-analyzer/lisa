@@ -22,9 +22,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NoOpTypes
-		implements
-		TypeDomain<SingleTypeLattice> {
+public class NoOpTypes implements TypeDomain<SingleTypeLattice> {
 
 	@Override
 	public SingleTypeLattice makeLattice() {

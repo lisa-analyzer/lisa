@@ -5,9 +5,7 @@ package it.unive.lisa.interprocedural.callgraph;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CallGraphConstructionException
-		extends
-		Exception {
+public class CallGraphConstructionException extends Exception {
 
 	private static final long serialVersionUID = 3751365560725223528L;
 

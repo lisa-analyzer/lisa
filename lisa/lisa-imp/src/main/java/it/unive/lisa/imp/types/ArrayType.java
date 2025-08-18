@@ -38,9 +38,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class ArrayType
-		implements
-		it.unive.lisa.type.ArrayType {
+public final class ArrayType implements it.unive.lisa.type.ArrayType {
 
 	private static final Map<Pair<Type, Integer>, ArrayType> types = new HashMap<>();
 
@@ -200,12 +198,11 @@ public final class ArrayType
 		return new DefaultParamInitialization(cfg, location, this) {
 
 			@Override
-			public <A extends AbstractLattice<A>,
-					D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-							AnalysisState<A> state,
-							InterproceduralAnalysis<A, D> interprocedural,
-							StatementStore<A> expressions)
-							throws SemanticException {
+			public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+					AnalysisState<A> state,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException {
 				Analysis<A, D> analysis = interprocedural.getAnalysis();
 				Type type = getStaticType();
 				ReferenceType reftype = new ReferenceType(type);
@@ -223,10 +220,10 @@ public final class ArrayType
 
 				// we define the length of the array as a child element
 				AccessChild len = new AccessChild(
-						Int32Type.INSTANCE,
-						array,
-						new Variable(Untyped.INSTANCE, "len", getLocation()),
-						getLocation());
+					Int32Type.INSTANCE,
+					array,
+					new Variable(Untyped.INSTANCE, "len", getLocation()),
+					getLocation());
 
 				// TODO fix when we'll support multidimensional arrays
 				AnalysisState<
@@ -243,12 +240,11 @@ public final class ArrayType
 			}
 
 			@Override
-			public <A extends AbstractLattice<A>,
-					D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
-							AnalysisState<A> exitState,
-							InterproceduralAnalysis<A, D> interprocedural,
-							StatementStore<A> expressions)
-							throws SemanticException {
+			public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
+					AnalysisState<A> exitState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions)
+					throws SemanticException {
 				// TODO implement this when backward analysis will be out of
 				// beta
 				throw new UnsupportedOperationException();

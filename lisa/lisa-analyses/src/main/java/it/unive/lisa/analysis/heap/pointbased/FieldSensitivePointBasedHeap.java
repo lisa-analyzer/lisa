@@ -35,9 +35,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @see <a href=
  *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
  */
-public class FieldSensitivePointBasedHeap
-		extends
-		AllocationSiteBasedAnalysis<HeapEnvWithFields> {
+public class FieldSensitivePointBasedHeap extends AllocationSiteBasedAnalysis<HeapEnvWithFields> {
 
 	private final Rewriter rewriter = new Rewriter();
 
@@ -56,10 +54,10 @@ public class FieldSensitivePointBasedHeap
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
 		StackAllocationSite clone = new StackAllocationSite(
-				site.getStaticType(),
-				id.getCodeLocation().toString(),
-				site.isWeak(),
-				id.getCodeLocation());
+			site.getStaticType(),
+			id.getCodeLocation().toString(),
+			site.isWeak(),
+			id.getCodeLocation());
 		HeapEnvWithFields heap = store(state, id, clone);
 
 		Map<AllocationSite, ExpressionSet> newFields = new HashMap<>(state.fields.getMap());
@@ -68,18 +66,18 @@ public class FieldSensitivePointBasedHeap
 		if (state.fields.getKeys().contains(site)) {
 			for (SymbolicExpression field : state.fields.getState(site)) {
 				StackAllocationSite cloneWithField = new StackAllocationSite(
-						field.getStaticType(),
-						id.getCodeLocation().toString(),
-						field,
-						site.isWeak(),
-						id.getCodeLocation());
+					field.getStaticType(),
+					id.getCodeLocation().toString(),
+					field,
+					site.isWeak(),
+					id.getCodeLocation());
 
 				StackAllocationSite star_yWithField = new StackAllocationSite(
-						field.getStaticType(),
-						site.getCodeLocation().toString(),
-						field,
-						site.isWeak(),
-						site.getCodeLocation());
+					field.getStaticType(),
+					site.getCodeLocation().toString(),
+					field,
+					site.isWeak(),
+					site.getCodeLocation());
 				HeapReplacement replacement = new HeapReplacement();
 				replacement.addSource(star_yWithField);
 				replacement.addTarget(cloneWithField);
@@ -101,9 +99,9 @@ public class FieldSensitivePointBasedHeap
 		replacements.add(replacement);
 
 		return new HeapEnvWithFields(
-				heap.lattice,
-				heap.function,
-				new GenericMapLattice<>(state.fields.lattice, newFields));
+			heap.lattice,
+			heap.function,
+			new GenericMapLattice<>(state.fields.lattice, newFields));
 	}
 
 	@Override
@@ -145,11 +143,9 @@ public class FieldSensitivePointBasedHeap
 						addField(site, child, mapping);
 				}
 
-			return Pair
-					.of(
-							new HeapEnvWithFields(st.lattice, st.function,
-									new GenericMapLattice<>(st.fields.lattice, mapping)),
-							sss.getRight());
+			return Pair.of(
+				new HeapEnvWithFields(st.lattice, st.function, new GenericMapLattice<>(st.fields.lattice, mapping)),
+				sss.getRight());
 		} else if (expression instanceof MemoryAllocation) {
 			String loc = expression.getCodeLocation().getCodeLocation();
 			Set<AllocationSite> alreadyAllocated = getAllocatedAt(st, loc);
@@ -228,9 +224,7 @@ public class FieldSensitivePointBasedHeap
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public class Rewriter
-			extends
-			AllocationSiteBasedAnalysis<HeapEnvWithFields>.Rewriter {
+	public class Rewriter extends AllocationSiteBasedAnalysis<HeapEnvWithFields>.Rewriter {
 
 		@Override
 		public ExpressionSet visit(
@@ -274,18 +268,18 @@ public class FieldSensitivePointBasedHeap
 
 				if (site instanceof StackAllocationSite)
 					e = new StackAllocationSite(
-							expression.getStaticType(),
-							site.getLocationName(),
-							target,
-							site.isWeak(),
-							site.getCodeLocation());
+						expression.getStaticType(),
+						site.getLocationName(),
+						target,
+						site.isWeak(),
+						site.getCodeLocation());
 				else
 					e = new HeapAllocationSite(
-							expression.getStaticType(),
-							site.getLocationName(),
-							target,
-							site.isWeak(),
-							site.getCodeLocation());
+						expression.getStaticType(),
+						site.getLocationName(),
+						target,
+						site.isWeak(),
+						site.getCodeLocation());
 
 				// propagates the annotations of the child value expression to
 				// the newly created allocation site

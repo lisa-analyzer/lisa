@@ -7,9 +7,15 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.statement.Statement;
 
-public class BeginFinallyEdge
-		extends
-		Edge {
+/**
+ * An edge that connects a statement to the beginning of a finally block. The
+ * control flow is transferred to the finally block, creating a trace with a
+ * given index to distinguish between different paths that may lead to the same
+ * finally block.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class BeginFinallyEdge extends Edge {
 
 	private final int pathIdx;
 
@@ -18,6 +24,7 @@ public class BeginFinallyEdge
 	 * 
 	 * @param source      the source statement
 	 * @param destination the destination statement
+	 * @param pathIdx     the index of the path that this edge belongs to
 	 */
 	public BeginFinallyEdge(
 			Statement source,
@@ -52,13 +59,7 @@ public class BeginFinallyEdge
 
 	@Override
 	public String toString() {
-		return "[ "
-				+ getSource()
-				+ " ] -("
-				+ pathIdx
-				+ ")-> [ "
-				+ getDestination()
-				+ " ]";
+		return "[ " + getSource() + " ] -(" + pathIdx + ")-> [ " + getDestination() + " ]";
 	}
 
 	@Override
@@ -67,21 +68,19 @@ public class BeginFinallyEdge
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		// TODO implement the semantics here
 		return state;
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		return traverseForward(state, analysis);
 	}
 

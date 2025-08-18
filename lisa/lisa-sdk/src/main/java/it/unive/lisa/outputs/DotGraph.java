@@ -30,9 +30,7 @@ import org.apache.commons.text.StringEscapeUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DotGraph
-		extends
-		VisualGraph {
+public class DotGraph extends VisualGraph {
 
 	/**
 	 * The wrapped graph.
@@ -53,13 +51,12 @@ public class DotGraph
 	}
 
 	private static MutableGraph buildLegend() {
-		MutableGraph legend = Factory
-				.mutGraph("legend")
-				.graphAttrs()
-				.add(Label.html("Legend"))
-				.graphAttrs()
-				.add("style", "dotted")
-				.setCluster(true);
+		MutableGraph legend = Factory.mutGraph("legend")
+			.graphAttrs()
+			.add(Label.html("Legend"))
+			.graphAttrs()
+			.add("style", "dotted")
+			.setCluster(true);
 
 		StringBuilder builder = new StringBuilder();
 		String row = "<tr><td align=\"right\">%s&nbsp;</td><td align=\"left\"><font color=\"%s\">%s</font>, %s</td></tr>";
@@ -120,13 +117,12 @@ public class DotGraph
 			extra = "<br/><br/>" + dotEscape(format(label));
 
 		String nodeName = nodeName(node.getId());
-		MutableNode n = Factory
-				.mutNode(nodeName)
-				.setName(nodeName)
-				.add(Label.html(l + extra))
-				.add(Shape.RECT)
-				// we keep trace of what was the original id of the node
-				.add("id", nodeName);
+		MutableNode n = Factory.mutNode(nodeName)
+			.setName(nodeName)
+			.add(Label.html(l + extra))
+			.add(Shape.RECT)
+			// we keep trace of what was the original id of the node
+			.add("id", nodeName);
 
 		if (!entry && !exit)
 			n = n.add(Color.GRAY);
@@ -173,8 +169,7 @@ public class DotGraph
 			}
 			return builder.append(" }\n").toString();
 		} else
-			throw new IllegalArgumentException(
-					"Unknown value type: " + value.getClass().getName());
+			throw new IllegalArgumentException("Unknown value type: " + value.getClass().getName());
 	}
 
 	/**

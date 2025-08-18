@@ -7,9 +7,7 @@ package it.unive.lisa;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AnalysisExecutionException
-		extends
-		AnalysisException {
+public class AnalysisExecutionException extends AnalysisException {
 
 	private static final long serialVersionUID = 3947756263710715139L;
 

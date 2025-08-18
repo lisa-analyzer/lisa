@@ -23,9 +23,7 @@ import java.util.Set;
  *                the non redundant set lattice
  */
 public class NonRedundantPowerset<S extends NonRedundantSetDomainLattice<S, L> & ValueLattice<S>,
-		L extends ValueLattice<L>>
-		implements
-		ValueDomain<S> {
+		L extends ValueLattice<L>> implements ValueDomain<S> {
 
 	/**
 	 * An instance of the underlying lattice from which top and bottom can be

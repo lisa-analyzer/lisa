@@ -13,9 +13,7 @@ import it.unive.lisa.lattices.heap.allocations.AllocationSites;
  * @see <a href=
  *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
  */
-public class PointBasedHeap
-		extends
-		AllocationSiteBasedAnalysis<HeapEnvironment<AllocationSites>> {
+public class PointBasedHeap extends AllocationSiteBasedAnalysis<HeapEnvironment<AllocationSites>> {
 
 	@Override
 	public HeapEnvironment<AllocationSites> makeLattice() {

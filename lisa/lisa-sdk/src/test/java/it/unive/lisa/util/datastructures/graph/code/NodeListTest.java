@@ -33,8 +33,14 @@ public class NodeListTest {
 			Collection<T> act) {
 		Set<T> ex = exp instanceof Set ? (Set<T>) exp : new HashSet<>(exp);
 		Set<T> ac = act instanceof Set ? (Set<T>) act : new HashSet<>(act);
-		return "Set of " + objs + " is different " + extra + "\nonly expected: " + SetUtils.difference(ex, ac)
-				+ "\nonly actual: " + SetUtils.difference(ac, ex);
+		return "Set of "
+			+ objs
+			+ " is different "
+			+ extra
+			+ "\nonly expected: "
+			+ SetUtils.difference(ex, ac)
+			+ "\nonly actual: "
+			+ SetUtils.difference(ac, ex);
 	}
 
 	private void verify(
@@ -63,14 +69,12 @@ public class NodeListTest {
 		assertTrue(msg("nodes", extra, nodes, matrix.getNodes()), isEqualCollection(nodes, matrix.getNodes()));
 		assertTrue(msg("edges", extra, edges, matrix.getEdges()), isEqualCollection(edges, matrix.getEdges()));
 		assertTrue(
-				msg("entries", extra, entries, matrix.getEntries()),
-				isEqualCollection(entries, matrix.getEntries()));
+			msg("entries", extra, entries, matrix.getEntries()),
+			isEqualCollection(entries, matrix.getEntries()));
 		assertTrue(msg("exits", extra, exits, matrix.getExits()), isEqualCollection(exits, matrix.getExits()));
 
 		for (TestCodeNode node : nodes) {
-			assertTrue(
-					"matrix does not contain " + node,
-					matrix.containsNode(node));
+			assertTrue("matrix does not contain " + node, matrix.containsNode(node));
 			Collection<TestCodeEdge> ins = new HashSet<>();
 			Collection<TestCodeEdge> outs = new HashSet<>();
 
@@ -82,29 +86,29 @@ public class NodeListTest {
 					ins.add(new TestCodeEdge(entry.getKey(), node));
 
 			assertTrue(
-					msg("ingoing edges", extra, ins, matrix.getIngoingEdges(node)),
-					isEqualCollection(ins, matrix.getIngoingEdges(node)));
+				msg("ingoing edges", extra, ins, matrix.getIngoingEdges(node)),
+				isEqualCollection(ins, matrix.getIngoingEdges(node)));
 			assertTrue(
-					msg("outgoing edges", extra, outs, matrix.getOutgoingEdges(node)),
-					isEqualCollection(outs, matrix.getOutgoingEdges(node)));
+				msg("outgoing edges", extra, outs, matrix.getOutgoingEdges(node)),
+				isEqualCollection(outs, matrix.getOutgoingEdges(node)));
 
 			Set<TestCodeNode> follows = outs.stream().map(Edge::getDestination).collect(Collectors.toSet());
 			Set<TestCodeNode> preds = ins.stream().map(Edge::getSource).collect(Collectors.toSet());
 			assertTrue(
-					msg("followers", extra, follows, matrix.followersOf(node)),
-					isEqualCollection(follows, matrix.followersOf(node)));
+				msg("followers", extra, follows, matrix.followersOf(node)),
+				isEqualCollection(follows, matrix.followersOf(node)));
 			assertTrue(
-					msg("predecessors", extra, preds, matrix.predecessorsOf(node)),
-					isEqualCollection(preds, matrix.predecessorsOf(node)));
+				msg("predecessors", extra, preds, matrix.predecessorsOf(node)),
+				isEqualCollection(preds, matrix.predecessorsOf(node)));
 
 			// we check that re-adding the node does not clear the edges
 			matrix.addNode(node);
 			assertTrue(
-					msg("ingoing edges", extra, ins, matrix.getIngoingEdges(node)),
-					isEqualCollection(ins, matrix.getIngoingEdges(node)));
+				msg("ingoing edges", extra, ins, matrix.getIngoingEdges(node)),
+				isEqualCollection(ins, matrix.getIngoingEdges(node)));
 			assertTrue(
-					msg("outgoing edges", extra, outs, matrix.getOutgoingEdges(node)),
-					isEqualCollection(outs, matrix.getOutgoingEdges(node)));
+				msg("outgoing edges", extra, outs, matrix.getOutgoingEdges(node)),
+				isEqualCollection(outs, matrix.getOutgoingEdges(node)));
 			boolean failed = false;
 			try {
 				matrix.addEdge(new TestCodeEdge(externalNode, node));
@@ -122,16 +126,14 @@ public class NodeListTest {
 		}
 
 		for (TestCodeEdge edge : edges) {
-			assertTrue(
-					"matrix does not contain " + edge,
-					matrix.containsEdge(edge));
+			assertTrue("matrix does not contain " + edge, matrix.containsEdge(edge));
 			// equals instead of same since sequential edges are encoded in the
 			// list,
 			// end are freshly created when queried
 			assertEquals(
-					edge + " is not connecting its endpoints",
-					edge,
-					matrix.getEdgeConnecting(edge.getSource(), edge.getDestination()));
+				edge + " is not connecting its endpoints",
+				edge,
+				matrix.getEdgeConnecting(edge.getSource(), edge.getDestination()));
 		}
 
 		assertEquals("matrix cloning failed", matrix, new NodeList<>(matrix));
@@ -568,11 +570,11 @@ public class NodeListTest {
 			exits.remove(n);
 			edges.removeIf(e -> e.getSource() == n || e.getDestination() == n);
 			adj.remove(n);
-			adj
-					.forEach(
-							(
-									nn,
-									follows) -> follows.remove(n));
+			adj.forEach(
+				(
+						nn,
+						follows
+				) -> follows.remove(n));
 			matrix.removeNode(n);
 		}
 
@@ -582,14 +584,7 @@ public class NodeListTest {
 			entries.remove(e.getDestination());
 			exits.remove(e.getSource());
 		}
-		verify(
-				adj,
-				nodes,
-				edges,
-				matrix,
-				entries,
-				exits,
-				"after removing " + removed.toString());
+		verify(adj, nodes, edges, matrix, entries, exits, "after removing " + removed.toString());
 	}
 
 	private static <T> T random(
@@ -628,14 +623,7 @@ public class NodeListTest {
 			exits.remove(e.getSource());
 		}
 
-		verify(
-				adj,
-				nodes,
-				edges,
-				matrix,
-				entries,
-				exits,
-				"after removing " + removed.toString());
+		verify(adj, nodes, edges, matrix, entries, exits, "after removing " + removed.toString());
 	}
 
 }

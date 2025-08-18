@@ -9,9 +9,7 @@ import it.unive.lisa.conf.LiSAConfiguration;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TestConfiguration
-		extends
-		LiSAConfiguration {
+public class TestConfiguration extends LiSAConfiguration {
 
 	/**
 	 * The name of the test folder; this is used for searching expected results

@@ -11,9 +11,6 @@ package it.unive.lisa.util.functional;
  *                operator
  */
 @FunctionalInterface
-public interface BinaryOperator<T,
-		E extends Exception>
-		extends
-		BiFunction<T, T, T, E> {
+public interface BinaryOperator<T, E extends Exception> extends BiFunction<T, T, T, E> {
 
 }

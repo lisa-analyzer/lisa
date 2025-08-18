@@ -13,9 +13,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class TopAtom
-		extends
-		Atom {
+public final class TopAtom extends Atom {
 
 	/**
 	 * The string used to represent this regular expression.
@@ -32,9 +30,8 @@ public final class TopAtom
 	}
 
 	@Override
-	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory) {
+	public <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory) {
 		return factory.unknownString();
 	}
 
@@ -185,9 +182,7 @@ public final class TopAtom
 
 	@Override
 	public RegularExpression[] explode() {
-		return new RegularExpression[] {
-				this
-		};
+		return new RegularExpression[] { this };
 	}
 
 	@Override

@@ -12,9 +12,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringConstant
-		implements
-		BaseLattice<StringConstant> {
+public class StringConstant implements BaseLattice<StringConstant> {
 
 	/**
 	 * The top element of this lattice, representing the set of all strings.

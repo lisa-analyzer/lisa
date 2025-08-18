@@ -114,13 +114,12 @@ public class PointBasedHeapTest {
 		// constants do not affect heap abstract domain
 		assertEquals(topHeap, assignResult.getLeft());
 
-		assignResult = heap
-				.assign(
-						topHeap,
-						x,
-						new BinaryExpression(intType, one, zero, NumericNonOverflowingAdd.INSTANCE, loc1),
-						pp1,
-						fakeOracle);
+		assignResult = heap.assign(
+			topHeap,
+			x,
+			new BinaryExpression(intType, one, zero, NumericNonOverflowingAdd.INSTANCE, loc1),
+			pp1,
+			fakeOracle);
 
 		// binary expressions do not affect heap abstract domain
 		assertEquals(topHeap, assignResult.getLeft());
@@ -128,8 +127,7 @@ public class PointBasedHeapTest {
 		// from empty environment, assignment x = *(pp1, fakeOracle)
 		// expected: x -> pp1
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xAssign = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 
 		AllocationSites xSites = new AllocationSites(Collections.singleton(alloc1));
 		HeapEnvironment<AllocationSites> expectedEnv = emptyHeapEnv.putState(x, xSites);
@@ -138,13 +136,12 @@ public class PointBasedHeapTest {
 		// from x -> pp1, assignment x = *(pp2, fakeOracle)
 		// expected: x -> pp2
 		Pair<HeapEnvironment<AllocationSites>,
-				List<HeapReplacement>> actual = heap
-						.assign(
-								xAssign.getLeft(),
-								x,
-								new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2),
-								pp2,
-								fakeOracle);
+				List<HeapReplacement>> actual = heap.assign(
+					xAssign.getLeft(),
+					x,
+					new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2),
+					pp2,
+					fakeOracle);
 
 		xSites = new AllocationSites(Collections.singleton(alloc2));
 		expectedEnv = emptyHeapEnv.putState(x, xSites);
@@ -166,23 +163,22 @@ public class PointBasedHeapTest {
 		Pair<HeapEnvironment<AllocationSites>,
 				List<HeapReplacement>> sss = heap.semanticsOf(topHeap, heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(topHeap, heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(topHeap, heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// from bottomState
 		sss = heap.semanticsOf(bottomHeap, heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(bottomHeap, heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(bottomHeap, heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// from x -> pp1
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xToLoc1 = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 		sss = heap.semanticsOf(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// 2. Heap reference
 		heapExpression = new HeapReference(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1);
@@ -190,20 +186,20 @@ public class PointBasedHeapTest {
 		// from topState
 		sss = heap.semanticsOf(topHeap, heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(topHeap, heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(topHeap, heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// from bottomState
 		sss = heap.semanticsOf(bottomHeap, heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(bottomHeap, heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(bottomHeap, heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// from x -> pp1
 		sss = heap.semanticsOf(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// 3. Access child
 		heapExpression = new AccessChild(untyped, x, y, loc1);
@@ -211,60 +207,57 @@ public class PointBasedHeapTest {
 		// from topState
 		sss = heap.semanticsOf(topHeap, heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(topHeap, heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(topHeap, heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// from bottomState
 		sss = heap.semanticsOf(bottomHeap, heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(bottomHeap, heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(bottomHeap, heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// from x -> pp1
 		sss = heap.semanticsOf(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// 4. Heap dereference
 		heapExpression = new HeapDereference(
-				untyped,
-				new HeapReference(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1),
-				loc1);
+			untyped,
+			new HeapReference(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1),
+			loc1);
 
 		// from topState
 		sss = heap.semanticsOf(topHeap, heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(topHeap, heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(topHeap, heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// from bottomState
 		sss = heap.semanticsOf(bottomHeap, heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(bottomHeap, heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(bottomHeap, heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 
 		// from x -> pp1
 		sss = heap.semanticsOf(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle);
 		assertEquals(
-				heap.rewrite(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle),
-				heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
+			heap.rewrite(xToLoc1.getLeft(), heapExpression, pp1, fakeOracle),
+			heap.rewrite(sss.getLeft(), heapExpression, pp1, fakeOracle));
 	}
 
 	@Test
 	public void testLub()
 			throws SemanticException {
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xToLoc1 = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xToLoc2 = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2, fakeOracle);
 
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> yToLoc2 = heap
-				.assign(topHeap, y, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
-						fakeOracle);
+			.assign(topHeap, y, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2, fakeOracle);
 
 		// top lub <any heap> or <any heap> lub top = top
 		assertTrue(topHeap.lub(topHeap).isTop());
@@ -302,16 +295,13 @@ public class PointBasedHeapTest {
 	public void testWidening()
 			throws SemanticException {
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xToLoc1 = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xToLoc2 = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2, fakeOracle);
 
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> yToLoc2 = heap
-				.assign(topHeap, y, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
-						fakeOracle);
+			.assign(topHeap, y, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2, fakeOracle);
 
 		// top lub <any heap> or <any heap> lub top = top
 		assertTrue(topHeap.widening(topHeap).isTop());
@@ -349,12 +339,10 @@ public class PointBasedHeapTest {
 	public void testLessOrEquals()
 			throws SemanticException {
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xAssign = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> yAssign = heap
-				.assign(topHeap, y, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
-						fakeOracle);
+			.assign(topHeap, y, new HeapReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2, fakeOracle);
 
 		// <any heap> <= top
 		assertTrue(topHeap.lessOrEqual(topHeap));
@@ -389,8 +377,7 @@ public class PointBasedHeapTest {
 		assertEquals(bottomHeap, bottomHeap.forgetIdentifier(x, pp1).getLeft());
 
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> result = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 
 		assertEquals(emptyHeap, result.getLeft().forgetIdentifier(x, pp1).getLeft());
 		assertEquals(result.getLeft(), result.getLeft().forgetIdentifier(y, pp1).getLeft());
@@ -412,16 +399,14 @@ public class PointBasedHeapTest {
 		assertEquals(bottomHeap, bottomHeap.pushScope(token, pp1).getLeft());
 
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xAssign = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 		Pair<HeapEnvironment<AllocationSites>,
-				List<HeapReplacement>> xPushedScopeAssign = heap
-						.assign(
-								topHeap,
-								new OutOfScopeIdentifier(x, token, loc1),
-								new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
-								pp1,
-								fakeOracle);
+				List<HeapReplacement>> xPushedScopeAssign = heap.assign(
+					topHeap,
+					new OutOfScopeIdentifier(x, token, loc1),
+					new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
+					pp1,
+					fakeOracle);
 
 		// x -> pp1 pushScope = [out-of-scope-id]x -> pp1
 		assertEquals(xPushedScopeAssign.getLeft(), xAssign.getLeft().pushScope(token, pp1).getLeft());
@@ -443,17 +428,15 @@ public class PointBasedHeapTest {
 		assertEquals(bottomHeap, bottomHeap.popScope(token, pp1).getLeft());
 
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xAssign = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 
 		Pair<HeapEnvironment<AllocationSites>,
-				List<HeapReplacement>> xScopedAssign = heap
-						.assign(
-								topHeap,
-								(Identifier) x.pushScope(token, pp1),
-								new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
-								pp1,
-								fakeOracle);
+				List<HeapReplacement>> xScopedAssign = heap.assign(
+					topHeap,
+					(Identifier) x.pushScope(token, pp1),
+					new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
+					pp1,
+					fakeOracle);
 
 		// [scoped]x -> pp1 popScope = x -> pp1
 		assertEquals(xAssign.getLeft(), xScopedAssign.getLeft().popScope(token, pp1).getLeft());
@@ -466,8 +449,7 @@ public class PointBasedHeapTest {
 	public void testAccessChildRewrite()
 			throws SemanticException {
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xAssign = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 		// x.y rewritten in x -> pp1 = pp1
 		AccessChild accessChild = new AccessChild(untyped, x, y, loc1);
 
@@ -483,8 +465,7 @@ public class PointBasedHeapTest {
 	public void testIdentifierRewrite()
 			throws SemanticException {
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xAssign = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 		// x rewritten in x -> pp1 = pp1
 		ExpressionSet expectedRewritten = new ExpressionSet(x);
 		assertEquals(expectedRewritten, heap.rewrite(xAssign.getLeft(), x, pp1, fakeOracle));
@@ -498,17 +479,16 @@ public class PointBasedHeapTest {
 			throws SemanticException {
 		// *(&(new loc(pp1, fakeOracle)) rewritten in top -> pp1
 		HeapDereference deref = new HeapDereference(
-				untyped,
-				new HeapReference(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1),
-				loc1);
+			untyped,
+			new HeapReference(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1),
+			loc1);
 
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
 		assertEquals(expectedRewritten, heap.rewrite(topHeap, deref, pp1, fakeOracle));
 
 		// *(x) rewritten in x -> pp1 -> pp1
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xAssign = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 		deref = new HeapDereference(untyped, x, loc1);
 		expectedRewritten = new ExpressionSet(alloc1);
 		assertEquals(expectedRewritten, heap.rewrite(xAssign.getLeft(), deref, pp1, fakeOracle));
@@ -525,18 +505,17 @@ public class PointBasedHeapTest {
 			throws SemanticException {
 		// ((type) x).f rewritten in x -> pp1 -> pp1
 		Pair<HeapEnvironment<AllocationSites>, List<HeapReplacement>> xAssign = heap
-				.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
-						fakeOracle);
+			.assign(topHeap, x, new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1, fakeOracle);
 		SymbolicExpression e = new AccessChild(
-				intType,
-				new BinaryExpression(
-						untyped,
-						x,
-						new Constant(new TypeTokenType(Collections.singleton(intType)), intType, loc1),
-						TypeConv.INSTANCE,
-						loc1),
-				new Constant(intType, 1, loc1),
-				loc1);
+			intType,
+			new BinaryExpression(
+				untyped,
+				x,
+				new Constant(new TypeTokenType(Collections.singleton(intType)), intType, loc1),
+				TypeConv.INSTANCE,
+				loc1),
+			new Constant(intType, 1, loc1),
+			loc1);
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
 		assertEquals(expectedRewritten, heap.rewrite(xAssign.getLeft(), e, pp1, fakeOracle));
 	}
@@ -546,11 +525,11 @@ public class PointBasedHeapTest {
 			throws SemanticException {
 		// (ref(alloc) conv-as type) rewritten in &alloc.loc
 		SymbolicExpression e = new BinaryExpression(
-				untyped,
-				new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
-				new Constant(new TypeTokenType(Collections.singleton(intType)), intType, loc1),
-				TypeConv.INSTANCE,
-				loc1);
+			untyped,
+			new HeapReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
+			new Constant(new TypeTokenType(Collections.singleton(intType)), intType, loc1),
+			TypeConv.INSTANCE,
+			loc1);
 		Pair<HeapEnvironment<AllocationSites>,
 				List<HeapReplacement>> xAssign = heap.assign(topHeap, x, e, pp1, fakeOracle);
 		AllocationSites xSites = new AllocationSites(Collections.singleton(alloc1));

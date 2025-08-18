@@ -20,9 +20,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ExpressionSet
-		extends
-		SetLattice<ExpressionSet, SymbolicExpression>
+public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 		implements
 		ScopedObject<ExpressionSet> {
 
@@ -116,15 +114,15 @@ public class ExpressionSet
 
 		// identifiers are added after lubbing the ones with the same name
 		Set<Identifier> idlub = new HashSet<>();
-		CollectionUtilities
-				.join(
-						onlyIds(),
-						other.onlyIds(),
-						idlub,
-						(
-								id1,
-								id2) -> id1.getName().equals(id2.getName()),
-						ExpressionSet::wrapper);
+		CollectionUtilities.join(
+			onlyIds(),
+			other.onlyIds(),
+			idlub,
+			(
+					id1,
+					id2
+			) -> id1.getName().equals(id2.getName()),
+			ExpressionSet::wrapper);
 		idlub.forEach(lub::add);
 
 		return new ExpressionSet(lub);
@@ -141,11 +139,10 @@ public class ExpressionSet
 	}
 
 	private Collection<Identifier> onlyIds() {
-		return elements
-				.stream()
-				.filter(Identifier.class::isInstance)
-				.map(Identifier.class::cast)
-				.collect(Collectors.toSet());
+		return elements.stream()
+			.filter(Identifier.class::isInstance)
+			.map(Identifier.class::cast)
+			.collect(Collectors.toSet());
 	}
 
 	@Override

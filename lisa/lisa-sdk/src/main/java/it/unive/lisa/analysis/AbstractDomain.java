@@ -12,9 +12,8 @@ import it.unive.lisa.symbolic.value.Identifier;
  * 
  * @param <L> the type of {@link AbstractLattice} that this domain works with
  */
-public interface AbstractDomain<L extends AbstractLattice<L>>
-		extends
-		SemanticDomain<L, L, SymbolicExpression, Identifier> {
+public interface AbstractDomain<
+		L extends AbstractLattice<L>> extends SemanticDomain<L, L, SymbolicExpression, Identifier> {
 
 	/**
 	 * Builds a {@link SemanticOracle} that can be used either by sub-domains or

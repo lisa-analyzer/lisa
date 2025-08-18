@@ -11,8 +11,7 @@ package it.unive.lisa.util.functional;
  *                predicate
  */
 @FunctionalInterface
-public interface Predicate<T,
-		E extends Exception> {
+public interface Predicate<T, E extends Exception> {
 
 	/**
 	 * Evaluates this predicate on the given argument.

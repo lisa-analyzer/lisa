@@ -93,9 +93,7 @@ public class LiSA {
 	 * 
 	 * @throws AnalysisException if anything goes wrong during the analysis
 	 */
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public LiSAReport run(
 			Consumer<LiSAReport> infoProvider,
 			Program... programs)
@@ -104,11 +102,11 @@ public class LiSA {
 
 		DateTime start = new DateTime();
 		LiSARunner runner = new LiSARunner(
-				conf,
-				fileManager,
-				conf.interproceduralAnalysis,
-				conf.callGraph,
-				conf.analysis == null ? null : new Analysis(conf.analysis));
+			conf,
+			fileManager,
+			conf.interproceduralAnalysis,
+			conf.callGraph,
+			conf.analysis == null ? null : new Analysis(conf.analysis));
 		Application app = new Application(programs);
 		Collection<Warning> warnings;
 
@@ -119,24 +117,18 @@ public class LiSA {
 		}
 
 		LiSARunInfo stats = new LiSARunInfo(warnings, fileManager.createdFiles(), app, start, new DateTime());
-		LOG
-				.info(
-						"LiSA statistics:\n" + stats);
+		LOG.info("LiSA statistics:\n" + stats);
 
 		LiSAReport report = new LiSAReport(conf, stats, warnings, fileManager.createdFiles());
 		if (infoProvider != null)
 			infoProvider.accept(report);
 		if (conf.jsonOutput) {
-			LOG
-					.info(
-							"Dumping analysis report to '" + REPORT_NAME + "'");
+			LOG.info("Dumping analysis report to '" + REPORT_NAME + "'");
 			try {
 				fileManager.mkOutputFile(REPORT_NAME, writer -> {
 					JsonReport json = new JsonReport(report);
 					json.dump(writer);
-					LOG
-							.info(
-									"Report file dumped to '" + REPORT_NAME + "'");
+					LOG.info("Report file dumped to '" + REPORT_NAME + "'");
 				});
 			} catch (IOException e) {
 				LOG.error("Unable to dump report file", e);

@@ -24,24 +24,24 @@ public class NegationRemovalTest {
 		Variable y = new Variable(Untyped.INSTANCE, "y", SyntheticLocation.INSTANCE);
 
 		BinaryExpression expr = new BinaryExpression(
-				Untyped.INSTANCE,
-				x,
-				y,
-				ComparisonEq.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			Untyped.INSTANCE,
+			x,
+			y,
+			ComparisonEq.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		UnaryExpression negated = new UnaryExpression(
-				Untyped.INSTANCE,
-				expr,
-				LogicalNegation.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			Untyped.INSTANCE,
+			expr,
+			LogicalNegation.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		BinaryExpression expected = new BinaryExpression(
-				Untyped.INSTANCE,
-				x,
-				y,
-				ComparisonNe.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			Untyped.INSTANCE,
+			x,
+			y,
+			ComparisonNe.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression result = negated.removeNegations();
 		assertTrue("Negation is not a binary expression", result instanceof BinaryExpression);
@@ -59,17 +59,17 @@ public class NegationRemovalTest {
 		Variable y = new Variable(Untyped.INSTANCE, "y", SyntheticLocation.INSTANCE);
 
 		BinaryExpression expr = new BinaryExpression(
-				Untyped.INSTANCE,
-				x,
-				y,
-				TypeCheck.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			Untyped.INSTANCE,
+			x,
+			y,
+			TypeCheck.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		UnaryExpression negated = new UnaryExpression(
-				Untyped.INSTANCE,
-				expr,
-				LogicalNegation.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			Untyped.INSTANCE,
+			expr,
+			LogicalNegation.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 		ValueExpression result = negated.removeNegations();
 		assertSame("Negated expression has been recreated", negated, result);

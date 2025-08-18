@@ -72,9 +72,8 @@ public class NonInterference
 			throws SemanticException {
 		NonInterferenceEnvironment assign = BaseNonRelationalDomain.super.assign(state, id, expression, pp, oracle);
 		Collection<Statement> guards = pp.getCFG().getGuards(pp);
-		GenericMapLattice<ProgramPoint,
-				NonInterferenceValue> newGuards = assign.guards.transform(k -> guards.contains(k) ? k : null, v -> v,
-						Lattice::lub);
+		GenericMapLattice<ProgramPoint, NonInterferenceValue> newGuards = assign.guards
+			.transform(k -> guards.contains(k) ? k : null, v -> v, Lattice::lub);
 		return new NonInterferenceEnvironment(assign.lattice, assign.function, newGuards);
 	}
 
@@ -85,12 +84,14 @@ public class NonInterference
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		NonInterferenceEnvironment sss = BaseNonRelationalDomain.super.smallStepSemantics(state, expression, pp,
-				oracle);
+		NonInterferenceEnvironment sss = BaseNonRelationalDomain.super.smallStepSemantics(
+			state,
+			expression,
+			pp,
+			oracle);
 		Collection<Statement> guards = pp.getCFG().getGuards(pp);
-		GenericMapLattice<ProgramPoint,
-				NonInterferenceValue> newGuards = sss.guards.transform(k -> guards.contains(k) ? k : null, v -> v,
-						Lattice::lub);
+		GenericMapLattice<ProgramPoint, NonInterferenceValue> newGuards = sss.guards
+			.transform(k -> guards.contains(k) ? k : null, v -> v, Lattice::lub);
 		return new NonInterferenceEnvironment(sss.lattice, sss.function, newGuards);
 	}
 

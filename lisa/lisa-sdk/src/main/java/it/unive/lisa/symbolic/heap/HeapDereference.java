@@ -11,9 +11,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class HeapDereference
-		extends
-		HeapExpression {
+public class HeapDereference extends HeapExpression {
 
 	/**
 	 * The symbolic expression to be dereferenced.

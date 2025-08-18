@@ -13,9 +13,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SequentialEdge
-		extends
-		Edge {
+public class SequentialEdge extends Edge {
 
 	/**
 	 * Builds an "empty" edge, meaning that it does not have endpoints.
@@ -42,19 +40,17 @@ public class SequentialEdge
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis) {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis) {
 		return state;
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		return traverseForward(state, analysis);
 	}
 

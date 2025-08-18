@@ -8,8 +8,6 @@ import it.unive.lisa.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface StringOperator
-		extends
-		Operator {
+public interface StringOperator extends Operator {
 
 }

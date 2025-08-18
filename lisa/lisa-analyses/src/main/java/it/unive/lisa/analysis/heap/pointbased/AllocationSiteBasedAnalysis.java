@@ -48,9 +48,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *                information for the heap locations
  */
 public abstract class AllocationSiteBasedAnalysis<
-		L extends FunctionalLattice<L, Identifier, AllocationSites> & HeapLattice<L>>
-		implements
-		BaseHeapDomain<L> {
+		L extends FunctionalLattice<L, Identifier, AllocationSites> & HeapLattice<L>> implements BaseHeapDomain<L> {
 
 	private final Rewriter rewriter = new Rewriter();
 
@@ -210,10 +208,10 @@ public abstract class AllocationSiteBasedAnalysis<
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
 		StackAllocationSite clone = new StackAllocationSite(
-				site.getStaticType(),
-				id.getCodeLocation().toString(),
-				site.isWeak(),
-				id.getCodeLocation());
+			site.getStaticType(),
+			id.getCodeLocation().toString(),
+			site.isWeak(),
+			id.getCodeLocation());
 
 		HeapReplacement replacement = new HeapReplacement();
 		replacement.addSource(site);
@@ -286,9 +284,7 @@ public abstract class AllocationSiteBasedAnalysis<
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public class Rewriter
-			extends
-			BaseHeapDomain.Rewriter {
+	public class Rewriter extends BaseHeapDomain.Rewriter {
 
 		/*
 		 * note that all the cases where we are adding a plain expression to the
@@ -323,16 +319,16 @@ public abstract class AllocationSiteBasedAnalysis<
 					AllocationSite e;
 					if (site instanceof StackAllocationSite)
 						e = new StackAllocationSite(
-								expression.getStaticType(),
-								site.getLocationName(),
-								true,
-								expression.getCodeLocation());
+							expression.getStaticType(),
+							site.getLocationName(),
+							true,
+							expression.getCodeLocation());
 					else
 						e = new HeapAllocationSite(
-								expression.getStaticType(),
-								site.getLocationName(),
-								true,
-								expression.getCodeLocation());
+							expression.getStaticType(),
+							site.getLocationName(),
+							true,
+							expression.getCodeLocation());
 
 					// propagates the annotations of the child value expression
 					// to the newly created allocation site
@@ -356,16 +352,16 @@ public abstract class AllocationSiteBasedAnalysis<
 			AllocationSite id;
 			if (expression.isStackAllocation())
 				id = new StackAllocationSite(
-						expression.getStaticType(),
-						expression.getCodeLocation().getCodeLocation(),
-						true,
-						expression.getCodeLocation());
+					expression.getStaticType(),
+					expression.getCodeLocation().getCodeLocation(),
+					true,
+					expression.getCodeLocation());
 			else
 				id = new HeapAllocationSite(
-						expression.getStaticType(),
-						expression.getCodeLocation().getCodeLocation(),
-						true,
-						expression.getCodeLocation());
+					expression.getStaticType(),
+					expression.getCodeLocation().getCodeLocation(),
+					true,
+					expression.getCodeLocation());
 			id.setAllocation(true);
 
 			// propagates the annotations of expression
@@ -399,9 +395,9 @@ public abstract class AllocationSiteBasedAnalysis<
 				if (loc instanceof AllocationSite) {
 					AllocationSite allocSite = (AllocationSite) loc;
 					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(loc.getStaticType()),
-							allocSite,
-							loc.getCodeLocation());
+						new ReferenceType(loc.getStaticType()),
+						allocSite,
+						loc.getCodeLocation());
 
 					// propagates the annotations of the allocation site
 					// to the newly created memory pointer
@@ -448,21 +444,12 @@ public abstract class AllocationSiteBasedAnalysis<
 						CodeLocation loc = expression.getCodeLocation();
 						AllocationSite site;
 						if (id.getStaticType().isPointerType())
-							site = new HeapAllocationSite(
-									id.getStaticType(),
-									"unknown@" + id.getName(),
-									true,
-									loc);
+							site = new HeapAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
 						else if (id.getStaticType().isInMemoryType() || id.getStaticType().isUntyped())
-							site = new StackAllocationSite(
-									id.getStaticType(),
-									"unknown@" + id.getName(),
-									true,
-									loc);
+							site = new StackAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
 						else
 							throw new SemanticException(
-									"The type " + id.getStaticType()
-											+ " cannot be allocated by point-based heap domains");
+								"The type " + id.getStaticType() + " cannot be allocated by point-based heap domains");
 
 						// propagates the annotations of the variable
 						// to the newly created allocation site
@@ -493,20 +480,16 @@ public abstract class AllocationSiteBasedAnalysis<
 			if (expression.getStaticType().isPointerType()) {
 				Type inner = expression.getStaticType().asPointerType().getInnerType();
 				CodeLocation loc = expression.getCodeLocation();
-				HeapAllocationSite site = new HeapAllocationSite(
-						inner,
-						"unknown@" + loc.getCodeLocation(),
-						false,
-						loc);
+				HeapAllocationSite site = new HeapAllocationSite(inner, "unknown@" + loc.getCodeLocation(), false, loc);
 				return new ExpressionSet(new MemoryPointer(expression.getStaticType(), site, loc));
 			} else if (expression.getStaticType().isInMemoryType()) {
 				Type type = expression.getStaticType();
 				CodeLocation loc = expression.getCodeLocation();
 				StackAllocationSite site = new StackAllocationSite(
-						type,
-						"unknown@" + loc.getCodeLocation(),
-						false,
-						loc);
+					type,
+					"unknown@" + loc.getCodeLocation(),
+					false,
+					loc);
 				return new ExpressionSet(new MemoryPointer(expression.getStaticType(), site, loc));
 			}
 			return new ExpressionSet(expression);

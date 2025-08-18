@@ -25,9 +25,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it>">Vincenzo Arceri</a>
  */
-public class Substrings
-		extends
-		FunctionalLattice<Substrings, Identifier, ExpressionInverseSet>
+public class Substrings extends FunctionalLattice<Substrings, Identifier, ExpressionInverseSet>
 		implements
 		ValueLattice<Substrings> {
 
@@ -64,13 +62,13 @@ public class Substrings
 			Substrings other)
 			throws SemanticException {
 		return functionalLift(
-				other,
-				lattice.top(),
-				this::glbKeys,
-				(
-						o1,
-						o2) -> o1.lub(o2))
-								.clear();
+			other,
+			lattice.top(),
+			this::glbKeys,
+			(
+					o1,
+					o2
+			) -> o1.lub(o2)).clear();
 	}
 
 	@Override
@@ -78,13 +76,13 @@ public class Substrings
 			Substrings other)
 			throws SemanticException {
 		return functionalLift(
-				other,
-				lattice.top(),
-				this::lubKeys,
-				(
-						o1,
-						o2) -> o1.glb(o2))
-								.closure();
+			other,
+			lattice.top(),
+			this::lubKeys,
+			(
+					o1,
+					o2
+			) -> o1.glb(o2)).closure();
 	}
 
 	@Override
@@ -139,11 +137,11 @@ public class Substrings
 
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
 		newFunction.remove(id);
-		newFunction
-				.replaceAll(
-						(
-								key,
-								value) -> removeFromSet(value, id));
+		newFunction.replaceAll(
+			(
+					key,
+					value
+			) -> removeFromSet(value, id));
 
 		return mk(lattice, newFunction);
 	}
@@ -159,11 +157,11 @@ public class Substrings
 		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
 		ids.forEach(id -> {
 			newFunction.remove(id);
-			newFunction
-					.replaceAll(
-							(
-									key,
-									value) -> removeFromSet(value, id));
+			newFunction.replaceAll(
+				(
+						key,
+						value
+				) -> removeFromSet(value, id));
 		});
 
 		return mk(lattice, newFunction);
@@ -316,10 +314,9 @@ public class Substrings
 	private static ExpressionInverseSet removeFromSet(
 			ExpressionInverseSet source,
 			Identifier id) {
-		Set<SymbolicExpression> newSet = source.elements
-				.stream()
-				.filter(element -> !appears(id, element))
-				.collect(Collectors.toSet());
+		Set<SymbolicExpression> newSet = source.elements.stream()
+			.filter(element -> !appears(id, element))
+			.collect(Collectors.toSet());
 
 		return newSet.isEmpty() ? new ExpressionInverseSet().top() : new ExpressionInverseSet(newSet);
 	}
@@ -353,9 +350,8 @@ public class Substrings
 				Set<SymbolicExpression> newRelation = new HashSet<>();
 				newRelation.add(assignedId);
 
-				ExpressionInverseSet newSet = newFunction
-						.get(entry.getKey())
-						.glb(new ExpressionInverseSet(newRelation));
+				ExpressionInverseSet newSet = newFunction.get(entry.getKey())
+					.glb(new ExpressionInverseSet(newRelation));
 				newFunction.put(entry.getKey(), newSet);
 			}
 

@@ -56,14 +56,13 @@ public interface ParameterAssigningStrategy {
 	 * @throws SemanticException if something goes wrong while preparing the
 	 *                               entry-state
 	 */
-	<A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
-					Call call,
-					AnalysisState<A> callState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					Parameter[] formals,
-					ExpressionSet[] actuals)
-					throws SemanticException;
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
+			Call call,
+			AnalysisState<A> callState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			Parameter[] formals,
+			ExpressionSet[] actuals)
+			throws SemanticException;
 
 }

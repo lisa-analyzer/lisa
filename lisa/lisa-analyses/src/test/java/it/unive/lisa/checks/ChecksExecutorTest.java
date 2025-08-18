@@ -11,13 +11,9 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.io.IOException;
 import org.junit.Test;
 
-public class ChecksExecutorTest
-		extends
-		IMPCronExecutor {
+public class ChecksExecutorTest extends IMPCronExecutor {
 
-	private static class VariableI
-			implements
-			SyntacticCheck {
+	private static class VariableI implements SyntacticCheck {
 
 		@Override
 		public boolean visit(

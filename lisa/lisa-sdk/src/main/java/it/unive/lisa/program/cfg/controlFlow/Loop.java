@@ -13,9 +13,7 @@ import java.util.HashSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Loop
-		extends
-		ControlFlowStructure {
+public class Loop extends ControlFlowStructure {
 
 	private final Collection<Statement> body;
 

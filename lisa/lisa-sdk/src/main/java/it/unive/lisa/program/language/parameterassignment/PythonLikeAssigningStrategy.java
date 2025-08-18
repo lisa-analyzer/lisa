@@ -50,9 +50,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *          "https://docs.python.org/3/reference/expressions.html#calls">Python
  *          Language Reference: calls</a>
  */
-public class PythonLikeAssigningStrategy
-		implements
-		ParameterAssigningStrategy {
+public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -64,15 +62,14 @@ public class PythonLikeAssigningStrategy
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
-					Call call,
-					AnalysisState<A> callState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					Parameter[] formals,
-					ExpressionSet[] parameters)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
+			Call call,
+			AnalysisState<A> callState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			Parameter[] formals,
+			ExpressionSet[] parameters)
+			throws SemanticException {
 
 		ExpressionSet[] slots = new ExpressionSet[formals.length];
 		Set<Type>[] slotsTypes = new Set[formals.length];
@@ -93,17 +90,16 @@ public class PythonLikeAssigningStrategy
 			}
 		}
 
-		AnalysisState<A> logic = PythonLikeMatchingStrategy
-				.pythonLogic(
-						formals,
-						actuals,
-						parameters,
-						call.parameterTypes(expressions, interprocedural.getAnalysis()),
-						defaults,
-						defaultTypes,
-						slots,
-						slotsTypes,
-						callState.bottom());
+		AnalysisState<A> logic = PythonLikeMatchingStrategy.pythonLogic(
+			formals,
+			actuals,
+			parameters,
+			call.parameterTypes(expressions, interprocedural.getAnalysis()),
+			defaults,
+			defaultTypes,
+			slots,
+			slotsTypes,
+			callState.bottom());
 		if (logic != null)
 			return Pair.of(logic, parameters);
 
@@ -113,8 +109,7 @@ public class PythonLikeAssigningStrategy
 			AnalysisState<A> temp = prepared.bottom();
 			for (SymbolicExpression exp : slots[i])
 				temp = temp
-						.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp,
-								call));
+					.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp, call));
 			prepared = temp;
 		}
 

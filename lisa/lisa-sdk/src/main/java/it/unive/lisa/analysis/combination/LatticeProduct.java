@@ -12,9 +12,7 @@ import it.unive.lisa.analysis.Lattice;
  * @param <T2> the type of the second lattice
  */
 public class LatticeProduct<T1 extends Lattice<T1>,
-		T2 extends Lattice<T2>>
-		extends
-		CartesianCombination<LatticeProduct<T1, T2>, T1, T2> {
+		T2 extends Lattice<T2>> extends CartesianCombination<LatticeProduct<T1, T2>, T1, T2> {
 
 	/**
 	 * Builds a new product of two lattices.

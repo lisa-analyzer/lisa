@@ -32,9 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <N> the type of the {@link CodeNode}s in this list
  * @param <E> the type of the {@link CodeEdge}s in this list
  */
-public class NodeList<G extends CodeGraph<G, N, E>,
-		N extends CodeNode<G, N, E>,
-		E extends CodeEdge<G, N, E>>
+public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
 		implements
 		Iterable<N> {
 
@@ -367,12 +365,11 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 	 * @return the collection of edges
 	 */
 	public final Collection<E> getEdges() {
-		Set<E> result = extraEdges
-				.values()
-				.stream()
-				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
-				.distinct()
-				.collect(Collectors.toSet());
+		Set<E> result = extraEdges.values()
+			.stream()
+			.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
+			.distinct()
+			.collect(Collectors.toSet());
 		for (int i = 0; i < nodes.size() - 1; i++)
 			if (!cutoff.contains(i))
 				result.add(sequentialSingleton.newInstance(nodes.get(i), nodes.get(i + 1)));
@@ -422,8 +419,7 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 			N node) {
 		int src = nodes.indexOf(node);
 		if (src == -1)
-			throw new IllegalArgumentException(
-					"'" + node + "' is not in the graph");
+			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
 		Set<N> result = new HashSet<>();
 		if (src != 0 && !cutoff.contains(src - 1))
@@ -501,7 +497,7 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 					for (E out : outgoing) {
 						if (!out.isUnconditional() && !out.isErrorHandling() && !out.isFinallyRelated())
 							throw new UnsupportedOperationException(
-									EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
+								EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
 
 						E _new;
 						// replicate the edge from ingoing.source to
@@ -791,8 +787,7 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 			// no deadcode
 			int idx = nodes.indexOf(node);
 			if (edges.ingoing.isEmpty() && (idx == 0 || cutoff.contains(idx - 1)) && !entrypoints.contains(node))
-				throw new ProgramValidationException(
-						"Unreachable node that is not marked as entrypoint: " + node);
+				throw new ProgramValidationException("Unreachable node that is not marked as entrypoint: " + node);
 		}
 	}
 
@@ -802,10 +797,10 @@ public class NodeList<G extends CodeGraph<G, N, E>,
 			throws ProgramValidationException {
 		if (!nodes.contains(edge.getSource()))
 			throw new ProgramValidationException(
-					"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
+				"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
 		else if (!nodes.contains(edge.getDestination()))
 			throw new ProgramValidationException(
-					"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
+				"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
 	}
 
 	/**

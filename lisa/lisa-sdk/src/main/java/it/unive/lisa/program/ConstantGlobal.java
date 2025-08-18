@@ -12,9 +12,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ConstantGlobal
-		extends
-		Global {
+public class ConstantGlobal extends Global {
 
 	private final Constant constant;
 

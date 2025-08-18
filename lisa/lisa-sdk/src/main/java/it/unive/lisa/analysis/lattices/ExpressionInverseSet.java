@@ -20,9 +20,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ExpressionInverseSet
-		extends
-		InverseSetLattice<ExpressionInverseSet, SymbolicExpression>
+public class ExpressionInverseSet extends InverseSetLattice<ExpressionInverseSet, SymbolicExpression>
 		implements
 		ScopedObject<ExpressionInverseSet> {
 
@@ -111,15 +109,15 @@ public class ExpressionInverseSet
 		lub.retainAll(other.exceptIds());
 
 		Set<Identifier> idlub = new HashSet<>();
-		CollectionUtilities
-				.meet(
-						onlyIds(),
-						other.onlyIds(),
-						idlub,
-						(
-								id1,
-								id2) -> id1.getName().equals(id2.getName()),
-						ExpressionInverseSet::wrapper);
+		CollectionUtilities.meet(
+			onlyIds(),
+			other.onlyIds(),
+			idlub,
+			(
+					id1,
+					id2
+			) -> id1.getName().equals(id2.getName()),
+			ExpressionInverseSet::wrapper);
 		idlub.forEach(lub::add);
 
 		if (lub.isEmpty())
@@ -141,11 +139,10 @@ public class ExpressionInverseSet
 	}
 
 	private Collection<Identifier> onlyIds() {
-		return elements
-				.stream()
-				.filter(Identifier.class::isInstance)
-				.map(Identifier.class::cast)
-				.collect(Collectors.toSet());
+		return elements.stream()
+			.filter(Identifier.class::isInstance)
+			.map(Identifier.class::cast)
+			.collect(Collectors.toSet());
 	}
 
 	private Collection<SymbolicExpression> exceptIds() {

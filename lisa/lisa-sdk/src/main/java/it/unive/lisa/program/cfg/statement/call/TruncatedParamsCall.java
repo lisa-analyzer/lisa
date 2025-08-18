@@ -19,11 +19,7 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TruncatedParamsCall
-		extends
-		Call
-		implements
-		ResolvedCall {
+public class TruncatedParamsCall extends Call implements ResolvedCall {
 
 	private final Call call;
 
@@ -35,14 +31,14 @@ public class TruncatedParamsCall
 	public TruncatedParamsCall(
 			Call call) {
 		super(
-				call.getCFG(),
-				call.getLocation(),
-				call.getCallType(),
-				call.getQualifier(),
-				call.getTargetName(),
-				call.getOrder(),
-				call.getStaticType(),
-				call.getParameters());
+			call.getCFG(),
+			call.getLocation(),
+			call.getCallType(),
+			call.getQualifier(),
+			call.getTargetName(),
+			call.getOrder(),
+			call.getStaticType(),
+			call.getParameters());
 		if (!(call instanceof ResolvedCall))
 			throw new IllegalArgumentException("The given call has not been resolved yet");
 		this.call = call;
@@ -88,13 +84,12 @@ public class TruncatedParamsCall
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Expression[] actuals = getParameters();
 		AnalysisState<A> post;
 		if (params.length == actuals.length) {

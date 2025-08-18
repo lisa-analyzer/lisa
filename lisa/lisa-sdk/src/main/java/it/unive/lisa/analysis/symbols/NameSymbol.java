@@ -5,9 +5,7 @@ package it.unive.lisa.analysis.symbols;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NameSymbol
-		implements
-		Symbol {
+public class NameSymbol implements Symbol {
 
 	private final String name;
 

@@ -56,8 +56,7 @@ public class Antlr4Util {
 		dumpProblem(file, problem, completeMessage);
 
 		log.error("Error while parsing " + file + ":\n" + completeMessage.toString());
-		return new ParsingException(
-				"Error while parsing " + file + ":\n" + message.toString());
+		return new ParsingException("Error while parsing " + file + ":\n" + message.toString());
 	}
 
 	private static void dumpProblem(
@@ -100,26 +99,24 @@ public class Antlr4Util {
 			RecognitionException e,
 			Token problem,
 			StringBuilder message) {
-		message
-				.append("matched '")
-				.append(problem.getText())
-				.append("' as <")
-				.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary()))
-				.append(">, expecting <")
-				.append(tokenNames(((InputMismatchException) e).getExpectedTokens(), e.getRecognizer().getVocabulary()))
-				.append(">");
+		message.append("matched '")
+			.append(problem.getText())
+			.append("' as <")
+			.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary()))
+			.append(">, expecting <")
+			.append(tokenNames(((InputMismatchException) e).getExpectedTokens(), e.getRecognizer().getVocabulary()))
+			.append(">");
 	}
 
 	private static StringBuilder errorHeader(
 			String file,
 			Token problem) {
-		return new StringBuilder()
-				.append(file)
-				.append(":")
-				.append(problem.getLine())
-				.append(":")
-				.append(problem.getCharPositionInLine())
-				.append(" - ");
+		return new StringBuilder().append(file)
+			.append(":")
+			.append(problem.getLine())
+			.append(":")
+			.append(problem.getCharPositionInLine())
+			.append(" - ");
 	}
 
 	private static String tokenName(
@@ -188,11 +185,25 @@ public class Antlr4Util {
 		return tok.getCharPositionInLine();
 	}
 
+	/**
+	 * Extracts the column number from an antlr terminal node.
+	 * 
+	 * @param node the terminal node
+	 * 
+	 * @return the column number where the terminal node appears
+	 */
 	public static int getCol(
 			TerminalNode node) {
 		return getCol(node.getSymbol());
 	}
 
+	/**
+	 * Extracts the line number from an antlr terminal node.
+	 * 
+	 * @param node the terminal node
+	 * 
+	 * @return the line number where the terminal node appears
+	 */
 	public static int getLine(
 			TerminalNode node) {
 		return getLine(node.getSymbol());

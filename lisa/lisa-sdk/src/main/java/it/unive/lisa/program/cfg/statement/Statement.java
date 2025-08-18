@@ -19,10 +19,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement
-		implements
-		CodeNode<CFG, Statement, Edge>,
-		ProgramPoint {
+public abstract class Statement implements CodeNode<CFG, Statement, Edge>, ProgramPoint {
 
 	/**
 	 * The cfg containing this statement.
@@ -77,10 +74,24 @@ public abstract class Statement
 		return false;
 	}
 
+	/**
+	 * Whether or not this statement breaks the control flow of the containing
+	 * cfg. This is typically the case for break statements in loops and
+	 * switches.
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
 	public boolean breaksControlFlow() {
 		return false;
 	}
 
+	/**
+	 * Whether or not this statement continues the control flow of the
+	 * containing cfg. This is typically the case for continue statements in
+	 * loops.
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
 	public boolean continuesControlFlow() {
 		return false;
 	}
@@ -140,12 +151,11 @@ public abstract class Statement
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException;
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException;
 
 	/**
 	 * Computes the backward semantics of the statement, expressing how semantic
@@ -175,12 +185,11 @@ public abstract class Statement
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
-					AnalysisState<A> exitState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		return forwardSemantics(exitState, interprocedural, expressions);
 	}
 

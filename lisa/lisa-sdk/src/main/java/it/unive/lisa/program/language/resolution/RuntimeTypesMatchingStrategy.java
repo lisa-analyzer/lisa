@@ -16,9 +16,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class RuntimeTypesMatchingStrategy
-		extends
-		FixedOrderMatchingStrategy {
+public class RuntimeTypesMatchingStrategy extends FixedOrderMatchingStrategy {
 
 	/**
 	 * The singleton instance of this class.

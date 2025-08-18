@@ -53,10 +53,7 @@ import org.apache.logging.log4j.Logger;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
-		extends
-		AnalyzedCFG<A> {
+public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends AbstractDomain<A>> extends AnalyzedCFG<A> {
 
 	private static final Logger LOG = LogManager.getLogger(OptimizedAnalyzedCFG.class);
 
@@ -205,34 +202,27 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			else {
 				Expression e = (Expression) stmt;
 				CompoundState<A> val = existing
-						.computeIfAbsent(e.getRootStatement(), ex -> CompoundState.of(bottom, bot.bottom()));
+					.computeIfAbsent(e.getRootStatement(), ex -> CompoundState.of(bottom, bot.bottom()));
 				val.intermediateStates.put(e, approx);
 			}
 		}
 
 		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
 		Fixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new Fixpoint<>(this, true);
-		TimerLogger
-				.execAction(
-						LOG,
-						"Unwinding optimizied results of " + this,
-						() -> {
-							try {
-								Map<Statement, CompoundState<A>> res = fix
-										.fixpoint(starting, WorkingSet.of(conf.fixpointWorkingSet), asc, existing);
-								expanded = new StatementStore<>(bottom);
-								for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
-									expanded.put(e.getKey(), e.getValue().postState);
-									for (Entry<Statement, AnalysisState<A>> ee : e.getValue().intermediateStates)
-										expanded.put(ee.getKey(), ee.getValue());
-								}
-							} catch (FixpointException e) {
-								LOG
-										.error(
-												"Unable to unwind optimized results of " + this,
-												e);
-							}
-						});
+		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
+			try {
+				Map<Statement, CompoundState<A>> res = fix
+					.fixpoint(starting, WorkingSet.of(conf.fixpointWorkingSet), asc, existing);
+				expanded = new StatementStore<>(bottom);
+				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
+					expanded.put(e.getKey(), e.getValue().postState);
+					for (Entry<Statement, AnalysisState<A>> ee : e.getValue().intermediateStates)
+						expanded.put(ee.getKey(), ee.getValue());
+				}
+			} catch (FixpointException e) {
+				LOG.error("Unable to unwind optimized results of " + this, e);
+			}
+		});
 	}
 
 	/**
@@ -261,9 +251,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		results.put(st, postState);
 	}
 
-	private class PrecomputedAnalysis
-			implements
-			InterproceduralAnalysis<A, D> {
+	private class PrecomputedAnalysis implements InterproceduralAnalysis<A, D> {
 
 		@Override
 		public void init(
@@ -305,13 +293,11 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			AnalysisState<A> state = entryState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();
-				state = state
-						.lub(
-								call
-										.getProgram()
-										.getFeatures()
-										.getScopingStrategy()
-										.unscope(call, scope, res, interprocedural.getAnalysis()));
+				state = state.lub(
+					call.getProgram()
+						.getFeatures()
+						.getScopingStrategy()
+						.unscope(call, scope, res, interprocedural.getAnalysis()));
 			}
 			return state;
 		}
@@ -365,12 +351,12 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@SuppressWarnings("unchecked")
 		OptimizedAnalyzedCFG<A, D> o = (OptimizedAnalyzedCFG<A, D>) other;
 		return new OptimizedAnalyzedCFG<A, D>(
-				this,
-				id,
-				entryStates.lub(other.entryStates),
-				results.lub(other.results),
-				expanded == null ? o.expanded : expanded.lub(o.expanded),
-				interprocedural);
+			this,
+			id,
+			entryStates.lub(other.entryStates),
+			results.lub(other.results),
+			expanded == null ? o.expanded : expanded.lub(o.expanded),
+			interprocedural);
 	}
 
 	@Override
@@ -385,12 +371,12 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@SuppressWarnings("unchecked")
 		OptimizedAnalyzedCFG<A, D> o = (OptimizedAnalyzedCFG<A, D>) other;
 		return new OptimizedAnalyzedCFG<A, D>(
-				this,
-				id,
-				entryStates.glb(other.entryStates),
-				results.glb(other.results),
-				expanded == null ? o.expanded : expanded.glb(o.expanded),
-				interprocedural);
+			this,
+			id,
+			entryStates.glb(other.entryStates),
+			results.glb(other.results),
+			expanded == null ? o.expanded : expanded.glb(o.expanded),
+			interprocedural);
 	}
 
 	@Override
@@ -405,12 +391,12 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@SuppressWarnings("unchecked")
 		OptimizedAnalyzedCFG<A, D> o = (OptimizedAnalyzedCFG<A, D>) other;
 		return new OptimizedAnalyzedCFG<A, D>(
-				this,
-				id,
-				entryStates.widening(other.entryStates),
-				results.widening(other.results),
-				expanded == null ? o.expanded : expanded.widening(o.expanded),
-				interprocedural);
+			this,
+			id,
+			entryStates.widening(other.entryStates),
+			results.widening(other.results),
+			expanded == null ? o.expanded : expanded.widening(o.expanded),
+			interprocedural);
 	}
 
 	@Override
@@ -425,12 +411,12 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@SuppressWarnings("unchecked")
 		OptimizedAnalyzedCFG<A, D> o = (OptimizedAnalyzedCFG<A, D>) other;
 		return new OptimizedAnalyzedCFG<A, D>(
-				this,
-				id,
-				entryStates.narrowing(other.entryStates),
-				results.narrowing(other.results),
-				expanded == null ? o.expanded : expanded.narrowing(o.expanded),
-				interprocedural);
+			this,
+			id,
+			entryStates.narrowing(other.entryStates),
+			results.narrowing(other.results),
+			expanded == null ? o.expanded : expanded.narrowing(o.expanded),
+			interprocedural);
 	}
 
 	@Override

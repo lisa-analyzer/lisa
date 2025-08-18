@@ -7,9 +7,7 @@ import it.unive.lisa.program.annotations.values.AnnotationValue;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class AnnotationMember
-		implements
-		Comparable<AnnotationMember> {
+public class AnnotationMember implements Comparable<AnnotationMember> {
 
 	private final String id;
 

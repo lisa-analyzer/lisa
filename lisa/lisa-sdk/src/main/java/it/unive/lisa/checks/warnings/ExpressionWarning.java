@@ -7,9 +7,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ExpressionWarning
-		extends
-		StatementWarning {
+public class ExpressionWarning extends StatementWarning {
 
 	/**
 	 * Builds the warning.

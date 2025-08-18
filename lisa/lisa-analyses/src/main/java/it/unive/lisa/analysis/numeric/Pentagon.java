@@ -24,9 +24,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Pentagon
-		implements
-		ValueDomain<PentagonLattice> {
+public class Pentagon implements ValueDomain<PentagonLattice> {
 
 	private final UpperBounds upperbounds = new UpperBounds();
 
@@ -60,19 +58,16 @@ public class Pentagon
 						// r = x - y
 						Identifier y = (Identifier) be.getRight();
 						if (newBounds.getState(y).contains(x)) {
-							newIntervals = newIntervals
-									.putState(
-											id,
-											newIntervals
-													.getState(id)
-													.glb(new IntInterval(MathNumber.ONE, MathNumber.PLUS_INFINITY)));
+							IntInterval glb = newIntervals.getState(id)
+								.glb(new IntInterval(MathNumber.ONE, MathNumber.PLUS_INFINITY));
+							newIntervals = newIntervals.putState(id, glb);
 						}
 						IntInterval intv = state.first.getState(y);
 						if (!intv.isBottom() && intv.getLow().compareTo(MathNumber.ZERO) > 0)
 							newBounds = state.second.putState(id, state.second.getState(x).add(x));
 						else
-							newBounds = state.second.putState(id,
-									new DefiniteIdSet(Collections.emptySet(), true).top());
+							newBounds = state.second
+								.putState(id, new DefiniteIdSet(Collections.emptySet(), true).top());
 					}
 				}
 			} else if (op instanceof RemainderOperator && be.getRight() instanceof Identifier) {
@@ -98,8 +93,8 @@ public class Pentagon
 			SemanticOracle oracle)
 			throws SemanticException {
 		return new PentagonLattice(
-				intervals.smallStepSemantics(state.first, expression, pp, oracle),
-				upperbounds.smallStepSemantics(state.second, expression, pp, oracle));
+			intervals.smallStepSemantics(state.first, expression, pp, oracle),
+			upperbounds.smallStepSemantics(state.second, expression, pp, oracle));
 	}
 
 	@Override
@@ -113,8 +108,8 @@ public class Pentagon
 		if (state.isBottom())
 			return state;
 		return new PentagonLattice(
-				intervals.assume(state.first, expression, src, dest, oracle),
-				upperbounds.assume(state.second, expression, src, dest, oracle));
+			intervals.assume(state.first, expression, src, dest, oracle),
+			upperbounds.assume(state.second, expression, src, dest, oracle));
 	}
 
 	@Override
@@ -124,9 +119,8 @@ public class Pentagon
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return intervals
-				.satisfies(state.first, expression, pp, oracle)
-				.glb(upperbounds.satisfies(state.second, expression, pp, oracle));
+		return intervals.satisfies(state.first, expression, pp, oracle)
+			.glb(upperbounds.satisfies(state.second, expression, pp, oracle));
 	}
 
 }

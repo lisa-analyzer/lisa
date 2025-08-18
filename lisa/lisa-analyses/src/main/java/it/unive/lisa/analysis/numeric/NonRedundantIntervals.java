@@ -20,9 +20,7 @@ import java.util.TreeSet;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NonRedundantIntervals
-		extends
-		NonRelationalNonRedundantPowerset<NonRedundantIntervalSet, IntInterval> {
+public class NonRedundantIntervals extends NonRelationalNonRedundantPowerset<NonRedundantIntervalSet, IntInterval> {
 
 	/**
 	 * Builds a new non redundant intervals analysis.

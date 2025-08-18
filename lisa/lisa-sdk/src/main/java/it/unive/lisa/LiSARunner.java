@@ -51,8 +51,7 @@ import org.apache.logging.log4j.Logger;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class LiSARunner<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> {
+public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A>> {
 
 	private static final Logger LOG = LogManager.getLogger(LiSARunner.class);
 
@@ -122,9 +121,7 @@ public class LiSARunner<A extends AbstractLattice<A>,
 			if (conf.serializeResults || conf.analysisGraphs != GraphType.NONE)
 				dumpResults(allCFGs, fixconf);
 
-			@SuppressWarnings({
-					"rawtypes", "unchecked"
-			})
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			Collection<SemanticCheck<A, D>> semanticChecks = (Collection) conf.semanticChecks;
 			if (!semanticChecks.isEmpty())
 				tool = runSemanticChecks(app, allCFGs, tool, semanticChecks);
@@ -190,8 +187,8 @@ public class LiSARunner<A extends AbstractLattice<A>,
 		} catch (InterproceduralAnalysisException e) {
 			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisSetupException(
-					"Exception while building the interprocedural analysis for the input program",
-					e);
+				"Exception while building the interprocedural analysis for the input program",
+				e);
 		}
 	}
 
@@ -203,7 +200,7 @@ public class LiSARunner<A extends AbstractLattice<A>,
 
 		if (callGraph == null && interproc.needsCallGraph())
 			throw new AnalysisSetupException(
-					"The provided interprocedural analysis needs a call graph to function, but none has been provided");
+				"The provided interprocedural analysis needs a call graph to function, but none has been provided");
 
 		if (analysis == null) {
 			LOG.warn("Skipping analysis execution since no analysis has been provided");
@@ -219,7 +216,7 @@ public class LiSARunner<A extends AbstractLattice<A>,
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {
 				interproc
-						.fixpoint(new AnalysisState<>(state.getState(), new Skip(SyntheticLocation.INSTANCE)), fixconf);
+					.fixpoint(new AnalysisState<>(state.getState(), new Skip(SyntheticLocation.INSTANCE)), fixconf);
 			} catch (FixpointException e) {
 				LOG.fatal("Exception during fixpoint computation", e);
 				throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -231,16 +228,16 @@ public class LiSARunner<A extends AbstractLattice<A>,
 	private void dumpResults(
 			Collection<CFG> allCFGs,
 			FixpointConfiguration fixconf) {
-		BiFunction<CFG, Statement, SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding
-				? (
-						cfg,
-						st) -> ((OptimizedAnalyzedCFG<A, D>) cfg)
-								.getUnwindedAnalysisStateAfter(st, fixconf)
-								.representation()
-								.toSerializableValue()
+		BiFunction<CFG, Statement, SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding ? (
+				cfg,
+				st
+		) -> ((OptimizedAnalyzedCFG<A, D>) cfg).getUnwindedAnalysisStateAfter(st, fixconf)
+			.representation()
+			.toSerializableValue()
 				: (
 						cfg,
-						st) -> ((AnalyzedCFG<A>) cfg).getAnalysisStateAfter(st).representation().toSerializableValue();
+						st
+				) -> ((AnalyzedCFG<A>) cfg).getAnalysisStateAfter(st).representation().toSerializableValue();
 
 		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 			for (AnalyzedCFG<A> result : interproc.getAnalysisResultsOf(cfg)) {
@@ -254,10 +251,9 @@ public class LiSARunner<A extends AbstractLattice<A>,
 						fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
 					dumpSingleGraph(filename, graph);
 				} catch (IOException e) {
-					LOG
-							.error(
-									"Exception while dumping the analysis results on {}",
-									cfg.getDescriptor().getFullSignature());
+					LOG.error(
+						"Exception while dumping the analysis results on {}",
+						cfg.getDescriptor().getFullSignature());
 					LOG.error(e);
 				}
 			}
@@ -282,8 +278,7 @@ public class LiSARunner<A extends AbstractLattice<A>,
 		case NONE:
 			break;
 		default:
-			throw new AnalysisExecutionException(
-					"Unknown graph type: " + conf.analysisGraphs);
+			throw new AnalysisExecutionException("Unknown graph type: " + conf.analysisGraphs);
 		}
 	}
 

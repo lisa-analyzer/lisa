@@ -21,40 +21,36 @@ public class SymbolicStringTest {
 	@Test
 	public void testCollapseInside() {
 		assertEquals(
-				mkString("a").concat(mkTopString(5)).concat(mkString("b")).collapseTopChars(),
-				mkString("a").concat(mkTopString(1)).concat(mkString("b")));
+			mkString("a").concat(mkTopString(5)).concat(mkString("b")).collapseTopChars(),
+			mkString("a").concat(mkTopString(1)).concat(mkString("b")));
 
 		assertEquals(
-				mkString("a")
-						.concat(mkTopString(5))
-						.concat(mkString("b"))
-						.concat(mkTopString(9))
-						.concat(mkString("c"))
-						.collapseTopChars(),
-				mkString("a").concat(mkTopString(1)).concat(mkString("b")).concat(mkTopString(1))
-						.concat(mkString("c")));
+			mkString("a").concat(mkTopString(5))
+				.concat(mkString("b"))
+				.concat(mkTopString(9))
+				.concat(mkString("c"))
+				.collapseTopChars(),
+			mkString("a").concat(mkTopString(1)).concat(mkString("b")).concat(mkTopString(1)).concat(mkString("c")));
 	}
 
 	@Test
 	public void testCollapseAll() {
 		assertEquals(
-				mkTopString(5).concat(mkString("a")).concat(mkTopString(5)).concat(mkString("b")).collapseTopChars(),
-				mkTopString(1).concat(mkString("a")).concat(mkTopString(1)).concat(mkString("b")));
+			mkTopString(5).concat(mkString("a")).concat(mkTopString(5)).concat(mkString("b")).collapseTopChars(),
+			mkTopString(1).concat(mkString("a")).concat(mkTopString(1)).concat(mkString("b")));
 
 		assertEquals(
-				mkString("a")
-						.concat(mkTopString(5))
-						.concat(mkString("b"))
-						.concat(mkTopString(9))
-						.concat(mkString("c"))
-						.concat(mkTopString(5))
-						.collapseTopChars(),
-				mkString("a")
-						.concat(mkTopString(1))
-						.concat(mkString("b"))
-						.concat(mkTopString(1))
-						.concat(mkString("c"))
-						.concat(mkTopString(1)));
+			mkString("a").concat(mkTopString(5))
+				.concat(mkString("b"))
+				.concat(mkTopString(9))
+				.concat(mkString("c"))
+				.concat(mkTopString(5))
+				.collapseTopChars(),
+			mkString("a").concat(mkTopString(1))
+				.concat(mkString("b"))
+				.concat(mkTopString(1))
+				.concat(mkString("c"))
+				.concat(mkTopString(1)));
 	}
 
 }

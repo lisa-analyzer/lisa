@@ -34,9 +34,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class TypeBasedHeap
-		implements
-		BaseHeapDomain<AllocatedTypes> {
+public class TypeBasedHeap implements BaseHeapDomain<AllocatedTypes> {
 
 	@Override
 	public AllocatedTypes makeLattice() {
@@ -115,9 +113,7 @@ public class TypeBasedHeap
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class Rewriter
-			extends
-			BaseHeapDomain.Rewriter {
+	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		/**
 		 * The singleton instance of this rewriter.
@@ -177,9 +173,9 @@ public class TypeBasedHeap
 					Set<Type> rt = oracle.getRuntimeTypesOf(refExp, pp);
 					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
 					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(sup),
-							(HeapLocation) refExp,
-							refExp.getCodeLocation());
+						new ReferenceType(sup),
+						(HeapLocation) refExp,
+						refExp.getCodeLocation());
 					result.add(e);
 				}
 			}

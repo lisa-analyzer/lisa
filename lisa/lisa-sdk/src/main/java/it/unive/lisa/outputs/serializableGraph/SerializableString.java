@@ -9,9 +9,7 @@ import java.util.SortedMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableString
-		extends
-		SerializableValue {
+public class SerializableString extends SerializableValue {
 
 	private final String value;
 

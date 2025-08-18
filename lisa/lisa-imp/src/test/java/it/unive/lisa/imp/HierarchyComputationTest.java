@@ -21,69 +21,55 @@ public class HierarchyComputationTest {
 			Program prog,
 			String name) {
 		Unit unit = prog.getUnits().stream().filter(u -> u.getName().equals(name)).findFirst().get();
-		assertNotNull(
-				"'" + name + "' unit not found",
-				unit);
+		assertNotNull("'" + name + "' unit not found", unit);
 		return unit;
 	}
 
 	private static CFG findCFG(
 			ClassUnit unit,
 			String name) {
-		CFG cfg = unit
-				.getInstanceCFGs(false)
-				.stream()
-				.filter(c -> c.getDescriptor().getName().equals(name))
-				.findFirst()
-				.get();
-		assertNotNull(
-				"'" + unit.getName() + "' unit does not contain cfg '" + name + "'",
-				cfg);
+		CFG cfg = unit.getInstanceCFGs(false)
+			.stream()
+			.filter(c -> c.getDescriptor().getName().equals(name))
+			.findFirst()
+			.get();
+		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
 	private static AbstractCodeMember findSignatureCFG(
 			ClassUnit unit,
 			String name) {
-		AbstractCodeMember cfg = unit
-				.getAbstractCodeMembers(false)
-				.stream()
-				.filter(c -> c.getDescriptor().getName().equals(name))
-				.findFirst()
-				.get();
-		assertNotNull(
-				"'" + unit.getName() + "' unit does not contain cfg '" + name + "'",
-				cfg);
+		AbstractCodeMember cfg = unit.getAbstractCodeMembers(false)
+			.stream()
+			.filter(c -> c.getDescriptor().getName().equals(name))
+			.findFirst()
+			.get();
+		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
 	private static AbstractCodeMember findSignatureCFG(
 			InterfaceUnit unit,
 			String name) {
-		AbstractCodeMember cfg = unit
-				.getAbstractCodeMembers(false)
-				.stream()
-				.filter(c -> c.getDescriptor().getName().equals(name))
-				.findFirst()
-				.get();
-		assertNotNull(
-				"'" + unit.getName() + "' unit does not contain cfg '" + name + "'",
-				cfg);
+		AbstractCodeMember cfg = unit.getAbstractCodeMembers(false)
+			.stream()
+			.filter(c -> c.getDescriptor().getName().equals(name))
+			.findFirst()
+			.get();
+		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
 	private static CFG findImplementedCFG(
 			InterfaceUnit unit,
 			String name) {
-		CFG cfg = unit
-				.getInstanceCFGs(false)
-				.stream()
-				.filter(c -> c.getDescriptor().getName().equals(name))
-				.findFirst()
-				.get();
-		assertNotNull(
-				"'" + unit.getName() + "' unit does not contain cfg '" + name + "'",
-				cfg);
+		CFG cfg = unit.getInstanceCFGs(false)
+			.stream()
+			.filter(c -> c.getDescriptor().getName().equals(name))
+			.findFirst()
+			.get();
+		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
@@ -91,17 +77,17 @@ public class HierarchyComputationTest {
 			CompilationUnit sup,
 			Unit unit) {
 		assertTrue(
-				"'" + unit.getName() + "' is not among '" + sup.getName() + "' instances",
-				sup.getInstances().contains(unit));
+			"'" + unit.getName() + "' is not among '" + sup.getName() + "' instances",
+			sup.getInstances().contains(unit));
 		if (sup != unit) {
 			if (unit instanceof ClassUnit)
 				assertTrue(
-						"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
-						((ClassUnit) unit).isInstanceOf(sup));
+					"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
+					((ClassUnit) unit).isInstanceOf(sup));
 			else
 				assertTrue(
-						"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
-						((InterfaceUnit) unit).isInstanceOf((InterfaceUnit) sup));
+					"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
+					((InterfaceUnit) unit).isInstanceOf((InterfaceUnit) sup));
 		}
 	}
 
@@ -109,37 +95,38 @@ public class HierarchyComputationTest {
 			CompilationUnit sup,
 			CompilationUnit unit) {
 		assertFalse(
-				"'" + unit.getName() + "' is among '" + sup.getName() + "' instances",
-				sup.getInstances().contains(unit));
+			"'" + unit.getName() + "' is among '" + sup.getName() + "' instances",
+			sup.getInstances().contains(unit));
 		if (sup != unit)
 			assertFalse(
-					"'" + sup.getName() + "' is among '" + unit.getName() + "' superunits",
-					unit.getImmediateAncestors().contains(sup));
+				"'" + sup.getName() + "' is among '" + unit.getName() + "' superunits",
+				unit.getImmediateAncestors().contains(sup));
 	}
 
 	private static void overrides(
 			CodeMember sup,
 			CodeMember cfg) {
 		assertTrue(
-				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '" + cfg.getDescriptor().getFullName()
-						+ "'",
-				sup.getDescriptor().overriddenBy().contains(cfg));
+			"'"
+				+ sup.getDescriptor().getFullName()
+				+ "' is not overridden by '"
+				+ cfg.getDescriptor().getFullName()
+				+ "'",
+			sup.getDescriptor().overriddenBy().contains(cfg));
 		assertTrue(
-				"'" + sup.getDescriptor().getFullName() + "' does not override '" + cfg.getDescriptor().getFullName()
-						+ "'",
-				cfg.getDescriptor().overrides().contains(sup));
+			"'" + sup.getDescriptor().getFullName() + "' does not override '" + cfg.getDescriptor().getFullName() + "'",
+			cfg.getDescriptor().overrides().contains(sup));
 	}
 
 	private static void notOverrides(
 			CFG sup,
 			CFG cfg) {
 		assertFalse(
-				"'" + sup.getDescriptor().getFullName() + "' is overridden by '" + cfg.getDescriptor().getFullName()
-						+ "'",
-				sup.getDescriptor().overriddenBy().contains(cfg));
+			"'" + sup.getDescriptor().getFullName() + "' is overridden by '" + cfg.getDescriptor().getFullName() + "'",
+			sup.getDescriptor().overriddenBy().contains(cfg));
 		assertFalse(
-				"'" + sup.getDescriptor().getFullName() + "' overrides '" + cfg.getDescriptor().getFullName() + "'",
-				cfg.getDescriptor().overrides().contains(sup));
+			"'" + sup.getDescriptor().getFullName() + "' overrides '" + cfg.getDescriptor().getFullName() + "'",
+			cfg.getDescriptor().overrides().contains(sup));
 	}
 
 	@Test
@@ -336,7 +323,7 @@ public class HierarchyComputationTest {
 			throws ParsingException,
 			ProgramValidationException {
 		Program prog = IMPFrontend
-				.processFile("imp-testcases/program-finalization/default-methods-interface.imp", false);
+			.processFile("imp-testcases/program-finalization/default-methods-interface.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
@@ -375,7 +362,7 @@ public class HierarchyComputationTest {
 			throws ParsingException,
 			ProgramValidationException {
 		Program prog = IMPFrontend
-				.processFile("imp-testcases/program-finalization/overriding-default-method.imp", false);
+			.processFile("imp-testcases/program-finalization/overriding-default-method.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
@@ -407,7 +394,7 @@ public class HierarchyComputationTest {
 			throws ParsingException,
 			ProgramValidationException {
 		Program prog = IMPFrontend
-				.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp", false);
+			.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp", false);
 		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 

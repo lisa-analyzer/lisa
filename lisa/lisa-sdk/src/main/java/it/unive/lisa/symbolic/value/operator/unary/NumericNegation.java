@@ -20,10 +20,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NumericNegation
-		implements
-		ArithmeticOperator,
-		UnaryOperator {
+public class NumericNegation implements ArithmeticOperator, UnaryOperator {
 
 	/**
 	 * The singleton instance of this class.

@@ -16,9 +16,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @param <T> the type of elements inside this set
  */
-public final class BitExternalSet<T>
-		implements
-		ExternalSet<T> {
+public final class BitExternalSet<T> implements ExternalSet<T> {
 
 	/**
 	 * The bits representing the set. If a bit is 1 then the corresponding
@@ -241,9 +239,7 @@ public final class BitExternalSet<T>
 	}
 
 	@Override
-	@SuppressWarnings({
-			"unchecked", "rawtypes"
-	})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public boolean equals(
 			Object obj) {
 		if (obj == null)
@@ -442,9 +438,7 @@ public final class BitExternalSet<T>
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	private final class BitSetIterator
-			implements
-			Iterator<T> {
+	private final class BitSetIterator implements Iterator<T> {
 
 		/**
 		 * The next bit to look at

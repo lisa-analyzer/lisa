@@ -27,10 +27,10 @@ import org.junit.Test;
 public class AdditionalInfoTest {
 
 	private static final ClassUnit unit = new ClassUnit(
-			SyntheticLocation.INSTANCE,
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-			"Testing",
-			false);
+		SyntheticLocation.INSTANCE,
+		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+		"Testing",
+		false);
 
 	@Test
 	public void testNoInfo()
@@ -49,8 +49,7 @@ public class AdditionalInfoTest {
 		LiSAReport report = lisa.run(program);
 
 		assertEquals(0, report.getAdditionalInfo().size());
-		try (FileReader reader = new FileReader(
-				"tmp/" + LiSA.REPORT_NAME)) {
+		try (FileReader reader = new FileReader("tmp/" + LiSA.REPORT_NAME)) {
 			JsonReport jsonReport = JsonReport.read(reader);
 			assertEquals(0, jsonReport.getAdditionalInfo().getFields().size());
 		}
@@ -74,8 +73,7 @@ public class AdditionalInfoTest {
 		LiSAReport report = lisa.run(filler, program);
 
 		assertEquals(1, report.getAdditionalInfo().size());
-		try (FileReader reader = new FileReader(
-				"tmp/" + LiSA.REPORT_NAME)) {
+		try (FileReader reader = new FileReader("tmp/" + LiSA.REPORT_NAME)) {
 			JsonReport jsonReport = JsonReport.read(reader);
 			assertEquals(1, jsonReport.getAdditionalInfo().getFields().size());
 		}

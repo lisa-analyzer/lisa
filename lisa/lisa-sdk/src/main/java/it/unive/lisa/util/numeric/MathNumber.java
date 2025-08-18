@@ -10,9 +10,7 @@ import java.math.RoundingMode;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MathNumber
-		implements
-		Comparable<MathNumber> {
+public class MathNumber implements Comparable<MathNumber> {
 
 	/**
 	 * The constant for plus infinity.

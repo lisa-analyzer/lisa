@@ -17,9 +17,7 @@ import java.util.Set;
  * 
  * @param <L> the type of lattice produced by this domain
  */
-public interface WholeValueStringDomain<L extends Lattice<L>>
-		extends
-		BaseNonRelationalValueDomain<L> {
+public interface WholeValueStringDomain<L extends Lattice<L>> extends BaseNonRelationalValueDomain<L> {
 
 	/**
 	 * Simplified semantics of the string contains operator, checking a single

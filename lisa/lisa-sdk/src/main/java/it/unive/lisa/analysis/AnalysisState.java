@@ -223,9 +223,9 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			ProgramPoint pp)
 			throws SemanticException {
 		return new AnalysisState<>(
-				state.pushScope(scope, pp),
-				onAllExpressions(this.computedExpressions, scope, pp, true),
-				info);
+			state.pushScope(scope, pp),
+			onAllExpressions(this.computedExpressions, scope, pp, true),
+			info);
 	}
 
 	private static ExpressionSet onAllExpressions(
@@ -246,9 +246,9 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			ProgramPoint pp)
 			throws SemanticException {
 		return new AnalysisState<>(
-				state.popScope(scope, pp),
-				onAllExpressions(this.computedExpressions, scope, pp, false),
-				info);
+			state.popScope(scope, pp),
+			onAllExpressions(this.computedExpressions, scope, pp, false),
+			info);
 	}
 
 	@Override
@@ -256,9 +256,9 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			AnalysisState<A> other)
 			throws SemanticException {
 		return new AnalysisState<>(
-				state.lub(other.state),
-				computedExpressions.lub(other.computedExpressions),
-				info.lub(other.info));
+			state.lub(other.state),
+			computedExpressions.lub(other.computedExpressions),
+			info.lub(other.info));
 	}
 
 	@Override
@@ -266,9 +266,9 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			AnalysisState<A> other)
 			throws SemanticException {
 		return new AnalysisState<>(
-				state.glb(other.state),
-				computedExpressions.glb(other.computedExpressions),
-				info.glb(other.info));
+			state.glb(other.state),
+			computedExpressions.glb(other.computedExpressions),
+			info.glb(other.info));
 	}
 
 	@Override
@@ -276,9 +276,9 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			AnalysisState<A> other)
 			throws SemanticException {
 		return new AnalysisState<>(
-				state.widening(other.state),
-				computedExpressions.lub(other.computedExpressions),
-				info.widening(other.info));
+			state.widening(other.state),
+			computedExpressions.lub(other.computedExpressions),
+			info.widening(other.info));
 	}
 
 	@Override
@@ -286,9 +286,9 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			AnalysisState<A> other)
 			throws SemanticException {
 		return new AnalysisState<>(
-				state.narrowing(other.state),
-				computedExpressions.glb(other.computedExpressions),
-				info.narrowing(other.info));
+			state.narrowing(other.state),
+			computedExpressions.glb(other.computedExpressions),
+			info.narrowing(other.info));
 	}
 
 	@Override

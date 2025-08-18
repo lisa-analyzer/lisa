@@ -20,9 +20,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @param <S> the type of the string lattice
  * @param <B> the type of the boolean lattice
  */
-public class WholeValue<N extends WholeValueElement<N>,
-		S extends WholeValueElement<S>,
-		B extends WholeValueElement<B>>
+public class WholeValue<N extends WholeValueElement<N>, S extends WholeValueElement<S>, B extends WholeValueElement<B>>
 		implements
 		BaseLattice<WholeValue<N, S, B>> {
 
@@ -83,9 +81,9 @@ public class WholeValue<N extends WholeValueElement<N>,
 			WholeValue<N, S, B> other)
 			throws SemanticException {
 		return new WholeValue<>(
-				this.intValue.lub(other.intValue),
-				this.stringValue.lub(other.stringValue),
-				this.boolValue.lub(other.boolValue));
+			this.intValue.lub(other.intValue),
+			this.stringValue.lub(other.stringValue),
+			this.boolValue.lub(other.boolValue));
 	}
 
 	@Override
@@ -102,9 +100,9 @@ public class WholeValue<N extends WholeValueElement<N>,
 			WholeValue<N, S, B> other)
 			throws SemanticException {
 		return new WholeValue<>(
-				this.intValue.widening(other.intValue),
-				this.stringValue.widening(other.stringValue),
-				this.boolValue.widening(other.boolValue));
+			this.intValue.widening(other.intValue),
+			this.stringValue.widening(other.stringValue),
+			this.boolValue.widening(other.boolValue));
 	}
 
 	@Override
@@ -178,8 +176,13 @@ public class WholeValue<N extends WholeValueElement<N>,
 		if (isBool())
 			return boolValue.representation();
 		return new StringRepresentation(
-				"(" + intValue.representation().toString() + ", " + stringValue.representation().toString() + ", "
-						+ boolValue.representation().toString() + ")");
+			"("
+				+ intValue.representation().toString()
+				+ ", "
+				+ stringValue.representation().toString()
+				+ ", "
+				+ boolValue.representation().toString()
+				+ ")");
 	}
 
 	@Override

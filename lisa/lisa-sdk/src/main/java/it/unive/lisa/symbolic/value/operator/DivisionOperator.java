@@ -5,8 +5,6 @@ package it.unive.lisa.symbolic.value.operator;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface DivisionOperator
-		extends
-		ArithmeticOperator {
+public interface DivisionOperator extends ArithmeticOperator {
 
 }

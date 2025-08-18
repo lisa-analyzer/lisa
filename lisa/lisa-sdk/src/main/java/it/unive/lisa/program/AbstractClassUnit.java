@@ -9,9 +9,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AbstractClassUnit
-		extends
-		ClassUnit {
+public class AbstractClassUnit extends ClassUnit {
 
 	/**
 	 * Builds a concrete compilation unit, defined at the given program point.

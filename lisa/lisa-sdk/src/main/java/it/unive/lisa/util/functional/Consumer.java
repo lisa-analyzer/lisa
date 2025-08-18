@@ -11,8 +11,7 @@ package it.unive.lisa.util.functional;
  *                consumer
  */
 @FunctionalInterface
-public interface Consumer<T,
-		E extends Exception> {
+public interface Consumer<T, E extends Exception> {
 
 	/**
 	 * Performs this operation on the given argument.

@@ -20,9 +20,7 @@ import it.unive.lisa.symbolic.value.Identifier;
  * 
  * @param <L> the concrete {@link LatticeWithReplacement} type
  */
-public interface LatticeWithReplacement<L extends LatticeWithReplacement<L>>
-		extends
-		DomainLattice<L, L> {
+public interface LatticeWithReplacement<L extends LatticeWithReplacement<L>> extends DomainLattice<L, L> {
 
 	/**
 	 * Applies a substitution of identifiers that is caused by a modification of

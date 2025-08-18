@@ -44,9 +44,7 @@ import java.util.Set;
  */
 public class WholeValueAnalysis<N extends WholeValueElement<N>,
 		S extends WholeValueElement<S>,
-		B extends WholeValueElement<B>>
-		implements
-		BaseNonRelationalValueDomain<WholeValue<N, S, B>> {
+		B extends WholeValueElement<B>> implements BaseNonRelationalValueDomain<WholeValue<N, S, B>> {
 
 	/**
 	 * The non-relational integer abstract domain.
@@ -119,11 +117,8 @@ public class WholeValueAnalysis<N extends WholeValueElement<N>,
 		UnaryOperator operator = expression.getOperator();
 		if (operator == StringLength.INSTANCE && arg.isString())
 			return mkInt(
-					arg
-							.getIntValue()
-							.generate(
-									arg.getStringValue().constraints((ValueExpression) expression.getExpression(), pp),
-									pp));
+				arg.getIntValue()
+					.generate(arg.getStringValue().constraints((ValueExpression) expression.getExpression(), pp), pp));
 		if (operator == NumericNegation.INSTANCE && arg.isNumber())
 			return mkInt(intDom.evalUnaryExpression(expression, arg.getIntValue(), pp, oracle));
 		if (operator == LogicalNegation.INSTANCE && arg.isBool())
@@ -144,50 +139,43 @@ public class WholeValueAnalysis<N extends WholeValueElement<N>,
 			return mkInt(intDom.evalBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle));
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
 			return mkBool(
-					boolDom.evalBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle));
+				boolDom.evalBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle));
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
 			return mkBool(
-					left
-							.getBoolValue()
-							.generate(
-									intDom
-											.satisfiesBinaryExpression(expression, left.getIntValue(),
-													right.getIntValue(), pp, oracle)
-											.constraints(expression, pp),
-									pp));
+				left.getBoolValue()
+					.generate(
+						intDom
+							.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle)
+							.constraints(expression, pp),
+						pp));
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE)
 			return mkBool(
-					left
-							.getBoolValue()
-							.generate(
-									satisfiesBinaryExpression(expression, left, right, pp, oracle)
-											.constraints(expression, pp),
-									pp));
+				left.getBoolValue()
+					.generate(
+						satisfiesBinaryExpression(expression, left, right, pp, oracle).constraints(expression, pp),
+						pp));
 		if (operator == StringIndexOf.INSTANCE && left.isString() && right.isString())
 			return mkInt(
-					left
-							.getIntValue()
-							.generate(
-									strDom.indexOf_constr(expression, left.getStringValue(), right.getStringValue(),
-											pp),
-									pp));
+				left.getIntValue()
+					.generate(
+						strDom.indexOf_constr(expression, left.getStringValue(), right.getStringValue(), pp),
+						pp));
 		if (operator == StringConcat.INSTANCE && left.isString() && right.isString())
 			return mkString(
-					strDom.evalBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle));
+				strDom.evalBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle));
 		if (operator instanceof StringOperation && left.isString() && right.isString())
 			return mkBool(
-					left
-							.getBoolValue()
-							.generate(
-									strDom
-											.satisfiesBinaryExpression(
-													expression,
-													left.getStringValue(),
-													right.getStringValue(),
-													pp,
-													oracle)
-											.constraints(expression, pp),
-									pp));
+				left.getBoolValue()
+					.generate(
+						strDom
+							.satisfiesBinaryExpression(
+								expression,
+								left.getStringValue(),
+								right.getStringValue(),
+								pp,
+								oracle)
+							.constraints(expression, pp),
+						pp));
 		return top();
 	}
 
@@ -207,14 +195,13 @@ public class WholeValueAnalysis<N extends WholeValueElement<N>,
 			return mkString(strDom.substring(left.getStringValue(), begin, end, pp));
 		} else if (operator == StringReplace.INSTANCE && left.isString() && middle.isString() && right.isString())
 			return mkString(
-					strDom
-							.evalTernaryExpression(
-									expression,
-									left.getStringValue(),
-									middle.getStringValue(),
-									right.getStringValue(),
-									pp,
-									oracle));
+				strDom.evalTernaryExpression(
+					expression,
+					left.getStringValue(),
+					middle.getStringValue(),
+					right.getStringValue(),
+					pp,
+					oracle));
 
 		return top();
 	}
@@ -230,7 +217,7 @@ public class WholeValueAnalysis<N extends WholeValueElement<N>,
 		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof StringOperation && left.isString() && right.isString())
 			return strDom
-					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
+				.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
 			return intDom.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
@@ -240,28 +227,26 @@ public class WholeValueAnalysis<N extends WholeValueElement<N>,
 				return Satisfiability.NOT_SATISFIED;
 			if (left.isString())
 				return strDom
-						.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
-								oracle);
+					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
 			if (left.isNumber())
 				return intDom
-						.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
+					.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 			if (left.isBool())
 				return boolDom
-						.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
+					.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		}
 		if (operator == ComparisonNe.INSTANCE) {
 			if (!left.sameKind(right))
 				return Satisfiability.SATISFIED;
 			if (left.isString())
 				return strDom
-						.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
-								oracle);
+					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
 			if (left.isNumber())
 				return intDom
-						.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
+					.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 			if (left.isBool())
 				return boolDom
-						.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
+					.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		}
 		return Satisfiability.UNKNOWN;
 	}

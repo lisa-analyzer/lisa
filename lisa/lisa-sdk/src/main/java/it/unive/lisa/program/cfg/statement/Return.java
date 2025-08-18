@@ -19,12 +19,7 @@ import it.unive.lisa.symbolic.value.Variable;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Return
-		extends
-		UnaryStatement
-		implements
-		MetaVariableCreator,
-		YieldsValue {
+public class Return extends UnaryStatement implements MetaVariableCreator, YieldsValue {
 
 	/**
 	 * Builds the return, returning {@code expression} to the caller CFG,
@@ -73,13 +68,12 @@ public class Return
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression expr,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression expr,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		// TODO need to smash the continuation into the normal one at returns
 		Identifier meta = getMetaVariable();
 		return interprocedural.getAnalysis().assign(state, meta, expr, this);

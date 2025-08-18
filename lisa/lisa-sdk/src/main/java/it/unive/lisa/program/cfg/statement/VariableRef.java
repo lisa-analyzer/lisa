@@ -23,9 +23,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class VariableRef
-		extends
-		Expression {
+public class VariableRef extends Expression {
 
 	/**
 	 * The name of this variable
@@ -126,12 +124,11 @@ public class VariableRef
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		SymbolicExpression expr = getVariable();
 		return interprocedural.getAnalysis().smallStepSemantics(entryState, expr, this);
 	}

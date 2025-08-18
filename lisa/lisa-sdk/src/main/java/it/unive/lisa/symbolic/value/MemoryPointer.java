@@ -14,9 +14,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class MemoryPointer
-		extends
-		Identifier {
+public class MemoryPointer extends Identifier {
 
 	/**
 	 * The heap location memory pointed by this pointer.

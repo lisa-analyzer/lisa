@@ -8,9 +8,7 @@ import it.unive.lisa.type.NullType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NullConstant
-		extends
-		Constant {
+public class NullConstant extends Constant {
 
 	private static final Object NULL_CONST = new Object();
 

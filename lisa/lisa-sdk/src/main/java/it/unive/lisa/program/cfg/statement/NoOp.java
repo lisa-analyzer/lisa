@@ -18,9 +18,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NoOp
-		extends
-		Statement {
+public class NoOp extends Statement {
 
 	/**
 	 * Builds the no-op, happening at the given location in the program.
@@ -64,12 +62,11 @@ public class NoOp
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		return interprocedural.getAnalysis().smallStepSemantics(entryState, new Skip(getLocation()), this);
 	}
 

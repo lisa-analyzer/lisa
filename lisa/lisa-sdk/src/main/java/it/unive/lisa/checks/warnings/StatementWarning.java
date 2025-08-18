@@ -7,9 +7,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StatementWarning
-		extends
-		WarningWithLocation {
+public class StatementWarning extends WarningWithLocation {
 
 	/**
 	 * The statement where this warning was reported on
@@ -88,8 +86,11 @@ public class StatementWarning
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + statement.getCFG().getDescriptor().getFullSignatureWithParNames()
-				+ "': " + getTaggedMessage();
+		return getLocationWithBrackets()
+			+ " on '"
+			+ statement.getCFG().getDescriptor().getFullSignatureWithParNames()
+			+ "': "
+			+ getTaggedMessage();
 	}
 
 }

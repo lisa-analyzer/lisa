@@ -389,9 +389,9 @@ public class IntInterval
 				return higher;
 			else
 				return cacheAndRound(
-						new IntInterval(
-								lower.low.compareTo(higher.low) > 0 ? higher.low : lower.low,
-								lower.high.compareTo(higher.high) < 0 ? higher.high : lower.high));
+					new IntInterval(
+						lower.low.compareTo(higher.low) > 0 ? higher.low : lower.low,
+						lower.high.compareTo(higher.high) < 0 ? higher.high : lower.high));
 		}
 	}
 
@@ -513,8 +513,7 @@ public class IntInterval
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 
-		return new StringRepresentation(
-				"[" + low + ", " + high + "]");
+		return new StringRepresentation("[" + low + ", " + high + "]");
 	}
 
 	@Override
@@ -590,22 +589,22 @@ public class IntInterval
 		BinaryExpression lbound, ubound;
 		try {
 			ubound = new BinaryExpression(
-					pp.getProgram().getTypes().getBooleanType(),
-					new Constant(pp.getProgram().getTypes().getIntegerType(), getHigh().toInt(), pp.getLocation()),
-					e,
-					ComparisonGe.INSTANCE,
-					e.getCodeLocation());
+				pp.getProgram().getTypes().getBooleanType(),
+				new Constant(pp.getProgram().getTypes().getIntegerType(), getHigh().toInt(), pp.getLocation()),
+				e,
+				ComparisonGe.INSTANCE,
+				e.getCodeLocation());
 		} catch (MathNumberConversionException e1) {
 			ubound = null;
 		}
 
 		try {
 			lbound = new BinaryExpression(
-					pp.getProgram().getTypes().getBooleanType(),
-					new Constant(pp.getProgram().getTypes().getIntegerType(), getLow().toInt(), pp.getLocation()),
-					e,
-					ComparisonLe.INSTANCE,
-					e.getCodeLocation());
+				pp.getProgram().getTypes().getBooleanType(),
+				new Constant(pp.getProgram().getTypes().getIntegerType(), getLow().toInt(), pp.getLocation()),
+				e,
+				ComparisonLe.INSTANCE,
+				e.getCodeLocation());
 		} catch (MathNumberConversionException e1) {
 			lbound = null;
 		}

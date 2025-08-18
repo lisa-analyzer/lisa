@@ -28,11 +28,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGCall
-		extends
-		CallWithResult
-		implements
-		CanRemoveReceiver {
+public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 
 	/**
 	 * The targets of this call
@@ -111,13 +107,13 @@ public class CFGCall
 			UnresolvedCall source,
 			Collection<CFG> targets) {
 		this(
-				source.getCFG(),
-				source.getLocation(),
-				source.getCallType(),
-				source.getQualifier(),
-				source.getTargetName(),
-				targets,
-				source.getParameters());
+			source.getCFG(),
+			source.getLocation(),
+			source.getCallType(),
+			source.getQualifier(),
+			source.getTargetName(),
+			targets,
+			source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);
@@ -198,10 +194,7 @@ public class CFGCall
 
 	@Override
 	public final Identifier getMetaVariable() {
-		Variable meta = new Variable(
-				getStaticType(),
-				"call_ret_value@" + getLocation(),
-				getLocation());
+		Variable meta = new Variable(getStaticType(), "call_ret_value@" + getLocation(), getLocation());
 		// propagate the annotations of the targets
 		// to the metavariable of this cfg call
 		for (CFG target : targets)
@@ -211,28 +204,27 @@ public class CFGCall
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> compute(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					ExpressionSet[] parameters)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> compute(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] parameters)
+			throws SemanticException {
 		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
 	}
 
 	@Override
 	public TruncatedParamsCall removeFirstParameter() {
 		return new TruncatedParamsCall(
-				new CFGCall(
-						getCFG(),
-						getLocation(),
-						getCallType(),
-						getQualifier(),
-						getFullTargetName(),
-						getOrder(),
-						targets,
-						CanRemoveReceiver.truncate(getParameters())));
+			new CFGCall(
+				getCFG(),
+				getLocation(),
+				getCallType(),
+				getQualifier(),
+				getFullTargetName(),
+				getOrder(),
+				targets,
+				CanRemoveReceiver.truncate(getParameters())));
 	}
 
 }

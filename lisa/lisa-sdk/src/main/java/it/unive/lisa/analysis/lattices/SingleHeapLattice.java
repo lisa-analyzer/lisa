@@ -22,10 +22,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SingleHeapLattice
-		implements
-		HeapLattice<SingleHeapLattice>,
-		HeapValue<SingleHeapLattice> {
+public class SingleHeapLattice implements HeapLattice<SingleHeapLattice>, HeapValue<SingleHeapLattice> {
 
 	/**
 	 * The singleton instance of this lattice, which is the only non-bottom

@@ -17,9 +17,7 @@ import java.util.TreeSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NonRedundantIntervalSet
-		extends
-		NonRedundantSetLattice<NonRedundantIntervalSet, IntInterval> {
+public class NonRedundantIntervalSet extends NonRedundantSetLattice<NonRedundantIntervalSet, IntInterval> {
 
 	/**
 	 * Builds a new non redundant intervals lattice with an empty set of

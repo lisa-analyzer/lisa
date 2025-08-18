@@ -17,7 +17,5 @@ import it.unive.lisa.checks.Check;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public interface SemanticCheck<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
-		extends
-		Check<CheckToolWithAnalysisResults<A, D>> {
+		D extends AbstractDomain<A>> extends Check<CheckToolWithAnalysisResults<A, D>> {
 }

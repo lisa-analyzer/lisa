@@ -14,9 +14,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public class OutOfScopeIdentifier
-		extends
-		Identifier {
+public class OutOfScopeIdentifier extends Identifier {
 
 	private final ScopeToken scope;
 
@@ -35,12 +33,7 @@ public class OutOfScopeIdentifier
 			Identifier id,
 			ScopeToken scope,
 			CodeLocation location) {
-		super(
-				id.getStaticType(),
-				scope.toString() + ":" + id.getName(),
-				id.isWeak(),
-				id.getAnnotations(),
-				location);
+		super(id.getStaticType(), scope.toString() + ":" + id.getName(), id.isWeak(), id.getAnnotations(), location);
 		this.id = id;
 		this.scope = scope;
 	}

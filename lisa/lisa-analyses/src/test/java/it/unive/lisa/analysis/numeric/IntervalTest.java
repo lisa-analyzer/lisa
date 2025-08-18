@@ -49,17 +49,17 @@ public class IntervalTest {
 	private final Variable varAux = new Variable(Int32Type.INSTANCE, "aux", pp.getLocation());
 
 	private final UnaryExpression unary = new UnaryExpression(
-			Int32Type.INSTANCE,
-			varAux,
-			NumericNegation.INSTANCE,
-			pp.getLocation());
+		Int32Type.INSTANCE,
+		varAux,
+		NumericNegation.INSTANCE,
+		pp.getLocation());
 
 	private final BinaryExpression binary = new BinaryExpression(
-			Int32Type.INSTANCE,
-			varAux,
-			variable,
-			NumericNonOverflowingAdd.INSTANCE,
-			pp.getLocation());
+		Int32Type.INSTANCE,
+		varAux,
+		variable,
+		NumericNonOverflowingAdd.INSTANCE,
+		pp.getLocation());
 
 	private final ValueEnvironment<
 			IntInterval> env = new ValueEnvironment<>(IntInterval.TOP).putState(variable, IntInterval.TOP);
@@ -71,10 +71,9 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			assertTrue(
-					"eval(" + val + ") did not return [" + val + ", " + val + "]",
-					singleton
-							.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle)
-							.is(val));
+				"eval(" + val + ") did not return [" + val + ", " + val + "]",
+				singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle)
+					.is(val));
 		}
 	}
 
@@ -83,10 +82,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
 			assertTrue(
-					"eval(-" + val + ") did not return [-" + val + ", -" + val + "]",
-					singleton.evalUnaryExpression(unary, aval, pp, oracle).is(-val));
+				"eval(-" + val + ") did not return [-" + val + ", -" + val + "]",
+				singleton.evalUnaryExpression(unary, aval, pp, oracle).is(-val));
 		}
 	}
 
@@ -96,14 +95,14 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval exp = aval1.plus(aval2);
 			assertEquals(
-					"eval(" + val1 + " + " + val2 + ") did not return " + exp,
-					exp,
-					singleton.evalBinaryExpression(binary, aval1, aval2, pp, oracle));
+				"eval(" + val1 + " + " + val2 + ") did not return " + exp,
+				exp,
+				singleton.evalBinaryExpression(binary, aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -113,20 +112,19 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval exp = aval1.diff(aval2);
 			assertEquals(
-					"eval(" + val1 + " - " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.evalBinaryExpression(
-									binary.withOperator(NumericNonOverflowingSub.INSTANCE),
-									aval1,
-									aval2,
-									pp,
-									oracle));
+				"eval(" + val1 + " - " + val2 + ") did not return " + exp,
+				exp,
+				singleton.evalBinaryExpression(
+					binary.withOperator(NumericNonOverflowingSub.INSTANCE),
+					aval1,
+					aval2,
+					pp,
+					oracle));
 		}
 	}
 
@@ -136,20 +134,19 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval exp = aval1.mul(aval2);
 			assertEquals(
-					"eval(" + val1 + " * " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.evalBinaryExpression(
-									binary.withOperator(NumericNonOverflowingMul.INSTANCE),
-									aval1,
-									aval2,
-									pp,
-									oracle));
+				"eval(" + val1 + " * " + val2 + ") did not return " + exp,
+				exp,
+				singleton.evalBinaryExpression(
+					binary.withOperator(NumericNonOverflowingMul.INSTANCE),
+					aval1,
+					aval2,
+					pp,
+					oracle));
 		}
 	}
 
@@ -159,20 +156,19 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval exp = aval1.div(aval2, false, false);
 			assertEquals(
-					"eval(" + val1 + " / " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.evalBinaryExpression(
-									binary.withOperator(NumericNonOverflowingDiv.INSTANCE),
-									aval1,
-									aval2,
-									pp,
-									oracle));
+				"eval(" + val1 + " / " + val2 + ") did not return " + exp,
+				exp,
+				singleton.evalBinaryExpression(
+					binary.withOperator(NumericNonOverflowingDiv.INSTANCE),
+					aval1,
+					aval2,
+					pp,
+					oracle));
 		}
 	}
 
@@ -183,52 +179,40 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval lub = aval1.lub(aval2);
 			IntInterval widen = aval1.widening(aval2);
 			IntInterval glb = aval1.glb(aval2);
+			assertTrue(aval1 + " does not include " + aval1, aval1.lessOrEqual(aval1));
+			assertTrue(aval2 + " does not include " + aval2, aval2.lessOrEqual(aval2));
+			assertTrue(aval1 + " lub " + aval2 + " (" + lub + ") does not include " + aval1, aval1.lessOrEqual(lub));
+			assertTrue(aval1 + " lub " + aval2 + " (" + lub + ") does not include " + aval2, aval2.lessOrEqual(lub));
 			assertTrue(
-					aval1 + " does not include " + aval1,
-					aval1.lessOrEqual(aval1));
+				aval1 + " widening " + aval2 + " (" + widen + ") does not include " + aval1,
+				aval1.lessOrEqual(widen));
 			assertTrue(
-					aval2 + " does not include " + aval2,
-					aval2.lessOrEqual(aval2));
-			assertTrue(
-					aval1 + " lub " + aval2 + " (" + lub + ") does not include " + aval1,
-					aval1.lessOrEqual(lub));
-			assertTrue(
-					aval1 + " lub " + aval2 + " (" + lub + ") does not include " + aval2,
-					aval2.lessOrEqual(lub));
-			assertTrue(
-					aval1 + " widening " + aval2 + " (" + widen + ") does not include " + aval1,
-					aval1.lessOrEqual(widen));
-			assertTrue(
-					aval1 + " widening " + aval2 + " (" + widen + ") does not include " + aval2,
-					aval2.lessOrEqual(widen));
+				aval1 + " widening " + aval2 + " (" + widen + ") does not include " + aval2,
+				aval2.lessOrEqual(widen));
 			if (val2 < val1)
 				assertTrue(
-						aval1 + " widening " + aval2 + " (" + widen + ") does not have its lower bound set to -Inf",
-						widen.lowIsMinusInfinity());
+					aval1 + " widening " + aval2 + " (" + widen + ") does not have its lower bound set to -Inf",
+					widen.lowIsMinusInfinity());
 			else
 				assertFalse(
-						aval1 + " widening " + aval2 + " (" + widen + ") has its lower bound set to -Inf",
-						widen.lowIsMinusInfinity());
+					aval1 + " widening " + aval2 + " (" + widen + ") has its lower bound set to -Inf",
+					widen.lowIsMinusInfinity());
 			if (val2 > val1)
 				assertTrue(
-						aval1 + " widening " + aval2 + " (" + widen + ") does not have its higher bound set to +Inf",
-						widen.highIsPlusInfinity());
+					aval1 + " widening " + aval2 + " (" + widen + ") does not have its higher bound set to +Inf",
+					widen.highIsPlusInfinity());
 			else
 				assertFalse(
-						aval1 + " widening " + aval2 + " (" + widen + ") has its higher bound set to +Inf",
-						widen.highIsPlusInfinity());
-			assertTrue(
-					aval1 + " glb " + aval2 + " (" + glb + ") is not included in " + aval1,
-					glb.lessOrEqual(aval1));
-			assertTrue(
-					aval1 + " glb " + aval2 + " (" + glb + ") is not included in " + aval2,
-					glb.lessOrEqual(aval2));
+					aval1 + " widening " + aval2 + " (" + widen + ") has its higher bound set to +Inf",
+					widen.highIsPlusInfinity());
+			assertTrue(aval1 + " glb " + aval2 + " (" + glb + ") is not included in " + aval1, glb.lessOrEqual(aval1));
+			assertTrue(aval1 + " glb " + aval2 + " (" + glb + ") is not included in " + aval2, glb.lessOrEqual(aval2));
 		}
 	}
 
@@ -238,16 +222,15 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 == val2);
 			assertEquals(
-					"satisfies(" + val1 + " == " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonEq.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + val1 + " == " + val2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonEq.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -257,16 +240,15 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 != val2);
 			assertEquals(
-					"satisfies(" + val1 + " != " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonNe.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + val1 + " != " + val2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonNe.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -276,16 +258,15 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 > val2);
 			assertEquals(
-					"satisfies(" + val1 + " > " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonGt.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + val1 + " > " + val2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonGt.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -295,16 +276,15 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 >= val2);
 			assertEquals(
-					"satisfies(" + val1 + " >= " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonGe.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + val1 + " >= " + val2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonGe.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -314,16 +294,15 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 < val2);
 			assertEquals(
-					"satisfies(" + val1 + " < " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonLt.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + val1 + " < " + val2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonLt.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -333,16 +312,15 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 <= val2);
 			assertEquals(
-					"satisfies(" + val1 + " <= " + val2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonLe.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + val1 + " <= " + val2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonLe.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -352,23 +330,22 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
-					"assume(" + variable + " == " + val + ") did not return " + exp,
-					exp,
-					singleton
-							.assumeBinaryExpression(
-									env,
-									new BinaryExpression(
-											BoolType.INSTANCE,
-											variable,
-											new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
-											ComparisonEq.INSTANCE,
-											pp.getLocation()),
-									pp,
-									pp,
-									oracle));
+				"assume(" + variable + " == " + val + ") did not return " + exp,
+				exp,
+				singleton.assumeBinaryExpression(
+					env,
+					new BinaryExpression(
+						BoolType.INSTANCE,
+						variable,
+						new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
+						ComparisonEq.INSTANCE,
+						pp.getLocation()),
+					pp,
+					pp,
+					oracle));
 		}
 	}
 
@@ -378,29 +355,25 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 1, pp.getLocation()), pp, oracle);
 			// val + 1, +inf
-			aval = aval
-					.widening(
-							singleton
-									.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()),
-											pp, oracle));
+			aval = aval.widening(
+				singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp, oracle));
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
-					"assume(" + variable + " > " + val + ") did not return " + exp,
-					exp,
-					singleton
-							.assumeBinaryExpression(
-									env,
-									new BinaryExpression(
-											BoolType.INSTANCE,
-											variable,
-											new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
-											ComparisonGt.INSTANCE,
-											pp.getLocation()),
-									pp,
-									pp,
-									oracle));
+				"assume(" + variable + " > " + val + ") did not return " + exp,
+				exp,
+				singleton.assumeBinaryExpression(
+					env,
+					new BinaryExpression(
+						BoolType.INSTANCE,
+						variable,
+						new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
+						ComparisonGt.INSTANCE,
+						pp.getLocation()),
+					pp,
+					pp,
+					oracle));
 		}
 	}
 
@@ -410,29 +383,25 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
 			// val, +inf
-			aval = aval
-					.widening(
-							singleton
-									.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()),
-											pp, oracle));
+			aval = aval.widening(
+				singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp, oracle));
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
-					"assume(" + variable + " >= " + val + ") did not return " + exp,
-					exp,
-					singleton
-							.assumeBinaryExpression(
-									env,
-									new BinaryExpression(
-											BoolType.INSTANCE,
-											variable,
-											new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
-											ComparisonGe.INSTANCE,
-											pp.getLocation()),
-									pp,
-									pp,
-									oracle));
+				"assume(" + variable + " >= " + val + ") did not return " + exp,
+				exp,
+				singleton.assumeBinaryExpression(
+					env,
+					new BinaryExpression(
+						BoolType.INSTANCE,
+						variable,
+						new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
+						ComparisonGe.INSTANCE,
+						pp.getLocation()),
+					pp,
+					pp,
+					oracle));
 		}
 	}
 
@@ -442,29 +411,25 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 1, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 1, pp.getLocation()), pp, oracle);
 			// -inf, val - 1
-			aval = aval
-					.widening(
-							singleton
-									.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()),
-											pp, oracle));
+			aval = aval.widening(
+				singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp, oracle));
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
-					"assume(" + variable + " < " + val + ") did not return " + exp,
-					exp,
-					singleton
-							.assumeBinaryExpression(
-									env,
-									new BinaryExpression(
-											BoolType.INSTANCE,
-											variable,
-											new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
-											ComparisonLt.INSTANCE,
-											pp.getLocation()),
-									pp,
-									pp,
-									oracle));
+				"assume(" + variable + " < " + val + ") did not return " + exp,
+				exp,
+				singleton.assumeBinaryExpression(
+					env,
+					new BinaryExpression(
+						BoolType.INSTANCE,
+						variable,
+						new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
+						ComparisonLt.INSTANCE,
+						pp.getLocation()),
+					pp,
+					pp,
+					oracle));
 		}
 	}
 
@@ -474,29 +439,25 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
 			// -inf, val
-			aval = aval
-					.widening(
-							singleton
-									.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()),
-											pp, oracle));
+			aval = aval.widening(
+				singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp, oracle));
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
-					"assume(" + variable + " <= " + val + ") did not return " + exp,
-					exp,
-					singleton
-							.assumeBinaryExpression(
-									env,
-									new BinaryExpression(
-											BoolType.INSTANCE,
-											variable,
-											new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
-											ComparisonLe.INSTANCE,
-											pp.getLocation()),
-									pp,
-									pp,
-									oracle));
+				"assume(" + variable + " <= " + val + ") did not return " + exp,
+				exp,
+				singleton.assumeBinaryExpression(
+					env,
+					new BinaryExpression(
+						BoolType.INSTANCE,
+						variable,
+						new Constant(Int32Type.INSTANCE, val, pp.getLocation()),
+						ComparisonLe.INSTANCE,
+						pp.getLocation()),
+					pp,
+					pp,
+					oracle));
 		}
 	}
 
@@ -505,9 +466,9 @@ public class IntervalTest {
 			int val2)
 			throws SemanticException {
 		IntInterval aval1 = singleton
-				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+			.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 		IntInterval aval2 = singleton
-				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+			.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 		return aval1.lub(aval2);
 	}
 
@@ -520,9 +481,9 @@ public class IntervalTest {
 			IntInterval aval = mk(val1, val2);
 			IntInterval exp = mk(-val1, -val2);
 			assertEquals(
-					"eval(-" + aval + ") did not return " + exp,
-					exp,
-					singleton.evalUnaryExpression(unary, aval, pp, oracle));
+				"eval(-" + aval + ") did not return " + exp,
+				exp,
+				singleton.evalUnaryExpression(unary, aval, pp, oracle));
 		}
 	}
 
@@ -538,9 +499,9 @@ public class IntervalTest {
 			IntInterval aval2 = mk(val3, val4);
 			IntInterval exp = aval1.plus(aval2);
 			assertEquals(
-					"eval(" + aval1 + " + " + aval2 + ") did not return " + exp,
-					exp,
-					singleton.evalBinaryExpression(binary, aval1, aval2, pp, oracle));
+				"eval(" + aval1 + " + " + aval2 + ") did not return " + exp,
+				exp,
+				singleton.evalBinaryExpression(binary, aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -556,15 +517,14 @@ public class IntervalTest {
 			IntInterval aval2 = mk(val3, val4);
 			IntInterval exp = aval1.diff(aval2);
 			assertEquals(
-					"eval(" + aval1 + " - " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.evalBinaryExpression(
-									binary.withOperator(NumericNonOverflowingSub.INSTANCE),
-									aval1,
-									aval2,
-									pp,
-									oracle));
+				"eval(" + aval1 + " - " + aval2 + ") did not return " + exp,
+				exp,
+				singleton.evalBinaryExpression(
+					binary.withOperator(NumericNonOverflowingSub.INSTANCE),
+					aval1,
+					aval2,
+					pp,
+					oracle));
 		}
 	}
 
@@ -580,15 +540,14 @@ public class IntervalTest {
 			IntInterval aval2 = mk(val3, val4);
 			IntInterval exp = aval1.mul(aval2);
 			assertEquals(
-					"eval(" + aval1 + " * " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.evalBinaryExpression(
-									binary.withOperator(NumericNonOverflowingMul.INSTANCE),
-									aval1,
-									aval2,
-									pp,
-									oracle));
+				"eval(" + aval1 + " * " + aval2 + ") did not return " + exp,
+				exp,
+				singleton.evalBinaryExpression(
+					binary.withOperator(NumericNonOverflowingMul.INSTANCE),
+					aval1,
+					aval2,
+					pp,
+					oracle));
 		}
 	}
 
@@ -604,15 +563,14 @@ public class IntervalTest {
 			IntInterval aval2 = mk(val3, val4);
 			IntInterval exp = aval1.div(aval2, false, false);
 			assertEquals(
-					"eval(" + aval1 + " / " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.evalBinaryExpression(
-									binary.withOperator(NumericNonOverflowingDiv.INSTANCE),
-									aval1,
-									aval2,
-									pp,
-									oracle));
+				"eval(" + aval1 + " / " + aval2 + ") did not return " + exp,
+				exp,
+				singleton.evalBinaryExpression(
+					binary.withOperator(NumericNonOverflowingDiv.INSTANCE),
+					aval1,
+					aval2,
+					pp,
+					oracle));
 		}
 	}
 
@@ -629,50 +587,36 @@ public class IntervalTest {
 			IntInterval lub = aval1.lub(aval2);
 			IntInterval widen = aval1.widening(aval2);
 			IntInterval glb = aval1.glb(aval2);
+			assertTrue(aval1 + " does not include " + aval1, aval1.lessOrEqual(aval1));
+			assertTrue(aval2 + " does not include " + aval2, aval2.lessOrEqual(aval2));
+			assertTrue(aval1 + " lub " + aval2 + " (" + lub + ") does not include " + aval1, aval1.lessOrEqual(lub));
+			assertTrue(aval1 + " lub " + aval2 + " (" + lub + ") does not include " + aval2, aval2.lessOrEqual(lub));
 			assertTrue(
-					aval1 + " does not include " + aval1,
-					aval1.lessOrEqual(aval1));
+				aval1 + " widening " + aval2 + " (" + widen + ") does not include " + aval1,
+				aval1.lessOrEqual(widen));
 			assertTrue(
-					aval2 + " does not include " + aval2,
-					aval2.lessOrEqual(aval2));
-			assertTrue(
-					aval1 + " lub " + aval2 + " (" + lub + ") does not include " + aval1,
-					aval1.lessOrEqual(lub));
-			assertTrue(
-					aval1 + " lub " + aval2 + " (" + lub + ") does not include " + aval2,
-					aval2.lessOrEqual(lub));
-			assertTrue(
-					aval1 + " widening " + aval2 + " (" + widen + ") does not include " + aval1,
-					aval1.lessOrEqual(widen));
-			assertTrue(
-					aval1 + " widening " + aval2 + " (" + widen + ") does not include " + aval2,
-					aval2.lessOrEqual(widen));
+				aval1 + " widening " + aval2 + " (" + widen + ") does not include " + aval2,
+				aval2.lessOrEqual(widen));
 			if (aval2.getLow().compareTo(aval1.getLow()) < 0)
 				assertTrue(
-						aval1 + " widening " + aval2 + " (" + widen + ") does not have its lower bound set to -Inf",
-						widen.lowIsMinusInfinity());
+					aval1 + " widening " + aval2 + " (" + widen + ") does not have its lower bound set to -Inf",
+					widen.lowIsMinusInfinity());
 			else
 				assertEquals(
-						aval1 + " widening " + aval2 + " (" + widen
-								+ ") has its lower bound different from the original",
-						aval1.getLow(),
-						widen.getLow());
+					aval1 + " widening " + aval2 + " (" + widen + ") has its lower bound different from the original",
+					aval1.getLow(),
+					widen.getLow());
 			if (aval2.getHigh().compareTo(aval1.getHigh()) > 0)
 				assertTrue(
-						aval1 + " widening " + aval2 + " (" + widen + ") does not have its higher bound set to +Inf",
-						widen.highIsPlusInfinity());
+					aval1 + " widening " + aval2 + " (" + widen + ") does not have its higher bound set to +Inf",
+					widen.highIsPlusInfinity());
 			else
 				assertEquals(
-						aval1 + " widening " + aval2 + " (" + widen
-								+ ") has its higher bound different from the original",
-						aval1.getHigh(),
-						widen.getHigh());
-			assertTrue(
-					aval1 + " glb " + aval2 + " (" + glb + ") is not included in " + aval1,
-					glb.lessOrEqual(aval1));
-			assertTrue(
-					aval1 + " glb " + aval2 + " (" + glb + ") is not included in " + aval2,
-					glb.lessOrEqual(aval2));
+					aval1 + " widening " + aval2 + " (" + widen + ") has its higher bound different from the original",
+					aval1.getHigh(),
+					widen.getHigh());
+			assertTrue(aval1 + " glb " + aval2 + " (" + glb + ") is not included in " + aval1, glb.lessOrEqual(aval1));
+			assertTrue(aval1 + " glb " + aval2 + " (" + glb + ") is not included in " + aval2, glb.lessOrEqual(aval2));
 		}
 	}
 
@@ -689,11 +633,10 @@ public class IntervalTest {
 			Satisfiability exp = Satisfiability.fromBoolean(aval1.equals(aval2) && aval1.isSingleton());
 			exp = exp.lub(Satisfiability.fromBoolean(aval1.intersects(aval2)));
 			assertEquals(
-					"satisfies(" + aval1 + " == " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonEq.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + aval1 + " == " + aval2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonEq.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -711,11 +654,10 @@ public class IntervalTest {
 			if (exp == Satisfiability.NOT_SATISFIED)
 				exp = Satisfiability.UNKNOWN;
 			assertEquals(
-					"satisfies(" + aval1 + " != " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonNe.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + aval1 + " != " + aval2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonNe.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -735,11 +677,10 @@ public class IntervalTest {
 			else
 				exp = Satisfiability.fromBoolean(aval1.getLow().compareTo(aval2.getHigh()) > 0);
 			assertEquals(
-					"satisfies(" + aval1 + " > " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonGt.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + aval1 + " > " + aval2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonGt.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -759,11 +700,10 @@ public class IntervalTest {
 			else
 				exp = Satisfiability.fromBoolean(aval1.getLow().compareTo(aval2.getHigh()) >= 0);
 			assertEquals(
-					"satisfies(" + aval1 + " >= " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonGe.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + aval1 + " >= " + aval2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonGe.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -783,11 +723,10 @@ public class IntervalTest {
 			else
 				exp = Satisfiability.fromBoolean(aval1.getLow().compareTo(aval2.getHigh()) < 0);
 			assertEquals(
-					"satisfies(" + aval1 + " < " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonLt.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + aval1 + " < " + aval2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonLt.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -807,11 +746,10 @@ public class IntervalTest {
 			else
 				exp = Satisfiability.fromBoolean(aval1.getLow().compareTo(aval2.getHigh()) <= 0);
 			assertEquals(
-					"satisfies(" + aval1 + " <= " + aval2 + ") did not return " + exp,
-					exp,
-					singleton
-							.satisfiesBinaryExpression(binary.withOperator(ComparisonLe.INSTANCE), aval1, aval2, pp,
-									oracle));
+				"satisfies(" + aval1 + " <= " + aval2 + ") did not return " + exp,
+				exp,
+				singleton
+					.satisfiesBinaryExpression(binary.withOperator(ComparisonLe.INSTANCE), aval1, aval2, pp, oracle));
 		}
 	}
 
@@ -825,20 +763,14 @@ public class IntervalTest {
 			ValueEnvironment<IntInterval> start = env.putState(varAux, aval);
 			ValueEnvironment<IntInterval> exp = start.putState(variable, aval);
 			assertEquals(
-					"assume(" + variable + " == " + aval + ") did not return " + exp,
-					exp,
-					singleton
-							.assumeBinaryExpression(
-									start,
-									new BinaryExpression(
-											BoolType.INSTANCE,
-											variable,
-											varAux,
-											ComparisonEq.INSTANCE,
-											pp.getLocation()),
-									pp,
-									pp,
-									oracle));
+				"assume(" + variable + " == " + aval + ") did not return " + exp,
+				exp,
+				singleton.assumeBinaryExpression(
+					start,
+					new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonEq.INSTANCE, pp.getLocation()),
+					pp,
+					pp,
+					oracle));
 		}
 	}
 
@@ -854,18 +786,13 @@ public class IntervalTest {
 			aval = aval.widening(mk(val1 + 1, val2 + 1));
 			ValueEnvironment<IntInterval> start = env.putState(varAux, bound);
 			ValueEnvironment<IntInterval> exp = start.putState(variable, aval);
-			ValueEnvironment<IntInterval> act = singleton
-					.assumeBinaryExpression(
-							start,
-							new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonGt.INSTANCE,
-									pp.getLocation()),
-							pp,
-							pp,
-							oracle);
-			assertEquals(
-					"assume(" + variable + " > " + bound + ") did not return " + exp,
-					exp,
-					act);
+			ValueEnvironment<IntInterval> act = singleton.assumeBinaryExpression(
+				start,
+				new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonGt.INSTANCE, pp.getLocation()),
+				pp,
+				pp,
+				oracle);
+			assertEquals("assume(" + variable + " > " + bound + ") did not return " + exp, exp, act);
 		}
 	}
 
@@ -880,18 +807,13 @@ public class IntervalTest {
 			IntInterval aval = bound.widening(val1 < val2 ? mk(val1, val2 + 1) : mk(val1 + 1, val2));
 			ValueEnvironment<IntInterval> start = env.putState(varAux, bound);
 			ValueEnvironment<IntInterval> exp = start.putState(variable, aval);
-			ValueEnvironment<IntInterval> act = singleton
-					.assumeBinaryExpression(
-							start,
-							new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonGe.INSTANCE,
-									pp.getLocation()),
-							pp,
-							pp,
-							oracle);
-			assertEquals(
-					"assume(" + variable + " >= " + bound + ") did not return " + exp,
-					exp,
-					act);
+			ValueEnvironment<IntInterval> act = singleton.assumeBinaryExpression(
+				start,
+				new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonGe.INSTANCE, pp.getLocation()),
+				pp,
+				pp,
+				oracle);
+			assertEquals("assume(" + variable + " >= " + bound + ") did not return " + exp, exp, act);
 		}
 	}
 
@@ -907,18 +829,13 @@ public class IntervalTest {
 			aval = aval.widening(mk(val1 - 1, val2 - 1));
 			ValueEnvironment<IntInterval> start = env.putState(varAux, bound);
 			ValueEnvironment<IntInterval> exp = start.putState(variable, aval);
-			ValueEnvironment<IntInterval> act = singleton
-					.assumeBinaryExpression(
-							start,
-							new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonLt.INSTANCE,
-									pp.getLocation()),
-							pp,
-							pp,
-							oracle);
-			assertEquals(
-					"assume(" + variable + " < " + bound + ") did not return " + exp,
-					exp,
-					act);
+			ValueEnvironment<IntInterval> act = singleton.assumeBinaryExpression(
+				start,
+				new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonLt.INSTANCE, pp.getLocation()),
+				pp,
+				pp,
+				oracle);
+			assertEquals("assume(" + variable + " < " + bound + ") did not return " + exp, exp, act);
 		}
 	}
 
@@ -933,18 +850,13 @@ public class IntervalTest {
 			IntInterval aval = bound.widening(val1 < val2 ? mk(val1 - 1, val2) : mk(val1, val2 - 1));
 			ValueEnvironment<IntInterval> start = env.putState(varAux, bound);
 			ValueEnvironment<IntInterval> exp = start.putState(variable, aval);
-			ValueEnvironment<IntInterval> act = singleton
-					.assumeBinaryExpression(
-							start,
-							new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonLe.INSTANCE,
-									pp.getLocation()),
-							pp,
-							pp,
-							oracle);
-			assertEquals(
-					"assume(" + variable + " <= " + bound + ") did not return " + exp,
-					exp,
-					act);
+			ValueEnvironment<IntInterval> act = singleton.assumeBinaryExpression(
+				start,
+				new BinaryExpression(BoolType.INSTANCE, variable, varAux, ComparisonLe.INSTANCE, pp.getLocation()),
+				pp,
+				pp,
+				oracle);
+			assertEquals("assume(" + variable + " <= " + bound + ") did not return " + exp, exp, act);
 		}
 	}
 

@@ -13,9 +13,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class InstrumentedReceiver
-		extends
-		Variable {
+public class InstrumentedReceiver extends Variable {
 
 	/**
 	 * Builds the instrumented receiver.

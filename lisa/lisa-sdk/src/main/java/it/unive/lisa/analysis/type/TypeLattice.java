@@ -13,7 +13,5 @@ import it.unive.lisa.analysis.value.LatticeWithReplacement;
  * 
  * @param <L> the concrete type of {@link TypeLattice}
  */
-public interface TypeLattice<L extends TypeLattice<L>>
-		extends
-		LatticeWithReplacement<L> {
+public interface TypeLattice<L extends TypeLattice<L>> extends LatticeWithReplacement<L> {
 }

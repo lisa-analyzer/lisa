@@ -12,9 +12,7 @@ package it.unive.lisa.util.functional;
  *                consumer
  */
 @FunctionalInterface
-public interface BiConsumer<T,
-		U,
-		E extends Exception> {
+public interface BiConsumer<T, U, E extends Exception> {
 
 	/**
 	 * Performs this operation on the given arguments.

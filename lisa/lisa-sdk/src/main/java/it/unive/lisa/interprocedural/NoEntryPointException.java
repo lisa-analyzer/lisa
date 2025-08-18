@@ -7,9 +7,7 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NoEntryPointException
-		extends
-		FixpointException {
+public class NoEntryPointException extends FixpointException {
 
 	private static final long serialVersionUID = -7989565407659746161L;
 

@@ -28,12 +28,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * Utility class for frontends that contains methods that add nodes and edges to
+ * a target {@link CFG} to ensure that it is well-formed.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class CFGTweaker {
 
 	private CFGTweaker() {
 		// utility class, no instances allowed
 	}
 
+	/**
+	 * Heuristics to add explicit return statements to paths that return
+	 * implicitly. This is useful to ensure that all paths in a method return
+	 * explicitly, and that the CFG has all exit nodes clearly marked by returns
+	 * or throws. This method:
+	 * <ul>
+	 * <li>adds a {@link Ret} node to the CFG, if it does not contain any
+	 * instruction;</li>
+	 * <li>checks that either all return statements return a value, or none
+	 * do;</li>
+	 * <li>adds a {@link Ret} node to the CFG after each instruction that does
+	 * not stop execution and does not have a follower, only if a value-less
+	 * return is allowed.</li>
+	 * </ul>
+	 * 
+	 * @param <E>              the type of exceptions this method can raise
+	 * @param cfg              the CFG to be tweaked
+	 * @param exceptionFactory a factory for exceptions to be raised in case of
+	 *                             errors
+	 */
 	public static <E extends RuntimeException> void addReturns(
 			CFG cfg,
 			Function<String, E> exceptionFactory) {
@@ -61,8 +87,8 @@ public class CFGTweaker {
 			if (st instanceof Return)
 				returnsValue = true;
 			else if (returnsValue)
-				throw exceptionFactory.apply("Return statement at " + st.getLocation()
-						+ " should return something, since other returns do it");
+				throw exceptionFactory.apply(
+					"Return statement at " + st.getLocation() + " should return something, since other returns do it");
 
 		cfg.addNode(ret);
 		for (Statement st : preExits) {
@@ -77,6 +103,27 @@ public class CFGTweaker {
 				entry.setScopeEnd(ret);
 	}
 
+	/**
+	 * Adds edges connecting each statement possibly needing to be followed by
+	 * the execution of a finally block to the (chain of) finally block(s) that
+	 * is (are) to be executed. These include:
+	 * <ul>
+	 * <li>Edges from statements terminating try/catch/else block normally, and
+	 * going into their corresponding finally block;</li>
+	 * <li>Edges from statements preceding execution-terminating statements
+	 * (e.g., returns or throws) to the enclosing finally blocks that must be
+	 * executed before leaving the current CFG, and then the edge back to the
+	 * statement itself;</li>
+	 * <li>Edges from control flow-altering statements (e.g., breaks or
+	 * continues) to the enclosing finally blocks that must be executed before
+	 * leaving the current control flow, and then the edge to their target.</li>
+	 * </ul>
+	 *
+	 * @param <E>              the type of exceptions this method can raise
+	 * @param cfg              the CFG to be tweaked
+	 * @param exceptionFactory a factory for exceptions to be raised in case of
+	 *                             errors
+	 */
 	public static <E extends RuntimeException> void addFinallyEdges(
 			CFG cfg,
 			Function<String, E> exceptionFactory) {
@@ -107,9 +154,11 @@ public class CFGTweaker {
 			if (fins.isEmpty())
 				continue;
 
-			fins.sort((
-					a,
-					b) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
+			fins.sort(
+				(
+						a,
+						b
+				) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
 			for (Edge preEnd : cfg.getIngoingEdges(yield)) {
 				cfg.getNodeList().removeEdge(preEnd);
 				pathIdx = addFinallyPathInBetween(cfg, preEnd.getSource(), yield, fins, pathIdx);
@@ -123,34 +172,36 @@ public class CFGTweaker {
 				Collection<Edge> outs = cfg.getOutgoingEdges(st);
 				Collection<Edge> toReplace = new TreeSet<>();
 				for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
-					if (pb.getFinallyBlock() == null
-							|| pb.getFinallyBlock().getBody().isEmpty())
+					if (pb.getFinallyBlock() == null || pb.getFinallyBlock().getBody().isEmpty())
 						continue;
 
 					AtomicBoolean found = new AtomicBoolean(false);
 
 					if (pb.getTryBlock().getBody().contains(st))
 						outs.stream()
-								.filter(e -> !pb.getTryBlock().getBody().contains(e.getDestination()))
-								.forEach(e -> {
-									found.set(true);
-									toReplace.add(e);
-								});
+							.filter(e -> !pb.getTryBlock().getBody().contains(e.getDestination()))
+							.forEach(e ->
+							{
+								found.set(true);
+								toReplace.add(e);
+							});
 					if (pb.getElseBlock() != null && pb.getElseBlock().getBody().contains(st))
 						outs.stream()
-								.filter(e -> !pb.getElseBlock().getBody().contains(e.getDestination()))
-								.forEach(e -> {
-									found.set(true);
-									toReplace.add(e);
-								});
+							.filter(e -> !pb.getElseBlock().getBody().contains(e.getDestination()))
+							.forEach(e ->
+							{
+								found.set(true);
+								toReplace.add(e);
+							});
 					for (CatchBlock catchBody : pb.getCatchBlocks())
 						if (catchBody.getBody().getBody().contains(st))
 							outs.stream()
-									.filter(e -> !catchBody.getBody().getBody().contains(e.getDestination()))
-									.forEach(e -> {
-										found.set(true);
-										toReplace.add(e);
-									});
+								.filter(e -> !catchBody.getBody().getBody().contains(e.getDestination()))
+								.forEach(e ->
+								{
+									found.set(true);
+									toReplace.add(e);
+								});
 
 					if (found.get())
 						fins.add(pb.getFinallyBlock());
@@ -158,9 +209,11 @@ public class CFGTweaker {
 				if (fins.isEmpty())
 					continue;
 
-				fins.sort((
-						a,
-						b) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
+				fins.sort(
+					(
+							a,
+							b
+					) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
 				for (Edge entry : toReplace) {
 					cfg.getNodeList().removeEdge(entry);
 					pathIdx = addFinallyPathInBetween(cfg, st, entry.getDestination(), fins, pathIdx);
@@ -231,15 +284,11 @@ public class CFGTweaker {
 
 			if (!next.alwaysContinues())
 				if (!next.canBeContinued()) {
-					lastYielders = next.getBody().stream()
-							.filter(Statement::stopsExecution)
-							.toList();
+					lastYielders = next.getBody().stream().filter(Statement::stopsExecution).toList();
 					yieldersInCurrentBlock = true;
 				} else {
 					lastYielders = new LinkedList<>(lastYielders);
-					next.getBody().stream()
-							.filter(Statement::stopsExecution)
-							.forEach(lastYielders::add);
+					next.getBody().stream().filter(Statement::stopsExecution).forEach(lastYielders::add);
 				}
 
 			current = next;
@@ -255,6 +304,37 @@ public class CFGTweaker {
 		return pathIdx + 1;
 	}
 
+	/**
+	 * Utility methods to split yields (i.e., returns, throws, or any
+	 * {@link Statement} returned by {@link CFG#getAllExitpoints()}) that is (i)
+	 * composite (i.e., it yields an expression that is not a constant or a
+	 * variable) and (ii) is inside a {@link ProtectionBlock} (i.e., inside a
+	 * try/catch/else/finally block). This is useful since errors might be
+	 * raised during the computation of that expression, and thus the creation
+	 * of the yielded value should be protected by an error edge. Moreover, any
+	 * finally block must be executed after the expression is computed, but
+	 * before the yield is executed. <br>
+	 * <br>
+	 * If {@code ret} is a yield, {@code b} is a condition, and {@code A} is an
+	 * arbitrary block of statements, this method will apply the following
+	 * transformations:
+	 * <ul>
+	 * <li>{@code ret} -> {@code noop; ret};</li>
+	 * <li>{@code ret 0} -> {@code noop; ret 0};</li>
+	 * <li>{@code if (b) ret} -> {@code if (b) noop; ret};</li>
+	 * <li>{@code if (b) ret 0} -> {@code if (b) noop; ret 0};</li>
+	 * <li>{@code A; ret} -> {@code A; ret};</li>
+	 * <li>{@code A; ret 0} -> {@code A; ret 0};</li>
+	 * <li>{@code ret x+2} -> {@code $val_to_yield=x+2; ret $val_to_yield};</li>
+	 * <li>{@code A; ret x+2} ->
+	 * {@code A; $val_to_yield=x+2; ret $val_to_yield}.</li>
+	 * </ul>
+	 * 
+	 * @param <E>              the type of exceptions this method can raise
+	 * @param cfg              the CFG to be tweaked
+	 * @param exceptionFactory a factory for exceptions to be raised in case of
+	 *                             errors
+	 */
 	public static <E extends RuntimeException> void splitProtectedYields(
 			CFG cfg,
 			Function<String, E> exceptionFactory) {
@@ -340,11 +420,7 @@ public class CFGTweaker {
 			needsRewriting = !(value instanceof VariableRef || value instanceof Literal);
 			VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), "$val_to_yield", value.getStaticType());
 			VariableRef tmpVar2 = new VariableRef(cfg, yielder.getLocation(), "$val_to_yield", value.getStaticType());
-			Assignment assign = new Assignment(
-					cfg,
-					yielder.getLocation(),
-					tmpVar1,
-					value);
+			Assignment assign = new Assignment(cfg, yielder.getLocation(), tmpVar1, value);
 			Statement newYielder = vyielder.withValue(tmpVar2);
 
 			cfg.addNode(assign);

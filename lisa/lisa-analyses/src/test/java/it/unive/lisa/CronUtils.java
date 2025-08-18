@@ -23,14 +23,13 @@ public class CronUtils {
 			throws IOException {
 		String target = "test-outputs/numeric/sign/untyped_tutorial.sign_parity_example(tutorial__this).json";
 
-		File throwAway = Paths.get(AnalysisTestExecutor.ACTUAL_RESULTS_DIR, "throw-away").toFile();
+		File throwAway = Paths.get(AnalysisTestExecutor.DEFAULT_ACTUAL_DIR, "throw-away").toFile();
 		try {
 			FileManager.forceDeleteFolder(throwAway.toString());
 			throwAway.mkdirs();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			fail(
-					"Cannot delete working directory '" + throwAway + "': " + e.getMessage());
+			fail("Cannot delete working directory '" + throwAway + "': " + e.getMessage());
 		}
 
 		FileManager mgr = new FileManager(throwAway.toString());

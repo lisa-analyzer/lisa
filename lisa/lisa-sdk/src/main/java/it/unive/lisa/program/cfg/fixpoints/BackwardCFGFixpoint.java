@@ -29,9 +29,7 @@ import java.util.List;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
-		implements
-		FixpointImplementation<Statement, Edge, CompoundState<A>> {
+		D extends AbstractDomain<A>> implements FixpointImplementation<Statement, Edge, CompoundState<A>> {
 
 	/**
 	 * The graph targeted by this implementation.
@@ -87,10 +85,9 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 		Collection<Identifier> ids = new LinkedList<>();
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(graph).getVariable();
-			for (SymbolicExpression expr : interprocedural
-					.getAnalysis()
-					.smallStepSemantics(approx, v, edge.getSource())
-					.getComputedExpressions())
+			for (SymbolicExpression expr : interprocedural.getAnalysis()
+				.smallStepSemantics(approx, v, edge.getSource())
+				.getComputedExpressions())
 				ids.add((Identifier) expr);
 		}
 

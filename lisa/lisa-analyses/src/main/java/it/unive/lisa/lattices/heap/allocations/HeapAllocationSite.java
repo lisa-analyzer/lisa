@@ -10,9 +10,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class HeapAllocationSite
-		extends
-		AllocationSite {
+public class HeapAllocationSite extends AllocationSite {
 
 	/**
 	 * Builds a heap allocation site.
@@ -74,8 +72,7 @@ public class HeapAllocationSite
 
 	@Override
 	public HeapAllocationSite toWeak() {
-		return isWeak()
-				? this
+		return isWeak() ? this
 				: new HeapAllocationSite(getStaticType(), getLocationName(), getField(), true, getCodeLocation());
 	}
 

@@ -40,9 +40,7 @@ import java.util.Set;
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class SubstringDomain
-		implements
-		ValueDomain<Substrings> {
+public class SubstringDomain implements ValueDomain<Substrings> {
 
 	@Override
 	public Substrings makeLattice() {
@@ -185,7 +183,7 @@ public class SubstringDomain
 
 				if (!(left instanceof ValueExpression) || !(right instanceof ValueExpression))
 					throw new SemanticException(
-							"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
+						"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
 
 				ValueExpression rightValueExpression = (ValueExpression) right;
 				ValueExpression leftValueExpression = (ValueExpression) left;
@@ -225,8 +223,7 @@ public class SubstringDomain
 			if (!(left instanceof Variable))
 				return Satisfiability.UNKNOWN;
 
-			return state.getState((Identifier) left).contains(right)
-					? Satisfiability.SATISFIED
+			return state.getState((Identifier) left).contains(right) ? Satisfiability.SATISFIED
 					: Satisfiability.UNKNOWN;
 		} else if (binaryOperator instanceof StringEquals
 				|| binaryOperator instanceof StringEndsWith
@@ -235,13 +232,12 @@ public class SubstringDomain
 				return Satisfiability.UNKNOWN;
 
 			return (state.getState((Identifier) left).contains(right))
-					&& (state.getState((Identifier) right).contains(left))
-							? Satisfiability.SATISFIED
+					&& (state.getState((Identifier) right).contains(left)) ? Satisfiability.SATISFIED
 							: Satisfiability.UNKNOWN;
 		} else if (binaryOperator instanceof LogicalOr) {
 			if (!(left instanceof ValueExpression) || !(right instanceof ValueExpression))
 				throw new SemanticException(
-						"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
+					"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
 			Satisfiability leftSatisfiability = satisfies(state, (ValueExpression) left, pp, oracle);
 
 			if (leftSatisfiability.equals(Satisfiability.SATISFIED))
@@ -254,7 +250,7 @@ public class SubstringDomain
 		} else if (binaryOperator instanceof LogicalAnd) {
 			if (!(left instanceof ValueExpression) || !(right instanceof ValueExpression))
 				throw new SemanticException(
-						"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
+					"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
 			Satisfiability leftSatisfiability = satisfies(state, (ValueExpression) left, pp, oracle);
 			Satisfiability rightSatisfiability = satisfies(state, (ValueExpression) right, pp, oracle);
 
@@ -449,14 +445,11 @@ public class SubstringDomain
 
 						Constant rightConstant = (Constant) right.get(0);
 
-						String s1 = leftConstant.getValue() instanceof String
-								? (String) leftConstant.getValue()
+						String s1 = leftConstant.getValue() instanceof String ? (String) leftConstant.getValue()
 								: leftConstant.getValue().toString();
-						String s2 = middleConstant.getValue() instanceof String
-								? (String) middleConstant.getValue()
+						String s2 = middleConstant.getValue() instanceof String ? (String) middleConstant.getValue()
 								: middleConstant.getValue().toString();
-						String s3 = rightConstant.getValue() instanceof String
-								? (String) rightConstant.getValue()
+						String s3 = rightConstant.getValue() instanceof String ? (String) rightConstant.getValue()
 								: rightConstant.getValue().toString();
 
 						temp.add(new Constant(strType, s1.replace(s2, s3), SyntheticLocation.INSTANCE));
@@ -477,8 +470,7 @@ public class SubstringDomain
 
 						Constant leftConstant = (Constant) left.get(0);
 
-						String s1 = leftConstant.getValue() instanceof String
-								? (String) leftConstant.getValue()
+						String s1 = leftConstant.getValue() instanceof String ? (String) leftConstant.getValue()
 								: leftConstant.getValue().toString();
 						Integer i1 = (Integer) ((Constant) ternaryExpression.getMiddle()).getValue();
 						Integer i2 = (Integer) ((Constant) ternaryExpression.getRight()).getValue();
@@ -584,9 +576,9 @@ public class SubstringDomain
 			// Iterate over the starting char
 			for (int i = 0; i <= str.length() - l; i++) {
 				Constant substring = new Constant(
-						c.getStaticType(),
-						str.substring(i, i + l),
-						SyntheticLocation.INSTANCE);
+					c.getStaticType(),
+					str.substring(i, i + l),
+					SyntheticLocation.INSTANCE);
 
 				result.add(substring);
 			}
@@ -629,9 +621,9 @@ public class SubstringDomain
 		// Iterate over the length
 		for (int i = 1; i <= length; i++) {
 			Constant suffix = new Constant(
-					c.getStaticType(),
-					str.substring(length - i, length),
-					SyntheticLocation.INSTANCE);
+				c.getStaticType(),
+				str.substring(length - i, length),
+				SyntheticLocation.INSTANCE);
 
 			result.add(suffix);
 		}
@@ -652,11 +644,11 @@ public class SubstringDomain
 			return expressions.get(0);
 
 		return new BinaryExpression(
-				expressions.get(0).getStaticType(),
-				expressions.get(0),
-				composeExpression(expressions.subList(1, expressions.size())),
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE);
+			expressions.get(0).getStaticType(),
+			expressions.get(0),
+			composeExpression(expressions.subList(1, expressions.size())),
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 	}
 
 }

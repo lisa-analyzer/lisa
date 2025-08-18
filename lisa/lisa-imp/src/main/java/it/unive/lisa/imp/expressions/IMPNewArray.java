@@ -34,9 +34,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewArray
-		extends
-		NaryExpression {
+public class IMPNewArray extends NaryExpression {
 
 	private final boolean staticallyAllocated;
 
@@ -62,11 +60,11 @@ public class IMPNewArray
 			boolean staticallyAllocated,
 			Expression[] dimensions) {
 		super(
-				cfg,
-				new SourceCodeLocation(sourceFile, line, col),
-				(staticallyAllocated ? "" : "new ") + type + "[]",
-				ArrayType.register(type, dimensions.length),
-				dimensions);
+			cfg,
+			new SourceCodeLocation(sourceFile, line, col),
+			(staticallyAllocated ? "" : "new ") + type + "[]",
+			ArrayType.register(type, dimensions.length),
+			dimensions);
 		if (dimensions.length != 1)
 			throw new UnsupportedOperationException("Multidimensional arrays are not yet supported");
 		this.staticallyAllocated = staticallyAllocated;
@@ -79,13 +77,12 @@ public class IMPNewArray
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
@@ -102,10 +99,10 @@ public class IMPNewArray
 
 		// we define the length of the array as a child element
 		AccessChild len = new AccessChild(
-				Int32Type.INSTANCE,
-				array,
-				new Variable(Untyped.INSTANCE, "len", getLocation()),
-				getLocation());
+			Int32Type.INSTANCE,
+			array,
+			new Variable(Untyped.INSTANCE, "len", getLocation()),
+			getLocation());
 
 		AnalysisState<A> lenSt = state.bottom();
 		// TODO fix when we'll support multidimensional arrays
@@ -122,13 +119,12 @@ public class IMPNewArray
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		// TODO implement this when backward analysis will be out of
 		// beta
 		throw new UnsupportedOperationException();

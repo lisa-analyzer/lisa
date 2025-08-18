@@ -16,9 +16,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge
-		implements
-		CodeEdge<CFG, Statement, Edge> {
+public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 
 	/**
 	 * The source node.
@@ -116,11 +114,10 @@ public abstract class Edge
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException;
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException;
 
 	/**
 	 * Traverses this edge in the backward direction, from destination to
@@ -139,11 +136,10 @@ public abstract class Edge
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException;
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException;
 
 	@Override
 	public <V> boolean accept(
@@ -163,6 +159,14 @@ public abstract class Edge
 		return getClass().getName().compareTo(o.getClass().getName());
 	}
 
+	/**
+	 * Yields the label of this edge, if any. The label is used mainly as a tool
+	 * for discriminating edges with the same kind and endpoints but with
+	 * different properties, e.g., different exceptions caught.
+	 * 
+	 * @return the label of this edge, or {@code null} if this edge does not
+	 *             have a label
+	 */
 	public String getLabel() {
 		return null;
 	}

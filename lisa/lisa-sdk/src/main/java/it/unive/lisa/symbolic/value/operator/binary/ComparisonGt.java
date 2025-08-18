@@ -16,9 +16,7 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ComparisonGt
-		extends
-		NumericComparison {
+public class ComparisonGt extends NumericComparison {
 
 	/**
 	 * The singleton instance of this class.

@@ -31,10 +31,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringReplace
-		implements
-		StringOperator,
-		TernaryOperator {
+public class StringReplace implements StringOperator, TernaryOperator {
 
 	/**
 	 * The singleton instance of this class.

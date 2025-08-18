@@ -8,9 +8,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CallGraphEdge
-		implements
-		Edge<CallGraph, CallGraphNode, CallGraphEdge> {
+public class CallGraphEdge implements Edge<CallGraph, CallGraphNode, CallGraphEdge> {
 
 	private final CallGraphNode source;
 

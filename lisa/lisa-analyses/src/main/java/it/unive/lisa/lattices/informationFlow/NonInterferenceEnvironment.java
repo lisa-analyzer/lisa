@@ -89,9 +89,7 @@ public class NonInterferenceEnvironment
 		});
 
 		if (holder.get() != null)
-			throw new SemanticException(
-					"Pushing the scope '" + scope + "' raised an error",
-					holder.get());
+			throw new SemanticException("Pushing the scope '" + scope + "' raised an error", holder.get());
 
 		return result;
 	}
@@ -113,9 +111,7 @@ public class NonInterferenceEnvironment
 		});
 
 		if (holder.get() != null)
-			throw new SemanticException(
-					"Popping the scope '" + scope + "' raised an error",
-					holder.get());
+			throw new SemanticException("Popping the scope '" + scope + "' raised an error", holder.get());
 
 		return result;
 	}
@@ -199,9 +195,7 @@ public class NonInterferenceEnvironment
 			try {
 				keys.add(pair.getLeft().lub(pair.getRight()));
 			} catch (SemanticException e) {
-				throw new SemanticException(
-						"Unable to lub " + pair.getLeft() + " and " + pair.getRight(),
-						e);
+				throw new SemanticException("Unable to lub " + pair.getLeft() + " and " + pair.getRight(), e);
 			}
 		return keys;
 	}
@@ -318,7 +312,7 @@ public class NonInterferenceEnvironment
 			return super.representation();
 
 		return new ObjectRepresentation(
-				Map.of("map", super.representation(), "state", getExecutionState().representation()));
+			Map.of("map", super.representation(), "state", getExecutionState().representation()));
 	}
 
 	@Override

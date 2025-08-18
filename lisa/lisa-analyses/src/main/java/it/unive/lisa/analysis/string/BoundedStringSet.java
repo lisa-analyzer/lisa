@@ -58,11 +58,7 @@ public class BoundedStringSet
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public class BSS
-			extends
-			SetLattice<BSS, String>
-			implements
-			WholeValueElement<BSS> {
+	public class BSS extends SetLattice<BSS, String> implements WholeValueElement<BSS> {
 
 		/**
 		 * Builds the top abstract value.
@@ -118,20 +114,19 @@ public class BoundedStringSet
 
 			BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
 			UnaryExpression strlen = new UnaryExpression(
-					pp.getProgram().getTypes().getIntegerType(),
-					e,
-					StringLength.INSTANCE,
-					pp.getLocation());
+				pp.getProgram().getTypes().getIntegerType(),
+				e,
+				StringLength.INSTANCE,
+				pp.getLocation());
 
 			if (isTop())
-				return Collections
-						.singleton(
-								new BinaryExpression(
-										booleanType,
-										new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-										strlen,
-										ComparisonLe.INSTANCE,
-										e.getCodeLocation()));
+				return Collections.singleton(
+					new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+						strlen,
+						ComparisonLe.INSTANCE,
+						e.getCodeLocation()));
 
 			int min = Integer.MAX_VALUE, max = 0;
 			String gcs = null, gcp = null;
@@ -148,32 +143,31 @@ public class BoundedStringSet
 					gcs = StringUtilities.gcp(gcs, StringUtils.reverse(str));
 			}
 
-			return Set
-					.of(
-							new BinaryExpression(
-									booleanType,
-									new Constant(pp.getProgram().getTypes().getIntegerType(), min, pp.getLocation()),
-									strlen,
-									ComparisonLe.INSTANCE,
-									e.getCodeLocation()),
-							new BinaryExpression(
-									booleanType,
-									new Constant(pp.getProgram().getTypes().getIntegerType(), max, pp.getLocation()),
-									strlen,
-									ComparisonGe.INSTANCE,
-									e.getCodeLocation()),
-							new BinaryExpression(
-									booleanType,
-									new Constant(pp.getProgram().getTypes().getStringType(), gcp, pp.getLocation()),
-									e,
-									StringStartsWith.INSTANCE,
-									e.getCodeLocation()),
-							new BinaryExpression(
-									booleanType,
-									new Constant(pp.getProgram().getTypes().getStringType(), gcs, pp.getLocation()),
-									e,
-									StringEndsWith.INSTANCE,
-									e.getCodeLocation()));
+			return Set.of(
+				new BinaryExpression(
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), min, pp.getLocation()),
+					strlen,
+					ComparisonLe.INSTANCE,
+					e.getCodeLocation()),
+				new BinaryExpression(
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), max, pp.getLocation()),
+					strlen,
+					ComparisonGe.INSTANCE,
+					e.getCodeLocation()),
+				new BinaryExpression(
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getStringType(), gcp, pp.getLocation()),
+					e,
+					StringStartsWith.INSTANCE,
+					e.getCodeLocation()),
+				new BinaryExpression(
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getStringType(), gcs, pp.getLocation()),
+					e,
+					StringEndsWith.INSTANCE,
+					e.getCodeLocation()));
 		}
 
 		@Override
@@ -487,29 +481,27 @@ public class BoundedStringSet
 
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
-			constr
-					.add(
-							new BinaryExpression(
-									booleanType,
-									new Constant(
-											pp.getProgram().getTypes().getIntegerType(),
-											indexes.getLow().toInt(),
-											pp.getLocation()),
-									expression,
-									ComparisonLe.INSTANCE,
-									pp.getLocation()));
+			constr.add(
+				new BinaryExpression(
+					booleanType,
+					new Constant(
+						pp.getProgram().getTypes().getIntegerType(),
+						indexes.getLow().toInt(),
+						pp.getLocation()),
+					expression,
+					ComparisonLe.INSTANCE,
+					pp.getLocation()));
 			if (indexes.getHigh().isFinite())
-				constr
-						.add(
-								new BinaryExpression(
-										booleanType,
-										new Constant(
-												pp.getProgram().getTypes().getIntegerType(),
-												indexes.getHigh().toInt(),
-												pp.getLocation()),
-										expression,
-										ComparisonGe.INSTANCE,
-										pp.getLocation()));
+				constr.add(
+					new BinaryExpression(
+						booleanType,
+						new Constant(
+							pp.getProgram().getTypes().getIntegerType(),
+							indexes.getHigh().toInt(),
+							pp.getLocation()),
+						expression,
+						ComparisonGe.INSTANCE,
+						pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}

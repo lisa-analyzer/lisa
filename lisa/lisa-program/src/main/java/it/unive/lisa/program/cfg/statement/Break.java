@@ -12,12 +12,24 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
-public class Break
-		extends
-		Statement {
+/**
+ * A break statement, which is used to exit a loop or switch statement.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class Break extends Statement {
 
 	private final String label;
 
+	/**
+	 * Builds a break statement.
+	 * 
+	 * @param cfg      the control flow graph to which this statement belongs
+	 * @param location the location of this statement in the source code
+	 * @param label    the label that this break statement refers to, if any (if
+	 *                     {@code null}, this break statement does not refer to
+	 *                     any label)
+	 */
 	public Break(
 			CFG cfg,
 			CodeLocation location,
@@ -26,10 +38,21 @@ public class Break
 		this.label = label;
 	}
 
+	/**
+	 * Yields whether this break statement has a target label.
+	 * 
+	 * @return {@code true} if this break statement has a target label,
+	 *             {@code false} otherwise
+	 */
 	public boolean hasLabel() {
 		return label != null;
 	}
 
+	/**
+	 * Yields the label that this break statement refers to, if any.
+	 * 
+	 * @return the label, or {@code null}
+	 */
 	public String getLabel() {
 		return label;
 	}

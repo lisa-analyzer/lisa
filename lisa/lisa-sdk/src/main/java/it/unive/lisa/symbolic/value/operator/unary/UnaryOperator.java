@@ -12,9 +12,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface UnaryOperator
-		extends
-		Operator {
+public interface UnaryOperator extends Operator {
 
 	/**
 	 * Computes the runtime types of this expression (i.e., of the result of

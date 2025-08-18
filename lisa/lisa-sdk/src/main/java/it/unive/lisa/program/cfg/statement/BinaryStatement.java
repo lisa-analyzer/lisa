@@ -18,9 +18,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class BinaryStatement
-		extends
-		NaryStatement {
+public abstract class BinaryStatement extends NaryStatement {
 
 	/**
 	 * Builds the statement, happening at the given location in the program. The
@@ -84,13 +82,12 @@ public abstract class BinaryStatement
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
@@ -127,23 +124,21 @@ public abstract class BinaryStatement
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A> expressions)
-					throws SemanticException;
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException;
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
@@ -184,14 +179,13 @@ public abstract class BinaryStatement
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> bwdBinarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> bwdBinarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		return fwdBinarySemantics(interprocedural, state, left, right, expressions);
 	}
 

@@ -11,9 +11,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public abstract class AllocationSite
-		extends
-		HeapLocation {
+public abstract class AllocationSite extends HeapLocation {
 
 	private final String locationName;
 
@@ -135,13 +133,7 @@ public abstract class AllocationSite
 			String field,
 			boolean isWeak,
 			CodeLocation location) {
-		super(
-				staticType,
-				"pp@" + locationName + (field == null
-						? ""
-						: "[" + field + "]"),
-				isWeak,
-				location);
+		super(staticType, "pp@" + locationName + (field == null ? "" : "[" + field + "]"), isWeak, location);
 		this.locationName = locationName;
 		this.field = field != null ? field.toString() : null;
 	}

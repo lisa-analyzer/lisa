@@ -19,11 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AllocatedTypes
-		extends
-		SetLattice<AllocatedTypes, String>
-		implements
-		HeapLattice<AllocatedTypes> {
+public class AllocatedTypes extends SetLattice<AllocatedTypes, String> implements HeapLattice<AllocatedTypes> {
 
 	/**
 	 * Builds an empty set of types.

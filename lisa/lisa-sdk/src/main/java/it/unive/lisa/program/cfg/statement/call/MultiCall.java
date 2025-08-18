@@ -22,11 +22,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MultiCall
-		extends
-		Call
-		implements
-		ResolvedCall {
+public class MultiCall extends Call implements ResolvedCall {
 
 	/**
 	 * The underlying calls
@@ -44,20 +40,19 @@ public class MultiCall
 			UnresolvedCall source,
 			Call... calls) {
 		super(
-				source.getCFG(),
-				source.getLocation(),
-				source.getCallType(),
-				source.getQualifier(),
-				source.getTargetName(),
-				source.getOrder(),
-				getCommonReturnType(calls),
-				source.getParameters());
+			source.getCFG(),
+			source.getLocation(),
+			source.getCallType(),
+			source.getQualifier(),
+			source.getTargetName(),
+			source.getOrder(),
+			getCommonReturnType(calls),
+			source.getParameters());
 		Objects.requireNonNull(calls, "The calls underlying a multi call cannot be null");
 		for (Call target : calls) {
 			Objects.requireNonNull(target, "A call underlying a multi call cannot be null");
 			if (!(target instanceof ResolvedCall))
-				throw new IllegalArgumentException(
-						target + " has not been resolved yet");
+				throw new IllegalArgumentException(target + " has not been resolved yet");
 		}
 		this.calls = List.of(calls);
 	}
@@ -146,13 +141,12 @@ public class MultiCall
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		AnalysisState<A> result = state.bottom();
 
 		for (Call call : calls) {
@@ -165,11 +159,10 @@ public class MultiCall
 
 	@Override
 	public Collection<CodeMember> getTargets() {
-		return calls
-				.stream()
-				.map(ResolvedCall.class::cast)
-				.flatMap(c -> c.getTargets().stream())
-				.collect(Collectors.toSet());
+		return calls.stream()
+			.map(ResolvedCall.class::cast)
+			.flatMap(c -> c.getTargets().stream())
+			.collect(Collectors.toSet());
 	}
 
 }

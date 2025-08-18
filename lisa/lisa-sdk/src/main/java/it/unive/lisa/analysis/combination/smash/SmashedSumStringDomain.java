@@ -14,9 +14,7 @@ import it.unive.lisa.util.numeric.IntInterval;
  *
  * @param <L> the type of lattice produced by this domain
  */
-public interface SmashedSumStringDomain<L extends Lattice<L>>
-		extends
-		BaseNonRelationalValueDomain<L> {
+public interface SmashedSumStringDomain<L extends Lattice<L>> extends BaseNonRelationalValueDomain<L> {
 
 	/**
 	 * Simplified semantics of the string contains operator, checking if a

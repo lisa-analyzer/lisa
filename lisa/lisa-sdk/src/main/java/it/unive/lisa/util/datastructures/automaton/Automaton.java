@@ -38,9 +38,7 @@ import org.apache.commons.lang3.tuple.Triple;
  *                this class have on their transitions
  */
 public abstract class Automaton<A extends Automaton<A, T>,
-		T extends TransitionSymbol<T>>
-		implements
-		AutomataFactory<A, T> {
+		T extends TransitionSymbol<T>> implements AutomataFactory<A, T> {
 
 	/**
 	 * The states of this automaton.
@@ -125,8 +123,7 @@ public abstract class Automaton<A extends Automaton<A, T>,
 	public void addState(
 			State s) {
 		if (states.stream().filter(ss -> ss.getId() == s.getId()).findAny().isPresent())
-			throw new IllegalArgumentException(
-					"A state with id " + s.getId() + " aready exists");
+			throw new IllegalArgumentException("A state with id " + s.getId() + " aready exists");
 		states.add(s);
 		this.deterministic = Optional.empty();
 		this.minimized = Optional.empty();
@@ -233,7 +230,7 @@ public abstract class Automaton<A extends Automaton<A, T>,
 	public SortedSet<Transition<T>> getIngoingTransitionsFrom(
 			State s) {
 		return new TreeSet<>(
-				transitions.stream().filter(t -> t.getDestination().equals(s)).collect(Collectors.toSet()));
+			transitions.stream().filter(t -> t.getDestination().equals(s)).collect(Collectors.toSet()));
 	}
 
 	/**
@@ -309,8 +306,7 @@ public abstract class Automaton<A extends Automaton<A, T>,
 
 		newStates.removeIf(s -> !reachableStates.contains(s));
 		newTransitions
-				.removeIf(
-						t -> !reachableStates.contains(t.getSource()) || !reachableStates.contains(t.getDestination()));
+			.removeIf(t -> !reachableStates.contains(t.getSource()) || !reachableStates.contains(t.getDestination()));
 		return from(newStates, newTransitions);
 	}
 
@@ -339,10 +335,9 @@ public abstract class Automaton<A extends Automaton<A, T>,
 
 		// create transitions using the new states of the reverse automaton
 		for (Transition<T> t : transitions)
-			tr
-					.add(
-							new Transition<T>(revStates.get(t.getDestination()), revStates.get(t.getSource()),
-									t.getSymbol().reverse()));
+			tr.add(
+				new Transition<
+						T>(revStates.get(t.getDestination()), revStates.get(t.getSource()), t.getSymbol().reverse()));
 
 		return from(st, tr);// .toSingleInitalState();
 	}
@@ -618,20 +613,12 @@ public abstract class Automaton<A extends Automaton<A, T>,
 			ts.add(new Transition<>(q0, s, epsilon()));
 
 		for (Transition<T> t : transitions)
-			ts
-					.add(
-							new Transition<>(
-									thisMapping.get(t.getSource()),
-									thisMapping.get(t.getDestination()),
-									t.getSymbol()));
+			ts.add(
+				new Transition<>(thisMapping.get(t.getSource()), thisMapping.get(t.getDestination()), t.getSymbol()));
 
 		for (Transition<T> t : other.transitions)
-			ts
-					.add(
-							new Transition<>(
-									otherMapping.get(t.getSource()),
-									otherMapping.get(t.getDestination()),
-									t.getSymbol()));
+			ts.add(
+				new Transition<>(otherMapping.get(t.getSource()), otherMapping.get(t.getDestination()), t.getSymbol()));
 
 		return from(sts, ts).minimize();
 	}
@@ -932,12 +919,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 		}
 
 		for (Transition<T> t : transitions)
-			newTransitions
-					.add(
-							new Transition<>(
-									nameToStates.get(t.getSource().getState()),
-									nameToStates.get(t.getDestination().getState()),
-									t.getSymbol()));
+			newTransitions.add(
+				new Transition<>(
+					nameToStates.get(t.getSource().getState()),
+					nameToStates.get(t.getDestination().getState()),
+					t.getSymbol()));
 
 		return from(newStates, newTransitions);
 	}
@@ -1015,11 +1001,10 @@ public abstract class Automaton<A extends Automaton<A, T>,
 				lang.add(newString);
 
 				if (top.getRight() - 1 > 0) {
-					for (State q : getOutgoingTransitionsFrom(top.getMiddle())
-							.stream()
-							.filter(t -> t.getSymbol().equals(c))
-							.map(Transition::getDestination)
-							.collect(Collectors.toSet()))
+					for (State q : getOutgoingTransitionsFrom(top.getMiddle()).stream()
+						.filter(t -> t.getSymbol().equals(c))
+						.map(Transition::getDestination)
+						.collect(Collectors.toSet()))
 						stack.push(Triple.of(newString, q, top.getRight() - 1));
 				}
 			}
@@ -1097,14 +1082,13 @@ public abstract class Automaton<A extends Automaton<A, T>,
 				result.append("\n");
 
 				for (Transition<T> t : transitions)
-					result
-							.append("\t")
-							.append(st)
-							.append(" [")
-							.append(t.getSymbol())
-							.append("] -> ")
-							.append(t.getDestination())
-							.append("\n");
+					result.append("\t")
+						.append(st)
+						.append(" [")
+						.append(t.getSymbol())
+						.append("] -> ")
+						.append(t.getDestination())
+						.append("\n");
 			}
 		}
 
@@ -1148,19 +1132,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 		}
 
 		for (Transition<T> t : transitions)
-			newTransitions
-					.add(
-							new Transition<>(
-									thisMapping.get(t.getSource()),
-									thisMapping.get(t.getDestination()),
-									t.getSymbol()));
+			newTransitions.add(
+				new Transition<>(thisMapping.get(t.getSource()), thisMapping.get(t.getDestination()), t.getSymbol()));
 		for (Transition<T> t : other.transitions)
-			newTransitions
-					.add(
-							new Transition<>(
-									otherMapping.get(t.getSource()),
-									otherMapping.get(t.getDestination()),
-									t.getSymbol()));
+			newTransitions.add(
+				new Transition<>(otherMapping.get(t.getSource()), otherMapping.get(t.getDestination()), t.getSymbol()));
 
 		for (State f : thisFinalStates)
 			for (State i : otherInitialStates)
@@ -1196,12 +1172,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 		}
 
 		for (Transition<T> t : transitions)
-			newDelta
-					.add(
-							new Transition<>(
-									nameToStates.get(t.getSource().getId()),
-									nameToStates.get(t.getDestination().getId()),
-									t.getSymbol()));
+			newDelta.add(
+				new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
 
 		State newInit = new State(max + 1, true, false);
 		newStates.add(newInit);
@@ -1747,10 +1722,9 @@ public abstract class Automaton<A extends Automaton<A, T>,
 	 */
 	public A makeAcyclic() {
 		Set<List<State>> paths = getAllPaths();
-		paths = paths
-				.stream()
-				.filter(p -> p.stream().distinct().collect(Collectors.toList()).equals(p))
-				.collect(Collectors.toSet());
+		paths = paths.stream()
+			.filter(p -> p.stream().distinct().collect(Collectors.toList()).equals(p))
+			.collect(Collectors.toSet());
 
 		SortedSet<State> states = new TreeSet<>();
 		SortedSet<Transition<T>> delta = new TreeSet<>();
@@ -1785,12 +1759,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 		}
 
 		for (Transition<T> t : transitions)
-			newDelta
-					.add(
-							new Transition<>(
-									nameToStates.get(t.getSource().getId()),
-									nameToStates.get(t.getDestination().getId()),
-									t.getSymbol()));
+			newDelta.add(
+				new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
 
 		return from(newStates, newDelta).minimize();
 	}
@@ -1813,12 +1786,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 		}
 
 		for (Transition<T> t : transitions)
-			newDelta
-					.add(
-							new Transition<>(
-									nameToStates.get(t.getSource().getId()),
-									nameToStates.get(t.getDestination().getId()),
-									t.getSymbol()));
+			newDelta.add(
+				new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
 
 		return from(newStates, newDelta).minimize();
 	}
@@ -1841,12 +1813,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 		}
 
 		for (Transition<T> t : transitions)
-			newDelta
-					.add(
-							new Transition<>(
-									nameToStates.get(t.getSource().getId()),
-									nameToStates.get(t.getDestination().getId()),
-									t.getSymbol()));
+			newDelta.add(
+				new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
 
 		return from(newStates, newDelta).minimize();
 	}
@@ -1953,12 +1924,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 		}
 
 		for (Transition<T> t : transitions)
-			newDelta
-					.add(
-							new Transition<>(
-									nameToStates.get(t.getSource().getId()),
-									nameToStates.get(t.getDestination().getId()),
-									t.getSymbol()));
+			newDelta.add(
+				new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
 		return from(newStates, newDelta).minimize();
 	}
 

@@ -12,9 +12,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessChild
-		extends
-		HeapExpression {
+public class AccessChild extends HeapExpression {
 
 	/**
 	 * The expression representing the parent memory location

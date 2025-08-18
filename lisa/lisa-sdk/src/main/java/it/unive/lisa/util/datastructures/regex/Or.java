@@ -12,9 +12,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class Or
-		extends
-		RegularExpression {
+public final class Or extends RegularExpression {
 
 	/**
 	 * The first regular expression
@@ -199,9 +197,8 @@ public final class Or
 	}
 
 	@Override
-	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory) {
+	public <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory) {
 		return first.toAutomaton(factory).union(second.toAutomaton(factory));
 	}
 

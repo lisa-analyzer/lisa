@@ -14,9 +14,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class NumericOperation
-		implements
-		BinaryOperator {
+public abstract class NumericOperation implements BinaryOperator {
 
 	@Override
 	public Set<Type> typeInference(

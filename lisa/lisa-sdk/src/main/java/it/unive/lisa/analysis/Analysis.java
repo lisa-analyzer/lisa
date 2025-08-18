@@ -22,8 +22,7 @@ import java.util.Set;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class Analysis<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		implements
 		SemanticDomain<AnalysisState<A>, AnalysisState<A>, SymbolicExpression, Identifier> {
 
@@ -84,8 +83,7 @@ public class Analysis<A extends AbstractLattice<A>,
 		ExpressionSet rewritten = oracle.rewrite(id, pp);
 		for (SymbolicExpression i : rewritten)
 			if (!(i instanceof Identifier))
-				throw new SemanticException(
-						"Rewriting '" + id + "' did not produce an identifier: " + i);
+				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
 				s = s.lub(domain.assign(sem.getState(), (Identifier) i, expression, pp));
 		return new AnalysisState<>(s, rewritten, state.getFixpointInformation());

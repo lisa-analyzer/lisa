@@ -6,9 +6,7 @@ package it.unive.lisa.outputs.serializableGraph;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableNodeDescription
-		implements
-		Comparable<SerializableNodeDescription> {
+public class SerializableNodeDescription implements Comparable<SerializableNodeDescription> {
 
 	private final int nodeId;
 

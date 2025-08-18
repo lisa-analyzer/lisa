@@ -12,9 +12,7 @@ package it.unive.lisa.util.functional;
  *                function
  */
 @FunctionalInterface
-public interface Function<T,
-		R,
-		E extends Exception> {
+public interface Function<T, R, E extends Exception> {
 
 	/**
 	 * Applies this function to the given argument.

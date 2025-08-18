@@ -22,10 +22,8 @@ import java.util.Set;
  * @param <L> the type of lattice used as values in environments produced by
  *                this domain
  */
-public interface BaseNonRelationalTypeDomain<L extends TypeValue<L>>
-		extends
-		BaseNonRelationalDomain<L, TypeEnvironment<L>>,
-		NonRelationalTypeDomain<L> {
+public interface BaseNonRelationalTypeDomain<
+		L extends TypeValue<L>> extends BaseNonRelationalDomain<L, TypeEnvironment<L>>, NonRelationalTypeDomain<L> {
 
 	@Override
 	default TypeEnvironment<L> makeLattice() {

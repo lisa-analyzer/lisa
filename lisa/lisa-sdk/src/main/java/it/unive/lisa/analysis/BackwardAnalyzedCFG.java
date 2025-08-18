@@ -22,11 +22,8 @@ import java.util.Map;
  * @param <A> the type of {@link AbstractLattice} contained into the analysis
  *                state
  */
-public class BackwardAnalyzedCFG<A extends AbstractLattice<A>>
-		extends
-		CFG
-		implements
-		BaseLattice<BackwardAnalyzedCFG<A>> {
+public class BackwardAnalyzedCFG<
+		A extends AbstractLattice<A>> extends CFG implements BaseLattice<BackwardAnalyzedCFG<A>> {
 
 	/**
 	 * Error message for the inability to lub two graphs.
@@ -266,10 +263,10 @@ public class BackwardAnalyzedCFG<A extends AbstractLattice<A>>
 			throw new SemanticException(CANNOT_WIDEN_ERROR);
 
 		return new BackwardAnalyzedCFG<>(
-				this,
-				id,
-				exitStates.widening(other.exitStates),
-				results.widening(other.results));
+			this,
+			id,
+			exitStates.widening(other.exitStates),
+			results.widening(other.results));
 	}
 
 	@Override
@@ -280,10 +277,10 @@ public class BackwardAnalyzedCFG<A extends AbstractLattice<A>>
 			throw new SemanticException(CANNOT_NARROW_ERROR);
 
 		return new BackwardAnalyzedCFG<>(
-				this,
-				id,
-				exitStates.narrowing(other.exitStates),
-				results.narrowing(other.results));
+			this,
+			id,
+			exitStates.narrowing(other.exitStates),
+			results.narrowing(other.results));
 	}
 
 	@Override

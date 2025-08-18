@@ -26,9 +26,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class NaryExpression
-		extends
-		Expression {
+public abstract class NaryExpression extends Expression {
 
 	/**
 	 * The sub-expressions of this expression
@@ -130,9 +128,7 @@ public abstract class NaryExpression
 		Objects.requireNonNull(subExpressions, "The array of sub-expressions of an expression cannot be null");
 		for (int i = 0; i < subExpressions.length; i++)
 			Objects
-					.requireNonNull(
-							subExpressions[i],
-							"The " + i + "-th sub-expression of an expression cannot be null");
+				.requireNonNull(subExpressions[i], "The " + i + "-th sub-expression of an expression cannot be null");
 		Objects.requireNonNull(constructName, "The name of the native construct of an expression cannot be null");
 		Objects.requireNonNull(order, "The evaluation order of an expression cannot be null");
 		this.constructName = constructName;
@@ -292,12 +288,11 @@ public abstract class NaryExpression
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
@@ -338,21 +333,19 @@ public abstract class NaryExpression
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException;
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException;
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
-					AnalysisState<A> exitState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
+			AnalysisState<A> exitState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
 
 		// TODO this evaluation should also happen backward, but the current
@@ -400,13 +393,12 @@ public abstract class NaryExpression
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		return forwardSemanticsAux(interprocedural, state, params, expressions);
 	}
 

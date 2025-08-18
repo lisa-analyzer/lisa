@@ -11,9 +11,7 @@ import java.util.Iterator;
  * 
  * @param <E> the type of elements returned by the iterator
  */
-final class CountingIterable<E>
-		implements
-		Iterable<E> {
+final class CountingIterable<E> implements Iterable<E> {
 
 	/**
 	 * The iterator that wraps the original one

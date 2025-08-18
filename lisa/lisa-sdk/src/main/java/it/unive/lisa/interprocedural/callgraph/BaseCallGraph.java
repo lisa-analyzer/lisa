@@ -51,9 +51,7 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph
-		extends
-		CallGraph {
+public abstract class BaseCallGraph extends CallGraph {
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
@@ -136,19 +134,19 @@ public abstract class BaseCallGraph
 		case UNKNOWN:
 		default:
 			UnresolvedCall tempCall = new UnresolvedCall(
-					call.getCFG(),
-					call.getLocation(),
-					CallType.INSTANCE,
-					call.getQualifier(),
-					call.getTargetName(),
-					call.getOrder(),
-					params);
+				call.getCFG(),
+				call.getLocation(),
+				CallType.INSTANCE,
+				call.getQualifier(),
+				call.getTargetName(),
+				call.getOrder(),
+				params);
 			resolveInstance(tempCall, types, targets, nativeTargets, aliasing);
 
 			if (!(params[0] instanceof VariableRef)) {
-				LOG
-						.debug(
-								call + ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
+				LOG.debug(
+					call
+						+ ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
 				break;
 			}
 
@@ -157,13 +155,13 @@ public abstract class BaseCallGraph
 			System.arraycopy(params, 1, truncatedParams, 0, params.length - 1);
 			System.arraycopy(types, 1, truncatedTypes, 0, types.length - 1);
 			tempCall = new UnresolvedCall(
-					call.getCFG(),
-					call.getLocation(),
-					CallType.STATIC,
-					((VariableRef) params[0]).getName(),
-					call.getTargetName(),
-					call.getOrder(),
-					truncatedParams);
+				call.getCFG(),
+				call.getLocation(),
+				CallType.STATIC,
+				((VariableRef) params[0]).getName(),
+				call.getTargetName(),
+				call.getOrder(),
+				truncatedParams);
 			resolveNonInstance(tempCall, truncatedTypes, targetsNoRec, nativeTargetsNoRec, aliasing);
 			break;
 		}
@@ -217,10 +215,8 @@ public abstract class BaseCallGraph
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
 
-		LOG
-				.trace(
-						call + " [" + call.getLocation() + "] has been resolved to: "
-								+ ((ResolvedCall) resolved).getTargets());
+		LOG.trace(
+			call + " [" + call.getLocation() + "] has been resolved to: " + ((ResolvedCall) resolved).getTargets());
 		return resolved;
 	}
 
@@ -348,7 +344,7 @@ public abstract class BaseCallGraph
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
 			throw new CallResolutionException(
-					"An instance call should have at least one parameter to be used as the receiver of the call");
+				"An instance call should have at least one parameter to be used as the receiver of the call");
 		Expression receiver = call.getParameters()[0];
 		for (Type recType : getPossibleTypesOfReceiver(receiver, types[0])) {
 			CompilationUnit unit;

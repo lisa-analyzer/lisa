@@ -38,9 +38,7 @@ import org.apache.commons.collections4.SetUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StaticTypes
-		implements
-		BaseNonRelationalTypeDomain<Supertype> {
+public class StaticTypes implements BaseNonRelationalTypeDomain<Supertype> {
 
 	@Override
 	public Supertype evalIdentifier(
@@ -103,8 +101,7 @@ public class StaticTypes
 					left = eval(environment, (ValueExpression) binary.getLeft(), pp, oracle);
 					right = eval(environment, (ValueExpression) binary.getRight(), pp, oracle);
 				} catch (ClassCastException e) {
-					throw new SemanticException(
-							expression + " is not a value expression");
+					throw new SemanticException(expression + " is not a value expression");
 				}
 				Set<Type> lelems = left.type.allInstances(types);
 				Set<Type> relems = right.type.allInstances(types);
@@ -129,12 +126,8 @@ public class StaticTypes
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.type.allInstances(types);
 		Set<Type> relems = right.type.allInstances(types);
-		return new InferredTypes().satisfiesBinaryExpression(
-				expression,
-				new TypeSet(types, lelems),
-				new TypeSet(types, relems),
-				pp,
-				oracle);
+		return new InferredTypes()
+			.satisfiesBinaryExpression(expression, new TypeSet(types, lelems), new TypeSet(types, relems), pp, oracle);
 	}
 
 	@Override
@@ -179,14 +172,13 @@ public class StaticTypes
 			return environment;
 
 		// these are all types compatible with the type tokens
-		Set<Type> okTypes = elems
-				.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
+		Set<Type> okTypes = elems.stream()
+			.filter(Type::isTypeTokenType)
+			.map(Type::asTypeTokenType)
+			.map(TypeTokenType::getTypes)
+			.flatMap(Set::stream)
+			.flatMap(t -> t.allInstances(types).stream())
+			.collect(Collectors.toSet());
 
 		Supertype starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
@@ -240,14 +232,13 @@ public class StaticTypes
 		TypeSystem types = src.getProgram().getTypes();
 		Set<Type> elems = eval.type.allInstances(types);
 		// these are all types compatible with the type tokens
-		Set<Type> filtered = elems
-				.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
+		Set<Type> filtered = elems.stream()
+			.filter(Type::isTypeTokenType)
+			.map(Type::asTypeTokenType)
+			.map(TypeTokenType::getTypes)
+			.flatMap(Set::stream)
+			.flatMap(t -> t.allInstances(types).stream())
+			.collect(Collectors.toSet());
 		if (filtered.isEmpty())
 			// if there is no type token in the evaluation,
 			// this is not a type condition and we cannot

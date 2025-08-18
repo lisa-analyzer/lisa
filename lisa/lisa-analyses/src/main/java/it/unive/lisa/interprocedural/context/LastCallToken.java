@@ -10,9 +10,7 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * regardless of the call stack. This corresponds to having a
  * {@link KDepthToken} with {@code k = 1}.
  */
-public class LastCallToken
-		implements
-		ContextSensitivityToken {
+public class LastCallToken implements ContextSensitivityToken {
 
 	private final CFGCall call;
 
@@ -32,9 +30,7 @@ public class LastCallToken
 
 	@Override
 	public String toString() {
-		return call == null
-				? "<empty>"
-				: "[" + call.getLocation().toString() + "]";
+		return call == null ? "<empty>" : "[" + call.getLocation().toString() + "]";
 	}
 
 	@Override

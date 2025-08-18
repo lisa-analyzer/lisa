@@ -15,10 +15,7 @@ import java.util.function.Predicate;
  * @param <K> the type of keys of this map
  * @param <V> the type of values of this map
  */
-public class GenericMapLattice<K,
-		V extends Lattice<V>>
-		extends
-		FunctionalLattice<GenericMapLattice<K, V>, K, V> {
+public class GenericMapLattice<K, V extends Lattice<V>> extends FunctionalLattice<GenericMapLattice<K, V>, K, V> {
 
 	/**
 	 * Builds the map.

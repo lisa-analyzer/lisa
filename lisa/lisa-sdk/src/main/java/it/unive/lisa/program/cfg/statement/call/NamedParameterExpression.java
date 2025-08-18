@@ -25,9 +25,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NamedParameterExpression
-		extends
-		UnaryExpression {
+public class NamedParameterExpression extends UnaryExpression {
 
 	private final String parameterName;
 
@@ -46,12 +44,7 @@ public class NamedParameterExpression
 			CodeLocation location,
 			String parameterName,
 			Expression subExpression) {
-		super(
-				cfg,
-				location,
-				parameterName + "=",
-				subExpression.getStaticType(),
-				subExpression);
+		super(cfg, location, parameterName + "=", subExpression.getStaticType(), subExpression);
 		this.parameterName = parameterName;
 	}
 
@@ -97,13 +90,12 @@ public class NamedParameterExpression
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression expr,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression expr,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		return interprocedural.getAnalysis().smallStepSemantics(state, expr, this);
 	}
 

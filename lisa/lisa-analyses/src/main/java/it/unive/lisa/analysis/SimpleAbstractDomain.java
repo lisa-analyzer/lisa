@@ -16,10 +16,7 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.representation.ObjectRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -41,9 +38,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <T> the type of {@link TypeLattice} embedded in the states produced by
  *                this domain
  */
-public class SimpleAbstractDomain<H extends HeapLattice<H>,
-		V extends ValueLattice<V>,
-		T extends TypeLattice<T>>
+public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLattice<V>, T extends TypeLattice<T>>
 		implements
 		AbstractDomain<SimpleAbstractState<H, V, T>> {
 
@@ -231,8 +226,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
 			if (!(expr instanceof ValueExpression))
-				throw new SemanticException(
-						"Rewriting failed for expression " + expr);
+				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
 			mo.value = valueDomain.assign(mo.value, id, ve, pp, mo);
@@ -243,8 +237,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 		V valueRes = mo.value.bottom();
 		for (SymbolicExpression expr : exprs) {
 			if (!(expr instanceof ValueExpression))
-				throw new SemanticException(
-						"Rewriting failed for expression " + expr);
+				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type;
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
@@ -285,8 +278,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
 			if (!(expr instanceof ValueExpression))
-				throw new SemanticException(
-						"Rewriting failed for expression " + expr);
+				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			mo.type = typeDomain.smallStepSemantics(mo.type, ve, pp, mo);
 			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
@@ -301,8 +293,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 		V valueRes = mo.value.bottom();
 		for (SymbolicExpression expr : exprs) {
 			if (!(expr instanceof ValueExpression))
-				throw new SemanticException(
-						"Rewriting failed for expression " + expr);
+				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type;
 			mo.type = typeDomain.smallStepSemantics(mo.type, ve, pp, mo);
@@ -356,8 +347,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
 			if (!(expr instanceof ValueExpression))
-				throw new SemanticException(
-						"Rewriting failed for expression " + expr);
+				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			mo.type = typeDomain.assume(mo.type, ve, src, dest, mo);
 			if (mo.type.isBottom())
@@ -372,8 +362,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 		V valueRes = mo.value.bottom();
 		for (SymbolicExpression expr : exprs) {
 			if (!(expr instanceof ValueExpression))
-				throw new SemanticException(
-						"Rewriting failed for expression " + expr);
+				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type;
 			mo.type = typeDomain.assume(mo.type, ve, src, dest, mo);
@@ -420,8 +409,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
 			if (!(expr instanceof ValueExpression))
-				throw new SemanticException(
-						"Rewriting failed for expression " + expr);
+				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expression;
 			Satisfiability typesat = typeDomain.satisfies(mo.type, ve, pp, mo);
 			if (typesat == Satisfiability.BOTTOM)
@@ -436,8 +424,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 		Satisfiability valuesat = Satisfiability.BOTTOM;
 		for (SymbolicExpression expr : exprs) {
 			if (!(expr instanceof ValueExpression))
-				throw new SemanticException(
-						"Rewriting failed for expression " + expr);
+				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			Satisfiability sat = typeDomain.satisfies(mo.type, ve, pp, mo);
 			if (sat == Satisfiability.BOTTOM)
@@ -465,9 +452,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public class MutableOracle
-			implements
-			SemanticOracle {
+	public class MutableOracle implements SemanticOracle {
 
 		/**
 		 * The state containing information regarding heap structures.
@@ -526,24 +511,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 
 		@Override
 		public String toString() {
-			if (heap.isBottom() || type.isBottom() || value.isBottom())
-				return Lattice.bottomRepresentation().toString();
-			if (heap.isTop() && type.isTop() && value.isTop())
-				return Lattice.topRepresentation().toString();
-
-			StructuredRepresentation h = heap.representation();
-			StructuredRepresentation t = type.representation();
-			StructuredRepresentation v = value.representation();
-			return new ObjectRepresentation(
-					Map
-							.of(
-									SimpleAbstractState.HEAP_REPRESENTATION_KEY,
-									h,
-									SimpleAbstractState.TYPE_REPRESENTATION_KEY,
-									t,
-									SimpleAbstractState.VALUE_REPRESENTATION_KEY,
-									v))
-											.toString();
+			return new SimpleAbstractState<>(this).toString();
 		}
 
 		@Override
@@ -593,10 +561,8 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>,
 
 	@Override
 	public SimpleAbstractState<H, V, T> makeLattice() {
-		return new SimpleAbstractState<H, V, T>(
-				heapDomain.makeLattice(),
-				valueDomain.makeLattice(),
-				typeDomain.makeLattice());
+		return new SimpleAbstractState<H, V,
+				T>(heapDomain.makeLattice(), valueDomain.makeLattice(), typeDomain.makeLattice());
 	}
 
 }

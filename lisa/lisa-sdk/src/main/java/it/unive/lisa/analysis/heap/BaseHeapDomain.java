@@ -35,9 +35,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @param <L> the type of {@link HeapLattice} produced by this domain
  */
-public interface BaseHeapDomain<L extends HeapLattice<L>>
-		extends
-		HeapDomain<L> {
+public interface BaseHeapDomain<L extends HeapLattice<L>> extends HeapDomain<L> {
 
 	@Override
 	default Pair<L, List<HeapReplacement>> smallStepSemantics(
@@ -72,10 +70,9 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 			if (sem2.getLeft().isBottom())
 				return Pair.of(sem2.getLeft(), ListUtils.union(sem1.getRight(), sem2.getRight()));
 			Pair<L, List<HeapReplacement>> sem3 = smallStepSemantics(sem2.getLeft(), ternary.getRight(), pp, oracle);
-			return Pair
-					.of(
-							sem3.getLeft(),
-							ListUtils.union(sem1.getRight(), ListUtils.union(sem2.getRight(), sem3.getRight())));
+			return Pair.of(
+				sem3.getLeft(),
+				ListUtils.union(sem1.getRight(), ListUtils.union(sem2.getRight(), sem3.getRight())));
 		}
 
 		if (expression instanceof ValueExpression)
@@ -112,9 +109,7 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public abstract static class Rewriter
-			implements
-			ExpressionVisitor<ExpressionSet> {
+	public abstract static class Rewriter implements ExpressionVisitor<ExpressionSet> {
 
 		@Override
 		public ExpressionSet visit(
@@ -125,10 +120,10 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 			Set<SymbolicExpression> result = new HashSet<>();
 			for (SymbolicExpression expr : arg) {
 				UnaryExpression e = new UnaryExpression(
-						expression.getStaticType(),
-						expr,
-						expression.getOperator(),
-						expression.getCodeLocation());
+					expression.getStaticType(),
+					expr,
+					expression.getOperator(),
+					expression.getCodeLocation());
 				result.add(e);
 			}
 			return new ExpressionSet(result);
@@ -145,11 +140,11 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 			for (SymbolicExpression l : left)
 				for (SymbolicExpression r : right) {
 					BinaryExpression e = new BinaryExpression(
-							expression.getStaticType(),
-							l,
-							r,
-							expression.getOperator(),
-							expression.getCodeLocation());
+						expression.getStaticType(),
+						l,
+						r,
+						expression.getOperator(),
+						expression.getCodeLocation());
 					result.add(e);
 				}
 			return new ExpressionSet(result);
@@ -168,12 +163,12 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 				for (SymbolicExpression m : middle)
 					for (SymbolicExpression r : right) {
 						TernaryExpression e = new TernaryExpression(
-								expression.getStaticType(),
-								l,
-								m,
-								r,
-								expression.getOperator(),
-								expression.getCodeLocation());
+							expression.getStaticType(),
+							l,
+							m,
+							r,
+							expression.getOperator(),
+							expression.getCodeLocation());
 						result.add(e);
 					}
 			return new ExpressionSet(result);
@@ -226,7 +221,7 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 				Object... params)
 				throws SemanticException {
 			throw new SemanticException(
-					"No rewriting rule for heap expression of type " + expression.getClass().getName());
+				"No rewriting rule for heap expression of type " + expression.getClass().getName());
 		}
 
 		@Override
@@ -236,7 +231,7 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 				Object... params)
 				throws SemanticException {
 			throw new SemanticException(
-					"No rewriting rule for value expression of type " + expression.getClass().getName());
+				"No rewriting rule for value expression of type " + expression.getClass().getName());
 		}
 
 	}

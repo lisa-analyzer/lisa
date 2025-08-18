@@ -21,9 +21,7 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">VincenzoArceri</a>
  */
-public abstract class CompilationUnit
-		extends
-		ProgramUnit {
+public abstract class CompilationUnit extends ProgramUnit {
 
 	/**
 	 * The instance globals defined in this unit, indexed by
@@ -403,8 +401,8 @@ public abstract class CompilationUnit
 			String signature,
 			boolean traverseHierarchy) {
 		Collection<CodeMember> res = searchCodeMembers(
-				cm -> cm.getDescriptor().getSignature().equals(signature),
-				traverseHierarchy);
+			cm -> cm.getDescriptor().getSignature().equals(signature),
+			traverseHierarchy);
 		if (res.isEmpty())
 			return null;
 		return res.stream().findFirst().get();

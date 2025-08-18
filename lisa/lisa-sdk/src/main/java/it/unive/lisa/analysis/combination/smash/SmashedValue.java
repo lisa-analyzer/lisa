@@ -20,10 +20,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @param <N> the type of the numeric lattice
  * @param <S> the type of the string lattice
  */
-public class SmashedValue<N extends Lattice<N>,
-		S extends Lattice<S>>
-		implements
-		BaseLattice<SmashedValue<N, S>> {
+public class SmashedValue<N extends Lattice<N>, S extends Lattice<S>> implements BaseLattice<SmashedValue<N, S>> {
 
 	private final N intValue;
 
@@ -81,10 +78,8 @@ public class SmashedValue<N extends Lattice<N>,
 	public SmashedValue<N, S> lubAux(
 			SmashedValue<N, S> other)
 			throws SemanticException {
-		return new SmashedValue<N, S>(
-				intValue.lub(other.intValue),
-				stringValue.lub(other.stringValue),
-				boolValue.lub(other.boolValue));
+		return new SmashedValue<N,
+				S>(intValue.lub(other.intValue), stringValue.lub(other.stringValue), boolValue.lub(other.boolValue));
 	}
 
 	@Override
@@ -92,9 +87,9 @@ public class SmashedValue<N extends Lattice<N>,
 			SmashedValue<N, S> other)
 			throws SemanticException {
 		return new SmashedValue<N, S>(
-				intValue.widening(other.intValue),
-				stringValue.widening(other.stringValue),
-				boolValue.widening(other.boolValue));
+			intValue.widening(other.intValue),
+			stringValue.widening(other.stringValue),
+			boolValue.widening(other.boolValue));
 
 	}
 
@@ -175,8 +170,13 @@ public class SmashedValue<N extends Lattice<N>,
 		if (isBool())
 			return boolValue.representation();
 		return new StringRepresentation(
-				"(" + intValue.representation().toString() + ", " + stringValue.representation().toString() + ", "
-						+ boolValue.representation().toString() + ")");
+			"("
+				+ intValue.representation().toString()
+				+ ", "
+				+ stringValue.representation().toString()
+				+ ", "
+				+ boolValue.representation().toString()
+				+ ")");
 	}
 
 	@Override

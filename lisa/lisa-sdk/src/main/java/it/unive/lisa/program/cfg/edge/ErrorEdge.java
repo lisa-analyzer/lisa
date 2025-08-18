@@ -13,9 +13,13 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 
-public class ErrorEdge
-		extends
-		Edge {
+/**
+ * An edge that transfers control flow to its destination only if an exception
+ * of specific types has been thrown previously and it reached its source.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class ErrorEdge extends Edge {
 
 	private final VariableRef variable;
 
@@ -26,6 +30,10 @@ public class ErrorEdge
 	 * 
 	 * @param source      the source statement
 	 * @param destination the destination statement
+	 * @param variable    the variable that is being caught by this edge, or
+	 *                        {@code null} if this edge does not catch any
+	 *                        variable
+	 * @param types       the types of exceptions that are caught by this edge
 	 */
 	public ErrorEdge(
 			Statement source,
@@ -72,14 +80,14 @@ public class ErrorEdge
 		for (Type type : types)
 			typeNames.add(type.toString());
 		return "[ "
-				+ getSource()
-				+ " ] -("
-				+ StringUtils.join(typeNames, ", ")
-				+ " = "
-				+ (variable == null ? "<no-var>" : variable.getName())
-				+ ")-> [ "
-				+ getDestination()
-				+ " ]";
+			+ getSource()
+			+ " ] -("
+			+ StringUtils.join(typeNames, ", ")
+			+ " = "
+			+ (variable == null ? "<no-var>" : variable.getName())
+			+ ")-> [ "
+			+ getDestination()
+			+ " ]";
 	}
 
 	@Override
@@ -87,16 +95,14 @@ public class ErrorEdge
 		Set<String> typeNames = new TreeSet<>();
 		for (Type type : types)
 			typeNames.add(type.toString());
-		return StringUtils.join(typeNames, ", ")
-				+ (variable == null ? "" : ", variable: " + variable.getName());
+		return StringUtils.join(typeNames, ", ") + (variable == null ? "" : ", variable: " + variable.getName());
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		// TODO implement the semantics
 		// TODO take into account also other error edges from the same source,
 		// to ensure that an error is caught only by the most specific catch
@@ -104,11 +110,10 @@ public class ErrorEdge
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		return traverseForward(state, analysis);
 	}
 

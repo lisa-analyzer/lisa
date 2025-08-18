@@ -35,12 +35,11 @@ public interface OpenCallPolicy {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> apply(
-					OpenCall call,
-					AnalysisState<A> entryState,
-					Analysis<A, D> analysis,
-					ExpressionSet[] params)
-					throws SemanticException;
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> apply(
+			OpenCall call,
+			AnalysisState<A> entryState,
+			Analysis<A, D> analysis,
+			ExpressionSet[] params)
+			throws SemanticException;
 
 }

@@ -78,11 +78,11 @@ public class SubstringDomainWithConstants
 			String stringConstantValue = constantValue.value;
 			Constant constant = new Constant(strType, stringConstantValue, SyntheticLocation.INSTANCE);
 			ValueExpression newExpression = new BinaryExpression(
-					boolType,
-					id,
-					constant,
-					StringEquals.INSTANCE,
-					SyntheticLocation.INSTANCE);
+				boolType,
+				id,
+				constant,
+				StringEquals.INSTANCE,
+				SyntheticLocation.INSTANCE);
 			b = subs.assume(b, newExpression, pp, pp, oracle);
 		}
 

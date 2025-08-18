@@ -26,9 +26,7 @@ import it.unive.lisa.type.Untyped;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnresolvedCall
-		extends
-		Call {
+public class UnresolvedCall extends Call {
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
@@ -144,24 +142,20 @@ public class UnresolvedCall
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Call resolved;
 		try {
-			resolved = interprocedural
-					.resolve(
-							this,
-							parameterTypes(expressions, interprocedural.getAnalysis()),
-							state.getInfo(SymbolAliasing.INFO_KEY, SymbolAliasing.class));
+			resolved = interprocedural.resolve(
+				this,
+				parameterTypes(expressions, interprocedural.getAnalysis()),
+				state.getInfo(SymbolAliasing.INFO_KEY, SymbolAliasing.class));
 		} catch (CallResolutionException e) {
-			throw new SemanticException(
-					"Unable to resolve call " + this,
-					e);
+			throw new SemanticException("Unable to resolve call " + this, e);
 		}
 		AnalysisState<A> result = resolved.forwardSemanticsAux(interprocedural, state, params, expressions);
 		getMetaVariables().addAll(resolved.getMetaVariables());

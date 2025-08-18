@@ -34,9 +34,7 @@ import org.apache.commons.lang3.StringUtils;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Bricks
-		implements
-		SmashedSumStringDomain<Bricks.BrickList> {
+public class Bricks implements SmashedSumStringDomain<Bricks.BrickList> {
 
 	/**
 	 * A single brick, containing a set of strings repeated a given number of
@@ -50,9 +48,7 @@ public class Bricks
 	 *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
 	 *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
 	 */
-	public class Brick
-			implements
-			BaseLattice<Brick> {
+	public class Brick implements BaseLattice<Brick> {
 
 		private final Set<String> strings;
 
@@ -310,8 +306,13 @@ public class Bricks
 				return Lattice.topRepresentation();
 
 			return new StringRepresentation(
-					"[{" + (strings == null ? Lattice.TOP_STRING : StringUtils.join(this.strings, ", ")) + "}]("
-							+ interval.getLow() + "," + interval.getHigh() + ")");
+				"[{"
+					+ (strings == null ? Lattice.TOP_STRING : StringUtils.join(this.strings, ", "))
+					+ "}]("
+					+ interval.getLow()
+					+ ","
+					+ interval.getHigh()
+					+ ")");
 		}
 
 	}
@@ -321,9 +322,7 @@ public class Bricks
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public class BrickList
-			implements
-			BaseLattice<BrickList> {
+	public class BrickList implements BaseLattice<BrickList> {
 
 		private final List<Brick> bricks;
 
@@ -493,10 +492,8 @@ public class Bricks
 				resultSet = null;
 			else {
 				resultSet = new TreeSet<>();
-				firstBrick
-						.getStrings()
-						.forEach(string -> secondBrick.getStrings()
-								.forEach(otherStr -> resultSet.add(string + otherStr)));
+				firstBrick.getStrings()
+					.forEach(string -> secondBrick.getStrings().forEach(otherStr -> resultSet.add(string + otherStr)));
 			}
 
 			this.bricks.set(first, new Brick(1, 1, resultSet));
@@ -516,13 +513,12 @@ public class Bricks
 			Brick firstBrick = this.bricks.get(first);
 			Brick secondBrick = this.bricks.get(second);
 
-			this.bricks
-					.set(
-							first,
-							new Brick(
-									firstBrick.getMin().add(secondBrick.getMin()),
-									firstBrick.getMax().add(secondBrick.getMax()),
-									firstBrick.getStrings()));
+			this.bricks.set(
+				first,
+				new Brick(
+					firstBrick.getMin().add(secondBrick.getMin()),
+					firstBrick.getMax().add(secondBrick.getMax()),
+					firstBrick.getStrings()));
 
 			this.bricks.remove(second);
 		}
@@ -534,10 +530,9 @@ public class Bricks
 			Brick br = new Brick(brick.getMin(), brick.getMin(), brick.getStrings());
 
 			this.bricks.set(index, new Brick(1, 1, br.getReps()));
-			this.bricks
-					.add(
-							index + 1,
-							new Brick(MathNumber.ZERO, brick.getMax().subtract(brick.getMin()), brick.getStrings()));
+			this.bricks.add(
+				index + 1,
+				new Brick(MathNumber.ZERO, brick.getMax().subtract(brick.getMin()), brick.getStrings()));
 		}
 
 		/**
@@ -551,12 +546,11 @@ public class Bricks
 			List<Brick> thisBricks = this.bricks;
 			List<Brick> tempList = new ArrayList<>(thisBricks);
 
-			thisBricks
-					.removeIf(
-							brick -> brick.getMin().equals(MathNumber.ZERO)
-									&& brick.getMax().equals(MathNumber.ZERO)
-									&& brick.getStrings() != null
-									&& brick.getStrings().isEmpty());
+			thisBricks.removeIf(
+				brick -> brick.getMin().equals(MathNumber.ZERO)
+						&& brick.getMax().equals(MathNumber.ZERO)
+						&& brick.getStrings() != null
+						&& brick.getStrings().isEmpty());
 
 			for (int i = 0; i < thisBricks.size(); ++i) {
 				Brick currentBrick = thisBricks.get(i);
@@ -657,18 +651,16 @@ public class Bricks
 
 			String c = strings.iterator().next();
 
-			boolean res = bricks
-					.stream()
-					.filter(b -> b.getMin().gt(MathNumber.ZERO))
-					.map(b -> b.getStrings())
-					.anyMatch(set -> set == null || set.stream().allMatch(s -> s.contains(c)));
+			boolean res = bricks.stream()
+				.filter(b -> b.getMin().gt(MathNumber.ZERO))
+				.map(b -> b.getStrings())
+				.anyMatch(set -> set == null || set.stream().allMatch(s -> s.contains(c)));
 			if (res)
 				return Satisfiability.SATISFIED;
 
-			res = bricks
-					.stream()
-					.map(b -> b.getStrings())
-					.allMatch(set -> set != null && set.stream().allMatch(s -> !s.contains(c)));
+			res = bricks.stream()
+				.map(b -> b.getStrings())
+				.allMatch(set -> set != null && set.stream().allMatch(s -> !s.contains(c)));
 			if (res)
 				return Satisfiability.NOT_SATISFIED;
 

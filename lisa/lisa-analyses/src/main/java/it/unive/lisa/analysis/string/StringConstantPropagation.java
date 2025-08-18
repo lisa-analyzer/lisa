@@ -31,9 +31,7 @@ import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class StringConstantPropagation
-		implements
-		BaseNonRelationalValueDomain<StringConstant> {
+public class StringConstantPropagation implements BaseNonRelationalValueDomain<StringConstant> {
 
 	@Override
 	public StringConstant evalNullConstant(

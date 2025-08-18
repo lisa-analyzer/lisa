@@ -63,10 +63,7 @@ public class CharInclusion
 	 *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
 	 *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
 	 */
-	public static class CI
-			implements
-			BaseLattice<CI>,
-			WholeValueElement<CI> {
+	public static class CI implements BaseLattice<CI>, WholeValueElement<CI> {
 
 		private static final CI TOP = new CI();
 
@@ -98,10 +95,9 @@ public class CharInclusion
 
 		private CI(
 				String str) {
-			Set<Character> charsSet = str
-					.chars()
-					.mapToObj(e -> (char) e)
-					.collect(Collectors.toCollection(TreeSet::new));
+			Set<Character> charsSet = str.chars()
+				.mapToObj(e -> (char) e)
+				.collect(Collectors.toCollection(TreeSet::new));
 			this.certainlyContained = charsSet;
 			this.maybeContained = charsSet;
 		}
@@ -217,8 +213,11 @@ public class CharInclusion
 		}
 
 		private String formatRepresentation() {
-			return "CertainlyContained: {" + StringUtils.join(this.certainlyContained, ", ") + "}, MaybeContained: {"
-					+ (maybeContained == null ? "Σ" : StringUtils.join(this.maybeContained, ", ")) + "}";
+			return "CertainlyContained: {"
+				+ StringUtils.join(this.certainlyContained, ", ")
+				+ "}, MaybeContained: {"
+				+ (maybeContained == null ? "Σ" : StringUtils.join(this.maybeContained, ", "))
+				+ "}";
 		}
 
 		@Override
@@ -231,45 +230,39 @@ public class CharInclusion
 
 			BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
 			UnaryExpression strlen = new UnaryExpression(
-					pp.getProgram().getTypes().getIntegerType(),
-					e,
-					StringLength.INSTANCE,
-					pp.getLocation());
+				pp.getProgram().getTypes().getIntegerType(),
+				e,
+				StringLength.INSTANCE,
+				pp.getLocation());
 
 			if (isTop())
-				return Collections
-						.singleton(
-								new BinaryExpression(
-										booleanType,
-										new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-										strlen,
-										ComparisonLe.INSTANCE,
-										e.getCodeLocation()));
+				return Collections.singleton(
+					new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+						strlen,
+						ComparisonLe.INSTANCE,
+						e.getCodeLocation()));
 
 			Set<BinaryExpression> constr = new HashSet<>();
-			constr
-					.add(
-							new BinaryExpression(
-									booleanType,
-									new Constant(
-											pp.getProgram().getTypes().getIntegerType(),
-											certainlyContained.size(),
-											pp.getLocation()),
-									strlen,
-									ComparisonLe.INSTANCE,
-									e.getCodeLocation()));
+			constr.add(
+				new BinaryExpression(
+					booleanType,
+					new Constant(
+						pp.getProgram().getTypes().getIntegerType(),
+						certainlyContained.size(),
+						pp.getLocation()),
+					strlen,
+					ComparisonLe.INSTANCE,
+					e.getCodeLocation()));
 			for (Character c : certainlyContained)
-				constr
-						.add(
-								new BinaryExpression(
-										booleanType,
-										new Constant(
-												pp.getProgram().getTypes().getStringType(),
-												String.valueOf(c),
-												pp.getLocation()),
-										e,
-										StringContains.INSTANCE,
-										pp.getLocation()));
+				constr.add(
+					new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getStringType(), String.valueOf(c), pp.getLocation()),
+						e,
+						StringContains.INSTANCE,
+						pp.getLocation()));
 			return constr;
 		}
 
@@ -460,29 +453,27 @@ public class CharInclusion
 
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
-			constr
-					.add(
-							new BinaryExpression(
-									booleanType,
-									new Constant(
-											pp.getProgram().getTypes().getIntegerType(),
-											indexes.getLow().toInt(),
-											pp.getLocation()),
-									expression,
-									ComparisonLe.INSTANCE,
-									pp.getLocation()));
+			constr.add(
+				new BinaryExpression(
+					booleanType,
+					new Constant(
+						pp.getProgram().getTypes().getIntegerType(),
+						indexes.getLow().toInt(),
+						pp.getLocation()),
+					expression,
+					ComparisonLe.INSTANCE,
+					pp.getLocation()));
 			if (indexes.getHigh().isFinite())
-				constr
-						.add(
-								new BinaryExpression(
-										booleanType,
-										new Constant(
-												pp.getProgram().getTypes().getIntegerType(),
-												indexes.getHigh().toInt(),
-												pp.getLocation()),
-										expression,
-										ComparisonGe.INSTANCE,
-										pp.getLocation()));
+				constr.add(
+					new BinaryExpression(
+						booleanType,
+						new Constant(
+							pp.getProgram().getTypes().getIntegerType(),
+							indexes.getHigh().toInt(),
+							pp.getLocation()),
+						expression,
+						ComparisonGe.INSTANCE,
+						pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}

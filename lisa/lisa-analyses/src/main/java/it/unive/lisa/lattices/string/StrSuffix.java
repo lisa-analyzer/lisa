@@ -25,10 +25,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StrSuffix
-		implements
-		BaseLattice<StrSuffix>,
-		WholeValueElement<StrSuffix> {
+public class StrSuffix implements BaseLattice<StrSuffix>, WholeValueElement<StrSuffix> {
 
 	/**
 	 * The top element of the lattice, representing an empty suffix.
@@ -143,38 +140,33 @@ public class StrSuffix
 
 		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
 		UnaryExpression strlen = new UnaryExpression(
-				pp.getProgram().getTypes().getIntegerType(),
-				e,
-				StringLength.INSTANCE,
-				pp.getLocation());
+			pp.getProgram().getTypes().getIntegerType(),
+			e,
+			StringLength.INSTANCE,
+			pp.getLocation());
 
 		if (isTop())
-			return Collections
-					.singleton(
-							new BinaryExpression(
-									booleanType,
-									new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-									strlen,
-									ComparisonLe.INSTANCE,
-									e.getCodeLocation()));
+			return Collections.singleton(
+				new BinaryExpression(
+					booleanType,
+					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+					strlen,
+					ComparisonLe.INSTANCE,
+					e.getCodeLocation()));
 
-		return Set
-				.of(
-						new BinaryExpression(
-								booleanType,
-								new Constant(
-										pp.getProgram().getTypes().getIntegerType(),
-										suffix.length(),
-										pp.getLocation()),
-								strlen,
-								ComparisonLe.INSTANCE,
-								e.getCodeLocation()),
-						new BinaryExpression(
-								booleanType,
-								new Constant(pp.getProgram().getTypes().getStringType(), suffix, pp.getLocation()),
-								e,
-								StringEndsWith.INSTANCE,
-								e.getCodeLocation()));
+		return Set.of(
+			new BinaryExpression(
+				booleanType,
+				new Constant(pp.getProgram().getTypes().getIntegerType(), suffix.length(), pp.getLocation()),
+				strlen,
+				ComparisonLe.INSTANCE,
+				e.getCodeLocation()),
+			new BinaryExpression(
+				booleanType,
+				new Constant(pp.getProgram().getTypes().getStringType(), suffix, pp.getLocation()),
+				e,
+				StringEndsWith.INSTANCE,
+				e.getCodeLocation()));
 	}
 
 	@Override

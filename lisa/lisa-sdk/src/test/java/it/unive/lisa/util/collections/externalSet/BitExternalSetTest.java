@@ -93,28 +93,28 @@ public class BitExternalSetTest {
 		ExternalSetCache<String> cache = new ExternalSetCache<>();
 		ExternalSet<String> eset = cache.mkEmptySet();
 		Set<String> set = new HashSet<>();
-		populateSingle(
-				new Set[] {
-						set, eset
-				});
+		populateSingle(new Set[] { set, eset });
 
 		verify(Set::equals, Pair.of(set, eset));
 		verify(Set::containsAll, Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set, eset));
 	}
 
 	@Test
@@ -124,33 +124,30 @@ public class BitExternalSetTest {
 		ExternalSet<String> eset2 = cache.mkEmptySet();
 		Set<String> set1 = new HashSet<>();
 		Set<String> set2 = new HashSet<>();
-		populateDouble(
-				new Set[] {
-						set1, eset1
-				},
-				new Set[] {
-						set2, eset2
-				});
+		populateDouble(new Set[] { set1, eset1 }, new Set[] { set2, eset2 });
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 	}
 
 	@Test
@@ -162,39 +159,33 @@ public class BitExternalSetTest {
 		Set<String> set1 = new HashSet<>();
 		Set<String> set2 = new HashSet<>();
 		Set<String> set3 = new HashSet<>();
-		populateTriple(
-				new Set[] {
-						set1, eset1
-				},
-				new Set[] {
-						set2, eset2
-				},
-				new Set[] {
-						set3, eset3
-				});
+		populateTriple(new Set[] { set1, eset1 }, new Set[] { set2, eset2 }, new Set[] { set3, eset3 });
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2), Pair.of(set3, eset3));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2), Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 	}
 
 	@Test
@@ -202,28 +193,28 @@ public class BitExternalSetTest {
 		ExternalSetCache<String> cache = new ExternalSetCache<>();
 		ExternalSet<String> eset = cache.mkEmptySet();
 		Set<String> set = new HashSet<>();
-		populateSingle(
-				new Set[] {
-						set
-				});
+		populateSingle(new Set[] { set });
 		eset.addAll(set);
 		verify(Set::equals, Pair.of(set, eset));
 		verify(Set::containsAll, Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set, eset));
 	}
 
 	@Test
@@ -233,35 +224,32 @@ public class BitExternalSetTest {
 		ExternalSet<String> eset2 = cache.mkEmptySet();
 		Set<String> set1 = new HashSet<>();
 		Set<String> set2 = new HashSet<>();
-		populateDouble(
-				new Set[] {
-						set1
-				},
-				new Set[] {
-						set2
-				});
+		populateDouble(new Set[] { set1 }, new Set[] { set2 });
 		eset1.addAll(set1);
 		eset2.addAll(set2);
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 	}
 
 	@Test
@@ -273,42 +261,36 @@ public class BitExternalSetTest {
 		Set<String> set1 = new HashSet<>();
 		Set<String> set2 = new HashSet<>();
 		Set<String> set3 = new HashSet<>();
-		populateTriple(
-				new Set[] {
-						set1
-				},
-				new Set[] {
-						set2
-				},
-				new Set[] {
-						set3
-				});
+		populateTriple(new Set[] { set1 }, new Set[] { set2 }, new Set[] { set3 });
 		eset1.addAll(set1);
 		eset2.addAll(set2);
 		eset3.addAll(set3);
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2), Pair.of(set3, eset3));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2), Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 	}
 
 	@Test
@@ -316,28 +298,28 @@ public class BitExternalSetTest {
 		ExternalSetCache<String> cache = new ExternalSetCache<>();
 		ExternalSet<String> eset = cache.mkEmptySet();
 		ExternalSet<String> set = cache.mkEmptySet();
-		populateSingle(
-				new Set[] {
-						set
-				});
+		populateSingle(new Set[] { set });
 		eset.addAll(set);
 		verify(Set::equals, Pair.of(set, eset));
 		verify(Set::containsAll, Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set, eset));
 	}
 
 	@Test
@@ -347,35 +329,32 @@ public class BitExternalSetTest {
 		ExternalSet<String> eset2 = cache.mkEmptySet();
 		ExternalSet<String> set1 = cache.mkEmptySet();
 		ExternalSet<String> set2 = cache.mkEmptySet();
-		populateDouble(
-				new Set[] {
-						set1
-				},
-				new Set[] {
-						set2
-				});
+		populateDouble(new Set[] { set1 }, new Set[] { set2 });
 		eset1.addAll(set1);
 		eset2.addAll(set2);
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 	}
 
 	@Test
@@ -387,42 +366,36 @@ public class BitExternalSetTest {
 		ExternalSet<String> set1 = cache.mkEmptySet();
 		ExternalSet<String> set2 = cache.mkEmptySet();
 		ExternalSet<String> set3 = cache.mkEmptySet();
-		populateTriple(
-				new Set[] {
-						set1
-				},
-				new Set[] {
-						set2
-				},
-				new Set[] {
-						set3
-				});
+		populateTriple(new Set[] { set1 }, new Set[] { set2 }, new Set[] { set3 });
 		eset1.addAll(set1);
 		eset2.addAll(set2);
 		eset3.addAll(set3);
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2), Pair.of(set3, eset3));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2), Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 	}
 
 	@Test
@@ -430,32 +403,29 @@ public class BitExternalSetTest {
 		ExternalSetCache<String> cache = new ExternalSetCache<>();
 		ExternalSet<String> eset = cache.mkEmptySet();
 		Set<String> set = new HashSet<>();
-		populateSingle(
-				new Set[] {
-						set, eset
-				});
-		removeSingle(
-				new Set[] {
-						set, eset
-				});
+		populateSingle(new Set[] { set, eset });
+		removeSingle(new Set[] { set, eset });
 
 		verify(Set::equals, Pair.of(set, eset));
 		verify(Set::containsAll, Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set, eset));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set, eset));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set, eset));
 	}
 
 	@Test
@@ -465,42 +435,33 @@ public class BitExternalSetTest {
 		ExternalSet<String> eset2 = cache.mkEmptySet();
 		Set<String> set1 = new HashSet<>();
 		Set<String> set2 = new HashSet<>();
-		populateDouble(
-				new Set[] {
-						set1, eset1
-				},
-				new Set[] {
-						set2, eset2
-				});
-		removeSingle(
-				new Set[] {
-						set1, eset1
-				});
-		removeSingle(
-				new Set[] {
-						set2, eset2
-				});
+		populateDouble(new Set[] { set1, eset1 }, new Set[] { set2, eset2 });
+		removeSingle(new Set[] { set1, eset1 });
+		removeSingle(new Set[] { set2, eset2 });
 
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 	}
 
 	@Test
@@ -512,52 +473,37 @@ public class BitExternalSetTest {
 		Set<String> set1 = new HashSet<>();
 		Set<String> set2 = new HashSet<>();
 		Set<String> set3 = new HashSet<>();
-		populateTriple(
-				new Set[] {
-						set1, eset1
-				},
-				new Set[] {
-						set2, eset2
-				},
-				new Set[] {
-						set3, eset3
-				});
-		removeSingle(
-				new Set[] {
-						set1, eset1
-				});
-		removeSingle(
-				new Set[] {
-						set2, eset2
-				});
-		removeSingle(
-				new Set[] {
-						set3, eset3
-				});
+		populateTriple(new Set[] { set1, eset1 }, new Set[] { set2, eset2 }, new Set[] { set3, eset3 });
+		removeSingle(new Set[] { set1, eset1 });
+		removeSingle(new Set[] { set2, eset2 });
+		removeSingle(new Set[] { set3, eset3 });
 
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2), Pair.of(set3, eset3));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2), Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2),
-				Pair.of(set3, eset3));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2),
+			Pair.of(set3, eset3));
 	}
 
 	@Test
@@ -567,34 +513,31 @@ public class BitExternalSetTest {
 		ExternalSet<String> eset2 = cache.mkEmptySet();
 		Set<String> set1 = new HashSet<>();
 		Set<String> set2 = new HashSet<>();
-		populateDouble(
-				new Set[] {
-						set1, eset1
-				},
-				new Set[] {
-						set2, eset2
-				});
+		populateDouble(new Set[] { set1, eset1 }, new Set[] { set2, eset2 });
 
 		verify(Set::equals, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(Set::containsAll, Pair.of(set1, eset1), Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.stream().allMatch(es::contains),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.stream().allMatch(es::contains),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.isEmpty() == es.isEmpty(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.isEmpty() == es.isEmpty(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 		verify(
-				(
-						s,
-						es) -> s.size() == es.size(),
-				Pair.of(set1, eset1),
-				Pair.of(set2, eset2));
+			(
+					s,
+					es
+			) -> s.size() == es.size(),
+			Pair.of(set1, eset1),
+			Pair.of(set2, eset2));
 
 		Set<String> tmp = new HashSet<>(set1);
 		tmp.addAll(set2);

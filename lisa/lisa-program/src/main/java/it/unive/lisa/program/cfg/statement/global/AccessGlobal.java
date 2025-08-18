@@ -23,9 +23,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessGlobal
-		extends
-		Expression {
+public class AccessGlobal extends Expression {
 
 	/**
 	 * The receiver of the access
@@ -131,22 +129,20 @@ public class AccessGlobal
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (target instanceof ConstantGlobal)
 			return analysis.smallStepSemantics(entryState, ((ConstantGlobal) target).getConstant(), this);
 
 		// unit globals are unique, we can directly access those
-		return analysis
-				.smallStepSemantics(
-						entryState,
-						new GlobalVariable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
-						this);
+		return analysis.smallStepSemantics(
+			entryState,
+			new GlobalVariable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
+			this);
 	}
 
 }

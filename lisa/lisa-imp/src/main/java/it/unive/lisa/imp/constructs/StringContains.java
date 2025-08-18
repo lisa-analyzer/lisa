@@ -22,9 +22,7 @@ import it.unive.lisa.program.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringContains
-		extends
-		NativeCFG {
+public class StringContains extends NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -36,15 +34,15 @@ public class StringContains
 			CodeLocation location,
 			ClassUnit stringUnit) {
 		super(
-				new CodeMemberDescriptor(
-						location,
-						stringUnit,
-						true,
-						"contains",
-						BoolType.INSTANCE,
-						new Parameter(location, "this", StringType.INSTANCE),
-						new Parameter(location, "other", StringType.INSTANCE)),
-				IMPStringContains.class);
+			new CodeMemberDescriptor(
+				location,
+				stringUnit,
+				true,
+				"contains",
+				BoolType.INSTANCE,
+				new Parameter(location, "this", StringType.INSTANCE),
+				new Parameter(location, "other", StringType.INSTANCE)),
+			IMPStringContains.class);
 	}
 
 	/**
@@ -54,11 +52,7 @@ public class StringContains
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringContains
-			extends
-			Contains
-			implements
-			PluggableStatement {
+	public static class IMPStringContains extends Contains implements PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the

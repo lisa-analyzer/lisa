@@ -36,9 +36,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IndexOf
-		extends
-		it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class IndexOf extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -63,12 +61,12 @@ public class IndexOf
 			Expression left,
 			Expression right) {
 		super(
-				cfg,
-				location,
-				"indexOf",
-				cfg.getDescriptor().getUnit().getProgram().getTypes().getIntegerType(),
-				left,
-				right);
+			cfg,
+			location,
+			"indexOf",
+			cfg.getDescriptor().getUnit().getProgram().getTypes().getIntegerType(),
+			left,
+			right);
 	}
 
 	@Override
@@ -78,25 +76,23 @@ public class IndexOf
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (analysis.getRuntimeTypesOf(state, left, this).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 		if (analysis.getRuntimeTypesOf(state, right, this).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
-		return analysis
-				.smallStepSemantics(
-						state,
-						new BinaryExpression(getStaticType(), left, right, StringIndexOf.INSTANCE, getLocation()),
-						originating == null ? this : originating);
+		return analysis.smallStepSemantics(
+			state,
+			new BinaryExpression(getStaticType(), left, right, StringIndexOf.INSTANCE, getLocation()),
+			originating == null ? this : originating);
 	}
 
 }

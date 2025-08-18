@@ -21,9 +21,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <A> the type of {@link AbstractDomain} contained into the analysis
  *                state
  */
-public class CFGResults<A extends AbstractLattice<A>>
-		extends
-		FunctionalLattice<CFGResults<A>, ScopeId, AnalyzedCFG<A>> {
+public class CFGResults<
+		A extends AbstractLattice<A>> extends FunctionalLattice<CFGResults<A>, ScopeId, AnalyzedCFG<A>> {
 
 	/**
 	 * Builds a new result.

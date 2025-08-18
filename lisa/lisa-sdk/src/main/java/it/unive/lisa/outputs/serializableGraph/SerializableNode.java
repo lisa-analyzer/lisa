@@ -19,9 +19,7 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableNode
-		implements
-		Comparable<SerializableNode> {
+public class SerializableNode implements Comparable<SerializableNode> {
 
 	private final int id;
 
@@ -130,9 +128,9 @@ public class SerializableNode
 			return cmp;
 
 		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
-				String.class,
-				unknownFields.keySet(),
-				o.unknownFields.keySet());
+			String.class,
+			unknownFields.keySet(),
+			o.unknownFields.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())
@@ -196,6 +194,20 @@ public class SerializableNode
 		return id + "(" + subNodes + "):" + text;
 	}
 
+	/**
+	 * Checks if this node is equal to another node, ignoring the ids of the
+	 * nodes themselves and their subnodes. This is useful to compare nodes that
+	 * are structurally equal, but that may have been assigned different ids in
+	 * different graphs.
+	 * 
+	 * @param other             the node to compare this one with
+	 * @param nodesInThisGraph  the nodes in the graph that contains this node
+	 * @param nodesInOtherGraph the nodes in the graph that contains the other
+	 *                              node
+	 * 
+	 * @return {@code true} if this node is equal to the other one, ignoring
+	 *             ids; {@code false} otherwise
+	 */
 	public boolean equalsUpToIds(
 			SerializableNode other,
 			Collection<SerializableNode> nodesInThisGraph,
@@ -220,13 +232,13 @@ public class SerializableNode
 			Integer thisSubNodeId = subNodes.get(i);
 			Integer otherSubNodeId = other.subNodes.get(i);
 			SerializableNode thisSubNode = nodesInThisGraph.stream()
-					.filter(n -> n.id == thisSubNodeId)
-					.findFirst()
-					.orElse(null);
+				.filter(n -> n.id == thisSubNodeId)
+				.findFirst()
+				.orElse(null);
 			SerializableNode otherSubNode = nodesInOtherGraph.stream()
-					.filter(n -> n.id == otherSubNodeId)
-					.findFirst()
-					.orElse(null);
+				.filter(n -> n.id == otherSubNodeId)
+				.findFirst()
+				.orElse(null);
 			if (thisSubNode == null || otherSubNode == null)
 				return false;
 			if (!thisSubNode.equalsUpToIds(otherSubNode, nodesInThisGraph, nodesInOtherGraph))

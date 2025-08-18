@@ -24,9 +24,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DefaultParamInitialization
-		extends
-		Expression {
+public class DefaultParamInitialization extends Expression {
 
 	/**
 	 * Builds the initializing expression.
@@ -63,15 +61,13 @@ public class DefaultParamInitialization
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
-		return interprocedural
-				.getAnalysis()
-				.smallStepSemantics(entryState, new PushAny(getStaticType(), getLocation()), this);
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return interprocedural.getAnalysis()
+			.smallStepSemantics(entryState, new PushAny(getStaticType(), getLocation()), this);
 	}
 
 }

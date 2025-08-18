@@ -27,9 +27,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPArrayAccess
-		extends
-		BinaryExpression {
+public class IMPArrayAccess extends BinaryExpression {
 
 	/**
 	 * Builds the array access.
@@ -59,14 +57,13 @@ public class IMPArrayAccess
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Set<Type> arraytypes = new HashSet<>();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		for (Type t : analysis.getRuntimeTypesOf(state, left, this))

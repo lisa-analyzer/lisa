@@ -17,10 +17,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class NumericComparison
-		implements
-		ComparisonOperator,
-		BinaryOperator {
+public abstract class NumericComparison implements ComparisonOperator, BinaryOperator {
 
 	@Override
 	public Set<Type> typeInference(

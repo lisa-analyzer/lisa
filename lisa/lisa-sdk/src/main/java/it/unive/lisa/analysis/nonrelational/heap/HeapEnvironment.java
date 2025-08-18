@@ -31,9 +31,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <L> the type of the lattice used to represent the locations stored in
  *                this environment
  */
-public class HeapEnvironment<L extends HeapValue<L>>
-		extends
-		FunctionalLattice<HeapEnvironment<L>, Identifier, L>
+public class HeapEnvironment<L extends HeapValue<L>> extends FunctionalLattice<HeapEnvironment<L>, Identifier, L>
 		implements
 		HeapLattice<HeapEnvironment<L>> {
 
@@ -82,9 +80,7 @@ public class HeapEnvironment<L extends HeapValue<L>>
 		});
 
 		if (holder.get() != null)
-			throw new SemanticException(
-					"Pushing the scope '" + scope + "' raised an error",
-					holder.get());
+			throw new SemanticException("Pushing the scope '" + scope + "' raised an error", holder.get());
 
 		return result;
 	}
@@ -106,9 +102,7 @@ public class HeapEnvironment<L extends HeapValue<L>>
 		});
 
 		if (holder.get() != null)
-			throw new SemanticException(
-					"Popping the scope '" + scope + "' raised an error",
-					holder.get());
+			throw new SemanticException("Popping the scope '" + scope + "' raised an error", holder.get());
 
 		return result;
 	}
@@ -214,9 +208,7 @@ public class HeapEnvironment<L extends HeapValue<L>>
 			try {
 				keys.add(pair.getLeft().lub(pair.getRight()));
 			} catch (SemanticException e) {
-				throw new SemanticException(
-						"Unable to lub " + pair.getLeft() + " and " + pair.getRight(),
-						e);
+				throw new SemanticException("Unable to lub " + pair.getLeft() + " and " + pair.getRight(), e);
 			}
 		return keys;
 	}

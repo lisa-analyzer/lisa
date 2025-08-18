@@ -111,9 +111,7 @@ public class AvailableExpressions
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IDCollector
-			implements
-			ExpressionVisitor<Collection<Identifier>> {
+	public static class IDCollector implements ExpressionVisitor<Collection<Identifier>> {
 
 		private final Collection<Identifier> result = new HashSet<>();
 
@@ -250,9 +248,7 @@ public class AvailableExpressions
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class AE
-			implements
-			DataflowElement<AE> {
+	public static class AE implements DataflowElement<AE> {
 
 		private final ValueExpression expression;
 

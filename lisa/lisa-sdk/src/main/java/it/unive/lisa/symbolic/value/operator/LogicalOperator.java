@@ -7,8 +7,6 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface LogicalOperator
-		extends
-		NegatableOperator {
+public interface LogicalOperator extends NegatableOperator {
 
 }

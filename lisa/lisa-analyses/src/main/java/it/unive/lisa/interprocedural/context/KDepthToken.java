@@ -11,9 +11,7 @@ import java.util.List;
  * length {@code k}, specified in the singleton creation
  * ({@link #getSingleton(int)}).
  */
-public class KDepthToken
-		implements
-		ContextSensitivityToken {
+public class KDepthToken implements ContextSensitivityToken {
 
 	private final List<CFGCall> calls;
 
@@ -59,8 +57,9 @@ public class KDepthToken
 	public String toString() {
 		if (calls.isEmpty())
 			return "<empty>";
-		return "[" + calls.stream().map(call -> call.getLocation())
-				.collect(new CollectionUtilities.StringCollector<>(", ")) + "]";
+		return "["
+			+ calls.stream().map(call -> call.getLocation()).collect(new CollectionUtilities.StringCollector<>(", "))
+			+ "]";
 	}
 
 	@Override

@@ -22,9 +22,7 @@ import java.util.Collection;
  */
 public abstract class CartesianCombination<C extends CartesianCombination<C, T1, T2>,
 		T1 extends Lattice<T1>,
-		T2 extends Lattice<T2>>
-		implements
-		BaseLattice<C> {
+		T2 extends Lattice<T2>> implements BaseLattice<C> {
 
 	/**
 	 * The first lattice in the combination.

@@ -35,9 +35,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BaseValidationLogic
-		implements
-		ProgramValidationLogic {
+public class BaseValidationLogic implements ProgramValidationLogic {
 
 	/**
 	 * Error message format for duplicated {@link CodeMember}s in the same
@@ -215,11 +213,11 @@ public class BaseValidationLogic
 			throws ProgramValidationException {
 		if (isInstance != global.isInstance())
 			throw new ProgramValidationException(
-					format(
-							GLOBAL_INSTANCE_MISMATCH,
-							global,
-							global.isInstance(),
-							isInstance ? "instance" : "non-instance"));
+				format(
+					GLOBAL_INSTANCE_MISMATCH,
+					global,
+					global.isInstance(),
+					isInstance ? "instance" : "non-instance"));
 
 		if (isInstance && global instanceof ConstantGlobal)
 			throw new ProgramValidationException(format(CONST_INSTANCE_GLOBAL, global));
@@ -346,8 +344,8 @@ public class BaseValidationLogic
 		for (CompilationUnit ancestor : unit.getImmediateAncestors()) {
 			// check overriders/implementers
 			for (CodeMember inherited : ancestor.getInstanceCodeMembers(true)) {
-				Collection<CodeMember> localOverrides = unit.getMatchingInstanceCodeMembers(inherited.getDescriptor(),
-						false);
+				Collection<CodeMember> localOverrides = unit
+					.getMatchingInstanceCodeMembers(inherited.getDescriptor(), false);
 				if (localOverrides.isEmpty()) {
 					if (inherited instanceof AbstractCodeMember
 							&& !ancestor.canBeInstantiated()
@@ -356,11 +354,11 @@ public class BaseValidationLogic
 						// it must provide an implementation for all abstract
 						// code members defined in the inheritance chain
 						throw new ProgramValidationException(
-								format(MISSING_OVERRIDE, unit, inherited.getDescriptor().getSignature(), ancestor));
+							format(MISSING_OVERRIDE, unit, inherited.getDescriptor().getSignature(), ancestor));
 				} else if (localOverrides.size() == 1) {
 					if (!inherited.getDescriptor().isOverridable()) {
 						throw new ProgramValidationException(
-								format(CANNOT_OVERRIDE, unit, inherited.getDescriptor().getSignature()));
+							format(CANNOT_OVERRIDE, unit, inherited.getDescriptor().getSignature()));
 					} else {
 						CodeMember over = localOverrides.iterator().next();
 						over.getDescriptor().overrides().addAll(inherited.getDescriptor().overrides());
@@ -369,11 +367,11 @@ public class BaseValidationLogic
 					}
 				} else {
 					throw new ProgramValidationException(
-							format(
-									MULTIPLE_OVERRIDES,
-									inherited.getDescriptor().getSignature(),
-									unit,
-									StringUtils.join(", ", localOverrides)));
+						format(
+							MULTIPLE_OVERRIDES,
+							inherited.getDescriptor().getSignature(),
+							unit,
+							StringUtils.join(", ", localOverrides)));
 				}
 			}
 
@@ -430,7 +428,7 @@ public class BaseValidationLogic
 			throw new ProgramValidationException(format(MEMBER_MISMATCH, member.getDescriptor().getSignature()));
 		else if (matching.size() != 1 || matching.iterator().next() != member)
 			throw new ProgramValidationException(
-					format(DUPLICATE_MEMBER, member.getDescriptor().getSignature(), container));
+				format(DUPLICATE_MEMBER, member.getDescriptor().getSignature(), container));
 
 		member.validate();
 	}

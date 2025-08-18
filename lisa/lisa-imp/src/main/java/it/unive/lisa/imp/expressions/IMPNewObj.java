@@ -37,9 +37,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewObj
-		extends
-		NaryExpression {
+public class IMPNewObj extends NaryExpression {
 
 	private final boolean staticallyAllocated;
 
@@ -65,11 +63,11 @@ public class IMPNewObj
 			boolean staticallyAllocated,
 			Expression... parameters) {
 		super(
-				cfg,
-				new SourceCodeLocation(sourceFile, line, col),
-				(staticallyAllocated ? "" : "new ") + type,
-				type,
-				parameters);
+			cfg,
+			new SourceCodeLocation(sourceFile, line, col),
+			(staticallyAllocated ? "" : "new ") + type,
+			type,
+			parameters);
 		this.staticallyAllocated = staticallyAllocated;
 	}
 
@@ -80,13 +78,12 @@ public class IMPNewObj
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
@@ -113,12 +110,12 @@ public class IMPNewObj
 
 		// constructor call
 		UnresolvedCall call = new UnresolvedCall(
-				getCFG(),
-				getLocation(),
-				CallType.INSTANCE,
-				type.toString(),
-				type.toString(),
-				fullExpressions);
+			getCFG(),
+			getLocation(),
+			CallType.INSTANCE,
+			type.toString(),
+			type.toString(),
+			fullExpressions);
 		AnalysisState<A> sem = call.forwardSemanticsAux(interprocedural, tmp, fullParams, expressions);
 
 		// now remove the instrumented receiver
@@ -137,13 +134,12 @@ public class IMPNewObj
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					ExpressionSet[] params,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			ExpressionSet[] params,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		// TODO implement this when backward analysis will be out of
 		// beta
 		throw new UnsupportedOperationException();

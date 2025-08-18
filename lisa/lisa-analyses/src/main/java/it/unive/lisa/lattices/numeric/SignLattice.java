@@ -13,9 +13,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class SignLattice
-		implements
-		BaseLattice<SignLattice> {
+public class SignLattice implements BaseLattice<SignLattice> {
 
 	/**
 	 * The abstract positive element.

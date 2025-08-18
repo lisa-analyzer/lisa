@@ -28,9 +28,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * 
  * @param <L> the concrete type of the lattice elements tracked by the analysis
  */
-public abstract class BaseTaint<L extends TaintLattice<L>>
-		implements
-		BaseNonRelationalValueDomain<L> {
+public abstract class BaseTaint<L extends TaintLattice<L>> implements BaseNonRelationalValueDomain<L> {
 
 	/**
 	 * The annotation used to mark tainted variables, that is, sources of

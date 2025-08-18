@@ -28,19 +28,16 @@ import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import java.util.Arrays;
 import org.junit.Test;
 
-public class DataflowAnalysesTest
-		extends
-		IMPCronExecutor {
+public class DataflowAnalysesTest extends IMPCronExecutor {
 
 	@Test
 	public void testAvailableExpressions() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						DefaultConfiguration.defaultHeapDomain(),
-						new AvailableExpressions(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			DefaultConfiguration.defaultHeapDomain(),
+			new AvailableExpressions(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/ae";
 		conf.programFile = "ae.imp";
 		perform(conf);
@@ -50,11 +47,10 @@ public class DataflowAnalysesTest
 	public void testConstantPropagation() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						DefaultConfiguration.defaultHeapDomain(),
-						new ConstantPropagation(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			DefaultConfiguration.defaultHeapDomain(),
+			new ConstantPropagation(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/cp";
 		conf.programFile = "cp.imp";
 		perform(conf);
@@ -64,11 +60,10 @@ public class DataflowAnalysesTest
 	public void testReachingDefinitions() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						DefaultConfiguration.defaultHeapDomain(),
-						new ReachingDefinitions(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			DefaultConfiguration.defaultHeapDomain(),
+			new ReachingDefinitions(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/rd";
 		conf.programFile = "rd.imp";
 		perform(conf);
@@ -79,11 +74,10 @@ public class DataflowAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.interproceduralAnalysis = new BackwardModularWorstCaseAnalysis<>();
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						DefaultConfiguration.defaultHeapDomain(),
-						new Liveness(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			DefaultConfiguration.defaultHeapDomain(),
+			new Liveness(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/liveness";
 		conf.programFile = "liveness.imp";
 		conf.compareWithOptimization = false;
@@ -95,11 +89,10 @@ public class DataflowAnalysesTest
 		Program program = buildProgram();
 
 		CronConfiguration conf = new CronConfiguration();
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						DefaultConfiguration.defaultHeapDomain(),
-						new ReachingDefinitions(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			DefaultConfiguration.defaultHeapDomain(),
+			new ReachingDefinitions(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.optimize = false;
 		conf.serializeResults = true;

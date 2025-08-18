@@ -12,10 +12,8 @@ import it.unive.lisa.analysis.nonrelational.BaseNonRelationalDomain;
  * @param <L> the type of lattice used as values in environments produced by
  *                this domain
  */
-public interface BaseNonRelationalValueDomain<L extends Lattice<L>>
-		extends
-		BaseNonRelationalDomain<L, ValueEnvironment<L>>,
-		NonRelationalValueDomain<L> {
+public interface BaseNonRelationalValueDomain<
+		L extends Lattice<L>> extends BaseNonRelationalDomain<L, ValueEnvironment<L>>, NonRelationalValueDomain<L> {
 
 	@Override
 	default ValueEnvironment<L> makeLattice() {

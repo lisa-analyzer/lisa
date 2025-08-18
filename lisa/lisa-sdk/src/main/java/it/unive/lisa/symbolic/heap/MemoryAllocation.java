@@ -13,9 +13,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MemoryAllocation
-		extends
-		HeapExpression {
+public class MemoryAllocation extends HeapExpression {
 
 	/**
 	 * If this allocation is allocated in the stack.

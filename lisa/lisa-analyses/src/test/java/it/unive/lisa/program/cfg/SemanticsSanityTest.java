@@ -51,29 +51,24 @@ public class SemanticsSanityTest {
 						for (int i = 0; i < params.length; i++)
 							params[i] = TestParameterProvider.provideParam(c, types[i]);
 						Statement st = (Statement) c.newInstance(params);
-						st
-								.forwardSemantics(
-										TestParameterProvider.as,
-										TestParameterProvider.interprocedural,
-										TestParameterProvider.store);
+						st.forwardSemantics(
+							TestParameterProvider.as,
+							TestParameterProvider.interprocedural,
+							TestParameterProvider.store);
 					} catch (Exception e) {
-						failures
-								.computeIfAbsent(statement, s -> new HashMap<>())
-								.put(Arrays.toString(c.getParameterTypes()), e);
+						failures.computeIfAbsent(statement, s -> new HashMap<>())
+							.put(Arrays.toString(c.getParameterTypes()), e);
 					}
 			}
 
 		for (Entry<Class<? extends Statement>, Map<String, Exception>> entry : failures.entrySet())
 			for (Entry<String, Exception> e : entry.getValue().entrySet()) {
-				System.err
-						.println(
-								entry.getKey() + " failed for " + e.getKey() + " due to " + e.getValue());
+				System.err.println(entry.getKey() + " failed for " + e.getKey() + " due to " + e.getValue());
 				e.getValue().printStackTrace(System.err);
 			}
 
 		if (!failures.isEmpty())
-			fail(
-					failures.size() + "/" + total + " semantics evaluation failed");
+			fail(failures.size() + "/" + total + " semantics evaluation failed");
 	}
 
 	private boolean excluded(
@@ -83,11 +78,10 @@ public class SemanticsSanityTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <O,
-			T extends O> int buildDomainsInstances(
-					Set<Class<? extends T>> classes,
-					Set<O> instances,
-					List<String> failures) {
+	private <O, T extends O> int buildDomainsInstances(
+			Set<Class<? extends T>> classes,
+			Set<O> instances,
+			List<String> failures) {
 		int total = 0;
 		Constructor<?> nullary, unary, binary, ternary, quaternary;
 		nullary = unary = binary = ternary = quaternary = null;
@@ -146,9 +140,7 @@ public class SemanticsSanityTest {
 						instance = (T) quaternary.newInstance(param1, param2, param3, param4);
 					} else {
 						failures.add(clazz.getName());
-						System.err
-								.println(
-										"No suitable consturctor found for " + clazz.getName());
+						System.err.println("No suitable consturctor found for " + clazz.getName());
 						continue;
 					}
 
@@ -157,9 +149,7 @@ public class SemanticsSanityTest {
 					nullary = unary = binary = ternary = quaternary = null;
 				} catch (Exception e) {
 					failures.add(clazz.getName());
-					System.err
-							.println(
-									"Instantiation of class " + clazz.getName() + " failed due to " + e);
+					System.err.println("Instantiation of class " + clazz.getName() + " failed due to " + e);
 					e.printStackTrace(System.err);
 				}
 			}
@@ -168,9 +158,7 @@ public class SemanticsSanityTest {
 	}
 
 	@Test
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testAssignOnBottom() {
 		List<String> failures = new ArrayList<>();
 
@@ -196,13 +184,12 @@ public class SemanticsSanityTest {
 				} else {
 					SemanticComponent dom = (SemanticComponent) instance;
 					DomainLattice l = (DomainLattice) dom.makeLattice().bottom();
-					res = dom
-							.assign(
-									l,
-									v,
-									arg,
-									TestParameterProvider.provideParam(null, ProgramPoint.class),
-									TestParameterProvider.provideParam(null, SemanticOracle.class));
+					res = dom.assign(
+						l,
+						v,
+						arg,
+						TestParameterProvider.provideParam(null, ProgramPoint.class),
+						TestParameterProvider.provideParam(null, SemanticOracle.class));
 				}
 				if (res instanceof Pair)
 					// heap domains return a pair of (state, replacements)
@@ -220,28 +207,23 @@ public class SemanticsSanityTest {
 
 				if (!isBottom) {
 					failures.add(instance.getClass().getName());
-					System.err
-							.println(
-									"Assigning to the bottom instance of " + instance.getClass().getName()
-											+ " returned a non-bottom instance");
+					System.err.println(
+						"Assigning to the bottom instance of "
+							+ instance.getClass().getName()
+							+ " returned a non-bottom instance");
 				}
 			} catch (Exception e) {
 				failures.add(instance.getClass().getName());
-				System.err
-						.println(
-								"assignOnBottom: " + instance.getClass().getName() + " failed due to " + e);
+				System.err.println("assignOnBottom: " + instance.getClass().getName() + " failed due to " + e);
 				e.printStackTrace(System.err);
 			}
 
 		if (!failures.isEmpty())
-			fail(
-					failures.size() + "/" + total + " assignments failed");
+			fail(failures.size() + "/" + total + " assignments failed");
 	}
 
 	@Test
-	@SuppressWarnings({
-			"rawtypes"
-	})
+	@SuppressWarnings({ "rawtypes" })
 	public void testIsTopIsBottom() {
 		List<String> failures = new ArrayList<>();
 
@@ -255,28 +237,21 @@ public class SemanticsSanityTest {
 			try {
 				if (!instance.bottom().isBottom()) {
 					failures.add(instance.getClass().getName());
-					System.err
-							.println(
-									"bottom().isBottom() returned false on " + instance.getClass().getName());
+					System.err.println("bottom().isBottom() returned false on " + instance.getClass().getName());
 				}
 
 				if (!instance.top().isTop()) {
 					failures.add(instance.getClass().getName());
-					System.err
-							.println(
-									"top().isTop() returned false on " + instance.getClass().getName());
+					System.err.println("top().isTop() returned false on " + instance.getClass().getName());
 				}
 			} catch (Exception e) {
 				failures.add(instance.getClass().getName());
-				System.err
-						.println(
-								"isTopIsBottom: " + instance.getClass().getName() + " failed due to " + e);
+				System.err.println("isTopIsBottom: " + instance.getClass().getName() + " failed due to " + e);
 				e.printStackTrace(System.err);
 			}
 
 		if (!failures.isEmpty())
-			fail(
-					failures.size() + "/" + total + " tests failed");
+			fail(failures.size() + "/" + total + " tests failed");
 	}
 
 }

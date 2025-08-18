@@ -17,9 +17,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <T2> the type of the second lattice
  */
 public class HeapLatticeProduct<T1 extends HeapLattice<T1>,
-		T2 extends HeapLattice<T2>>
-		extends
-		HeapCartesianCombination<HeapLatticeProduct<T1, T2>, T1, T2> {
+		T2 extends HeapLattice<T2>> extends HeapCartesianCombination<HeapLatticeProduct<T1, T2>, T1, T2> {
 
 	/**
 	 * Builds a new product of two lattices.
@@ -47,10 +45,7 @@ public class HeapLatticeProduct<T1 extends HeapLattice<T1>,
 		List<HeapReplacement> replacements = new LinkedList<>();
 		replacements.addAll(first.getRight());
 		replacements.addAll(second.getRight());
-		return Pair
-				.of(
-						new HeapLatticeProduct<>(first.getLeft(), second.getLeft()),
-						replacements);
+		return Pair.of(new HeapLatticeProduct<>(first.getLeft(), second.getLeft()), replacements);
 	}
 
 	@Override

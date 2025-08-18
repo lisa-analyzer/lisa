@@ -97,14 +97,13 @@ public interface EvaluationOrder {
 	 * 
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
-	<A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> evaluate(
-					Expression[] subExpressions,
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					ExpressionSet[] computed)
-					throws SemanticException;
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> evaluate(
+			Expression[] subExpressions,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] computed)
+			throws SemanticException;
 
 	/**
 	 * Evaluates the given sub-expressions according to this order, but in
@@ -132,13 +131,12 @@ public interface EvaluationOrder {
 	 * 
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
-	<A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> bwdEvaluate(
-					Expression[] subExpressions,
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					ExpressionSet[] computed)
-					throws SemanticException;
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> bwdEvaluate(
+			Expression[] subExpressions,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] computed)
+			throws SemanticException;
 
 }

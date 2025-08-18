@@ -31,9 +31,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HeapEnvWithFields
-		extends
-		FunctionalLattice<HeapEnvWithFields, Identifier, AllocationSites>
+public class HeapEnvWithFields extends FunctionalLattice<HeapEnvWithFields, Identifier, AllocationSites>
 		implements
 		HeapLattice<HeapEnvWithFields> {
 
@@ -89,9 +87,7 @@ public class HeapEnvWithFields
 		});
 
 		if (holder.get() != null)
-			throw new SemanticException(
-					"Pushing the scope '" + scope + "' raised an error",
-					holder.get());
+			throw new SemanticException("Pushing the scope '" + scope + "' raised an error", holder.get());
 
 		if (result.getRight().isEmpty())
 			return result;
@@ -104,7 +100,7 @@ public class HeapEnvWithFields
 				sites.add((AllocationSite) id);
 		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
 		return Pair
-				.of(new HeapEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
+			.of(new HeapEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
 	}
 
 	@Override
@@ -124,9 +120,7 @@ public class HeapEnvWithFields
 		});
 
 		if (holder.get() != null)
-			throw new SemanticException(
-					"Popping the scope '" + scope + "' raised an error",
-					holder.get());
+			throw new SemanticException("Popping the scope '" + scope + "' raised an error", holder.get());
 
 		if (result.getRight().isEmpty())
 			return result;
@@ -139,7 +133,7 @@ public class HeapEnvWithFields
 				sites.add((AllocationSite) id);
 		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
 		return Pair
-				.of(new HeapEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
+			.of(new HeapEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
 	}
 
 	private Pair<HeapEnvWithFields, List<HeapReplacement>> liftIdentifiers(
@@ -225,12 +219,11 @@ public class HeapEnvWithFields
 		if (isTop() || isBottom() || function == null)
 			return Pair.of(this, List.of());
 
-		Set<AllocationSite> sites = getKeys()
-				.stream()
-				.filter(test)
-				.filter(k -> k instanceof AllocationSite)
-				.map(k -> (AllocationSite) k)
-				.collect(Collectors.toSet());
+		Set<AllocationSite> sites = getKeys().stream()
+			.filter(test)
+			.filter(k -> k instanceof AllocationSite)
+			.map(k -> (AllocationSite) k)
+			.collect(Collectors.toSet());
 		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
 
 		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
@@ -261,9 +254,7 @@ public class HeapEnvWithFields
 			try {
 				keys.add(pair.getLeft().lub(pair.getRight()));
 			} catch (SemanticException e) {
-				throw new SemanticException(
-						"Unable to lub " + pair.getLeft() + " and " + pair.getRight(),
-						e);
+				throw new SemanticException("Unable to lub " + pair.getLeft() + " and " + pair.getRight(), e);
 			}
 		return keys;
 	}

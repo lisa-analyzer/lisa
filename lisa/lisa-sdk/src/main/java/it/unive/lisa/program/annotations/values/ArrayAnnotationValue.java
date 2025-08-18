@@ -10,9 +10,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ArrayAnnotationValue
-		implements
-		AnnotationValue {
+public class ArrayAnnotationValue implements AnnotationValue {
 
 	private final BasicAnnotationValue[] arr;
 
@@ -51,9 +49,7 @@ public class ArrayAnnotationValue
 
 	@Override
 	public String toString() {
-		return arr == null
-				? "[]"
-				: "[" + StringUtils.join(arr, ", ") + "]";
+		return arr == null ? "[]" : "[" + StringUtils.join(arr, ", ") + "]";
 	}
 
 	@Override
@@ -68,9 +64,9 @@ public class ArrayAnnotationValue
 			return cmp;
 
 		CollectionsDiffBuilder<BasicAnnotationValue> builder = new CollectionsDiffBuilder<>(
-				BasicAnnotationValue.class,
-				List.of(arr),
-				List.of(other.arr));
+			BasicAnnotationValue.class,
+			List.of(arr),
+			List.of(other.arr));
 		builder.compute(BasicAnnotationValue::compareTo);
 
 		if (builder.sameContent())

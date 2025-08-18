@@ -29,19 +29,13 @@ public interface WorkingSet<E> {
 			Class<? extends WorkingSet<E>> clazz)
 			throws AnalysisSetupException {
 		if (!WorkingSet.class.isAssignableFrom(clazz))
-			throw new AnalysisSetupException(
-					clazz + " is not a working set");
+			throw new AnalysisSetupException(clazz + " is not a working set");
 
 		try {
 			return (WorkingSet<E>) clazz.getMethod("mk").invoke(null);
-		} catch (IllegalAccessException
-				| IllegalArgumentException
-				| InvocationTargetException
-				| NoSuchMethodException
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
-			throw new AnalysisSetupException(
-					"Unable to create an instance of " + clazz.getName(),
-					e);
+			throw new AnalysisSetupException("Unable to create an instance of " + clazz.getName(), e);
 		}
 	}
 

@@ -17,11 +17,7 @@ import it.unive.lisa.symbolic.value.Skip;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Throw
-		extends
-		UnaryStatement
-		implements
-		YieldsValue {
+public class Throw extends UnaryStatement implements YieldsValue {
 
 	/**
 	 * Builds the throw, raising {@code expression} as error, happening at the
@@ -67,13 +63,12 @@ public class Throw
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression expr,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression expr,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		// TODO need to smash the continuation into the normal one at returns
 		// only temporary
 		return interprocedural.getAnalysis().smallStepSemantics(state, new Skip(getLocation()), this);

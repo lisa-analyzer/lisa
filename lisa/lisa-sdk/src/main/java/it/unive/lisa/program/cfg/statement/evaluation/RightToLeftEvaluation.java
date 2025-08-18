@@ -15,9 +15,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class RightToLeftEvaluation
-		implements
-		EvaluationOrder {
+public class RightToLeftEvaluation implements EvaluationOrder {
 
 	/**
 	 * The singleton instance of this class.
@@ -28,14 +26,13 @@ public class RightToLeftEvaluation
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> evaluate(
-					Expression[] subExpressions,
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					ExpressionSet[] computed)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> evaluate(
+			Expression[] subExpressions,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] computed)
+			throws SemanticException {
 		if (subExpressions.length == 0)
 			return entryState;
 
@@ -51,14 +48,13 @@ public class RightToLeftEvaluation
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> bwdEvaluate(
-					Expression[] subExpressions,
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions,
-					ExpressionSet[] computed)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> bwdEvaluate(
+			Expression[] subExpressions,
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions,
+			ExpressionSet[] computed)
+			throws SemanticException {
 		if (subExpressions.length == 0)
 			return entryState;
 

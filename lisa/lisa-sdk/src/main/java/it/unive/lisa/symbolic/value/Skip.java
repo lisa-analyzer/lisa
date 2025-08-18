@@ -13,9 +13,7 @@ import it.unive.lisa.type.VoidType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Skip
-		extends
-		ValueExpression {
+public class Skip extends ValueExpression {
 
 	/**
 	 * Builds the skip.

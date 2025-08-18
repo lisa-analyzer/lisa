@@ -31,9 +31,7 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class SimpleAutomaton
-		extends
-		Automaton<SimpleAutomaton, StringSymbol>
+public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymbol>
 		implements
 		BaseLattice<SimpleAutomaton> {
 
@@ -169,11 +167,10 @@ public final class SimpleAutomaton
 			for (State s : currentStates) {
 
 				// stores all the states reached after char computation
-				Set<State> dest = transitions
-						.stream()
-						.filter(t -> t.getSource().equals(s) && t.getSymbol().getSymbol().equals(c))
-						.map(Transition::getDestination)
-						.collect(Collectors.toSet());
+				Set<State> dest = transitions.stream()
+					.filter(t -> t.getSource().equals(s) && t.getSymbol().getSymbol().equals(c))
+					.map(Transition::getDestination)
+					.collect(Collectors.toSet());
 				if (!dest.isEmpty()) {
 					dest = epsilonClosure(dest);
 					newCurr.addAll(dest);
@@ -276,8 +273,7 @@ public final class SimpleAutomaton
 					if (t.getSymbol().getSymbol().equals(" ")) {
 						toRemove.add(t);
 						toAdd
-								.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(),
-										StringSymbol.EPSILON));
+							.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(), StringSymbol.EPSILON));
 					}
 			}
 
@@ -339,24 +335,22 @@ public final class SimpleAutomaton
 
 		if (low.isMinusInfinity()) {
 			if (high.isPlusInfinity())
-				return epsilon
-						.union(
-								auxRepeat(
-										new IntInterval(MathNumber.ONE, high),
-										getInitialState(),
-										new TreeSet<Transition<StringSymbol>>(),
-										emptyLanguage()));
+				return epsilon.union(
+					auxRepeat(
+						new IntInterval(MathNumber.ONE, high),
+						getInitialState(),
+						new TreeSet<Transition<StringSymbol>>(),
+						emptyLanguage()));
 
 			if (high.isZero())
 				return emptyString();
 			else
-				return epsilon
-						.union(
-								auxRepeat(
-										new IntInterval(MathNumber.ONE, high),
-										getInitialState(),
-										new TreeSet<Transition<StringSymbol>>(),
-										emptyLanguage()));
+				return epsilon.union(
+					auxRepeat(
+						new IntInterval(MathNumber.ONE, high),
+						getInitialState(),
+						new TreeSet<Transition<StringSymbol>>(),
+						emptyLanguage()));
 		}
 
 		long lowInt = low.toLong();
@@ -364,25 +358,22 @@ public final class SimpleAutomaton
 		if (high.isPlusInfinity()) {
 			// need exception
 			if (lowInt < 0)
-				return epsilon
-						.union(
-								auxRepeat(
-										new IntInterval(MathNumber.ONE, high),
-										getInitialState(),
-										new TreeSet<Transition<StringSymbol>>(),
-										emptyLanguage()));
+				return epsilon.union(
+					auxRepeat(
+						new IntInterval(MathNumber.ONE, high),
+						getInitialState(),
+						new TreeSet<Transition<StringSymbol>>(),
+						emptyLanguage()));
 			if (low.isZero())
-				return epsilon
-						.union(
-								auxRepeat(
-										new IntInterval(MathNumber.ONE, high),
-										getInitialState(),
-										new TreeSet<Transition<StringSymbol>>(),
-										emptyLanguage()));
+				return epsilon.union(
+					auxRepeat(
+						new IntInterval(MathNumber.ONE, high),
+						getInitialState(),
+						new TreeSet<Transition<StringSymbol>>(),
+						emptyLanguage()));
 			if (lowInt > 0)
 				return epsilon
-						.union(auxRepeat(i, getInitialState(), new TreeSet<Transition<StringSymbol>>(),
-								emptyLanguage()));
+					.union(auxRepeat(i, getInitialState(), new TreeSet<Transition<StringSymbol>>(), emptyLanguage()));
 		}
 
 		long highInt = high.toLong();
@@ -394,13 +385,12 @@ public final class SimpleAutomaton
 			if (high.isZero())
 				return emptyString();
 			else
-				return epsilon
-						.union(
-								auxRepeat(
-										new IntInterval(MathNumber.ONE, high),
-										getInitialState(),
-										new TreeSet<Transition<StringSymbol>>(),
-										emptyLanguage()));
+				return epsilon.union(
+					auxRepeat(
+						new IntInterval(MathNumber.ONE, high),
+						getInitialState(),
+						new TreeSet<Transition<StringSymbol>>(),
+						emptyLanguage()));
 		}
 
 		if (low.isZero()) {
@@ -408,13 +398,12 @@ public final class SimpleAutomaton
 				return emptyString();
 
 			if (highInt > 0)
-				return epsilon
-						.union(
-								auxRepeat(
-										new IntInterval(MathNumber.ONE, high),
-										getInitialState(),
-										new TreeSet<Transition<StringSymbol>>(),
-										emptyLanguage()));
+				return epsilon.union(
+					auxRepeat(
+						new IntInterval(MathNumber.ONE, high),
+						getInitialState(),
+						new TreeSet<Transition<StringSymbol>>(),
+						emptyLanguage()));
 		}
 
 		if (lowInt > 0 && highInt > 0)
@@ -502,12 +491,8 @@ public final class SimpleAutomaton
 		}
 
 		for (Transition<StringSymbol> t : getTransitions()) {
-			delta
-					.add(
-							new Transition<>(
-									firstMapping.get(t.getSource()),
-									firstMapping.get(t.getDestination()),
-									t.getSymbol()));
+			delta.add(
+				new Transition<>(firstMapping.get(t.getSource()), firstMapping.get(t.getDestination()), t.getSymbol()));
 		}
 
 		if (second.getStates().size() == 1 && second.getInitialState().isFinal()) {
@@ -538,34 +523,25 @@ public final class SimpleAutomaton
 					continue;
 
 				if (!t.getSource().isInitial() && !t.getDestination().isInitial()) {
-					delta
-							.add(
-									new Transition<>(
-											secondMapping.get(t.getSource()),
-											secondMapping.get(t.getDestination()),
-											t.getSymbol()));
+					delta.add(
+						new Transition<>(
+							secondMapping.get(t.getSource()),
+							secondMapping.get(t.getDestination()),
+							t.getSymbol()));
 				}
 				if (t.getSource().isInitial()) {
 					for (State s : connectOn) {
 						if (states.contains(secondMapping.get(t.getSource())))
-							delta
-									.add(
-											new Transition<>(
-													secondMapping.get(t.getSource()),
-													firstMapping.get(s),
-													t.getSymbol()));
+							delta.add(
+								new Transition<>(secondMapping.get(t.getSource()), firstMapping.get(s), t.getSymbol()));
 					}
 				}
 			}
 
 			for (Transition<StringSymbol> t : second.getOutgoingTransitionsFrom(second.getInitialState())) {
 				for (State s : connectOn) {
-					delta
-							.add(
-									new Transition<>(
-											firstMapping.get(s),
-											secondMapping.get(t.getDestination()),
-											t.getSymbol()));
+					delta.add(
+						new Transition<>(firstMapping.get(s), secondMapping.get(t.getDestination()), t.getSymbol()));
 				}
 			}
 		}

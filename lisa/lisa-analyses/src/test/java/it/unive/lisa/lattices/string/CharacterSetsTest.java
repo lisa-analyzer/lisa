@@ -26,8 +26,8 @@ public class CharacterSetsTest {
 		maybeContained.add('f');
 
 		assertEquals(
-				new CI(certainlyContained, maybeContained).representation().toString(),
-				"CertainlyContained: {a, b, c}, MaybeContained: {d, e, f}");
+			new CI(certainlyContained, maybeContained).representation().toString(),
+			"CertainlyContained: {a, b, c}, MaybeContained: {d, e, f}");
 	}
 
 	@Test
@@ -64,8 +64,8 @@ public class CharacterSetsTest {
 		maybeContainedResult.add('z');
 
 		assertEquals(
-				new CI(certainlyContained, maybeContained).lubAux(new CI(otherCertainlyContained, otherMaybeContained)),
-				new CI(certainlyContainedResult, maybeContainedResult));
+			new CI(certainlyContained, maybeContained).lubAux(new CI(otherCertainlyContained, otherMaybeContained)),
+			new CI(certainlyContainedResult, maybeContainedResult));
 	}
 
 	@Test
@@ -92,8 +92,8 @@ public class CharacterSetsTest {
 		maybeContained.add('h');
 
 		assertTrue(
-				new CI(certainlyContained, maybeContained)
-						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
+			new CI(certainlyContained, maybeContained)
+				.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 	@Test
@@ -123,8 +123,8 @@ public class CharacterSetsTest {
 		otherMaybeContained.add('h');
 
 		assertFalse(
-				new CI(certainlyContained, maybeContained)
-						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
+			new CI(certainlyContained, maybeContained)
+				.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 	@Test
@@ -152,8 +152,8 @@ public class CharacterSetsTest {
 		otherMaybeContained.add('h');
 
 		assertFalse(
-				new CI(certainlyContained, maybeContained)
-						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
+			new CI(certainlyContained, maybeContained)
+				.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 	@Test
@@ -184,8 +184,8 @@ public class CharacterSetsTest {
 		maybeContained.add('g');
 
 		assertFalse(
-				new CI(certainlyContained, maybeContained)
-						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
+			new CI(certainlyContained, maybeContained)
+				.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 	@Test
@@ -216,8 +216,8 @@ public class CharacterSetsTest {
 		otherMaybeContained.add('f');
 
 		assertTrue(
-				new CI(certainlyContained, maybeContained)
-						.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
+			new CI(certainlyContained, maybeContained)
+				.lessOrEqualAux(new CI(otherCertainlyContained, otherMaybeContained)));
 	}
 
 }

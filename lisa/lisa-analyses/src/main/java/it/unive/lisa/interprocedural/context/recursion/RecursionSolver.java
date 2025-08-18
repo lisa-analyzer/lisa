@@ -45,9 +45,7 @@ import org.apache.logging.log4j.Logger;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public class RecursionSolver<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
-		extends
-		ContextBasedAnalysis<A, D> {
+		D extends AbstractDomain<A>> extends ContextBasedAnalysis<A, D> {
 
 	private static final Logger LOG = LogManager.getLogger(RecursionSolver.class);
 
@@ -164,10 +162,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 		Collection<CFGCall> ends = finalEntryStates.keySet();
 		CompoundState<A> entryState = recursion.getEntryState();
 
-		LOG
-				.info(
-						"Solving recursion at " + start.getLocation() + " for context "
-								+ recursion.getInvocationToken());
+		LOG.info("Solving recursion at " + start.getLocation() + " for context " + recursion.getInvocationToken());
 
 		recursiveApprox = new GenericMapLattice<>(entryState.postState.bottom());
 		recursiveApprox = recursiveApprox.bottom();
@@ -179,18 +174,18 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
 
 		do {
-			LOG
-					.debug(
-							StringUtilities.ordinal(recursionCount + 1) + " evaluation of recursive chain at "
-									+ start.getLocation());
+			LOG.debug(
+				StringUtilities.ordinal(recursionCount + 1)
+					+ " evaluation of recursive chain at "
+					+ start.getLocation());
 
 			previousApprox = recursiveApprox;
 
 			// we reset the analysis at the point where the starting call can be
 			// evaluated
 			token = recursion.getInvocationToken();
-			AnalysisState<A> post = start.forwardSemanticsAux(this, entryState.postState, params,
-					entryState.intermediateStates);
+			AnalysisState<A> post = start
+				.forwardSemanticsAux(this, entryState.postState, params, entryState.intermediateStates);
 
 			for (CFGCall end : ends)
 				recursiveApprox = recursiveApprox.putState(end, transferToCallsite(start, end, post));

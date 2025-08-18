@@ -11,9 +11,6 @@ package it.unive.lisa.util.functional;
  *                operator
  */
 @FunctionalInterface
-public interface UnaryOperator<T,
-		E extends Exception>
-		extends
-		Function<T, T, E> {
+public interface UnaryOperator<T, E extends Exception> extends Function<T, T, E> {
 
 }

@@ -16,9 +16,7 @@ import java.util.Set;
  * 
  * @param <L> the concrete type of this lattice
  */
-public interface WholeValueElement<L extends WholeValueElement<L>>
-		extends
-		Lattice<L> {
+public interface WholeValueElement<L extends WholeValueElement<L>> extends Lattice<L> {
 
 	/**
 	 * Generates a set of constraints that model the concrete values represented

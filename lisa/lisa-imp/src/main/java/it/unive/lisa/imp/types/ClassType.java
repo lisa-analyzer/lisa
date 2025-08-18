@@ -25,9 +25,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class ClassType
-		implements
-		UnitType {
+public final class ClassType implements UnitType {
 
 	private static final Map<String, ClassType> types = new HashMap<>();
 

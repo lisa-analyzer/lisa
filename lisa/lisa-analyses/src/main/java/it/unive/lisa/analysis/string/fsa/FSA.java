@@ -36,9 +36,7 @@ import java.util.TreeSet;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class FSA
-		implements
-		SmashedSumStringDomain<SimpleAutomaton> {
+public class FSA implements SmashedSumStringDomain<SimpleAutomaton> {
 
 	@Override
 	public SimpleAutomaton evalNonNullConstant(
@@ -120,12 +118,11 @@ public class FSA
 			}
 		}
 
-		SimpleAutomaton[] array = current
-				.toRegex()
-				.substring((int) begin, (int) end)
-				.parallelStream()
-				.map(s -> new SimpleAutomaton(s.toString()))
-				.toArray(SimpleAutomaton[]::new);
+		SimpleAutomaton[] array = current.toRegex()
+			.substring((int) begin, (int) end)
+			.parallelStream()
+			.map(s -> new SimpleAutomaton(s.toString()))
+			.toArray(SimpleAutomaton[]::new);
 
 		SimpleAutomaton result = current.emptyLanguage();
 
@@ -194,8 +191,8 @@ public class FSA
 			return mkInterval(-1, -1);
 		else if (s.recognizesExactlyOneString() && current.recognizesExactlyOneString())
 			return mkInterval(
-					indexesOf.stream().mapToInt(i -> i).min().getAsInt(),
-					indexesOf.stream().mapToInt(i -> i).max().getAsInt());
+				indexesOf.stream().mapToInt(i -> i).min().getAsInt(),
+				indexesOf.stream().mapToInt(i -> i).max().getAsInt());
 		else
 			return mkInterval(-1, indexesOf.stream().mapToInt(i -> i).max().getAsInt());
 	}

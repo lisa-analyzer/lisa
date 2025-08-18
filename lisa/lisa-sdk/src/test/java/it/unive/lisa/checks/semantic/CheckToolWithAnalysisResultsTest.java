@@ -54,26 +54,26 @@ import org.junit.Test;
 public class CheckToolWithAnalysisResultsTest {
 
 	private static final ClassUnit unit = new ClassUnit(
-			new SourceCodeLocation("fake", 1, 0),
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-			"fake",
-			false);
+		new SourceCodeLocation("fake", 1, 0),
+		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+		"fake",
+		false);
 
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
 
 	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
-			new SourceCodeLocation("fake", 2, 0),
-			unit,
-			false,
-			"foo");
+		new SourceCodeLocation("fake", 2, 0),
+		unit,
+		false,
+		"foo");
 
 	private static final CFG cfg = new CFG(descriptor);
 
 	private static final CodeMemberDescriptor descriptor2 = new CodeMemberDescriptor(
-			new SourceCodeLocation("fake", 10, 0),
-			unit,
-			false,
-			"faa");
+		new SourceCodeLocation("fake", 10, 0),
+		unit,
+		false,
+		"faa");
 
 	private static final CFG cfg2 = new CFG(descriptor2);
 
@@ -164,11 +164,11 @@ public class CheckToolWithAnalysisResultsTest {
 	public void testCopy() {
 		CheckToolWithAnalysisResults<TestAbstractState,
 				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
-						new LiSAConfiguration(),
-						new FileManager("foo"),
-						Map.of(),
-						fakeCallGraph,
-						new Analysis<>(new TestAbstractDomain()));
+					new LiSAConfiguration(),
+					new FileManager("foo"),
+					Map.of(),
+					fakeCallGraph,
+					new Analysis<>(new TestAbstractDomain()));
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -191,27 +191,25 @@ public class CheckToolWithAnalysisResultsTest {
 
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
 		assertTrue(
-				"Wrong set of warnings",
-				CollectionUtils
-						.isEqualCollection(
-								exp,
-								new CheckToolWithAnalysisResults<>(
-										tool,
-										Map.of(),
-										fakeCallGraph,
-										new Analysis<>(new TestAbstractDomain()))
-												.getWarnings()));
+			"Wrong set of warnings",
+			CollectionUtils.isEqualCollection(
+				exp,
+				new CheckToolWithAnalysisResults<>(
+					tool,
+					Map.of(),
+					fakeCallGraph,
+					new Analysis<>(new TestAbstractDomain())).getWarnings()));
 	}
 
 	@Test
 	public void testSimpleFill() {
 		CheckToolWithAnalysisResults<TestAbstractState,
 				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
-						new LiSAConfiguration(),
-						new FileManager("foo"),
-						Map.of(),
-						fakeCallGraph,
-						new Analysis<>(new TestAbstractDomain()));
+					new LiSAConfiguration(),
+					new FileManager("foo"),
+					Map.of(),
+					fakeCallGraph,
+					new Analysis<>(new TestAbstractDomain()));
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -228,11 +226,11 @@ public class CheckToolWithAnalysisResultsTest {
 	public void testDisjointWarnings() {
 		CheckToolWithAnalysisResults<TestAbstractState,
 				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
-						new LiSAConfiguration(),
-						new FileManager("foo"),
-						Map.of(),
-						fakeCallGraph,
-						new Analysis<>(new TestAbstractDomain()));
+					new LiSAConfiguration(),
+					new FileManager("foo"),
+					Map.of(),
+					fakeCallGraph,
+					new Analysis<>(new TestAbstractDomain()));
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -247,11 +245,11 @@ public class CheckToolWithAnalysisResultsTest {
 	public void testDuplicateWarnings() {
 		CheckToolWithAnalysisResults<TestAbstractState,
 				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
-						new LiSAConfiguration(),
-						new FileManager("foo"),
-						Map.of(),
-						fakeCallGraph,
-						new Analysis<>(new TestAbstractDomain()));
+					new LiSAConfiguration(),
+					new FileManager("foo"),
+					Map.of(),
+					fakeCallGraph,
+					new Analysis<>(new TestAbstractDomain()));
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -270,27 +268,27 @@ public class CheckToolWithAnalysisResultsTest {
 		AnalysisState<TestAbstractState> singleton = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
 		AnalyzedCFG<TestAbstractState> res1 = new AnalyzedCFG<>(
-				cfg,
-				new UniqueScope(),
-				singleton,
-				Map.of(noop, singleton.bottom()),
-				Map.of(noop, singleton.bottom()));
+			cfg,
+			new UniqueScope(),
+			singleton,
+			Map.of(noop, singleton.bottom()),
+			Map.of(noop, singleton.bottom()));
 
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
 		AnalyzedCFG<TestAbstractState> res2 = new AnalyzedCFG<>(
-				cfg2,
-				new UniqueScope(),
-				singleton,
-				Map.of(noop, singleton.bottom()),
-				Map.of(noop, singleton.bottom()));
+			cfg2,
+			new UniqueScope(),
+			singleton,
+			Map.of(noop, singleton.bottom()),
+			Map.of(noop, singleton.bottom()));
 
 		CheckToolWithAnalysisResults<TestAbstractState,
 				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
-						new LiSAConfiguration(),
-						new FileManager("foo"),
-						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)),
-						fakeCallGraph,
-						new Analysis<>(new TestAbstractDomain()));
+					new LiSAConfiguration(),
+					new FileManager("foo"),
+					Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)),
+					fakeCallGraph,
+					new Analysis<>(new TestAbstractDomain()));
 
 		assertEquals(res1, tool.getResultOf(cfg).iterator().next());
 		assertEquals(res2, tool.getResultOf(cfg2).iterator().next());

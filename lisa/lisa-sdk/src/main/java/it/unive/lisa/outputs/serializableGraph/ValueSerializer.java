@@ -12,9 +12,7 @@ import java.util.SortedMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ValueSerializer
-		extends
-		StdSerializer<SerializableValue> {
+public class ValueSerializer extends StdSerializer<SerializableValue> {
 
 	private static final long serialVersionUID = 2323974954619016107L;
 
@@ -87,8 +85,7 @@ public class ValueSerializer
 			else
 				provider.defaultSerializeValue(((SerializableObject) value).getFields(), gen);
 		else
-			throw new IllegalArgumentException(
-					"Unknown value type: " + value.getClass().getName());
+			throw new IllegalArgumentException("Unknown value type: " + value.getClass().getName());
 
 		if (hasProps)
 			gen.writeEndObject();

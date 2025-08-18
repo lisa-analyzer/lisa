@@ -20,11 +20,7 @@ import java.util.function.Predicate;
  *                the non redundant set lattice
  */
 public abstract class NonRedundantSetDomainLattice<S extends NonRedundantSetDomainLattice<S, L>,
-		L extends ValueLattice<L>>
-		extends
-		NonRedundantSetLattice<S, L>
-		implements
-		DomainLattice<S, S> {
+		L extends ValueLattice<L>> extends NonRedundantSetLattice<S, L> implements DomainLattice<S, S> {
 
 	/**
 	 * Creates a new non redundant set domain lattice with the given elements

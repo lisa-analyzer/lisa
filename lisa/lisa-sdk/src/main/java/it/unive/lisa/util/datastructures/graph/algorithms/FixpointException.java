@@ -5,9 +5,7 @@ package it.unive.lisa.util.datastructures.graph.algorithms;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class FixpointException
-		extends
-		Exception {
+public class FixpointException extends Exception {
 
 	private static final long serialVersionUID = 8975446457619020051L;
 

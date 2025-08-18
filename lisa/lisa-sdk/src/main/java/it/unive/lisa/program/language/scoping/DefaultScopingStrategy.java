@@ -20,19 +20,16 @@ import org.apache.commons.lang3.tuple.Pair;
  * {@link AnalysisState#pushScope(ScopeToken, ProgramPoint)} and
  * {@link AnalysisState#popScope(ScopeToken, ProgramPoint)}.
  */
-public class DefaultScopingStrategy
-		implements
-		ScopingStrategy {
+public class DefaultScopingStrategy implements ScopingStrategy {
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> scope(
-					CFGCall call,
-					ScopeToken scope,
-					AnalysisState<A> state,
-					Analysis<A, D> analysis,
-					ExpressionSet[] actuals)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> scope(
+			CFGCall call,
+			ScopeToken scope,
+			AnalysisState<A> state,
+			Analysis<A, D> analysis,
+			ExpressionSet[] actuals)
+			throws SemanticException {
 		ExpressionSet[] locals = new ExpressionSet[actuals.length];
 		AnalysisState<A> callState = state.pushScope(scope, call);
 		for (int i = 0; i < actuals.length; i++)
@@ -41,13 +38,12 @@ public class DefaultScopingStrategy
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> unscope(
-					CFGCall call,
-					ScopeToken scope,
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> unscope(
+			CFGCall call,
+			ScopeToken scope,
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		if (call.returnsVoid(state))
 			return state.popScope(scope, call);
 

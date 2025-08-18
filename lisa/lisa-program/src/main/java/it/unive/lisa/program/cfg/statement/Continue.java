@@ -12,12 +12,25 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
-public class Continue
-		extends
-		Statement {
+/**
+ * A continue statement, which is used to skip the rest of the current iteration
+ * of a loop.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class Continue extends Statement {
 
 	private final String label;
 
+	/**
+	 * Builds a continue statement.
+	 * 
+	 * @param cfg      the control flow graph to which this statement belongs
+	 * @param location the location of this statement in the source code
+	 * @param label    the label that this continue statement refers to, if any
+	 *                     (if {@code null}, this continue statement does not
+	 *                     refer to any label)
+	 */
 	public Continue(
 			CFG cfg,
 			CodeLocation location,
@@ -26,10 +39,21 @@ public class Continue
 		this.label = label;
 	}
 
+	/**
+	 * Yields whether this continue statement has a target label.
+	 * 
+	 * @return {@code true} if this continue statement has a target label,
+	 *             {@code false} otherwise
+	 */
 	public boolean hasLabel() {
 		return label != null;
 	}
 
+	/**
+	 * Yields the label that this continue statement refers to, if any.
+	 * 
+	 * @return the label, or {@code null}
+	 */
 	public String getLabel() {
 		return label;
 	}

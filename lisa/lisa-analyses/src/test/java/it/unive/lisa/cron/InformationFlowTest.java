@@ -39,18 +39,15 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import org.junit.Test;
 
-public class InformationFlowTest
-		extends
-		IMPCronExecutor {
+public class InformationFlowTest extends IMPCronExecutor {
 
 	@Test
 	public void testTaint() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						DefaultConfiguration.defaultHeapDomain(),
-						new TwoLevelsTaint(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			DefaultConfiguration.defaultHeapDomain(),
+			new TwoLevelsTaint(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.serializeResults = true;
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
@@ -66,11 +63,10 @@ public class InformationFlowTest
 	@Test
 	public void testThreeLevelsTaint() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.analysis = DefaultConfiguration
-				.simpleState(
-						DefaultConfiguration.defaultHeapDomain(),
-						new ThreeLevelsTaint(),
-						DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration.simpleState(
+			DefaultConfiguration.defaultHeapDomain(),
+			new ThreeLevelsTaint(),
+			DefaultConfiguration.defaultTypeDomain());
 		conf.serializeResults = true;
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
@@ -85,21 +81,14 @@ public class InformationFlowTest
 
 	private static class TaintCheck<L extends TaintLattice<L>>
 			implements
-			SemanticCheck<SimpleAbstractState<Monolith,
-					ValueEnvironment<L>,
-					TypeEnvironment<TypeSet>>,
-					SimpleAbstractDomain<Monolith,
-							ValueEnvironment<L>,
-							TypeEnvironment<TypeSet>>> {
+			SemanticCheck<SimpleAbstractState<Monolith, ValueEnvironment<L>, TypeEnvironment<TypeSet>>,
+					SimpleAbstractDomain<Monolith, ValueEnvironment<L>, TypeEnvironment<TypeSet>>> {
 
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<SimpleAbstractState<Monolith,
-						ValueEnvironment<L>,
-						TypeEnvironment<TypeSet>>,
-						SimpleAbstractDomain<Monolith,
-								ValueEnvironment<L>,
-								TypeEnvironment<TypeSet>>> tool,
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<Monolith, ValueEnvironment<L>, TypeEnvironment<TypeSet>>,
+						SimpleAbstractDomain<Monolith, ValueEnvironment<L>, TypeEnvironment<TypeSet>>> tool,
 				CFG graph,
 				Statement node) {
 			if (!(node instanceof UnresolvedCall))
@@ -109,9 +98,9 @@ public class InformationFlowTest
 			BaseTaint<L> domain = (BaseTaint<L>) tool.getAnalysis().domain.valueDomain;
 
 			try {
-				for (AnalyzedCFG<SimpleAbstractState<Monolith,
-						ValueEnvironment<L>,
-						TypeEnvironment<TypeSet>>> result : tool.getResultOf(call.getCFG())) {
+				for (AnalyzedCFG<
+						SimpleAbstractState<Monolith, ValueEnvironment<L>, TypeEnvironment<TypeSet>>> result : tool
+							.getResultOf(call.getCFG())) {
 					Call resolved = (Call) tool.getResolvedVersion(call, result);
 
 					if (resolved instanceof CFGCall) {
@@ -120,28 +109,19 @@ public class InformationFlowTest
 							Parameter[] parameters = n.getDescriptor().getFormals();
 							for (int i = 0; i < parameters.length; i++)
 								if (parameters[i].getAnnotations().contains(BaseTaint.CLEAN_MATCHER)) {
-									AnalysisState<SimpleAbstractState<Monolith,
-											ValueEnvironment<L>,
-											TypeEnvironment<TypeSet>>> post = result
-													.getAnalysisStateAfter(call.getParameters()[i]);
+									AnalysisState<SimpleAbstractState<Monolith, ValueEnvironment<L>, TypeEnvironment<
+											TypeSet>>> post = result.getAnalysisStateAfter(call.getParameters()[i]);
 									SemanticOracle oracle = tool.getAnalysis().domain.makeOracle(post.getState());
 
-									for (SymbolicExpression e : tool
-											.getAnalysis()
-											.rewrite(post, post.getComputedExpressions(), node)) {
+									for (SymbolicExpression e : tool.getAnalysis()
+										.rewrite(post, post.getComputedExpressions(), node)) {
 										L stack = domain
-												.eval(post.getState().valueState, (ValueExpression) e, node, oracle);
+											.eval(post.getState().valueState, (ValueExpression) e, node, oracle);
 
 										if (stack.isAlwaysTainted())
-											tool
-													.warnOn(
-															call,
-															"Parameter " + i + " is always tainted");
+											tool.warnOn(call, "Parameter " + i + " is always tainted");
 										else if (stack.isPossiblyTainted())
-											tool
-													.warnOn(
-															call,
-															"Parameter " + i + " is possibly tainted");
+											tool.warnOn(call, "Parameter " + i + " is possibly tainted");
 									}
 								}
 						}
@@ -206,9 +186,7 @@ public class InformationFlowTest
 		public boolean visit(
 				CheckToolWithAnalysisResults<
 						SimpleAbstractState<Monolith, NonInterferenceEnvironment, TypeEnvironment<TypeSet>>,
-						SimpleAbstractDomain<Monolith,
-								NonInterferenceEnvironment,
-								TypeEnvironment<TypeSet>>> tool,
+						SimpleAbstractDomain<Monolith, NonInterferenceEnvironment, TypeEnvironment<TypeSet>>> tool,
 				CFG graph,
 				Statement node) {
 			if (!(node instanceof Assignment))
@@ -221,51 +199,41 @@ public class InformationFlowTest
 				try {
 					var post = result.getAnalysisStateAfter(assign);
 					NonInterferenceEnvironment state = post.getState()
-							.getLatticeInstance(NonInterferenceEnvironment.class);
+						.getLatticeInstance(NonInterferenceEnvironment.class);
 					var postL = result.getAnalysisStateAfter(assign.getLeft());
 					var postR = result.getAnalysisStateAfter(assign.getRight());
 					NonInterference domain = (NonInterference) tool.getAnalysis().domain.valueDomain;
 					SemanticOracle oracleL = tool.getAnalysis().domain.makeOracle(postL.getState());
 					SemanticOracle oracleR = tool.getAnalysis().domain.makeOracle(postR.getState());
 
-					for (SymbolicExpression l : tool
-							.getAnalysis()
-							.rewrite(postL, postL.getComputedExpressions(), assign))
-						for (SymbolicExpression r : tool
-								.getAnalysis()
-								.rewrite(postR, postR.getComputedExpressions(), assign)) {
+					for (SymbolicExpression l : tool.getAnalysis()
+						.rewrite(postL, postL.getComputedExpressions(), assign))
+						for (SymbolicExpression r : tool.getAnalysis()
+							.rewrite(postR, postR.getComputedExpressions(), assign)) {
 							NonInterferenceValue ll = domain
-									.eval(postL.getState().valueState, (ValueExpression) l, assign.getLeft(), oracleL);
+								.eval(postL.getState().valueState, (ValueExpression) l, assign.getLeft(), oracleL);
 							NonInterferenceValue rr = domain
-									.eval(
-											postR.getState().valueState,
-											(ValueExpression) r,
-											assign.getRight(),
-											oracleR);
+								.eval(postR.getState().valueState, (ValueExpression) r, assign.getRight(), oracleR);
 
 							if (ll.isLowConfidentiality() && rr.isHighConfidentiality())
-								tool
-										.warnOn(
-												assign,
-												"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
+								tool.warnOn(
+									assign,
+									"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
 
 							if (ll.isLowConfidentiality() && state.getExecutionState().isHighConfidentiality())
-								tool
-										.warnOn(
-												assign,
-												"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
+								tool.warnOn(
+									assign,
+									"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
 
 							if (ll.isHighIntegrity() && rr.isLowIntegrity())
-								tool
-										.warnOn(
-												assign,
-												"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
+								tool.warnOn(
+									assign,
+									"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
 
 							if (ll.isHighIntegrity() && state.getExecutionState().isLowIntegrity())
-								tool
-										.warnOn(
-												assign,
-												"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
+								tool.warnOn(
+									assign,
+									"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
 						}
 				} catch (SemanticException e) {
 					throw new RuntimeException(e);

@@ -23,10 +23,10 @@ import org.junit.Test;
 public class AnalyzedCFGTest {
 
 	private static final ClassUnit unit = new ClassUnit(
-			new SourceCodeLocation("unknown", 0, 0),
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-			"Testing",
-			false);
+		new SourceCodeLocation("unknown", 0, 0),
+		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+		"Testing",
+		false);
 
 	@Test
 	public void testIssue189()
@@ -66,12 +66,12 @@ public class AnalyzedCFGTest {
 
 		OptimizedAnalyzedCFG<TestAbstractState,
 				TestAbstractDomain> res = new OptimizedAnalyzedCFG<>(
-						cfg,
-						new UniqueScope(),
-						state,
-						entries,
-						results,
-						new TestInterproceduralAnalysis<>());
+					cfg,
+					new UniqueScope(),
+					state,
+					entries,
+					results,
+					new TestInterproceduralAnalysis<>());
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -118,12 +118,12 @@ public class AnalyzedCFGTest {
 
 		BackwardOptimizedAnalyzedCFG<TestAbstractState,
 				TestAbstractDomain> res = new BackwardOptimizedAnalyzedCFG<>(
-						cfg,
-						new UniqueScope(),
-						state,
-						entries,
-						results,
-						new TestInterproceduralAnalysis<>());
+					cfg,
+					new UniqueScope(),
+					state,
+					entries,
+					results,
+					new TestInterproceduralAnalysis<>());
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));

@@ -42,13 +42,13 @@ public class IterationLoggerTest {
 
 		sum = 0;
 		for (Integer i : IterationLogger
-				.iterate(logger, (Iterable<Integer>) list, "Iteration test - iterable", "integers"))
+			.iterate(logger, (Iterable<Integer>) list, "Iteration test - iterable", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
 
 		sum = 0;
 		for (Integer i : IterationLogger
-				.iterate(logger, Level.OFF, (Iterable<Integer>) list, "Iteration test - iterable", "integers"))
+			.iterate(logger, Level.OFF, (Iterable<Integer>) list, "Iteration test - iterable", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
 
@@ -59,7 +59,7 @@ public class IterationLoggerTest {
 
 		sum = 0;
 		for (Integer i : IterationLogger
-				.iterate(logger, Level.OFF, list.stream(), "Iteration test - stream", "integers"))
+			.iterate(logger, Level.OFF, list.stream(), "Iteration test - stream", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
 	}
@@ -77,9 +77,7 @@ public class IterationLoggerTest {
 		}
 		counter.off();
 
-		logger
-				.info(
-						"MANUAL SUM: " + sum);
+		logger.info("MANUAL SUM: " + sum);
 	}
 
 	private Integer[] generateArray() {

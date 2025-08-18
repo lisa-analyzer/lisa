@@ -14,10 +14,7 @@ public class IntIntervalTest {
 			String symbol,
 			BiFunction<IntInterval, IntInterval, IntInterval> operator) {
 		IntInterval actual = operator.apply(x, y);
-		assertEquals(
-				x + " " + symbol + " " + y + " = " + expected + " (got " + actual + ")",
-				expected,
-				actual);
+		assertEquals(x + " " + symbol + " " + y + " = " + expected + " (got " + actual + ")", expected, actual);
 	}
 
 	private static void test(
@@ -105,7 +102,8 @@ public class IntIntervalTest {
 	public void testDivision() {
 		BiFunction<IntInterval, IntInterval, IntInterval> div = (
 				l,
-				r) -> l.div(r, false, false);
+				r
+		) -> l.div(r, false, false);
 		test(-2, -1, -2, -1, 0, 2, "/", div);
 		test(-2, -1, -2, 3, IntInterval.TOP, "/", div);
 		test(-2, -1, 1, 2, -2, 0, "/", div);
@@ -136,7 +134,8 @@ public class IntIntervalTest {
 	public void testDivisionIgnoreZero() {
 		BiFunction<IntInterval, IntInterval, IntInterval> div = (
 				l,
-				r) -> l.div(r, true, false);
+				r
+		) -> l.div(r, true, false);
 		test(-2, -1, -2, -1, 0, 2, "/", div);
 		test(-2, -1, -2, 3, -1, 1, "/", div);
 		test(-2, -1, 1, 2, -2, 0, "/", div);

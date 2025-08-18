@@ -13,9 +13,7 @@ import java.util.HashSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IfThenElse
-		extends
-		ControlFlowStructure {
+public class IfThenElse extends ControlFlowStructure {
 
 	private final Collection<Statement> trueBranch;
 

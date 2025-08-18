@@ -9,9 +9,7 @@ import java.util.List;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Annotation
-		implements
-		Comparable<Annotation> {
+public class Annotation implements Comparable<Annotation> {
 
 	private final String annotationName;
 
@@ -151,9 +149,9 @@ public class Annotation
 		if ((cmp = annotationMembers.size() - o.annotationMembers.size()) != 0)
 			return cmp;
 		CollectionsDiffBuilder<AnnotationMember> builder = new CollectionsDiffBuilder<>(
-				AnnotationMember.class,
-				annotationMembers,
-				o.annotationMembers);
+			AnnotationMember.class,
+			annotationMembers,
+			o.annotationMembers);
 		builder.compute(AnnotationMember::compareTo);
 
 		if (builder.sameContent())

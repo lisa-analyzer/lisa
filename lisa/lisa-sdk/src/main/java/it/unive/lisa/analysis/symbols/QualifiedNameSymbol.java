@@ -6,9 +6,7 @@ package it.unive.lisa.analysis.symbols;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class QualifiedNameSymbol
-		implements
-		Symbol {
+public class QualifiedNameSymbol implements Symbol {
 
 	private final String qualifier;
 

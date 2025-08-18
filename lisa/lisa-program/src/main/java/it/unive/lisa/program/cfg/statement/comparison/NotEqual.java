@@ -22,9 +22,7 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NotEqual
-		extends
-		it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the inequality test.
@@ -49,20 +47,18 @@ public class NotEqual
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
-					InterproceduralAnalysis<A, D> interprocedural,
-					AnalysisState<A> state,
-					SymbolicExpression left,
-					SymbolicExpression right,
-					StatementStore<A> expressions)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			StatementStore<A> expressions)
+			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		return analysis
-				.smallStepSemantics(
-						state,
-						new BinaryExpression(getStaticType(), left, right, ComparisonNe.INSTANCE, getLocation()),
-						this);
+		return analysis.smallStepSemantics(
+			state,
+			new BinaryExpression(getStaticType(), left, right, ComparisonNe.INSTANCE, getLocation()),
+			this);
 	}
 
 }

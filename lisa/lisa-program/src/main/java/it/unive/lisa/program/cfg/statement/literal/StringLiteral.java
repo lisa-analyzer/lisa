@@ -10,9 +10,7 @@ import it.unive.lisa.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringLiteral
-		extends
-		Literal<String> {
+public class StringLiteral extends Literal<String> {
 
 	/**
 	 * Builds the literal.

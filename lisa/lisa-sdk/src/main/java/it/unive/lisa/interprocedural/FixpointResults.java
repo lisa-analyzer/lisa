@@ -20,9 +20,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <A> the type of {@link AbstractDomain} contained into the analysis
  *                state
  */
-public class FixpointResults<A extends AbstractLattice<A>>
-		extends
-		FunctionalLattice<FixpointResults<A>, CFG, CFGResults<A>> {
+public class FixpointResults<
+		A extends AbstractLattice<A>> extends FunctionalLattice<FixpointResults<A>, CFG, CFGResults<A>> {
 
 	/**
 	 * Builds a new result.

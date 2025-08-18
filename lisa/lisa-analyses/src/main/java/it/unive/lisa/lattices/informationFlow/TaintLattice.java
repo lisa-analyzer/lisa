@@ -13,9 +13,7 @@ import it.unive.lisa.analysis.SemanticException;
  * 
  * @param <L> the concrete type of the taint lattice
  */
-public interface TaintLattice<L extends TaintLattice<L>>
-		extends
-		BaseLattice<L> {
+public interface TaintLattice<L extends TaintLattice<L>> extends BaseLattice<L> {
 
 	/**
 	 * Yields the domain element that represents tainted values.

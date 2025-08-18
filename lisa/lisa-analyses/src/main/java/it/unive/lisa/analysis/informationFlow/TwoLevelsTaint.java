@@ -9,9 +9,7 @@ import it.unive.lisa.lattices.informationFlow.SimpleTaint;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TwoLevelsTaint
-		extends
-		BaseTaint<SimpleTaint> {
+public class TwoLevelsTaint extends BaseTaint<SimpleTaint> {
 
 	@Override
 	public SimpleTaint top() {

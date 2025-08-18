@@ -17,12 +17,7 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric32BitSub
-		extends
-		NumericOperation
-		implements
-		SubtractionOperator,
-		OverflowingOperator {
+public class Numeric32BitSub extends NumericOperation implements SubtractionOperator, OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.

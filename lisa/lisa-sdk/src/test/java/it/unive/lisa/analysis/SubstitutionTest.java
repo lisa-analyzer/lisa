@@ -27,9 +27,7 @@ import org.junit.Test;
 
 public class SubstitutionTest {
 
-	private static class Collector
-			implements
-			ValueLattice<Collector> {
+	private static class Collector implements ValueLattice<Collector> {
 
 		private final ExpressionSet assigned, removed;
 
@@ -162,7 +160,8 @@ public class SubstitutionTest {
 
 	private final Comparator<SymbolicExpression> comparer = (
 			l,
-			r) -> ((Identifier) l).getName().compareTo(((Identifier) r).getName());
+			r
+	) -> ((Identifier) l).getName().compareTo(((Identifier) r).getName());
 
 	private void check(
 			List<HeapReplacement> sub,
@@ -175,28 +174,28 @@ public class SubstitutionTest {
 				c = c.lub(c.applyReplacement(repl, fake));
 
 		CollectionsDiffBuilder<SymbolicExpression> add = new CollectionsDiffBuilder<>(
-				SymbolicExpression.class,
-				addexpected,
-				c.assigned.elements());
+			SymbolicExpression.class,
+			addexpected,
+			c.assigned.elements());
 		CollectionsDiffBuilder<SymbolicExpression> rem = new CollectionsDiffBuilder<>(
-				SymbolicExpression.class,
-				remexpected,
-				c.removed.elements());
+			SymbolicExpression.class,
+			remexpected,
+			c.removed.elements());
 		add.compute(comparer);
 		rem.compute(comparer);
 
 		assertTrue(
-				"Applying " + sub + " assigned unexpected identifiers: " + add.getOnlySecond(),
-				add.getOnlySecond().isEmpty());
+			"Applying " + sub + " assigned unexpected identifiers: " + add.getOnlySecond(),
+			add.getOnlySecond().isEmpty());
 		assertTrue(
-				"Applying " + sub + " removed unexpected identifiers: " + rem.getOnlySecond(),
-				rem.getOnlySecond().isEmpty());
+			"Applying " + sub + " removed unexpected identifiers: " + rem.getOnlySecond(),
+			rem.getOnlySecond().isEmpty());
 		assertTrue(
-				"Applying " + sub + " did not assign some identifiers: " + add.getOnlyFirst(),
-				add.getOnlyFirst().isEmpty());
+			"Applying " + sub + " did not assign some identifiers: " + add.getOnlyFirst(),
+			add.getOnlyFirst().isEmpty());
 		assertTrue(
-				"Applying " + sub + " did not remove some identifiers: " + rem.getOnlyFirst(),
-				rem.getOnlyFirst().isEmpty());
+			"Applying " + sub + " did not remove some identifiers: " + rem.getOnlyFirst(),
+			rem.getOnlyFirst().isEmpty());
 	}
 
 	@Test

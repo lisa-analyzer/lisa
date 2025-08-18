@@ -17,9 +17,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Program
-		extends
-		Unit {
+public class Program extends Unit {
 
 	/**
 	 * The name of the program.
@@ -196,11 +194,10 @@ public class Program
 	 * @return the cfgs
 	 */
 	public Collection<CFG> getAllCFGs() {
-		return getCodeMembersRecursively()
-				.stream()
-				.filter(CFG.class::isInstance)
-				.map(CFG.class::cast)
-				.collect(Collectors.toSet());
+		return getCodeMembersRecursively().stream()
+			.filter(CFG.class::isInstance)
+			.map(CFG.class::cast)
+			.collect(Collectors.toSet());
 	}
 
 }

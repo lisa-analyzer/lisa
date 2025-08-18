@@ -25,8 +25,6 @@ import org.apache.commons.lang3.tuple.Pair;
 public interface NonRelationalHeapDomain<L extends HeapValue<L>>
 		extends
 		HeapDomain<HeapEnvironment<L>>,
-		NonRelationalDomain<L,
-				Pair<HeapEnvironment<L>, List<HeapReplacement>>,
-				HeapEnvironment<L>,
+		NonRelationalDomain<L, Pair<HeapEnvironment<L>, List<HeapReplacement>>, HeapEnvironment<L>,
 				SymbolicExpression> {
 }

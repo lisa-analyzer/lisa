@@ -10,9 +10,7 @@ package it.unive.lisa.analysis;
  * 
  * @param <L> the concrete {@link BaseLattice} instance
  */
-public interface BaseLattice<L extends BaseLattice<L>>
-		extends
-		Lattice<L> {
+public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
 
 	@Override
 	default boolean lessOrEqual(

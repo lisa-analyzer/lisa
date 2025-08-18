@@ -36,8 +36,8 @@ public class PentagonLattice
 	 */
 	public PentagonLattice() {
 		super(
-				new ValueEnvironment<>(IntInterval.TOP),
-				new ValueEnvironment<>(new DefiniteIdSet(Collections.emptySet())));
+			new ValueEnvironment<>(IntInterval.TOP),
+			new ValueEnvironment<>(new DefiniteIdSet(Collections.emptySet())));
 	}
 
 	/**
@@ -172,11 +172,9 @@ public class PentagonLattice
 			return Lattice.bottomRepresentation();
 		Map<StructuredRepresentation, StructuredRepresentation> mapping = new HashMap<>();
 		for (Identifier id : CollectionUtils.union(first.getKeys(), second.getKeys()))
-			mapping
-					.put(
-							new StringRepresentation(id),
-							new StringRepresentation(
-									first.getState(id).toString() + ", " + second.getState(id).representation()));
+			mapping.put(
+				new StringRepresentation(id),
+				new StringRepresentation(first.getState(id).toString() + ", " + second.getState(id).representation()));
 		return new MapRepresentation(mapping);
 	}
 

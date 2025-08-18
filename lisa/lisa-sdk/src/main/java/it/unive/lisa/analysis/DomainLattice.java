@@ -15,11 +15,7 @@ import java.util.function.Predicate;
  * @param <T> the type of the abstract element that this lattice produces when
  *                forgetting identifiers or managing scopes
  */
-public interface DomainLattice<L extends DomainLattice<L, T>,
-		T>
-		extends
-		Lattice<L>,
-		ScopedObject<T> {
+public interface DomainLattice<L extends DomainLattice<L, T>, T> extends Lattice<L>, ScopedObject<T> {
 
 	/**
 	 * Yields {@code true} if this instance is currently tracking abstract

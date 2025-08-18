@@ -24,9 +24,7 @@ import java.util.function.BiFunction;
  * @param <N> the type of {@link CodeNode}s in this graph
  * @param <E> the type of {@link CodeEdge}s in this graph
  */
-public abstract class CodeGraph<G extends CodeGraph<G, N, E>,
-		N extends CodeNode<G, N, E>,
-		E extends CodeEdge<G, N, E>>
+public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
 		implements
 		Graph<G, N, E> {
 
@@ -188,8 +186,7 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>,
 	@Override
 	public SerializableGraph toSerializableGraph(
 			BiFunction<G, N, SerializableValue> descriptionGenerator) {
-		throw new UnsupportedOperationException(
-				getClass().getName() + " does not provide a serialization logic");
+		throw new UnsupportedOperationException(getClass().getName() + " does not provide a serialization logic");
 	}
 
 	@Override

@@ -7,9 +7,7 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnknownSymbolicChar
-		extends
-		SymbolicChar {
+public class UnknownSymbolicChar extends SymbolicChar {
 
 	/**
 	 * The singleton instance.

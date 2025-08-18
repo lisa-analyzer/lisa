@@ -34,11 +34,10 @@ public final class ChecksExecutor {
 	 * @param app    the application to analyze
 	 * @param checks the checks to execute
 	 */
-	public static <C extends Check<T>,
-			T> void executeAll(
-					T tool,
-					Application app,
-					Iterable<C> checks) {
+	public static <C extends Check<T>, T> void executeAll(
+			T tool,
+			Application app,
+			Iterable<C> checks) {
 		checks.forEach(c -> c.beforeExecution(tool));
 
 		for (Program p : app.getPrograms())
@@ -47,11 +46,10 @@ public final class ChecksExecutor {
 		checks.forEach(c -> c.afterExecution(tool));
 	}
 
-	private static <T,
-			C extends Check<T>> void visitProgram(
-					T tool,
-					Program program,
-					Iterable<C> checks) {
+	private static <T, C extends Check<T>> void visitProgram(
+			T tool,
+			Program program,
+			Iterable<C> checks) {
 		for (Global global : iterate(LOG, program.getGlobals(), "Analyzing program globals...", "Globals"))
 			checks.forEach(c -> c.visitGlobal(tool, program, global, false));
 
@@ -63,11 +61,10 @@ public final class ChecksExecutor {
 			checks.forEach(c -> visitUnit(tool, unit, c));
 	}
 
-	private static <C extends Check<T>,
-			T> void visitUnit(
-					T tool,
-					Unit unit,
-					C c) {
+	private static <C extends Check<T>, T> void visitUnit(
+			T tool,
+			Unit unit,
+			C c) {
 		if (!c.visitUnit(tool, unit))
 			return;
 

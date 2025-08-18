@@ -10,9 +10,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class StackAllocationSite
-		extends
-		AllocationSite {
+public class StackAllocationSite extends AllocationSite {
 
 	/**
 	 * Builds a stack allocation site.
@@ -74,8 +72,7 @@ public class StackAllocationSite
 
 	@Override
 	public StackAllocationSite toWeak() {
-		return isWeak()
-				? this
+		return isWeak() ? this
 				: new StackAllocationSite(getStaticType(), getLocationName(), getField(), true, getCodeLocation());
 	}
 

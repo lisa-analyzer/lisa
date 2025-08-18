@@ -21,10 +21,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TypeCheck
-		implements
-		TypeOperator,
-		BinaryOperator {
+public class TypeCheck implements TypeOperator, BinaryOperator {
 
 	/**
 	 * The singleton instance of this class.

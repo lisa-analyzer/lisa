@@ -32,18 +32,18 @@ import org.junit.Test;
 public class CheckToolTest {
 
 	private static final ClassUnit unit = new ClassUnit(
-			new SourceCodeLocation("fake", 1, 0),
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-			"fake",
-			false);
+		new SourceCodeLocation("fake", 1, 0),
+		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+		"fake",
+		false);
 
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
 
 	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
-			new SourceCodeLocation("fake", 2, 0),
-			unit,
-			false,
-			"foo");
+		new SourceCodeLocation("fake", 2, 0),
+		unit,
+		false,
+		"foo");
 
 	private static final CFG cfg = new CFG(descriptor);
 

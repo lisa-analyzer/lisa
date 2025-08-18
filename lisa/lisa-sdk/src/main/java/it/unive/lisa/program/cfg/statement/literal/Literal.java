@@ -22,9 +22,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @param <E> the type of constant represented by this literal
  */
-public abstract class Literal<E>
-		extends
-		Expression {
+public abstract class Literal<E> extends Expression {
 
 	/**
 	 * The value of this literal
@@ -99,15 +97,13 @@ public abstract class Literal<E>
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
-					AnalysisState<A> entryState,
-					InterproceduralAnalysis<A, D> interprocedural,
-					StatementStore<A> expressions)
-					throws SemanticException {
-		return interprocedural
-				.getAnalysis()
-				.smallStepSemantics(entryState, new Constant(getStaticType(), getValue(), getLocation()), this);
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
+			AnalysisState<A> entryState,
+			InterproceduralAnalysis<A, D> interprocedural,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return interprocedural.getAnalysis()
+			.smallStepSemantics(entryState, new Constant(getStaticType(), getValue(), getLocation()), this);
 	}
 
 	@Override

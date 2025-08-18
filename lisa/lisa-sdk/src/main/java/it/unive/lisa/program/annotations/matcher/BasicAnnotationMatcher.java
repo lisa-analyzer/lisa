@@ -7,9 +7,7 @@ import it.unive.lisa.program.annotations.Annotation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class BasicAnnotationMatcher
-		implements
-		AnnotationMatcher {
+public class BasicAnnotationMatcher implements AnnotationMatcher {
 
 	private final String annotationName;
 

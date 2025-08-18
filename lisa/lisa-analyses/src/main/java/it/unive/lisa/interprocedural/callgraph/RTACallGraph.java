@@ -15,9 +15,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public class RTACallGraph
-		extends
-		BaseCallGraph {
+public class RTACallGraph extends BaseCallGraph {
 
 	@Override
 	public Collection<Type> getPossibleTypesOfReceiver(

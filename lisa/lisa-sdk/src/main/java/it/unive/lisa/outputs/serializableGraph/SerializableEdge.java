@@ -16,9 +16,7 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableEdge
-		implements
-		Comparable<SerializableEdge> {
+public class SerializableEdge implements Comparable<SerializableEdge> {
 
 	private final int sourceId;
 
@@ -186,9 +184,9 @@ public class SerializableEdge
 			return cmp;
 
 		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
-				String.class,
-				unknownFields.keySet(),
-				o.unknownFields.keySet());
+			String.class,
+			unknownFields.keySet(),
+			o.unknownFields.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())
@@ -206,6 +204,21 @@ public class SerializableEdge
 		return 0;
 	}
 
+	/**
+	 * Yields true if this edge is equal to the given one, ignoring the ids of
+	 * the source and destination nodes. This is useful when comparing edges in
+	 * two graphs that have been serialized, where the ids of the nodes might
+	 * not match. For this method to return {@code true}, the source and
+	 * destination nodes must be equal up to ids (i.e.,
+	 * {@link SerializableNode#equalsUpToIds(SerializableNode, Collection, Collection)}).
+	 * 
+	 * @param other             the edge to compare to
+	 * @param nodesInThisGraph  the nodes in this graph
+	 * @param nodesInOtherGraph the nodes in the other graph
+	 * 
+	 * @return {@code true} if the edges are equal up to ids, {@code false}
+	 *             otherwise
+	 */
 	public boolean equalsUpToIds(
 			SerializableEdge other,
 			Collection<SerializableNode> nodesInThisGraph,
@@ -225,21 +238,18 @@ public class SerializableEdge
 			return false;
 
 		SerializableNode thisSource = nodesInThisGraph.stream()
-				.filter(n -> n.getId() == sourceId)
-				.findFirst()
-				.orElse(null);
+			.filter(n -> n.getId() == sourceId)
+			.findFirst()
+			.orElse(null);
 		SerializableNode otherSource = nodesInOtherGraph.stream()
-				.filter(n -> n.getId() == other.sourceId)
-				.findFirst()
-				.orElse(null);
-		SerializableNode thisDest = nodesInThisGraph.stream()
-				.filter(n -> n.getId() == destId)
-				.findFirst()
-				.orElse(null);
+			.filter(n -> n.getId() == other.sourceId)
+			.findFirst()
+			.orElse(null);
+		SerializableNode thisDest = nodesInThisGraph.stream().filter(n -> n.getId() == destId).findFirst().orElse(null);
 		SerializableNode otherDest = nodesInOtherGraph.stream()
-				.filter(n -> n.getId() == other.destId)
-				.findFirst()
-				.orElse(null);
+			.filter(n -> n.getId() == other.destId)
+			.findFirst()
+			.orElse(null);
 		if (thisSource == null || otherSource == null)
 			return false;
 		if (thisDest == null || otherDest == null)

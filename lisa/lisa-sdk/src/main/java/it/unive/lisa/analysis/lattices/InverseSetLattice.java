@@ -27,11 +27,7 @@ import java.util.Set;
  * @param <S> the concrete instance of {@link InverseSetLattice}
  * @param <E> the type of elements of the domain of this lattice
  */
-public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>,
-		E>
-		implements
-		BaseLattice<S>,
-		Iterable<E> {
+public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> implements BaseLattice<S>, Iterable<E> {
 
 	/**
 	 * The set of elements contained in the lattice.

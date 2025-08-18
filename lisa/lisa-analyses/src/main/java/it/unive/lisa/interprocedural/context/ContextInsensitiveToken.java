@@ -8,9 +8,7 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * together regardless of the call site. This corresponds to having a
  * {@link KDepthToken} with {@code k = 0}.
  */
-public class ContextInsensitiveToken
-		implements
-		ContextSensitivityToken {
+public class ContextInsensitiveToken implements ContextSensitivityToken {
 
 	private static final ContextInsensitiveToken SINGLETON = new ContextInsensitiveToken();
 

@@ -13,9 +13,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class Comp
-		extends
-		RegularExpression {
+public final class Comp extends RegularExpression {
 
 	/**
 	 * The first regular expression
@@ -122,8 +120,9 @@ public final class Comp
 				&& second.isStar()
 				&& second.asStar().getOperand().isComp()
 				&& second.asStar().getOperand().asComp().second.isStar()
-				&& second.asStar().getOperand().asComp().second.asStar().getOperand()
-						.equals(first.asStar().getOperand()))
+				&& second.asStar().getOperand().asComp().second.asStar()
+					.getOperand()
+					.equals(first.asStar().getOperand()))
 			result = first.asStar().getOperand().or(second.asStar().getOperand().asComp().first).star();
 
 		// a.((b.a)*.b) = (a.b)*
@@ -131,8 +130,9 @@ public final class Comp
 				&& second.isComp()
 				&& second.asComp().first.isStar()
 				&& second.asComp().second.isAtom()
-				&& second.asComp().second.asAtom().comp(first.asAtom())
-						.equals(second.asComp().first.asStar().getOperand()))
+				&& second.asComp().second.asAtom()
+					.comp(first.asAtom())
+					.equals(second.asComp().first.asStar().getOperand()))
 			result = first.asAtom().comp(second.asComp().second.asAtom()).star();
 
 		// a*.(a*.b) = a*b
@@ -152,9 +152,8 @@ public final class Comp
 	}
 
 	@Override
-	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory) {
+	public <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory) {
 		return first.toAutomaton(factory).concat(second.toAutomaton(factory));
 	}
 

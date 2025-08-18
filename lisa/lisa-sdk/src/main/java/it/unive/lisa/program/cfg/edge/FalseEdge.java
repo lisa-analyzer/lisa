@@ -19,9 +19,7 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class FalseEdge
-		extends
-		Edge {
+public class FalseEdge extends Edge {
 
 	/**
 	 * Builds the edge.
@@ -41,30 +39,28 @@ public class FalseEdge
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		ExpressionSet exprs = state.getComputedExpressions();
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : exprs) {
 			UnaryExpression negated = new UnaryExpression(
-					expr.getStaticType(),
-					expr,
-					LogicalNegation.INSTANCE,
-					expr.getCodeLocation());
+				expr.getStaticType(),
+				expr,
+				LogicalNegation.INSTANCE,
+				expr.getCodeLocation());
 			result = result.lub(analysis.assume(state, negated, getSource(), getDestination()));
 		}
 		return result;
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
-					AnalysisState<A> state,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		return traverseForward(state, analysis);
 	}
 

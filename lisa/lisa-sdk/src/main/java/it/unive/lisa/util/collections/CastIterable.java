@@ -11,10 +11,7 @@ import java.util.Iterator;
  * @param <E> the type of elements contained in the iterable to be wrapped
  * @param <T> the type to cast the elements to
  */
-public class CastIterable<E,
-		T extends E>
-		implements
-		Iterable<T> {
+public class CastIterable<E, T extends E> implements Iterable<T> {
 
 	private final Iterable<E> parent;
 
@@ -39,9 +36,7 @@ public class CastIterable<E,
 		return new CastIterator(parent.iterator());
 	}
 
-	private class CastIterator
-			implements
-			Iterator<T> {
+	private class CastIterator implements Iterator<T> {
 
 		private final Iterator<E> wrapped;
 

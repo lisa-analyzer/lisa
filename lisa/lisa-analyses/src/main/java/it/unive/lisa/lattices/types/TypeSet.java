@@ -14,11 +14,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TypeSet
-		extends
-		SetLattice<TypeSet, Type>
-		implements
-		TypeValue<TypeSet> {
+public class TypeSet extends SetLattice<TypeSet, Type> implements TypeValue<TypeSet> {
 
 	/**
 	 * The top element of the type lattice, representing all possible types.

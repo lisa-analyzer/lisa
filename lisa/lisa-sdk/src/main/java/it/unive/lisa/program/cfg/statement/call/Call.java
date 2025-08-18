@@ -31,9 +31,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Call
-		extends
-		NaryExpression {
+public abstract class Call extends NaryExpression {
 
 	/**
 	 * Possible types of a call, identifying the type of targets (instance or
@@ -119,9 +117,7 @@ public abstract class Call
 	private static String completeName(
 			String qualifier,
 			String name) {
-		return StringUtils.isNotBlank(qualifier)
-				? qualifier + "::" + name
-				: name;
+		return StringUtils.isNotBlank(qualifier) ? qualifier + "::" + name : name;
 	}
 
 	/**
@@ -304,11 +300,10 @@ public abstract class Call
 	 *                               types
 	 */
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> Set<Type>[] parameterTypes(
-					StatementStore<A> expressions,
-					Analysis<A, D> analysis)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Set<Type>[] parameterTypes(
+			StatementStore<A> expressions,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		Expression[] actuals = getParameters();
 		Set<Type>[] types = new Set[actuals.length];
 		for (int i = 0; i < actuals.length; i++) {
@@ -344,13 +339,12 @@ public abstract class Call
 			CFGCall cfgcall = (CFGCall) this;
 			Collection<CFG> targets = cfgcall.getTargetedCFGs();
 			if (!targets.isEmpty())
-				return !targets
-						.iterator()
-						.next()
-						.getNormalExitpoints()
-						.stream()
-						// returned values will be stored in meta variables
-						.anyMatch(st -> st instanceof MetaVariableCreator);
+				return !targets.iterator()
+					.next()
+					.getNormalExitpoints()
+					.stream()
+					// returned values will be stored in meta variables
+					.anyMatch(st -> st instanceof MetaVariableCreator);
 		}
 
 		if (this instanceof NativeCall) {

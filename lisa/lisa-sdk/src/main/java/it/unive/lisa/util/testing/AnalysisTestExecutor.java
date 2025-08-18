@@ -26,17 +26,64 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
+/**
+ * Utility class to perform tests that run complete analyses, optionally
+ * comparing the obtained results with previous ones.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public abstract class AnalysisTestExecutor {
 
-	public static final String EXPECTED_RESULTS_DIR = "imp-testcases";
+	/**
+	 * The default root directory where the expected results of the tests are
+	 * stored, if any.
+	 */
+	public static final String DEFAULT_EXPECTED_DIR = "lisa-testcases";
 
-	public static final String ACTUAL_RESULTS_DIR = "test-outputs";
+	/**
+	 * The default root directory where the tests should be executed.
+	 */
+	public static final String DEFAULT_ACTUAL_DIR = "test-outputs";
+
+	private final String expectedResultsDir;
+
+	private final String actualResultsDir;
+
+	/**
+	 * Creates a new test executor that will use the default directories to
+	 * store the expected and actual results of the tests.
+	 */
+	public AnalysisTestExecutor() {
+		this(DEFAULT_EXPECTED_DIR, DEFAULT_ACTUAL_DIR);
+	}
+
+	/**
+	 * Creates a new test executor that will use the given directories to store
+	 * the expected and actual results of the tests.
+	 * 
+	 * @param expectedResultsDir the root directory where the expected results
+	 *                               of the tests are stored, if any; this is
+	 *                               the folder where
+	 *                               {@link TestConfiguration#testDir} will be
+	 *                               searched for.
+	 * @param actualResultsDir   the root directory where the actual results of
+	 *                               the tests are stored; this is the folder
+	 *                               where {@link TestConfiguration#testDir}
+	 *                               will be created.
+	 */
+	public AnalysisTestExecutor(
+			String expectedResultsDir,
+			String actualResultsDir) {
+		Objects.requireNonNull(expectedResultsDir, "Expected results directory cannot be null");
+		Objects.requireNonNull(actualResultsDir, "Actual results directory cannot be null");
+		this.expectedResultsDir = expectedResultsDir;
+		this.actualResultsDir = actualResultsDir;
+	}
 
 	/**
 	 * Performs a test, running an analysis. The test will fail if:
 	 * <ul>
-	 * <li>The imp file cannot be parsed (i.e. a {@link ParsingException} is
-	 * thrown)</li>
+	 * <li>The target program cannot be parsed</li>
 	 * <li>The previous working directory using for the test execution cannot be
 	 * deleted</li>
 	 * <li>The analysis run terminates with an {@link AnalysisException}</li>
@@ -47,24 +94,41 @@ public abstract class AnalysisTestExecutor {
 	 * <li>The external files mentioned in the reports are different</li>
 	 * </ul>
 	 * 
-	 * @param conf       the configuration of the test to run (note that the
-	 *                       workdir present into the configuration will be
-	 *                       ignored, as it will be overwritten by the computed
-	 *                       workdir)
-	 * @param allMethods whether or not all IMP methods should be added as
-	 *                       entrypoints
+	 * @param conf the configuration of the test to run (note that the workdir
+	 *                 present into the configuration will be ignored, as it
+	 *                 will be overwritten by the computed workdir)
 	 */
 	public void perform(
 			TestConfiguration conf) {
 		Objects.requireNonNull(conf);
 		Objects.requireNonNull(conf.testDir);
 		Objects.requireNonNull(conf.programFile);
-		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, conf.testDir);
+		Path expectedPath = Paths.get(expectedResultsDir, conf.testDir);
 		Path target = Paths.get(expectedPath.toString(), conf.programFile);
 		Program program = readProgram(conf, target);
 		perform(conf, program);
 	}
 
+	/**
+	 * Performs a test, running an analysis. The test will fail if:
+	 * <ul>
+	 * <li>The target program cannot be parsed</li>
+	 * <li>The previous working directory using for the test execution cannot be
+	 * deleted</li>
+	 * <li>The analysis run terminates with an {@link AnalysisException}</li>
+	 * <li>One of the json reports (either the one generated during the test
+	 * execution or the one used as baseline) cannot be found or cannot be
+	 * opened</li>
+	 * <li>The two json reports are different</li>
+	 * <li>The external files mentioned in the reports are different</li>
+	 * </ul>
+	 * 
+	 * @param conf    the configuration of the test to run (note that the
+	 *                    workdir present into the configuration will be
+	 *                    ignored, as it will be overwritten by the computed
+	 *                    workdir)
+	 * @param program the program to analyze
+	 */
 	public void perform(
 			TestConfiguration conf,
 			Program program) {
@@ -73,8 +137,8 @@ public abstract class AnalysisTestExecutor {
 		Objects.requireNonNull(conf);
 		Objects.requireNonNull(conf.testDir);
 
-		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, conf.testDir);
-		Path actualPath = Paths.get(ACTUAL_RESULTS_DIR, conf.testDir);
+		Path expectedPath = Paths.get(expectedResultsDir, conf.testDir);
+		Path actualPath = Paths.get(actualResultsDir, conf.testDir);
 		if (conf.testSubDir != null) {
 			expectedPath = Paths.get(expectedPath.toString(), conf.testSubDir);
 			actualPath = Paths.get(actualPath.toString(), conf.testSubDir);
@@ -139,31 +203,18 @@ public abstract class AnalysisTestExecutor {
 			Accumulator acc = new Accumulator(expectedPath);
 			if (optimized)
 				failIf(
-						"Optimized results are different",
-						!JsonReportComparer.compare(
-								expected,
-								actual,
-								expectedPath.toFile(),
-								actualPath.toFile(),
-								new OptimizedRunDiff()));
+					"Optimized results are different",
+					!JsonReportComparer
+						.compare(expected, actual, expectedPath.toFile(), actualPath.toFile(), new OptimizedRunDiff()));
 			else if (update) {
-				if (!JsonReportComparer.compare(
-						expected,
-						actual,
-						expectedPath.toFile(),
-						actualPath.toFile(),
-						acc)) {
+				if (!JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile(), acc)) {
 					System.err.println("Results are different, regenerating differences");
 					regen(expectedPath, actualPath, expFile, actFile, acc);
 				}
 			} else
 				failIf(
-						"Results are different",
-						!JsonReportComparer.compare(
-								expected,
-								actual,
-								expectedPath.toFile(),
-								actualPath.toFile()));
+					"Results are different",
+					!JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
 			throw new TestException("File not found", e);
@@ -247,6 +298,15 @@ public abstract class AnalysisTestExecutor {
 		}
 	}
 
+	/**
+	 * Reads the program to be analyzed, given the test configuration and target
+	 * path. This method is responsible for parsing the program file.
+	 * 
+	 * @param conf   the test configuration
+	 * @param target the target path
+	 * 
+	 * @return the parsed program
+	 */
 	public abstract Program readProgram(
 			TestConfiguration conf,
 			Path target);
@@ -274,9 +334,7 @@ public abstract class AnalysisTestExecutor {
 		configuration.workdir = workdir.toString();
 	}
 
-	private class Accumulator
-			implements
-			DiffAlgorithm {
+	private class Accumulator implements DiffAlgorithm {
 
 		private final Collection<Path> changedFileName = new HashSet<>();
 
@@ -373,9 +431,7 @@ public abstract class AnalysisTestExecutor {
 
 	}
 
-	private static class OptimizedRunDiff
-			extends
-			BaseDiffAlgorithm {
+	private static class OptimizedRunDiff extends BaseDiffAlgorithm {
 
 		@Override
 		public boolean shouldCompareConfigurations() {

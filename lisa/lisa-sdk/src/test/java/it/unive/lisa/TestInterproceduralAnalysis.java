@@ -28,9 +28,7 @@ import java.util.Collection;
 import java.util.Set;
 
 public class TestInterproceduralAnalysis<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
-		implements
-		InterproceduralAnalysis<A, D> {
+		D extends AbstractDomain<A>> implements InterproceduralAnalysis<A, D> {
 
 	@Override
 	public boolean needsCallGraph() {

@@ -35,9 +35,7 @@ import org.apache.commons.io.FilenameUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LiSAConfiguration
-		extends
-		BaseConfiguration {
+public class LiSAConfiguration extends BaseConfiguration {
 
 	static {
 		// ensure that some logging configuration is in place
@@ -357,11 +355,10 @@ public class LiSAConfiguration
 
 					String val;
 					if (Collection.class.isAssignableFrom(field.getType()))
-						val = ((Collection<?>) value)
-								.stream()
-								.map(e -> e.getClass().getSimpleName())
-								.sorted()
-								.collect(new CollectionUtilities.StringCollector<>(", "));
+						val = ((Collection<?>) value).stream()
+							.map(e -> e.getClass().getSimpleName())
+							.sorted()
+							.collect(new CollectionUtilities.StringCollector<>(", "));
 					else if (Class.class.isAssignableFrom(field.getType()))
 						val = ((Class<?>) value).getSimpleName();
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))

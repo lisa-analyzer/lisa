@@ -17,9 +17,7 @@ import it.unive.lisa.symbolic.value.Skip;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class WorstCasePolicy
-		implements
-		OpenCallPolicy {
+public class WorstCasePolicy implements OpenCallPolicy {
 
 	/**
 	 * The singleton instance of this class.
@@ -30,13 +28,12 @@ public class WorstCasePolicy
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> AnalysisState<A> apply(
-					OpenCall call,
-					AnalysisState<A> entryState,
-					Analysis<A, D> analysis,
-					ExpressionSet[] params)
-					throws SemanticException {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> apply(
+			OpenCall call,
+			AnalysisState<A> entryState,
+			Analysis<A, D> analysis,
+			ExpressionSet[] params)
+			throws SemanticException {
 		AnalysisState<A> poststate = entryState.top();
 
 		if (call.getStaticType().isVoidType())

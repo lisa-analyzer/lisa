@@ -1,12 +1,8 @@
 package it.unive.lisa.util.datastructures.graph;
 
-public class TestGraph
-		extends
-		BaseGraph<TestGraph, TestGraph.TestNode, TestGraph.TestEdge> {
+public class TestGraph extends BaseGraph<TestGraph, TestGraph.TestNode, TestGraph.TestEdge> {
 
-	public static class TestNode
-			implements
-			Node<TestGraph, TestNode, TestEdge> {
+	public static class TestNode implements Node<TestGraph, TestNode, TestEdge> {
 
 		private final int id;
 
@@ -52,9 +48,7 @@ public class TestGraph
 
 	}
 
-	public static class TestEdge
-			implements
-			Edge<TestGraph, TestNode, TestEdge> {
+	public static class TestEdge implements Edge<TestGraph, TestNode, TestEdge> {
 
 		private final TestNode source, destination;
 

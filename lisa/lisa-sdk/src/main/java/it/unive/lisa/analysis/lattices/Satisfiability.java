@@ -234,14 +234,13 @@ public enum Satisfiability
 			return null;
 
 		BooleanType boolType = pp.getProgram().getTypes().getBooleanType();
-		return Collections
-				.singleton(
-						new BinaryExpression(
-								boolType,
-								new Constant(boolType, this == SATISFIED ? true : false, e.getCodeLocation()),
-								e,
-								ComparisonEq.INSTANCE,
-								e.getCodeLocation()));
+		return Collections.singleton(
+			new BinaryExpression(
+				boolType,
+				new Constant(boolType, this == SATISFIED ? true : false, e.getCodeLocation()),
+				e,
+				ComparisonEq.INSTANCE,
+				e.getCodeLocation()));
 	}
 
 	@Override

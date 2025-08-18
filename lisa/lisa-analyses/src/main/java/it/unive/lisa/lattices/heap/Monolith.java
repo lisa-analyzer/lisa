@@ -23,9 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Monolith
-		implements
-		HeapLattice<Monolith> {
+public class Monolith implements HeapLattice<Monolith> {
 
 	/**
 	 * The singleton instance of the monolithic heap.
