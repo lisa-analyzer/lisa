@@ -10,6 +10,10 @@ import org.junit.Test;
 
 public class IMPFrontendTest extends AnalysisTestExecutor {
 
+	public IMPFrontendTest() {
+		super("imp-testcases", AnalysisTestExecutor.DEFAULT_ACTUAL_DIR);
+	}
+
 	@Test
 	public void testExampleProgram() {
 		TestConfiguration conf = new TestConfiguration();
