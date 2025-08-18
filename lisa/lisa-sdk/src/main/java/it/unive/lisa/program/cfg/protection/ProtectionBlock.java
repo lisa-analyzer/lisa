@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -135,7 +136,7 @@ public class ProtectionBlock {
 	public Collection<Statement> getFullBody(
 			boolean includeFinally) {
 		Collection<Statement> all = new LinkedList<>(tryBlock.getBody());
-		all.addAll(catchBlocks.stream().flatMap(cb -> cb.getBody().getBody().stream()).toList());
+		all.addAll(catchBlocks.stream().flatMap(cb -> cb.getBody().getBody().stream()).collect(Collectors.toList()));
 		if (elseBlock != null)
 			all.addAll(elseBlock.getBody());
 		if (finallyBlock != null && includeFinally)

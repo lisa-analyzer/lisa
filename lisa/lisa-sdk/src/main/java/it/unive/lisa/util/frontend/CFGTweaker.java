@@ -27,6 +27,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for frontends that contains methods that add nodes and edges to
@@ -284,7 +285,10 @@ public class CFGTweaker {
 
 			if (!next.alwaysContinues())
 				if (!next.canBeContinued()) {
-					lastYielders = next.getBody().stream().filter(Statement::stopsExecution).toList();
+					lastYielders = next.getBody()
+						.stream()
+						.filter(Statement::stopsExecution)
+						.collect(Collectors.toList());
 					yieldersInCurrentBlock = true;
 				} else {
 					lastYielders = new LinkedList<>(lastYielders);
