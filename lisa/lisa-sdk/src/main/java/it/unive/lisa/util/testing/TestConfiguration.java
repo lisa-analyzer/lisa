@@ -1,6 +1,7 @@
 package it.unive.lisa.util.testing;
 
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.outputs.compare.ResultComparer;
 
 /**
  * An extended {@link LiSAConfiguration} that also holds test configuration
@@ -40,5 +41,11 @@ public class TestConfiguration extends LiSAConfiguration {
 	 * and the results will be checked to be equal to the non-optimized version.
 	 */
 	public boolean compareWithOptimization = true;
+
+	/**
+	 * The {@link ResultComparer} used to compare the test results with the
+	 * expected results.
+	 */
+	public ResultComparer reportComparer = new ResultComparer();
 
 }

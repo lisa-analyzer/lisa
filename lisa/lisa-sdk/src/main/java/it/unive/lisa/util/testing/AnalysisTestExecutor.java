@@ -7,11 +7,7 @@ import static java.nio.file.Files.delete;
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.outputs.compare.JsonReportComparer;
-import it.unive.lisa.outputs.compare.JsonReportComparer.BaseDiffAlgorithm;
-import it.unive.lisa.outputs.compare.JsonReportComparer.DiffAlgorithm;
-import it.unive.lisa.outputs.compare.JsonReportComparer.REPORTED_COMPONENT;
-import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
+import it.unive.lisa.outputs.compare.ResultComparer;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
@@ -201,20 +197,20 @@ public abstract class AnalysisTestExecutor {
 			JsonReport expected = JsonReport.read(l);
 			JsonReport actual = JsonReport.read(r);
 			Accumulator acc = new Accumulator(expectedPath);
+			OptimizedRunDiff opt = new OptimizedRunDiff();
 			if (optimized)
 				failIf(
 					"Optimized results are different",
-					!JsonReportComparer
-						.compare(expected, actual, expectedPath.toFile(), actualPath.toFile(), new OptimizedRunDiff()));
+					!opt.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
 			else if (update) {
-				if (!JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile(), acc)) {
+				if (!acc.compare(expected, actual, expectedPath.toFile(), actualPath.toFile())) {
 					System.err.println("Results are different, regenerating differences");
 					regen(expectedPath, actualPath, expFile, actFile, acc);
 				}
 			} else
 				failIf(
 					"Results are different",
-					!JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
+					!conf.reportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
 			throw new TestException("File not found", e);
@@ -334,7 +330,7 @@ public abstract class AnalysisTestExecutor {
 		configuration.workdir = workdir.toString();
 	}
 
-	private class Accumulator implements DiffAlgorithm {
+	private class Accumulator extends ResultComparer {
 
 		private final Collection<Path> changedFileName = new HashSet<>();
 
@@ -431,7 +427,7 @@ public abstract class AnalysisTestExecutor {
 
 	}
 
-	private static class OptimizedRunDiff extends BaseDiffAlgorithm {
+	private static class OptimizedRunDiff extends ResultComparer {
 
 		@Override
 		public boolean shouldCompareConfigurations() {
