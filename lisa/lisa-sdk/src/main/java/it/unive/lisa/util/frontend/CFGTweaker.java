@@ -323,15 +323,14 @@ public class CFGTweaker {
 	 * arbitrary block of statements, this method will apply the following
 	 * transformations:
 	 * <ul>
-	 * <li>{@code ret} -> {@code noop; ret};</li>
-	 * <li>{@code ret 0} -> {@code noop; ret 0};</li>
-	 * <li>{@code if (b) ret} -> {@code if (b) noop; ret};</li>
-	 * <li>{@code if (b) ret 0} -> {@code if (b) noop; ret 0};</li>
-	 * <li>{@code A; ret} -> {@code A; ret};</li>
-	 * <li>{@code A; ret 0} -> {@code A; ret 0};</li>
-	 * <li>{@code ret x+2} -> {@code $val_to_yield=x+2; ret $val_to_yield};</li>
-	 * <li>{@code A; ret x+2} ->
-	 * {@code A; $val_to_yield=x+2; ret $val_to_yield}.</li>
+	 * <li>{@code ret} -&gt; {@code noop; ret};</li>
+	 * <li>{@code ret 0} -&gt; {@code noop; ret 0};</li>
+	 * <li>{@code if (b) ret} -&gt; {@code if (b) noop; ret};</li>
+	 * <li>{@code if (b) ret 0} -&gt; {@code if (b) noop; ret 0};</li>
+	 * <li>{@code A; ret} -&gt; {@code A; ret};</li>
+	 * <li>{@code A; ret 0} -&gt; {@code A; ret 0};</li>
+	 * <li>{@code ret x+2} -&gt; {@code $val_to_yield=x+2; ret $val_to_yield};</li>
+	 * <li>{@code A; ret x+2} -&gt; {@code A; $val_to_yield=x+2; ret $val_to_yield}.</li>
 	 * </ul>
 	 * 
 	 * @param <E>              the type of exceptions this method can raise
