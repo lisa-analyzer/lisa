@@ -661,6 +661,10 @@ public class TestParameterProvider {
 		if (param == ScopeId.class)
 			return (R) new UniqueScope();
 
+		// expressions
+		if (param == ExpressionSet.class)
+			return (R) new ExpressionSet();
+
 		// lattice structures
 		if (root == ValueEnvironment.class || param == ValueLattice.class)
 			return (R) SingleValueLattice.SINGLETON;
