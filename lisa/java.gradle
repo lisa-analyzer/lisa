@@ -55,6 +55,31 @@ test {
 		excludeTestsMatching 'it.unive.lisa.cron.*'
 	}
 	
+    testLogging {
+        showStandardStreams = false
+        events "failed"
+		exceptionFormat "full"
+    }
+
+    def outputs = [:]  // map from test ID -> output buffer
+    onOutput { descriptor, event ->
+        def buf = outputs.computeIfAbsent(descriptor.id) { new StringBuilder() }
+        buf.append(event.message)
+    }
+
+    afterTest { desc, result ->
+        if (result.resultType == org.gradle.api.tasks.testing.TestResult.ResultType.FAILURE) {
+            def buf = outputs.remove(desc.id)
+            if (buf) {
+                println "=== Captured output for ${desc.className}.${desc.name} ==="
+                print buf.toString()
+                println "============================================================="
+            }
+        } else {
+            outputs.remove(desc.id)
+        }
+    }
+	
 	jacoco {
 		// we don't care about coverage of excpetion classes
 		// most of the times they only define constructors
@@ -74,6 +99,31 @@ tasks.register('cron', Test) {
     	failOnNoMatchingTests false
 		includeTestsMatching 'it.unive.lisa.cron.*'
 	}
+	
+    testLogging {
+        showStandardStreams = false
+        events "failed"
+		exceptionFormat "full"
+    }
+
+    def outputs = [:]  // map from test ID -> output buffer
+    onOutput { descriptor, event ->
+        def buf = outputs.computeIfAbsent(descriptor.id) { new StringBuilder() }
+        buf.append(event.message)
+    }
+
+    afterTest { desc, result ->
+        if (result.resultType == org.gradle.api.tasks.testing.TestResult.ResultType.FAILURE) {
+            def buf = outputs.remove(desc.id)
+            if (buf) {
+                println "=== Captured output for ${desc.className}.${desc.name} ==="
+                print buf.toString()
+                println "============================================================="
+            }
+        } else {
+            outputs.remove(desc.id)
+        }
+    }
 }
 
 tasks.register('update-cron', Test) {
