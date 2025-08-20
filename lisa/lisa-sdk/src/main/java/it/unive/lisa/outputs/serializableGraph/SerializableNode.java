@@ -19,7 +19,9 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableNode implements Comparable<SerializableNode> {
+public class SerializableNode
+		implements
+		Comparable<SerializableNode> {
 
 	private final int id;
 
@@ -128,9 +130,9 @@ public class SerializableNode implements Comparable<SerializableNode> {
 			return cmp;
 
 		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
-			String.class,
-			unknownFields.keySet(),
-			o.unknownFields.keySet());
+				String.class,
+				unknownFields.keySet(),
+				o.unknownFields.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())
@@ -232,13 +234,13 @@ public class SerializableNode implements Comparable<SerializableNode> {
 			Integer thisSubNodeId = subNodes.get(i);
 			Integer otherSubNodeId = other.subNodes.get(i);
 			SerializableNode thisSubNode = nodesInThisGraph.stream()
-				.filter(n -> n.id == thisSubNodeId)
-				.findFirst()
-				.orElse(null);
+					.filter(n -> n.id == thisSubNodeId)
+					.findFirst()
+					.orElse(null);
 			SerializableNode otherSubNode = nodesInOtherGraph.stream()
-				.filter(n -> n.id == otherSubNodeId)
-				.findFirst()
-				.orElse(null);
+					.filter(n -> n.id == otherSubNodeId)
+					.findFirst()
+					.orElse(null);
 			if (thisSubNode == null || otherSubNode == null)
 				return false;
 			if (!thisSubNode.equalsUpToIds(otherSubNode, nodesInThisGraph, nodesInOtherGraph))

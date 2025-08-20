@@ -49,7 +49,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			ProgramPoint pp)
 			throws SemanticException {
 		A s = domain.assign(state.getState(), id, value, pp);
-		return new AnalysisState<>(s, new ExpressionSet(id), state.getFixpointInformation());
+		return state.withExecutionState(new ProgramState<>(s, new ExpressionSet(id), state.getFixpointInformation()));
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
 				s = s.lub(domain.assign(sem.getState(), (Identifier) i, expression, pp));
-		return new AnalysisState<>(s, rewritten, state.getFixpointInformation());
+		return state.withExecutionState(new ProgramState<>(s, rewritten, state.getFixpointInformation()));
 	}
 
 	@Override
@@ -96,7 +96,9 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			ProgramPoint pp)
 			throws SemanticException {
 		A s = domain.smallStepSemantics(state.getState(), expression, pp);
-		return new AnalysisState<>(s, new ExpressionSet(expression), state.getFixpointInformation());
+		return state
+				.withExecutionState(
+						new ProgramState<>(s, new ExpressionSet(expression), state.getFixpointInformation()));
 	}
 
 	@Override
@@ -109,7 +111,8 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		A assume = domain.assume(state.getState(), expression, src, dest);
 		if (assume.isBottom())
 			return state.bottom();
-		return new AnalysisState<>(assume, state.getComputedExpressions(), state.getFixpointInformation());
+		return state.withExecutionState(
+				new ProgramState<>(assume, state.getComputedExpressions(), state.getFixpointInformation()));
 	}
 
 	@Override
@@ -318,7 +321,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 
 	@Override
 	public AnalysisState<A> makeLattice() {
-		return new AnalysisState<>(domain.makeLattice(), new ExpressionSet(), new FixpointInfo());
+		return new AnalysisState<>(new ProgramState<>(domain.makeLattice(), new ExpressionSet(), new FixpointInfo()));
 	}
 
 }

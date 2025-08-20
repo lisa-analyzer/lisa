@@ -22,7 +22,9 @@ import it.unive.lisa.program.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringEndsWith extends NativeCFG {
+public class StringEndsWith
+		extends
+		NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -34,15 +36,15 @@ public class StringEndsWith extends NativeCFG {
 			CodeLocation location,
 			ClassUnit stringUnit) {
 		super(
-			new CodeMemberDescriptor(
-				location,
-				stringUnit,
-				true,
-				"endsWith",
-				BoolType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE),
-				new Parameter(location, "other", StringType.INSTANCE)),
-			IMPStringEndsWith.class);
+				new CodeMemberDescriptor(
+						location,
+						stringUnit,
+						true,
+						"endsWith",
+						BoolType.INSTANCE,
+						new Parameter(location, "this", StringType.INSTANCE),
+						new Parameter(location, "other", StringType.INSTANCE)),
+				IMPStringEndsWith.class);
 	}
 
 	/**
@@ -52,7 +54,11 @@ public class StringEndsWith extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringEndsWith extends EndsWith implements PluggableStatement {
+	public static class IMPStringEndsWith
+			extends
+			EndsWith
+			implements
+			PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the

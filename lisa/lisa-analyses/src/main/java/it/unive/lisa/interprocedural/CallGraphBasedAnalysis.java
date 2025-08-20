@@ -30,7 +30,9 @@ import java.util.Set;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> implements InterproceduralAnalysis<A, D> {
+		D extends AbstractDomain<A>>
+		implements
+		InterproceduralAnalysis<A, D> {
 
 	/**
 	 * The call graph used to resolve method calls.
@@ -125,15 +127,15 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
 			CodeLocation loc = arg.getLocation();
 			Assignment a = new Assignment(
-				cfg,
-				loc,
-				new VariableRef(cfg, loc, arg.getName()),
-				arg.getStaticType().unknownValue(cfg, loc));
+					cfg,
+					loc,
+					new VariableRef(cfg, loc, arg.getName()),
+					arg.getStaticType().unknownValue(cfg, loc));
 			prepared = a.forwardSemantics(prepared, this, store);
 		}
 
 		// the stack has to be empty
-		return new AnalysisState<>(prepared.getState(), new ExpressionSet());
+		return prepared.withComputedExpressions(new ExpressionSet());
 	}
 
 	@Override

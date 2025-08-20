@@ -88,8 +88,8 @@ public class ParsedBlock {
 	public boolean alwaysContinues() {
 		return canBeContinued()
 				&& body.getNodes()
-					.stream()
-					.noneMatch(st -> st.stopsExecution() || st.breaksControlFlow() || st.continuesControlFlow());
+						.stream()
+						.noneMatch(st -> st.stopsExecution() || st.breaksControlFlow() || st.continuesControlFlow());
 	}
 
 	@Override

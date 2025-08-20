@@ -27,7 +27,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPArrayAccess extends BinaryExpression {
+public class IMPArrayAccess
+		extends
+		BinaryExpression {
 
 	/**
 	 * Builds the array access.

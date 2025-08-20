@@ -129,9 +129,9 @@ public class SerializableGraph {
 	public SerializableNode getNodeById(
 			int id) {
 		return nodes.stream()
-			.filter(n -> n.getId() == id)
-			.findFirst()
-			.orElseThrow(() -> new IllegalArgumentException("No node with id " + id + " in the graph"));
+				.filter(n -> n.getId() == id)
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("No node with id " + id + " in the graph"));
 	}
 
 	@Override
@@ -212,7 +212,7 @@ public class SerializableGraph {
 			SerializableNodeDescription desc) {
 		if (descriptions.stream().map(d -> d.getNodeId()).anyMatch(i -> i == desc.getNodeId()))
 			throw new IllegalArgumentException(
-				"A description for node " + desc.getNodeId() + " is already in the graph");
+					"A description for node " + desc.getNodeId() + " is already in the graph");
 		descriptions.add(desc);
 	}
 

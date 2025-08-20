@@ -35,7 +35,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpression {
+public class Replace
+		extends
+		it.unive.lisa.program.cfg.statement.TernaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -62,13 +64,13 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 			Expression middle,
 			Expression right) {
 		super(
-			cfg,
-			location,
-			"replace",
-			cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
-			left,
-			middle,
-			right);
+				cfg,
+				location,
+				"replace",
+				cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
+				left,
+				middle,
+				right);
 	}
 
 	@Override
@@ -95,9 +97,9 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new TernaryExpression(getStaticType(), left, middle, right, StringReplace.INSTANCE, getLocation()),
-			originating == null ? this : originating);
+				state,
+				new TernaryExpression(getStaticType(), left, middle, right, StringReplace.INSTANCE, getLocation()),
+				originating == null ? this : originating);
 	}
 
 }

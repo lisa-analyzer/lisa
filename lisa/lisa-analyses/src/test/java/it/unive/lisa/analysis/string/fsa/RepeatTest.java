@@ -28,8 +28,8 @@ public class RepeatTest {
 			throws MathNumberConversionException {
 		SimpleAutomaton a = new SimpleAutomaton("ab").union(new SimpleAutomaton("cd"));
 		assertEquals(
-			a.repeat(new IntInterval(3, 3)),
-			new SimpleAutomaton("ababab").union(new SimpleAutomaton("cdcdcd")));
+				a.repeat(new IntInterval(3, 3)),
+				new SimpleAutomaton("ababab").union(new SimpleAutomaton("cdcdcd")));
 	}
 
 	@Test

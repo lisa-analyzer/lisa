@@ -6,7 +6,9 @@ package it.unive.lisa.interprocedural;
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
 
-public class InterproceduralAnalysisException extends Exception {
+public class InterproceduralAnalysisException
+		extends
+		Exception {
 
 	private static final long serialVersionUID = -284151525683946469L;
 

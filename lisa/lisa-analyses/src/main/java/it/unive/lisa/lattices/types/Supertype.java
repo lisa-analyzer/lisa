@@ -20,7 +20,10 @@ import org.apache.commons.collections4.SetUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Supertype implements TypeValue<Supertype>, BaseLattice<Supertype> {
+public class Supertype
+		implements
+		TypeValue<Supertype>,
+		BaseLattice<Supertype> {
 
 	/**
 	 * The bottom element of this lattice, representing an invalid type.
@@ -109,7 +112,7 @@ public class Supertype implements TypeValue<Supertype>, BaseLattice<Supertype> {
 			Supertype other)
 			throws SemanticException {
 		Type sup = Type
-			.commonSupertype(SetUtils.intersection(type.allInstances(types), other.type.allInstances(types)), null);
+				.commonSupertype(SetUtils.intersection(type.allInstances(types), other.type.allInstances(types)), null);
 		if (sup == null)
 			return BOTTOM;
 		if (sup == Untyped.INSTANCE)

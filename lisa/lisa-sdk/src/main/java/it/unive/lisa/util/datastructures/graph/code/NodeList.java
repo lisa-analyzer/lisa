@@ -370,10 +370,10 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 */
 	public final Collection<E> getEdges() {
 		Set<E> result = extraEdges.values()
-			.stream()
-			.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
-			.distinct()
-			.collect(Collectors.toSet());
+				.stream()
+				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
+				.distinct()
+				.collect(Collectors.toSet());
 		for (int i = 0; i < nodes.size() - 1; i++)
 			if (!cutoff.contains(i))
 				result.add(sequentialSingleton.newInstance(nodes.get(i), nodes.get(i + 1)));
@@ -501,7 +501,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 					for (E out : outgoing) {
 						if (!out.isUnconditional() && !out.isErrorHandling() && !out.isFinallyRelated())
 							throw new UnsupportedOperationException(
-								EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
+									EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
 
 						E _new;
 						// replicate the edge from ingoing.source to
@@ -800,10 +800,10 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 			throws ProgramValidationException {
 		if (!nodes.contains(edge.getSource()))
 			throw new ProgramValidationException(
-				"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
+					"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
 		else if (!nodes.contains(edge.getDestination()))
 			throw new ProgramValidationException(
-				"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
+					"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
 	}
 
 	/**

@@ -35,7 +35,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ArrayLength extends NativeCFG {
+public class ArrayLength
+		extends
+		NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -47,14 +49,14 @@ public class ArrayLength extends NativeCFG {
 			CodeLocation location,
 			Program program) {
 		super(
-			new CodeMemberDescriptor(
-				location,
-				program,
-				false,
-				"arraylen",
-				Int32Type.INSTANCE,
-				new Parameter(location, "a", Untyped.INSTANCE)),
-			IMPArrayLength.class);
+				new CodeMemberDescriptor(
+						location,
+						program,
+						false,
+						"arraylen",
+						Int32Type.INSTANCE,
+						new Parameter(location, "a", Untyped.INSTANCE)),
+				IMPArrayLength.class);
 	}
 
 	/**
@@ -64,7 +66,11 @@ public class ArrayLength extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPArrayLength extends UnaryExpression implements PluggableStatement {
+	public static class IMPArrayLength
+			extends
+			UnaryExpression
+			implements
+			PluggableStatement {
 
 		/**
 		 * The statement that originated this one.
@@ -153,10 +159,10 @@ public class ArrayLength extends NativeCFG {
 			Type cst = Type.commonSupertype(arraytypes, getStaticType());
 			HeapDereference container = new HeapDereference(cst, expr, getLocation());
 			AccessChild len = new AccessChild(
-				Int32Type.INSTANCE,
-				container,
-				new Variable(Untyped.INSTANCE, "len", getLocation()),
-				getLocation());
+					Int32Type.INSTANCE,
+					container,
+					new Variable(Untyped.INSTANCE, "len", getLocation()),
+					getLocation());
 
 			return analysis.smallStepSemantics(state, len, this);
 		}

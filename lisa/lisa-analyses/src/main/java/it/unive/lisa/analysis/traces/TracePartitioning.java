@@ -53,7 +53,9 @@ import java.util.Set;
  *          "https://doi.org/10.1145/1275497.1275501">https://doi.org/10.1145/1275497.1275501</a>
  */
 public class TracePartitioning<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> implements AbstractDomain<TraceLattice<A>> {
+		D extends AbstractDomain<A>>
+		implements
+		AbstractDomain<TraceLattice<A>> {
 
 	/**
 	 * The maximum number of {@link LoopIteration} tokens that a trace can
@@ -245,7 +247,9 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		return new TraceLattice<>(domain.makeLattice());
 	}
 
-	private class TraceOracle implements SemanticOracle {
+	private class TraceOracle
+			implements
+			SemanticOracle {
 
 		private final TraceLattice<A> state;
 

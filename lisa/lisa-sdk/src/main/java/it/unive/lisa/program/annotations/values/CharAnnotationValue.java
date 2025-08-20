@@ -5,7 +5,9 @@ package it.unive.lisa.program.annotations.values;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class CharAnnotationValue implements BasicAnnotationValue {
+public class CharAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final char c;
 

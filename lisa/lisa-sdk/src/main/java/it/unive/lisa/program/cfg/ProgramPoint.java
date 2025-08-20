@@ -10,7 +10,9 @@ import it.unive.lisa.program.Unit;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface ProgramPoint extends CodeElement {
+public interface ProgramPoint
+		extends
+		CodeElement {
 
 	/**
 	 * Yields the {@link CFG} that this program point belongs to.

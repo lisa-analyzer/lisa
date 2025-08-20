@@ -13,7 +13,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class Comp extends RegularExpression {
+public final class Comp
+		extends
+		RegularExpression {
 
 	/**
 	 * The first regular expression
@@ -121,8 +123,8 @@ public final class Comp extends RegularExpression {
 				&& second.asStar().getOperand().isComp()
 				&& second.asStar().getOperand().asComp().second.isStar()
 				&& second.asStar().getOperand().asComp().second.asStar()
-					.getOperand()
-					.equals(first.asStar().getOperand()))
+						.getOperand()
+						.equals(first.asStar().getOperand()))
 			result = first.asStar().getOperand().or(second.asStar().getOperand().asComp().first).star();
 
 		// a.((b.a)*.b) = (a.b)*
@@ -131,8 +133,8 @@ public final class Comp extends RegularExpression {
 				&& second.asComp().first.isStar()
 				&& second.asComp().second.isAtom()
 				&& second.asComp().second.asAtom()
-					.comp(first.asAtom())
-					.equals(second.asComp().first.asStar().getOperand()))
+						.comp(first.asAtom())
+						.equals(second.asComp().first.asStar().getOperand()))
 			result = first.asAtom().comp(second.asComp().second.asAtom()).star();
 
 		// a*.(a*.b) = a*b

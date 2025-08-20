@@ -56,11 +56,11 @@ public class SubstringsTest {
 	private final Substrings BOTTOM;
 
 	private final ValueExpression XConcatA = new BinaryExpression(
-		StringType.INSTANCE,
-		x,
-		a,
-		StringConcat.INSTANCE,
-		SyntheticLocation.INSTANCE);
+			StringType.INSTANCE,
+			x,
+			a,
+			StringConcat.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 	private final ProgramPoint pp = new ProgramPoint() {
 
@@ -194,7 +194,8 @@ public class SubstringsTest {
 	@Test
 	public void testForgetIdentifiersIf()
 			throws SemanticException {
-		Substrings s = valF.forgetIdentifiersIf((id) -> id.getName().equals("w") || id.getName().equals("y"), pp);
+		Substrings s = valF.forgetIdentifiersIf((
+				id) -> id.getName().equals("w") || id.getName().equals("y"), pp);
 		assertEquals(s.getState(w), new ExpressionInverseSet().top());
 		assertFalse(s.getState(x).contains(y));
 	}

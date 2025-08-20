@@ -18,7 +18,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnaryExpression extends ValueExpression {
+public class UnaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The inner expression
@@ -83,11 +85,11 @@ public class UnaryExpression extends ValueExpression {
 				// if nothing changed, preserve reference equality
 				return this;
 			return new BinaryExpression(
-				expression.getStaticType(),
-				oppositeLeft,
-				oppositeRight,
-				oppositeOp,
-				getCodeLocation());
+					expression.getStaticType(),
+					oppositeLeft,
+					oppositeRight,
+					oppositeOp,
+					getCodeLocation());
 		}
 
 		return this;
@@ -99,10 +101,10 @@ public class UnaryExpression extends ValueExpression {
 			ProgramPoint pp)
 			throws SemanticException {
 		UnaryExpression expr = new UnaryExpression(
-			getStaticType(),
-			expression.pushScope(token, pp),
-			operator,
-			getCodeLocation());
+				getStaticType(),
+				expression.pushScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 
@@ -112,10 +114,10 @@ public class UnaryExpression extends ValueExpression {
 			ProgramPoint pp)
 			throws SemanticException {
 		UnaryExpression expr = new UnaryExpression(
-			getStaticType(),
-			expression.popScope(token, pp),
-			operator,
-			getCodeLocation());
+				getStaticType(),
+				expression.popScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 

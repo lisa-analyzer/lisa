@@ -20,7 +20,9 @@ import it.unive.lisa.type.Untyped;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class BinaryExpression extends NaryExpression {
+public abstract class BinaryExpression
+		extends
+		NaryExpression {
 
 	/**
 	 * Builds the untyped expression, happening at the given location in the

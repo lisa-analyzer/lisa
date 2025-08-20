@@ -37,7 +37,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpression {
+public class Substring
+		extends
+		it.unive.lisa.program.cfg.statement.TernaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -64,13 +66,13 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 			Expression middle,
 			Expression right) {
 		super(
-			cfg,
-			location,
-			"substring",
-			cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
-			left,
-			middle,
-			right);
+				cfg,
+				location,
+				"substring",
+				cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
+				left,
+				middle,
+				right);
 	}
 
 	@Override
@@ -97,9 +99,9 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new TernaryExpression(getStaticType(), left, middle, right, StringSubstring.INSTANCE, getLocation()),
-			originating == null ? this : originating);
+				state,
+				new TernaryExpression(getStaticType(), left, middle, right, StringSubstring.INSTANCE, getLocation()),
+				originating == null ? this : originating);
 	}
 
 }

@@ -113,11 +113,11 @@ public class Stability<L extends ValueLattice<L>>
 			SymbolicExpression r,
 			ProgramPoint pp) {
 		return new BinaryExpression(
-			pp.getProgram().getTypes().getBooleanType(),
-			l,
-			r,
-			operator,
-			SyntheticLocation.INSTANCE);
+				pp.getProgram().getTypes().getBooleanType(),
+				l,
+				r,
+				operator,
+				SyntheticLocation.INSTANCE);
 	}
 
 	/**
@@ -424,10 +424,10 @@ public class Stability<L extends ValueLattice<L>>
 					// x = x * other || x = other * x
 					if (query(state.second, binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
 							|| query(
-								state.second,
-								binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp),
-								pp,
-								oracle))
+									state.second,
+									binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp),
+									pp,
+									oracle))
 						// id == 0 || other == 1
 						t = Trend.STABLE;
 					else if (query(state.second, binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp), pp, oracle))
@@ -444,10 +444,10 @@ public class Stability<L extends ValueLattice<L>>
 						t = nonDecreasingIfLess(state.second, other, constantInt(1, pp), pp, oracle);
 					else if (query(state.second, binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
 							&& query(
-								state.second,
-								binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp),
-								pp,
-								oracle))
+									state.second,
+									binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp),
+									pp,
+									oracle))
 						// id != 0 && other != 1
 						t = Trend.NON_STABLE;
 				} else if (op instanceof DivisionOperator) {
@@ -455,50 +455,50 @@ public class Stability<L extends ValueLattice<L>>
 					if (isLeft) {
 						if (query(state.second, binary(ComparisonEq.INSTANCE, id, constantInt(0, pp), pp), pp, oracle)
 								|| query(
-									state.second,
-									binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp),
-									pp,
-									oracle))
+										state.second,
+										binary(ComparisonEq.INSTANCE, other, constantInt(1, pp), pp),
+										pp,
+										oracle))
 							// id == 0 || other == 1
 							t = Trend.STABLE;
 						else if (query(
-							state.second,
-							binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp),
-							pp,
-							oracle))
+								state.second,
+								binary(ComparisonGt.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle))
 							// id > 0
 							t = increasingIfBetweenZeroAndOne(state.second, other, pp, oracle);
 						else if (query(
-							state.second,
-							binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp),
-							pp,
-							oracle))
+								state.second,
+								binary(ComparisonLt.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle))
 							// id < 0
 							t = increasingIfOutsideZeroAndOne(state.second, other, pp, oracle);
 						else if (query(
-							state.second,
-							binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp),
-							pp,
-							oracle))
+								state.second,
+								binary(ComparisonGe.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle))
 							// id >= 0
 							t = nonDecreasingIfBetweenZeroAndOne(state.second, other, pp, oracle);
 						else if (query(
-							state.second,
-							binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp),
-							pp,
-							oracle))
+								state.second,
+								binary(ComparisonLe.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle))
 							// id <= 0
 							t = nonDecreasingIfOutsideZeroAndOne(state.second, other, pp, oracle);
 						else if (query(
-							state.second,
-							binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp),
-							pp,
-							oracle)
+								state.second,
+								binary(ComparisonNe.INSTANCE, id, constantInt(0, pp), pp),
+								pp,
+								oracle)
 								&& query(
-									state.second,
-									binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp),
-									pp,
-									oracle))
+										state.second,
+										binary(ComparisonNe.INSTANCE, other, constantInt(1, pp), pp),
+										pp,
+										oracle))
 							// id != 0 && other != 1
 							t = Trend.NON_STABLE;
 					} else

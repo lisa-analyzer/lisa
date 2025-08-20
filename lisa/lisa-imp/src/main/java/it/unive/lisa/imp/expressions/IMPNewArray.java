@@ -34,7 +34,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewArray extends NaryExpression {
+public class IMPNewArray
+		extends
+		NaryExpression {
 
 	private final boolean staticallyAllocated;
 
@@ -60,11 +62,11 @@ public class IMPNewArray extends NaryExpression {
 			boolean staticallyAllocated,
 			Expression[] dimensions) {
 		super(
-			cfg,
-			new SourceCodeLocation(sourceFile, line, col),
-			(staticallyAllocated ? "" : "new ") + type + "[]",
-			ArrayType.register(type, dimensions.length),
-			dimensions);
+				cfg,
+				new SourceCodeLocation(sourceFile, line, col),
+				(staticallyAllocated ? "" : "new ") + type + "[]",
+				ArrayType.register(type, dimensions.length),
+				dimensions);
 		if (dimensions.length != 1)
 			throw new UnsupportedOperationException("Multidimensional arrays are not yet supported");
 		this.staticallyAllocated = staticallyAllocated;
@@ -99,10 +101,10 @@ public class IMPNewArray extends NaryExpression {
 
 		// we define the length of the array as a child element
 		AccessChild len = new AccessChild(
-			Int32Type.INSTANCE,
-			array,
-			new Variable(Untyped.INSTANCE, "len", getLocation()),
-			getLocation());
+				Int32Type.INSTANCE,
+				array,
+				new Variable(Untyped.INSTANCE, "len", getLocation()),
+				getLocation());
 
 		AnalysisState<A> lenSt = state.bottom();
 		// TODO fix when we'll support multidimensional arrays

@@ -13,7 +13,9 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collections;
 import java.util.Set;
 
-public class TestAbstractDomain implements AbstractDomain<TestAbstractState> {
+public class TestAbstractDomain
+		implements
+		AbstractDomain<TestAbstractState> {
 
 	@Override
 	public TestAbstractState assign(
@@ -55,7 +57,9 @@ public class TestAbstractDomain implements AbstractDomain<TestAbstractState> {
 		return new TestAbstractState();
 	}
 
-	public class TestOracle implements SemanticOracle {
+	public class TestOracle
+			implements
+			SemanticOracle {
 
 		@Override
 		public Set<Type> getRuntimeTypesOf(

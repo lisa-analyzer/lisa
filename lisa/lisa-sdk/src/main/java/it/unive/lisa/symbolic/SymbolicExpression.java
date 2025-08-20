@@ -19,7 +19,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class SymbolicExpression implements ScopedObject<SymbolicExpression> {
+public abstract class SymbolicExpression
+		implements
+		ScopedObject<SymbolicExpression> {
 
 	/**
 	 * The code location of the statement that has generated this symbolic

@@ -23,7 +23,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @param <T> the type of tool used during the inspection
  */
-public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
+public interface Check<T>
+		extends
+		GraphVisitor<CFG, Statement, Edge, T> {
 
 	/**
 	 * Callback invoked only once before the beginning of the inspection of the

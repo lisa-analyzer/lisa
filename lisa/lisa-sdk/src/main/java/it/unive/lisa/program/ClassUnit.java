@@ -13,7 +13,9 @@ import org.apache.commons.collections4.CollectionUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ClassUnit extends CompilationUnit {
+public class ClassUnit
+		extends
+		CompilationUnit {
 
 	/**
 	 * The collection of compilation units this unit directly inherits from.
@@ -111,10 +113,10 @@ public class ClassUnit extends CompilationUnit {
 			throws ProgramValidationException {
 		if (superclasses.contains(unit) || interfaces.contains(unit))
 			throw new ProgramValidationException(
-				"Found loop in compilation units hierarchy: "
-					+ unit
-					+ " is both an ancestor and an instance of "
-					+ this);
+					"Found loop in compilation units hierarchy: "
+							+ unit
+							+ " is both an ancestor and an instance of "
+							+ this);
 		instances.add(unit);
 
 		for (ClassUnit sup : superclasses)

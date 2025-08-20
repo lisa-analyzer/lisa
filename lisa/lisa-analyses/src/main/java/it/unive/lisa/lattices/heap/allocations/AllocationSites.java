@@ -26,7 +26,11 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class AllocationSites extends SetLattice<AllocationSites, AllocationSite> implements HeapValue<AllocationSites> {
+public class AllocationSites
+		extends
+		SetLattice<AllocationSites, AllocationSite>
+		implements
+		HeapValue<AllocationSites> {
 
 	private static final AllocationSites TOP = new AllocationSites(new HashSet<>(), true);
 
@@ -108,8 +112,8 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 				// if the left is strong, it must be present in the right
 				// as a weak identifier
 				Optional<AllocationSite> match = hullRight.stream()
-					.filter(e -> e.getName().equals(left.getName()) && e.isWeak())
-					.findAny();
+						.filter(e -> e.getName().equals(left.getName()) && e.isWeak())
+						.findAny();
 				if (match.isEmpty())
 					// if there is no match, then the partial order does not
 					// hold
@@ -140,14 +144,14 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 		// strong identifiers are only added if we did not consider a
 		// weak identifier with the same name
 		elements.stream()
-			.filter(Predicate.not(AllocationSite::isWeak))
-			.filter(e -> !lub.containsKey(e.getName()))
-			.forEach(e -> lub.put(e.getName(), e));
+				.filter(Predicate.not(AllocationSite::isWeak))
+				.filter(e -> !lub.containsKey(e.getName()))
+				.forEach(e -> lub.put(e.getName(), e));
 
 		other.elements.stream()
-			.filter(Predicate.not(AllocationSite::isWeak))
-			.filter(e -> !lub.containsKey(e.getName()))
-			.forEach(e -> lub.put(e.getName(), e));
+				.filter(Predicate.not(AllocationSite::isWeak))
+				.filter(e -> !lub.containsKey(e.getName()))
+				.forEach(e -> lub.put(e.getName(), e));
 
 		return new AllocationSites(new HashSet<>(lub.values()), true);
 	}
@@ -175,10 +179,10 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 		Set<AllocationSite> copy = new HashSet<>(elements);
 		if (copy.removeAll(r.getSources())) {
 			r.getTargets()
-				.stream()
-				.filter(AllocationSite.class::isInstance)
-				.map(AllocationSite.class::cast)
-				.forEach(copy::add);
+					.stream()
+					.filter(AllocationSite.class::isInstance)
+					.map(AllocationSite.class::cast)
+					.forEach(copy::add);
 			return new AllocationSites(copy, isTop);
 		} else
 			return this;

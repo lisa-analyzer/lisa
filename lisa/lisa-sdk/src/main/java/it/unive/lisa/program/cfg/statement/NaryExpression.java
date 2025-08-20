@@ -26,7 +26,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class NaryExpression extends Expression {
+public abstract class NaryExpression
+		extends
+		Expression {
 
 	/**
 	 * The sub-expressions of this expression
@@ -128,7 +130,8 @@ public abstract class NaryExpression extends Expression {
 		Objects.requireNonNull(subExpressions, "The array of sub-expressions of an expression cannot be null");
 		for (int i = 0; i < subExpressions.length; i++)
 			Objects
-				.requireNonNull(subExpressions[i], "The " + i + "-th sub-expression of an expression cannot be null");
+					.requireNonNull(subExpressions[i],
+							"The " + i + "-th sub-expression of an expression cannot be null");
 		Objects.requireNonNull(constructName, "The name of the native construct of an expression cannot be null");
 		Objects.requireNonNull(order, "The evaluation order of an expression cannot be null");
 		this.constructName = constructName;

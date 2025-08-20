@@ -23,10 +23,10 @@ import org.junit.Test;
 public class AnalyzedCFGTest {
 
 	private static final ClassUnit unit = new ClassUnit(
-		new SourceCodeLocation("unknown", 0, 0),
-		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-		"Testing",
-		false);
+			new SourceCodeLocation("unknown", 0, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"Testing",
+			false);
 
 	@Test
 	public void testIssue189()
@@ -37,7 +37,8 @@ public class AnalyzedCFGTest {
 		Return y = new Return(cfg, unknown, x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
@@ -59,19 +60,20 @@ public class AnalyzedCFGTest {
 		Return y = new Return(cfg, unknown, x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
 		OptimizedAnalyzedCFG<TestAbstractState,
 				TestAbstractDomain> res = new OptimizedAnalyzedCFG<>(
-					cfg,
-					new UniqueScope(),
-					state,
-					entries,
-					results,
-					new TestInterproceduralAnalysis<>());
+						cfg,
+						new UniqueScope(),
+						state,
+						entries,
+						results,
+						new TestInterproceduralAnalysis<>());
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -88,7 +90,8 @@ public class AnalyzedCFGTest {
 		Return y = new Return(cfg, unknown, x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
@@ -111,19 +114,20 @@ public class AnalyzedCFGTest {
 		Return y = new Return(cfg, unknown, x);
 		cfg.addNode(y, true);
 
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
 		BackwardOptimizedAnalyzedCFG<TestAbstractState,
 				TestAbstractDomain> res = new BackwardOptimizedAnalyzedCFG<>(
-					cfg,
-					new UniqueScope(),
-					state,
-					entries,
-					results,
-					new TestInterproceduralAnalysis<>());
+						cfg,
+						new UniqueScope(),
+						state,
+						entries,
+						results,
+						new TestInterproceduralAnalysis<>());
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));

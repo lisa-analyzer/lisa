@@ -22,7 +22,9 @@ import it.unive.lisa.program.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringReplace extends NativeCFG {
+public class StringReplace
+		extends
+		NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -34,16 +36,16 @@ public class StringReplace extends NativeCFG {
 			CodeLocation location,
 			ClassUnit stringUnit) {
 		super(
-			new CodeMemberDescriptor(
-				location,
-				stringUnit,
-				true,
-				"replace",
-				BoolType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE),
-				new Parameter(location, "search", StringType.INSTANCE),
-				new Parameter(location, "replacement", StringType.INSTANCE)),
-			IMPStringReplace.class);
+				new CodeMemberDescriptor(
+						location,
+						stringUnit,
+						true,
+						"replace",
+						BoolType.INSTANCE,
+						new Parameter(location, "this", StringType.INSTANCE),
+						new Parameter(location, "search", StringType.INSTANCE),
+						new Parameter(location, "replacement", StringType.INSTANCE)),
+				IMPStringReplace.class);
 	}
 
 	/**
@@ -53,7 +55,11 @@ public class StringReplace extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringReplace extends Replace implements PluggableStatement {
+	public static class IMPStringReplace
+			extends
+			Replace
+			implements
+			PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the

@@ -13,7 +13,9 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class RegularExpression implements TransitionSymbol<RegularExpression> {
+public abstract class RegularExpression
+		implements
+		TransitionSymbol<RegularExpression> {
 
 	@Override
 	public final int compareTo(
@@ -177,9 +179,9 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 			int start,
 			int end) {
 		return substringAux(start, end - start).stream()
-			.filter(ps -> ps.missingChars == 0)
-			.map(t -> t.getSubstring())
-			.collect(Collectors.toSet());
+				.filter(ps -> ps.missingChars == 0)
+				.map(t -> t.getSubstring())
+				.collect(Collectors.toSet());
 	}
 
 	/**

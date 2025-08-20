@@ -9,7 +9,9 @@ package it.unive.lisa.program.cfg;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class AbstractCodeMember implements CodeMember {
+public class AbstractCodeMember
+		implements
+		CodeMember {
 
 	/**
 	 * The descriptor of this signature control flow graph.

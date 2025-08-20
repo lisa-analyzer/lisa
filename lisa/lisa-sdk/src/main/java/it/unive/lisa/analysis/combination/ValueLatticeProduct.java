@@ -14,7 +14,9 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <T2> the type of the second lattice
  */
 public class ValueLatticeProduct<T1 extends ValueLattice<T1>,
-		T2 extends ValueLattice<T2>> extends ValueCartesianCombination<ValueLatticeProduct<T1, T2>, T1, T2> {
+		T2 extends ValueLattice<T2>>
+		extends
+		ValueCartesianCombination<ValueLatticeProduct<T1, T2>, T1, T2> {
 
 	/**
 	 * Builds a new product of two lattices.

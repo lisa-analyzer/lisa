@@ -21,16 +21,16 @@ public class StringConstantPropagationTest {
 		StringConstant s2 = new StringConstant("def");
 
 		StringConstant res = domain.evalBinaryExpression(
-			new BinaryExpression(
-				StringType.INSTANCE,
-				new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
-				new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE),
-			s1,
-			s2,
-			null,
-			null);
+				new BinaryExpression(
+						StringType.INSTANCE,
+						new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
+						new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
+						StringConcat.INSTANCE,
+						SyntheticLocation.INSTANCE),
+				s1,
+				s2,
+				null,
+				null);
 
 		assertEquals(res, new StringConstant("abcdef"));
 	}
@@ -43,18 +43,18 @@ public class StringConstantPropagationTest {
 		StringConstant s3 = new StringConstant("b");
 
 		StringConstant res = domain.evalTernaryExpression(
-			new TernaryExpression(
-				StringType.INSTANCE,
-				new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
-				new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
-				new Variable(StringType.INSTANCE, "z", SyntheticLocation.INSTANCE),
-				StringReplace.INSTANCE,
-				SyntheticLocation.INSTANCE),
-			s1,
-			s2,
-			s3,
-			null,
-			null);
+				new TernaryExpression(
+						StringType.INSTANCE,
+						new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
+						new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
+						new Variable(StringType.INSTANCE, "z", SyntheticLocation.INSTANCE),
+						StringReplace.INSTANCE,
+						SyntheticLocation.INSTANCE),
+				s1,
+				s2,
+				s3,
+				null,
+				null);
 
 		assertEquals(res, new StringConstant("ba"));
 	}

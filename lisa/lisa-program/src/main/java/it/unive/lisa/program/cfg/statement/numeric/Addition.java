@@ -25,7 +25,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Addition extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class Addition
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the addition.
@@ -64,9 +66,9 @@ public class Addition extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new BinaryExpression(getStaticType(), left, right, NumericNonOverflowingAdd.INSTANCE, getLocation()),
-			this);
+				state,
+				new BinaryExpression(getStaticType(), left, right, NumericNonOverflowingAdd.INSTANCE, getLocation()),
+				this);
 	}
 
 }

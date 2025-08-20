@@ -31,7 +31,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessInstanceGlobal extends UnaryExpression {
+public class AccessInstanceGlobal
+		extends
+		UnaryExpression {
 
 	/**
 	 * The global being accessed

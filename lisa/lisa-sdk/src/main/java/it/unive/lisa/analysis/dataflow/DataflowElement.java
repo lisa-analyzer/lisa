@@ -13,7 +13,10 @@ import java.util.Collection;
  * 
  * @param <E> the concrete type of {@link DataflowElement}
  */
-public interface DataflowElement<E extends DataflowElement<E>> extends StructuredObject, ScopedObject<E> {
+public interface DataflowElement<E extends DataflowElement<E>>
+		extends
+		StructuredObject,
+		ScopedObject<E> {
 
 	/**
 	 * Yields all the {@link Identifier}s that are involved in the definition of

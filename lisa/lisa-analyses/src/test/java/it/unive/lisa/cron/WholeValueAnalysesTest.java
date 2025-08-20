@@ -59,10 +59,14 @@ import java.util.TreeSet;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-public class WholeValueAnalysesTest extends IMPCronExecutor {
+public class WholeValueAnalysesTest
+		extends
+		IMPCronExecutor {
 
 	private static class AssertionCheck<A extends AbstractLattice<A>,
-			D extends AbstractDomain<A>> implements SemanticCheck<A, D> {
+			D extends AbstractDomain<A>>
+			implements
+			SemanticCheck<A, D> {
 
 		private boolean first = true;
 
@@ -215,20 +219,20 @@ public class WholeValueAnalysesTest extends IMPCronExecutor {
 	}
 
 	private static Map<String, NonRelationalValueDomain<?>> INT_DOMAINS = Map
-		.of("intv", new Interval(), "cp", new IntegerConstantPropagation());
+			.of("intv", new Interval(), "cp", new IntegerConstantPropagation());
 
 	private static Map<String,
 			NonRelationalValueDomain<?>> STRING_DOMAINS = Map.of(
-				"prefix",
-				new Prefix(),
-				"suffix",
-				new Suffix(),
-				"ci",
-				new CharInclusion(),
-				"tarsis",
-				new Tarsis(),
-				"bss",
-				new BoundedStringSet(5));
+					"prefix",
+					new Prefix(),
+					"suffix",
+					new Suffix(),
+					"ci",
+					new CharInclusion(),
+					"tarsis",
+					new Tarsis(),
+					"bss",
+					new BoundedStringSet(5));
 
 	private static Map<String,
 			Boolean> TESTFILES = Map.of("toString.imp", false, "subs.imp", false, "loop.imp", false, "count.imp", true);
@@ -245,11 +249,11 @@ public class WholeValueAnalysesTest extends IMPCronExecutor {
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
 					TestConfiguration conf = mkConf();
 					conf.analysis = new SimpleAbstractDomain<>(
-						new MonolithicHeap(),
-						new SmashedSum<>(
-							(SmashedSumIntDomain) intDomain.getValue(),
-							(SmashedSumStringDomain) strDomain.getValue()),
-						new InferredTypes());
+							new MonolithicHeap(),
+							new SmashedSum<>(
+									(SmashedSumIntDomain) intDomain.getValue(),
+									(SmashedSumStringDomain) strDomain.getValue()),
+							new InferredTypes());
 					if (test.getValue())
 						conf.analysis = new TracePartitioning(conf.analysis);
 					// conf.analysisGraphs =
@@ -259,15 +263,15 @@ public class WholeValueAnalysesTest extends IMPCronExecutor {
 					perform("whole-value", "smashed/" + testKey.replace(".imp", ""), test.getKey(), conf);
 					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
 					STATES
-						.computeIfAbsent(
-							"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
-							k -> new HashMap<>())
-						.put(test.getKey(), check.valuesAtFirstAssertion);
+							.computeIfAbsent(
+									"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
+									k -> new HashMap<>())
+							.put(test.getKey(), check.valuesAtFirstAssertion);
 					MESSAGES
-						.computeIfAbsent(
-							"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
-							k -> new HashMap<>())
-						.put(test.getKey(), check.assertions);
+							.computeIfAbsent(
+									"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
+									k -> new HashMap<>())
+							.put(test.getKey(), check.assertions);
 				}
 	}
 
@@ -279,12 +283,12 @@ public class WholeValueAnalysesTest extends IMPCronExecutor {
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
 					TestConfiguration conf = mkConf();
 					conf.analysis = new SimpleAbstractDomain<>(
-						new MonolithicHeap(),
-						new WholeValueAnalysis(
-							(BaseNonRelationalValueDomain<?>) intDomain.getValue(),
-							(WholeValueStringDomain<?>) strDomain.getValue(),
-							new BooleanPowerset()),
-						new InferredTypes());
+							new MonolithicHeap(),
+							new WholeValueAnalysis(
+									(BaseNonRelationalValueDomain<?>) intDomain.getValue(),
+									(WholeValueStringDomain<?>) strDomain.getValue(),
+									new BooleanPowerset()),
+							new InferredTypes());
 					if (test.getValue())
 						conf.analysis = new TracePartitioning(conf.analysis);
 					// conf.analysisGraphs =
@@ -294,15 +298,15 @@ public class WholeValueAnalysesTest extends IMPCronExecutor {
 					perform("whole-value", "constr/" + testKey.replace(".imp", ""), test.getKey(), conf);
 					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
 					STATES
-						.computeIfAbsent(
-							"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
-							k -> new HashMap<>())
-						.put(test.getKey(), check.valuesAtFirstAssertion);
+							.computeIfAbsent(
+									"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
+									k -> new HashMap<>())
+							.put(test.getKey(), check.valuesAtFirstAssertion);
 					MESSAGES
-						.computeIfAbsent(
-							"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
-							k -> new HashMap<>())
-						.put(test.getKey(), check.assertions);
+							.computeIfAbsent(
+									"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
+									k -> new HashMap<>())
+							.put(test.getKey(), check.assertions);
 				}
 	}
 

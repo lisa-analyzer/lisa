@@ -7,7 +7,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-public final class TestAutomaton extends Automaton<TestAutomaton, TestSymbol> {
+public final class TestAutomaton
+		extends
+		Automaton<TestAutomaton, TestSymbol> {
 
 	@Override
 	public TestAutomaton singleString(
@@ -124,9 +126,9 @@ public final class TestAutomaton extends Automaton<TestAutomaton, TestSymbol> {
 
 				// stores all the states reached after char computation
 				Set<State> dest = transitions.stream()
-					.filter(t -> t.getSource().equals(s) && t.getSymbol().getSymbol().equals(c))
-					.map(Transition::getDestination)
-					.collect(Collectors.toSet());
+						.filter(t -> t.getSource().equals(s) && t.getSymbol().getSymbol().equals(c))
+						.map(Transition::getDestination)
+						.collect(Collectors.toSet());
 				if (!dest.isEmpty()) {
 					dest = epsilonClosure(dest);
 					newCurr.addAll(dest);

@@ -28,7 +28,9 @@ import it.unive.lisa.symbolic.value.Identifier;
  *                process
  */
 public interface DomainWithReplacement<L extends DomainLattice<L, L>,
-		E extends SymbolicExpression> extends SemanticComponent<L, L, E, Identifier> {
+		E extends SymbolicExpression>
+		extends
+		SemanticComponent<L, L, E, Identifier> {
 
 	/**
 	 * Applies a substitution of identifiers that is caused by a modification of

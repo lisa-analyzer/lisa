@@ -16,7 +16,10 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class SymbolicString implements Comparable<SymbolicString>, Iterable<SymbolicChar> {
+public final class SymbolicString
+		implements
+		Comparable<SymbolicString>,
+		Iterable<SymbolicChar> {
 
 	/**
 	 * The underlying {@link SymbolicChar} array

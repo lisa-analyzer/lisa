@@ -13,7 +13,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Annotations implements Iterable<Annotation> {
+public class Annotations
+		implements
+		Iterable<Annotation> {
 
 	private final Set<Annotation> annotations;
 

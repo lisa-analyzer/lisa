@@ -25,7 +25,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NamedParameterExpression extends UnaryExpression {
+public class NamedParameterExpression
+		extends
+		UnaryExpression {
 
 	private final String parameterName;
 

@@ -82,7 +82,9 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPFrontend extends IMPParserBaseVisitor<Object> {
+public class IMPFrontend
+		extends
+		IMPParserBaseVisitor<Object> {
 
 	private static final Logger log = LogManager.getLogger(IMPFrontend.class);
 
@@ -351,11 +353,11 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 		for (CodeMember cm : unit.getInstanceCodeMembers(false)) {
 			if (unit.getInstanceCodeMembers(false)
-				.stream()
-				.anyMatch(
-					c -> c != cm
-							&& c.getDescriptor().matchesSignature(cm.getDescriptor())
-							&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
+					.stream()
+					.anyMatch(
+							c -> c != cm
+									&& c.getDescriptor().matchesSignature(cm.getDescriptor())
+									&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate code member: " + cm);
 		}
 
@@ -396,11 +398,11 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 		for (CodeMember cm : unit.getInstanceCodeMembers(false)) {
 			if (unit.getInstanceCodeMembers(false)
-				.stream()
-				.anyMatch(
-					c -> c != cm
-							&& c.getDescriptor().matchesSignature(cm.getDescriptor())
-							&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
+					.stream()
+					.anyMatch(
+							c -> c != cm
+									&& c.getDescriptor().matchesSignature(cm.getDescriptor())
+									&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate code member: " + cm);
 			if (isEntryPoint(cm))
 				program.addEntryPoint((CFG) cm);
@@ -414,8 +416,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 		for (Global global : unit.getInstanceGlobals(false))
 			if (unit.getInstanceGlobals(false)
-				.stream()
-				.anyMatch(g -> g != global && g.getName().equals(global.getName())))
+					.stream()
+					.anyMatch(g -> g != global && g.getName().equals(global.getName())))
 				throw new IMPSyntaxException("Duplicate global: " + global);
 
 		return unit;
@@ -476,13 +478,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private CodeMemberDescriptor mkDescriptor(
 			SignatureDeclarationContext ctx) {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
-			new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-			currentUnit,
-			true,
-			ctx.name.getText(),
-			Untyped.INSTANCE,
-			new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
-			visitFormals(ctx.formals()));
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				currentUnit,
+				true,
+				ctx.name.getText(),
+				Untyped.INSTANCE,
+				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
+				visitFormals(ctx.formals()));
 		descriptor.setOverridable(true);
 		return descriptor;
 	}
@@ -490,13 +492,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private CodeMemberDescriptor mkDescriptor(
 			ConstructorDeclarationContext ctx) {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
-			new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-			currentUnit,
-			true,
-			ctx.name.getText(),
-			Untyped.INSTANCE,
-			new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
-			visitFormals(ctx.formals()));
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				currentUnit,
+				true,
+				ctx.name.getText(),
+				Untyped.INSTANCE,
+				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
+				visitFormals(ctx.formals()));
 		descriptor.setOverridable(false);
 		return descriptor;
 	}
@@ -504,13 +506,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private CodeMemberDescriptor mkDescriptor(
 			MethodDeclarationContext ctx) {
 		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
-			new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-			currentUnit,
-			true,
-			ctx.name.getText(),
-			Untyped.INSTANCE,
-			new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
-			visitFormals(ctx.formals()));
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				currentUnit,
+				true,
+				ctx.name.getText(),
+				Untyped.INSTANCE,
+				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
+				visitFormals(ctx.formals()));
 
 		if (ctx.FINAL() != null)
 			descriptor.setOverridable(false);
@@ -525,9 +527,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			FormalsContext ctx) {
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
 		formals[0] = new Parameter(
-			new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-			"this",
-			new ReferenceType(ClassType.register(this.currentUnit.getName(), this.currentUnit)));
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				"this",
+				new ReferenceType(ClassType.register(this.currentUnit.getName(), this.currentUnit)));
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);
@@ -538,11 +540,11 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Parameter visitFormal(
 			FormalContext ctx) {
 		return new Parameter(
-			new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-			ctx.name.getText(),
-			Untyped.INSTANCE,
-			null,
-			new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				ctx.name.getText(),
+				Untyped.INSTANCE,
+				null,
+				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 
 	@Override

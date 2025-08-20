@@ -8,6 +8,7 @@ import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.CodeUnit;
@@ -101,11 +102,12 @@ public class OptimizedFixpointTest {
 		graph.computeBasicBlocks();
 
 		Map<Statement, CompoundState<TestAbstractState>> res = null;
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-				.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
+					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -140,11 +142,12 @@ public class OptimizedFixpointTest {
 		graph.computeBasicBlocks();
 
 		Map<Statement, CompoundState<TestAbstractState>> res = null;
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-				.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
+					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -179,11 +182,12 @@ public class OptimizedFixpointTest {
 		graph.computeBasicBlocks();
 
 		Map<Statement, CompoundState<TestAbstractState>> res = null;
-		AnalysisState<TestAbstractState> state = new AnalysisState<>(new TestAbstractState(), new ExpressionSet());
+		AnalysisState<TestAbstractState> state = new AnalysisState<>(
+				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-				.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
+					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");

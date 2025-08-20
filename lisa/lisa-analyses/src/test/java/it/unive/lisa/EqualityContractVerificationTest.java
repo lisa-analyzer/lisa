@@ -13,6 +13,9 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.continuations.Continuation;
+import it.unive.lisa.analysis.continuations.Execution;
+import it.unive.lisa.analysis.continuations.Halt;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.informationFlow.NonInterference;
@@ -159,28 +162,28 @@ public class EqualityContractVerificationTest {
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
 
 	private static final ClassUnit unit1 = new ClassUnit(
-		loc,
-		new Program(new IMPFeatures(), new IMPTypeSystem()),
-		"fake1",
-		false);
+			loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake1",
+			false);
 
 	private static final ClassUnit unit2 = new ClassUnit(
-		loc,
-		new Program(new IMPFeatures(), new IMPTypeSystem()),
-		"fake2",
-		false);
+			loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake2",
+			false);
 
 	private static final InterfaceUnit interface1 = new InterfaceUnit(
-		loc,
-		new Program(new IMPFeatures(), new IMPTypeSystem()),
-		"fake1",
-		false);
+			loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake1",
+			false);
 
 	private static final InterfaceUnit interface2 = new InterfaceUnit(
-		loc,
-		new Program(new IMPFeatures(), new IMPTypeSystem()),
-		"fake2",
-		false);
+			loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake2",
+			false);
 
 	private static final CodeMemberDescriptor descr1 = new CodeMemberDescriptor(loc, unit1, false, "fake1");
 
@@ -312,32 +315,33 @@ public class EqualityContractVerificationTest {
 			return;
 
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
-			.suppress(suppressions)
-			.withPrefabValues(CFG.class, cfg1, cfg2)
-			.withPrefabValues(AbstractCodeMember.class, signCfg1, signCfg2)
-			.withPrefabValues(CodeMemberDescriptor.class, descr1, descr2)
-			.withPrefabValues(ClassUnit.class, unit1, unit2)
-			.withPrefabValues(Unit.class, unit1, unit2)
-			.withPrefabValues(InterfaceUnit.class, interface1, interface2)
-			.withPrefabValues(InterfaceUnit.class, interface1, interface2)
-			.withPrefabValues(NodeList.class, adj1, adj2)
-			.withPrefabValues(StructuredRepresentation.class, dr1, dr2)
-			.withPrefabValues(RegularExpression.class, re1, re2)
-			.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
-			.withPrefabValues(NonInterferenceValue.class, new NonInterference().top(), new NonInterference().bottom())
-			.withPrefabValues(UnresolvedCall.class, uc1, uc2)
-			.withPrefabValues(Set.class, s1, s2)
-			.withPrefabValues(
-				AbstractDomain.class,
-				DefaultConfiguration.simpleState(
-					DefaultConfiguration.defaultHeapDomain(),
-					new Interval(),
-					DefaultConfiguration.defaultTypeDomain()),
-				DefaultConfiguration.simpleState(
-					DefaultConfiguration.defaultHeapDomain(),
-					new Sign(),
-					DefaultConfiguration.defaultTypeDomain()))
-			.withPrefabValues(MutableGraph.class, g1, g2);
+				.suppress(suppressions)
+				.withPrefabValues(CFG.class, cfg1, cfg2)
+				.withPrefabValues(AbstractCodeMember.class, signCfg1, signCfg2)
+				.withPrefabValues(CodeMemberDescriptor.class, descr1, descr2)
+				.withPrefabValues(ClassUnit.class, unit1, unit2)
+				.withPrefabValues(Unit.class, unit1, unit2)
+				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
+				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
+				.withPrefabValues(NodeList.class, adj1, adj2)
+				.withPrefabValues(StructuredRepresentation.class, dr1, dr2)
+				.withPrefabValues(RegularExpression.class, re1, re2)
+				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
+				.withPrefabValues(NonInterferenceValue.class, new NonInterference().top(),
+						new NonInterference().bottom())
+				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
+				.withPrefabValues(Set.class, s1, s2)
+				.withPrefabValues(
+						AbstractDomain.class,
+						DefaultConfiguration.simpleState(
+								DefaultConfiguration.defaultHeapDomain(),
+								new Interval(),
+								DefaultConfiguration.defaultTypeDomain()),
+						DefaultConfiguration.simpleState(
+								DefaultConfiguration.defaultHeapDomain(),
+								new Sign(),
+								DefaultConfiguration.defaultTypeDomain()))
+				.withPrefabValues(MutableGraph.class, g1, g2);
 
 		if (getClass)
 			verifier = verifier.usingGetClass();
@@ -466,19 +470,19 @@ public class EqualityContractVerificationTest {
 				if (NaryExpression.class.isAssignableFrom(st))
 					extra.add("order");
 				verify(
-					st,
-					verifier -> verifier
-						.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)),
-					Warning.NULL_FIELDS);
+						st,
+						verifier -> verifier
+								.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)),
+						Warning.NULL_FIELDS);
 			} else {
 				List<String> extra = new LinkedList<>();
 				if (NaryStatement.class.isAssignableFrom(st))
 					extra.add("order");
 				verify(
-					st,
-					verifier -> verifier
-						.withIgnoredFields(ListUtils.union(statementFields, extra).toArray(String[]::new)),
-					Warning.NULL_FIELDS);
+						st,
+						verifier -> verifier
+								.withIgnoredFields(ListUtils.union(statementFields, extra).toArray(String[]::new)),
+						Warning.NULL_FIELDS);
 			}
 	}
 
@@ -554,28 +558,34 @@ public class EqualityContractVerificationTest {
 		// we consider only fields that compose the results
 		// id is mutable
 		verify(
-			AnalyzedCFG.class,
-			verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
-			Warning.NONFINAL_FIELDS);
+				AnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+				Warning.NONFINAL_FIELDS);
 		verify(
-			BackwardAnalyzedCFG.class,
-			verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
-			Warning.NONFINAL_FIELDS);
+				BackwardAnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
+				Warning.NONFINAL_FIELDS);
 		// we do not consider the expanded results or interprocedural
 		// as they do not identify the results
 		verify(
-			OptimizedAnalyzedCFG.class,
-			verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
-			Warning.NONFINAL_FIELDS);
+				OptimizedAnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+				Warning.NONFINAL_FIELDS);
 		verify(
-			BackwardOptimizedAnalyzedCFG.class,
-			verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
-			Warning.NONFINAL_FIELDS);
+				BackwardOptimizedAnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
+				Warning.NONFINAL_FIELDS);
 
 		verify(ExecutionTrace.class);
 		Reflections scanner = mkReflections();
-		for (Class<? extends TraceToken> warning : scanner.getSubTypesOf(TraceToken.class))
-			verify(warning);
+		for (Class<? extends TraceToken> token : scanner.getSubTypesOf(TraceToken.class))
+			verify(token);
+
+		for (Class<? extends Continuation> cont : scanner.getSubTypesOf(Continuation.class))
+			if (cont == Execution.class || cont == Halt.class)
+				verify(cont, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
+			else
+				verify(cont);
 	}
 
 	@Test
@@ -585,7 +595,7 @@ public class EqualityContractVerificationTest {
 		verify(it.unive.lisa.checks.warnings.Warning.class);
 		Reflections scanner = mkReflections();
 		for (Class<? extends it.unive.lisa.checks.warnings.Warning> warning : scanner
-			.getSubTypesOf(it.unive.lisa.checks.warnings.Warning.class))
+				.getSubTypesOf(it.unive.lisa.checks.warnings.Warning.class))
 			verify(warning);
 	}
 

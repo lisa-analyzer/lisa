@@ -14,7 +14,9 @@ import java.util.Map;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SymbolAliasing extends FunctionalLattice<SymbolAliasing, Symbol, Aliases> {
+public class SymbolAliasing
+		extends
+		FunctionalLattice<SymbolAliasing, Symbol, Aliases> {
 
 	/**
 	 * The key to use for accessing instances of this class within a

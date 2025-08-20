@@ -112,7 +112,7 @@ public class ProtectedBlock {
 	public boolean alwaysContinues() {
 		return canBeContinued()
 				&& body.stream()
-					.noneMatch(st -> st.stopsExecution() || st.breaksControlFlow() || st.continuesControlFlow());
+						.noneMatch(st -> st.stopsExecution() || st.breaksControlFlow() || st.continuesControlFlow());
 	}
 
 	@Override

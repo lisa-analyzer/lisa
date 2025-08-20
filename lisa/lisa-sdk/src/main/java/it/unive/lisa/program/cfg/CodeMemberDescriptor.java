@@ -25,7 +25,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CodeMemberDescriptor implements CodeElement {
+public class CodeMemberDescriptor
+		implements
+		CodeElement {
 
 	/**
 	 * The unit the cfg belongs to
@@ -179,13 +181,13 @@ public class CodeMemberDescriptor implements CodeElement {
 		int i = 0;
 		for (Parameter formal : formals)
 			addVariable(
-				new VariableTableEntry(
-					formal.getLocation(),
-					i++,
-					null,
-					null,
-					formal.getName(),
-					formal.getStaticType()));
+					new VariableTableEntry(
+							formal.getLocation(),
+							i++,
+							null,
+							null,
+							formal.getName(),
+							formal.getStaticType()));
 	}
 
 	/**
@@ -318,8 +320,8 @@ public class CodeMemberDescriptor implements CodeElement {
 			ControlFlowStructure cf) {
 		if (cfStructs.stream().anyMatch(c -> c.getCondition().equals(cf.getCondition())))
 			throw new IllegalArgumentException(
-				"Cannot have more than one conditional structure happening on the same condition: "
-					+ cf.getCondition());
+					"Cannot have more than one conditional structure happening on the same condition: "
+							+ cf.getCondition());
 		cfStructs.add(cf);
 	}
 

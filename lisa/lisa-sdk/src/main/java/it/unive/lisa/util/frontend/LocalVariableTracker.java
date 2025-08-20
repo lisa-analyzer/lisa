@@ -64,8 +64,8 @@ public class LocalVariableTracker {
 		latestScope = new HashMap<>();
 		for (VariableTableEntry par : descriptor.getVariables())
 			latestScope.put(
-				par.getName(),
-				new LocalVariable(par.getLocation(), par.createReference(cfg), par.getAnnotations()));
+					par.getName(),
+					new LocalVariable(par.getLocation(), par.createReference(cfg), par.getAnnotations()));
 		visibleIds.add(latestScope);
 		varIndex = descriptor.getVariables().size();
 	}
@@ -97,14 +97,14 @@ public class LocalVariableTracker {
 
 		for (Entry<String, LocalVariable> id : latestScope.entrySet())
 			descriptor.addVariable(
-				new VariableTableEntry(
-					id.getValue().location,
-					varIndex++,
-					id.getValue().scopeStart,
-					closing,
-					id.getKey(),
-					Untyped.INSTANCE,
-					id.getValue().annotations));
+					new VariableTableEntry(
+							id.getValue().location,
+							varIndex++,
+							id.getValue().scopeStart,
+							closing,
+							id.getKey(),
+							Untyped.INSTANCE,
+							id.getValue().annotations));
 
 		visibleIds.remove(visibleIds.size() - 1);
 		latestScope = visibleIds.get(visibleIds.size() - 1);
@@ -140,10 +140,10 @@ public class LocalVariableTracker {
 			Statement definition,
 			Annotations annotations) {
 		latestScope.put(
-			name,
-			new LocalVariable(
-				definition.getLocation(),
-				definition instanceof Expression ? ((Expression) definition).getRootStatement() : definition,
-				annotations));
+				name,
+				new LocalVariable(
+						definition.getLocation(),
+						definition instanceof Expression ? ((Expression) definition).getRootStatement() : definition,
+						annotations));
 	}
 }

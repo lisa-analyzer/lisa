@@ -38,6 +38,7 @@
     "semanticChecks" : "AssertionCheck",
     "serializeInputs" : "false",
     "serializeResults" : "true",
+    "shouldSmashException" : "unset",
     "syntacticChecks" : "",
     "useWideningPoints" : "true",
     "wideningThreshold" : "5",

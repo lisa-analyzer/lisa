@@ -6,7 +6,9 @@ package it.unive.lisa.program.cfg;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">VincenzoArceri</a>
  */
-public interface CodeLocation extends Comparable<CodeLocation> {
+public interface CodeLocation
+		extends
+		Comparable<CodeLocation> {
 
 	/**
 	 * Yields the string code location representation.

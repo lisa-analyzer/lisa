@@ -19,7 +19,11 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TruncatedParamsCall extends Call implements ResolvedCall {
+public class TruncatedParamsCall
+		extends
+		Call
+		implements
+		ResolvedCall {
 
 	private final Call call;
 
@@ -31,14 +35,14 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	public TruncatedParamsCall(
 			Call call) {
 		super(
-			call.getCFG(),
-			call.getLocation(),
-			call.getCallType(),
-			call.getQualifier(),
-			call.getTargetName(),
-			call.getOrder(),
-			call.getStaticType(),
-			call.getParameters());
+				call.getCFG(),
+				call.getLocation(),
+				call.getCallType(),
+				call.getQualifier(),
+				call.getTargetName(),
+				call.getOrder(),
+				call.getStaticType(),
+				call.getParameters());
 		if (!(call instanceof ResolvedCall))
 			throw new IllegalArgumentException("The given call has not been resolved yet");
 		this.call = call;

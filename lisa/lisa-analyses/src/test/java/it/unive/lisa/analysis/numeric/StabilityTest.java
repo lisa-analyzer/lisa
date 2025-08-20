@@ -26,83 +26,83 @@ public class StabilityTest {
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s1top = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.TOP),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.TOP),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s1bot = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.BOTTOM),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.BOTTOM),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s1st = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.STABLE),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.STABLE),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s1in = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.INC),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.INC),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s1de = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.DEC),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.DEC),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s1nd = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_DEC),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_DEC),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s1ni = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_INC),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_INC),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s1ns = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_STABLE),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_STABLE),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s2top = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.TOP),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.TOP),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s2bot = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.BOTTOM),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.BOTTOM),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s2st = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.STABLE),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.STABLE),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s2in = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.INC),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.INC),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s2de = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.DEC),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.DEC),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s2nd = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_DEC),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_DEC),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s2ni = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_INC),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_INC),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
 
 	ValueLatticeProduct<ValueEnvironment<Trend>,
 			ValueEnvironment<IntInterval>> s2ns = new ValueLatticeProduct<>(
-				new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_STABLE),
-				new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
+					new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_STABLE),
+					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval2));
 
 	@Test
 	public void test_Equals() {
@@ -111,8 +111,8 @@ public class StabilityTest {
 
 		ValueLatticeProduct<ValueEnvironment<Trend>,
 				ValueEnvironment<IntInterval>> s1ns_bis = new ValueLatticeProduct<>(
-					new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_STABLE),
-					new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
+						new ValueEnvironment<>(new Trend()).putState(x, Trend.NON_STABLE),
+						new ValueEnvironment<>(IntInterval.TOP).putState(x, interval1));
 
 		assertEquals(s1ns, s1ns_bis);
 

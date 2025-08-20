@@ -31,7 +31,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HeapEnvWithFields extends FunctionalLattice<HeapEnvWithFields, Identifier, AllocationSites>
+public class HeapEnvWithFields
+		extends
+		FunctionalLattice<HeapEnvWithFields, Identifier, AllocationSites>
 		implements
 		HeapLattice<HeapEnvWithFields> {
 
@@ -100,7 +102,7 @@ public class HeapEnvWithFields extends FunctionalLattice<HeapEnvWithFields, Iden
 				sites.add((AllocationSite) id);
 		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
 		return Pair
-			.of(new HeapEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
+				.of(new HeapEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
 	}
 
 	@Override
@@ -133,7 +135,7 @@ public class HeapEnvWithFields extends FunctionalLattice<HeapEnvWithFields, Iden
 				sites.add((AllocationSite) id);
 		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
 		return Pair
-			.of(new HeapEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
+				.of(new HeapEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
 	}
 
 	private Pair<HeapEnvWithFields, List<HeapReplacement>> liftIdentifiers(
@@ -220,10 +222,10 @@ public class HeapEnvWithFields extends FunctionalLattice<HeapEnvWithFields, Iden
 			return Pair.of(this, List.of());
 
 		Set<AllocationSite> sites = getKeys().stream()
-			.filter(test)
-			.filter(k -> k instanceof AllocationSite)
-			.map(k -> (AllocationSite) k)
-			.collect(Collectors.toSet());
+				.filter(test)
+				.filter(k -> k instanceof AllocationSite)
+				.map(k -> (AllocationSite) k)
+				.collect(Collectors.toSet());
 		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
 
 		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);

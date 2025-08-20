@@ -27,11 +27,11 @@ public class ContainsTest {
 	private final SemanticOracle oracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
 
 	private final BinaryExpression expr = new BinaryExpression(
-		BoolType.INSTANCE,
-		new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
-		new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
-		StringContains.INSTANCE,
-		SyntheticLocation.INSTANCE);
+			BoolType.INSTANCE,
+			new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
+			new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
+			StringContains.INSTANCE,
+			SyntheticLocation.INSTANCE);
 
 	@Test
 	public void test01()
@@ -409,7 +409,7 @@ public class ContainsTest {
 			throws SemanticException {
 		Tarsis domain = new Tarsis();
 		RegexAutomaton a = RegexAutomaton
-			.strings("pandaat", "pandamat", "pansarat", "pansasat", "koladat", "kolabato", "kosalata", "kosanaat");
+				.strings("pandaat", "pandamat", "pansarat", "pansasat", "koladat", "kolabato", "kosalata", "kosanaat");
 		RegexAutomaton search = RegexAutomaton.string("at");
 
 		// {"pandaat", "pandamat", "pansarat","pansasat",

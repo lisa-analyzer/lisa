@@ -9,7 +9,9 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.function.Predicate;
 
-public class TestAbstractState implements AbstractLattice<TestAbstractState> {
+public class TestAbstractState
+		implements
+		AbstractLattice<TestAbstractState> {
 
 	@Override
 	public StructuredRepresentation representation() {

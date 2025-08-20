@@ -8,7 +8,9 @@ import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringSymbol implements TransitionSymbol<StringSymbol> {
+public class StringSymbol
+		implements
+		TransitionSymbol<StringSymbol> {
 
 	/**
 	 * Singleton symbol for the epsilon.

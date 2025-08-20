@@ -29,7 +29,10 @@ import it.unive.lisa.symbolic.value.Identifier;
 public interface NonRelationalDomain<L extends Lattice<L>,
 		T,
 		M extends FunctionalLattice<M, Identifier, L> & DomainLattice<M, T>,
-		E extends SymbolicExpression> extends SemanticComponent<M, T, E, Identifier>, SemanticEvaluator {
+		E extends SymbolicExpression>
+		extends
+		SemanticComponent<M, T, E, Identifier>,
+		SemanticEvaluator {
 
 	/**
 	 * Evaluates a {@link SymbolicExpression}, assuming that the values of

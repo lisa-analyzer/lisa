@@ -14,7 +14,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DefiniteIdSet extends InverseSetLattice<DefiniteIdSet, Identifier> {
+public class DefiniteIdSet
+		extends
+		InverseSetLattice<DefiniteIdSet, Identifier> {
 
 	/**
 	 * Builds the lattice.

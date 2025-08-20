@@ -23,7 +23,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessGlobal extends Expression {
+public class AccessGlobal
+		extends
+		Expression {
 
 	/**
 	 * The receiver of the access
@@ -140,9 +142,9 @@ public class AccessGlobal extends Expression {
 
 		// unit globals are unique, we can directly access those
 		return analysis.smallStepSemantics(
-			entryState,
-			new GlobalVariable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
-			this);
+				entryState,
+				new GlobalVariable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
+				this);
 	}
 
 }

@@ -18,7 +18,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OrderPreservingAssigningStrategy implements ParameterAssigningStrategy {
+public class OrderPreservingAssigningStrategy
+		implements
+		ParameterAssigningStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -43,12 +45,13 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 			AnalysisState<A> temp = prepared.bottom();
 			for (SymbolicExpression exp : parameters[i])
 				temp = temp
-					.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp, call));
+						.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp,
+								call));
 			prepared = temp;
 		}
 
 		// we remove expressions from the stack
-		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet(), prepared.getFixpointInformation());
+		prepared = prepared.withComputedExpressions(new ExpressionSet());
 		return Pair.of(prepared, parameters);
 	}
 

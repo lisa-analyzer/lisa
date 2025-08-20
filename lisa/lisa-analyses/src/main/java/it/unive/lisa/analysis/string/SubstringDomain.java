@@ -40,7 +40,9 @@ import java.util.Set;
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class SubstringDomain implements ValueDomain<Substrings> {
+public class SubstringDomain
+		implements
+		ValueDomain<Substrings> {
 
 	@Override
 	public Substrings makeLattice() {
@@ -183,7 +185,7 @@ public class SubstringDomain implements ValueDomain<Substrings> {
 
 				if (!(left instanceof ValueExpression) || !(right instanceof ValueExpression))
 					throw new SemanticException(
-						"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
+							"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
 
 				ValueExpression rightValueExpression = (ValueExpression) right;
 				ValueExpression leftValueExpression = (ValueExpression) left;
@@ -237,7 +239,7 @@ public class SubstringDomain implements ValueDomain<Substrings> {
 		} else if (binaryOperator instanceof LogicalOr) {
 			if (!(left instanceof ValueExpression) || !(right instanceof ValueExpression))
 				throw new SemanticException(
-					"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
+						"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
 			Satisfiability leftSatisfiability = satisfies(state, (ValueExpression) left, pp, oracle);
 
 			if (leftSatisfiability.equals(Satisfiability.SATISFIED))
@@ -250,7 +252,7 @@ public class SubstringDomain implements ValueDomain<Substrings> {
 		} else if (binaryOperator instanceof LogicalAnd) {
 			if (!(left instanceof ValueExpression) || !(right instanceof ValueExpression))
 				throw new SemanticException(
-					"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
+						"!(left instanceof ValueExpression) || !(right instanceof ValueExpression)");
 			Satisfiability leftSatisfiability = satisfies(state, (ValueExpression) left, pp, oracle);
 			Satisfiability rightSatisfiability = satisfies(state, (ValueExpression) right, pp, oracle);
 
@@ -576,9 +578,9 @@ public class SubstringDomain implements ValueDomain<Substrings> {
 			// Iterate over the starting char
 			for (int i = 0; i <= str.length() - l; i++) {
 				Constant substring = new Constant(
-					c.getStaticType(),
-					str.substring(i, i + l),
-					SyntheticLocation.INSTANCE);
+						c.getStaticType(),
+						str.substring(i, i + l),
+						SyntheticLocation.INSTANCE);
 
 				result.add(substring);
 			}
@@ -621,9 +623,9 @@ public class SubstringDomain implements ValueDomain<Substrings> {
 		// Iterate over the length
 		for (int i = 1; i <= length; i++) {
 			Constant suffix = new Constant(
-				c.getStaticType(),
-				str.substring(length - i, length),
-				SyntheticLocation.INSTANCE);
+					c.getStaticType(),
+					str.substring(length - i, length),
+					SyntheticLocation.INSTANCE);
 
 			result.add(suffix);
 		}
@@ -644,11 +646,11 @@ public class SubstringDomain implements ValueDomain<Substrings> {
 			return expressions.get(0);
 
 		return new BinaryExpression(
-			expressions.get(0).getStaticType(),
-			expressions.get(0),
-			composeExpression(expressions.subList(1, expressions.size())),
-			StringConcat.INSTANCE,
-			SyntheticLocation.INSTANCE);
+				expressions.get(0).getStaticType(),
+				expressions.get(0),
+				composeExpression(expressions.subList(1, expressions.size())),
+				StringConcat.INSTANCE,
+				SyntheticLocation.INSTANCE);
 	}
 
 }

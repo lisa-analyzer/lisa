@@ -18,7 +18,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Continue extends Statement {
+public class Continue
+		extends
+		Statement {
 
 	private final String label;
 

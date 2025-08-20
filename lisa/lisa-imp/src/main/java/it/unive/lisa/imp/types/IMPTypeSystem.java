@@ -13,7 +13,9 @@ import it.unive.lisa.type.TypeSystem;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPTypeSystem extends TypeSystem {
+public class IMPTypeSystem
+		extends
+		TypeSystem {
 
 	@Override
 	public BooleanType getBooleanType() {

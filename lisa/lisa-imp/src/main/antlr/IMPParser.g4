@@ -138,7 +138,7 @@ statement
 		ELSE otherwise = blockOrStatement
 	)?
 	| loop
-	| try
+	| tryBlock
 	| RETURN expression? SEMI
 	| THROW expression SEMI
 	| BREAK IDENTIFIER? SEMI
@@ -168,7 +168,7 @@ forDeclaration
 		= expression?
 ;
 
-try
+tryBlock
 	: TRY body = block catchBlock catchBlock* (ELSE else = block)? (
 		FINALLY final = block
 	)?

@@ -5,7 +5,9 @@ package it.unive.lisa.program.annotations.values;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class BoolAnnotationValue implements BasicAnnotationValue {
+public class BoolAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final boolean b;
 

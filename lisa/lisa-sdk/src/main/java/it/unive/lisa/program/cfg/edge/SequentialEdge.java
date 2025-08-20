@@ -13,7 +13,9 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SequentialEdge extends Edge {
+public class SequentialEdge
+		extends
+		Edge {
 
 	/**
 	 * Builds an "empty" edge, meaning that it does not have endpoints.

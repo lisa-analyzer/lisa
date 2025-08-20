@@ -11,7 +11,9 @@ import java.util.Objects;
  * @param <T> the concrete type of {@link TransitionSymbol}s that the transition
  *                recognizes
  */
-public final class Transition<T extends TransitionSymbol<T>> implements Comparable<Transition<T>> {
+public final class Transition<T extends TransitionSymbol<T>>
+		implements
+		Comparable<Transition<T>> {
 
 	private final State source;
 

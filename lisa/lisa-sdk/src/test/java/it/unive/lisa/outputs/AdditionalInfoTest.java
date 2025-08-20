@@ -27,10 +27,10 @@ import org.junit.Test;
 public class AdditionalInfoTest {
 
 	private static final ClassUnit unit = new ClassUnit(
-		SyntheticLocation.INSTANCE,
-		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-		"Testing",
-		false);
+			SyntheticLocation.INSTANCE,
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"Testing",
+			false);
 
 	@Test
 	public void testNoInfo()

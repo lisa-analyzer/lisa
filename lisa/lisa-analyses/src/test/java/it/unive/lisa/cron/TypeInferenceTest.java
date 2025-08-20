@@ -8,16 +8,18 @@ import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
 import org.junit.Test;
 
-public class TypeInferenceTest extends IMPCronExecutor {
+public class TypeInferenceTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testInferredTypesCollection() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			DefaultConfiguration.defaultValueDomain(),
-			new InferredTypes());
+				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultValueDomain(),
+				new InferredTypes());
 		conf.testDir = "type-inference";
 		conf.testSubDir = "inferred-basic";
 		conf.programFile = "inference.imp";
@@ -29,9 +31,9 @@ public class TypeInferenceTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			DefaultConfiguration.defaultValueDomain(),
-			new InferredTypes());
+				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultValueDomain(),
+				new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "type-inference";
 		conf.testSubDir = "inferred-casts";
@@ -44,9 +46,9 @@ public class TypeInferenceTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			new FieldSensitivePointBasedHeap(),
-			DefaultConfiguration.defaultValueDomain(),
-			new InferredTypes());
+				new FieldSensitivePointBasedHeap(),
+				DefaultConfiguration.defaultValueDomain(),
+				new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "type-inference";
 		conf.testSubDir = "inferred-objects";
@@ -59,9 +61,9 @@ public class TypeInferenceTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			DefaultConfiguration.defaultValueDomain(),
-			new StaticTypes());
+				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultValueDomain(),
+				new StaticTypes());
 		conf.testDir = "type-inference";
 		conf.testSubDir = "static-basic";
 		conf.programFile = "inference.imp";
@@ -73,9 +75,9 @@ public class TypeInferenceTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			DefaultConfiguration.defaultValueDomain(),
-			new StaticTypes());
+				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultValueDomain(),
+				new StaticTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "type-inference";
 		conf.testSubDir = "static-casts";
@@ -88,9 +90,9 @@ public class TypeInferenceTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			new FieldSensitivePointBasedHeap(),
-			DefaultConfiguration.defaultValueDomain(),
-			new StaticTypes());
+				new FieldSensitivePointBasedHeap(),
+				DefaultConfiguration.defaultValueDomain(),
+				new StaticTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.testDir = "type-inference";
 		conf.testSubDir = "static-objects";

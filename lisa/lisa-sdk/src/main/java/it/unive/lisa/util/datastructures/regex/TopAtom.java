@@ -13,7 +13,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class TopAtom extends Atom {
+public final class TopAtom
+		extends
+		Atom {
 
 	/**
 	 * The string used to represent this regular expression.

@@ -11,7 +11,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class EmptySet extends RegularExpression {
+public final class EmptySet
+		extends
+		RegularExpression {
 
 	/**
 	 * The singleton instance.

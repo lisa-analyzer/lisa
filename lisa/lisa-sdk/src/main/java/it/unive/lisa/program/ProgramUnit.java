@@ -7,7 +7,11 @@ import it.unive.lisa.program.cfg.CodeLocation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class ProgramUnit extends Unit implements CodeElement {
+public abstract class ProgramUnit
+		extends
+		Unit
+		implements
+		CodeElement {
 
 	/**
 	 * The location in the program of this unit

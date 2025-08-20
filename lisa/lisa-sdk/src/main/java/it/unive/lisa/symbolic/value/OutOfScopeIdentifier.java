@@ -14,7 +14,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public class OutOfScopeIdentifier extends Identifier {
+public class OutOfScopeIdentifier
+		extends
+		Identifier {
 
 	private final ScopeToken scope;
 

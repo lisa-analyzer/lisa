@@ -32,7 +32,9 @@ import org.apache.commons.lang3.StringUtils;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public abstract class CFGFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> implements FixpointImplementation<Statement, Edge, CFGFixpoint.CompoundState<A>> {
+		D extends AbstractDomain<A>>
+		implements
+		FixpointImplementation<Statement, Edge, CFGFixpoint.CompoundState<A>> {
 
 	/**
 	 * The graph targeted by this implementation.
@@ -89,8 +91,8 @@ public abstract class CFGFixpoint<A extends AbstractLattice<A>,
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(graph).getVariable();
 			for (SymbolicExpression expr : interprocedural.getAnalysis()
-				.smallStepSemantics(approx, v, edge.getSource())
-				.getComputedExpressions())
+					.smallStepSemantics(approx, v, edge.getSource())
+					.getComputedExpressions())
 				ids.add((Identifier) expr);
 		}
 
@@ -118,7 +120,9 @@ public abstract class CFGFixpoint<A extends AbstractLattice<A>,
 	 * @param <A> the type of {@link AbstractLattice} contained into the
 	 *                analysis state
 	 */
-	public static final class CompoundState<A extends AbstractLattice<A>> implements Lattice<CompoundState<A>> {
+	public static final class CompoundState<A extends AbstractLattice<A>>
+			implements
+			Lattice<CompoundState<A>> {
 
 		/**
 		 * Builds a compound state from the given post-states.
@@ -236,7 +240,7 @@ public abstract class CFGFixpoint<A extends AbstractLattice<A>,
 				CompoundState<A> other)
 				throws SemanticException {
 			return CompoundState
-				.of(postState.narrowing(other.postState), intermediateStates.narrowing(other.intermediateStates));
+					.of(postState.narrowing(other.postState), intermediateStates.narrowing(other.intermediateStates));
 		}
 
 		@Override
@@ -244,7 +248,7 @@ public abstract class CFGFixpoint<A extends AbstractLattice<A>,
 				CompoundState<A> other)
 				throws SemanticException {
 			return CompoundState
-				.of(postState.widening(other.postState), intermediateStates.widening(other.intermediateStates));
+					.of(postState.widening(other.postState), intermediateStates.widening(other.intermediateStates));
 		}
 
 		@Override

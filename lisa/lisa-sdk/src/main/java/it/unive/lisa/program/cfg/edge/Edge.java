@@ -16,7 +16,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
+public abstract class Edge
+		implements
+		CodeEdge<CFG, Statement, Edge> {
 
 	/**
 	 * The source node.

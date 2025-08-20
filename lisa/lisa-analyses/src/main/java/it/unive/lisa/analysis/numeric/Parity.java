@@ -27,7 +27,9 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Parity implements BaseNonRelationalValueDomain<ParityLattice> {
+public class Parity
+		implements
+		BaseNonRelationalValueDomain<ParityLattice> {
 
 	@Override
 	public ParityLattice evalNullConstant(

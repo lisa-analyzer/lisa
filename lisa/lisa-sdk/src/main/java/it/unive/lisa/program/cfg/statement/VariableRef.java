@@ -23,7 +23,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class VariableRef extends Expression {
+public class VariableRef
+		extends
+		Expression {
 
 	/**
 	 * The name of this variable

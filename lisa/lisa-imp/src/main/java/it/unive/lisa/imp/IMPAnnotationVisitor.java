@@ -29,7 +29,9 @@ import java.util.TreeSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
+public class IMPAnnotationVisitor
+		extends
+		IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Annotations visitAnnotations(

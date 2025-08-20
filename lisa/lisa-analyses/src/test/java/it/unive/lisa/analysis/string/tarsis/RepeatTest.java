@@ -38,8 +38,8 @@ public class RepeatTest {
 
 		// "abc".repeat([1,+infty]) = abc(abc)*
 		assertTrue(
-			domain.repeat(abc, new IntInterval(MathNumber.ONE, MathNumber.PLUS_INFINITY))
-				.isEqualTo(abc.concat(abc_star)));
+				domain.repeat(abc, new IntInterval(MathNumber.ONE, MathNumber.PLUS_INFINITY))
+						.isEqualTo(abc.concat(abc_star)));
 	}
 
 	@Test
@@ -48,7 +48,7 @@ public class RepeatTest {
 
 		RegexAutomaton ab_or_cd = new Or(new Atom("ab"), new Atom("cd")).toAutomaton(RegexAutomaton.emptyLang());
 		RegexAutomaton abab_or_cdcd = new Or(new Atom("abab"), new Atom("cdcd"))
-			.toAutomaton(RegexAutomaton.emptyLang());
+				.toAutomaton(RegexAutomaton.emptyLang());
 
 		Tarsis domain = new Tarsis();
 
@@ -66,13 +66,13 @@ public class RepeatTest {
 
 		// {"ab", "cd"}.repeat([0,+infty]) = (ab|cd)*
 		assertTrue(
-			domain.repeat(ab_or_cd, new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY))
-				.isEqualTo(ab_or_cd.star()));
+				domain.repeat(ab_or_cd, new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY))
+						.isEqualTo(ab_or_cd.star()));
 
 		// {"ab", "cd"}.repeat([1,+infty]) = (ab|cd)(ab|cd)*
 		assertTrue(
-			domain.repeat(ab_or_cd, new IntInterval(MathNumber.ONE, MathNumber.PLUS_INFINITY))
-				.isEqualTo(ab_or_cd.concat(ab_or_cd.star())));
+				domain.repeat(ab_or_cd, new IntInterval(MathNumber.ONE, MathNumber.PLUS_INFINITY))
+						.isEqualTo(ab_or_cd.concat(ab_or_cd.star())));
 	}
 
 }

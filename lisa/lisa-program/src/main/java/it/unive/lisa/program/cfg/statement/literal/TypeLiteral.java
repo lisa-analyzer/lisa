@@ -12,7 +12,9 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TypeLiteral extends Literal<Type> {
+public class TypeLiteral
+		extends
+		Literal<Type> {
 
 	/**
 	 * Builds the literal.

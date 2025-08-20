@@ -11,7 +11,9 @@ import it.unive.lisa.program.type.Int32Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Int32Literal extends Literal<Integer> {
+public class Int32Literal
+		extends
+		Literal<Integer> {
 
 	/**
 	 * Builds the literal.

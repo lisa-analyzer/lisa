@@ -9,7 +9,9 @@ import it.unive.lisa.lattices.informationFlow.ThreeTaint;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ThreeLevelsTaint extends BaseTaint<ThreeTaint> {
+public class ThreeLevelsTaint
+		extends
+		BaseTaint<ThreeTaint> {
 
 	@Override
 	public ThreeTaint top() {

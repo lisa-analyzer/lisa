@@ -15,7 +15,9 @@ import java.util.function.Function;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ObjectRepresentation extends StructuredRepresentation {
+public class ObjectRepresentation
+		extends
+		StructuredRepresentation {
 
 	/**
 	 * The fields of this object, with their values.
@@ -74,9 +76,9 @@ public class ObjectRepresentation extends StructuredRepresentation {
 				sb.append(first ? "\n  " : ",\n  ").append(e.getKey()).append(": ").append(e.getValue());
 			else
 				sb.append(first ? "\n  " : ",\n  ")
-					.append(e.getKey())
-					.append(":\n")
-					.append(StringUtilities.indent(val, "  ", 2));
+						.append(e.getKey())
+						.append(":\n")
+						.append(StringUtilities.indent(val, "  ", 2));
 			first = false;
 		}
 		sb.append("\n}");

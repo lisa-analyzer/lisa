@@ -15,7 +15,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStrategy {
+public class SingleInheritanceTraversalStrategy
+		implements
+		HierarcyTraversalStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -39,7 +41,9 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 		};
 	}
 
-	private class SingleInheritanceIterator implements Iterator<CompilationUnit> {
+	private class SingleInheritanceIterator
+			implements
+			Iterator<CompilationUnit> {
 
 		private CompilationUnit current;
 

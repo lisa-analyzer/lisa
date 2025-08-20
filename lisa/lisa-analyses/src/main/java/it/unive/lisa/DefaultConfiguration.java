@@ -31,7 +31,9 @@ import it.unive.lisa.util.numeric.IntInterval;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DefaultConfiguration extends LiSAConfiguration {
+public class DefaultConfiguration
+		extends
+		LiSAConfiguration {
 
 	/**
 	 * Yields a default {@link CallGraph} that can be used to run analyses.
@@ -117,7 +119,8 @@ public class DefaultConfiguration extends LiSAConfiguration {
 	 * 
 	 * @return the abstract state
 	 */
-	public static SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>,
+	public static SimpleAbstractDomain<Monolith,
+			ValueEnvironment<IntInterval>,
 			TypeEnvironment<TypeSet>> defaultAbstractDomain() {
 		return simpleState(defaultHeapDomain(), defaultValueDomain(), defaultTypeDomain());
 	}

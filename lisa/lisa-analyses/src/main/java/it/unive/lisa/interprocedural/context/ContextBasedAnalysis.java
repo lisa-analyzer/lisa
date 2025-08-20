@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -61,7 +60,9 @@ import org.apache.logging.log4j.Logger;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public class ContextBasedAnalysis<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> extends CallGraphBasedAnalysis<A, D> {
+		D extends AbstractDomain<A>>
+		extends
+		CallGraphBasedAnalysis<A, D> {
 
 	private static final Logger LOG = LogManager.getLogger(ContextBasedAnalysis.class);
 
@@ -166,10 +167,9 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		ContextSensitivityToken empty = (ContextSensitivityToken) token.startingId();
 
 		Collection<CFG> entryPoints = new TreeSet<>(
-			(
-					c1,
-					c2
-			) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
+				(
+						c1,
+						c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
 		entryPoints.addAll(app.getEntryPoints());
 
 		do {
@@ -234,19 +234,19 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		// these are the calls that start the recursion by invoking
 		// one of its members
 		Collection<Call> starters = callgraph.getCallSites(rec)
-			.stream()
-			.filter(site -> !rec.contains(site.getCFG()))
-			.collect(Collectors.toSet());
+				.stream()
+				.filter(site -> !rec.contains(site.getCFG()))
+				.collect(Collectors.toSet());
 
 		for (Call starter : starters) {
 			// these are the head of the recursion: members invoked
 			// from outside of it
 			Set<CFG> heads = callgraph.getCallees(starter.getCFG())
-				.stream()
-				.filter(callee -> rec.contains(callee))
-				.filter(CFG.class::isInstance)
-				.map(CFG.class::cast)
-				.collect(Collectors.toSet());
+					.stream()
+					.filter(callee -> rec.contains(callee))
+					.filter(CFG.class::isInstance)
+					.map(CFG.class::cast)
+					.collect(Collectors.toSet());
 			Set<Pair<ContextSensitivityToken, CompoundState<A>>> entries = new HashSet<>();
 			for (Entry<ScopeId, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
 				StatementStore<A> params = new StatementStore<>(entryState.bottom());
@@ -254,16 +254,17 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 				if (conf.optimize)
 					for (Expression actual : parameters)
 						params.put(
-							actual,
-							((OptimizedAnalyzedCFG<A, D>) res.getValue()).getUnwindedAnalysisStateAfter(actual, conf));
+								actual,
+								((OptimizedAnalyzedCFG<A, D>) res.getValue()).getUnwindedAnalysisStateAfter(actual,
+										conf));
 				else
 					for (Expression actual : parameters)
 						params.put(actual, res.getValue().getAnalysisStateAfter(actual));
 
 				entries.add(
-					Pair.of(
-						(ContextSensitivityToken) res.getKey(),
-						CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
+						Pair.of(
+								(ContextSensitivityToken) res.getKey(),
+								CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
 			}
 
 			for (CFG head : heads)
@@ -291,7 +292,8 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 				token = empty;
 				AnalysisState<A> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 				results
-					.putResult(cfg, empty, cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
+						.putResult(cfg, empty,
+								cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
@@ -390,9 +392,9 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		// prepare the state for the call: hide the visible variables
 		Pair<AnalysisState<A>,
 				ExpressionSet[]> scoped = call.getProgram()
-					.getFeatures()
-					.getScopingStrategy()
-					.scope(call, scope, entryState, analysis, parameters);
+						.getFeatures()
+						.getScopingStrategy()
+						.scope(call, scope, entryState, analysis, parameters);
 		AnalysisState<A> callState = scoped.getLeft();
 		ExpressionSet[] locals = scoped.getRight();
 
@@ -425,7 +427,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			if (call.returnsVoid(null))
 				return entryState.bottom();
 			else
-				return new AnalysisState<>(entryState.getState().bottom(), call.getMetaVariable(), FixpointInfo.BOTTOM);
+				return entryState.bottom().withComputedExpression(call.getMetaVariable());
 		}
 
 		ContextSensitivityToken callerToken = token;
@@ -440,12 +442,12 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			AnalyzedCFG<A> states = localResults == null ? null : localResults.get(token);
 			Pair<AnalysisState<A>,
 					ExpressionSet[]> prepared = prepareEntryState(
-						call,
-						entryState,
-						parameters,
-						expressions,
-						scope,
-						cfg);
+							call,
+							entryState,
+							parameters,
+							expressions,
+							scope,
+							cfg);
 
 			AnalysisState<A> exitState;
 			if (canShortcut(cfg) && states != null && prepared.getLeft().lessOrEqual(states.getEntryState()))
@@ -467,7 +469,8 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 
 			// save the resulting state
 			result = result
-				.lub(call.getProgram().getFeatures().getScopingStrategy().unscope(call, scope, exitState, analysis));
+					.lub(call.getProgram().getFeatures().getScopingStrategy().unscope(call, scope, exitState,
+							analysis));
 		}
 
 		token = callerToken;

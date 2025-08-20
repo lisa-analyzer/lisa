@@ -24,7 +24,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public final class InterfaceType implements UnitType {
+public final class InterfaceType
+		implements
+		UnitType {
 
 	private static final Map<String, InterfaceType> types = new HashMap<>();
 

@@ -25,7 +25,9 @@ import java.util.function.Predicate;
  * @param <E> the concrete type of {@link DataflowElement} contained in this
  *                lattice
  */
-public class DefiniteSet<E extends DataflowElement<E>> extends InverseSetLattice<DefiniteSet<E>, E>
+public class DefiniteSet<E extends DataflowElement<E>>
+		extends
+		InverseSetLattice<DefiniteSet<E>, E>
 		implements
 		DataflowDomainLattice<DefiniteSet<E>, E> {
 

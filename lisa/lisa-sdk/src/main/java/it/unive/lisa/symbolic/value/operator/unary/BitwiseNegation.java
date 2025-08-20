@@ -19,7 +19,10 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BitwiseNegation implements BitwiseOperator, UnaryOperator {
+public class BitwiseNegation
+		implements
+		BitwiseOperator,
+		UnaryOperator {
 
 	/**
 	 * The singleton instance of this class.

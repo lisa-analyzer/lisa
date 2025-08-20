@@ -19,7 +19,9 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class FalseEdge extends Edge {
+public class FalseEdge
+		extends
+		Edge {
 
 	/**
 	 * Builds the edge.
@@ -47,10 +49,10 @@ public class FalseEdge extends Edge {
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : exprs) {
 			UnaryExpression negated = new UnaryExpression(
-				expr.getStaticType(),
-				expr,
-				LogicalNegation.INSTANCE,
-				expr.getCodeLocation());
+					expr.getStaticType(),
+					expr,
+					LogicalNegation.INSTANCE,
+					expr.getCodeLocation());
 			result = result.lub(analysis.assume(state, negated, getSource(), getDestination()));
 		}
 		return result;

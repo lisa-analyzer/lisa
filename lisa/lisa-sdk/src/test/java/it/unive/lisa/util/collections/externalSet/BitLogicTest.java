@@ -50,27 +50,27 @@ public class BitLogicTest {
 
 			assertEquals("Testing " + test + ": the bitvector is not set to 0 before the computation", 0L, smash(bits));
 			assertFalse(
-				"Testing " + test + ": the corresponding bit is set at the beginning",
-				(bits[test >> 6] & 1L << (test % 64)) != 0L);
+					"Testing " + test + ": the corresponding bit is set at the beginning",
+					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 
 			bits[test >> 6] |= 1L << (test % 64);
 			assertNotEquals(
-				"Testing " + test + ": set() did not modify the bitvector (still equal to 0)",
-				0L,
-				smash(bits));
+					"Testing " + test + ": set() did not modify the bitvector (still equal to 0)",
+					0L,
+					smash(bits));
 			assertArrayEquals(
-				"Testing " + test + ": set() did not modfiy the bits appropriately",
-				new int[] { test },
-				actives(bits));
+					"Testing " + test + ": set() did not modfiy the bits appropriately",
+					new int[] { test },
+					actives(bits));
 			assertTrue(
-				"Testing " + test + ": isset() does not detect the modification made by set()",
-				(bits[test >> 6] & 1L << (test % 64)) != 0L);
+					"Testing " + test + ": isset() does not detect the modification made by set()",
+					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 
 			bits[test >> 6] &= ~(1L << (test % 64));
 			assertEquals("Testing " + test + ": unset() did not bring the bitvector to 0", 0L, smash(bits));
 			assertFalse(
-				"Testing " + test + ": isset() does not detect the modification made by unset()",
-				(bits[test >> 6] & 1L << (test % 64)) != 0L);
+					"Testing " + test + ": isset() does not detect the modification made by unset()",
+					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 		}
 	}
 

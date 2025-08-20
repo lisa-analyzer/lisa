@@ -187,8 +187,8 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 		} catch (InterproceduralAnalysisException e) {
 			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisSetupException(
-				"Exception while building the interprocedural analysis for the input program",
-				e);
+					"Exception while building the interprocedural analysis for the input program",
+					e);
 		}
 	}
 
@@ -200,7 +200,7 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 
 		if (callGraph == null && interproc.needsCallGraph())
 			throw new AnalysisSetupException(
-				"The provided interprocedural analysis needs a call graph to function, but none has been provided");
+					"The provided interprocedural analysis needs a call graph to function, but none has been provided");
 
 		if (analysis == null) {
 			LOG.warn("Skipping analysis execution since no analysis has been provided");
@@ -212,11 +212,12 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 
 	private void analyze(
 			FixpointConfiguration fixconf) {
-		AnalysisState<A> state = this.analysis.makeLattice();
+		AnalysisState<A> state = this.analysis.makeLattice()
+				.top()
+				.withComputedExpression(new Skip(SyntheticLocation.INSTANCE));
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {
-				interproc
-					.fixpoint(new AnalysisState<>(state.getState(), new Skip(SyntheticLocation.INSTANCE)), fixconf);
+				interproc.fixpoint(state, fixconf);
 			} catch (FixpointException e) {
 				LOG.fatal("Exception during fixpoint computation", e);
 				throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -230,14 +231,12 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			FixpointConfiguration fixconf) {
 		BiFunction<CFG, Statement, SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding ? (
 				cfg,
-				st
-		) -> ((OptimizedAnalyzedCFG<A, D>) cfg).getUnwindedAnalysisStateAfter(st, fixconf)
-			.representation()
-			.toSerializableValue()
+				st) -> ((OptimizedAnalyzedCFG<A, D>) cfg).getUnwindedAnalysisStateAfter(st, fixconf)
+						.representation()
+						.toSerializableValue()
 				: (
 						cfg,
-						st
-				) -> ((AnalyzedCFG<A>) cfg).getAnalysisStateAfter(st).representation().toSerializableValue();
+						st) -> ((AnalyzedCFG<A>) cfg).getAnalysisStateAfter(st).representation().toSerializableValue();
 
 		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 			for (AnalyzedCFG<A> result : interproc.getAnalysisResultsOf(cfg)) {
@@ -252,8 +251,8 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 					dumpSingleGraph(filename, graph);
 				} catch (IOException e) {
 					LOG.error(
-						"Exception while dumping the analysis results on {}",
-						cfg.getDescriptor().getFullSignature());
+							"Exception while dumping the analysis results on {}",
+							cfg.getDescriptor().getFullSignature());
 					LOG.error(e);
 				}
 			}

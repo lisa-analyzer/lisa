@@ -107,11 +107,11 @@ public class TimeFormatTest {
 			long minutes = TimeUnit.NANOSECONDS.toMinutes(l);
 			long seconds = TimeUnit.NANOSECONDS.toSeconds(l - TimeUnit.MINUTES.toNanos(minutes));
 			long millis = TimeUnit.NANOSECONDS
-				.toMillis(l - TimeUnit.MINUTES.toNanos(minutes) - TimeUnit.SECONDS.toNanos(seconds));
+					.toMillis(l - TimeUnit.MINUTES.toNanos(minutes) - TimeUnit.SECONDS.toNanos(seconds));
 			long nanos = l
-				- TimeUnit.MINUTES.toNanos(minutes)
-				- TimeUnit.SECONDS.toNanos(seconds)
-				- TimeUnit.MILLISECONDS.toNanos(millis);
+					- TimeUnit.MINUTES.toNanos(minutes)
+					- TimeUnit.SECONDS.toNanos(seconds)
+					- TimeUnit.MILLISECONDS.toNanos(millis);
 			String result = nanos + UNIT_NANOS;
 			if (millis != 0)
 				result = millis + UNIT_MILLIS + " " + result;
@@ -129,17 +129,17 @@ public class TimeFormatTest {
 			long hours = TimeUnit.NANOSECONDS.toHours(l);
 			long minutes = TimeUnit.NANOSECONDS.toMinutes(l - TimeUnit.HOURS.toNanos(hours));
 			long seconds = TimeUnit.NANOSECONDS
-				.toSeconds(l - TimeUnit.HOURS.toNanos(hours) - TimeUnit.MINUTES.toNanos(minutes));
+					.toSeconds(l - TimeUnit.HOURS.toNanos(hours) - TimeUnit.MINUTES.toNanos(minutes));
 			long millis = TimeUnit.NANOSECONDS.toMillis(
-				l
+					l
+							- TimeUnit.HOURS.toNanos(hours)
+							- TimeUnit.MINUTES.toNanos(minutes)
+							- TimeUnit.SECONDS.toNanos(seconds));
+			long nanos = l
 					- TimeUnit.HOURS.toNanos(hours)
 					- TimeUnit.MINUTES.toNanos(minutes)
-					- TimeUnit.SECONDS.toNanos(seconds));
-			long nanos = l
-				- TimeUnit.HOURS.toNanos(hours)
-				- TimeUnit.MINUTES.toNanos(minutes)
-				- TimeUnit.SECONDS.toNanos(seconds)
-				- TimeUnit.MILLISECONDS.toNanos(millis);
+					- TimeUnit.SECONDS.toNanos(seconds)
+					- TimeUnit.MILLISECONDS.toNanos(millis);
 			String result = nanos + UNIT_NANOS;
 			if (millis != 0)
 				result = millis + UNIT_MILLIS + " " + result;
@@ -159,15 +159,15 @@ public class TimeFormatTest {
 			Function<Long, String> expectedGenerator,
 			Function<Long, String> actualGenerator) {
 		LongStream
-			.iterate(
-				1L + generator.nextInt(9),
-				l -> (1L + generator.nextInt(9)) * ((long) Math.pow(10, Math.log10(l))) + l)
-			.limit((long) Math.log10(Long.MAX_VALUE))
-			.forEach(
-				random -> assertEquals(
-					"Conversion failed for long value " + random,
-					expectedGenerator.apply(random),
-					actualGenerator.apply(random)));
+				.iterate(
+						1L + generator.nextInt(9),
+						l -> (1L + generator.nextInt(9)) * ((long) Math.pow(10, Math.log10(l))) + l)
+				.limit((long) Math.log10(Long.MAX_VALUE))
+				.forEach(
+						random -> assertEquals(
+								"Conversion failed for long value " + random,
+								expectedGenerator.apply(random),
+								actualGenerator.apply(random)));
 	}
 
 }

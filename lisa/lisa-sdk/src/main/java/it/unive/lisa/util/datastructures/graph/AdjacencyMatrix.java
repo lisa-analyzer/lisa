@@ -209,10 +209,10 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 */
 	public Collection<E> getEdges() {
 		return matrix.values()
-			.stream()
-			.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
-			.distinct()
-			.collect(Collectors.toSet());
+				.stream()
+				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
+				.distinct()
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -334,10 +334,10 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 */
 	public Collection<N> getEntries() {
 		return matrix.entrySet()
-			.stream()
-			.filter(e -> e.getValue().ingoing.isEmpty())
-			.map(Entry::getKey)
-			.collect(Collectors.toSet());
+				.stream()
+				.filter(e -> e.getValue().ingoing.isEmpty())
+				.map(Entry::getKey)
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -348,10 +348,10 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 */
 	public Collection<N> getExits() {
 		return matrix.entrySet()
-			.stream()
-			.filter(e -> e.getValue().outgoing.isEmpty())
-			.map(Entry::getKey)
-			.collect(Collectors.toSet());
+				.stream()
+				.filter(e -> e.getValue().outgoing.isEmpty())
+				.map(Entry::getKey)
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -443,7 +443,7 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 			// no deadcode
 			if (st.getValue().ingoing.isEmpty() && !entrypoints.contains(st.getKey()))
 				throw new ProgramValidationException(
-					"Unreachable node that is not marked as entrypoint: " + st.getKey());
+						"Unreachable node that is not marked as entrypoint: " + st.getKey());
 		}
 	}
 
@@ -453,10 +453,10 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 			throws ProgramValidationException {
 		if (!nodes.contains(edge.getSource()))
 			throw new ProgramValidationException(
-				"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
+					"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
 		else if (!nodes.contains(edge.getDestination()))
 			throw new ProgramValidationException(
-				"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
+					"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
 	}
 
 	/**

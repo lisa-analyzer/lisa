@@ -20,7 +20,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NoOpHeap implements HeapDomain<SingleHeapLattice> {
+public class NoOpHeap
+		implements
+		HeapDomain<SingleHeapLattice> {
 
 	@Override
 	public SingleHeapLattice makeLattice() {

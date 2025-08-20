@@ -9,7 +9,9 @@ import it.unive.lisa.util.testing.AnalysisTestExecutor;
 import it.unive.lisa.util.testing.TestConfiguration;
 import java.nio.file.Path;
 
-public class IMPCronExecutor extends AnalysisTestExecutor {
+public class IMPCronExecutor
+		extends
+		AnalysisTestExecutor {
 
 	public IMPCronExecutor() {
 		super("imp-testcases", AnalysisTestExecutor.DEFAULT_ACTUAL_DIR);
@@ -22,8 +24,8 @@ public class IMPCronExecutor extends AnalysisTestExecutor {
 		Program program = null;
 		try {
 			program = IMPFrontend.processFile(
-				target.toString(),
-				conf instanceof CronConfiguration ? !((CronConfiguration) conf).allMethods : true);
+					target.toString(),
+					conf instanceof CronConfiguration ? !((CronConfiguration) conf).allMethods : true);
 		} catch (ParsingException e) {
 			e.printStackTrace(System.err);
 			fail("Exception while parsing '" + target + "': " + e.getMessage());

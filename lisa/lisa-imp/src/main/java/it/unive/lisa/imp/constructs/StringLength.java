@@ -20,7 +20,9 @@ import it.unive.lisa.program.type.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringLength extends NativeCFG {
+public class StringLength
+		extends
+		NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -32,14 +34,14 @@ public class StringLength extends NativeCFG {
 			CodeLocation location,
 			ClassUnit stringUnit) {
 		super(
-			new CodeMemberDescriptor(
-				location,
-				stringUnit,
-				true,
-				"len",
-				Int32Type.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE)),
-			IMPStringLength.class);
+				new CodeMemberDescriptor(
+						location,
+						stringUnit,
+						true,
+						"len",
+						Int32Type.INSTANCE,
+						new Parameter(location, "this", StringType.INSTANCE)),
+				IMPStringLength.class);
 	}
 
 	/**
@@ -49,7 +51,11 @@ public class StringLength extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringLength extends Length implements PluggableStatement {
+	public static class IMPStringLength
+			extends
+			Length
+			implements
+			PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the

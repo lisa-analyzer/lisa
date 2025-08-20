@@ -136,12 +136,12 @@ public final class Counter {
 
 		logging = false;
 		logger.log(
-			level,
-			"{} [stop] [{} {} in {}]",
-			message,
-			count,
-			objects,
-			TimeFormat.UP_TO_SECONDS.format(System.nanoTime() - startTime));
+				level,
+				"{} [stop] [{} {} in {}]",
+				message,
+				count,
+				objects,
+				TimeFormat.UP_TO_SECONDS.format(System.nanoTime() - startTime));
 	}
 
 	private void step() {

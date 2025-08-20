@@ -4,7 +4,9 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.traces.TracePartitioning;
 import org.junit.Test;
 
-public class TracePartitioningTest extends IMPCronExecutor {
+public class TracePartitioningTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testTracePartitioning() {

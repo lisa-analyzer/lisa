@@ -10,16 +10,18 @@ import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import org.junit.Test;
 
-public class NumericAnalysesTest extends IMPCronExecutor {
+public class NumericAnalysesTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testSign() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Sign(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "sign";
 		conf.programFile = "numeric.imp";
@@ -31,9 +33,9 @@ public class NumericAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Parity(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Parity(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "parity";
 		conf.programFile = "numeric.imp";
@@ -45,9 +47,9 @@ public class NumericAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "interval";
 		conf.programFile = "numeric.imp";
@@ -59,9 +61,9 @@ public class NumericAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new IntegerConstantPropagation(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new IntegerConstantPropagation(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "int-const";
 		conf.programFile = "numeric.imp";
@@ -73,9 +75,9 @@ public class NumericAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new NonRedundantIntervals(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new NonRedundantIntervals(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "interval-set";
 		conf.programFile = "numeric.imp";
@@ -94,9 +96,9 @@ public class NumericAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Pentagon(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Pentagon(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "pentagons";
 		conf.programFile = "pentagons.imp";

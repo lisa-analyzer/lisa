@@ -8,7 +8,9 @@ import it.unive.lisa.program.cfg.ProgramPoint;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Branching extends TraceToken {
+public class Branching
+		extends
+		TraceToken {
 
 	private final boolean trueBranch;
 

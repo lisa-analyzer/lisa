@@ -46,7 +46,9 @@ import it.unive.lisa.util.numeric.IntInterval;
  * @param <S> the non-relational string abstract domain
  */
 public class SmashedSum<I extends Lattice<I>,
-		S extends Lattice<S>> implements BaseNonRelationalValueDomain<SmashedValue<I, S>> {
+		S extends Lattice<S>>
+		implements
+		BaseNonRelationalValueDomain<SmashedValue<I, S>> {
 
 	/**
 	 * The integer domain.
@@ -137,21 +139,22 @@ public class SmashedSum<I extends Lattice<I>,
 			return mkInt(intDom.evalBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle));
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
 			return mkBool(
-				boolDom.evalBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle));
+					boolDom.evalBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle));
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
 			return mkBool(
-				intDom.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle));
+					intDom.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle));
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE)
 			return mkBool(satisfiesBinaryExpression(expression, left, right, pp, oracle));
 		if (operator == StringIndexOf.INSTANCE && left.isString() && right.isString())
 			return mkInt(intDom.fromInterval(strDom.indexOf(left.getStringValue(), right.getStringValue())));
 		if (operator == StringConcat.INSTANCE && left.isString() && right.isString())
 			return mkString(
-				strDom.evalBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle));
+					strDom.evalBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle));
 		if (operator instanceof StringOperation && left.isString() && right.isString())
 			return mkBool(
-				strDom
-					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle));
+					strDom
+							.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
+									oracle));
 		return top();
 	}
 
@@ -182,10 +185,10 @@ public class SmashedSum<I extends Lattice<I>,
 							temp = partial.lub(strDom.substring(left.getStringValue(), b, e));
 						else if (b == e)
 							temp = partial.lub(
-								this.strDom.evalNonNullConstant(
-									new Constant(Untyped.INSTANCE, "", SyntheticLocation.INSTANCE),
-									null,
-									oracle));
+									this.strDom.evalNonNullConstant(
+											new Constant(Untyped.INSTANCE, "", SyntheticLocation.INSTANCE),
+											null,
+											oracle));
 						else
 							temp = strDom.bottom();
 
@@ -200,13 +203,13 @@ public class SmashedSum<I extends Lattice<I>,
 			return mkString(partial);
 		} else if (operator == StringReplace.INSTANCE && left.isString() && middle.isString() && right.isString())
 			return mkString(
-				strDom.evalTernaryExpression(
-					expression,
-					left.getStringValue(),
-					middle.getStringValue(),
-					right.getStringValue(),
-					pp,
-					oracle));
+					strDom.evalTernaryExpression(
+							expression,
+							left.getStringValue(),
+							middle.getStringValue(),
+							right.getStringValue(),
+							pp,
+							oracle));
 
 		return top();
 	}
@@ -222,7 +225,7 @@ public class SmashedSum<I extends Lattice<I>,
 		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof StringOperation && left.isString() && right.isString())
 			return strDom
-				.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
+					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
 			return intDom.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
@@ -232,26 +235,28 @@ public class SmashedSum<I extends Lattice<I>,
 				return Satisfiability.NOT_SATISFIED;
 			if (left.isString())
 				return strDom
-					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
+						.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
+								oracle);
 			if (left.isNumber())
 				return intDom
-					.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
+						.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 			if (left.isBool())
 				return boolDom
-					.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
+						.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		}
 		if (operator == ComparisonNe.INSTANCE) {
 			if (!left.sameKind(right))
 				return Satisfiability.SATISFIED;
 			if (left.isString())
 				return strDom
-					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
+						.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
+								oracle);
 			if (left.isNumber())
 				return intDom
-					.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
+						.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 			if (left.isBool())
 				return boolDom
-					.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
+						.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		}
 		return Satisfiability.UNKNOWN;
 	}

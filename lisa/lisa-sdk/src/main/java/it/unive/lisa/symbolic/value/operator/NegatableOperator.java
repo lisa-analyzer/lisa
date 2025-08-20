@@ -12,7 +12,9 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface NegatableOperator extends Operator {
+public interface NegatableOperator
+		extends
+		Operator {
 
 	/**
 	 * Yields the opposite operator of this operator (e.g., {@link ComparisonLe}

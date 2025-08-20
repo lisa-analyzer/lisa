@@ -16,7 +16,9 @@ import java.util.function.Predicate;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SingleValueLattice implements ValueLattice<SingleValueLattice> {
+public class SingleValueLattice
+		implements
+		ValueLattice<SingleValueLattice> {
 
 	/**
 	 * The singleton instance of this lattice, which is the only non-bottom

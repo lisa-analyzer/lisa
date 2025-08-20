@@ -13,7 +13,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class NullType implements InMemoryType {
+public class NullType
+		implements
+		InMemoryType {
 
 	/**
 	 * Unique instance of {@link NullType}.

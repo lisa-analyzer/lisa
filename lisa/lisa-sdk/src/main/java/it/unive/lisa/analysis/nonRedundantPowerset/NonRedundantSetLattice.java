@@ -24,7 +24,9 @@ import java.util.Set;
  *                the non redundant set lattice
  */
 public abstract class NonRedundantSetLattice<S extends NonRedundantSetLattice<S, L>,
-		L extends Lattice<L>> implements BaseLattice<S> {
+		L extends Lattice<L>>
+		implements
+		BaseLattice<S> {
 
 	/**
 	 * The set that containing the elements.

@@ -19,7 +19,12 @@ import it.unive.lisa.symbolic.value.Variable;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Return extends UnaryStatement implements MetaVariableCreator, YieldsValue {
+public class Return
+		extends
+		UnaryStatement
+		implements
+		MetaVariableCreator,
+		YieldsValue {
 
 	/**
 	 * Builds the return, returning {@code expression} to the caller CFG,

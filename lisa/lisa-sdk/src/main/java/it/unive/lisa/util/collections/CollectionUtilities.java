@@ -210,7 +210,9 @@ public final class CollectionUtilities {
 	 * 
 	 * @param <E> the type of the elements to be sorted
 	 */
-	public static class SortedSetCollector<E> implements Collector<E, SortedSet<E>, SortedSet<E>> {
+	public static class SortedSetCollector<E>
+			implements
+			Collector<E, SortedSet<E>, SortedSet<E>> {
 
 		@Override
 		public Supplier<SortedSet<E>> supplier() {
@@ -221,17 +223,14 @@ public final class CollectionUtilities {
 		public BiConsumer<SortedSet<E>, E> accumulator() {
 			return (
 					set,
-					e
-			) -> set.add(e);
+					e) -> set.add(e);
 		}
 
 		@Override
 		public BinaryOperator<SortedSet<E>> combiner() {
 			return (
 					result,
-					partial
-			) ->
-			{
+					partial) -> {
 				result.addAll(partial);
 				return result;
 			};
@@ -258,7 +257,9 @@ public final class CollectionUtilities {
 	 * 
 	 * @param <E> the type of the elements to be sorted
 	 */
-	public static class StringCollector<E> implements Collector<E, StringBuilder, String> {
+	public static class StringCollector<E>
+			implements
+			Collector<E, StringBuilder, String> {
 
 		private final String separator;
 
@@ -281,9 +282,7 @@ public final class CollectionUtilities {
 		public BiConsumer<StringBuilder, E> accumulator() {
 			return (
 					builder,
-					e
-			) ->
-			{
+					e) -> {
 				if (builder.length() == 0)
 					builder.append(e);
 				else
@@ -295,8 +294,7 @@ public final class CollectionUtilities {
 		public BinaryOperator<StringBuilder> combiner() {
 			return (
 					result,
-					partial
-			) -> result.append(partial);
+					partial) -> result.append(partial);
 		}
 
 		@Override

@@ -13,7 +13,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Constant extends ValueExpression {
+public class Constant
+		extends
+		ValueExpression {
 
 	/**
 	 * The constant

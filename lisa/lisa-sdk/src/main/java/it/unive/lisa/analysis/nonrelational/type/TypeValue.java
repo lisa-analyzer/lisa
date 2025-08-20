@@ -12,7 +12,9 @@ import java.util.Set;
  * 
  * @param <L> the concrete type of the lattice
  */
-public interface TypeValue<L extends TypeValue<L>> extends Lattice<L> {
+public interface TypeValue<L extends TypeValue<L>>
+		extends
+		Lattice<L> {
 
 	/**
 	 * Yields the set containing the types held by this instance.

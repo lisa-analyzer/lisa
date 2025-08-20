@@ -26,7 +26,9 @@ import it.unive.lisa.type.Untyped;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnresolvedCall extends Call {
+public class UnresolvedCall
+		extends
+		Call {
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
@@ -151,9 +153,9 @@ public class UnresolvedCall extends Call {
 		Call resolved;
 		try {
 			resolved = interprocedural.resolve(
-				this,
-				parameterTypes(expressions, interprocedural.getAnalysis()),
-				state.getInfo(SymbolAliasing.INFO_KEY, SymbolAliasing.class));
+					this,
+					parameterTypes(expressions, interprocedural.getAnalysis()),
+					state.getInfo(SymbolAliasing.INFO_KEY, SymbolAliasing.class));
 		} catch (CallResolutionException e) {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}

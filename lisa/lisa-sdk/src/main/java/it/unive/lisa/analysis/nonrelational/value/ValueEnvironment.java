@@ -17,7 +17,11 @@ import java.util.Map;
  *                this environment
  */
 public class ValueEnvironment<
-		L extends Lattice<L>> extends Environment<L, ValueEnvironment<L>> implements ValueLattice<ValueEnvironment<L>> {
+		L extends Lattice<L>>
+		extends
+		Environment<L, ValueEnvironment<L>>
+		implements
+		ValueLattice<ValueEnvironment<L>> {
 
 	/**
 	 * Builds an empty environment.

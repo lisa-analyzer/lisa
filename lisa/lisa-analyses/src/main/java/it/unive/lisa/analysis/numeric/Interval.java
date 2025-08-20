@@ -41,7 +41,9 @@ import it.unive.lisa.util.numeric.MathNumber;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Interval implements SmashedSumIntDomain<IntInterval> {
+public class Interval
+		implements
+		SmashedSumIntDomain<IntInterval> {
 
 	@Override
 	public IntInterval evalNonNullConstant(
@@ -134,8 +136,8 @@ public class Interval implements SmashedSumIntDomain<IntInterval> {
 					return new IntInterval(MathNumber.ZERO, right.getHigh().subtract(MathNumber.ONE));
 				else
 					return new IntInterval(
-						right.getLow().add(MathNumber.ONE),
-						right.getHigh().subtract(MathNumber.ONE));
+							right.getLow().add(MathNumber.ONE),
+							right.getHigh().subtract(MathNumber.ONE));
 			}
 		else if (operator instanceof RemainderOperator)
 			if (right.is(0))
@@ -167,8 +169,8 @@ public class Interval implements SmashedSumIntDomain<IntInterval> {
 					return new IntInterval(MathNumber.ZERO, M.subtract(MathNumber.ONE));
 				else
 					return new IntInterval(
-						M.multiply(MathNumber.MINUS_ONE).add(MathNumber.ONE),
-						M.subtract(MathNumber.ONE));
+							M.multiply(MathNumber.MINUS_ONE).add(MathNumber.ONE),
+							M.subtract(MathNumber.ONE));
 			}
 		return IntInterval.TOP;
 	}
@@ -316,8 +318,8 @@ public class Interval implements SmashedSumIntDomain<IntInterval> {
 		IntInterval lowp1_inf = new IntInterval(exprValue.getLow().add(MathNumber.ONE), MathNumber.PLUS_INFINITY);
 		IntInterval inf_high = new IntInterval(MathNumber.MINUS_INFINITY, exprValue.getHigh());
 		IntInterval inf_highm1 = new IntInterval(
-			MathNumber.MINUS_INFINITY,
-			exprValue.getHigh().subtract(MathNumber.ONE));
+				MathNumber.MINUS_INFINITY,
+				exprValue.getHigh().subtract(MathNumber.ONE));
 
 		IntInterval update = null;
 		if (operator == ComparisonEq.INSTANCE)

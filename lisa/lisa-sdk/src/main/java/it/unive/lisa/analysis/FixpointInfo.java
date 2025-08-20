@@ -21,7 +21,10 @@ import org.apache.commons.collections4.SetUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Entry<String, Lattice<?>>> {
+public class FixpointInfo
+		implements
+		BaseLattice<FixpointInfo>,
+		Iterable<Map.Entry<String, Lattice<?>>> {
 
 	/**
 	 * The unique bottom instance of this class.
@@ -146,11 +149,11 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 		Lattice prev = get(key);
 		if (prev.getClass() != info.getClass())
 			throw new IllegalArgumentException(
-				"The given lattice instance has a different type ("
-					+ info.getClass().getName()
-					+ ") from the one already associated with the given key ("
-					+ prev.getClass().getName()
-					+ ")");
+					"The given lattice instance has a different type ("
+							+ info.getClass().getName()
+							+ ") from the one already associated with the given key ("
+							+ prev.getClass().getName()
+							+ ")");
 		result.put(key, prev != null ? prev.lub(info) : info);
 		return new FixpointInfo(result);
 	}

@@ -47,9 +47,9 @@ public class IndexFinder {
 		StringSearcher searcher = new StringSearcher(exploded);
 		Set<List<State>> allPaths = exploded.getAllPaths();
 		Set<Transition<RegularExpression>> topTransitions = exploded.getTransitions()
-			.parallelStream()
-			.filter(t -> t.getSymbol() == TopAtom.INSTANCE)
-			.collect(Collectors.toSet());
+				.parallelStream()
+				.filter(t -> t.getSymbol() == TopAtom.INSTANCE)
+				.collect(Collectors.toSet());
 		int min = Integer.MAX_VALUE;
 		int max = -1;
 		boolean maxIsInfinity = true;
@@ -58,9 +58,9 @@ public class IndexFinder {
 			if (s.isEmpty())
 				// we can directly return 0, len(aut)
 				return Pair.of(
-					0,
-					automaton.acceptsTopEventually() || automaton.hasCycle() ? null
-							: automaton.lengthOfLongestString());
+						0,
+						automaton.acceptsTopEventually() || automaton.hasCycle() ? null
+								: automaton.lengthOfLongestString());
 			Set<Vector<Transition<RegularExpression>>> matching = searcher.searchInAllPaths(s);
 			for (List<State> p : allPaths) {
 				int lower = Integer.MAX_VALUE;
@@ -73,11 +73,11 @@ public class IndexFinder {
 							&& (match.size() < 2 || p.indexOf(match.get(1).getSource()) == index + 1)) {
 						int i = index;
 						long tops = topTransitions.parallelStream()
-							.map(t -> Pair.of(t.getSource(), t.getDestination()))
-							.map(pair -> Pair.of(p.indexOf(pair.getLeft()), p.indexOf(pair.getRight())))
-							.filter(pair -> pair.getLeft() == pair.getRight() - 1)
-							.filter(pair -> pair.getLeft() < i)
-							.count();
+								.map(t -> Pair.of(t.getSource(), t.getDestination()))
+								.map(pair -> Pair.of(p.indexOf(pair.getLeft()), p.indexOf(pair.getRight())))
+								.filter(pair -> pair.getLeft() == pair.getRight() - 1)
+								.filter(pair -> pair.getLeft() < i)
+								.count();
 						index -= tops; // TOP should not count
 						if (index <= lower) {
 							if (tops > 0) {

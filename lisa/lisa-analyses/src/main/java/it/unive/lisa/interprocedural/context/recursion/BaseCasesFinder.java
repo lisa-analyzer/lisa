@@ -34,7 +34,9 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public class BaseCasesFinder<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> extends ContextBasedAnalysis<A, D> {
+		D extends AbstractDomain<A>>
+		extends
+		ContextBasedAnalysis<A, D> {
 
 	private final Recursion<A> recursion;
 
@@ -137,7 +139,7 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 		// it should be enough to send values to top, retaining all type
 		// information
 		return start
-			.forwardSemanticsAux(this, entryState.postState.withTopValues(), params, entryState.intermediateStates);
+				.forwardSemanticsAux(this, entryState.postState.withTopValues(), params, entryState.intermediateStates);
 	}
 
 }

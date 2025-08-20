@@ -11,7 +11,9 @@ import it.unive.lisa.program.type.UInt16Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UInt16Literal extends Literal<Short> {
+public class UInt16Literal
+		extends
+		Literal<Short> {
 
 	/**
 	 * Builds the literal.

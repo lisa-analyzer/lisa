@@ -30,7 +30,7 @@ import it.unive.lisa.imp.antlr.IMPParser.ReceiverContext;
 import it.unive.lisa.imp.antlr.IMPParser.StatementContext;
 import it.unive.lisa.imp.antlr.IMPParser.StringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.TernaryStringExprContext;
-import it.unive.lisa.imp.antlr.IMPParser.TryContext;
+import it.unive.lisa.imp.antlr.IMPParser.TryBlockContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnaryStringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnitNameContext;
 import it.unive.lisa.imp.antlr.IMPParser.WhileLoopContext;
@@ -134,7 +134,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
+class IMPCodeMemberVisitor
+		extends
+		IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
@@ -184,15 +186,15 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		if (!control.getModifiers().isEmpty())
 			throw new IMPSyntaxException(
-				"Unclosed control flow statements detected: "
-					+ String.join(
-						", ",
-						control.getModifiers()
-							.stream()
-							.map(Pair::getLeft)
-							.map(Statement::getLocation)
-							.map(CodeLocation::toString)
-							.collect(Collectors.toList())));
+					"Unclosed control flow statements detected: "
+							+ String.join(
+									", ",
+									control.getModifiers()
+											.stream()
+											.map(Pair::getLeft)
+											.map(Statement::getLocation)
+											.map(CodeLocation::toString)
+											.collect(Collectors.toList())));
 
 		entrypoints.add(visited.getBegin());
 		list.mergeWith(visited.getBody());
@@ -214,11 +216,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
 			if (!canProceed)
 				throw new IMPSyntaxException(
-					"Deadcode detected at "
-						+ new SourceCodeLocation(
-							file,
-							getLine(ctx.blockOrStatement(i)),
-							getCol(ctx.blockOrStatement(i))));
+						"Deadcode detected at "
+								+ new SourceCodeLocation(
+										file,
+										getLine(ctx.blockOrStatement(i)),
+										getCol(ctx.blockOrStatement(i))));
 			ParsedBlock st = visitBlockOrStatement(ctx.blockOrStatement(i));
 			block.mergeWith(st.getBody());
 			if (first == null)
@@ -234,8 +236,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (first == null && last == null) {
 			// empty block: instrument it with a noop
 			NoOp instrumented = new NoOp(
-				cfg,
-				new SourceCodeLocation(file, getLine(ctx.LBRACE()), getCol(ctx.LBRACE())));
+					cfg,
+					new SourceCodeLocation(file, getLine(ctx.LBRACE()), getCol(ctx.LBRACE())));
 			first = last = instrumented;
 			block.addNode(instrumented);
 		}
@@ -263,24 +265,24 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.RETURN() != null)
 			if (ctx.expression() != null)
 				st = new Return(
-					cfg,
-					new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-					visitExpression(ctx.expression()));
+						cfg,
+						new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+						visitExpression(ctx.expression()));
 			else
 				st = new Ret(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 		else if (ctx.THROW() != null)
 			st = new Throw(
-				cfg,
-				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-				visitExpression(ctx.expression()));
+					cfg,
+					new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+					visitExpression(ctx.expression()));
 		else if (ctx.skip != null)
 			st = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 		else if (ctx.IF() != null)
 			return visitIf(ctx);
 		else if (ctx.loop() != null)
 			return visitLoop(ctx.loop());
-		else if (ctx.try_() != null)
-			return visitTry(ctx.try_());
+		else if (ctx.tryBlock() != null)
+			return visitTryBlock(ctx.tryBlock());
 		else if (ctx.BREAK() != null)
 			st = visitBreak(ctx);
 		else if (ctx.CONTINUE() != null)
@@ -327,12 +329,12 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			ite.addEdge(new FalseEdge(condition, noop));
 
 		descriptor.addControlFlowStructure(
-			new IfThenElse(
-				list,
-				condition,
-				needsNoop ? noop : null,
-				then.getBody().getNodes(),
-				otherwise == null ? Collections.emptyList() : otherwise.getBody().getNodes()));
+				new IfThenElse(
+						list,
+						condition,
+						needsNoop ? noop : null,
+						then.getBody().getNodes(),
+						otherwise == null ? Collections.emptyList() : otherwise.getBody().getNodes()));
 
 		return new ParsedBlock(condition, ite, needsNoop ? noop : null);
 	}
@@ -460,11 +462,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		loop.addEdge(new FalseEdge(condition, noop));
 
 		control.endControlFlowOf(
-			loop,
-			condition,
-			noop,
-			post == null ? condition : last,
-			label == null ? null : label.getText());
+				loop,
+				condition,
+				noop,
+				post == null ? condition : last,
+				label == null ? null : label.getText());
 		if (post == null)
 			descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getBody().getNodes()));
 		else {
@@ -489,9 +491,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			target = visitArrayAccess(ctx.arrayAccess());
 		else
 			throw new IMPSyntaxException(
-				"Target of the assignment at "
-					+ expression.getLocation()
-					+ " is neither an identifier, a field access or an array access");
+					"Target of the assignment at "
+							+ expression.getLocation()
+							+ " is neither an identifier, a field access or an array access");
 
 		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), target, expression);
 	}
@@ -500,13 +502,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			TerminalNode identifier,
 			boolean localReference) {
 		VariableRef ref = new VariableRef(
-			cfg,
-			new SourceCodeLocation(file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol())),
-			identifier.getText(),
-			Untyped.INSTANCE);
+				cfg,
+				new SourceCodeLocation(file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol())),
+				identifier.getText(),
+				Untyped.INSTANCE);
 		if (localReference && !tracker.hasVariable(ref.getName()))
 			throw new IMPSyntaxException(
-				"Referencing undeclared variable '" + ref.getName() + "' at " + ref.getLocation());
+					"Referencing undeclared variable '" + ref.getName() + "' at " + ref.getLocation());
 		return ref;
 	}
 
@@ -515,10 +517,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			FieldAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
 		return new AccessInstanceGlobal(
-			cfg,
-			new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-			receiver,
-			ctx.name.getText());
+				cfg,
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				receiver,
+				ctx.name.getText());
 	}
 
 	@Override
@@ -550,9 +552,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return visitVar(ctx.IDENTIFIER(), true);
 		else
 			return new Int32Literal(
-				cfg,
-				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-				Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
+					cfg,
+					new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+					Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 	}
 
 	@Override
@@ -574,97 +576,97 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.left != null && ctx.right != null)
 			if (ctx.MUL() != null)
 				return new Multiplication(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.DIV() != null)
 				return new Division(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.MOD() != null)
 				return new Remainder(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.ADD() != null)
 				return new IMPAddOrConcat(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
 			else if (ctx.SUB() != null)
 				return new Subtraction(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.GT() != null)
 				return new GreaterThan(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.GE() != null)
 				return new GreaterOrEqual(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.LT() != null)
 				return new LessThan(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.LE() != null)
 				return new LessOrEqual(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.EQUAL() != null)
 				return new Equal(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.NOTEQUAL() != null)
 				return new NotEqual(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.AND() != null)
 				return new And(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else
 				return new Or(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					visitExpression(ctx.right));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						visitExpression(ctx.right));
 		else if (ctx.left != null && ctx.type != null)
 			if (ctx.IS() != null)
 				return new IsInstance(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					new TypeLiteral(
 						cfg,
 						new SourceCodeLocation(file, line, col),
-						makeType(ctx.type.getText(), ctx.type)));
+						visitExpression(ctx.left),
+						new TypeLiteral(
+								cfg,
+								new SourceCodeLocation(file, line, col),
+								makeType(ctx.type.getText(), ctx.type)));
 			else
 				return new Cast(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					visitExpression(ctx.left),
-					new TypeLiteral(
 						cfg,
 						new SourceCodeLocation(file, line, col),
-						makeType(ctx.type.getText(), ctx.type)));
+						visitExpression(ctx.left),
+						new TypeLiteral(
+								cfg,
+								new SourceCodeLocation(file, line, col),
+								makeType(ctx.type.getText(), ctx.type)));
 		else if (ctx.NEW() != null)
 			if (ctx.newBasicArrayExpr() != null)
 				return visitNewBasicArrayExpr(ctx.newBasicArrayExpr());
@@ -757,52 +759,52 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			BinaryStringExprContext ctx) {
 		if (ctx.STRCAT() != null)
 			return new StringConcat.IMPStringConcat(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				visitExpression(ctx.left),
-				visitExpression(ctx.right));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.right));
 		else if (ctx.STRCONTAINS() != null)
 			return new StringContains.IMPStringContains(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				visitExpression(ctx.left),
-				visitExpression(ctx.right));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.right));
 		else if (ctx.STRENDS() != null)
 			return new StringEndsWith.IMPStringEndsWith(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				visitExpression(ctx.left),
-				visitExpression(ctx.right));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.right));
 		else if (ctx.STREQ() != null)
 			return new StringEquals.IMPStringEquals(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				visitExpression(ctx.left),
-				visitExpression(ctx.right));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.right));
 		else if (ctx.STRINDEXOF() != null)
 			return new StringIndexOf.IMPStringIndexOf(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				visitExpression(ctx.left),
-				visitExpression(ctx.right));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.right));
 		else if (ctx.STRSTARTS() != null)
 			return new StringStartsWith.IMPStringStartsWith(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				visitExpression(ctx.left),
-				visitExpression(ctx.right));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.right));
 
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
@@ -812,22 +814,22 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			TernaryStringExprContext ctx) {
 		if (ctx.STRREPLACE() != null)
 			return new StringReplace.IMPStringReplace(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				visitExpression(ctx.left),
-				visitExpression(ctx.middle),
-				visitExpression(ctx.right));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.middle),
+					visitExpression(ctx.right));
 		else if (ctx.STRSUB() != null)
 			return new StringSubstring.IMPStringSubstring(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				visitExpression(ctx.left),
-				visitExpression(ctx.middle),
-				visitExpression(ctx.right));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.middle),
+					visitExpression(ctx.right));
 
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
@@ -835,26 +837,26 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	private Expression visitBumpBasicArrayExpr(
 			NewBasicArrayExprContext ctx) {
 		return new IMPNewArray(
-			cfg,
-			file,
-			getLine(ctx),
-			getCol(ctx),
-			visitPrimitiveType(ctx.primitiveType()),
-			true,
-			visitArrayCreatorRest(ctx.arrayCreatorRest()));
+				cfg,
+				file,
+				getLine(ctx),
+				getCol(ctx),
+				visitPrimitiveType(ctx.primitiveType()),
+				true,
+				visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
 	public Expression visitNewBasicArrayExpr(
 			NewBasicArrayExprContext ctx) {
 		return new IMPNewArray(
-			cfg,
-			file,
-			getLine(ctx),
-			getCol(ctx),
-			visitPrimitiveType(ctx.primitiveType()),
-			false,
-			visitArrayCreatorRest(ctx.arrayCreatorRest()));
+				cfg,
+				file,
+				getLine(ctx),
+				getCol(ctx),
+				visitPrimitiveType(ctx.primitiveType()),
+				false,
+				visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
@@ -884,13 +886,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText());
 		if (ctx.arrayCreatorRest() != null)
 			return new IMPNewArray(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				base,
-				true,
-				visitArrayCreatorRest(ctx.arrayCreatorRest()));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					base,
+					true,
+					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
 			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, true, visitArguments(ctx.arguments()));
 	}
@@ -903,13 +905,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText());
 		if (ctx.arrayCreatorRest() != null)
 			return new IMPNewArray(
-				cfg,
-				file,
-				getLine(ctx),
-				getCol(ctx),
-				base,
-				false,
-				visitArrayCreatorRest(ctx.arrayCreatorRest()));
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					base,
+					false,
+					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
 			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, false, visitArguments(ctx.arguments()));
 	}
@@ -948,12 +950,12 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		String name = ctx.name.getText();
 		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
 		return new UnresolvedCall(
-			cfg,
-			new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-			CallType.INSTANCE,
-			null,
-			name,
-			args);
+				cfg,
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				CallType.INSTANCE,
+				null,
+				name,
+				args);
 	}
 
 	@Override
@@ -986,25 +988,25 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
 				return new Float32Literal(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 			else
 				return new Float32Literal(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 		else if (ctx.LITERAL_DECIMAL() != null)
 			if (ctx.SUB() != null)
 				return new Int32Literal(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 			else
 				return new Int32Literal(
-					cfg,
-					new SourceCodeLocation(file, line, col),
-					Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
 	}
@@ -1025,8 +1027,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public ParsedBlock visitTry(
-			TryContext ctx) {
+	public ParsedBlock visitTryBlock(
+			TryBlockContext ctx) {
 		NodeList<CFG, Statement, Edge> trycatch = new NodeList<>(new SequentialEdge());
 
 		// normal exit points of the try-catch in case there is no finally
@@ -1059,7 +1061,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.else_ != null)
 			// the else is deadcode
 			throw new IMPSyntaxException(
-				"Deadcode detected at " + new SourceCodeLocation(file, getLine(ctx.else_), getCol(ctx.else_)));
+					"Deadcode detected at " + new SourceCodeLocation(file, getLine(ctx.else_), getCol(ctx.else_)));
 
 		// we then parse each catch block, and we connect *every* instruction
 		// that can end the try block to the beginning of each catch block
@@ -1074,7 +1076,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			trycatch.mergeWith(visit.getBody());
 			if (body.canBeContinued())
 				trycatch.addEdge(
-					new ErrorEdge(body.getEnd(), visit.getBegin(), block.getIdentifier(), block.getExceptions()));
+						new ErrorEdge(body.getEnd(), visit.getBegin(), block.getIdentifier(), block.getExceptions()));
 			for (Statement st : body.getBody().getNodes())
 				if (st.stopsExecution())
 					trycatch.addEdge(new ErrorEdge(st, visit.getBegin(), block.getIdentifier(), block.getExceptions()));
@@ -1110,17 +1112,18 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		// build protection block
 		descriptor.addProtectionBlock(
-			new ProtectionBlock(
-				new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes()),
-				catches,
-				elseBlock == null ? null
-						: new ProtectedBlock(elseBlock.getBegin(), elseBlock.getEnd(), elseBlock.getBody().getNodes()),
-				finalBlock == null ? null
-						: new ProtectedBlock(
-							finalBlock.getBegin(),
-							finalBlock.getEnd(),
-							finalBlock.getBody().getNodes()),
-				usedNoop ? noop : null));
+				new ProtectionBlock(
+						new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes()),
+						catches,
+						elseBlock == null ? null
+								: new ProtectedBlock(elseBlock.getBegin(), elseBlock.getEnd(),
+										elseBlock.getBody().getNodes()),
+						finalBlock == null ? null
+								: new ProtectedBlock(
+										finalBlock.getBegin(),
+										finalBlock.getEnd(),
+										finalBlock.getBody().getNodes()),
+						usedNoop ? noop : null));
 
 		return new ParsedBlock(body.getBegin(), trycatch, usedNoop ? noop : null);
 	}
@@ -1133,10 +1136,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			Type t = ClassType.lookup(name.getText());
 			if (t == null)
 				throw new IMPSyntaxException(
-					"Type '"
-						+ name.getText()
-						+ "' not found at "
-						+ new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
+						"Type '"
+								+ name.getText()
+								+ "' not found at "
+								+ new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 			exceptions.add(t);
 		}
 
@@ -1153,9 +1156,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		tracker.exitScope(last);
 
 		CatchBlock catchBlock = new CatchBlock(
-			variable,
-			new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes()),
-			exceptions.toArray(Type[]::new));
+				variable,
+				new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes()),
+				exceptions.toArray(Type[]::new));
 
 		Pair<CatchBlock, ParsedBlock> result = Pair.of(catchBlock, body);
 		return result;

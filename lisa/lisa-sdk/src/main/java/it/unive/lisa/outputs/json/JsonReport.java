@@ -67,11 +67,11 @@ public class JsonReport {
 	public JsonReport(
 			LiSAReport report) {
 		this(
-			report.getWarnings(),
-			report.getCreatedFiles(),
-			report.getRunInfo().toPropertyBag(),
-			report.getConfiguration().toPropertyBag(),
-			report.getAdditionalInfo());
+				report.getWarnings(),
+				report.getCreatedFiles(),
+				report.getRunInfo().toPropertyBag(),
+				report.getConfiguration().toPropertyBag(),
+				report.getAdditionalInfo());
 	}
 
 	private JsonReport(
@@ -233,16 +233,16 @@ public class JsonReport {
 	@Override
 	public String toString() {
 		return "JsonReport [warnings="
-			+ warnings
-			+ ", files="
-			+ files
-			+ ", info="
-			+ info
-			+ ", configuration="
-			+ configuration
-			+ ", additionalInfo="
-			+ additionalInfo
-			+ "]";
+				+ warnings
+				+ ", files="
+				+ files
+				+ ", info="
+				+ info
+				+ ", configuration="
+				+ configuration
+				+ ", additionalInfo="
+				+ additionalInfo
+				+ "]";
 	}
 
 	/**
@@ -250,7 +250,9 @@ public class JsonReport {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class JsonWarning implements Comparable<JsonWarning> {
+	public static class JsonWarning
+			implements
+			Comparable<JsonWarning> {
 
 		private String message;
 

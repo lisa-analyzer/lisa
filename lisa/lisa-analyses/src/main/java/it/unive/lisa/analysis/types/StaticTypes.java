@@ -38,7 +38,9 @@ import org.apache.commons.collections4.SetUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StaticTypes implements BaseNonRelationalTypeDomain<Supertype> {
+public class StaticTypes
+		implements
+		BaseNonRelationalTypeDomain<Supertype> {
 
 	@Override
 	public Supertype evalIdentifier(
@@ -127,7 +129,8 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<Supertype> {
 		Set<Type> lelems = left.type.allInstances(types);
 		Set<Type> relems = right.type.allInstances(types);
 		return new InferredTypes()
-			.satisfiesBinaryExpression(expression, new TypeSet(types, lelems), new TypeSet(types, relems), pp, oracle);
+				.satisfiesBinaryExpression(expression, new TypeSet(types, lelems), new TypeSet(types, relems), pp,
+						oracle);
 	}
 
 	@Override
@@ -173,12 +176,12 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<Supertype> {
 
 		// these are all types compatible with the type tokens
 		Set<Type> okTypes = elems.stream()
-			.filter(Type::isTypeTokenType)
-			.map(Type::asTypeTokenType)
-			.map(TypeTokenType::getTypes)
-			.flatMap(Set::stream)
-			.flatMap(t -> t.allInstances(types).stream())
-			.collect(Collectors.toSet());
+				.filter(Type::isTypeTokenType)
+				.map(Type::asTypeTokenType)
+				.map(TypeTokenType::getTypes)
+				.flatMap(Set::stream)
+				.flatMap(t -> t.allInstances(types).stream())
+				.collect(Collectors.toSet());
 
 		Supertype starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
@@ -233,12 +236,12 @@ public class StaticTypes implements BaseNonRelationalTypeDomain<Supertype> {
 		Set<Type> elems = eval.type.allInstances(types);
 		// these are all types compatible with the type tokens
 		Set<Type> filtered = elems.stream()
-			.filter(Type::isTypeTokenType)
-			.map(Type::asTypeTokenType)
-			.map(TypeTokenType::getTypes)
-			.flatMap(Set::stream)
-			.flatMap(t -> t.allInstances(types).stream())
-			.collect(Collectors.toSet());
+				.filter(Type::isTypeTokenType)
+				.map(Type::asTypeTokenType)
+				.map(TypeTokenType::getTypes)
+				.flatMap(Set::stream)
+				.flatMap(t -> t.allInstances(types).stream())
+				.collect(Collectors.toSet());
 		if (filtered.isEmpty())
 			// if there is no type token in the evaluation,
 			// this is not a type condition and we cannot

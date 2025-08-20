@@ -22,7 +22,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IntegerConstant implements BaseLattice<IntegerConstant>, WholeValueElement<IntegerConstant> {
+public class IntegerConstant
+		implements
+		BaseLattice<IntegerConstant>,
+		WholeValueElement<IntegerConstant> {
 
 	/**
 	 * The top element of this lattice, representing the set of all integers.
@@ -154,12 +157,12 @@ public class IntegerConstant implements BaseLattice<IntegerConstant>, WholeValue
 		if (isBottom())
 			return null;
 		return Collections.singleton(
-			new BinaryExpression(
-				pp.getProgram().getTypes().getBooleanType(),
-				new Constant(pp.getProgram().getTypes().getIntegerType(), value, e.getCodeLocation()),
-				e,
-				ComparisonEq.INSTANCE,
-				pp.getLocation()));
+				new BinaryExpression(
+						pp.getProgram().getTypes().getBooleanType(),
+						new Constant(pp.getProgram().getTypes().getIntegerType(), value, e.getCodeLocation()),
+						e,
+						ComparisonEq.INSTANCE,
+						pp.getLocation()));
 	}
 
 	@Override

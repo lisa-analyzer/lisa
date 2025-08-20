@@ -10,7 +10,9 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SimpleTaint implements TaintLattice<SimpleTaint> {
+public class SimpleTaint
+		implements
+		TaintLattice<SimpleTaint> {
 
 	/**
 	 * The tainted instance of this taint lattice, representing values that are

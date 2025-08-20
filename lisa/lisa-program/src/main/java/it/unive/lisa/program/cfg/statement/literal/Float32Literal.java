@@ -11,7 +11,9 @@ import it.unive.lisa.program.type.Float32Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Float32Literal extends Literal<Float> {
+public class Float32Literal
+		extends
+		Literal<Float> {
 
 	/**
 	 * Builds the literal.

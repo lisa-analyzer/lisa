@@ -5,7 +5,9 @@ package it.unive.lisa.imp;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ParsingException extends Exception {
+public class ParsingException
+		extends
+		Exception {
 
 	private static final long serialVersionUID = 4950907533241537847L;
 

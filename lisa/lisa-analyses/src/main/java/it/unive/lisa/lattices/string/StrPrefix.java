@@ -25,7 +25,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StrPrefix implements BaseLattice<StrPrefix>, WholeValueElement<StrPrefix> {
+public class StrPrefix
+		implements
+		BaseLattice<StrPrefix>,
+		WholeValueElement<StrPrefix> {
 
 	/**
 	 * The top element of this lattice, representing the empty prefix.
@@ -140,33 +143,33 @@ public class StrPrefix implements BaseLattice<StrPrefix>, WholeValueElement<StrP
 
 		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
 		UnaryExpression strlen = new UnaryExpression(
-			pp.getProgram().getTypes().getIntegerType(),
-			e,
-			StringLength.INSTANCE,
-			pp.getLocation());
+				pp.getProgram().getTypes().getIntegerType(),
+				e,
+				StringLength.INSTANCE,
+				pp.getLocation());
 
 		if (isTop())
 			return Collections.singleton(
-				new BinaryExpression(
-					booleanType,
-					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-					strlen,
-					ComparisonLe.INSTANCE,
-					e.getCodeLocation()));
+					new BinaryExpression(
+							booleanType,
+							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+							strlen,
+							ComparisonLe.INSTANCE,
+							e.getCodeLocation()));
 
 		return Set.of(
-			new BinaryExpression(
-				booleanType,
-				new Constant(pp.getProgram().getTypes().getIntegerType(), prefix.length(), pp.getLocation()),
-				strlen,
-				ComparisonLe.INSTANCE,
-				e.getCodeLocation()),
-			new BinaryExpression(
-				booleanType,
-				new Constant(pp.getProgram().getTypes().getStringType(), prefix, pp.getLocation()),
-				e,
-				StringStartsWith.INSTANCE,
-				e.getCodeLocation()));
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getIntegerType(), prefix.length(), pp.getLocation()),
+						strlen,
+						ComparisonLe.INSTANCE,
+						e.getCodeLocation()),
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getStringType(), prefix, pp.getLocation()),
+						e,
+						StringStartsWith.INSTANCE,
+						e.getCodeLocation()));
 	}
 
 	@Override

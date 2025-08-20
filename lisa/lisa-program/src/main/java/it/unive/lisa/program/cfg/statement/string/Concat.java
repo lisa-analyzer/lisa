@@ -35,7 +35,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Concat extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class Concat
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -60,12 +62,12 @@ public class Concat extends it.unive.lisa.program.cfg.statement.BinaryExpression
 			Expression left,
 			Expression right) {
 		super(
-			cfg,
-			location,
-			"concat",
-			cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
-			left,
-			right);
+				cfg,
+				location,
+				"concat",
+				cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
+				left,
+				right);
 	}
 
 	@Override
@@ -89,9 +91,9 @@ public class Concat extends it.unive.lisa.program.cfg.statement.BinaryExpression
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new BinaryExpression(getStaticType(), left, right, StringConcat.INSTANCE, getLocation()),
-			originating == null ? this : originating);
+				state,
+				new BinaryExpression(getStaticType(), left, right, StringConcat.INSTANCE, getLocation()),
+				originating == null ? this : originating);
 	}
 
 }

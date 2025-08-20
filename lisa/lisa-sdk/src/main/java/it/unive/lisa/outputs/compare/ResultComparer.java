@@ -93,8 +93,7 @@ import org.apache.logging.log4j.util.TriConsumer;
  * {@link #configurationDiff(String, String, String)},
  * {@link #infoDiff(String, String, String)},
  * {@link #fileDiff(String, String, String)}, and
- * {@link #additionalInfoDiff(String, String, String)} for reporting
- * differences.</li>
+ * {@link #additionalInfoDiff(String)} for reporting differences.</li>
  * </ul>
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -277,19 +276,18 @@ public class ResultComparer {
 			JsonReport first,
 			JsonReport second) {
 		return compareBags(
-			REPORTED_COMPONENT.CONFIGURATION,
-			first.getConfiguration(),
-			second.getConfiguration(),
-			(
-					key,
-					fvalue,
-					svalue
-			) -> configurationDiff(key, fvalue, svalue),
-			key -> ignoredConfigurationKeys().contains(key));
+				REPORTED_COMPONENT.CONFIGURATION,
+				first.getConfiguration(),
+				second.getConfiguration(),
+				(
+						key,
+						fvalue,
+						svalue) -> configurationDiff(key, fvalue, svalue),
+				key -> ignoredConfigurationKeys().contains(key));
 	}
 
 	/**
-	 * Compares the run information ({@link JsonReport#getRunInfo()}) of both
+	 * Compares the run information ({@link JsonReport#getInfo()}) of both
 	 * reports, excluding the run information keys returned by
 	 * {@link #ignoredRunInfoKeys()}.
 	 * 
@@ -303,15 +301,14 @@ public class ResultComparer {
 			JsonReport first,
 			JsonReport second) {
 		return compareBags(
-			REPORTED_COMPONENT.INFO,
-			first.getInfo(),
-			second.getInfo(),
-			(
-					key,
-					fvalue,
-					svalue
-			) -> infoDiff(key, fvalue, svalue),
-			key -> ignoredRunInfoKeys().contains(key));
+				REPORTED_COMPONENT.INFO,
+				first.getInfo(),
+				second.getInfo(),
+				(
+						key,
+						fvalue,
+						svalue) -> infoDiff(key, fvalue, svalue),
+				key -> ignoredRunInfoKeys().contains(key));
 	}
 
 	private boolean compareBags(
@@ -360,9 +357,9 @@ public class ResultComparer {
 			JsonReport first,
 			JsonReport second) {
 		CollectionsDiffBuilder<JsonWarning> warnings = new CollectionsDiffBuilder<>(
-			JsonWarning.class,
-			first.getWarnings(),
-			second.getWarnings());
+				JsonWarning.class,
+				first.getWarnings(),
+				second.getWarnings());
 		warnings.compute(JsonWarning::compareTo);
 
 		if (!warnings.getCommons().isEmpty())
@@ -409,8 +406,8 @@ public class ResultComparer {
 	 * <li>the JSON report itself is ignored;</li>
 	 * <li>JSON graphs are compared through
 	 * {@link #matchJsonGraphs(File, File)};</li>
-	 * <li>visualization files (according to {@link #isVisualizationFile(File)})
-	 * are ignored;</li>
+	 * <li>visualization files (according to
+	 * {@link #isVisualizationFile(String)}) are ignored;</li>
 	 * <li>all other files are compared through
 	 * {@link #customFileCompare(File, File)}.</li>
 	 * </ul>
@@ -513,9 +510,9 @@ public class ResultComparer {
 						structuralDiff(leftGraph, rightGraph, leftpath, rightpath);
 				else {
 					CollectionsDiffBuilder<SerializableNodeDescription> builder = new CollectionsDiffBuilder<>(
-						SerializableNodeDescription.class,
-						leftGraph.getDescriptions(),
-						rightGraph.getDescriptions());
+							SerializableNodeDescription.class,
+							leftGraph.getDescriptions(),
+							rightGraph.getDescriptions());
 					builder.compute(SerializableNodeDescription::compareTo);
 
 					if (builder.sameContent())
@@ -535,9 +532,9 @@ public class ResultComparer {
 			String leftpath,
 			String rightpath) {
 		CollectionsDiffBuilder<SerializableNode> nodeBuilder = new CollectionsDiffBuilder<>(
-			SerializableNode.class,
-			leftGraph.getNodes(),
-			rightGraph.getNodes());
+				SerializableNode.class,
+				leftGraph.getNodes(),
+				rightGraph.getNodes());
 		nodeBuilder.compute(SerializableNode::compareTo);
 
 		Collection<SerializableNode> onlyFirst = new TreeSet<>();
@@ -547,29 +544,32 @@ public class ResultComparer {
 
 		if (!renamings.isEmpty())
 			fileDiff(
-				leftpath,
-				rightpath,
-				"Nodes that changed offsets:\n\t"
-					+ StringUtils.join(
-						renamings.keySet().stream().map(SerializableNode::getText).collect(Collectors.toList()),
-						"\n\t"));
+					leftpath,
+					rightpath,
+					"Nodes that changed offsets:\n\t"
+							+ StringUtils.join(
+									renamings.keySet().stream().map(SerializableNode::getText)
+											.collect(Collectors.toList()),
+									"\n\t"));
 		if (!onlyFirst.isEmpty())
 			fileDiff(
-				leftpath,
-				rightpath,
-				"Nodes only in first graph:\n\t"
-					+ StringUtils.join(onlyFirst.stream().map(n -> enrich(n)).collect(Collectors.toList()), "\n\t"));
+					leftpath,
+					rightpath,
+					"Nodes only in first graph:\n\t"
+							+ StringUtils.join(onlyFirst.stream().map(n -> enrich(n)).collect(Collectors.toList()),
+									"\n\t"));
 		if (!onlySecond.isEmpty())
 			fileDiff(
-				leftpath,
-				rightpath,
-				"Nodes only in second graph:\n\t"
-					+ StringUtils.join(onlySecond.stream().map(n -> enrich(n)).collect(Collectors.toList()), "\n\t"));
+					leftpath,
+					rightpath,
+					"Nodes only in second graph:\n\t"
+							+ StringUtils.join(onlySecond.stream().map(n -> enrich(n)).collect(Collectors.toList()),
+									"\n\t"));
 
 		CollectionsDiffBuilder<SerializableEdge> edgeBuilder = new CollectionsDiffBuilder<>(
-			SerializableEdge.class,
-			leftGraph.getEdges(),
-			rightGraph.getEdges());
+				SerializableEdge.class,
+				leftGraph.getEdges(),
+				rightGraph.getEdges());
 		edgeBuilder.compute(SerializableEdge::compareTo);
 
 		Collection<SerializableEdge> onlyFirstEdges = new TreeSet<>();
@@ -582,34 +582,36 @@ public class ResultComparer {
 					renamingsEdges.put(edge, other);
 		edgeBuilder.getOnlyFirst().stream().filter(e -> !renamingsEdges.containsKey(e)).forEach(onlyFirstEdges::add);
 		edgeBuilder.getOnlySecond()
-			.stream()
-			.filter(e -> !renamingsEdges.containsValue(e))
-			.forEach(onlySecondEdges::add);
+				.stream()
+				.filter(e -> !renamingsEdges.containsValue(e))
+				.forEach(onlySecondEdges::add);
 
 		if (!renamingsEdges.isEmpty())
 			fileDiff(
-				leftpath,
-				rightpath,
-				"Edges whose endpoints changed offsets:\n\t"
-					+ StringUtils.join(
-						renamingsEdges.keySet().stream().map(e -> enrich(e, leftGraph)).collect(Collectors.toList()),
-						"\n\t"));
+					leftpath,
+					rightpath,
+					"Edges whose endpoints changed offsets:\n\t"
+							+ StringUtils.join(
+									renamingsEdges.keySet().stream().map(e -> enrich(e, leftGraph))
+											.collect(Collectors.toList()),
+									"\n\t"));
 		if (!onlyFirstEdges.isEmpty())
 			fileDiff(
-				leftpath,
-				rightpath,
-				"Edges only in first graph:\n\t"
-					+ StringUtils.join(
-						onlyFirstEdges.stream().map(e -> enrich(e, leftGraph)).collect(Collectors.toList()),
-						"\n\t"));
+					leftpath,
+					rightpath,
+					"Edges only in first graph:\n\t"
+							+ StringUtils.join(
+									onlyFirstEdges.stream().map(e -> enrich(e, leftGraph)).collect(Collectors.toList()),
+									"\n\t"));
 		if (!onlySecondEdges.isEmpty())
 			fileDiff(
-				leftpath,
-				rightpath,
-				"Edges only in second graph:\n\t"
-					+ StringUtils.join(
-						onlySecondEdges.stream().map(e -> enrich(e, rightGraph)).collect(Collectors.toList()),
-						"\n\t"));
+					leftpath,
+					rightpath,
+					"Edges only in second graph:\n\t"
+							+ StringUtils.join(
+									onlySecondEdges.stream().map(e -> enrich(e, rightGraph))
+											.collect(Collectors.toList()),
+									"\n\t"));
 	}
 
 	private void findRenamings(
@@ -621,17 +623,15 @@ public class ResultComparer {
 			Map<SerializableNode, SerializableNode> renamings) {
 		List<SerializableNode> firstSorted = new ArrayList<>(builder.getOnlyFirst());
 		firstSorted.sort(
-			(
-					f,
-					s
-			) -> f.getText().compareTo(s.getText()));
+				(
+						f,
+						s) -> f.getText().compareTo(s.getText()));
 		Iterator<SerializableNode> ol = firstSorted.iterator();
 		List<SerializableNode> secondSorted = new ArrayList<>(builder.getOnlySecond());
 		secondSorted.sort(
-			(
-					f,
-					s
-			) -> f.getText().compareTo(s.getText()));
+				(
+						f,
+						s) -> f.getText().compareTo(s.getText()));
 		Iterator<SerializableNode> or = secondSorted.iterator();
 
 		SerializableNode currentF = null;
@@ -680,10 +680,11 @@ public class ResultComparer {
 	private String enrich(
 			SerializableNode node) {
 		return node.getText()
-			+ "\t(id: "
-			+ node.getId()
-			+ (node.getSubNodes() == null || node.getSubNodes().isEmpty() ? "" : ", subnodes: " + node.getSubNodes())
-			+ ")";
+				+ "\t(id: "
+				+ node.getId()
+				+ (node.getSubNodes() == null || node.getSubNodes().isEmpty() ? ""
+						: ", subnodes: " + node.getSubNodes())
+				+ ")";
 	}
 
 	private String enrich(
@@ -692,12 +693,12 @@ public class ResultComparer {
 		SerializableNode source = graph.getNodeById(edge.getSourceId());
 		SerializableNode target = graph.getNodeById(edge.getDestId());
 		return source.getText()
-			+ " ---("
-			+ edge.getKind()
-			+ ")"
-			+ (edge.getLabel() != null ? edge.getLabel() : "")
-			+ "---> "
-			+ target.getText();
+				+ " ---("
+				+ edge.getKind()
+				+ ")"
+				+ (edge.getLabel() != null ? edge.getLabel() : "")
+				+ "---> "
+				+ target.getText();
 	}
 
 	private void compareLabels(
@@ -728,17 +729,17 @@ public class ResultComparer {
 					break;
 				else {
 					fileDiff(
-						leftpath,
-						rightpath,
-						format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
+							leftpath,
+							rightpath,
+							format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
 					currentS = null;
 					continue;
 				}
 			else if (currentS == null) {
 				fileDiff(
-					leftpath,
-					rightpath,
-					format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
+						leftpath,
+						rightpath,
+						format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 				continue;
 			}
@@ -748,31 +749,31 @@ public class ResultComparer {
 			if (fid == sid) {
 				if (verboseLabelDiff())
 					fileDiff(
-						leftpath,
-						rightpath,
-						format(
-							DESC_DIFF_VERBOSE,
-							currentF.getNodeId(),
-							llabels.get(currentF.getNodeId()),
-							diff(currentF.getDescription(), currentS.getDescription())));
+							leftpath,
+							rightpath,
+							format(
+									DESC_DIFF_VERBOSE,
+									currentF.getNodeId(),
+									llabels.get(currentF.getNodeId()),
+									diff(currentF.getDescription(), currentS.getDescription())));
 				else
 					fileDiff(
-						leftpath,
-						rightpath,
-						format(DESC_DIFF, currentF.getNodeId(), llabels.get(currentF.getNodeId())));
+							leftpath,
+							rightpath,
+							format(DESC_DIFF, currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 				currentS = null;
 			} else if (fid < sid) {
 				fileDiff(
-					leftpath,
-					rightpath,
-					format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
+						leftpath,
+						rightpath,
+						format(NO_DESC, "Second", currentF.getNodeId(), llabels.get(currentF.getNodeId())));
 				currentF = null;
 			} else {
 				fileDiff(
-					leftpath,
-					rightpath,
-					format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
+						leftpath,
+						rightpath,
+						format(NO_DESC, "First", currentS.getNodeId(), rlabels.get(currentS.getNodeId())));
 				currentS = null;
 			}
 		}
@@ -833,27 +834,27 @@ public class ResultComparer {
 		for (int i = 0; i < min; i++)
 			if (diff(depth + 1, inner = new StringBuilder(), felements.get(i), selements.get(i))) {
 				builder.append("\t".repeat(depth))
-					.append(">ELEMENT #")
-					.append(i)
-					.append(":\n")
-					.append(inner.toString())
-					.append("\n");
+						.append(">ELEMENT #")
+						.append(i)
+						.append(":\n")
+						.append(inner.toString())
+						.append("\n");
 				atLeastOne = true;
 			}
 
 		if (fsize > min) {
 			builder.append("\t".repeat(depth))
-				.append(">EXPECTED HAS ")
-				.append(fsize - min)
-				.append(" MORE ELEMENT(S):\n");
+					.append(">EXPECTED HAS ")
+					.append(fsize - min)
+					.append(" MORE ELEMENT(S):\n");
 			for (int i = min; i < fsize; i++) {
 				builder.append("\t".repeat(depth + 1))
-					.append(">ELEMENT #")
-					.append(i)
-					.append(":\n")
-					.append("\t".repeat(depth + 2))
-					.append(felements.get(i))
-					.append("\n");
+						.append(">ELEMENT #")
+						.append(i)
+						.append(":\n")
+						.append("\t".repeat(depth + 2))
+						.append(felements.get(i))
+						.append("\n");
 			}
 			atLeastOne = true;
 		}
@@ -862,12 +863,12 @@ public class ResultComparer {
 			builder.append("\t".repeat(depth)).append(">ACTUAL HAS ").append(ssize - min).append(" MORE ELEMENT(S):\n");
 			for (int i = min; i < ssize; i++) {
 				builder.append("\t".repeat(depth + 1))
-					.append(">ELEMENT #")
-					.append(i)
-					.append(":\n")
-					.append("\t".repeat(depth + 2))
-					.append(selements.get(i))
-					.append("\n");
+						.append(">ELEMENT #")
+						.append(i)
+						.append(":\n")
+						.append("\t".repeat(depth + 2))
+						.append(selements.get(i))
+						.append("\n");
 			}
 			atLeastOne = true;
 		}
@@ -891,49 +892,49 @@ public class ResultComparer {
 		StringBuilder inner;
 		for (Pair<String, String> field : diff.getCommons())
 			if (diff(
-				depth + 1,
-				inner = new StringBuilder(),
-				felements.get(field.getLeft()),
-				selements.get(field.getLeft()))) {
+					depth + 1,
+					inner = new StringBuilder(),
+					felements.get(field.getLeft()),
+					selements.get(field.getLeft()))) {
 				builder.append("\t".repeat(depth))
-					.append(">FIELD ")
-					.append(field.getLeft())
-					.append(":\n")
-					.append(inner.toString())
-					.append("\n");
+						.append(">FIELD ")
+						.append(field.getLeft())
+						.append(":\n")
+						.append(inner.toString())
+						.append("\n");
 				atLeastOne = true;
 			}
 
 		if (!diff.getOnlyFirst().isEmpty()) {
 			builder.append("\t".repeat(depth))
-				.append(">EXPECTED HAS ")
-				.append(diff.getOnlyFirst().size())
-				.append(" MORE FIELD(S):\n");
+					.append(">EXPECTED HAS ")
+					.append(diff.getOnlyFirst().size())
+					.append(" MORE FIELD(S):\n");
 			for (String field : diff.getOnlyFirst()) {
 				builder.append("\t".repeat(depth + 1))
-					.append(">FIELD ")
-					.append(field)
-					.append(":\n")
-					.append("\t".repeat(depth + 2))
-					.append(felements.get(field))
-					.append("\n");
+						.append(">FIELD ")
+						.append(field)
+						.append(":\n")
+						.append("\t".repeat(depth + 2))
+						.append(felements.get(field))
+						.append("\n");
 			}
 			atLeastOne = true;
 		}
 
 		if (!diff.getOnlySecond().isEmpty()) {
 			builder.append("\t".repeat(depth))
-				.append(">ACTUAL HAS ")
-				.append(diff.getOnlySecond().size())
-				.append(" MORE FIELD(S):\n");
+					.append(">ACTUAL HAS ")
+					.append(diff.getOnlySecond().size())
+					.append(" MORE FIELD(S):\n");
 			for (String field : diff.getOnlySecond()) {
 				builder.append("\t".repeat(depth + 1))
-					.append(">FIELD ")
-					.append(field)
-					.append(":\n")
-					.append("\t".repeat(depth + 2))
-					.append(selements.get(field))
-					.append("\n");
+						.append(">FIELD ")
+						.append(field)
+						.append(":\n")
+						.append("\t".repeat(depth + 2))
+						.append(selements.get(field))
+						.append("\n");
 			}
 			atLeastOne = true;
 		}
@@ -947,12 +948,12 @@ public class ResultComparer {
 			SerializableValue first,
 			SerializableValue second) {
 		builder.append("\t".repeat(depth))
-			.append(first)
-			.append("\n")
-			.append("\t".repeat(depth))
-			.append("<--->\n")
-			.append("\t".repeat(depth))
-			.append(second);
+				.append(first)
+				.append("\n")
+				.append("\t".repeat(depth))
+				.append("<--->\n")
+				.append("\t".repeat(depth))
+				.append(second);
 	}
 
 	/**
@@ -973,17 +974,17 @@ public class ResultComparer {
 
 		if (first.getAdditionalInfo() == null) {
 			report(
-				REPORTED_COMPONENT.ADDITIONAL_INFO,
-				REPORT_TYPE.ONLY_SECOND,
-				Collections.singleton(second.getAdditionalInfo()));
+					REPORTED_COMPONENT.ADDITIONAL_INFO,
+					REPORT_TYPE.ONLY_SECOND,
+					Collections.singleton(second.getAdditionalInfo()));
 			return false;
 		}
 
 		if (second.getAdditionalInfo() == null) {
 			report(
-				REPORTED_COMPONENT.ADDITIONAL_INFO,
-				REPORT_TYPE.ONLY_FIRST,
-				Collections.singleton(first.getAdditionalInfo()));
+					REPORTED_COMPONENT.ADDITIONAL_INFO,
+					REPORT_TYPE.ONLY_FIRST,
+					Collections.singleton(first.getAdditionalInfo()));
 			return false;
 		}
 
@@ -1208,7 +1209,7 @@ public class ResultComparer {
 			String path) {
 		String ext = FilenameUtils.getExtension(path);
 		return ext.equals(
-			"dot") || ext.equals("graphml") || ext.equals("png") || ext.equals("html") || ext.equals("js");
+				"dot") || ext.equals("graphml") || ext.equals("png") || ext.equals("html") || ext.equals("js");
 	}
 
 	/**
@@ -1253,7 +1254,7 @@ public class ResultComparer {
 	}
 
 	/**
-	 * Yields the keys in {@link JsonReport#getRunInfo()} that should be ignored
+	 * Yields the keys in {@link JsonReport#getInfo()} that should be ignored
 	 * when comparing run info. By default, the following keys are ignored:
 	 * <ul>
 	 * <li>duration</li>

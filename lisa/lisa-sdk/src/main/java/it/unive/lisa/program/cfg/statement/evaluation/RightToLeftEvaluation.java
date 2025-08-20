@@ -15,7 +15,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class RightToLeftEvaluation implements EvaluationOrder {
+public class RightToLeftEvaluation
+		implements
+		EvaluationOrder {
 
 	/**
 	 * The singleton instance of this class.

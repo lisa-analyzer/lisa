@@ -18,7 +18,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Parameter implements CodeElement {
+public class Parameter
+		implements
+		CodeElement {
 
 	/**
 	 * The name of this parameter

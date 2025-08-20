@@ -30,7 +30,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MonolithicHeap implements BaseHeapDomain<Monolith> {
+public class MonolithicHeap
+		implements
+		BaseHeapDomain<Monolith> {
 
 	private static final String MONOLITH_NAME = "heap";
 
@@ -86,7 +88,9 @@ public class MonolithicHeap implements BaseHeapDomain<Monolith> {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class Rewriter extends BaseHeapDomain.Rewriter {
+	public static class Rewriter
+			extends
+			BaseHeapDomain.Rewriter {
 
 		/**
 		 * The singleton instance of this rewriter.
@@ -125,10 +129,10 @@ public class MonolithicHeap implements BaseHeapDomain<Monolith> {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			HeapLocation e = new HeapLocation(
-				expression.getStaticType(),
-				MONOLITH_NAME,
-				true,
-				expression.getCodeLocation());
+					expression.getStaticType(),
+					MONOLITH_NAME,
+					true,
+					expression.getCodeLocation());
 			e.setAllocation(true);
 			return new ExpressionSet(e);
 		}

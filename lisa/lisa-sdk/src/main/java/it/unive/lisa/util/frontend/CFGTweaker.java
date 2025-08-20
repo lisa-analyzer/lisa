@@ -89,7 +89,8 @@ public class CFGTweaker {
 				returnsValue = true;
 			else if (returnsValue)
 				throw exceptionFactory.apply(
-					"Return statement at " + st.getLocation() + " should return something, since other returns do it");
+						"Return statement at " + st.getLocation()
+								+ " should return something, since other returns do it");
 
 		cfg.addNode(ret);
 		for (Statement st : preExits) {
@@ -156,10 +157,9 @@ public class CFGTweaker {
 				continue;
 
 			fins.sort(
-				(
-						a,
-						b
-				) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
+					(
+							a,
+							b) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
 			for (Edge preEnd : cfg.getIngoingEdges(yield)) {
 				cfg.getNodeList().removeEdge(preEnd);
 				pathIdx = addFinallyPathInBetween(cfg, preEnd.getSource(), yield, fins, pathIdx);
@@ -180,29 +180,26 @@ public class CFGTweaker {
 
 					if (pb.getTryBlock().getBody().contains(st))
 						outs.stream()
-							.filter(e -> !pb.getTryBlock().getBody().contains(e.getDestination()))
-							.forEach(e ->
-							{
-								found.set(true);
-								toReplace.add(e);
-							});
-					if (pb.getElseBlock() != null && pb.getElseBlock().getBody().contains(st))
-						outs.stream()
-							.filter(e -> !pb.getElseBlock().getBody().contains(e.getDestination()))
-							.forEach(e ->
-							{
-								found.set(true);
-								toReplace.add(e);
-							});
-					for (CatchBlock catchBody : pb.getCatchBlocks())
-						if (catchBody.getBody().getBody().contains(st))
-							outs.stream()
-								.filter(e -> !catchBody.getBody().getBody().contains(e.getDestination()))
-								.forEach(e ->
-								{
+								.filter(e -> !pb.getTryBlock().getBody().contains(e.getDestination()))
+								.forEach(e -> {
 									found.set(true);
 									toReplace.add(e);
 								});
+					if (pb.getElseBlock() != null && pb.getElseBlock().getBody().contains(st))
+						outs.stream()
+								.filter(e -> !pb.getElseBlock().getBody().contains(e.getDestination()))
+								.forEach(e -> {
+									found.set(true);
+									toReplace.add(e);
+								});
+					for (CatchBlock catchBody : pb.getCatchBlocks())
+						if (catchBody.getBody().getBody().contains(st))
+							outs.stream()
+									.filter(e -> !catchBody.getBody().getBody().contains(e.getDestination()))
+									.forEach(e -> {
+										found.set(true);
+										toReplace.add(e);
+									});
 
 					if (found.get())
 						fins.add(pb.getFinallyBlock());
@@ -211,10 +208,9 @@ public class CFGTweaker {
 					continue;
 
 				fins.sort(
-					(
-							a,
-							b
-					) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
+						(
+								a,
+								b) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
 				for (Edge entry : toReplace) {
 					cfg.getNodeList().removeEdge(entry);
 					pathIdx = addFinallyPathInBetween(cfg, st, entry.getDestination(), fins, pathIdx);
@@ -286,9 +282,9 @@ public class CFGTweaker {
 			if (!next.alwaysContinues())
 				if (!next.canBeContinued()) {
 					lastYielders = next.getBody()
-						.stream()
-						.filter(Statement::stopsExecution)
-						.collect(Collectors.toList());
+							.stream()
+							.filter(Statement::stopsExecution)
+							.collect(Collectors.toList());
 					yieldersInCurrentBlock = true;
 				} else {
 					lastYielders = new LinkedList<>(lastYielders);

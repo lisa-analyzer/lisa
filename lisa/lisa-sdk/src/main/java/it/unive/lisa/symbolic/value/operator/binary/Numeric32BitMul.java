@@ -17,7 +17,12 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric32BitMul extends NumericOperation implements MultiplicationOperator, OverflowingOperator {
+public class Numeric32BitMul
+		extends
+		NumericOperation
+		implements
+		MultiplicationOperator,
+		OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.

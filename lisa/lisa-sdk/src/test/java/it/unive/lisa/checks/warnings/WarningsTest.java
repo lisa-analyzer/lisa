@@ -22,26 +22,26 @@ import org.junit.Test;
 public class WarningsTest {
 
 	private static final ClassUnit unit1 = new ClassUnit(
-		new SourceCodeLocation("fake", 1, 0),
-		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-		"fake1",
-		false);
+			new SourceCodeLocation("fake", 1, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"fake1",
+			false);
 
 	private static final ClassUnit unit2 = new ClassUnit(
-		new SourceCodeLocation("fake", 1, 1),
-		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-		"fake2",
-		false);
+			new SourceCodeLocation("fake", 1, 1),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"fake2",
+			false);
 
 	private static final Global global1 = new Global(new SourceCodeLocation("fake", 15, 0), unit1, "fake1", false);
 
 	private static final Global global2 = new Global(new SourceCodeLocation("fake", 15, 1), unit2, "fake2", false);
 
 	private static final CodeMemberDescriptor descriptor1 = new CodeMemberDescriptor(
-		new SourceCodeLocation("fake", 2, 0),
-		unit1,
-		false,
-		"foo1");
+			new SourceCodeLocation("fake", 2, 0),
+			unit1,
+			false,
+			"foo1");
 
 	private static final CFG cfg1 = new CFG(descriptor1);
 
@@ -50,10 +50,10 @@ public class WarningsTest {
 	private static final Expression e1 = new VariableRef(cfg1, new SourceCodeLocation("fake", 4, 0), "x");
 
 	private static final CodeMemberDescriptor descriptor2 = new CodeMemberDescriptor(
-		new SourceCodeLocation("fake", 2, 1),
-		unit2,
-		false,
-		"foo2");
+			new SourceCodeLocation("fake", 2, 1),
+			unit2,
+			false,
+			"foo2");
 
 	private static final CFG cfg2 = new CFG(descriptor2);
 
@@ -148,26 +148,26 @@ public class WarningsTest {
 	@Test
 	public void testDifferentType() {
 		List<Warning> warns = List.of(
-			new Warning("bar"),
-			new UnitWarning(unit1, "foo"),
-			new GlobalWarning(unit1, global1, "foo"),
-			new CFGWarning(cfg1, "foo"),
-			new CFGDescriptorWarning(descriptor1, "foo"),
-			new ExpressionWarning(e1, "foo"),
-			new StatementWarning(st1, "foo"));
+				new Warning("bar"),
+				new UnitWarning(unit1, "foo"),
+				new GlobalWarning(unit1, global1, "foo"),
+				new CFGWarning(cfg1, "foo"),
+				new CFGDescriptorWarning(descriptor1, "foo"),
+				new ExpressionWarning(e1, "foo"),
+				new StatementWarning(st1, "foo"));
 
 		for (int i = 0; i < warns.size(); i++)
 			for (int j = 0; j < warns.size(); j++)
 				if (i != j) {
 					Warning w1 = warns.get(i), w2 = warns.get(j);
 					assertNotEquals(
-						w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(),
-						0,
-						w1.compareTo(w2));
+							w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(),
+							0,
+							w1.compareTo(w2));
 					assertNotEquals(
-						w2.getClass().getSimpleName() + " == " + w1.getClass().getSimpleName(),
-						0,
-						w2.compareTo(w1));
+							w2.getClass().getSimpleName() + " == " + w1.getClass().getSimpleName(),
+							0,
+							w2.compareTo(w1));
 
 					// these are here just to ensure that they don't throw
 					// exceptions

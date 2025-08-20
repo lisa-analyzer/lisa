@@ -37,7 +37,9 @@ import java.util.function.Predicate;
  *                state
  */
 public class OptimizedBackwardFixpoint<
-		A extends AbstractLattice<A>> extends BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> {
+		A extends AbstractLattice<A>>
+		extends
+		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> {
 
 	private final Predicate<Statement> hotspots;
 

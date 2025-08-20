@@ -33,7 +33,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UpperBounds implements ValueDomain<ValueEnvironment<DefiniteIdSet>> {
+public class UpperBounds
+		implements
+		ValueDomain<ValueEnvironment<DefiniteIdSet>> {
 
 	@Override
 	public ValueEnvironment<DefiniteIdSet> assign(
@@ -184,29 +186,29 @@ public class UpperBounds implements ValueDomain<ValueEnvironment<DefiniteIdSet>>
 		} else if (operator instanceof ComparisonGt) {
 			// x > y --> y < x
 			return assume(
-				state,
-				new BinaryExpression(
-					expression.getStaticType(),
-					right,
-					left,
-					ComparisonLt.INSTANCE,
-					expression.getCodeLocation()),
-				src,
-				dest,
-				oracle);
+					state,
+					new BinaryExpression(
+							expression.getStaticType(),
+							right,
+							left,
+							ComparisonLt.INSTANCE,
+							expression.getCodeLocation()),
+					src,
+					dest,
+					oracle);
 		} else if (operator instanceof ComparisonGe) {
 			// x >= y --> y <= x
 			return assume(
-				state,
-				new BinaryExpression(
-					expression.getStaticType(),
-					right,
-					left,
-					ComparisonLe.INSTANCE,
-					expression.getCodeLocation()),
-				src,
-				dest,
-				oracle);
+					state,
+					new BinaryExpression(
+							expression.getStaticType(),
+							right,
+							left,
+							ComparisonLe.INSTANCE,
+							expression.getCodeLocation()),
+					src,
+					dest,
+					oracle);
 		}
 
 		return state;

@@ -7,7 +7,9 @@ import it.unive.lisa.program.cfg.CodeLocation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class SyntheticLocation implements CodeLocation {
+public class SyntheticLocation
+		implements
+		CodeLocation {
 
 	/**
 	 * Singleton instance of the synthetic location.

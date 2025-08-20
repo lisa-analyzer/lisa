@@ -31,7 +31,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Call extends NaryExpression {
+public abstract class Call
+		extends
+		NaryExpression {
 
 	/**
 	 * Possible types of a call, identifying the type of targets (instance or
@@ -340,11 +342,11 @@ public abstract class Call extends NaryExpression {
 			Collection<CFG> targets = cfgcall.getTargetedCFGs();
 			if (!targets.isEmpty())
 				return !targets.iterator()
-					.next()
-					.getNormalExitpoints()
-					.stream()
-					// returned values will be stored in meta variables
-					.anyMatch(st -> st instanceof MetaVariableCreator);
+						.next()
+						.getNormalExitpoints()
+						.stream()
+						// returned values will be stored in meta variables
+						.anyMatch(st -> st instanceof MetaVariableCreator);
 		}
 
 		if (this instanceof NativeCall) {

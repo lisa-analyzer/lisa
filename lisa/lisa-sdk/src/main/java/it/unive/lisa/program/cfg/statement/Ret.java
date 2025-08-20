@@ -19,7 +19,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Ret extends Statement {
+public class Ret
+		extends
+		Statement {
 
 	/**
 	 * Builds the return, happening at the given location in the program.

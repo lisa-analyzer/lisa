@@ -5,6 +5,8 @@ package it.unive.lisa.symbolic.value.operator;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface SubtractionOperator extends ArithmeticOperator {
+public interface SubtractionOperator
+		extends
+		ArithmeticOperator {
 
 }

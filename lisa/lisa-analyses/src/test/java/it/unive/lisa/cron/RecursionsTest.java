@@ -13,16 +13,18 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class RecursionsTest extends IMPCronExecutor {
+public class RecursionsTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testFibonacciFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -36,9 +38,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -52,9 +54,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -68,9 +70,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -84,9 +86,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -100,9 +102,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -116,9 +118,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -132,9 +134,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -148,9 +150,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -165,9 +167,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -182,9 +184,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -199,9 +201,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -216,9 +218,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -233,9 +235,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -250,9 +252,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -267,9 +269,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -284,9 +286,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -300,9 +302,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -316,9 +318,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -332,9 +334,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -348,9 +350,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -364,9 +366,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -380,9 +382,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -396,9 +398,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -412,9 +414,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -428,9 +430,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -444,9 +446,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -460,9 +462,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -476,9 +478,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -492,9 +494,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -508,9 +510,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -524,9 +526,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -540,9 +542,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -556,9 +558,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -572,9 +574,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -588,9 +590,9 @@ public class RecursionsTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Interval(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";

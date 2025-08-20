@@ -20,7 +20,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * {@link AnalysisState#pushScope(ScopeToken, ProgramPoint)} and
  * {@link AnalysisState#popScope(ScopeToken, ProgramPoint)}.
  */
-public class DefaultScopingStrategy implements ScopingStrategy {
+public class DefaultScopingStrategy
+		implements
+		ScopingStrategy {
 
 	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> scope(

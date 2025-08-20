@@ -17,7 +17,9 @@ import java.util.TreeMap;
  */
 @JsonSerialize(using = ValueSerializer.class)
 @JsonDeserialize(using = ValueDeserializer.class)
-public abstract class SerializableValue implements Comparable<SerializableValue> {
+public abstract class SerializableValue
+		implements
+		Comparable<SerializableValue> {
 
 	private final SortedMap<String, String> properties;
 
@@ -104,9 +106,9 @@ public abstract class SerializableValue implements Comparable<SerializableValue>
 			return cmp;
 
 		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
-			String.class,
-			properties.keySet(),
-			o.properties.keySet());
+				String.class,
+				properties.keySet(),
+				o.properties.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())

@@ -40,7 +40,9 @@ import it.unive.lisa.util.numeric.MathNumberConversionException;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IntegerConstantPropagation implements SmashedSumIntDomain<IntegerConstant> {
+public class IntegerConstantPropagation
+		implements
+		SmashedSumIntDomain<IntegerConstant> {
 
 	@Override
 	public IntegerConstant evalNullConstant(
@@ -108,7 +110,8 @@ public class IntegerConstantPropagation implements SmashedSumIntDomain<IntegerCo
 			// this is different from the semantics of java
 			return left.isTop() || right.isTop() ? IntegerConstant.TOP
 					: new IntegerConstant(
-						right.value < 0 ? -Math.abs(left.value % right.value) : -Math.abs(left.value % right.value));
+							right.value < 0 ? -Math.abs(left.value % right.value)
+									: -Math.abs(left.value % right.value));
 		else if (operator instanceof RemainderOperator)
 			// this matches the semantics of java
 			return left.isTop() || right.isTop() ? IntegerConstant.TOP : new IntegerConstant(left.value % right.value);

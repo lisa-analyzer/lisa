@@ -10,7 +10,9 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TrueLiteral extends Literal<Boolean> {
+public class TrueLiteral
+		extends
+		Literal<Boolean> {
 
 	/**
 	 * Builds the literal.

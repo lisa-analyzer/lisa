@@ -41,7 +41,9 @@ import org.apache.logging.log4j.Logger;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> implements InterproceduralAnalysis<A, D> {
+		D extends AbstractDomain<A>>
+		implements
+		InterproceduralAnalysis<A, D> {
 
 	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
@@ -105,15 +107,16 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
 					CodeLocation loc = arg.getLocation();
 					Assignment a = new Assignment(
-						cfg,
-						loc,
-						new VariableRef(cfg, loc, arg.getName()),
-						arg.getStaticType().unknownValue(cfg, loc));
+							cfg,
+							loc,
+							new VariableRef(cfg, loc, arg.getName()),
+							arg.getStaticType().unknownValue(cfg, loc));
 					prepared = a.forwardSemantics(prepared, this, store);
 				}
 
 				results
-					.putResult(cfg, ID, cfg.fixpoint(prepared, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
+						.putResult(cfg, ID,
+								cfg.fixpoint(prepared, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
@@ -141,8 +144,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 		// location for generated code). But if they also have the same
 		// signature, then they should be equal...
 		return g1.getDescriptor()
-			.getFullSignatureWithParNames()
-			.compareTo(g2.getDescriptor().getFullSignatureWithParNames());
+				.getFullSignatureWithParNames()
+				.compareTo(g2.getDescriptor().getFullSignatureWithParNames());
 	}
 
 	@Override
@@ -159,13 +162,13 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		OpenCall open = new OpenCall(
-			call.getCFG(),
-			call.getLocation(),
-			call.getCallType(),
-			call.getQualifier(),
-			call.getTargetName(),
-			call.getStaticType(),
-			call.getParameters());
+				call.getCFG(),
+				call.getLocation(),
+				call.getCallType(),
+				call.getQualifier(),
+				call.getTargetName(),
+				call.getStaticType(),
+				call.getParameters());
 		return getAbstractResultOf(open, entryState, parameters, expressions);
 	}
 

@@ -19,7 +19,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ComparisonNe implements ComparisonOperator, BinaryOperator {
+public class ComparisonNe
+		implements
+		ComparisonOperator,
+		BinaryOperator {
 
 	/**
 	 * The singleton instance of this class.

@@ -24,7 +24,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Or extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class Or
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the logical disjunction.
@@ -63,9 +65,9 @@ public class Or extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new BinaryExpression(getStaticType(), left, right, LogicalOr.INSTANCE, getLocation()),
-			this);
+				state,
+				new BinaryExpression(getStaticType(), left, right, LogicalOr.INSTANCE, getLocation()),
+				this);
 	}
 
 }

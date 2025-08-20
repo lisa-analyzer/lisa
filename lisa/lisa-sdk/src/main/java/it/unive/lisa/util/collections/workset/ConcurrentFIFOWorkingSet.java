@@ -11,7 +11,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public final class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
+public final class ConcurrentFIFOWorkingSet<E>
+		implements
+		WorkingSet<E> {
 
 	private final Deque<E> ws;
 

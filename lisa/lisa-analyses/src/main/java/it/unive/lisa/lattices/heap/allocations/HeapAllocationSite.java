@@ -10,7 +10,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class HeapAllocationSite extends AllocationSite {
+public class HeapAllocationSite
+		extends
+		AllocationSite {
 
 	/**
 	 * Builds a heap allocation site.

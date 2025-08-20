@@ -18,7 +18,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class BinaryStatement extends NaryStatement {
+public abstract class BinaryStatement
+		extends
+		NaryStatement {
 
 	/**
 	 * Builds the statement, happening at the given location in the program. The

@@ -36,7 +36,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Contains extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class Contains
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -61,12 +63,12 @@ public class Contains extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 			Expression left,
 			Expression right) {
 		super(
-			cfg,
-			location,
-			"contains",
-			cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(),
-			left,
-			right);
+				cfg,
+				location,
+				"contains",
+				cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(),
+				left,
+				right);
 	}
 
 	@Override
@@ -90,9 +92,9 @@ public class Contains extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new BinaryExpression(getStaticType(), left, right, StringContains.INSTANCE, getLocation()),
-			originating == null ? this : originating);
+				state,
+				new BinaryExpression(getStaticType(), left, right, StringContains.INSTANCE, getLocation()),
+				originating == null ? this : originating);
 	}
 
 }

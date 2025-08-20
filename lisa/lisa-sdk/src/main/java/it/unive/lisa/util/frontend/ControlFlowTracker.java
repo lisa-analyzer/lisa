@@ -96,7 +96,7 @@ public class ControlFlowTracker {
 					list.addEdge(new SequentialEdge(modifier.getLeft(), targetForContinuing));
 				else
 					throw new IllegalStateException(
-						"Statement " + modifier.getLeft() + " not supported at " + condition.getLocation());
+							"Statement " + modifier.getLeft() + " not supported at " + condition.getLocation());
 				it.remove();
 			}
 		}

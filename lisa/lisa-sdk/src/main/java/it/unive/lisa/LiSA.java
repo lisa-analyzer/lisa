@@ -102,11 +102,11 @@ public class LiSA {
 
 		DateTime start = new DateTime();
 		LiSARunner runner = new LiSARunner(
-			conf,
-			fileManager,
-			conf.interproceduralAnalysis,
-			conf.callGraph,
-			conf.analysis == null ? null : new Analysis(conf.analysis));
+				conf,
+				fileManager,
+				conf.interproceduralAnalysis,
+				conf.callGraph,
+				conf.analysis == null ? null : new Analysis(conf.analysis));
 		Application app = new Application(programs);
 		Collection<Warning> warnings;
 

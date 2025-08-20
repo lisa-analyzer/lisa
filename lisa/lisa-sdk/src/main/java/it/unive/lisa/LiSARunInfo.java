@@ -32,7 +32,9 @@ import org.joda.time.format.PeriodFormatterBuilder;
  */
 public class LiSARunInfo {
 
-	private static class StatementCounter implements GraphVisitor<CFG, Statement, Edge, Void> {
+	private static class StatementCounter
+			implements
+			GraphVisitor<CFG, Statement, Edge, Void> {
 
 		private int statements = 0;
 
@@ -62,21 +64,21 @@ public class LiSARunInfo {
 	 * <i>milliseconds</i>ms. Note that zeros are omitted.
 	 */
 	public static final PeriodFormatter PERIOD_FORMAT = new PeriodFormatterBuilder().appendYears()
-		.appendSuffix("Y ")
-		.appendMonths()
-		.appendSuffix("M ")
-		.appendDays()
-		.appendSuffix("D ")
-		.appendHours()
-		.appendSuffix("h ")
-		.appendMinutes()
-		.appendSuffix("m ")
-		.appendSeconds()
-		.appendSuffix("s ")
-		.appendMillis()
-		.appendSuffix("ms")
-		.printZeroNever()
-		.toFormatter();
+			.appendSuffix("Y ")
+			.appendMonths()
+			.appendSuffix("M ")
+			.appendDays()
+			.appendSuffix("D ")
+			.appendHours()
+			.appendSuffix("h ")
+			.appendMinutes()
+			.appendSuffix("m ")
+			.appendSeconds()
+			.appendSuffix("s ")
+			.appendMillis()
+			.appendSuffix("ms")
+			.printZeroNever()
+			.toFormatter();
 
 	/**
 	 * The version of LiSA used to run the analysis.
@@ -266,32 +268,32 @@ public class LiSARunInfo {
 	@Override
 	public String toString() {
 		return "Version "
-			+ version
-			+ "\nDuration: "
-			+ duration
-			+ " (started: "
-			+ start
-			+ ", ended: "
-			+ end
-			+ ")"
-			+ "\nPrograms: "
-			+ programs
-			+ "\nUnits: "
-			+ units
-			+ "\nGlobals: "
-			+ globals
-			+ "\nCode Members: "
-			+ members
-			+ "\nCFGs: "
-			+ cfgs
-			+ "\nStatements: "
-			+ statements
-			+ "\nExpressions: "
-			+ expressions
-			+ "\nGenerated Warnings: "
-			+ warnings
-			+ "\nGenerated Files: "
-			+ files;
+				+ version
+				+ "\nDuration: "
+				+ duration
+				+ " (started: "
+				+ start
+				+ ", ended: "
+				+ end
+				+ ")"
+				+ "\nPrograms: "
+				+ programs
+				+ "\nUnits: "
+				+ units
+				+ "\nGlobals: "
+				+ globals
+				+ "\nCode Members: "
+				+ members
+				+ "\nCFGs: "
+				+ cfgs
+				+ "\nStatements: "
+				+ statements
+				+ "\nExpressions: "
+				+ expressions
+				+ "\nGenerated Warnings: "
+				+ warnings
+				+ "\nGenerated Files: "
+				+ files;
 	}
 
 	/**

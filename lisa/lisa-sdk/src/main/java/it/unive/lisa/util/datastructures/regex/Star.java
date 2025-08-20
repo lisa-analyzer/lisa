@@ -13,7 +13,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class Star extends RegularExpression {
+public final class Star
+		extends
+		RegularExpression {
 
 	private final RegularExpression op;
 

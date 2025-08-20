@@ -36,7 +36,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 
-public class StabilityTest extends IMPCronExecutor {
+public class StabilityTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testStability()
@@ -45,9 +47,9 @@ public class StabilityTest extends IMPCronExecutor {
 		conf.serializeResults = true;
 		Interval aux = new Interval();
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Stability<>(aux),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Stability<>(aux),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.testDir = "stability";
 		conf.programFile = "stability.imp";
@@ -102,77 +104,77 @@ public class StabilityTest extends IMPCronExecutor {
 				try {
 					Map<Statement,
 							ValueEnvironment<Trend>> fixpoint = fix.fixpoint(
-								entrypoints,
-								FIFOWorkingSet.mk(),
-								new FixpointImplementation<Statement, Edge, ValueEnvironment<Trend>>() {
+									entrypoints,
+									FIFOWorkingSet.mk(),
+									new FixpointImplementation<Statement, Edge, ValueEnvironment<Trend>>() {
 
-									@Override
-									public ValueEnvironment<Trend> union(
-											Statement node,
-											ValueEnvironment<Trend> left,
-											ValueEnvironment<Trend> right)
-											throws Exception {
-										return left.lub(right);
-									}
+										@Override
+										public ValueEnvironment<Trend> union(
+												Statement node,
+												ValueEnvironment<Trend> left,
+												ValueEnvironment<Trend> right)
+												throws Exception {
+											return left.lub(right);
+										}
 
-									@Override
-									public ValueEnvironment<Trend> traverse(
-											Edge edge,
-											ValueEnvironment<Trend> entrystate)
-											throws Exception {
-										return entrystate;
-									}
+										@Override
+										public ValueEnvironment<Trend> traverse(
+												Edge edge,
+												ValueEnvironment<Trend> entrystate)
+												throws Exception {
+											return entrystate;
+										}
 
-									@Override
-									public boolean equality(
-											Statement node,
-											ValueEnvironment<Trend> approx,
-											ValueEnvironment<Trend> old)
-											throws Exception {
-										return approx.lessOrEqual(old);
-									}
+										@Override
+										public boolean equality(
+												Statement node,
+												ValueEnvironment<Trend> approx,
+												ValueEnvironment<Trend> old)
+												throws Exception {
+											return approx.lessOrEqual(old);
+										}
 
-									@Override
-									@SuppressWarnings("unchecked")
-									public ValueEnvironment<Trend> semantics(
-											Statement node,
-											ValueEnvironment<Trend> entrystate)
-											throws Exception {
-										ValueEnvironment<Trend> post;
-										if (result instanceof OptimizedAnalyzedCFG)
-											post = ((OptimizedAnalyzedCFG<
-													SimpleAbstractState<Monolith,
-															ValueLatticeProduct<ValueEnvironment<Trend>,
-																	ValueEnvironment<IntInterval>>,
-															TypeEnvironment<TypeSet>>,
-													SimpleAbstractDomain<Monolith,
-															ValueLatticeProduct<ValueEnvironment<Trend>,
-																	ValueEnvironment<IntInterval>>,
-															TypeEnvironment<TypeSet>>>) result)
-												.getUnwindedAnalysisStateAfter(node, conf)
-												.getState().valueState.first;
-										else
-											post = result.getAnalysisStateAfter(node).getState().valueState.first;
-										return analysis.combine(entrystate, post);
-									}
+										@Override
+										@SuppressWarnings("unchecked")
+										public ValueEnvironment<Trend> semantics(
+												Statement node,
+												ValueEnvironment<Trend> entrystate)
+												throws Exception {
+											ValueEnvironment<Trend> post;
+											if (result instanceof OptimizedAnalyzedCFG)
+												post = ((OptimizedAnalyzedCFG<
+														SimpleAbstractState<Monolith,
+																ValueLatticeProduct<ValueEnvironment<Trend>,
+																		ValueEnvironment<IntInterval>>,
+																TypeEnvironment<TypeSet>>,
+														SimpleAbstractDomain<Monolith,
+																ValueLatticeProduct<ValueEnvironment<Trend>,
+																		ValueEnvironment<IntInterval>>,
+																TypeEnvironment<TypeSet>>>) result)
+																		.getUnwindedAnalysisStateAfter(node, conf)
+																		.getState().valueState.first;
+											else
+												post = result.getAnalysisStateAfter(node).getState().valueState.first;
+											return analysis.combine(entrystate, post);
+										}
 
-									@Override
-									public ValueEnvironment<Trend> operation(
-											Statement node,
-											ValueEnvironment<Trend> approx,
-											ValueEnvironment<Trend> old)
-											throws Exception {
-										return approx.lub(old);
-									}
+										@Override
+										public ValueEnvironment<Trend> operation(
+												Statement node,
+												ValueEnvironment<Trend> approx,
+												ValueEnvironment<Trend> old)
+												throws Exception {
+											return approx.lub(old);
+										}
 
-								});
+									});
 
 					for (Statement exit : graph.getAllExitpoints()) {
 						ValueEnvironment<Trend> state = fixpoint.get(exit);
 						MapRepresentation repr = new MapRepresentation(
-							analysis.getCovarianceClasses(state),
-							StringRepresentation::new,
-							v -> new SetRepresentation(v, StringRepresentation::new));
+								analysis.getCovarianceClasses(state),
+								StringRepresentation::new,
+								v -> new SetRepresentation(v, StringRepresentation::new));
 						tool.warnOn(exit, "Classes computed: " + StringUtilities.flatten(repr.toString()));
 					}
 				} catch (FixpointException e) {

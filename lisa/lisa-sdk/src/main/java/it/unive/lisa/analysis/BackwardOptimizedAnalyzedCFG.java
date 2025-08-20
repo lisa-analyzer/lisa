@@ -55,7 +55,9 @@ import org.apache.logging.log4j.Logger;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> extends BackwardAnalyzedCFG<A> {
+		D extends AbstractDomain<A>>
+		extends
+		BackwardAnalyzedCFG<A> {
 
 	private static final Logger LOG = LogManager.getLogger(BackwardOptimizedAnalyzedCFG.class);
 
@@ -204,7 +206,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			else {
 				Expression e = (Expression) stmt;
 				CompoundState<A> val = existing
-					.computeIfAbsent(e.getRootStatement(), ex -> CompoundState.of(bottom, bot.bottom()));
+						.computeIfAbsent(e.getRootStatement(), ex -> CompoundState.of(bottom, bot.bottom()));
 				val.intermediateStates.put(e, approx);
 			}
 		}
@@ -252,7 +254,9 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		results.put(st, prestate);
 	}
 
-	private class PrecomputedAnalysis implements InterproceduralAnalysis<A, D> {
+	private class PrecomputedAnalysis
+			implements
+			InterproceduralAnalysis<A, D> {
 
 		@Override
 		public void init(
@@ -296,10 +300,10 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();
 				state = state.lub(
-					call.getProgram()
-						.getFeatures()
-						.getScopingStrategy()
-						.unscope(call, scope, res, interprocedural.getAnalysis()));
+						call.getProgram()
+								.getFeatures()
+								.getScopingStrategy()
+								.unscope(call, scope, res, interprocedural.getAnalysis()));
 			}
 			return state;
 		}
@@ -353,12 +357,12 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@SuppressWarnings("unchecked")
 		BackwardOptimizedAnalyzedCFG<A, D> o = (BackwardOptimizedAnalyzedCFG<A, D>) other;
 		return new BackwardOptimizedAnalyzedCFG<A, D>(
-			this,
-			id,
-			exitStates.lub(other.exitStates),
-			results.lub(other.results),
-			expanded == null ? o.expanded : expanded.lub(o.expanded),
-			interprocedural);
+				this,
+				id,
+				exitStates.lub(other.exitStates),
+				results.lub(other.results),
+				expanded == null ? o.expanded : expanded.lub(o.expanded),
+				interprocedural);
 	}
 
 	@Override
@@ -373,12 +377,12 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@SuppressWarnings("unchecked")
 		BackwardOptimizedAnalyzedCFG<A, D> o = (BackwardOptimizedAnalyzedCFG<A, D>) other;
 		return new BackwardOptimizedAnalyzedCFG<A, D>(
-			this,
-			id,
-			exitStates.glb(other.exitStates),
-			results.glb(other.results),
-			expanded == null ? o.expanded : expanded.glb(o.expanded),
-			interprocedural);
+				this,
+				id,
+				exitStates.glb(other.exitStates),
+				results.glb(other.results),
+				expanded == null ? o.expanded : expanded.glb(o.expanded),
+				interprocedural);
 	}
 
 	@Override
@@ -393,12 +397,12 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@SuppressWarnings("unchecked")
 		BackwardOptimizedAnalyzedCFG<A, D> o = (BackwardOptimizedAnalyzedCFG<A, D>) other;
 		return new BackwardOptimizedAnalyzedCFG<A, D>(
-			this,
-			id,
-			exitStates.widening(other.exitStates),
-			results.widening(other.results),
-			expanded == null ? o.expanded : expanded.widening(o.expanded),
-			interprocedural);
+				this,
+				id,
+				exitStates.widening(other.exitStates),
+				results.widening(other.results),
+				expanded == null ? o.expanded : expanded.widening(o.expanded),
+				interprocedural);
 	}
 
 	@Override
@@ -413,12 +417,12 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@SuppressWarnings("unchecked")
 		BackwardOptimizedAnalyzedCFG<A, D> o = (BackwardOptimizedAnalyzedCFG<A, D>) other;
 		return new BackwardOptimizedAnalyzedCFG<A, D>(
-			this,
-			id,
-			exitStates.narrowing(other.exitStates),
-			results.narrowing(other.results),
-			expanded == null ? o.expanded : expanded.narrowing(o.expanded),
-			interprocedural);
+				this,
+				id,
+				exitStates.narrowing(other.exitStates),
+				results.narrowing(other.results),
+				expanded == null ? o.expanded : expanded.narrowing(o.expanded),
+				interprocedural);
 	}
 
 	@Override
@@ -429,12 +433,12 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	@Override
 	public BackwardOptimizedAnalyzedCFG<A, D> bottom() {
 		return new BackwardOptimizedAnalyzedCFG<>(
-			this,
-			id.startingId(),
-			exitStates.bottom(),
-			results.bottom(),
-			null,
-			null);
+				this,
+				id.startingId(),
+				exitStates.bottom(),
+				results.bottom(),
+				null,
+				null);
 	}
 
 }

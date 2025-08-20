@@ -37,7 +37,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class IMPAddOrConcat
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the addition.
@@ -110,7 +112,8 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 
 				Type t = Type.commonSupertype(op.typeInference(types, ltypes, rtypes), Untyped.INSTANCE);
 				result = result.lub(
-					analysis.smallStepSemantics(state, new BinaryExpression(t, left, right, op, getLocation()), this));
+						analysis.smallStepSemantics(state, new BinaryExpression(t, left, right, op, getLocation()),
+								this));
 			}
 
 		return result;

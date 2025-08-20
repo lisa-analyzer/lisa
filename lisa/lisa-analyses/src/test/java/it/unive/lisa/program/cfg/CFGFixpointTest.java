@@ -7,6 +7,7 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
@@ -59,22 +60,24 @@ public class CFGFixpointTest {
 					throws InterproceduralAnalysisException,
 					CallGraphConstructionException {
 		ModularWorstCaseAnalysis<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
-				SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>,
+				SimpleAbstractDomain<Monolith,
+						ValueEnvironment<IntInterval>,
 						TypeEnvironment<TypeSet>>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
 		Application app = new Application(p);
 		callgraph.init(app);
 		analysis.init(
-			app,
-			callgraph,
-			WorstCasePolicy.INSTANCE,
-			new Analysis<>(DefaultConfiguration.defaultAbstractDomain()));
+				app,
+				callgraph,
+				WorstCasePolicy.INSTANCE,
+				new Analysis<>(DefaultConfiguration.defaultAbstractDomain()));
 		return analysis;
 	}
 
 	private AnalysisState<
 			SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> mkState() {
-		return new AnalysisState<>(DefaultConfiguration.defaultAbstractDomain().makeLattice(), new ExpressionSet());
+		return new AnalysisState<>(
+				new ProgramState<>(DefaultConfiguration.defaultAbstractDomain().makeLattice(), new ExpressionSet()));
 	}
 
 	@Test
@@ -132,10 +135,11 @@ public class CFGFixpointTest {
 		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");
 		cfg.addNode(call, true);
 
-		AnalysisState<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>,
+		AnalysisState<SimpleAbstractState<Monolith,
+				ValueEnvironment<IntInterval>,
 				TypeEnvironment<TypeSet>>> domain = mkState();
 		AnalyzedCFG<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = cfg
-			.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
+				.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
 
 		assertTrue(result.getAnalysisStateAfter(call).getState().valueState.getKeys().isEmpty());
 	}

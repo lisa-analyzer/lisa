@@ -34,7 +34,9 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Sign implements BaseNonRelationalValueDomain<SignLattice> {
+public class Sign
+		implements
+		BaseNonRelationalValueDomain<SignLattice> {
 
 	@Override
 	public SignLattice evalNullConstant(

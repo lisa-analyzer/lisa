@@ -22,7 +22,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class NaryStatement extends Statement {
+public abstract class NaryStatement
+		extends
+		Statement {
 
 	/**
 	 * The sub-expressions of this statement

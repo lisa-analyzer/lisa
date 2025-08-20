@@ -200,8 +200,8 @@ public abstract class AnalysisTestExecutor {
 			OptimizedRunDiff opt = new OptimizedRunDiff();
 			if (optimized)
 				failIf(
-					"Optimized results are different",
-					!opt.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
+						"Optimized results are different",
+						!opt.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
 			else if (update) {
 				if (!acc.compare(expected, actual, expectedPath.toFile(), actualPath.toFile())) {
 					System.err.println("Results are different, regenerating differences");
@@ -209,8 +209,8 @@ public abstract class AnalysisTestExecutor {
 				}
 			} else
 				failIf(
-					"Results are different",
-					!conf.reportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
+						"Results are different",
+						!conf.reportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
 			throw new TestException("File not found", e);
@@ -330,7 +330,9 @@ public abstract class AnalysisTestExecutor {
 		configuration.workdir = workdir.toString();
 	}
 
-	private class Accumulator extends ResultComparer {
+	private class Accumulator
+			extends
+			ResultComparer {
 
 		private final Collection<Path> changedFileName = new HashSet<>();
 
@@ -427,7 +429,9 @@ public abstract class AnalysisTestExecutor {
 
 	}
 
-	private static class OptimizedRunDiff extends ResultComparer {
+	private static class OptimizedRunDiff
+			extends
+			ResultComparer {
 
 		@Override
 		public boolean shouldCompareConfigurations() {

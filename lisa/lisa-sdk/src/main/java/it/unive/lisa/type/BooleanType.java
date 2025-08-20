@@ -6,7 +6,9 @@ package it.unive.lisa.type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public interface BooleanType extends Type {
+public interface BooleanType
+		extends
+		Type {
 
 	@Override
 	default boolean castIsConversion() {

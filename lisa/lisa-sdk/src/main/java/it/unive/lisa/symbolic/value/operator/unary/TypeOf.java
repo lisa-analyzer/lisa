@@ -19,7 +19,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TypeOf implements TypeOperator, UnaryOperator {
+public class TypeOf
+		implements
+		TypeOperator,
+		UnaryOperator {
 
 	/**
 	 * The singleton instance of this class.

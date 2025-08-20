@@ -12,5 +12,7 @@ import it.unive.lisa.analysis.DomainLattice;
  * 
  * @param <L> the concrete type of {@link ValueLattice}
  */
-public interface ValueLattice<L extends ValueLattice<L>> extends LatticeWithReplacement<L> {
+public interface ValueLattice<L extends ValueLattice<L>>
+		extends
+		LatticeWithReplacement<L> {
 }

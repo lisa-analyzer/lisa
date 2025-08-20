@@ -22,7 +22,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @param <L> the concrete type of {@link HeapLattice}
  */
-public interface HeapLattice<L extends HeapLattice<L>> extends DomainLattice<L, Pair<L, List<HeapReplacement>>> {
+public interface HeapLattice<L extends HeapLattice<L>>
+		extends
+		DomainLattice<L, Pair<L, List<HeapReplacement>>> {
 
 	/**
 	 * Expands the given heap replacement {@code base} by adding all locations

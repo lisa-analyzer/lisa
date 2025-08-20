@@ -19,7 +19,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ReachingDefinitions extends DataflowDomain<PossibleSet<ReachingDefinitions.RD>, ReachingDefinitions.RD> {
+public class ReachingDefinitions
+		extends
+		DataflowDomain<PossibleSet<ReachingDefinitions.RD>, ReachingDefinitions.RD> {
 
 	@Override
 	public PossibleSet<RD> makeLattice() {
@@ -72,7 +74,9 @@ public class ReachingDefinitions extends DataflowDomain<PossibleSet<ReachingDefi
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class RD implements DataflowElement<RD> {
+	public static class RD
+			implements
+			DataflowElement<RD> {
 
 		private final Identifier variable;
 

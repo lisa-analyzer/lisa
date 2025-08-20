@@ -23,7 +23,11 @@ import java.util.Map;
  *                state
  */
 public class BackwardAnalyzedCFG<
-		A extends AbstractLattice<A>> extends CFG implements BaseLattice<BackwardAnalyzedCFG<A>> {
+		A extends AbstractLattice<A>>
+		extends
+		CFG
+		implements
+		BaseLattice<BackwardAnalyzedCFG<A>> {
 
 	/**
 	 * Error message for the inability to lub two graphs.
@@ -263,10 +267,10 @@ public class BackwardAnalyzedCFG<
 			throw new SemanticException(CANNOT_WIDEN_ERROR);
 
 		return new BackwardAnalyzedCFG<>(
-			this,
-			id,
-			exitStates.widening(other.exitStates),
-			results.widening(other.results));
+				this,
+				id,
+				exitStates.widening(other.exitStates),
+				results.widening(other.results));
 	}
 
 	@Override
@@ -277,10 +281,10 @@ public class BackwardAnalyzedCFG<
 			throw new SemanticException(CANNOT_NARROW_ERROR);
 
 		return new BackwardAnalyzedCFG<>(
-			this,
-			id,
-			exitStates.narrowing(other.exitStates),
-			results.narrowing(other.results));
+				this,
+				id,
+				exitStates.narrowing(other.exitStates),
+				results.narrowing(other.results));
 	}
 
 	@Override

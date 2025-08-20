@@ -9,7 +9,9 @@ import java.util.TreeSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TypeTokenType implements Type {
+public class TypeTokenType
+		implements
+		Type {
 
 	private final Set<Type> types;
 

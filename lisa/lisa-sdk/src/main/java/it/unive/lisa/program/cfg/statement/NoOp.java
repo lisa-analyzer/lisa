@@ -18,7 +18,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NoOp extends Statement {
+public class NoOp
+		extends
+		Statement {
 
 	/**
 	 * Builds the no-op, happening at the given location in the program.

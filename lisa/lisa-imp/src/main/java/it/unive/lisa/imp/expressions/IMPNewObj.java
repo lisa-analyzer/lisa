@@ -37,7 +37,9 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewObj extends NaryExpression {
+public class IMPNewObj
+		extends
+		NaryExpression {
 
 	private final boolean staticallyAllocated;
 
@@ -63,11 +65,11 @@ public class IMPNewObj extends NaryExpression {
 			boolean staticallyAllocated,
 			Expression... parameters) {
 		super(
-			cfg,
-			new SourceCodeLocation(sourceFile, line, col),
-			(staticallyAllocated ? "" : "new ") + type,
-			type,
-			parameters);
+				cfg,
+				new SourceCodeLocation(sourceFile, line, col),
+				(staticallyAllocated ? "" : "new ") + type,
+				type,
+				parameters);
 		this.staticallyAllocated = staticallyAllocated;
 	}
 
@@ -110,12 +112,12 @@ public class IMPNewObj extends NaryExpression {
 
 		// constructor call
 		UnresolvedCall call = new UnresolvedCall(
-			getCFG(),
-			getLocation(),
-			CallType.INSTANCE,
-			type.toString(),
-			type.toString(),
-			fullExpressions);
+				getCFG(),
+				getLocation(),
+				CallType.INSTANCE,
+				type.toString(),
+				type.toString(),
+				fullExpressions);
 		AnalysisState<A> sem = call.forwardSemanticsAux(interprocedural, tmp, fullParams, expressions);
 
 		// now remove the instrumented receiver
@@ -130,7 +132,7 @@ public class IMPNewObj extends NaryExpression {
 		// finally, we leave a reference to the newly created object on the
 		// stack; this correponds to the state after the constructor call
 		// but with the receiver left on the stack
-		return new AnalysisState<>(sem.getState(), callstate.getComputedExpressions(), sem.getFixpointInformation());
+		return sem.withComputedExpressions(callstate.getComputedExpressions());
 	}
 
 	@Override

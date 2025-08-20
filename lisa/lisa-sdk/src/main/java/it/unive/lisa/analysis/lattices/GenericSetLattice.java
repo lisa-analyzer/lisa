@@ -12,7 +12,9 @@ import java.util.Set;
  * 
  * @param <E> the type of elements of this set
  */
-public class GenericSetLattice<E> extends SetLattice<GenericSetLattice<E>, E> {
+public class GenericSetLattice<E>
+		extends
+		SetLattice<GenericSetLattice<E>, E> {
 
 	/**
 	 * Builds an empty set representing the top element.

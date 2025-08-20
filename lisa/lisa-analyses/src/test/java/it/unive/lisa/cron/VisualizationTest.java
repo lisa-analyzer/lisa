@@ -13,7 +13,9 @@ import java.util.HashSet;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-public class VisualizationTest extends IMPCronExecutor {
+public class VisualizationTest
+		extends
+		IMPCronExecutor {
 
 	private static TestConfiguration config() {
 		CronConfiguration conf = new CronConfiguration();

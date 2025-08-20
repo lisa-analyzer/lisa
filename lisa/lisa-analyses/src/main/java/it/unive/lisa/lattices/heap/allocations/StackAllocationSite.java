@@ -10,7 +10,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class StackAllocationSite extends AllocationSite {
+public class StackAllocationSite
+		extends
+		AllocationSite {
 
 	/**
 	 * Builds a stack allocation site.

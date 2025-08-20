@@ -16,7 +16,7 @@ public class TimerLoggerTest {
 		Integer result = TimerLogger.execSupplier(logger, Level.INFO, "Test supplier logging", this::supplier);
 		assertEquals(5, result.intValue());
 		result = TimerLogger
-			.execSupplier(logger, Level.INFO, TimeFormat.MILLIS, "Test supplier logging", this::supplier);
+				.execSupplier(logger, Level.INFO, TimeFormat.MILLIS, "Test supplier logging", this::supplier);
 		assertEquals(5, result.intValue());
 	}
 

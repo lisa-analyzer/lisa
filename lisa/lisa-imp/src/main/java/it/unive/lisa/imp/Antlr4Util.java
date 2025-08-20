@@ -100,23 +100,23 @@ public class Antlr4Util {
 			Token problem,
 			StringBuilder message) {
 		message.append("matched '")
-			.append(problem.getText())
-			.append("' as <")
-			.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary()))
-			.append(">, expecting <")
-			.append(tokenNames(((InputMismatchException) e).getExpectedTokens(), e.getRecognizer().getVocabulary()))
-			.append(">");
+				.append(problem.getText())
+				.append("' as <")
+				.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary()))
+				.append(">, expecting <")
+				.append(tokenNames(((InputMismatchException) e).getExpectedTokens(), e.getRecognizer().getVocabulary()))
+				.append(">");
 	}
 
 	private static StringBuilder errorHeader(
 			String file,
 			Token problem) {
 		return new StringBuilder().append(file)
-			.append(":")
-			.append(problem.getLine())
-			.append(":")
-			.append(problem.getCharPositionInLine())
-			.append(" - ");
+				.append(":")
+				.append(problem.getLine())
+				.append(":")
+				.append(problem.getCharPositionInLine())
+				.append(" - ");
 	}
 
 	private static String tokenName(

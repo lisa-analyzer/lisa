@@ -39,14 +39,18 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ConstantPropagation extends DataflowDomain<DefiniteSet<ConstantPropagation.CP>, ConstantPropagation.CP> {
+public class ConstantPropagation
+		extends
+		DataflowDomain<DefiniteSet<ConstantPropagation.CP>, ConstantPropagation.CP> {
 
 	@Override
 	public DefiniteSet<CP> makeLattice() {
 		return new DefiniteSet<>();
 	}
 
-	private static class Evaluator implements ExpressionVisitor<Integer> {
+	private static class Evaluator
+			implements
+			ExpressionVisitor<Integer> {
 
 		@Override
 		public Integer visit(
@@ -250,7 +254,9 @@ public class ConstantPropagation extends DataflowDomain<DefiniteSet<ConstantProp
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class CP implements DataflowElement<CP> {
+	public static class CP
+			implements
+			DataflowElement<CP> {
 
 		private final Identifier id;
 

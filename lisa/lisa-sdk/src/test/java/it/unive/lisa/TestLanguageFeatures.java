@@ -10,7 +10,9 @@ import it.unive.lisa.program.language.resolution.RuntimeTypesMatchingStrategy;
 import it.unive.lisa.program.language.validation.BaseValidationLogic;
 import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 
-public class TestLanguageFeatures extends LanguageFeatures {
+public class TestLanguageFeatures
+		extends
+		LanguageFeatures {
 
 	@Override
 	public ParameterMatchingStrategy getMatchingStrategy() {

@@ -22,7 +22,9 @@ import java.util.Collection;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public class BackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> extends BackwardCFGFixpoint<A, D> {
+		D extends AbstractDomain<A>>
+		extends
+		BackwardCFGFixpoint<A, D> {
 
 	private final FixpointConfiguration config;
 

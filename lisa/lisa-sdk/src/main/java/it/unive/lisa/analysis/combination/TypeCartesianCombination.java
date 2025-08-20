@@ -22,7 +22,11 @@ import java.util.function.Predicate;
  */
 public abstract class TypeCartesianCombination<C extends TypeCartesianCombination<C, T1, T2>,
 		T1 extends TypeLattice<T1>,
-		T2 extends TypeLattice<T2>> extends CartesianCombination<C, T1, T2> implements TypeLattice<C> {
+		T2 extends TypeLattice<T2>>
+		extends
+		CartesianCombination<C, T1, T2>
+		implements
+		TypeLattice<C> {
 
 	/**
 	 * Creates a new cartesian combination of two type lattices.

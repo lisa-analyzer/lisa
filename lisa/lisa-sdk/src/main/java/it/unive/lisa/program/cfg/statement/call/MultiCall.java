@@ -22,7 +22,11 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MultiCall extends Call implements ResolvedCall {
+public class MultiCall
+		extends
+		Call
+		implements
+		ResolvedCall {
 
 	/**
 	 * The underlying calls
@@ -40,14 +44,14 @@ public class MultiCall extends Call implements ResolvedCall {
 			UnresolvedCall source,
 			Call... calls) {
 		super(
-			source.getCFG(),
-			source.getLocation(),
-			source.getCallType(),
-			source.getQualifier(),
-			source.getTargetName(),
-			source.getOrder(),
-			getCommonReturnType(calls),
-			source.getParameters());
+				source.getCFG(),
+				source.getLocation(),
+				source.getCallType(),
+				source.getQualifier(),
+				source.getTargetName(),
+				source.getOrder(),
+				getCommonReturnType(calls),
+				source.getParameters());
 		Objects.requireNonNull(calls, "The calls underlying a multi call cannot be null");
 		for (Call target : calls) {
 			Objects.requireNonNull(target, "A call underlying a multi call cannot be null");
@@ -160,9 +164,9 @@ public class MultiCall extends Call implements ResolvedCall {
 	@Override
 	public Collection<CodeMember> getTargets() {
 		return calls.stream()
-			.map(ResolvedCall.class::cast)
-			.flatMap(c -> c.getTargets().stream())
-			.collect(Collectors.toSet());
+				.map(ResolvedCall.class::cast)
+				.flatMap(c -> c.getTargets().stream())
+				.collect(Collectors.toSet());
 	}
 
 }

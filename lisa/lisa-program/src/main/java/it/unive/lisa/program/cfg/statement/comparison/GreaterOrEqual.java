@@ -25,7 +25,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class GreaterOrEqual extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class GreaterOrEqual
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the greater or equal.
@@ -64,9 +66,9 @@ public class GreaterOrEqual extends it.unive.lisa.program.cfg.statement.BinaryEx
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new BinaryExpression(getStaticType(), left, right, ComparisonGe.INSTANCE, getLocation()),
-			this);
+				state,
+				new BinaryExpression(getStaticType(), left, right, ComparisonGe.INSTANCE, getLocation()),
+				this);
 	}
 
 }

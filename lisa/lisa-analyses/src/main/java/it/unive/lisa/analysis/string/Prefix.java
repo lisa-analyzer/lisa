@@ -32,7 +32,10 @@ import java.util.Set;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Prefix implements SmashedSumStringDomain<StrPrefix>, WholeValueStringDomain<StrPrefix> {
+public class Prefix
+		implements
+		SmashedSumStringDomain<StrPrefix>,
+		WholeValueStringDomain<StrPrefix> {
 
 	@Override
 	public StrPrefix evalNonNullConstant(
@@ -173,26 +176,26 @@ public class Prefix implements SmashedSumStringDomain<StrPrefix>, WholeValueStri
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
 			constr.add(
-				new BinaryExpression(
-					booleanType,
-					new Constant(
-						pp.getProgram().getTypes().getIntegerType(),
-						indexes.getLow().toInt(),
-						pp.getLocation()),
-					expression,
-					ComparisonLe.INSTANCE,
-					pp.getLocation()));
+					new BinaryExpression(
+							booleanType,
+							new Constant(
+									pp.getProgram().getTypes().getIntegerType(),
+									indexes.getLow().toInt(),
+									pp.getLocation()),
+							expression,
+							ComparisonLe.INSTANCE,
+							pp.getLocation()));
 			if (indexes.getHigh().isFinite())
 				constr.add(
-					new BinaryExpression(
-						booleanType,
-						new Constant(
-							pp.getProgram().getTypes().getIntegerType(),
-							indexes.getHigh().toInt(),
-							pp.getLocation()),
-						expression,
-						ComparisonGe.INSTANCE,
-						pp.getLocation()));
+						new BinaryExpression(
+								booleanType,
+								new Constant(
+										pp.getProgram().getTypes().getIntegerType(),
+										indexes.getHigh().toInt(),
+										pp.getLocation()),
+								expression,
+								ComparisonGe.INSTANCE,
+								pp.getLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}

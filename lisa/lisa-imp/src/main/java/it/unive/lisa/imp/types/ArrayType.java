@@ -38,7 +38,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class ArrayType implements it.unive.lisa.type.ArrayType {
+public final class ArrayType
+		implements
+		it.unive.lisa.type.ArrayType {
 
 	private static final Map<Pair<Type, Integer>, ArrayType> types = new HashMap<>();
 
@@ -220,10 +222,10 @@ public final class ArrayType implements it.unive.lisa.type.ArrayType {
 
 				// we define the length of the array as a child element
 				AccessChild len = new AccessChild(
-					Int32Type.INSTANCE,
-					array,
-					new Variable(Untyped.INSTANCE, "len", getLocation()),
-					getLocation());
+						Int32Type.INSTANCE,
+						array,
+						new Variable(Untyped.INSTANCE, "len", getLocation()),
+						getLocation());
 
 				// TODO fix when we'll support multidimensional arrays
 				AnalysisState<

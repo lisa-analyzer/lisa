@@ -22,7 +22,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAssert extends UnaryStatement {
+public class IMPAssert
+		extends
+		UnaryStatement {
 
 	/**
 	 * Builds the assertion.

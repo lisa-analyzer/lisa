@@ -27,7 +27,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Int64Type implements NumericType {
+public class Int64Type
+		implements
+		NumericType {
 
 	/**
 	 * The unique singleton instance of this type.

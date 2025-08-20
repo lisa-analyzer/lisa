@@ -19,7 +19,9 @@ import java.util.Set;
  * 
  * @param <L> the type of {@link TypeLattice} that this domain works with
  */
-public interface TypeDomain<L extends TypeLattice<L>> extends DomainWithReplacement<L, ValueExpression> {
+public interface TypeDomain<L extends TypeLattice<L>>
+		extends
+		DomainWithReplacement<L, ValueExpression> {
 
 	/**
 	 * Yields the runtime types that this analysis infers for the given

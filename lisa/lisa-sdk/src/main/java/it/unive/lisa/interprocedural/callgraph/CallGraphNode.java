@@ -9,7 +9,9 @@ import it.unive.lisa.util.datastructures.graph.Node;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CallGraphNode implements Node<CallGraph, CallGraphNode, CallGraphEdge> {
+public class CallGraphNode
+		implements
+		Node<CallGraph, CallGraphNode, CallGraphEdge> {
 
 	private final CallGraph graph;
 

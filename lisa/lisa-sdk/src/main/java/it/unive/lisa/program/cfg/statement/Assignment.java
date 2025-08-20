@@ -20,7 +20,9 @@ import it.unive.lisa.type.Untyped;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Assignment extends BinaryExpression {
+public class Assignment
+		extends
+		BinaryExpression {
 
 	/**
 	 * Builds the assignment, assigning {@code expression} to {@code target},

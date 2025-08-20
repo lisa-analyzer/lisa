@@ -26,7 +26,9 @@ import java.util.Set;
  *                the non redundant set lattice
  */
 public class NonRelationalNonRedundantPowerset<S extends NonRedundantSetLattice<S, L>,
-		L extends Lattice<L>> implements BaseNonRelationalValueDomain<S> {
+		L extends Lattice<L>>
+		implements
+		BaseNonRelationalValueDomain<S> {
 
 	/**
 	 * The underlying {@link BaseNonRelationalValueDomain} by which it can be

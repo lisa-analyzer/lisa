@@ -12,5 +12,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * 
  * @param <L> the type of {@link ValueLattice} that this domain works with
  */
-public interface ValueDomain<L extends ValueLattice<L>> extends DomainWithReplacement<L, ValueExpression> {
+public interface ValueDomain<L extends ValueLattice<L>>
+		extends
+		DomainWithReplacement<L, ValueExpression> {
 }

@@ -19,7 +19,9 @@ import it.unive.lisa.symbolic.value.Skip;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ReturnTopPolicy implements OpenCallPolicy {
+public class ReturnTopPolicy
+		implements
+		OpenCallPolicy {
 
 	/**
 	 * The singleton instance of this class.

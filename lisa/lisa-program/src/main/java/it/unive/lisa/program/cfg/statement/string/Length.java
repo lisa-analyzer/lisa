@@ -36,7 +36,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression {
+public class Length
+		extends
+		it.unive.lisa.program.cfg.statement.UnaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -79,9 +81,9 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new UnaryExpression(getStaticType(), expr, StringLength.INSTANCE, getLocation()),
-			originating == null ? this : originating);
+				state,
+				new UnaryExpression(getStaticType(), expr, StringLength.INSTANCE, getLocation()),
+				originating == null ? this : originating);
 	}
 
 }

@@ -19,7 +19,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ErrorEdge extends Edge {
+public class ErrorEdge
+		extends
+		Edge {
 
 	private final VariableRef variable;
 
@@ -80,14 +82,14 @@ public class ErrorEdge extends Edge {
 		for (Type type : types)
 			typeNames.add(type.toString());
 		return "[ "
-			+ getSource()
-			+ " ] -("
-			+ StringUtils.join(typeNames, ", ")
-			+ " = "
-			+ (variable == null ? "<no-var>" : variable.getName())
-			+ ")-> [ "
-			+ getDestination()
-			+ " ]";
+				+ getSource()
+				+ " ] -("
+				+ StringUtils.join(typeNames, ", ")
+				+ " = "
+				+ (variable == null ? "<no-var>" : variable.getName())
+				+ ")-> [ "
+				+ getDestination()
+				+ " ]";
 	}
 
 	@Override

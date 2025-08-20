@@ -16,7 +16,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Identifier extends ValueExpression {
+public abstract class Identifier
+		extends
+		ValueExpression {
 
 	/**
 	 * The name of the identifier
@@ -165,11 +167,11 @@ public abstract class Identifier extends ValueExpression {
 			throws SemanticException {
 		if (!equals(other))
 			throw new SemanticException(
-				"Cannot perform the least upper bound between different identifiers: '"
-					+ this
-					+ "' and '"
-					+ other
-					+ "'");
+					"Cannot perform the least upper bound between different identifiers: '"
+							+ this
+							+ "' and '"
+							+ other
+							+ "'");
 		return this;
 	}
 

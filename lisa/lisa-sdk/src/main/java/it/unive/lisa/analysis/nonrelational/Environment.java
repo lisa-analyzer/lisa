@@ -35,7 +35,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <E> the concrete type of environment
  */
 public abstract class Environment<L extends Lattice<L>,
-		E extends Environment<L, E>> extends FunctionalLattice<E, Identifier, L> implements DomainLattice<E, E> {
+		E extends Environment<L, E>>
+		extends
+		FunctionalLattice<E, Identifier, L>
+		implements
+		DomainLattice<E, E> {
 
 	/**
 	 * Builds an empty environment.

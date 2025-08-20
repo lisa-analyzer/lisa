@@ -23,7 +23,10 @@ import java.util.Set;
  *                this domain
  */
 public interface BaseNonRelationalTypeDomain<
-		L extends TypeValue<L>> extends BaseNonRelationalDomain<L, TypeEnvironment<L>>, NonRelationalTypeDomain<L> {
+		L extends TypeValue<L>>
+		extends
+		BaseNonRelationalDomain<L, TypeEnvironment<L>>,
+		NonRelationalTypeDomain<L> {
 
 	@Override
 	default TypeEnvironment<L> makeLattice() {

@@ -5,7 +5,9 @@ package it.unive.lisa.imp;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPSyntaxException extends RuntimeException {
+public class IMPSyntaxException
+		extends
+		RuntimeException {
 
 	private static final long serialVersionUID = 4950907533241537847L;
 

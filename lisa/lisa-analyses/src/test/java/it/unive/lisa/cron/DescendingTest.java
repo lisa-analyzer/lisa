@@ -4,16 +4,18 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import org.junit.Test;
 
-public class DescendingTest extends IMPCronExecutor {
+public class DescendingTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testIntervalDescendingWidening() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			DefaultConfiguration.defaultValueDomain(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.descendingPhaseType = DescendingPhaseType.NARROWING;
 		conf.testDir = "descending";
 		conf.testSubDir = "widening";
@@ -26,9 +28,9 @@ public class DescendingTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			DefaultConfiguration.defaultValueDomain(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.descendingPhaseType = DescendingPhaseType.GLB;
 		conf.glbThreshold = 5;
 		conf.testDir = "descending";

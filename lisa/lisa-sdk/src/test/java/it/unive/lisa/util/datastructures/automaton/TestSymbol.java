@@ -1,6 +1,8 @@
 package it.unive.lisa.util.datastructures.automaton;
 
-public class TestSymbol implements TransitionSymbol<TestSymbol> {
+public class TestSymbol
+		implements
+		TransitionSymbol<TestSymbol> {
 
 	private final String symbol;
 

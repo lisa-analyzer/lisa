@@ -25,7 +25,9 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OpenCall extends CallWithResult {
+public class OpenCall
+		extends
+		CallWithResult {
 
 	/**
 	 * Builds the open call, happening at the given location in the program.
@@ -48,14 +50,14 @@ public class OpenCall extends CallWithResult {
 			String targetName,
 			Expression... parameters) {
 		super(
-			cfg,
-			location,
-			callType,
-			qualifier,
-			targetName,
-			LeftToRightEvaluation.INSTANCE,
-			Untyped.INSTANCE,
-			parameters);
+				cfg,
+				location,
+				callType,
+				qualifier,
+				targetName,
+				LeftToRightEvaluation.INSTANCE,
+				Untyped.INSTANCE,
+				parameters);
 	}
 
 	/**
@@ -148,14 +150,14 @@ public class OpenCall extends CallWithResult {
 	public OpenCall(
 			UnresolvedCall source) {
 		this(
-			source.getCFG(),
-			source.getLocation(),
-			source.getCallType(),
-			source.getQualifier(),
-			source.getTargetName(),
-			source.getOrder(),
-			source.getStaticType(),
-			source.getParameters());
+				source.getCFG(),
+				source.getLocation(),
+				source.getCallType(),
+				source.getQualifier(),
+				source.getTargetName(),
+				source.getOrder(),
+				source.getStaticType(),
+				source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);

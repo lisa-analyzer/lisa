@@ -336,10 +336,10 @@ public class FileManager {
 					mkOutputFile(file, false, writer -> writer.write(content));
 				else
 					mkOutputFile(
-						file.substring(0, pos),
-						file.substring(pos + 1),
-						false,
-						writer -> writer.write(content));
+							file.substring(0, pos),
+							file.substring(pos + 1),
+							false,
+							writer -> writer.write(content));
 			}
 	}
 

@@ -14,7 +14,9 @@ import java.util.Map;
  * @param <A> the type of {@link AbstractLattice}
  */
 public class StatementStore<
-		A extends AbstractLattice<A>> extends FunctionalLattice<StatementStore<A>, Statement, AnalysisState<A>> {
+		A extends AbstractLattice<A>>
+		extends
+		FunctionalLattice<StatementStore<A>, Statement, AnalysisState<A>> {
 
 	/**
 	 * Builds the store.

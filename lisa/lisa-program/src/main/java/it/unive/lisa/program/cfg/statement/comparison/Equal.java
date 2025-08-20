@@ -21,7 +21,9 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Equal extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class Equal
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the equality test.
@@ -54,10 +56,10 @@ public class Equal extends it.unive.lisa.program.cfg.statement.BinaryExpression 
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return interprocedural.getAnalysis()
-			.smallStepSemantics(
-				state,
-				new BinaryExpression(getStaticType(), left, right, ComparisonEq.INSTANCE, getLocation()),
-				this);
+				.smallStepSemantics(
+						state,
+						new BinaryExpression(getStaticType(), left, right, ComparisonEq.INSTANCE, getLocation()),
+						this);
 	}
 
 }

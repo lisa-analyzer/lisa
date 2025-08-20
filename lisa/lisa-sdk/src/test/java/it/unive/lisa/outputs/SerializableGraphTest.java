@@ -31,10 +31,10 @@ import org.junit.Test;
 public class SerializableGraphTest {
 
 	private static final ClassUnit unit = new ClassUnit(
-		SyntheticLocation.INSTANCE,
-		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-		"Testing",
-		false);
+			SyntheticLocation.INSTANCE,
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"Testing",
+			false);
 
 	private static void addNode(
 			SortedSet<SerializableNode> nodes,
@@ -108,11 +108,11 @@ public class SerializableGraphTest {
 		addEdge(edges, e4, 6, 9);
 
 		SerializableGraph expected = new SerializableGraph(
-			cfg.getDescriptor().getFullSignatureWithParNames(),
-			null,
-			nodes,
-			edges,
-			Collections.emptySortedSet());
+				cfg.getDescriptor().getFullSignatureWithParNames(),
+				null,
+				nodes,
+				edges,
+				Collections.emptySortedSet());
 		assertEquals(expected, graph);
 	}
 
@@ -141,11 +141,11 @@ public class SerializableGraphTest {
 		addEdge(edges, e1, 0, 3);
 		addEdge(edges, e2, 0, 3);
 		SerializableGraph expected = new SerializableGraph(
-			cfg.getDescriptor().getFullSignatureWithParNames(),
-			null,
-			nodes,
-			edges,
-			Collections.emptySortedSet());
+				cfg.getDescriptor().getFullSignatureWithParNames(),
+				null,
+				nodes,
+				edges,
+				Collections.emptySortedSet());
 		assertEquals(expected, graph);
 	}
 
@@ -194,11 +194,11 @@ public class SerializableGraphTest {
 		addEdge(edges, e3, 3, 6);
 		addEdge(edges, e4, 6, 9);
 		SerializableGraph expected = new SerializableGraph(
-			cfg.getDescriptor().getFullSignatureWithParNames(),
-			null,
-			nodes,
-			edges,
-			Collections.emptySortedSet());
+				cfg.getDescriptor().getFullSignatureWithParNames(),
+				null,
+				nodes,
+				edges,
+				Collections.emptySortedSet());
 		assertEquals(expected, graph);
 	}
 
@@ -257,11 +257,11 @@ public class SerializableGraphTest {
 		addEdge(edges, e4, 6, 12);
 		addEdge(edges, e5, 9, 12);
 		SerializableGraph expected = new SerializableGraph(
-			cfg.getDescriptor().getFullSignatureWithParNames(),
-			null,
-			nodes,
-			edges,
-			Collections.emptySortedSet());
+				cfg.getDescriptor().getFullSignatureWithParNames(),
+				null,
+				nodes,
+				edges,
+				Collections.emptySortedSet());
 		assertEquals(expected, graph);
 	}
 
@@ -310,11 +310,11 @@ public class SerializableGraphTest {
 		addEdge(edges, e3, 3, 0);
 		addEdge(edges, e4, 6, 9);
 		SerializableGraph expected = new SerializableGraph(
-			cfg.getDescriptor().getFullSignatureWithParNames(),
-			null,
-			nodes,
-			edges,
-			Collections.emptySortedSet());
+				cfg.getDescriptor().getFullSignatureWithParNames(),
+				null,
+				nodes,
+				edges,
+				Collections.emptySortedSet());
 		assertEquals(expected, graph);
 	}
 
@@ -353,11 +353,11 @@ public class SerializableGraphTest {
 		addEdge(edges, e2, 0, 3);
 		addEdge(edges, e4, 3, 6);
 		SerializableGraph expected = new SerializableGraph(
-			cfg.getDescriptor().getFullSignatureWithParNames(),
-			null,
-			nodes,
-			edges,
-			Collections.emptySortedSet());
+				cfg.getDescriptor().getFullSignatureWithParNames(),
+				null,
+				nodes,
+				edges,
+				Collections.emptySortedSet());
 		assertEquals(expected, graph);
 	}
 
@@ -449,11 +449,11 @@ public class SerializableGraphTest {
 		addEdge(edges, e8, 6, 0);
 		addEdge(edges, e9, 0, 21);
 		SerializableGraph expected = new SerializableGraph(
-			cfg.getDescriptor().getFullSignatureWithParNames(),
-			null,
-			nodes,
-			edges,
-			Collections.emptySortedSet());
+				cfg.getDescriptor().getFullSignatureWithParNames(),
+				null,
+				nodes,
+				edges,
+				Collections.emptySortedSet());
 		assertEquals(expected, graph);
 	}
 

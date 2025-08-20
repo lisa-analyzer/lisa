@@ -8,7 +8,9 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UniqueScope implements ScopeId {
+public class UniqueScope
+		implements
+		ScopeId {
 
 	@Override
 	public ScopeId startingId() {

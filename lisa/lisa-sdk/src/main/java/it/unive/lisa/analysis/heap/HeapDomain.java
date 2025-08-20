@@ -373,10 +373,10 @@ public interface HeapDomain<L extends HeapLattice<L>>
 		@Override
 		public String toString() {
 			return "{sources: "
-				+ StringUtils.join(sources, ", ")
-				+ "} -> {targets: "
-				+ StringUtils.join(targets, ", ")
-				+ "}";
+					+ StringUtils.join(sources, ", ")
+					+ "} -> {targets: "
+					+ StringUtils.join(targets, ", ")
+					+ "}";
 		}
 
 	}

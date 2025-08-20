@@ -43,7 +43,9 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class InferredTypes implements BaseNonRelationalTypeDomain<TypeSet> {
+public class InferredTypes
+		implements
+		BaseNonRelationalTypeDomain<TypeSet> {
 
 	@Override
 	public TypeSet evalIdentifier(
@@ -67,8 +69,8 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<TypeSet> {
 			if (inner.isBottom())
 				return TypeSet.BOTTOM;
 			return new TypeSet(
-				types,
-				inner.elements.stream().map(t -> new ReferenceType(t)).collect(Collectors.toSet()));
+					types,
+					inner.elements.stream().map(t -> new ReferenceType(t)).collect(Collectors.toSet()));
 		}
 		TypeSet eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp, oracle);
 		if (!eval.isTop())
@@ -263,12 +265,12 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<TypeSet> {
 
 		// these are all types compatible with the type tokens
 		Set<Type> okTypes = elems.stream()
-			.filter(Type::isTypeTokenType)
-			.map(Type::asTypeTokenType)
-			.map(TypeTokenType::getTypes)
-			.flatMap(Set::stream)
-			.flatMap(t -> t.allInstances(types).stream())
-			.collect(Collectors.toSet());
+				.filter(Type::isTypeTokenType)
+				.map(Type::asTypeTokenType)
+				.map(TypeTokenType::getTypes)
+				.flatMap(Set::stream)
+				.flatMap(t -> t.allInstances(types).stream())
+				.collect(Collectors.toSet());
 
 		TypeSet starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
@@ -318,8 +320,8 @@ public class InferredTypes implements BaseNonRelationalTypeDomain<TypeSet> {
 			return environment;
 
 		Set<Type> exactTypes = tokens.stream()
-			.flatMap(t -> t.asTypeTokenType().getTypes().stream())
-			.collect(Collectors.toSet());
+				.flatMap(t -> t.asTypeTokenType().getTypes().stream())
+				.collect(Collectors.toSet());
 
 		BinaryOperator operator = expression.getOperator();
 		TypeSet starting = environment.getState(id);

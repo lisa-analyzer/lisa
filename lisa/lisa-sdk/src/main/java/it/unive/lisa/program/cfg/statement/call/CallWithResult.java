@@ -22,7 +22,12 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class CallWithResult extends Call implements MetaVariableCreator, ResolvedCall {
+public abstract class CallWithResult
+		extends
+		Call
+		implements
+		MetaVariableCreator,
+		ResolvedCall {
 
 	/**
 	 * Builds the call, happening at the given location in the program.
@@ -92,7 +97,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 			StatementStore<A> expressions)
 			throws SemanticException {
 		// the stack has to be empty
-		state = new AnalysisState<>(state.getState(), new ExpressionSet(), state.getFixpointInformation());
+		state = state.withComputedExpressions(new ExpressionSet());
 
 		// this will contain only the information about the returned
 		// metavariable

@@ -146,16 +146,16 @@ public class LiSAReport {
 	@Override
 	public String toString() {
 		return "LiSAReport [info="
-			+ info
-			+ ", configuration="
-			+ configuration
-			+ ", warnings="
-			+ warnings
-			+ ", createdFiles="
-			+ createdFiles
-			+ ", additionalInfo="
-			+ additionalInfo
-			+ "]";
+				+ info
+				+ ", configuration="
+				+ configuration
+				+ ", warnings="
+				+ warnings
+				+ ", createdFiles="
+				+ createdFiles
+				+ ", additionalInfo="
+				+ additionalInfo
+				+ "]";
 	}
 
 }

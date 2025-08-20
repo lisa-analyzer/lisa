@@ -17,7 +17,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BinaryExpression extends ValueExpression {
+public class BinaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The left-hand side operand of this expression
@@ -90,11 +92,11 @@ public class BinaryExpression extends ValueExpression {
 			ProgramPoint pp)
 			throws SemanticException {
 		BinaryExpression expr = new BinaryExpression(
-			getStaticType(),
-			left.pushScope(token, pp),
-			right.pushScope(token, pp),
-			operator,
-			getCodeLocation());
+				getStaticType(),
+				left.pushScope(token, pp),
+				right.pushScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 
@@ -104,11 +106,11 @@ public class BinaryExpression extends ValueExpression {
 			ProgramPoint pp)
 			throws SemanticException {
 		BinaryExpression expr = new BinaryExpression(
-			getStaticType(),
-			left.popScope(token, pp),
-			right.popScope(token, pp),
-			operator,
-			getCodeLocation());
+				getStaticType(),
+				left.popScope(token, pp),
+				right.popScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 

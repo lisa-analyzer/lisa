@@ -17,7 +17,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <T2> the type of the second lattice
  */
 public class HeapLatticeProduct<T1 extends HeapLattice<T1>,
-		T2 extends HeapLattice<T2>> extends HeapCartesianCombination<HeapLatticeProduct<T1, T2>, T1, T2> {
+		T2 extends HeapLattice<T2>>
+		extends
+		HeapCartesianCombination<HeapLatticeProduct<T1, T2>, T1, T2> {
 
 	/**
 	 * Builds a new product of two lattices.

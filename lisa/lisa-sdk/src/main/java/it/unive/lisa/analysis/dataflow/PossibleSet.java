@@ -25,7 +25,9 @@ import java.util.function.Predicate;
  * @param <E> the concrete type of {@link DataflowElement} contained in this
  *                lattice
  */
-public class PossibleSet<E extends DataflowElement<E>> extends SetLattice<PossibleSet<E>, E>
+public class PossibleSet<E extends DataflowElement<E>>
+		extends
+		SetLattice<PossibleSet<E>, E>
 		implements
 		DataflowDomainLattice<PossibleSet<E>, E> {
 

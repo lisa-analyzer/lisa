@@ -23,7 +23,9 @@ import java.util.Map;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class AscendingFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>> extends CFGFixpoint<A, D> {
+public class AscendingFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+		extends
+		CFGFixpoint<A, D> {
 
 	private final FixpointConfiguration config;
 

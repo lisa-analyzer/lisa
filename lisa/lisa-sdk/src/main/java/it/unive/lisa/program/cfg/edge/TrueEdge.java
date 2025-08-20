@@ -16,7 +16,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TrueEdge extends Edge {
+public class TrueEdge
+		extends
+		Edge {
 
 	/**
 	 * Builds the edge.

@@ -54,7 +54,9 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
+public class RegexAutomaton
+		extends
+		Automaton<RegexAutomaton, RegularExpression>
 		implements
 		BaseLattice<RegexAutomaton>,
 		WholeValueElement<RegexAutomaton> {
@@ -646,42 +648,44 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 
 		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
 		UnaryExpression strlen = new UnaryExpression(
-			pp.getProgram().getTypes().getIntegerType(),
-			e,
-			StringLength.INSTANCE,
-			pp.getLocation());
+				pp.getProgram().getTypes().getIntegerType(),
+				e,
+				StringLength.INSTANCE,
+				pp.getLocation());
 
 		if (isTop())
 			return Collections.singleton(
-				new BinaryExpression(
-					booleanType,
-					new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-					strlen,
-					ComparisonLe.INSTANCE,
-					e.getCodeLocation()));
+					new BinaryExpression(
+							booleanType,
+							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
+							strlen,
+							ComparisonLe.INSTANCE,
+							e.getCodeLocation()));
 
 		try {
 			if (!hasCycle() && getLanguage().size() == 1) {
 				String str = getLanguage().iterator().next();
 				return Set.of(
-					new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(), pp.getLocation()),
-						strlen,
-						ComparisonLe.INSTANCE,
-						e.getCodeLocation()),
-					new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(), pp.getLocation()),
-						strlen,
-						ComparisonGe.INSTANCE,
-						e.getCodeLocation()),
-					new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getStringType(), str, pp.getLocation()),
-						e,
-						ComparisonEq.INSTANCE,
-						e.getCodeLocation()));
+						new BinaryExpression(
+								booleanType,
+								new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(),
+										pp.getLocation()),
+								strlen,
+								ComparisonLe.INSTANCE,
+								e.getCodeLocation()),
+						new BinaryExpression(
+								booleanType,
+								new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(),
+										pp.getLocation()),
+								strlen,
+								ComparisonGe.INSTANCE,
+								e.getCodeLocation()),
+						new BinaryExpression(
+								booleanType,
+								new Constant(pp.getProgram().getTypes().getStringType(), str, pp.getLocation()),
+								e,
+								ComparisonEq.INSTANCE,
+								e.getCodeLocation()));
 			}
 		} catch (CyclicAutomatonException e1) {
 			// should be unreachable, since we check for cycles before
@@ -695,44 +699,44 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		Set<BinaryExpression> constr = new HashSet<>();
 		try {
 			constr.add(
-				new BinaryExpression(
-					booleanType,
-					new Constant(
-						pp.getProgram().getTypes().getIntegerType(),
-						length.getLow().toInt(),
-						pp.getLocation()),
-					strlen,
-					ComparisonLe.INSTANCE,
-					e.getCodeLocation()));
+					new BinaryExpression(
+							booleanType,
+							new Constant(
+									pp.getProgram().getTypes().getIntegerType(),
+									length.getLow().toInt(),
+									pp.getLocation()),
+							strlen,
+							ComparisonLe.INSTANCE,
+							e.getCodeLocation()));
 			if (length.getHigh().isFinite())
 				constr.add(
-					new BinaryExpression(
-						booleanType,
-						new Constant(
-							pp.getProgram().getTypes().getIntegerType(),
-							length.getHigh().toInt(),
-							pp.getLocation()),
-						strlen,
-						ComparisonGe.INSTANCE,
-						e.getCodeLocation()));
+						new BinaryExpression(
+								booleanType,
+								new Constant(
+										pp.getProgram().getTypes().getIntegerType(),
+										length.getHigh().toInt(),
+										pp.getLocation()),
+								strlen,
+								ComparisonGe.INSTANCE,
+								e.getCodeLocation()));
 		} catch (MathNumberConversionException e1) {
 			throw new SemanticException("Cannot convert stirng length bound to int", e1);
 		}
 
 		constr.add(
-			new BinaryExpression(
-				booleanType,
-				new Constant(pp.getProgram().getTypes().getStringType(), lcp, pp.getLocation()),
-				e,
-				StringStartsWith.INSTANCE,
-				e.getCodeLocation()));
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getStringType(), lcp, pp.getLocation()),
+						e,
+						StringStartsWith.INSTANCE,
+						e.getCodeLocation()));
 		constr.add(
-			new BinaryExpression(
-				booleanType,
-				new Constant(pp.getProgram().getTypes().getStringType(), lcs, pp.getLocation()),
-				e,
-				StringEndsWith.INSTANCE,
-				e.getCodeLocation()));
+				new BinaryExpression(
+						booleanType,
+						new Constant(pp.getProgram().getTypes().getStringType(), lcs, pp.getLocation()),
+						e,
+						StringEndsWith.INSTANCE,
+						e.getCodeLocation()));
 		return constr;
 	}
 
@@ -778,7 +782,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		if (!acceptsTopEventually()) {
 			for (Transition<RegularExpression> t : exploded.getTransitions())
 				fsaDelta.add(
-					new Transition<>(t.getSource(), t.getDestination(), new StringSymbol(t.getSymbol().toString())));
+						new Transition<>(t.getSource(), t.getDestination(),
+								new StringSymbol(t.getSymbol().toString())));
 
 			return new SimpleAutomaton(exploded.getStates(), fsaDelta);
 		}
@@ -788,7 +793,8 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		for (Transition<RegularExpression> t : exploded.getTransitions()) {
 			if (t.getSymbol() != TopAtom.INSTANCE)
 				fsaDelta.add(
-					new Transition<>(t.getSource(), t.getDestination(), new StringSymbol(t.getSymbol().toString())));
+						new Transition<>(t.getSource(), t.getDestination(),
+								new StringSymbol(t.getSymbol().toString())));
 			else {
 				for (char c = 32; c <= 123; c++)
 					fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(), new StringSymbol(c)));

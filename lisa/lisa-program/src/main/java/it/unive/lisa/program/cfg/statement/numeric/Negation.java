@@ -24,7 +24,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpression {
+public class Negation
+		extends
+		it.unive.lisa.program.cfg.statement.UnaryExpression {
 
 	/**
 	 * Builds the numerical negation.
@@ -58,9 +60,9 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 			return state.bottom();
 
 		return analysis.smallStepSemantics(
-			state,
-			new UnaryExpression(expr.getStaticType(), expr, NumericNegation.INSTANCE, getLocation()),
-			this);
+				state,
+				new UnaryExpression(expr.getStaticType(), expr, NumericNegation.INSTANCE, getLocation()),
+				this);
 	}
 
 }

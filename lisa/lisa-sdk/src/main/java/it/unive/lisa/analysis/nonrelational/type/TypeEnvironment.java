@@ -16,7 +16,11 @@ import java.util.Map;
  *                environment
  */
 public class TypeEnvironment<
-		L extends TypeValue<L>> extends Environment<L, TypeEnvironment<L>> implements TypeLattice<TypeEnvironment<L>> {
+		L extends TypeValue<L>>
+		extends
+		Environment<L, TypeEnvironment<L>>
+		implements
+		TypeLattice<TypeEnvironment<L>> {
 
 	/**
 	 * Builds an empty environment.

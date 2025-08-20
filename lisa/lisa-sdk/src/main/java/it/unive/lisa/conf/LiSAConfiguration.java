@@ -2,7 +2,9 @@ package it.unive.lisa.conf;
 
 import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
@@ -16,6 +18,7 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.workset.OrderBasedWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -35,7 +38,9 @@ import org.apache.commons.io.FilenameUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LiSAConfiguration extends BaseConfiguration {
+public class LiSAConfiguration
+		extends
+		BaseConfiguration {
 
 	static {
 		// ensure that some logging configuration is in place
@@ -297,6 +302,15 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 */
 	public boolean dumpForcesUnwinding = false;
 
+	/**
+	 * This predicate determines if an exception of a given type should have its
+	 * separate continuation in the {@link AnalysisState}, or if it should be
+	 * "smashed" into the summary exception continuation. All smashed exceptions
+	 * share a unique {@link ProgramState}, as they are deemed as mostly noise
+	 * or uninteresting.
+	 */
+	public Predicate<Type> shouldSmashException = null;
+
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();
@@ -356,9 +370,9 @@ public class LiSAConfiguration extends BaseConfiguration {
 					String val;
 					if (Collection.class.isAssignableFrom(field.getType()))
 						val = ((Collection<?>) value).stream()
-							.map(e -> e.getClass().getSimpleName())
-							.sorted()
-							.collect(new CollectionUtilities.StringCollector<>(", "));
+								.map(e -> e.getClass().getSimpleName())
+								.sorted()
+								.collect(new CollectionUtilities.StringCollector<>(", "));
 					else if (Class.class.isAssignableFrom(field.getType()))
 						val = ((Class<?>) value).getSimpleName();
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))

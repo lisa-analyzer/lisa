@@ -13,7 +13,9 @@ import it.unive.lisa.util.numeric.IntInterval;
  *
  * @param <L> the type of lattice produced by this domain
  */
-public interface SmashedSumIntDomain<L extends Lattice<L>> extends BaseNonRelationalValueDomain<L> {
+public interface SmashedSumIntDomain<L extends Lattice<L>>
+		extends
+		BaseNonRelationalValueDomain<L> {
 
 	/**
 	 * Creates a new instance of the lattice produced by this domain from the

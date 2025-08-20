@@ -118,9 +118,9 @@ public abstract class TypeSystem {
 
 		Set<Type> result = new HashSet<>();
 		Set<Type> filtered = tokens.stream()
-			.filter(Type::isTypeTokenType)
-			.flatMap(t -> t.asTypeTokenType().getTypes().stream())
-			.collect(Collectors.toSet());
+				.filter(Type::isTypeTokenType)
+				.flatMap(t -> t.asTypeTokenType().getTypes().stream())
+				.collect(Collectors.toSet());
 		for (Type token : filtered)
 			for (Type t : types)
 				if (t.canBeAssignedTo(token))
@@ -150,9 +150,9 @@ public abstract class TypeSystem {
 			Set<Type> tokens) {
 		Set<Type> result = new HashSet<>();
 		Set<Type> filtered = tokens.stream()
-			.filter(Type::isTypeTokenType)
-			.flatMap(t -> t.asTypeTokenType().getTypes().stream())
-			.collect(Collectors.toSet());
+				.filter(Type::isTypeTokenType)
+				.flatMap(t -> t.asTypeTokenType().getTypes().stream())
+				.collect(Collectors.toSet());
 
 		for (Type token : filtered)
 			for (Type t : types)

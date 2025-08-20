@@ -11,7 +11,9 @@ import it.unive.lisa.program.type.Float64Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Float64Literal extends Literal<Double> {
+public class Float64Literal
+		extends
+		Literal<Double> {
 
 	/**
 	 * Builds the literal.

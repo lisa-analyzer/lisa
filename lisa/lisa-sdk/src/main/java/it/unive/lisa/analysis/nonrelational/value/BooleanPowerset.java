@@ -24,7 +24,9 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BooleanPowerset implements BaseNonRelationalValueDomain<Satisfiability> {
+public class BooleanPowerset
+		implements
+		BaseNonRelationalValueDomain<Satisfiability> {
 
 	@Override
 	public Satisfiability evalNonNullConstant(

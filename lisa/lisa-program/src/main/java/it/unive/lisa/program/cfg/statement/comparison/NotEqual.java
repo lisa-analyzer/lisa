@@ -22,7 +22,9 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class NotEqual
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the inequality test.
@@ -56,9 +58,9 @@ public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		return analysis.smallStepSemantics(
-			state,
-			new BinaryExpression(getStaticType(), left, right, ComparisonNe.INSTANCE, getLocation()),
-			this);
+				state,
+				new BinaryExpression(getStaticType(), left, right, ComparisonNe.INSTANCE, getLocation()),
+				this);
 	}
 
 }

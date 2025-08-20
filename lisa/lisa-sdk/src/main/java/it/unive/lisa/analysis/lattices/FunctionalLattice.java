@@ -27,7 +27,10 @@ import java.util.Set;
  */
 public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 		K,
-		V extends Lattice<V>> implements BaseLattice<F>, Iterable<Map.Entry<K, V>> {
+		V extends Lattice<V>>
+		implements
+		BaseLattice<F>,
+		Iterable<Map.Entry<K, V>> {
 
 	/**
 	 * The function implemented by this lattice.
@@ -189,13 +192,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 			F other)
 			throws SemanticException {
 		return functionalLift(
-			other,
-			lattice.bottom(),
-			this::lubKeys,
-			(
-					o1,
-					o2
-			) -> o1 == null ? o2 : o1.lub(o2));
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
@@ -203,13 +205,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 			F other)
 			throws SemanticException {
 		return functionalLift(
-			other,
-			lattice.top(),
-			this::glbKeys,
-			(
-					o1,
-					o2
-			) -> o1 == null ? o2 : o1.glb(o2));
+				other,
+				lattice.top(),
+				this::glbKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
 	@Override
@@ -217,13 +218,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 			F other)
 			throws SemanticException {
 		return functionalLift(
-			other,
-			lattice.bottom(),
-			this::lubKeys,
-			(
-					o1,
-					o2
-			) -> o1 == null ? o2 : o1.widening(o2));
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
 	@Override
@@ -231,13 +231,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 			F other)
 			throws SemanticException {
 		return functionalLift(
-			other,
-			lattice.top(),
-			this::glbKeys,
-			(
-					o1,
-					o2
-			) -> o1 == null ? o2 : o1.narrowing(o2));
+				other,
+				lattice.top(),
+				this::glbKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.narrowing(o2));
 	}
 
 	/**

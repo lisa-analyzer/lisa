@@ -209,7 +209,7 @@ public class ControlFlowExtractor {
 						Collection<Edge> ins = completeStructure.getIngoingEdges(struct.getFirstFollower());
 						if (ins.isEmpty())
 							throw new IllegalStateException(
-								"The first follower of " + struct + " does not have ingoing edges");
+									"The first follower of " + struct + " does not have ingoing edges");
 
 						// we just take one of the edges, we do not care
 						trueNext = ins.iterator().next();
@@ -230,7 +230,7 @@ public class ControlFlowExtractor {
 						Collection<Edge> ins = completeStructure.getIngoingEdges(struct.getFirstFollower());
 						if (ins.isEmpty())
 							throw new IllegalStateException(
-								"The first follower of " + struct + " does not have ingoing edges");
+									"The first follower of " + struct + " does not have ingoing edges");
 
 						// we just take one of the edges, we do not care
 						falseNext = ins.iterator().next();
@@ -278,12 +278,12 @@ public class ControlFlowExtractor {
 					// we reached the end of both branches: this is just a
 					// conditional that goes on until the end of cfg
 					return store(
-						new IfThenElse(
-							target.getNodeList(),
-							conditional,
-							null,
-							trueBranch.getNodes(),
-							falseBranch.getNodes()));
+							new IfThenElse(
+									target.getNodeList(),
+									conditional,
+									null,
+									trueBranch.getNodes(),
+									falseBranch.getNodes()));
 
 				first = false;
 			}
@@ -296,33 +296,33 @@ public class ControlFlowExtractor {
 				// need to cut the extra part from the false branch
 				falseBranch.removeFrom(trueNext);
 				return new IfThenElse(
-					target.getNodeList(),
-					conditional,
-					trueNext,
-					trueBranch.getNodes(),
-					falseBranch.getNodes());
+						target.getNodeList(),
+						conditional,
+						trueNext,
+						trueBranch.getNodes(),
+						falseBranch.getNodes());
 			}
 
 			if (trueBranch.containsNode(falseNext)) {
 				// need to cut the extra part from the false branch
 				trueBranch.removeFrom(falseNext);
 				return new IfThenElse(
-					target.getNodeList(),
-					conditional,
-					falseNext,
-					trueBranch.getNodes(),
-					falseBranch.getNodes());
+						target.getNodeList(),
+						conditional,
+						falseNext,
+						trueBranch.getNodes(),
+						falseBranch.getNodes());
 			}
 
 			if (trueNext.equals(falseNext))
 				// this only holds for the symmetric if - same number of
 				// statements in both branches
 				return new IfThenElse(
-					target.getNodeList(),
-					conditional,
-					falseNext,
-					trueBranch.getNodes(),
-					falseBranch.getNodes());
+						target.getNodeList(),
+						conditional,
+						falseNext,
+						trueBranch.getNodes(),
+						falseBranch.getNodes());
 
 			return null;
 		}
@@ -355,7 +355,9 @@ public class ControlFlowExtractor {
 		return false;
 	}
 
-	private static class ConditionalsExtractor implements GraphVisitor<CFG, Statement, Edge, Collection<Statement>> {
+	private static class ConditionalsExtractor
+			implements
+			GraphVisitor<CFG, Statement, Edge, Collection<Statement>> {
 
 		@Override
 		public boolean visit(

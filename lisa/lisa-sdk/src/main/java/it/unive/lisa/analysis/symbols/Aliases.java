@@ -10,7 +10,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Aliases extends SetLattice<Aliases, Symbol> {
+public class Aliases
+		extends
+		SetLattice<Aliases, Symbol> {
 
 	private static final Aliases TOP = new Aliases();
 

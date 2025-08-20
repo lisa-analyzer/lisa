@@ -34,10 +34,10 @@ import org.junit.Test;
 public class ConditionalsExtractionTest {
 
 	private static final ClassUnit unit = new ClassUnit(
-		new SourceCodeLocation("unknown", 0, 0),
-		new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-		"Testing",
-		false);
+			new SourceCodeLocation("unknown", 0, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"Testing",
+			false);
 
 	private static void checkMatrix(
 			String label,
@@ -371,10 +371,10 @@ public class ConditionalsExtractionTest {
 			loop = (Loop) first;
 		} else
 			fail(
-				"Wrong conditional structures: excpected one loop and one if-then-else, but got a "
-					+ first.getClass().getSimpleName()
-					+ " and a "
-					+ second.getClass().getSimpleName());
+					"Wrong conditional structures: excpected one loop and one if-then-else, but got a "
+							+ first.getClass().getSimpleName()
+							+ " and a "
+							+ second.getClass().getSimpleName());
 
 		assertIf(if_condition, loop_a2, collect(if_a1, if_a3), collect(if_a2), ith);
 		assertLoop(loop_condition, ret, collect(loop_a1, if_condition, if_a1, if_a3, if_a2, loop_a2), loop);

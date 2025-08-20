@@ -10,7 +10,9 @@ import it.unive.lisa.outputs.compare.ResultComparer;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TestConfiguration extends LiSAConfiguration {
+public class TestConfiguration
+		extends
+		LiSAConfiguration {
 
 	/**
 	 * The name of the test folder; this is used for searching expected results

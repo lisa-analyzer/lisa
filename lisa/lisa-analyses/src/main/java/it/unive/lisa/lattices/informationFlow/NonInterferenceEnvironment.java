@@ -312,7 +312,7 @@ public class NonInterferenceEnvironment
 			return super.representation();
 
 		return new ObjectRepresentation(
-			Map.of("map", super.representation(), "state", getExecutionState().representation()));
+				Map.of("map", super.representation(), "state", getExecutionState().representation()));
 	}
 
 	@Override

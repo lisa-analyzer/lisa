@@ -7,7 +7,9 @@ package it.unive.lisa.program;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ProgramValidationException extends Exception {
+public class ProgramValidationException
+		extends
+		Exception {
 
 	private static final long serialVersionUID = -1505555428371757795L;
 

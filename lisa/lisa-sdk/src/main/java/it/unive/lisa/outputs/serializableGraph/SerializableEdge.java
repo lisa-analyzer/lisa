@@ -16,7 +16,9 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableEdge implements Comparable<SerializableEdge> {
+public class SerializableEdge
+		implements
+		Comparable<SerializableEdge> {
 
 	private final int sourceId;
 
@@ -184,9 +186,9 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 			return cmp;
 
 		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
-			String.class,
-			unknownFields.keySet(),
-			o.unknownFields.keySet());
+				String.class,
+				unknownFields.keySet(),
+				o.unknownFields.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())
@@ -238,18 +240,18 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 			return false;
 
 		SerializableNode thisSource = nodesInThisGraph.stream()
-			.filter(n -> n.getId() == sourceId)
-			.findFirst()
-			.orElse(null);
+				.filter(n -> n.getId() == sourceId)
+				.findFirst()
+				.orElse(null);
 		SerializableNode otherSource = nodesInOtherGraph.stream()
-			.filter(n -> n.getId() == other.sourceId)
-			.findFirst()
-			.orElse(null);
+				.filter(n -> n.getId() == other.sourceId)
+				.findFirst()
+				.orElse(null);
 		SerializableNode thisDest = nodesInThisGraph.stream().filter(n -> n.getId() == destId).findFirst().orElse(null);
 		SerializableNode otherDest = nodesInOtherGraph.stream()
-			.filter(n -> n.getId() == other.destId)
-			.findFirst()
-			.orElse(null);
+				.filter(n -> n.getId() == other.destId)
+				.findFirst()
+				.orElse(null);
 		if (thisSource == null || otherSource == null)
 			return false;
 		if (thisDest == null || otherDest == null)

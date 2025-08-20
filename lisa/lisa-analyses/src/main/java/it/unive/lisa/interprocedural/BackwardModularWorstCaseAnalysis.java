@@ -37,7 +37,9 @@ import org.apache.logging.log4j.Logger;
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
 public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>> implements InterproceduralAnalysis<A, D> {
+		D extends AbstractDomain<A>>
+		implements
+		InterproceduralAnalysis<A, D> {
 
 	private static final Logger LOG = LogManager.getLogger(BackwardModularWorstCaseAnalysis.class);
 
@@ -100,9 +102,9 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 				}
 
 				results.putResult(
-					cfg,
-					ID,
-					cfg.backwardFixpoint(entryState, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
+						cfg,
+						ID,
+						cfg.backwardFixpoint(entryState, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
@@ -122,13 +124,13 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		OpenCall open = new OpenCall(
-			call.getCFG(),
-			call.getLocation(),
-			call.getCallType(),
-			call.getQualifier(),
-			call.getTargetName(),
-			call.getStaticType(),
-			call.getParameters());
+				call.getCFG(),
+				call.getLocation(),
+				call.getCallType(),
+				call.getQualifier(),
+				call.getTargetName(),
+				call.getStaticType(),
+				call.getParameters());
 		return getAbstractResultOf(open, entryState, parameters, expressions);
 	}
 

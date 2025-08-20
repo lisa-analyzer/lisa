@@ -6,6 +6,8 @@ package it.unive.lisa.type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public interface StringType extends Type {
+public interface StringType
+		extends
+		Type {
 
 }

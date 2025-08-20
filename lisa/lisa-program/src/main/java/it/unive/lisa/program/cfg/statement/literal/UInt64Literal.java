@@ -11,7 +11,9 @@ import it.unive.lisa.program.type.UInt64Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UInt64Literal extends Literal<Long> {
+public class UInt64Literal
+		extends
+		Literal<Long> {
 
 	/**
 	 * Builds the literal.

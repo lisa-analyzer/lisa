@@ -24,7 +24,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DefaultParamInitialization extends Expression {
+public class DefaultParamInitialization
+		extends
+		Expression {
 
 	/**
 	 * Builds the initializing expression.
@@ -67,7 +69,7 @@ public class DefaultParamInitialization extends Expression {
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return interprocedural.getAnalysis()
-			.smallStepSemantics(entryState, new PushAny(getStaticType(), getLocation()), this);
+				.smallStepSemantics(entryState, new PushAny(getStaticType(), getLocation()), this);
 	}
 
 }

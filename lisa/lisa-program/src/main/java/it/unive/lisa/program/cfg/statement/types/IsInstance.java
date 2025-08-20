@@ -26,7 +26,9 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IsInstance extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class IsInstance
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the expression.
@@ -69,15 +71,15 @@ public class IsInstance extends it.unive.lisa.program.cfg.statement.BinaryExpres
 			right = new Constant(new TypeTokenType(Collections.singleton(ref)), ref, right.getCodeLocation());
 		}
 		return interprocedural.getAnalysis()
-			.smallStepSemantics(
-				state,
-				new BinaryExpression(
-					getProgram().getTypes().getBooleanType(),
-					left,
-					right,
-					TypeCheck.INSTANCE,
-					getLocation()),
-				this);
+				.smallStepSemantics(
+						state,
+						new BinaryExpression(
+								getProgram().getTypes().getBooleanType(),
+								left,
+								right,
+								TypeCheck.INSTANCE,
+								getLocation()),
+						this);
 	}
 
 }

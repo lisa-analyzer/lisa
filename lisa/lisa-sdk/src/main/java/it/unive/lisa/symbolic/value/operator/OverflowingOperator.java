@@ -5,6 +5,8 @@ package it.unive.lisa.symbolic.value.operator;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface OverflowingOperator extends ArithmeticOperator {
+public interface OverflowingOperator
+		extends
+		ArithmeticOperator {
 
 }

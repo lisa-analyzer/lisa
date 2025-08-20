@@ -7,7 +7,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Warning implements Comparable<Warning> {
+public class Warning
+		implements
+		Comparable<Warning> {
 
 	/**
 	 * The message of this warning

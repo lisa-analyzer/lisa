@@ -11,7 +11,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Untyped implements Type {
+public class Untyped
+		implements
+		Type {
 
 	/**
 	 * Unique instance of Untyped type.

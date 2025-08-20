@@ -11,7 +11,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HeapReference extends HeapExpression {
+public class HeapReference
+		extends
+		HeapExpression {
 
 	/**
 	 * The expression referred by this expression

@@ -35,7 +35,9 @@ import java.util.function.Predicate;
  * @param <A> the type of {@link AbstractDomain} contained into the analysis
  *                state
  */
-public class OptimizedFixpoint<A extends AbstractLattice<A>> extends Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
+public class OptimizedFixpoint<A extends AbstractLattice<A>>
+		extends
+		Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
 
 	private final Predicate<Statement> hotspots;
 

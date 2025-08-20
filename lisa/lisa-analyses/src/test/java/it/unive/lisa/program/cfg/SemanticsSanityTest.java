@@ -52,12 +52,12 @@ public class SemanticsSanityTest {
 							params[i] = TestParameterProvider.provideParam(c, types[i]);
 						Statement st = (Statement) c.newInstance(params);
 						st.forwardSemantics(
-							TestParameterProvider.as,
-							TestParameterProvider.interprocedural,
-							TestParameterProvider.store);
+								TestParameterProvider.as,
+								TestParameterProvider.interprocedural,
+								TestParameterProvider.store);
 					} catch (Exception e) {
 						failures.computeIfAbsent(statement, s -> new HashMap<>())
-							.put(Arrays.toString(c.getParameterTypes()), e);
+								.put(Arrays.toString(c.getParameterTypes()), e);
 					}
 			}
 
@@ -185,11 +185,11 @@ public class SemanticsSanityTest {
 					SemanticComponent dom = (SemanticComponent) instance;
 					DomainLattice l = (DomainLattice) dom.makeLattice().bottom();
 					res = dom.assign(
-						l,
-						v,
-						arg,
-						TestParameterProvider.provideParam(null, ProgramPoint.class),
-						TestParameterProvider.provideParam(null, SemanticOracle.class));
+							l,
+							v,
+							arg,
+							TestParameterProvider.provideParam(null, ProgramPoint.class),
+							TestParameterProvider.provideParam(null, SemanticOracle.class));
 				}
 				if (res instanceof Pair)
 					// heap domains return a pair of (state, replacements)
@@ -208,9 +208,9 @@ public class SemanticsSanityTest {
 				if (!isBottom) {
 					failures.add(instance.getClass().getName());
 					System.err.println(
-						"Assigning to the bottom instance of "
-							+ instance.getClass().getName()
-							+ " returned a non-bottom instance");
+							"Assigning to the bottom instance of "
+									+ instance.getClass().getName()
+									+ " returned a non-bottom instance");
 				}
 			} catch (Exception e) {
 				failures.add(instance.getClass().getName());

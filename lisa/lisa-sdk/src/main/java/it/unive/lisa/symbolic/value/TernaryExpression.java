@@ -15,7 +15,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TernaryExpression extends ValueExpression {
+public class TernaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The left-hand side operand of this expression
@@ -105,12 +107,12 @@ public class TernaryExpression extends ValueExpression {
 			ProgramPoint pp)
 			throws SemanticException {
 		TernaryExpression expr = new TernaryExpression(
-			getStaticType(),
-			left.pushScope(token, pp),
-			middle.pushScope(token, pp),
-			right.pushScope(token, pp),
-			operator,
-			getCodeLocation());
+				getStaticType(),
+				left.pushScope(token, pp),
+				middle.pushScope(token, pp),
+				right.pushScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 
@@ -120,12 +122,12 @@ public class TernaryExpression extends ValueExpression {
 			ProgramPoint pp)
 			throws SemanticException {
 		TernaryExpression expr = new TernaryExpression(
-			getStaticType(),
-			left.popScope(token, pp),
-			middle.popScope(token, pp),
-			right.popScope(token, pp),
-			operator,
-			getCodeLocation());
+				getStaticType(),
+				left.popScope(token, pp),
+				middle.popScope(token, pp),
+				right.popScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 

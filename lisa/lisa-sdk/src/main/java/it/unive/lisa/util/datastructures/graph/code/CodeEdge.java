@@ -13,7 +13,10 @@ import it.unive.lisa.util.datastructures.graph.Edge;
  */
 public interface CodeEdge<G extends CodeGraph<G, N, E>,
 		N extends CodeNode<G, N, E>,
-		E extends CodeEdge<G, N, E>> extends Edge<G, N, E>, Comparable<E> {
+		E extends CodeEdge<G, N, E>>
+		extends
+		Edge<G, N, E>,
+		Comparable<E> {
 
 	/**
 	 * Yields {@code true} if and only if this edge represent unconditional

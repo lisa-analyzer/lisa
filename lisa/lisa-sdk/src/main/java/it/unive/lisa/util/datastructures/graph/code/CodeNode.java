@@ -13,5 +13,8 @@ import it.unive.lisa.util.datastructures.graph.Node;
  */
 public interface CodeNode<G extends CodeGraph<G, N, E>,
 		N extends CodeNode<G, N, E>,
-		E extends CodeEdge<G, N, E>> extends Node<G, N, E>, Comparable<N> {
+		E extends CodeEdge<G, N, E>>
+		extends
+		Node<G, N, E>,
+		Comparable<N> {
 }

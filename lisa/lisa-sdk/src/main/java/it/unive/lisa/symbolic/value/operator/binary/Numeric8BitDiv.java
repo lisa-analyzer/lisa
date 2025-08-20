@@ -17,7 +17,12 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric8BitDiv extends NumericOperation implements DivisionOperator, OverflowingOperator {
+public class Numeric8BitDiv
+		extends
+		NumericOperation
+		implements
+		DivisionOperator,
+		OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.

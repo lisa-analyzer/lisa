@@ -14,7 +14,9 @@ import java.util.function.Function;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MapRepresentation extends StructuredRepresentation {
+public class MapRepresentation
+		extends
+		StructuredRepresentation {
 
 	/**
 	 * The mappings of contained in this map.
@@ -78,9 +80,9 @@ public class MapRepresentation extends StructuredRepresentation {
 				sb.append(first ? "\n  " : ",\n  ").append(key).append(": ").append(val);
 			else
 				sb.append(first ? "\n  " : ",\n  ")
-					.append(StringUtilities.indent(key, "  ", 1))
-					.append(":\n")
-					.append(StringUtilities.indent(val, "  ", 2));
+						.append(StringUtilities.indent(key, "  ", 1))
+						.append(":\n")
+						.append(StringUtilities.indent(val, "  ", 2));
 			first = false;
 		}
 		sb.append("\n}");

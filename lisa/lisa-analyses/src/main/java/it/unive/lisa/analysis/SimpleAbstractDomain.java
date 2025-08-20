@@ -452,7 +452,9 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public class MutableOracle implements SemanticOracle {
+	public class MutableOracle
+			implements
+			SemanticOracle {
 
 		/**
 		 * The state containing information regarding heap structures.
@@ -561,7 +563,8 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 
 	@Override
 	public SimpleAbstractState<H, V, T> makeLattice() {
-		return new SimpleAbstractState<H, V,
+		return new SimpleAbstractState<H,
+				V,
 				T>(heapDomain.makeLattice(), valueDomain.makeLattice(), typeDomain.makeLattice());
 	}
 

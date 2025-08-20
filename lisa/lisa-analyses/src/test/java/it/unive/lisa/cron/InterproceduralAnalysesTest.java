@@ -16,16 +16,18 @@ import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.FullStackToken;
 import org.junit.Test;
 
-public class InterproceduralAnalysesTest extends IMPCronExecutor {
+public class InterproceduralAnalysesTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testWorstCaseCHA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Sign(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
 		conf.callGraph = new CHACallGraph();
 		conf.testDir = "interprocedural";
@@ -39,9 +41,9 @@ public class InterproceduralAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Sign(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -55,9 +57,9 @@ public class InterproceduralAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Sign(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -71,9 +73,9 @@ public class InterproceduralAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Sign(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -87,9 +89,9 @@ public class InterproceduralAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.simpleState(
-			DefaultConfiguration.defaultHeapDomain(),
-			new Sign(),
-			DefaultConfiguration.defaultTypeDomain());
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -103,7 +105,7 @@ public class InterproceduralAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration
-			.simpleState(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+				.simpleState(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -117,7 +119,7 @@ public class InterproceduralAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration
-			.simpleState(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+				.simpleState(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -133,7 +135,7 @@ public class InterproceduralAnalysesTest extends IMPCronExecutor {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration
-			.simpleState(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(), new InferredTypes());
+				.simpleState(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(), new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "issues";
