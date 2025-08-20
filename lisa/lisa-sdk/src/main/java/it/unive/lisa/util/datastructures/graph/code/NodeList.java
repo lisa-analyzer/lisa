@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A list of nodes of a {@link CodeGraph}, together with the edges connecting
@@ -35,6 +37,8 @@ import org.apache.commons.lang3.tuple.Pair;
 public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
 		implements
 		Iterable<N> {
+
+	private static final Logger LOG = LogManager.getLogger(NodeList.class);
 
 	private static final String EDGE_SIMPLIFY_ERROR = "Cannot simplify an edge with class ";
 
@@ -772,8 +776,12 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	public void validate(
 			Collection<N> entrypoints)
 			throws ProgramValidationException {
-		// all edges should be connected to statements inside the list
 		for (N node : nodes) {
+			// no deadcode
+			if (getIngoingEdges(node).isEmpty() && !entrypoints.contains(node))
+				LOG.warn("Unreachable node is not marked as entrypoint: " + node);
+
+			// all edges should be connected to statements inside the list
 			NodeEdges<G, N, E> edges = extraEdges.get(node);
 			if (edges == null)
 				continue;
@@ -783,11 +791,6 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 
 			for (E out : edges.outgoing)
 				validateEdge(nodes, out);
-
-			// no deadcode
-			int idx = nodes.indexOf(node);
-			if (edges.ingoing.isEmpty() && (idx == 0 || cutoff.contains(idx - 1)) && !entrypoints.contains(node))
-				throw new ProgramValidationException("Unreachable node that is not marked as entrypoint: " + node);
 		}
 	}
 

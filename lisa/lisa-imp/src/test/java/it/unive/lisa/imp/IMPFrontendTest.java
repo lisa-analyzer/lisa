@@ -84,6 +84,18 @@ public class IMPFrontendTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
+	@Test
+	public void testDeadcode() {
+		// the true expected results of this test are the log
+		// messages reporting unreachable nodes
+		TestConfiguration conf = new TestConfiguration();
+		conf.testDir = "deadcode";
+		conf.programFile = "deadcode.imp";
+		conf.jsonOutput = true;
+		conf.serializeInputs = true;
+		perform(conf);
+	}
+
 	@Override
 	public Program readProgram(
 			TestConfiguration conf,
