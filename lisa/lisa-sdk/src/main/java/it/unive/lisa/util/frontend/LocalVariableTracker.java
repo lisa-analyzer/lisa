@@ -148,9 +148,9 @@ public class LocalVariableTracker {
 	}
 
 	/**
-	 * Yields a copy of the latest scope
+	 * Yields a copy of the latest scope.
 	 * 
-	 * @return a map with the current lastest scope
+	 * @return map the copy of the latest scope.
 	 */
 	public Map<String, LocalVariable> getLatestScope() {
 		return new HashMap<>(latestScope);
