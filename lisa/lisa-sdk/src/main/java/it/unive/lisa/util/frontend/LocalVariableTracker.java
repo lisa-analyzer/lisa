@@ -146,4 +146,14 @@ public class LocalVariableTracker {
 						definition instanceof Expression ? ((Expression) definition).getRootStatement() : definition,
 						annotations));
 	}
+
+	/**
+	 * Yields a copy of the latest scope
+	 * 
+	 * @return a map with the current lastest scope
+	 */
+	public Map<String, LocalVariable> getLatestScope() {
+		return new HashMap<>(latestScope);
+	}
+
 }
