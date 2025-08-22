@@ -79,7 +79,6 @@ public class Return
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		// TODO need to smash the continuation into the normal one at returns
 		Identifier meta = getMetaVariable();
 		return interprocedural.getAnalysis().assign(state, meta, expr, this);
 	}

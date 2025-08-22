@@ -427,7 +427,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			if (call.returnsVoid(null))
 				return entryState.bottom();
 			else
-				return entryState.bottom().withComputedExpression(call.getMetaVariable());
+				return entryState.bottom().withExecutionExpression(call.getMetaVariable());
 		}
 
 		ContextSensitivityToken callerToken = token;

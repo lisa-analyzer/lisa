@@ -127,7 +127,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 			// we bring in the entry state to carry over the correct scope
 			AnalysisState<A> res = approx.lub(entryState);
 			Identifier meta = call.getMetaVariable();
-			if (!res.getState().knowsIdentifier(meta)) {
+			if (!res.getExecutionState().knowsIdentifier(meta)) {
 				// if we have no information for the return value, we want to
 				// force it to bottom as it means that this is either the first
 				// execution (that must start from bottom) or that the recursion
@@ -173,7 +173,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 		Expression[] actuals = start.getParameters();
 		ExpressionSet[] params = new ExpressionSet[actuals.length];
 		for (int i = 0; i < params.length; i++)
-			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
+			params[i] = entryState.intermediateStates.getState(actuals[i]).getExecutionExpressions();
 
 		do {
 			LOG.debug(
@@ -229,7 +229,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 					AnalysisState<A> local = transferToCallsite(start, call, base);
 					AnalysisState<A> returned = callEntry.lub(recursiveApprox.getState(call).lub(local));
 					Identifier meta = call.getMetaVariable();
-					if (!returned.getState().knowsIdentifier(meta)) {
+					if (!returned.getExecutionState().knowsIdentifier(meta)) {
 						// if we have no information for the return value, we
 						// want to
 						// force it to bottom as it means that this is either
@@ -261,7 +261,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 				// we transfer the return value
 				res = res.lub(analysis.assign(state, meta, variable, original));
 
-		if (!res.getState().knowsIdentifier(meta)) {
+		if (!res.getExecutionState().knowsIdentifier(meta)) {
 			// if we have no information for the return value, we want to
 			// force it to bottom as it means that this is either the first
 			// execution (that must start from bottom) or that the recursion

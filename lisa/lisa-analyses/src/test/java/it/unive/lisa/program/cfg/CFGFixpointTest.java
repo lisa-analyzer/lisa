@@ -141,7 +141,7 @@ public class CFGFixpointTest {
 		AnalyzedCFG<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = cfg
 				.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
 
-		assertTrue(result.getAnalysisStateAfter(call).getState().valueState.getKeys().isEmpty());
+		assertTrue(result.getAnalysisStateAfter(call).getExecutionState().valueState.getKeys().isEmpty());
 	}
 
 }

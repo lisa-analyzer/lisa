@@ -51,14 +51,14 @@ public class DefaultScopingStrategy
 
 		Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope, call);
 
-		if (state.getComputedExpressions().isEmpty()) {
+		if (state.getExecutionExpressions().isEmpty()) {
 			// a return value is expected, but nothing is left on the stack
 			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
 			return analysis.assign(state, meta, inv, call).popScope(scope, call);
 		}
 
 		AnalysisState<A> tmp = state.bottom();
-		for (SymbolicExpression ret : state.getComputedExpressions())
+		for (SymbolicExpression ret : state.getExecutionExpressions())
 			tmp = tmp.lub(analysis.assign(state, meta, ret, call));
 
 		return tmp.popScope(scope, call);

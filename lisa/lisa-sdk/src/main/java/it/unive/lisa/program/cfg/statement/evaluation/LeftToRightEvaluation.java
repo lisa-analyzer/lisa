@@ -42,7 +42,7 @@ public class LeftToRightEvaluation
 		for (int i = 0; i < computed.length; i++) {
 			AnalysisState<A> tmp = subExpressions[i].forwardSemantics(postState, interprocedural, expressions);
 			expressions.put(subExpressions[i], tmp);
-			computed[i] = tmp.getComputedExpressions();
+			computed[i] = tmp.getExecutionExpressions();
 			postState = tmp;
 		}
 
@@ -64,7 +64,7 @@ public class LeftToRightEvaluation
 		for (int i = computed.length - 1; i >= 0; i--) {
 			AnalysisState<A> tmp = subExpressions[i].backwardSemantics(postState, interprocedural, expressions);
 			expressions.put(subExpressions[i], tmp);
-			computed[i] = tmp.getComputedExpressions();
+			computed[i] = tmp.getExecutionExpressions();
 			postState = tmp;
 		}
 

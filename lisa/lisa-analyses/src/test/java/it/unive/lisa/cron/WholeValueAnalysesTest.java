@@ -100,9 +100,10 @@ public class WholeValueAnalysesTest
 
 						if (first) {
 							first = false;
-							ValueEnvironment<?> env = targetPost.getState().getLatticeInstance(ValueEnvironment.class);
+							ValueEnvironment<
+									?> env = targetPost.getExecutionState().getLatticeInstance(ValueEnvironment.class);
 							Lattice vals = null;
-							for (SymbolicExpression expr : targetPost.getComputedExpressions()) {
+							for (SymbolicExpression expr : targetPost.getExecutionExpressions()) {
 								Lattice val = env.getState((Identifier) expr);
 								if (vals == null)
 									vals = val;
@@ -137,8 +138,8 @@ public class WholeValueAnalysesTest
 				StringLiteral ch)
 				throws SemanticException {
 			AnalysisState<A> target = res.getAnalysisStateAfter(variable);
-			for (SymbolicExpression expr : target.getComputedExpressions()) {
-				ValueEnvironment<?> values = target.getState().getLatticeInstance(ValueEnvironment.class);
+			for (SymbolicExpression expr : target.getExecutionExpressions()) {
+				ValueEnvironment<?> values = target.getExecutionState().getLatticeInstance(ValueEnvironment.class);
 				Lattice<?> state = values.getState((Identifier) expr);
 				Satisfiability sat = Satisfiability.UNKNOWN;
 				ValueDomain<?> vdom = ((SimpleAbstractDomain<?, ?, ?>) tool.getAnalysis().domain).valueDomain;
@@ -167,7 +168,7 @@ public class WholeValueAnalysesTest
 				D domain,
 				A state)
 				throws SemanticException {
-			for (SymbolicExpression expr : post.getComputedExpressions()) {
+			for (SymbolicExpression expr : post.getExecutionExpressions()) {
 				Satisfiability sat = domain.satisfies(state, expr, node);
 				if (sat == Satisfiability.UNKNOWN)
 					warnOn(tool, node, "This assertion might fail");

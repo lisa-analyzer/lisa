@@ -9,6 +9,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
@@ -105,10 +107,17 @@ public class ErrorEdge
 			AnalysisState<A> state,
 			Analysis<A, D> analysis)
 			throws SemanticException {
-		// TODO implement the semantics
-		// TODO take into account also other error edges from the same source,
-		// to ensure that an error is caught only by the most specific catch
-		return state;
+		Collection<Type> excluded = new HashSet<>();
+		for (Edge other : getSource().getCFG().getOutgoingEdges(getSource()))
+			if (other instanceof ErrorEdge && this != other)
+				for (Type ex : ((ErrorEdge) other).types)
+					for (Type e : types)
+						if (!e.equals(ex) && ex.canBeAssignedTo(e))
+							// ex is a more specific error than e,
+							// so we leave it to the other catch
+							excluded.add(ex);
+
+		return analysis.moveErrorsToExecution(state, Arrays.asList(types), excluded, variable);
 	}
 
 	@Override

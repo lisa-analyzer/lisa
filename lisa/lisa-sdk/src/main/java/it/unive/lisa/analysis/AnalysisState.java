@@ -43,7 +43,13 @@ public class AnalysisState<A extends AbstractLattice<A>>
 		super(lattice);
 	}
 
-	private AnalysisState(
+	/**
+	 * Builds a new analysis state.
+	 * 
+	 * @param lattice  the program state to embed in this analysis state
+	 * @param function the mapping from continuations to program states
+	 */
+	public AnalysisState(
 			ProgramState<A> lattice,
 			Map<Continuation, ProgramState<A>> function) {
 		super(lattice, function);
@@ -78,7 +84,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	 * 
 	 * @return the abstract state
 	 */
-	public A getState() {
+	public A getExecutionState() {
 		return getState(Execution.INSTANCE).getState();
 	}
 
@@ -91,7 +97,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	 * 
 	 * @return the last computed expression
 	 */
-	public ExpressionSet getComputedExpressions() {
+	public ExpressionSet getExecutionExpressions() {
 		return getState(Execution.INSTANCE).getComputedExpressions();
 	}
 
@@ -103,9 +109,9 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	 * 
 	 * @return the shallow copy with the new expression
 	 */
-	public AnalysisState<A> withComputedExpression(
+	public AnalysisState<A> withExecutionExpression(
 			SymbolicExpression computedExpression) {
-		return withComputedExpressions(new ExpressionSet(computedExpression));
+		return withExecutionExpressions(new ExpressionSet(computedExpression));
 	}
 
 	/**
@@ -116,7 +122,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	 * 
 	 * @return the shallow copy with the new expressions
 	 */
-	public AnalysisState<A> withComputedExpressions(
+	public AnalysisState<A> withExecutionExpressions(
 			ExpressionSet computedExpressions) {
 		return withExecutionState(getState(Execution.INSTANCE).withComputedExpressions(computedExpressions));
 	}
@@ -128,13 +134,13 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	 * 
 	 * @return the additional information
 	 */
-	public FixpointInfo getFixpointInformation() {
+	public FixpointInfo getExecutionInformation() {
 		return getState(Execution.INSTANCE).getFixpointInformation();
 	}
 
 	/**
 	 * Yields the additional information associated to the given key, as defined
-	 * in this instance's {@link #getFixpointInformation()}. Note that the info
+	 * in this instance's {@link #getExecutionInformation()}. Note that the info
 	 * is retrieved from the program state corresponding to the normal
 	 * execution.
 	 * 
@@ -142,15 +148,15 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	 * 
 	 * @return the mapped information
 	 */
-	public Lattice<?> getInfo(
+	public Lattice<?> getExecutionInfo(
 			String key) {
-		return getState(Execution.INSTANCE).getFixpointInformation().get(key);
+		return getState(Execution.INSTANCE).getInfo(key);
 	}
 
 	/**
 	 * Yields the additional information associated to the given key, casted to
 	 * the given type, as defined in this instance's
-	 * {@link #getFixpointInformation()}. Note that the info is retrieved from
+	 * {@link #getExecutionInformation()}. Note that the info is retrieved from
 	 * the program state corresponding to the normal execution.
 	 * 
 	 * @param <T>  the type to cast the return value of this method to
@@ -159,42 +165,40 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	 * 
 	 * @return the mapped information
 	 */
-	public <T> T getInfo(
+	public <T> T getExecutionInfo(
 			String key,
 			Class<T> type) {
-		return getState(Execution.INSTANCE).getFixpointInformation().get(key, type);
+		return getState(Execution.INSTANCE).getInfo(key, type);
 	}
 
 	/**
 	 * Yields a copy of this state where the additional fixpoint information
-	 * ({@link #getFixpointInformation()}) of the normal execution has been
+	 * ({@link #getExecutionInformation()}) of the normal execution has been
 	 * updated by mapping the given key to {@code info}. This is a strong
 	 * update, meaning that the information previously mapped to the same key,
 	 * if any, is lost. For a weak update, use
-	 * {@link #weakStoreInfo(String, Lattice)}.
+	 * {@link #weakStoreExecutionInfo(String, Lattice)}.
 	 * 
 	 * @param key  the key
 	 * @param info the information to store
 	 * 
 	 * @return a new instance with the updated mapping
 	 */
-	public AnalysisState<A> storeInfo(
+	public AnalysisState<A> storeExecutionInfo(
 			String key,
 			Lattice<?> info) {
 		ProgramState<A> state = getState(Execution.INSTANCE);
-		FixpointInfo fixinfo = state.getFixpointInformation().put(key, info);
-		ProgramState<A> newState = new ProgramState<>(state.getState(), state.getComputedExpressions(), fixinfo);
-		return putState(Execution.INSTANCE, newState);
+		return putState(Execution.INSTANCE, state.storeInfo(key, info));
 	}
 
 	/**
 	 * Yields a copy of this state where the additional fixpoint information
-	 * ({@link #getFixpointInformation()}) of the normal execution has been
+	 * ({@link #getExecutionInformation()}) of the normal execution has been
 	 * updated by mapping the given key to {@code info}. This is a weak update,
 	 * meaning that the information previously mapped to the same key, if any,
 	 * is lubbed together with the given one, and the result is stored inside
 	 * the mapping instead. For a strong update, use
-	 * {@link #storeInfo(String, Lattice)}.
+	 * {@link #storeExecutionInfo(String, Lattice)}.
 	 * 
 	 * @param key  the key
 	 * @param info the information to store
@@ -203,14 +207,12 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the lub
 	 */
-	public AnalysisState<A> weakStoreInfo(
+	public AnalysisState<A> weakStoreExecutionInfo(
 			String key,
 			Lattice<?> info)
 			throws SemanticException {
 		ProgramState<A> state = getState(Execution.INSTANCE);
-		FixpointInfo fixinfo = state.getFixpointInformation().putWeak(key, info);
-		ProgramState<A> newState = new ProgramState<>(state.getState(), state.getComputedExpressions(), fixinfo);
-		return putState(Execution.INSTANCE, newState);
+		return putState(Execution.INSTANCE, state.weakStoreInfo(key, info));
 	}
 
 	@Override

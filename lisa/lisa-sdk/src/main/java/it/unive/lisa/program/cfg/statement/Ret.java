@@ -75,7 +75,6 @@ public class Ret
 			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		// TODO need to smash the continuation into the normal one at returns
 		return interprocedural.getAnalysis().smallStepSemantics(entryState, new Skip(getLocation()), this);
 	}
 

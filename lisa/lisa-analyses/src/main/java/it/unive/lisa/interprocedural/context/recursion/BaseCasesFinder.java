@@ -135,7 +135,7 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 		Expression[] actuals = start.getParameters();
 		ExpressionSet[] params = new ExpressionSet[actuals.length];
 		for (int i = 0; i < params.length; i++)
-			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
+			params[i] = entryState.intermediateStates.getState(actuals[i]).getExecutionExpressions();
 		// it should be enough to send values to top, retaining all type
 		// information
 		return start

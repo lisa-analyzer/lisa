@@ -89,7 +89,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 			SymbolicExpression v = entry.createReference(graph).getVariable();
 			for (SymbolicExpression expr : interprocedural.getAnalysis()
 					.smallStepSemantics(approx, v, edge.getSource())
-					.getComputedExpressions())
+					.getExecutionExpressions())
 				ids.add((Identifier) expr);
 		}
 

@@ -155,7 +155,7 @@ public class UnresolvedCall
 			resolved = interprocedural.resolve(
 					this,
 					parameterTypes(expressions, interprocedural.getAnalysis()),
-					state.getInfo(SymbolAliasing.INFO_KEY, SymbolAliasing.class));
+					state.getExecutionInfo(SymbolAliasing.INFO_KEY, SymbolAliasing.class));
 		} catch (CallResolutionException e) {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}

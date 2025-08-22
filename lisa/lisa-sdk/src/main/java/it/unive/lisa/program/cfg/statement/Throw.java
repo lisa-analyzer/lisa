@@ -2,14 +2,15 @@ package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.analysis.continuations.Exception;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Skip;
 
 /**
  * A statement that raises an error, stopping the execution of the current CFG
@@ -73,9 +74,10 @@ public class Throw
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		// TODO need to smash the continuation into the normal one at returns
-		// only temporary
-		return interprocedural.getAnalysis().smallStepSemantics(state, new Skip(getLocation()), this);
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		AnalysisState<A> sem = analysis.smallStepSemantics(state, expr, this);
+		AnalysisState<A> moved = analysis.moveExecutionTo(sem, new Exception(expr.getStaticType()));
+		return moved;
 	}
 
 }

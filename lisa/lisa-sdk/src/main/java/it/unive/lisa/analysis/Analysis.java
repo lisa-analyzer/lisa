@@ -1,14 +1,28 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.continuations.Continuation;
+import it.unive.lisa.analysis.continuations.Exception;
+import it.unive.lisa.analysis.continuations.Exceptions;
+import it.unive.lisa.analysis.continuations.Execution;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * An analysis that wraps a {@link SemanticDomain} of choice and provides a set
@@ -31,6 +45,8 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 */
 	public final D domain;
 
+	private final Predicate<Type> shouldSmashException;
+
 	/**
 	 * Builds the analysis, wrapping the given domain.
 	 * 
@@ -38,7 +54,23 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 */
 	public Analysis(
 			D domain) {
+		this(domain, null);
+	}
+
+	/**
+	 * Builds the analysis, wrapping the given domain.
+	 * 
+	 * @param domain               the domain to wrap
+	 * @param shouldSmashException a predicate that, if non-null, is used to
+	 *                                 determine whether to smash exceptional
+	 *                                 continuations or keep them separate in
+	 *                                 the state
+	 */
+	public Analysis(
+			D domain,
+			Predicate<Type> shouldSmashException) {
 		this.domain = domain;
+		this.shouldSmashException = shouldSmashException;
 	}
 
 	@Override
@@ -48,8 +80,8 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression value,
 			ProgramPoint pp)
 			throws SemanticException {
-		A s = domain.assign(state.getState(), id, value, pp);
-		return state.withExecutionState(new ProgramState<>(s, new ExpressionSet(id), state.getFixpointInformation()));
+		A s = domain.assign(state.getExecutionState(), id, value, pp);
+		return state.withExecutionState(new ProgramState<>(s, new ExpressionSet(id), state.getExecutionInformation()));
 	}
 
 	/**
@@ -77,16 +109,16 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		if (id instanceof Identifier)
 			return assign(state, (Identifier) id, expression, pp);
 
-		A s = state.getState().bottom();
+		A s = state.getExecutionState().bottom();
 		AnalysisState<A> sem = smallStepSemantics(state, id, pp);
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		ExpressionSet rewritten = oracle.rewrite(id, pp);
 		for (SymbolicExpression i : rewritten)
 			if (!(i instanceof Identifier))
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
-				s = s.lub(domain.assign(sem.getState(), (Identifier) i, expression, pp));
-		return state.withExecutionState(new ProgramState<>(s, rewritten, state.getFixpointInformation()));
+				s = s.lub(domain.assign(sem.getExecutionState(), (Identifier) i, expression, pp));
+		return state.withExecutionState(new ProgramState<>(s, rewritten, state.getExecutionInformation()));
 	}
 
 	@Override
@@ -95,10 +127,10 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
-		A s = domain.smallStepSemantics(state.getState(), expression, pp);
+		A s = domain.smallStepSemantics(state.getExecutionState(), expression, pp);
 		return state
 				.withExecutionState(
-						new ProgramState<>(s, new ExpressionSet(expression), state.getFixpointInformation()));
+						new ProgramState<>(s, new ExpressionSet(expression), state.getExecutionInformation()));
 	}
 
 	@Override
@@ -108,11 +140,11 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException {
-		A assume = domain.assume(state.getState(), expression, src, dest);
+		A assume = domain.assume(state.getExecutionState(), expression, src, dest);
 		if (assume.isBottom())
 			return state.bottom();
 		return state.withExecutionState(
-				new ProgramState<>(assume, state.getComputedExpressions(), state.getFixpointInformation()));
+				new ProgramState<>(assume, state.getExecutionExpressions(), state.getExecutionInformation()));
 	}
 
 	@Override
@@ -121,7 +153,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
-		return domain.satisfies(state.getState(), expression, pp);
+		return domain.satisfies(state.getExecutionState(), expression, pp);
 	}
 
 	/**
@@ -141,7 +173,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression e,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		return oracle.getRuntimeTypesOf(e, pp);
 	}
 
@@ -163,7 +195,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression e,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		return oracle.getDynamicTypeOf(e, pp);
 	}
 
@@ -186,7 +218,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		return oracle.rewrite(expression, pp);
 	}
 
@@ -209,7 +241,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			ExpressionSet expressions,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		return oracle.rewrite(expressions, pp);
 	}
 
@@ -234,7 +266,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression y,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		return oracle.alias(x, y, pp);
 	}
 
@@ -259,7 +291,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression e,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		return oracle.reachableFrom(e, pp);
 	}
 
@@ -288,7 +320,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression y,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		return oracle.isReachableFrom(x, y, pp);
 	}
 
@@ -315,13 +347,136 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression y,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
 		return oracle.areMutuallyReachable(x, y, pp);
 	}
 
 	@Override
 	public AnalysisState<A> makeLattice() {
 		return new AnalysisState<>(new ProgramState<>(domain.makeLattice(), new ExpressionSet(), new FixpointInfo()));
+	}
+
+	/**
+	 * Sets the execution state to {@link ProgramState#bottom()} after moving
+	 * the current execution state to the given exception continuation. If a
+	 * state already exists for the given exception continuation, it is merged
+	 * with the current state. Moreover, if the given exception should be
+	 * smashed (see {@link LiSAConfiguration#shouldSmashException}), the state
+	 * is set/merged with the {@link Exceptions} continuation instead.
+	 * 
+	 * @param state     the current analysis state
+	 * @param exception the exception to move the execution state to
+	 * 
+	 * @return the updated analysis state
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public AnalysisState<A> moveExecutionTo(
+			AnalysisState<A> state,
+			Exception exception)
+			throws SemanticException {
+		ProgramState<A> exec = state.getState(Execution.INSTANCE);
+		AnalysisState<A> result = state.putState(Execution.INSTANCE, exec.bottom());
+
+		if (shouldSmashException == null || !shouldSmashException.test(exception.getType())) {
+			ProgramState<A> exc = state.getState(exception);
+			return result.putState(exception, exec.lub(exc));
+		}
+
+		Optional<Exceptions> excs = state.getKeys().stream().filter(Exceptions.class::isInstance)
+				.map(Exceptions.class::cast).findFirst();
+		if (excs.isEmpty()) {
+			Exceptions exceptions = new Exceptions(exception.getType());
+			return result.putState(exceptions, exec);
+		} else {
+			Exceptions exceptions = excs.get();
+			ProgramState<A> exc = state.getState(exceptions);
+			Exceptions newExceptions = exceptions.add(exception.getType());
+			return result.putState(newExceptions, exec.lub(exc));
+		}
+	}
+
+	/**
+	 * Moves the states corresponding to the given errors to the execution
+	 * state. This corresponds to collecting all states for {@link Exception}s
+	 * that are subtypes of a type in {@code toMove}, removing them from the
+	 * current. The {@link Exceptions} continuation is also updated by removing
+	 * the caught exceptions. All states corresponding to the removed exceptions
+	 * are merged into the execution state.
+	 * 
+	 * @param state    the current analysis state
+	 * @param toMove   the types to move
+	 * @param excluded the types to exclude
+	 * @param variable the variable to assign the exception to (can be
+	 *                     {@code null})
+	 * 
+	 * @return the updated analysis state
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public AnalysisState<A> moveErrorsToExecution(
+			AnalysisState<A> state,
+			Collection<Type> toMove,
+			Collection<Type> excluded,
+			VariableRef variable)
+			throws SemanticException {
+		if (state.isBottom() || state.isTop() || state.function == null || state.function.isEmpty())
+			return state;
+
+		ProgramState<A> result = state.lattice.bottom();
+		Map<Continuation, ProgramState<A>> function = state.mkNewFunction(state.function, false);
+		Collection<SymbolicExpression> excs = new HashSet<>();
+
+		for (Entry<Continuation, ProgramState<A>> entry : state)
+			if (entry.getKey() instanceof Exception) {
+				Exception cont = (Exception) entry.getKey();
+				if (toMove.stream().noneMatch(t -> cont.getType().canBeAssignedTo(t))
+						|| excluded.stream().anyMatch(t -> cont.getType().canBeAssignedTo(t)))
+					// either the type is excluded (precisely or through one of
+					// its super types) or is is not caught (precisely or
+					// through one of its super types)
+					continue;
+				function.remove(cont);
+				result = result.lub(entry.getValue());
+				for (SymbolicExpression e : entry.getValue().getComputedExpressions())
+					if (e.getStaticType().canBeAssignedTo(cont.getType()))
+						excs.add(e);
+			} else if (entry.getKey() instanceof Exceptions) {
+				Exceptions cont = (Exceptions) entry.getKey();
+				Set<Type> caughtSet = new HashSet<>();
+				for (Type type : cont.getTypes())
+					if (toMove.stream().anyMatch(t -> type.canBeAssignedTo(t))
+							&& excluded.stream().noneMatch(t -> type.canBeAssignedTo(t)))
+						// the type not excluded (precisely or through one of
+						// its super types) and is is caught (precisely or
+						// through one of its super types)
+						caughtSet.add(type);
+				if (!caughtSet.isEmpty()) {
+					function.remove(cont);
+					Exceptions newCont = cont.removeAll(caughtSet);
+					if (!newCont.getTypes().isEmpty())
+						// put back the remaining exceptions
+						function.put(newCont, entry.getValue());
+					result = result.lub(entry.getValue());
+					for (SymbolicExpression e : entry.getValue().getComputedExpressions())
+						if (caughtSet.stream().anyMatch(type -> type.canBeAssignedTo(e.getStaticType())))
+							excs.add(e);
+				}
+			}
+
+		if (result.isBottom())
+			// nothing to catch, result should be bottom
+			return state.withExecutionState(result);
+
+		A assigned = result.getState().bottom();
+		if (variable != null)
+			for (SymbolicExpression e : excs)
+				assigned = assigned.lub(domain.assign(result.getState(), variable.getVariable(), e, variable));
+
+		function.put(Execution.INSTANCE, new ProgramState<>(
+				assigned,
+				variable == null ? new Skip(SyntheticLocation.INSTANCE) : variable.getVariable()));
+		return new AnalysisState<>(state.lattice, function);
 	}
 
 }

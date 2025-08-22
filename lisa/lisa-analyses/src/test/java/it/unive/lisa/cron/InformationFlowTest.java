@@ -116,12 +116,14 @@ public class InformationFlowTest
 											TypeEnvironment<
 													TypeSet>>> post = result
 															.getAnalysisStateAfter(call.getParameters()[i]);
-									SemanticOracle oracle = tool.getAnalysis().domain.makeOracle(post.getState());
+									SemanticOracle oracle = tool.getAnalysis().domain
+											.makeOracle(post.getExecutionState());
 
 									for (SymbolicExpression e : tool.getAnalysis()
-											.rewrite(post, post.getComputedExpressions(), node)) {
+											.rewrite(post, post.getExecutionExpressions(), node)) {
 										L stack = domain
-												.eval(post.getState().valueState, (ValueExpression) e, node, oracle);
+												.eval(post.getExecutionState().valueState, (ValueExpression) e, node,
+														oracle);
 
 										if (stack.isAlwaysTainted())
 											tool.warnOn(call, "Parameter " + i + " is always tainted");
@@ -203,22 +205,24 @@ public class InformationFlowTest
 			for (var result : results)
 				try {
 					var post = result.getAnalysisStateAfter(assign);
-					NonInterferenceEnvironment state = post.getState()
+					NonInterferenceEnvironment state = post.getExecutionState()
 							.getLatticeInstance(NonInterferenceEnvironment.class);
 					var postL = result.getAnalysisStateAfter(assign.getLeft());
 					var postR = result.getAnalysisStateAfter(assign.getRight());
 					NonInterference domain = (NonInterference) tool.getAnalysis().domain.valueDomain;
-					SemanticOracle oracleL = tool.getAnalysis().domain.makeOracle(postL.getState());
-					SemanticOracle oracleR = tool.getAnalysis().domain.makeOracle(postR.getState());
+					SemanticOracle oracleL = tool.getAnalysis().domain.makeOracle(postL.getExecutionState());
+					SemanticOracle oracleR = tool.getAnalysis().domain.makeOracle(postR.getExecutionState());
 
 					for (SymbolicExpression l : tool.getAnalysis()
-							.rewrite(postL, postL.getComputedExpressions(), assign))
+							.rewrite(postL, postL.getExecutionExpressions(), assign))
 						for (SymbolicExpression r : tool.getAnalysis()
-								.rewrite(postR, postR.getComputedExpressions(), assign)) {
+								.rewrite(postR, postR.getExecutionExpressions(), assign)) {
 							NonInterferenceValue ll = domain
-									.eval(postL.getState().valueState, (ValueExpression) l, assign.getLeft(), oracleL);
+									.eval(postL.getExecutionState().valueState, (ValueExpression) l, assign.getLeft(),
+											oracleL);
 							NonInterferenceValue rr = domain
-									.eval(postR.getState().valueState, (ValueExpression) r, assign.getRight(), oracleR);
+									.eval(postR.getExecutionState().valueState, (ValueExpression) r, assign.getRight(),
+											oracleR);
 
 							if (ll.isLowConfidentiality() && rr.isHighConfidentiality())
 								tool.warnOn(

@@ -101,11 +101,11 @@ public class IMPNewObj
 
 		// we also have to add the receiver inside the state
 		AnalysisState<A> callstate = paramThis.forwardSemantics(allocated, interprocedural, expressions);
-		ExpressionSet[] fullParams = ArrayUtils.insert(0, params, callstate.getComputedExpressions());
+		ExpressionSet[] fullParams = ArrayUtils.insert(0, params, callstate.getExecutionExpressions());
 
 		// we store a reference to the newly created region in the receiver
 		AnalysisState<A> tmp = state.bottom();
-		for (SymbolicExpression rec : callstate.getComputedExpressions())
+		for (SymbolicExpression rec : callstate.getExecutionExpressions())
 			tmp = tmp.lub(analysis.assign(callstate, rec, ref, paramThis));
 		// we store the approximation of the receiver in the sub-expressions
 		expressions.put(paramThis, tmp);
@@ -122,7 +122,7 @@ public class IMPNewObj
 
 		// now remove the instrumented receiver
 		expressions.forget(paramThis);
-		for (SymbolicExpression v : callstate.getComputedExpressions())
+		for (SymbolicExpression v : callstate.getExecutionExpressions())
 			if (v instanceof Identifier)
 				// we leave the instrumented receiver in the program variables
 				// until it is popped from the stack to keep a reference to the
@@ -132,7 +132,7 @@ public class IMPNewObj
 		// finally, we leave a reference to the newly created object on the
 		// stack; this correponds to the state after the constructor call
 		// but with the receiver left on the stack
-		return sem.withComputedExpressions(callstate.getComputedExpressions());
+		return sem.withExecutionExpressions(callstate.getExecutionExpressions());
 	}
 
 	@Override

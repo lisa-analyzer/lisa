@@ -152,9 +152,10 @@ public class StabilityTest
 																		ValueEnvironment<IntInterval>>,
 																TypeEnvironment<TypeSet>>>) result)
 																		.getUnwindedAnalysisStateAfter(node, conf)
-																		.getState().valueState.first;
+																		.getExecutionState().valueState.first;
 											else
-												post = result.getAnalysisStateAfter(node).getState().valueState.first;
+												post = result.getAnalysisStateAfter(node)
+														.getExecutionState().valueState.first;
 											return analysis.combine(entrystate, post);
 										}
 

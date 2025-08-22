@@ -135,7 +135,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 		}
 
 		// the stack has to be empty
-		return prepared.withComputedExpressions(new ExpressionSet());
+		return prepared.withExecutionExpressions(new ExpressionSet());
 	}
 
 	@Override

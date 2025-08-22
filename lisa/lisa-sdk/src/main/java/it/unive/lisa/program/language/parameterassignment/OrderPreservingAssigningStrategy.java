@@ -51,7 +51,7 @@ public class OrderPreservingAssigningStrategy
 		}
 
 		// we remove expressions from the stack
-		prepared = prepared.withComputedExpressions(new ExpressionSet());
+		prepared = prepared.withExecutionExpressions(new ExpressionSet());
 		return Pair.of(prepared, parameters);
 	}
 

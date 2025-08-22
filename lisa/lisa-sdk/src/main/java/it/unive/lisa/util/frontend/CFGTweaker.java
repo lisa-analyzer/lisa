@@ -223,7 +223,8 @@ public class CFGTweaker {
 		// the edges are added as follows:
 		// - if the block can be continued, an edge is added from the end of the
 		// block to the start of the finally
-		// - if both the block and the finally block can be continued, an edge is
+		// - if both the block and the finally block can be continued, an edge
+		// is
 		// added
 		// from the end of the finally block to the closing
 		if (!pb.canBeContinued())

@@ -214,7 +214,7 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			FixpointConfiguration fixconf) {
 		AnalysisState<A> state = this.analysis.makeLattice()
 				.top()
-				.withComputedExpression(new Skip(SyntheticLocation.INSTANCE));
+				.withExecutionExpression(new Skip(SyntheticLocation.INSTANCE));
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {
 				interproc.fixpoint(state, fixconf);

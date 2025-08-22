@@ -45,7 +45,7 @@ public class FalseEdge
 			AnalysisState<A> state,
 			Analysis<A, D> analysis)
 			throws SemanticException {
-		ExpressionSet exprs = state.getComputedExpressions();
+		ExpressionSet exprs = state.getExecutionExpressions();
 		AnalysisState<A> result = state.bottom();
 		for (SymbolicExpression expr : exprs) {
 			UnaryExpression negated = new UnaryExpression(

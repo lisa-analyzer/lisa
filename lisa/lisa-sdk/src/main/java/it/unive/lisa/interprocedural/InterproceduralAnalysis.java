@@ -128,7 +128,7 @@ public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends
 	 *
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the cfg call. The
-	 *             {@link AnalysisState#getComputedExpressions()} will contain
+	 *             {@link AnalysisState#getExecutionExpressions()} will contain
 	 *             an {@link Identifier} pointing to the meta variable
 	 *             containing the abstraction of the returned value, if any
 	 *
@@ -156,7 +156,7 @@ public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends
 	 *
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the open call. The
-	 *             {@link AnalysisState#getComputedExpressions()} will contain
+	 *             {@link AnalysisState#getExecutionExpressions()} will contain
 	 *             an {@link Identifier} pointing to the meta variable
 	 *             containing the abstraction of the returned value, if any
 	 *

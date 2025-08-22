@@ -84,7 +84,7 @@ public class PythonLikeAssigningStrategy
 			if (def != null) {
 				callState = def.forwardSemantics(callState, interprocedural, expressions);
 				expressions.put(def, callState);
-				defaults[pos] = callState.getComputedExpressions();
+				defaults[pos] = callState.getExecutionExpressions();
 				Set<Type> types = new HashSet<>();
 				for (SymbolicExpression e : defaults[pos])
 					types.addAll(interprocedural.getAnalysis().getRuntimeTypesOf(callState, e, call));
@@ -117,7 +117,7 @@ public class PythonLikeAssigningStrategy
 		}
 
 		// we remove expressions from the stack
-		prepared = prepared.withComputedExpressions(new ExpressionSet());
+		prepared = prepared.withExecutionExpressions(new ExpressionSet());
 		return Pair.of(prepared, slots);
 	}
 

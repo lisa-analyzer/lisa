@@ -197,12 +197,12 @@ public class SemanticsSanityTest {
 				boolean isBottom = ((Lattice) res).isBottom();
 				if (res instanceof AnalysisState) {
 					AnalysisState state = (AnalysisState) res;
-					isBottom = state.getState().isBottom()
-							&& state.getFixpointInformation() != null
-							&& state.getFixpointInformation().isBottom()
+					isBottom = state.getExecutionState().isBottom()
+							&& state.getExecutionInformation() != null
+							&& state.getExecutionInformation().isBottom()
 							// analysis state keeps the assigned id on the stack
-							&& state.getComputedExpressions().size() == 1
-							&& state.getComputedExpressions().iterator().next().equals(v);
+							&& state.getExecutionExpressions().size() == 1
+							&& state.getExecutionExpressions().iterator().next().equals(v);
 				}
 
 				if (!isBottom) {

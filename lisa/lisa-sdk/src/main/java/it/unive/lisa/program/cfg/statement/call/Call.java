@@ -311,7 +311,7 @@ public abstract class Call
 		for (int i = 0; i < actuals.length; i++) {
 			AnalysisState<A> state = expressions.getState(actuals[i]);
 			Set<Type> t = new HashSet<>();
-			for (SymbolicExpression e : state.getComputedExpressions())
+			for (SymbolicExpression e : state.getExecutionExpressions())
 				t.addAll(analysis.getRuntimeTypesOf(state, e, this));
 			types[i] = t;
 		}
@@ -370,10 +370,10 @@ public abstract class Call
 		}
 
 		if (returned != null)
-			if (returned.getComputedExpressions().isEmpty())
+			if (returned.getExecutionExpressions().isEmpty())
 				return true;
-			else if (returned.getComputedExpressions().size() == 1
-					&& returned.getComputedExpressions().iterator().next() instanceof Skip)
+			else if (returned.getExecutionExpressions().size() == 1
+					&& returned.getExecutionExpressions().iterator().next() instanceof Skip)
 				return true;
 
 		return false;

@@ -76,7 +76,7 @@ public abstract class CallWithResult
 	 * 
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the cfg call. The
-	 *             {@link AnalysisState#getComputedExpressions()} will contain
+	 *             {@link AnalysisState#getExecutionExpressions()} will contain
 	 *             an {@link Identifier} pointing to the meta variable
 	 *             containing the abstraction of the returned value, if any
 	 *
@@ -97,7 +97,7 @@ public abstract class CallWithResult
 			StatementStore<A> expressions)
 			throws SemanticException {
 		// the stack has to be empty
-		state = state.withComputedExpressions(new ExpressionSet());
+		state = state.withExecutionExpressions(new ExpressionSet());
 
 		// this will contain only the information about the returned
 		// metavariable
@@ -109,7 +109,7 @@ public abstract class CallWithResult
 			return interprocedural.getAnalysis().smallStepSemantics(returned, new Skip(getLocation()), this);
 
 		Identifier meta = getMetaVariable();
-		for (SymbolicExpression expr : returned.getComputedExpressions())
+		for (SymbolicExpression expr : returned.getExecutionExpressions())
 			getMetaVariables().add((Identifier) expr);
 		getMetaVariables().add(meta);
 		return returned;

@@ -1182,7 +1182,7 @@ public class CFG
 			if (block.getFinallyBlock() != null) {
 				leaders.add(block.getFinallyBlock().getStart());
 				Collection<Statement> body = block.getFinallyBlock().getBody();
-				for (Edge e : getEdges()) 
+				for (Edge e : getEdges())
 					if (body.contains(e.getSource()) && !body.contains(e.getDestination()))
 						leaders.add(e.getDestination());
 			}
