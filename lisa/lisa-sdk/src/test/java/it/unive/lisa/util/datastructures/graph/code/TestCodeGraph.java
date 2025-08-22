@@ -105,11 +105,6 @@ public class TestCodeGraph
 		}
 
 		@Override
-		public boolean isFinallyRelated() {
-			return false;
-		}
-
-		@Override
 		public TestCodeEdge newInstance(
 				TestCodeNode source,
 				TestCodeNode destination) {

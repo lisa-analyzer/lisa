@@ -68,11 +68,6 @@ public class TrueEdge
 	}
 
 	@Override
-	public boolean isFinallyRelated() {
-		return false;
-	}
-
-	@Override
 	public TrueEdge newInstance(
 			Statement source,
 			Statement destination) {

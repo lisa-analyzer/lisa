@@ -39,18 +39,6 @@ public interface CodeEdge<G extends CodeGraph<G, N, E>,
 	boolean isErrorHandling();
 
 	/**
-	 * Yields {@code true} if and only if this edge is used to move the control
-	 * flow to, or back from, the execution of code that is guaranteed to be
-	 * executed before leaving some context. This includes, for instance, edges
-	 * leaving statements of a Java's try/catch-block and going into the finally
-	 * block, and ones coming back from the finally block to the code to execute
-	 * after.
-	 * 
-	 * @return whether or not this edge is used for finally blocks
-	 */
-	boolean isFinallyRelated();
-
-	/**
 	 * Builds a new instance of this edge, connecting the given nodes.
 	 * 
 	 * @param source      the source node

@@ -23,7 +23,6 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.edge.EndFinallyEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
@@ -256,7 +255,7 @@ public class CFG
 						s) -> getIngoingEdges(s).size() == 1
 								&& getIngoingEdges(s).stream().anyMatch(Predicate.not(Edge::isUnconditional))
 								&& getOutgoingEdges(s).stream()
-										.allMatch(e -> e.isFinallyRelated() || e.isErrorHandling()));
+										.allMatch(Edge::isErrorHandling));
 
 		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
 			if (exclusions.stream().anyMatch(e -> e.test(pb.getTryBlock(), st)))
@@ -1182,8 +1181,9 @@ public class CFG
 				leaders.add(block.getElseBlock().getStart());
 			if (block.getFinallyBlock() != null) {
 				leaders.add(block.getFinallyBlock().getStart());
-				for (Edge e : getEdges())
-					if (e instanceof EndFinallyEdge)
+				Collection<Statement> body = block.getFinallyBlock().getBody();
+				for (Edge e : getEdges()) 
+					if (body.contains(e.getSource()) && !body.contains(e.getDestination()))
 						leaders.add(e.getDestination());
 			}
 			for (CatchBlock cb : block.getCatchBlocks())

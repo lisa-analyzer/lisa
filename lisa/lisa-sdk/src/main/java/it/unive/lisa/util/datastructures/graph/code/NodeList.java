@@ -499,14 +499,14 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 				// normal intermediate edge
 				for (E in : ingoing)
 					for (E out : outgoing) {
-						if (!out.isUnconditional() && !out.isErrorHandling() && !out.isFinallyRelated())
+						if (!out.isUnconditional() && !out.isErrorHandling())
 							throw new UnsupportedOperationException(
 									EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
 
 						E _new;
 						// replicate the edge from ingoing.source to
 						// outgoing.dest
-						if (out.isFinallyRelated() || out.isErrorHandling())
+						if (out.isErrorHandling())
 							_new = out.newInstance(in.getSource(), out.getDestination());
 						else
 							_new = in.newInstance(in.getSource(), out.getDestination());

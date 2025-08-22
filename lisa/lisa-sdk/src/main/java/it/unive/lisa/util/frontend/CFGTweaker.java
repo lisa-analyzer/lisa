@@ -2,9 +2,7 @@ package it.unive.lisa.util.frontend;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
-import it.unive.lisa.program.cfg.edge.BeginFinallyEdge;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.edge.EndFinallyEdge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
@@ -129,19 +127,18 @@ public class CFGTweaker {
 	public static <E extends RuntimeException> void addFinallyEdges(
 			CFG cfg,
 			Function<String, E> exceptionFactory) {
-		int pathIdx = 0;
 		for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
 			ProtectedBlock fin = pb.getFinallyBlock();
 			if (fin == null || fin.getBody().isEmpty())
 				continue;
 
 			if (pb.getElseBlock() == null)
-				pathIdx = addNormalFinallyEdges(cfg, pb.getTryBlock(), fin, pb.getClosing(), pathIdx);
+				addNormalFinallyEdges(cfg, pb.getTryBlock(), fin, pb.getClosing());
 			else
-				pathIdx = addNormalFinallyEdges(cfg, pb.getElseBlock(), fin, pb.getClosing(), pathIdx);
+				addNormalFinallyEdges(cfg, pb.getElseBlock(), fin, pb.getClosing());
 
 			for (CatchBlock catchBody : pb.getCatchBlocks())
-				pathIdx = addNormalFinallyEdges(cfg, catchBody.getBody(), fin, pb.getClosing(), pathIdx);
+				addNormalFinallyEdges(cfg, catchBody.getBody(), fin, pb.getClosing());
 		}
 
 		// we sort them for deterministic processing
@@ -162,7 +159,7 @@ public class CFGTweaker {
 							b) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
 			for (Edge preEnd : cfg.getIngoingEdges(yield)) {
 				cfg.getNodeList().removeEdge(preEnd);
-				pathIdx = addFinallyPathInBetween(cfg, preEnd.getSource(), yield, fins, pathIdx);
+				addFinallyPathInBetween(cfg, preEnd.getSource(), yield, fins);
 			}
 		}
 
@@ -213,49 +210,46 @@ public class CFGTweaker {
 								b) -> a.getStart().getLocation().compareTo(b.getStart().getLocation()));
 				for (Edge entry : toReplace) {
 					cfg.getNodeList().removeEdge(entry);
-					pathIdx = addFinallyPathInBetween(cfg, st, entry.getDestination(), fins, pathIdx);
+					addFinallyPathInBetween(cfg, st, entry.getDestination(), fins);
 				}
 			}
 	}
 
-	private static int addNormalFinallyEdges(
+	private static void addNormalFinallyEdges(
 			CFG cfg,
 			ProtectedBlock pb,
 			ProtectedBlock fin,
-			Statement normalExit,
-			int pathIdx) {
-		// the edges are added as follows (BF: BeginFinallyEdge, EF:
-		// EndFinallyEdge):
-		// - if the block can be continued, a BF is added from the end of the
+			Statement normalExit) {
+		// the edges are added as follows:
+		// - if the block can be continued, an edge is added from the end of the
 		// block to the start of the finally
-		// - if both the block and the finally block can be continued, an EF is
+		// - if both the block and the finally block can be continued, an edge is
 		// added
 		// from the end of the finally block to the closing
 		if (!pb.canBeContinued())
-			return pathIdx;
-		cfg.addEdge(new BeginFinallyEdge(pb.getEnd(), fin.getStart(), pathIdx));
+			return;
+		cfg.addEdge(new SequentialEdge(pb.getEnd(), fin.getStart()));
 		if (fin.canBeContinued())
-			cfg.addEdge(new EndFinallyEdge(fin.getEnd(), normalExit, pathIdx));
-		return pathIdx + 1;
+			cfg.addEdge(new SequentialEdge(fin.getEnd(), normalExit));
+		return;
 	}
 
-	private static int addFinallyPathInBetween(
+	private static void addFinallyPathInBetween(
 			CFG cfg,
 			Statement start,
 			Statement end,
-			List<ProtectedBlock> fins,
-			int pathIdx) {
+			List<ProtectedBlock> fins) {
 		// we add:
-		// - a BeginFinallyEdge from the predecessors of the yield to the
+		// - an edge from the predecessors of the yield to the
 		// start of the first finally block
-		// - a BeginFinallyEdge from the end each finally block to the beginning
+		// - an edge from the end each finally block to the beginning
 		// of the next one
-		// - an EndFinallyEdge from the end of the last finally block to the
+		// - an edge from the end of the last finally block to the
 		// yield if no yielders were found in the finally blocks
-		// - an EndFinallyEdge from the end of the last finally block to the
+		// - an edge from the end of the last finally block to the
 		// last yielders found in the finally blocks otherwise
 		if (fins.isEmpty())
-			return pathIdx;
+			return;
 
 		int idx = 0;
 		ProtectedBlock current = null;
@@ -266,15 +260,15 @@ public class CFGTweaker {
 		while (next != null) {
 			yieldersInCurrentBlock = false;
 			if (current == null)
-				cfg.addEdge(new BeginFinallyEdge(start, next.getStart(), pathIdx));
+				cfg.addEdge(new SequentialEdge(start, next.getStart()));
 			else {
 				if (current.alwaysContinues())
-					cfg.addEdge(new BeginFinallyEdge(current.getEnd(), next.getStart(), pathIdx));
+					cfg.addEdge(new SequentialEdge(current.getEnd(), next.getStart()));
 				else
 					for (Statement st : current.getBody())
 						if (st.stopsExecution())
 							for (Edge preEnd : cfg.getIngoingEdges(st)) {
-								cfg.addEdge(new BeginFinallyEdge(preEnd.getSource(), next.getStart(), pathIdx));
+								cfg.addEdge(new SequentialEdge(preEnd.getSource(), next.getStart()));
 								cfg.getNodeList().removeEdge(preEnd);
 							}
 			}
@@ -300,8 +294,8 @@ public class CFGTweaker {
 		// block we found on our way there
 		if (!yieldersInCurrentBlock)
 			for (Statement st : lastYielders)
-				cfg.addEdge(new EndFinallyEdge(current.getEnd(), st, pathIdx));
-		return pathIdx + 1;
+				cfg.addEdge(new SequentialEdge(current.getEnd(), st));
+		return;
 	}
 
 	/**

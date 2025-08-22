@@ -3,7 +3,6 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.analysis.continuations.Continuation;
 import it.unive.lisa.analysis.continuations.Exceptions;
 import it.unive.lisa.analysis.continuations.Execution;
-import it.unive.lisa.analysis.continuations.Finally;
 import it.unive.lisa.analysis.continuations.Halt;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;

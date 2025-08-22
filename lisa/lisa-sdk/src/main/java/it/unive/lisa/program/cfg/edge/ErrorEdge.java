@@ -130,11 +130,6 @@ public class ErrorEdge
 	}
 
 	@Override
-	public boolean isFinallyRelated() {
-		return false;
-	}
-
-	@Override
 	public ErrorEdge newInstance(
 			Statement source,
 			Statement destination) {
