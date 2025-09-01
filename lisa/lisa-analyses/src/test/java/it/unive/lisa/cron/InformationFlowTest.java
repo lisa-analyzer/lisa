@@ -46,7 +46,7 @@ public class InformationFlowTest
 	@Test
 	public void testTaint() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new TwoLevelsTaint(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -65,7 +65,7 @@ public class InformationFlowTest
 	@Test
 	public void testThreeLevelsTaint() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new ThreeLevelsTaint(),
 				DefaultConfiguration.defaultTypeDomain());

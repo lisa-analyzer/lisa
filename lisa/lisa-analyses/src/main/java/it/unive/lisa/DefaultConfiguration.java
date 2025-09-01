@@ -107,7 +107,7 @@ public class DefaultConfiguration
 			V extends ValueLattice<V>,
 			VD extends ValueDomain<V>,
 			T extends TypeLattice<T>,
-			TD extends TypeDomain<T>> SimpleAbstractDomain<H, V, T> simpleState(
+			TD extends TypeDomain<T>> SimpleAbstractDomain<H, V, T> simpleDomain(
 					HD heap,
 					VD value,
 					TD type) {
@@ -122,7 +122,7 @@ public class DefaultConfiguration
 	public static SimpleAbstractDomain<Monolith,
 			ValueEnvironment<IntInterval>,
 			TypeEnvironment<TypeSet>> defaultAbstractDomain() {
-		return simpleState(defaultHeapDomain(), defaultValueDomain(), defaultTypeDomain());
+		return simpleDomain(defaultHeapDomain(), defaultValueDomain(), defaultTypeDomain());
 	}
 
 	/**

@@ -20,7 +20,7 @@ public class StringAnalysesTest
 	public void testPrefix() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Prefix(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -34,7 +34,7 @@ public class StringAnalysesTest
 	public void testSuffix() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Suffix(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -48,7 +48,7 @@ public class StringAnalysesTest
 	public void testCharInclusion() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new CharInclusion(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -62,7 +62,7 @@ public class StringAnalysesTest
 	public void testBricks() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Bricks(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -86,7 +86,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration
-				.simpleState(DefaultConfiguration.defaultHeapDomain(), new FSA(),
+				.simpleDomain(DefaultConfiguration.defaultHeapDomain(), new FSA(),
 						DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "fsa";
@@ -98,7 +98,7 @@ public class StringAnalysesTest
 	public void testTarsis() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Tarsis(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -112,7 +112,7 @@ public class StringAnalysesTest
 	public void testBoundedStringSet() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new BoundedStringSet(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -126,7 +126,7 @@ public class StringAnalysesTest
 	public void testSubstringDomain() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new SubstringDomain(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -141,7 +141,7 @@ public class StringAnalysesTest
 	public void testSubstringDomainWithConstants() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new SubstringDomainWithConstants(),
 				DefaultConfiguration.defaultTypeDomain());

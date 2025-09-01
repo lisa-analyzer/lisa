@@ -24,7 +24,7 @@ public class InterproceduralAnalysesTest
 	public void testWorstCaseCHA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -40,7 +40,7 @@ public class InterproceduralAnalysesTest
 	public void testWorstCaseRTA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -56,7 +56,7 @@ public class InterproceduralAnalysesTest
 	public void testContextSensitiveRTA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -72,7 +72,7 @@ public class InterproceduralAnalysesTest
 	public void testContextSensitiveRTAHelper() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -88,7 +88,7 @@ public class InterproceduralAnalysesTest
 	public void testContextSensitiveRTAHelperFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -105,7 +105,7 @@ public class InterproceduralAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration
-				.simpleState(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -119,7 +119,7 @@ public class InterproceduralAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration
-				.simpleState(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -135,7 +135,7 @@ public class InterproceduralAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration
-				.simpleState(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(), new InferredTypes());
+				.simpleDomain(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(), new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "issues";

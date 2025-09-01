@@ -21,7 +21,7 @@ public class RecursionsTest
 	public void testFibonacciFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -37,7 +37,7 @@ public class RecursionsTest
 	public void testFibonacciKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -53,7 +53,7 @@ public class RecursionsTest
 	public void testFibonacciLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -69,7 +69,7 @@ public class RecursionsTest
 	public void testFibonacciInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -85,7 +85,7 @@ public class RecursionsTest
 	public void testFactorialLoopFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -101,7 +101,7 @@ public class RecursionsTest
 	public void testFactorialLoopKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -117,7 +117,7 @@ public class RecursionsTest
 	public void testFactorialLoopLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -133,7 +133,7 @@ public class RecursionsTest
 	public void testFactorialLoopInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -149,7 +149,7 @@ public class RecursionsTest
 	public void testInfiniteRecursion2FullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -166,7 +166,7 @@ public class RecursionsTest
 	public void testInfiniteRecursion2KDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -183,7 +183,7 @@ public class RecursionsTest
 	public void testInfiniteRecursion2Last() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -200,7 +200,7 @@ public class RecursionsTest
 	public void testInfiniteRecursion2Insensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -217,7 +217,7 @@ public class RecursionsTest
 	public void testInfiniteRecursion1FullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -234,7 +234,7 @@ public class RecursionsTest
 	public void testInfiniteRecursion1KDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -251,7 +251,7 @@ public class RecursionsTest
 	public void testInfiniteRecursion1Last() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -268,7 +268,7 @@ public class RecursionsTest
 	public void testInfiniteRecursion1Insensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -285,7 +285,7 @@ public class RecursionsTest
 	public void testFactorialFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -301,7 +301,7 @@ public class RecursionsTest
 	public void testFactorialKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -317,7 +317,7 @@ public class RecursionsTest
 	public void testFactorialLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -333,7 +333,7 @@ public class RecursionsTest
 	public void testFactorialInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -349,7 +349,7 @@ public class RecursionsTest
 	public void testFactorialInterleavedFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -365,7 +365,7 @@ public class RecursionsTest
 	public void testFactorialInterleavedKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -381,7 +381,7 @@ public class RecursionsTest
 	public void testFactorialInterleavedLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -397,7 +397,7 @@ public class RecursionsTest
 	public void testFactorialInterleavedInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -413,7 +413,7 @@ public class RecursionsTest
 	public void testTwoRecursionsFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -429,7 +429,7 @@ public class RecursionsTest
 	public void testTwoRecursionsKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -445,7 +445,7 @@ public class RecursionsTest
 	public void testTwoRecursionsLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -461,7 +461,7 @@ public class RecursionsTest
 	public void testTwoRecursionsInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -477,7 +477,7 @@ public class RecursionsTest
 	public void testNestedRecursionsFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -493,7 +493,7 @@ public class RecursionsTest
 	public void testNestedRecursionsKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -509,7 +509,7 @@ public class RecursionsTest
 	public void testNestedRecursionsLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -525,7 +525,7 @@ public class RecursionsTest
 	public void testNestedRecursionsInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -541,7 +541,7 @@ public class RecursionsTest
 	public void testUnreachableBaseCaseFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -557,7 +557,7 @@ public class RecursionsTest
 	public void testUnreachableBaseCaseKDepth() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -573,7 +573,7 @@ public class RecursionsTest
 	public void testUnreachableBaseCaseLast() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -589,7 +589,7 @@ public class RecursionsTest
 	public void testUnreachableBaseCaseInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());

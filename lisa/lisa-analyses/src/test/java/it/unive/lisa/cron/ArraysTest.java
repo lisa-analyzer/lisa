@@ -14,7 +14,7 @@ public class ArraysTest
 	public void monolithTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				new MonolithicHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -28,7 +28,7 @@ public class ArraysTest
 	public void fieldInsensitiveTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				new PointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -42,7 +42,7 @@ public class ArraysTest
 	public void fieldSensitiveTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());

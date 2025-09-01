@@ -18,7 +18,7 @@ public class NumericAnalysesTest
 	public void testSign() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -32,7 +32,7 @@ public class NumericAnalysesTest
 	public void testParity() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Parity(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -46,7 +46,7 @@ public class NumericAnalysesTest
 	public void testInterval() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -60,7 +60,7 @@ public class NumericAnalysesTest
 	public void testIntegerConstantPropagation() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new IntegerConstantPropagation(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -74,7 +74,7 @@ public class NumericAnalysesTest
 	public void testNonRedundantSetOfInterval() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new NonRedundantIntervals(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -95,7 +95,7 @@ public class NumericAnalysesTest
 	public void testPentagons() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Pentagon(),
 				DefaultConfiguration.defaultTypeDomain());

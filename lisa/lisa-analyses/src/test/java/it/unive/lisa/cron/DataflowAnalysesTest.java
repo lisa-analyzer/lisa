@@ -36,7 +36,7 @@ public class DataflowAnalysesTest
 	public void testAvailableExpressions() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new AvailableExpressions(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -49,7 +49,7 @@ public class DataflowAnalysesTest
 	public void testConstantPropagation() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new ConstantPropagation(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -62,7 +62,7 @@ public class DataflowAnalysesTest
 	public void testReachingDefinitions() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new ReachingDefinitions(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -76,7 +76,7 @@ public class DataflowAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.interproceduralAnalysis = new BackwardModularWorstCaseAnalysis<>();
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Liveness(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -91,7 +91,7 @@ public class DataflowAnalysesTest
 		Program program = buildProgram();
 
 		CronConfiguration conf = new CronConfiguration();
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new ReachingDefinitions(),
 				DefaultConfiguration.defaultTypeDomain());

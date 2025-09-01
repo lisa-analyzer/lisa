@@ -46,7 +46,7 @@ public class StabilityTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		Interval aux = new Interval();
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Stability<>(aux),
 				DefaultConfiguration.defaultTypeDomain());

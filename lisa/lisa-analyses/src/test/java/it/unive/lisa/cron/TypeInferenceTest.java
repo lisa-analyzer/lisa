@@ -16,7 +16,7 @@ public class TypeInferenceTest
 	public void testInferredTypesCollection() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
@@ -30,7 +30,7 @@ public class TypeInferenceTest
 	public void testInferredCasts() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
@@ -45,7 +45,7 @@ public class TypeInferenceTest
 	public void testInferredTypesCollectionOnObjects() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
@@ -60,7 +60,7 @@ public class TypeInferenceTest
 	public void testStaticTypesCollection() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
@@ -74,7 +74,7 @@ public class TypeInferenceTest
 	public void testStaticCasts() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
@@ -89,7 +89,7 @@ public class TypeInferenceTest
 	public void testStaticTypesCollectionOnObjects() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.analysis = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());

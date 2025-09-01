@@ -333,11 +333,11 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(Set.class, s1, s2)
 				.withPrefabValues(
 						AbstractDomain.class,
-						DefaultConfiguration.simpleState(
+						DefaultConfiguration.simpleDomain(
 								DefaultConfiguration.defaultHeapDomain(),
 								new Interval(),
 								DefaultConfiguration.defaultTypeDomain()),
-						DefaultConfiguration.simpleState(
+						DefaultConfiguration.simpleDomain(
 								DefaultConfiguration.defaultHeapDomain(),
 								new Sign(),
 								DefaultConfiguration.defaultTypeDomain()))
