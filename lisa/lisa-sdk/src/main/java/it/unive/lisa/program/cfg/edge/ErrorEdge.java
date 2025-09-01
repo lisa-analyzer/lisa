@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
@@ -29,6 +30,8 @@ public class ErrorEdge
 
 	private final Type[] types;
 
+	private final ProtectedBlock protectedBlock;
+
 	/**
 	 * Builds the edge.
 	 * 
@@ -37,16 +40,19 @@ public class ErrorEdge
 	 * @param variable    the variable that is being caught by this edge, or
 	 *                        {@code null} if this edge does not catch any
 	 *                        variable
+	 * @param protectedBlock the block that is protected by this edge
 	 * @param types       the types of exceptions that are caught by this edge
 	 */
 	public ErrorEdge(
 			Statement source,
 			Statement destination,
 			VariableRef variable,
+			ProtectedBlock protectedBlock,
 			Type... types) {
 		super(source, destination);
 		this.variable = variable;
 		this.types = types;
+		this.protectedBlock = protectedBlock;
 	}
 
 	@Override
@@ -54,6 +60,7 @@ public class ErrorEdge
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((variable == null) ? 0 : variable.hashCode());
+		result = prime * result + ((protectedBlock == null) ? 0 : protectedBlock.hashCode());
 		result = prime * result + Arrays.hashCode(types);
 		return result;
 	}
@@ -72,6 +79,11 @@ public class ErrorEdge
 			if (other.variable != null)
 				return false;
 		} else if (!variable.equals(other.variable))
+			return false;
+		if (protectedBlock == null) {
+			if (other.protectedBlock != null)
+				return false;
+		} else if (!protectedBlock.equals(other.protectedBlock))
 			return false;
 		if (!Arrays.equals(types, other.types))
 			return false;
@@ -117,7 +129,7 @@ public class ErrorEdge
 							// so we leave it to the other catch
 							excluded.add(ex);
 
-		return analysis.moveErrorsToExecution(state, Arrays.asList(types), excluded, variable);
+		return analysis.moveErrorsToExecution(state, protectedBlock, Arrays.asList(types), excluded, variable);
 	}
 
 	@Override
@@ -142,7 +154,7 @@ public class ErrorEdge
 	public ErrorEdge newInstance(
 			Statement source,
 			Statement destination) {
-		return new ErrorEdge(source, destination, variable, types);
+		return new ErrorEdge(source, destination, variable, protectedBlock, types);
 	}
 
 }

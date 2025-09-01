@@ -1,5 +1,17 @@
 package it.unive.lisa.util.frontend;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -17,15 +29,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.YieldsValue;
 import it.unive.lisa.program.cfg.statement.literal.Literal;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for frontends that contains methods that add nodes and edges to
@@ -341,20 +344,18 @@ public class CFGTweaker {
 			// all blocks containing the yield, to be updated if we add nodes
 			List<ProtectedBlock> blocks = new LinkedList<>();
 			// the catches that must be executed in case an error happens
-			List<CatchBlock> catches = new LinkedList<>();
+			// together with the try block they protect
+			List<Pair<CatchBlock, ProtectedBlock>> catches = new LinkedList<>();
 
 			// here we find the inner-most protected block that contains the
-			// yield
-			// to decide whether to add a noop before it or not; we collect all
-			// catches
-			// that the yield or the possible noop should be connected to, and
-			// we
-			// collect all protected blocks that contain the yield to update
-			// them
+			// yield to decide whether to add a noop before it or not; we
+			// collect all catches that the yield or the possible noop should
+			// be connected to, and we collect all protected blocks that
+			// contain the yield to update them
 			for (ProtectionBlock pb : cfg.getDescriptor().getProtectionBlocks()) {
 				if (pb.getTryBlock().getBody().contains(yield)) {
 					blocks.add(pb.getTryBlock());
-					catches.addAll(pb.getCatchBlocks());
+					pb.getCatchBlocks().forEach(cb -> catches.add(Pair.of(cb, pb.getTryBlock())));
 					if (block == null || block.getBody().containsAll(pb.getTryBlock().getBody()))
 						block = pb.getTryBlock();
 				}
@@ -384,7 +385,7 @@ public class CFGTweaker {
 			Statement yielder,
 			boolean isOnlyNode,
 			List<ProtectedBlock> blocks,
-			Collection<CatchBlock> catches) {
+			List<Pair<CatchBlock, ProtectedBlock>> catches) {
 		// ret -> noop; ret
 		// ret 0 -> noop; ret 0
 		// if (b) { ret } -> if (b) { noop; ret }
@@ -414,8 +415,8 @@ public class CFGTweaker {
 			YieldsValue vyielder = (YieldsValue) yielder;
 			Expression value = vyielder.yieldedValue();
 			needsRewriting = !(value instanceof VariableRef || value instanceof Literal);
-			VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), "$val_to_yield", value.getStaticType());
-			VariableRef tmpVar2 = new VariableRef(cfg, yielder.getLocation(), "$val_to_yield", value.getStaticType());
+			VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), "", value.getStaticType());
+			VariableRef tmpVar2 = new VariableRef(cfg, yielder.getLocation(), "", value.getStaticType());
 			Assignment assign = new Assignment(cfg, yielder.getLocation(), tmpVar1, value);
 			Statement newYielder = vyielder.withValue(tmpVar2);
 
@@ -476,11 +477,16 @@ public class CFGTweaker {
 	private static void connectToCatches(
 			CFG cfg,
 			Statement target,
-			Collection<CatchBlock> catches) {
+			List<Pair<CatchBlock, ProtectedBlock>> catches) {
 		if (catches.isEmpty())
 			return;
-		for (CatchBlock cb : catches)
-			cfg.addEdge(new ErrorEdge(target, cb.getBody().getStart(), cb.getIdentifier(), cb.getExceptions()));
+		for (Pair<CatchBlock, ProtectedBlock> cb : catches)
+			cfg.addEdge(new ErrorEdge(
+				target, 
+				cb.getLeft().getBody().getStart(), 
+				cb.getLeft().getIdentifier(), 
+				cb.getRight(), 
+				cb.getLeft().getExceptions()));
 	}
 
 	private static void removeOutgoingErrorEdges(

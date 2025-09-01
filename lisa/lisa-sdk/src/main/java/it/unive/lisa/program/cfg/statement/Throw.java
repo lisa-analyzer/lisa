@@ -76,7 +76,7 @@ public class Throw
 			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		AnalysisState<A> sem = analysis.smallStepSemantics(state, expr, this);
-		AnalysisState<A> moved = analysis.moveExecutionTo(sem, new Exception(expr.getStaticType()));
+		AnalysisState<A> moved = analysis.moveExecutionTo(sem, new Exception(expr.getStaticType(), this));
 		return moved;
 	}
 

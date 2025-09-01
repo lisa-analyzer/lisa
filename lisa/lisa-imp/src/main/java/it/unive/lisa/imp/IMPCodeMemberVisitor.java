@@ -1040,6 +1040,7 @@ class IMPCodeMemberVisitor
 		// we parse the body of the try block normally
 		ParsedBlock body = visitBlock(ctx.body);
 		trycatch.mergeWith(body.getBody());
+		ProtectedBlock tryBlock = new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes());
 
 		// if there is an else block, we parse it immediately and connect it
 		// to the end of the try block *only* if it does not end with a
@@ -1076,10 +1077,10 @@ class IMPCodeMemberVisitor
 			trycatch.mergeWith(visit.getBody());
 			if (body.canBeContinued())
 				trycatch.addEdge(
-						new ErrorEdge(body.getEnd(), visit.getBegin(), block.getIdentifier(), block.getExceptions()));
+						new ErrorEdge(body.getEnd(), visit.getBegin(), block.getIdentifier(), tryBlock, block.getExceptions()));
 			for (Statement st : body.getBody().getNodes())
 				if (st.stopsExecution())
-					trycatch.addEdge(new ErrorEdge(st, visit.getBegin(), block.getIdentifier(), block.getExceptions()));
+					trycatch.addEdge(new ErrorEdge(st, visit.getBegin(), block.getIdentifier(), tryBlock, block.getExceptions()));
 			if (visit.canBeContinued())
 				// non-stopping last statement
 				normalExits.add(visit.getEnd());
@@ -1113,7 +1114,7 @@ class IMPCodeMemberVisitor
 		// build protection block
 		descriptor.addProtectionBlock(
 				new ProtectionBlock(
-						new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes()),
+						tryBlock,
 						catches,
 						elseBlock == null ? null
 								: new ProtectedBlock(elseBlock.getBegin(), elseBlock.getEnd(),
