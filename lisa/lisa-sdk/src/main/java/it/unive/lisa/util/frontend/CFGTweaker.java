@@ -415,8 +415,8 @@ public class CFGTweaker {
 			YieldsValue vyielder = (YieldsValue) yielder;
 			Expression value = vyielder.yieldedValue();
 			needsRewriting = !(value instanceof VariableRef || value instanceof Literal);
-			VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), "", value.getStaticType());
-			VariableRef tmpVar2 = new VariableRef(cfg, yielder.getLocation(), "", value.getStaticType());
+			VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), "$val_to_yield", value.getStaticType());
+			VariableRef tmpVar2 = new VariableRef(cfg, yielder.getLocation(), "$val_to_yield", value.getStaticType());
 			Assignment assign = new Assignment(cfg, yielder.getLocation(), tmpVar1, value);
 			Statement newYielder = vyielder.withValue(tmpVar2);
 

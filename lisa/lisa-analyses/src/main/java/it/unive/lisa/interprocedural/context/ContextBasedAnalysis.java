@@ -33,6 +33,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
+import it.unive.lisa.program.language.scoping.ScopingStrategy;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -468,9 +469,10 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			}
 
 			// save the resulting state
-			result = result
-					.lub(call.getProgram().getFeatures().getScopingStrategy().unscope(call, scope, exitState,
-							analysis));
+			ScopingStrategy strategy = call.getProgram().getFeatures().getScopingStrategy();
+			AnalysisState<A> callres = strategy.unscope(call, scope, exitState, analysis);
+			callres = analysis.moveThrowersTo(callres, call, cfg);
+			result = result.lub(callres);
 		}
 
 		token = callerToken;

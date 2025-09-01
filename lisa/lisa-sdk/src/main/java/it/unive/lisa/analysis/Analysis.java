@@ -17,6 +17,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -495,6 +496,59 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				assigned,
 				variable == null ? new Skip(SyntheticLocation.INSTANCE) : variable.getVariable()));
 		return new AnalysisState<>(state.lattice, function);
+	}
+
+	/**
+	 * For all exceptional continuations in the given state, move all throwers that are within {@code origin} to the given target.
+	 * This is useful when returning control to the caller of {@code origin}, as exceptions that are not caught within origin
+	 * are transferred from their original thrower to the call, so that they can be caught by the appropriate protection blocks.
+	 * @param state the state to operate on
+	 * @param target the target to transfer the exceptional continuations to
+	 * @param origin the cfg containing the original throwers
+	 * @return a new state with the updated exceptional continuations
+	 */
+	public AnalysisState<A> moveThrowersTo(AnalysisState<A> state, Statement target, CFG origin) {
+		Map<Continuation, ProgramState<A>> newFunction = new HashMap<>();
+		for (Entry<Continuation, ProgramState<A>> entry : state) {
+			Continuation cont = entry.getKey();
+			ProgramState<A> contState = entry.getValue();
+
+			if (cont instanceof Exception) {
+				Exception ex = (Exception) cont;
+				Statement thrower = ex.getThrower();
+				if (thrower instanceof Expression)
+					thrower = ((Expression) thrower).getRootStatement();
+
+				if (origin.containsNode(thrower)) {
+					Exception newEx = ex.withThrower(target);
+					newFunction.put(newEx, contState);
+				} else 
+					newFunction.put(cont, contState);
+			} else if (cont instanceof Exceptions) {
+				Exceptions exs = (Exceptions) cont;
+				Map<Type, Set<Statement>> toRemove = new HashMap<>();
+				for (Entry<Type, Set<Statement>> ex : exs.getTypes().entrySet()) 
+					for (Statement st : ex.getValue()) {
+						Statement thrower = st;
+						if (thrower instanceof Expression)
+							thrower = ((Expression) thrower).getRootStatement();
+						if (origin.containsNode(thrower)) 
+							toRemove.computeIfAbsent(ex.getKey(), k -> new HashSet<>()).add(st);
+					}
+
+				if (toRemove.isEmpty()) 
+					newFunction.put(cont, contState);
+				else {
+					Exceptions newExs = exs.removeAll(toRemove);
+					for (Type t : toRemove.keySet())
+						newExs = newExs.add(t, target);
+					newFunction.put(newExs, contState);
+				}
+			} else
+				newFunction.put(cont, contState);
+		}
+
+		return new AnalysisState<>(state.lattice, newFunction);
 	}
 
 }
