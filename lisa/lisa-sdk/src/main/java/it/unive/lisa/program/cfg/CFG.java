@@ -23,6 +23,7 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
@@ -564,7 +565,8 @@ public class CFG
 		Fixpoint<CFG,
 				Statement,
 				Edge,
-				CompoundState<A>> fix = isOptimized ? new OptimizedFixpoint<>(this, false, conf.hotspots)
+				CompoundState<A>> fix = isOptimized
+						? new OptimizedFixpoint<>(this, false, conf.hotspots)
 						: new Fixpoint<>(this, false);
 		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, interprocedural, conf);
 
@@ -885,8 +887,9 @@ public class CFG
 			// unless they are error-handling ones
 			Collection<Edge> outs = list.getOutgoingEdges(st);
 			if (st.stopsExecution() && !outs.isEmpty())
-				throw new ProgramValidationException(
-						this + " contains an execution-stopping node that has followers: " + st);
+				if (!st.throwsError() || outs.stream().anyMatch(Predicate.not(ErrorEdge.class::isInstance)))
+					throw new ProgramValidationException(
+							this + " contains an execution-stopping node that has followers: " + st);
 			if (outs.isEmpty() && !st.stopsExecution() && !st.throwsError())
 				throw new ProgramValidationException(
 						this + " contains a node with no followers that is not execution-stopping: " + st);
@@ -1188,6 +1191,10 @@ public class CFG
 			}
 			for (CatchBlock cb : block.getCatchBlocks())
 				leaders.add(cb.getBody().getStart());
+			if (block.getClosing() != null)
+				// TODO not having the appropriate statements here might be a
+				// problem
+				leaders.add(block.getClosing());
 		}
 
 		basicBlocks = new IdentityHashMap<>(leaders.size());
@@ -1230,6 +1237,45 @@ public class CFG
 		if (basicBlocks == null)
 			throw new IllegalStateException("Cannot retrieve basic blocks before computing them");
 		return basicBlocks;
+	}
+
+	/**
+	 * Yields the protection blocks that enclose the given program point. The
+	 * blocks are returned in order, from the inner-most to the outer-most.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return the protection blocks
+	 */
+	public List<ProtectionBlock> getProtectionsOf(
+			ProgramPoint pp) {
+		if (!(pp instanceof Statement))
+			// synthetic pp
+			return List.of();
+
+		Statement st = (Statement) pp;
+		List<ProtectionBlock> blocks = new LinkedList<>();
+
+		for (ProtectionBlock pb : getDescriptor().getProtectionBlocks())
+			if (pb.getTryBlock().getBody().contains(st))
+				blocks.add(pb);
+
+		if (blocks.isEmpty())
+			return List.of();
+		if (blocks.size() == 1)
+			return blocks;
+
+		blocks.sort((
+				b1,
+				b2) -> {
+			if (b1 == b2)
+				return 0;
+			if (b2.getTryBlock().getBody().containsAll(b1.getFullBody(true)))
+				return -1;
+			return 1;
+		});
+
+		return blocks;
 	}
 
 }

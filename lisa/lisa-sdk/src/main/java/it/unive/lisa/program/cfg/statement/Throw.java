@@ -11,6 +11,9 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.Type;
 
 /**
  * A statement that raises an error, stopping the execution of the current CFG
@@ -22,6 +25,7 @@ public class Throw
 		extends
 		UnaryStatement
 		implements
+		MetaVariableCreator,
 		YieldsValue {
 
 	/**
@@ -57,6 +61,14 @@ public class Throw
 	}
 
 	@Override
+	public final Identifier getMetaVariable() {
+		Expression e = getSubExpression();
+		String name = "thrown@" + getCFG().getDescriptor().getName();
+		Variable var = new Variable(e.getStaticType(), name, getLocation());
+		return var;
+	}
+
+	@Override
 	public Expression yieldedValue() {
 		return getSubExpression();
 	}
@@ -75,8 +87,15 @@ public class Throw
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		AnalysisState<A> sem = analysis.smallStepSemantics(state, expr, this);
-		AnalysisState<A> moved = analysis.moveExecutionTo(sem, new Exception(expr.getStaticType(), this));
+		Identifier meta = getMetaVariable();
+		AnalysisState<A> sem = analysis.assign(state, meta, expr, this);
+		// we forget the meta variables before moving as the operation only
+		// affects the normal execution, and won't be effective after we
+		// move the state to the exception
+		sem = sem.forgetIdentifiers(getSubExpression().getMetaVariables(), this);
+		Type thrown = expr.getStaticType().isReferenceType() ? expr.getStaticType().asReferenceType().getInnerType()
+				: expr.getStaticType();
+		AnalysisState<A> moved = analysis.moveExecutionToError(sem, new Exception(thrown, this));
 		return moved;
 	}
 

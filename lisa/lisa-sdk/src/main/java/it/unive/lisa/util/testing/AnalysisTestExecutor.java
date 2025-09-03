@@ -101,8 +101,10 @@ public abstract class AnalysisTestExecutor {
 		Objects.requireNonNull(conf.programFile);
 		Path expectedPath = Paths.get(expectedResultsDir, conf.testDir);
 		Path target = Paths.get(expectedPath.toString(), conf.programFile);
+		String testMethod = getCaller();
+		System.out.println("### Testing " + testMethod);
 		Program program = readProgram(conf, target);
-		perform(conf, program);
+		exec(conf, program, testMethod);
 	}
 
 	/**
@@ -130,6 +132,13 @@ public abstract class AnalysisTestExecutor {
 			Program program) {
 		String testMethod = getCaller();
 		System.out.println("### Testing " + testMethod);
+		exec(conf, program, testMethod);
+	}
+
+	private void exec(
+			TestConfiguration conf,
+			Program program,
+			String testMethod) {
 		Objects.requireNonNull(conf);
 		Objects.requireNonNull(conf.testDir);
 
@@ -164,6 +173,7 @@ public abstract class AnalysisTestExecutor {
 		}
 
 		compare(conf, expectedPath, actualPath, expFile, actFile, false);
+		System.out.println("Test successful!");
 
 		if (conf.compareWithOptimization && !conf.optimize) {
 			System.out.println("### Testing " + testMethod + " with optimization enabled");
@@ -182,6 +192,7 @@ public abstract class AnalysisTestExecutor {
 
 			actFile = Paths.get(actualPath.toString(), LiSA.REPORT_NAME).toFile();
 			compare(conf, expectedPath, actualPath, expFile, actFile, true);
+			System.out.println("Test successful!");
 		}
 	}
 

@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this)_2101368133.json", "untyped_B.B(B__this)_2101369311.json", "untyped_D.D(D__this)_2101365777.json", "untyped_E.E(E__this)_2101366955.json", "untyped_exceptions.main(exceptions__this,_untyped_b).json", "untyped_exceptions.thrower1(exceptions__this,_untyped_b)_1005192134.json", "untyped_exceptions.thrower2(exceptions__this,_untyped_b)_1005192165.json", "untyped_exceptions.thrower3(exceptions__this,_untyped_b)_1005192196.json", "untyped_exceptions.thrower4(exceptions__this,_untyped_b)_1005192227.json" ],
+  "info" : {
+    "cfgs" : "10",
+    "duration" : "99ms",
+    "end" : "2025-09-03T16:51:51.371+02:00",
+    "expressions" : "39",
+    "files" : "9",
+    "globals" : "0",
+    "members" : "10",
+    "programs" : "1",
+    "start" : "2025-09-03T16:51:51.272+02:00",
+    "statements" : "27",
+    "units" : "6",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashException" : "set",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/exceptions/smashed"
+  }
+}

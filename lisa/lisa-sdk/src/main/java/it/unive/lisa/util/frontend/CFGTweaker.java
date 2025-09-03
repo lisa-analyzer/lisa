@@ -1,19 +1,8 @@
 package it.unive.lisa.util.frontend;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
@@ -28,7 +17,16 @@ import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.YieldsValue;
-import it.unive.lisa.program.cfg.statement.literal.Literal;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Utility class for frontends that contains methods that add nodes and edges to
@@ -227,9 +225,7 @@ public class CFGTweaker {
 		// - if the block can be continued, an edge is added from the end of the
 		// block to the start of the finally
 		// - if both the block and the finally block can be continued, an edge
-		// is
-		// added
-		// from the end of the finally block to the closing
+		// is added from the end of the finally block to the closing
 		if (!pb.canBeContinued())
 			return;
 		cfg.addEdge(new SequentialEdge(pb.getEnd(), fin.getStart()));
@@ -403,20 +399,21 @@ public class CFGTweaker {
 			// third and fourth cases
 			NoOp noop = addNoOp(cfg, yielder, ingoing);
 			connectToCatches(cfg, noop, catches);
-			removeOutgoingErrorEdges(cfg, yielder);
+			removeOutgoingErrorEdges(cfg, yielder, null);
 			updateBlocks(cfg, yielder, noop, null, blocks, false);
+			updateMetadata(cfg, noop, yielder, null);
 		} else if (!isOnlyNode && !needsRewriting && !isBeginningOfBranch) {
 			// fifth and sixth cases
 			for (Edge in : ingoing)
 				connectToCatches(cfg, in.getSource(), catches);
-			removeOutgoingErrorEdges(cfg, yielder);
+			removeOutgoingErrorEdges(cfg, yielder, null);
 		} else {
 			// seventh and eighth cases
 			YieldsValue vyielder = (YieldsValue) yielder;
 			Expression value = vyielder.yieldedValue();
-			needsRewriting = !(value instanceof VariableRef || value instanceof Literal);
-			VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), "$val_to_yield", value.getStaticType());
-			VariableRef tmpVar2 = new VariableRef(cfg, yielder.getLocation(), "$val_to_yield", value.getStaticType());
+			String name = "yield@" + yielder.getLocation();
+			VariableRef tmpVar1 = new VariableRef(cfg, value.getLocation(), name, value.getStaticType());
+			VariableRef tmpVar2 = new VariableRef(cfg, yielder.getLocation(), name, value.getStaticType());
 			Assignment assign = new Assignment(cfg, yielder.getLocation(), tmpVar1, value);
 			Statement newYielder = vyielder.withValue(tmpVar2);
 
@@ -429,10 +426,33 @@ public class CFGTweaker {
 			}
 
 			connectToCatches(cfg, assign, catches);
-			removeOutgoingErrorEdges(cfg, yielder);
+			removeOutgoingErrorEdges(cfg, yielder, newYielder);
 			updateBlocks(cfg, yielder, assign, newYielder, blocks, true);
+			updateMetadata(cfg, assign, yielder, newYielder);
 
 			cfg.getNodeList().removeNode(yielder);
+		}
+	}
+
+	private static void updateMetadata(
+			CFG cfg,
+			Statement added,
+			Statement original,
+			Statement replacement) {
+		for (ControlFlowStructure cfs : cfg.getDescriptor().getControlFlowStructures())
+			cfs.addWith(added, original);
+
+		if (replacement == null)
+			return;
+
+		for (ControlFlowStructure cfs : cfg.getDescriptor().getControlFlowStructures())
+			cfs.replace(original, replacement);
+
+		for (VariableTableEntry variable : cfg.getDescriptor().getVariables()) {
+			if (variable.getScopeStart() != null && variable.getScopeStart().equals(original))
+				variable.setScopeStart(replacement);
+			if (variable.getScopeEnd() != null && variable.getScopeEnd().equals(original))
+				variable.setScopeEnd(replacement);
 		}
 	}
 
@@ -482,16 +502,30 @@ public class CFGTweaker {
 			return;
 		for (Pair<CatchBlock, ProtectedBlock> cb : catches)
 			cfg.addEdge(new ErrorEdge(
-				target, 
-				cb.getLeft().getBody().getStart(), 
-				cb.getLeft().getIdentifier(), 
-				cb.getRight(), 
-				cb.getLeft().getExceptions()));
+					target,
+					cb.getLeft().getBody().getStart(),
+					cb.getLeft().getIdentifier(),
+					cb.getRight(),
+					cb.getLeft().getExceptions()));
 	}
 
 	private static void removeOutgoingErrorEdges(
 			CFG cfg,
-			Statement yielder) {
+			Statement yielder,
+			Statement replacement) {
+		if (yielder.throwsError()) {
+			// throws are allowed to be connected to surrounding
+			// catch blocks in case they immediately catch the
+			// thrown error
+			if (replacement != null)
+				for (Edge out : cfg.getOutgoingEdges(yielder))
+					if (out.isErrorHandling()) {
+						cfg.addEdge(out.newInstance(replacement, out.getDestination()));
+						cfg.getNodeList().removeEdge(out);
+					}
+
+			return;
+		}
 		for (Edge out : cfg.getOutgoingEdges(yielder))
 			if (out.isErrorHandling())
 				cfg.getNodeList().removeEdge(out);

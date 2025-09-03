@@ -261,8 +261,13 @@ public class ProgramState<A extends AbstractLattice<A>>
 			boolean push)
 			throws SemanticException {
 		Set<SymbolicExpression> result = new HashSet<>();
-		for (SymbolicExpression exp : computedExpressions)
-			result.add(push ? exp.pushScope(scope, pp) : exp.popScope(scope, pp));
+		for (SymbolicExpression exp : computedExpressions) {
+			SymbolicExpression e = push ? exp.pushScope(scope, pp) : exp.popScope(scope, pp);
+			if (e != null)
+				// this can happen when popping a scope from
+				// a non-scoped identifier
+				result.add(e);
+		}
 		return new ExpressionSet(result);
 	}
 

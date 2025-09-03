@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A fixpoint algorithm for a {@link Graph}, parametric to the
@@ -147,7 +148,8 @@ public class OptimizedFixpoint<A extends AbstractLattice<A>>
 		StatementStore<A> emptyIntermediate = entrystate.intermediateStates.bottom();
 		CompoundState<A> newApprox = CompoundState.of(entrystate.postState.bottom(), emptyIntermediate);
 		CompoundState<A> entry = entrystate;
-		for (Statement cursor : bb)
+		for (int i = 0; i < bb.length; i++) {
+			Statement cursor = bb[i];
 			try {
 				newApprox = implementation.semantics(cursor, entry);
 
@@ -162,10 +164,19 @@ public class OptimizedFixpoint<A extends AbstractLattice<A>>
 						&& (cursor.stopsExecution() || (hotspots != null && hotspots.test(cursor))))
 					result.put(cursor, CompoundState.of(newApprox.postState, emptyIntermediate));
 
-				entry = newApprox;
+				if (i < bb.length - 1) {
+					Collection<Edge> edges = graph.getEdgesConnecting(cursor, bb[i + 1]);
+					if (edges.size() != 1)
+						throw new FixpointException("More than one edge connecting " + cursor + " and " + bb[i + 1]
+								+ " in the basic block: " + StringUtils.join(edges, ", "));
+					// we still invoke traverse as there is variable scoping
+					// handling happening there
+					entry = implementation.traverse(edges.iterator().next(), newApprox);
+				}
 			} catch (Exception e) {
 				throw new FixpointException(format(ERROR, "computing semantics", cursor, graph), e);
 			}
+		}
 
 		return CompoundState.of(newApprox.postState, emptyIntermediate);
 	}

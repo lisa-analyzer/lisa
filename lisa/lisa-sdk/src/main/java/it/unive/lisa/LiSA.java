@@ -106,7 +106,7 @@ public class LiSA {
 				fileManager,
 				conf.interproceduralAnalysis,
 				conf.callGraph,
-				conf.analysis == null ? null : new Analysis(conf.analysis));
+				conf.analysis == null ? null : new Analysis(conf.analysis, conf.shouldSmashException));
 		Application app = new Application(programs);
 		Collection<Warning> warnings;
 

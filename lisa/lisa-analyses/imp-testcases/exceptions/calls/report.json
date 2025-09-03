@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_D.D(D__this)_-1680236500.json", "untyped_D.D(D__this)_-1681122542.json", "untyped_D.D(D__this)_219107227.json", "untyped_exceptions.catchAfterCall(exceptions__this,_untyped_b)_-1788017588.json", "untyped_exceptions.catchAfterCallChain(exceptions__this,_untyped_b)_-1788012721.json", "untyped_exceptions.intermediate1(exceptions__this,_untyped_b)_-1381838331.json", "untyped_exceptions.intermediate2(exceptions__this,_untyped_b)_-1675335276.json", "untyped_exceptions.intermediate3(exceptions__this,_untyped_b)_2111161193.json", "untyped_exceptions.main(exceptions__this,_untyped_b).json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1381996059.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1382024641.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-766537578.json", "untyped_exceptions.tryAfterThrow(exceptions__this,_untyped_b)_-1788018518.json" ],
+  "info" : {
+    "cfgs" : "13",
+    "duration" : "137ms",
+    "end" : "2025-09-03T16:51:48.767+02:00",
+    "expressions" : "57",
+    "files" : "13",
+    "globals" : "0",
+    "members" : "13",
+    "programs" : "1",
+    "start" : "2025-09-03T16:51:48.630+02:00",
+    "statements" : "30",
+    "units" : "6",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashException" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/exceptions/calls"
+  }
+}

@@ -68,7 +68,7 @@ public class IMPNewObj
 				cfg,
 				new SourceCodeLocation(sourceFile, line, col),
 				(staticallyAllocated ? "" : "new ") + type,
-				type,
+				staticallyAllocated ? type : new ReferenceType(type),
 				parameters);
 		this.staticallyAllocated = staticallyAllocated;
 	}
@@ -87,8 +87,10 @@ public class IMPNewObj
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		Type type = getStaticType();
-		ReferenceType reftype = new ReferenceType(type);
+		Type staticType = getStaticType();
+		Type type = staticType.isReferenceType() ? staticType.asReferenceType().getInnerType() : staticType;
+		ReferenceType reftype = staticType.isReferenceType() ? staticType.asReferenceType()
+				: new ReferenceType(staticType);
 		MemoryAllocation creation = new MemoryAllocation(type, getLocation(), staticallyAllocated);
 		HeapReference ref = new HeapReference(reftype, creation, getLocation());
 

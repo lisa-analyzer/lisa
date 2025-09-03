@@ -211,4 +211,26 @@ public abstract class ControlFlowStructure {
 	 */
 	public abstract Collection<Statement> getTargetedStatements();
 
+	/**
+	 * Adds the statement {@code toAdd} in all the branches that also contain
+	 * {@code reference}.
+	 * 
+	 * @param toAdd     the statement to add
+	 * @param reference the statement to match
+	 */
+	public abstract void addWith(
+			Statement toAdd,
+			Statement reference);
+
+	/**
+	 * Replaces all occurrences of {@code original} in all branches with
+	 * {@code replacement}.
+	 * 
+	 * @param original    the statement to replace
+	 * @param replacement the statement to replace with
+	 */
+	public abstract void replace(
+			Statement original,
+			Statement replacement);
+
 }

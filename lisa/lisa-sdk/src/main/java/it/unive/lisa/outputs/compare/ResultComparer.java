@@ -580,7 +580,10 @@ public class ResultComparer {
 			for (SerializableEdge other : edgeBuilder.getOnlySecond())
 				if (edge.equalsUpToIds(other, leftGraph.getNodes(), rightGraph.getNodes()))
 					renamingsEdges.put(edge, other);
-		edgeBuilder.getOnlyFirst().stream().filter(e -> !renamingsEdges.containsKey(e)).forEach(onlyFirstEdges::add);
+		edgeBuilder.getOnlyFirst()
+				.stream()
+				.filter(e -> !renamingsEdges.containsKey(e))
+				.forEach(onlyFirstEdges::add);
 		edgeBuilder.getOnlySecond()
 				.stream()
 				.filter(e -> !renamingsEdges.containsValue(e))
@@ -637,7 +640,7 @@ public class ResultComparer {
 		SerializableNode currentF = null;
 		SerializableNode currentS = null;
 
-		while (ol.hasNext() && or.hasNext()) {
+		while (ol.hasNext() || or.hasNext()) {
 			if (ol.hasNext() && currentF == null)
 				currentF = ol.next();
 			if (or.hasNext() && currentS == null)

@@ -1,0 +1,56 @@
+class A { ~A() {} }
+class B extends A { ~B() {} }
+class C extends A { ~C() {} }
+class D extends B { ~D() {} }
+class E extends B { ~E() {} }
+
+class exceptions {
+
+    thrower1(b) {
+        if (b)
+            return 1;
+        else 
+            throw new D();
+    }
+
+    thrower2(b) {
+        if (b)
+            return 3;
+        else 
+            throw new E();
+    }
+
+    thrower3(b) {
+        if (b)
+            return 5;
+        else 
+            throw new A();
+    }
+
+    thrower4(b) {
+        if (b)
+            return 7;
+        else 
+            throw new B();
+    }
+
+    main(b) {
+        def x = 0;
+        try {
+            x = x + this.thrower1(b);
+            x = x + this.thrower2(b);
+            x = x + this.thrower3(b);
+            x = x + this.thrower4(b);
+        } catch (C e) {
+            return -1;
+        } catch (D e) {
+            return -2;
+        } catch (E e) {
+            return -3;
+        } catch (A e) {
+            return -4;
+        }
+        return x;
+    }
+
+}

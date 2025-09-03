@@ -99,4 +99,20 @@ public class Loop
 		return targeted;
 	}
 
+	@Override
+	public void addWith(
+			Statement toAdd,
+			Statement reference) {
+		if (body.contains(reference))
+			body.add(toAdd);
+	}
+
+	@Override
+	public void replace(
+			Statement original,
+			Statement replacement) {
+		if (body.remove(original))
+			body.add(replacement);
+	}
+
 }

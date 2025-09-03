@@ -22,7 +22,7 @@ public class Exception
 	/**
 	 * Builds a new continuation for the given exception type.
 	 * 
-	 * @param type the exception type
+	 * @param type    the exception type
 	 * @param thrower the statement that threw the exception
 	 */
 	public Exception(
@@ -51,11 +51,15 @@ public class Exception
 	}
 
 	/**
-	 * Yields a new instance of this class with the same exception type and the given thrower.
+	 * Yields a new instance of this class with the same exception type and the
+	 * given thrower.
+	 * 
 	 * @param thrower the statement that threw the exception
+	 * 
 	 * @return the new instance
 	 */
-	public Exception withThrower(Statement thrower) {
+	public Exception withThrower(
+			Statement thrower) {
 		return new Exception(type, thrower);
 	}
 
@@ -93,6 +97,6 @@ public class Exception
 
 	@Override
 	public StructuredRepresentation representation() {
-		return new StringRepresentation(type + " thrown by " + thrower);
+		return new StringRepresentation(type + " from " + thrower);
 	}
 }

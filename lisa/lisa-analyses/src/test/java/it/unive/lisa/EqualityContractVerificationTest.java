@@ -79,6 +79,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
@@ -490,7 +491,10 @@ public class EqualityContractVerificationTest {
 	public void testEdges() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Edge> edge : scanner.getSubTypesOf(Edge.class))
-			verify(edge);
+			if (edge == ErrorEdge.class)
+				verify(edge, verifier -> verifier.withIgnoredFields("protectedBlock"));
+			else
+				verify(edge);
 	}
 
 	@Test

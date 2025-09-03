@@ -127,4 +127,24 @@ public class IfThenElse
 		return targeted;
 	}
 
+	@Override
+	public void addWith(
+			Statement toAdd,
+			Statement reference) {
+		if (trueBranch.contains(reference))
+			trueBranch.add(toAdd);
+		if (falseBranch.contains(reference))
+			falseBranch.add(toAdd);
+	}
+
+	@Override
+	public void replace(
+			Statement original,
+			Statement replacement) {
+		if (trueBranch.remove(original))
+			trueBranch.add(replacement);
+		if (falseBranch.remove(original))
+			falseBranch.add(replacement);
+	}
+
 }

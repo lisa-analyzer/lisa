@@ -79,7 +79,14 @@ public abstract class CFGFixpoint<A extends AbstractLattice<A>,
 			Edge edge,
 			CompoundState<A> entrystate)
 			throws SemanticException {
-		AnalysisState<A> approx = edge.traverseForward(entrystate.postState, interprocedural.getAnalysis());
+		AnalysisState<A> state = entrystate.postState;
+
+		// we remove the exceptions that are caught by error edges
+		// going out from the same source
+		if (!edge.isErrorHandling())
+			state = interprocedural.getAnalysis().removeCaughtErrors(state, edge.getSource());
+
+		AnalysisState<A> approx = edge.traverseForward(state, interprocedural.getAnalysis());
 
 		// we remove out of scope variables here
 		List<VariableTableEntry> toRemove = new LinkedList<>();

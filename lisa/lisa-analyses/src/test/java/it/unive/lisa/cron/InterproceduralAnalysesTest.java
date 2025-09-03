@@ -135,7 +135,8 @@ public class InterproceduralAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration
-				.simpleDomain(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(), new InferredTypes());
+				.simpleDomain(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(),
+						new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "issues";

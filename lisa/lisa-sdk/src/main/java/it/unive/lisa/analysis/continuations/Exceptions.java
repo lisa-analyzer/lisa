@@ -1,18 +1,15 @@
 package it.unive.lisa.analysis.continuations;
 
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.representation.MapRepresentation;
-import it.unive.lisa.util.representation.SetRepresentation;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A {@link Continuation} that represents an erroneous state caused by one or
@@ -32,7 +29,7 @@ public class Exceptions
 	/**
 	 * Builds a new continuation for the given exception type.
 	 * 
-	 * @param type the exception type
+	 * @param type    the exception type
 	 * @param thrower the statement that threw the exception
 	 */
 	public Exceptions(
@@ -47,7 +44,8 @@ public class Exceptions
 	}
 
 	/**
-	 * Yields the exception types associated with this continuation, each mapped to the statements that threw them.
+	 * Yields the exception types associated with this continuation, each mapped
+	 * to the statements that threw them.
 	 * 
 	 * @return the exception types
 	 */
@@ -59,12 +57,12 @@ public class Exceptions
 	 * Yields a new continuation that is equal to this one but with the given
 	 * type and thrower added.
 	 * 
-	 * @param type the type to add
+	 * @param type    the type to add
 	 * @param thrower the statement that threw the exception
 	 * 
-	 * @return a new continuation with the added type and thrower if
-	 *         the type was not already present, otherwise a new continuation with
-	 *         thrower added to the existing type
+	 * @return a new continuation with the added type and thrower if the type
+	 *             was not already present, otherwise a new continuation with
+	 *             thrower added to the existing type
 	 */
 	public Exceptions add(
 			Type type,
@@ -81,16 +79,20 @@ public class Exceptions
 	 * @param types the types to add
 	 * 
 	 * @return a new continuation with the added types, where each one is either
-	 * added to the mapping with the given throwers if not already present, and merged with
-	 * the given throwers otherwise
+	 *             added to the mapping with the given throwers if not already
+	 *             present, and merged with the given throwers otherwise
 	 */
 	public Exceptions addAll(
 			Map<Type, Set<Statement>> types) {
 		Map<Type, Set<Statement>> newTypes = new HashMap<>(this.types);
-		types.forEach((k, v) -> newTypes.merge(k, v, (oldV, newV) -> {
-			oldV.addAll(newV);
-			return oldV;
-		}));
+		types.forEach((
+				k,
+				v) -> newTypes.merge(k, v, (
+						oldV,
+						newV) -> {
+					oldV.addAll(newV);
+					return oldV;
+				}));
 		return this.types.equals(newTypes) ? this : new Exceptions(newTypes);
 	}
 
@@ -115,7 +117,7 @@ public class Exceptions
 	 * Yields a new continuation that is equal to this one but with the given
 	 * thrower removed for the given type.
 	 * 
-	 * @param type the type to remove the thrower from
+	 * @param type    the type to remove the thrower from
 	 * @param thrower the statement that threw the exception
 	 * 
 	 * @return a new continuation with the removed thrower
@@ -137,15 +139,17 @@ public class Exceptions
 	 * types removed.
 	 * 
 	 * @param types the types to remove
-	 * @param throwers the statements that threw the exceptions
 	 * 
 	 * @return a new continuation with the removed types
 	 */
 	public Exceptions removeAll(
 			Map<Type, Set<Statement>> types) {
 		Map<Type, Set<Statement>> newTypes = new HashMap<>(this.types);
-		types.forEach((k, v) -> newTypes.remove(k));
-		Set<Type> toRemove = newTypes.entrySet().stream().filter(p -> p.getValue().isEmpty()).map(Map.Entry::getKey).collect(Collectors.toSet());
+		types.forEach((
+				k,
+				v) -> newTypes.remove(k));
+		Set<Type> toRemove = newTypes.entrySet().stream().filter(p -> p.getValue().isEmpty()).map(Map.Entry::getKey)
+				.collect(Collectors.toSet());
 		toRemove.forEach(newTypes::remove);
 		return this.types.equals(newTypes) ? this : new Exceptions(newTypes);
 	}
@@ -178,6 +182,17 @@ public class Exceptions
 
 	@Override
 	public StructuredRepresentation representation() {
-		return new MapRepresentation(types, StringRepresentation::new, set -> new SetRepresentation(set, StringRepresentation::new));
+		StringBuilder s = new StringBuilder("smashed exceptions: ");
+		types.entrySet()
+				.stream()
+				.sorted((
+						e1,
+						e2) -> e1.getKey().toString().compareTo(e2.getKey().toString()))
+				.forEachOrdered(t -> s.append(t.getKey())
+						.append(" from ")
+						.append(t.getValue().stream().map(Object::toString).sorted().collect(Collectors.joining(", ")))
+						.append("; "));
+		s.delete(s.length() - 2, s.length());
+		return new StringRepresentation(s.toString());
 	}
 }

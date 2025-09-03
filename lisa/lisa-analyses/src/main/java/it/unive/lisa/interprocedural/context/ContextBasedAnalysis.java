@@ -438,13 +438,14 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 
 		// compute the result over all possible targets, and take the lub of
 		// the results
+		AnalysisState<A> initialState = analysis.removeAllErrors(entryState);
 		for (CFG cfg : call.getTargetedCFGs()) {
 			CFGResults<A> localResults = results.get(cfg);
 			AnalyzedCFG<A> states = localResults == null ? null : localResults.get(token);
 			Pair<AnalysisState<A>,
 					ExpressionSet[]> prepared = prepareEntryState(
 							call,
-							entryState,
+							initialState,
 							parameters,
 							expressions,
 							scope,
@@ -471,7 +472,8 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			// save the resulting state
 			ScopingStrategy strategy = call.getProgram().getFeatures().getScopingStrategy();
 			AnalysisState<A> callres = strategy.unscope(call, scope, exitState, analysis);
-			callres = analysis.moveThrowersTo(callres, call, cfg);
+			callres = analysis.mergeErrors(callres, entryState);
+			callres = analysis.transferThrowers(callres, call, cfg);
 			result = result.lub(callres);
 		}
 

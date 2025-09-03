@@ -225,7 +225,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	 */
 	public AnalysisState<A> getExitState()
 			throws SemanticException {
-		return lub(this.getNormalExitpoints(), false);
+		return lub(this.getAllExitpoints(), false);
 	}
 
 	private AnalysisState<A> lub(

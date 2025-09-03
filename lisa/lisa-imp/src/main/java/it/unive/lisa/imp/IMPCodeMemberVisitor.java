@@ -1076,11 +1076,20 @@ class IMPCodeMemberVisitor
 			catchBodies.add(visit);
 			trycatch.mergeWith(visit.getBody());
 			if (body.canBeContinued())
-				trycatch.addEdge(
-						new ErrorEdge(body.getEnd(), visit.getBegin(), block.getIdentifier(), tryBlock, block.getExceptions()));
+				trycatch.addEdge(new ErrorEdge(
+						body.getEnd(),
+						visit.getBegin(),
+						block.getIdentifier(),
+						tryBlock,
+						block.getExceptions()));
 			for (Statement st : body.getBody().getNodes())
 				if (st.stopsExecution())
-					trycatch.addEdge(new ErrorEdge(st, visit.getBegin(), block.getIdentifier(), tryBlock, block.getExceptions()));
+					trycatch.addEdge(new ErrorEdge(
+							st,
+							visit.getBegin(),
+							block.getIdentifier(),
+							tryBlock,
+							block.getExceptions()));
 			if (visit.canBeContinued())
 				// non-stopping last statement
 				normalExits.add(visit.getEnd());

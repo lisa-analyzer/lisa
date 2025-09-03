@@ -5,7 +5,9 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
@@ -35,13 +37,14 @@ public class ErrorEdge
 	/**
 	 * Builds the edge.
 	 * 
-	 * @param source      the source statement
-	 * @param destination the destination statement
-	 * @param variable    the variable that is being caught by this edge, or
-	 *                        {@code null} if this edge does not catch any
-	 *                        variable
+	 * @param source         the source statement
+	 * @param destination    the destination statement
+	 * @param variable       the variable that is being caught by this edge, or
+	 *                           {@code null} if this edge does not catch any
+	 *                           variable
 	 * @param protectedBlock the block that is protected by this edge
-	 * @param types       the types of exceptions that are caught by this edge
+	 * @param types          the types of exceptions that are caught by this
+	 *                           edge
 	 */
 	public ErrorEdge(
 			Statement source,
@@ -60,8 +63,9 @@ public class ErrorEdge
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((variable == null) ? 0 : variable.hashCode());
-		result = prime * result + ((protectedBlock == null) ? 0 : protectedBlock.hashCode());
 		result = prime * result + Arrays.hashCode(types);
+		// we do not consider the protected block in the hash code
+		// as it is (i) mutable and (ii) not relevant for the object identity
 		return result;
 	}
 
@@ -80,13 +84,10 @@ public class ErrorEdge
 				return false;
 		} else if (!variable.equals(other.variable))
 			return false;
-		if (protectedBlock == null) {
-			if (other.protectedBlock != null)
-				return false;
-		} else if (!protectedBlock.equals(other.protectedBlock))
-			return false;
 		if (!Arrays.equals(types, other.types))
 			return false;
+		// we do not consider the protected block in the equals
+		// as it is (i) mutable and (ii) not relevant for the object identity
 		return true;
 	}
 
@@ -106,6 +107,39 @@ public class ErrorEdge
 				+ " ]";
 	}
 
+	/**
+	 * Yields the error types can be caught when traversing this edge. Note that
+	 * not all of them are guaranteed to be caught: if there is an edge with a
+	 * more specific error type, or if there is an edge from an inner-most
+	 * protection block, those will catch the errors instead.
+	 * 
+	 * @return the types
+	 */
+	public Type[] getTypes() {
+		return types;
+	}
+
+	/**
+	 * Yields the expression that the errors will be assigned to when they are
+	 * caught by traversing this edge. If no named variable will contain the
+	 * errors, this method returns {@code null}.
+	 * 
+	 * @return the variable, or {@code null}
+	 */
+	public VariableRef getVariable() {
+		return variable;
+	}
+
+	/**
+	 * Yields the protected block that this edge protects, and whose errors of
+	 * matching types will be caught.
+	 * 
+	 * @return the protected block
+	 */
+	public ProtectedBlock getProtectedBlock() {
+		return protectedBlock;
+	}
+
 	@Override
 	public String getLabel() {
 		Set<String> typeNames = new TreeSet<>();
@@ -120,14 +154,27 @@ public class ErrorEdge
 			Analysis<A, D> analysis)
 			throws SemanticException {
 		Collection<Type> excluded = new HashSet<>();
-		for (Edge other : getSource().getCFG().getOutgoingEdges(getSource()))
-			if (other instanceof ErrorEdge && this != other)
-				for (Type ex : ((ErrorEdge) other).types)
-					for (Type e : types)
-						if (!e.equals(ex) && ex.canBeAssignedTo(e))
-							// ex is a more specific error than e,
-							// so we leave it to the other catch
-							excluded.add(ex);
+		Collection<ProtectionBlock> blocks = getSource().getCFG().getProtectionsOf(getSource());
+
+		for (ProtectionBlock block : blocks)
+			if (!block.getFullBody(false).contains(getDestination()))
+				// the catch block is not in this protection block:
+				// those exceptions will be catched first
+				for (CatchBlock cb : block.getCatchBlocks())
+					excluded.addAll(Arrays.asList(cb.getExceptions()));
+			else {
+				for (CatchBlock cb : block.getCatchBlocks())
+					if (!cb.getBody().getStart().equals(getDestination()))
+						for (Type otherType : cb.getExceptions())
+							for (Type caught : types)
+								if (!caught.equals(otherType) && otherType.canBeAssignedTo(caught))
+									// otherType is a more specific error than
+									// caught,
+									// so we leave it to the other catch
+									excluded.add(otherType);
+				// the other catches happen later, so we can just ignore them
+				break;
+			}
 
 		return analysis.moveErrorsToExecution(state, protectedBlock, Arrays.asList(types), excluded, variable);
 	}
