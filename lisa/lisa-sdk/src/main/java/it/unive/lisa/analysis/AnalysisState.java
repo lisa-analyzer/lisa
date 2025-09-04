@@ -337,7 +337,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		if (function.size() == 1 && function.keySet().iterator().next() == Execution.INSTANCE)
+		if (function != null && function.size() == 1 && function.keySet().iterator().next() == Execution.INSTANCE)
 			return function.values().iterator().next().representation();
 
 		return super.representation();
