@@ -260,7 +260,7 @@ public class WholeValueAnalysesTest
 					// conf.analysisGraphs =
 					// it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
 					String testKey = intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey();
-					System.out.println("\n\n###Running test " + testKey);
+					System.out.println("\n\n### Running test " + testKey);
 					perform("whole-value", "smashed/" + testKey.replace(".imp", ""), test.getKey(), conf);
 					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
 					STATES
@@ -295,16 +295,14 @@ public class WholeValueAnalysesTest
 					// conf.analysisGraphs =
 					// it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
 					String testKey = intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey();
-					System.out.println("\n\n###Running test " + testKey);
+					System.out.println("\n\n### Running test " + testKey);
 					perform("whole-value", "constr/" + testKey.replace(".imp", ""), test.getKey(), conf);
 					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
-					STATES
-							.computeIfAbsent(
+					STATES.computeIfAbsent(
 									"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
 									k -> new HashMap<>())
 							.put(test.getKey(), check.valuesAtFirstAssertion);
-					MESSAGES
-							.computeIfAbsent(
+					MESSAGES.computeIfAbsent(
 									"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
 									k -> new HashMap<>())
 							.put(test.getKey(), check.assertions);

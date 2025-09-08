@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * The abstract analysis state at a given program point. An analysis state is a
  * function from {@link Continuation}s to {@link ProgramState}s, separating the
@@ -215,6 +217,18 @@ public class AnalysisState<A extends AbstractLattice<A>>
 		return putState(Execution.INSTANCE, state.weakStoreInfo(key, info));
 	}
 
+	public Pair<Exceptions, ProgramState<A>> getSmashedExceptions() {
+		if (isTop() || isBottom() || function == null || function.isEmpty())
+			return null;
+		
+		for (Entry<Continuation, ProgramState<A>> entry : this)
+			if (entry.getKey() instanceof Exceptions) 
+				return Pair.of((Exceptions) entry.getKey(), entry.getValue());
+
+		return null;
+			
+	}
+
 	@Override
 	public AnalysisState<A> pushScope(
 			ScopeToken scope,
@@ -237,9 +251,91 @@ public class AnalysisState<A extends AbstractLattice<A>>
 		return new AnalysisState<>(lattice, function);
 	}
 
+	// @Override
+	// public boolean lessOrEqualAux(
+	// 		AnalysisState<A> other)
+	// 		throws SemanticException {
+	// 	if (function != null)
+	// 		for (Continuation key : function.keySet()) 
+	// 			if (!(key instanceof Exceptions)) {
+	// 				ProgramState<A> state = getState(key);
+	// 				if (state != null && !state.lessOrEqual(other.getState(key)))
+	// 					return false;
+	// 			} else {
+	// 				Pair<Exceptions, ProgramState<A>> excs = other.getSmashedExceptions();
+	// 				if (excs == null)
+	// 					return false;
+	// 				if ()
+	// 			}
+
+	// 	return true;
+	// }
+
+	// public AnalysisState<A> lubAux(
+	// 		AnalysisState<A> other)
+	// 		throws SemanticException {
+	// 	return functionalLift(
+	// 			other,
+	// 			lattice.bottom(),
+	// 			this::lubKeys,
+	// 			(
+	// 					o1,
+	// 					o2) -> o1 == null ? o2 : o1.lub(o2));
+	// }
+
+	// @Override
+	// public AnalysisState<A> glbAux(
+	// 		AnalysisState<A> other)
+	// 		throws SemanticException {
+	// 	return functionalLift(
+	// 			other,
+	// 			lattice.top(),
+	// 			this::glbKeys,
+	// 			(
+	// 					o1,
+	// 					o2) -> o1 == null ? o2 : o1.glb(o2));
+	// }
+
+	// @Override
+	// public AnalysisState<A> wideningAux(
+	// 		AnalysisState<A> other)
+	// 		throws SemanticException {
+	// 	return functionalLift(
+	// 			other,
+	// 			lattice.bottom(),
+	// 			this::lubKeys,
+	// 			(
+	// 					o1,
+	// 					o2) -> o1 == null ? o2 : o1.widening(o2));
+	// }
+
+	// @Override
+	// public AnalysisState<A> narrowingAux(
+	// 		AnalysisState<A> other)
+	// 		throws SemanticException {
+	// 	return functionalLift(
+	// 			other,
+	// 			lattice.top(),
+	// 			this::glbKeys,
+	// 			(
+	// 					o1,
+	// 					o2) -> o1 == null ? o2 : o1.narrowing(o2));
+	// }
+
 	@Override
 	public AnalysisState<A> top() {
 		return isTop() ? this : new AnalysisState<>(lattice.top(), null);
+	}
+
+	/**
+	 * Yields a copy of this state where the inner {@link ProgramState} corresponding
+	 * to the normal execution (i.e., {@link Execution#INSTANCE}) has been
+	 * set to top.
+	 *
+	 * @return this state but with the top execution
+	 */
+	public AnalysisState<A> topExecution() {
+		return putState(Execution.INSTANCE, lattice.top());
 	}
 
 	@Override
@@ -254,6 +350,17 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	@Override
 	public AnalysisState<A> bottom() {
 		return isBottom() ? this : new AnalysisState<>(lattice.bottom(), null);
+	}
+
+	/**
+	 * Yields a copy of this state where the inner {@link ProgramState} corresponding
+	 * to the normal execution (i.e., {@link Execution#INSTANCE}) has been
+	 * set to bottom.
+	 *
+	 * @return this state but with the bottom execution
+	 */
+	public AnalysisState<A> bottomExecution() {
+		return putState(Execution.INSTANCE, lattice.bottom());
 	}
 
 	@Override

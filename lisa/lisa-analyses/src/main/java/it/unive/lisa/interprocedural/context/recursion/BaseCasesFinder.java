@@ -92,9 +92,9 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 		if (inRecursion && call.getTargetedCFGs().contains(recursion.getRecursionHead())) {
 			// this is a back call
 			if (returnsVoid)
-				return entryState.bottom();
+				return entryState.bottomExecution();
 			else
-				return analysis.smallStepSemantics(entryState.bottom(), call.getMetaVariable(), call);
+				return entryState.bottomExecution().withExecutionExpression(call.getMetaVariable());
 		}
 
 		return super.getAbstractResultOf(call, entryState, parameters, expressions);
@@ -138,8 +138,12 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getExecutionExpressions();
 		// it should be enough to send values to top, retaining all type
 		// information
-		return start
-				.forwardSemanticsAux(this, entryState.postState.withTopValues(), params, entryState.intermediateStates);
+		// TODO what about heap?
+		return start.forwardSemanticsAux(
+			this, 
+			entryState.postState.withTopValues(), 
+			params, 
+			entryState.intermediateStates);
 	}
 
 }

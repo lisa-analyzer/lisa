@@ -156,9 +156,12 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			throws SemanticException {
 		A assume = domain.assume(state.getExecutionState(), expression, src, dest);
 		if (assume.isBottom())
-			return state.bottom();
+			return state.bottomExecution();
 		return state.withExecutionState(
-				new ProgramState<>(assume, state.getExecutionExpressions(), state.getExecutionInformation()));
+				new ProgramState<>(
+					assume, 
+					state.getExecutionExpressions(), 
+					state.getExecutionInformation()));
 	}
 
 	@Override
@@ -394,7 +397,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		ProgramState<A> exec = state.getState(Execution.INSTANCE);
 		if (exec.isBottom())
 			return state;
-		AnalysisState<A> result = state.putState(Execution.INSTANCE, exec.bottom());
+		AnalysisState<A> result = state.bottomExecution();
 
 		if (shouldSmashException == null || !shouldSmashException.test(exception.getType())) {
 			ProgramState<A> exc = state.getState(exception);
@@ -497,6 +500,8 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 
 		if (result.isBottom())
 			// nothing to catch, result should be bottom
+			// we put the whole state to bottom here
+			// since the catch is unreachable
 			return state.bottom();
 
 		A start = result.getState();
@@ -510,7 +515,6 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			if (moved.isBottom()) {
 				// no exceptions have been assigned to the variable:
 				// this happens when the catch is in a different cfg
-				// TODO for now, we just set the exception to top
 				moved = domain.assign(start, target, new PushAny(varType, variable.getLocation()), variable);
 			}
 		}
@@ -667,50 +671,6 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			return state;
 
 		return state.bottom().putState(Execution.INSTANCE, state.getState(Execution.INSTANCE));
-	}
-
-	/**
-	 * Yields a new state corresponding to {@code target} augmented with all the
-	 * non-normal continuations (i.e., different from {@link Execution}) that
-	 * are present in {@code source}.
-	 * 
-	 * @param target the target state where the continuations should be merged
-	 * @param source the source state where to take the continuations from
-	 * 
-	 * @return the new merged state
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	public AnalysisState<A> mergeErrors(
-			AnalysisState<A> target,
-			AnalysisState<A> source)
-			throws SemanticException {
-		if (source.isBottom() || source.isTop() || source.function == null || source.function.isEmpty())
-			return target;
-
-		Map<Continuation, ProgramState<A>> newFunction = target.mkNewFunction(target.function, false);
-		for (Entry<Continuation, ProgramState<A>> entry : source)
-			if (entry.getKey() instanceof Exceptions) {
-				Exceptions cont = (Exceptions) entry.getKey();
-				Optional<Continuation> excs = newFunction.keySet()
-						.stream()
-						.filter(Exceptions.class::isInstance)
-						.findAny();
-				if (excs.isEmpty())
-					newFunction.put(cont, entry.getValue());
-				else {
-					Exceptions existing = (Exceptions) excs.get();
-					Exceptions newCont = existing.addAll(cont.getTypes());
-					ProgramState<A> prev = newFunction.remove(existing);
-					newFunction.put(newCont, prev.lub(entry.getValue()));
-				}
-			} else if (!(entry.getKey() instanceof Execution))
-				if (newFunction.containsKey(entry.getKey()))
-					newFunction.put(entry.getKey(), newFunction.get(entry.getKey()).lub(entry.getValue()));
-				else
-					newFunction.put(entry.getKey(), entry.getValue());
-
-		return new AnalysisState<>(target.lattice, newFunction);
 	}
 
 }

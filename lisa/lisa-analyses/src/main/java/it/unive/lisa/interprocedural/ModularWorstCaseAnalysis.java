@@ -15,8 +15,11 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
+import it.unive.lisa.program.CodeUnit;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.VariableRef;
@@ -86,23 +89,20 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			FixpointConfiguration conf)
 			throws FixpointException {
 		// new fixpoint iteration: restart
-		this.results = null;
+		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
+		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
+		AnalyzedCFG<A> graph = conf.optimize 
+				? new OptimizedAnalyzedCFG<>(singleton, ID, entryState.bottom(), this)
+				: new AnalyzedCFG<>(singleton, ID, entryState);
+		CFGResults<A> value = new CFGResults<>(graph);
+		this.results = new FixpointResults<>(value.top());
 
 		Collection<CFG> all = new TreeSet<>(ModularWorstCaseAnalysis::sorter);
 		all.addAll(app.getAllCFGs());
 
 		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program", "cfgs"))
 			try {
-				AnalysisState<A> st = entryState.bottom();
-				StatementStore<A> store = new StatementStore<>(st);
-
-				if (results == null) {
-					AnalyzedCFG<A> graph = conf.optimize ? new OptimizedAnalyzedCFG<>(cfg, ID, st, this)
-							: new AnalyzedCFG<>(cfg, ID, entryState);
-					CFGResults<A> value = new CFGResults<>(graph);
-					this.results = new FixpointResults<>(value.top());
-				}
-
+				StatementStore<A> store = new StatementStore<>(entryState.bottom());
 				AnalysisState<A> prepared = entryState;
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
 					CodeLocation loc = arg.getLocation();
@@ -114,9 +114,10 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 					prepared = a.forwardSemantics(prepared, this, store);
 				}
 
-				results
-						.putResult(cfg, ID,
-								cfg.fixpoint(prepared, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
+				results.putResult(
+					cfg, 
+					ID,
+					cfg.fixpoint(prepared, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}

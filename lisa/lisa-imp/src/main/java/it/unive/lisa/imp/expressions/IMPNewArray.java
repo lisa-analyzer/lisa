@@ -106,7 +106,7 @@ public class IMPNewArray
 				new Variable(Untyped.INSTANCE, "len", getLocation()),
 				getLocation());
 
-		AnalysisState<A> lenSt = state.bottom();
+		AnalysisState<A> lenSt = state.bottomExecution();
 		// TODO fix when we'll support multidimensional arrays
 		for (SymbolicExpression dim : params[0])
 			lenSt = lenSt.lub(analysis.assign(tmp, len, dim, this));

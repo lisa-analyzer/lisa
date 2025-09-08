@@ -154,7 +154,7 @@ public class ArrayLength
 					arraytypes.add(t.asPointerType().getInnerType());
 
 			if (arraytypes.isEmpty())
-				return state.bottom();
+				return state.bottomExecution();
 
 			Type cst = Type.commonSupertype(arraytypes, getStaticType());
 			HeapDereference container = new HeapDereference(cst, expr, getLocation());

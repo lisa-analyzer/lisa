@@ -9,7 +9,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Execution
-		extends
+		implements
 		Continuation {
 
 	/**
@@ -18,6 +18,11 @@ public class Execution
 	public static final Execution INSTANCE = new Execution();
 
 	private Execution() {
+	}
+
+	@Override
+	public String toString() {
+		return representation().toString();
 	}
 
 	@Override

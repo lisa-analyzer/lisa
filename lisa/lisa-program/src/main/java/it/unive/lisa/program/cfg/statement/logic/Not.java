@@ -57,7 +57,7 @@ public class Not
 			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (analysis.getRuntimeTypesOf(state, expr, this).stream().noneMatch(Type::isBooleanType))
-			return state.bottom();
+			return state.bottomExecution();
 
 		return analysis.smallStepSemantics(
 				state,

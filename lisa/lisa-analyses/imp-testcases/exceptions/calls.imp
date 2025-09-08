@@ -58,10 +58,22 @@ class exceptions {
         return x;
     }
 
+    unconditionalThrow() {
+        throw new B();
+    }
+
+    assignAfterException() {
+        def x = 1;
+        this.unconditionalThrow();
+        def z = 1;
+        def j = 10 / this.unconditionalThrow();
+    }
+
     main(b) {
         def x = this.catchAfterCall(b);
         def y = this.tryAfterThrow(b);
         def z = this.catchAfterCallChain(b);
+        def w = this.assignAfterException();
     }
 
 }

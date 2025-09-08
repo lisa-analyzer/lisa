@@ -124,7 +124,7 @@ public abstract class UnaryExpression
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression expr : params[0])
 			result = result.lub(fwdUnarySemantics(interprocedural, state, expr, expressions));
 		return result;
@@ -168,7 +168,7 @@ public abstract class UnaryExpression
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression expr : params[0])
 			result = result.lub(bwdUnarySemantics(interprocedural, state, expr, expressions));
 		return result;

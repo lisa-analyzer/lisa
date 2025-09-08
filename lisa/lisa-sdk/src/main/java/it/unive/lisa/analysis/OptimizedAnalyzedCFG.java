@@ -294,7 +294,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
 			ScopeId id = getId().push(call);
-			AnalysisState<A> result = entryState.bottom();
+			AnalysisState<A> result = entryState.bottomExecution();
 			Analysis<A, D> analysis = interprocedural.getAnalysis();
 
 			for (CFG target : call.getTargetedCFGs()) {
@@ -303,7 +303,6 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 						.getFeatures()
 						.getScopingStrategy()
 						.unscope(call, scope, exitState, analysis);
-				callres = analysis.mergeErrors(callres, entryState);
 				callres = analysis.transferThrowers(callres, call, target);
 				result = result.lub(callres);
 			}

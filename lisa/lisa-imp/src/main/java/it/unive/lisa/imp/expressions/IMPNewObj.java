@@ -106,7 +106,7 @@ public class IMPNewObj
 		ExpressionSet[] fullParams = ArrayUtils.insert(0, params, callstate.getExecutionExpressions());
 
 		// we store a reference to the newly created region in the receiver
-		AnalysisState<A> tmp = state.bottom();
+		AnalysisState<A> tmp = state.bottomExecution();
 		for (SymbolicExpression rec : callstate.getExecutionExpressions())
 			tmp = tmp.lub(analysis.assign(callstate, rec, ref, paramThis));
 		// we store the approximation of the receiver in the sub-expressions

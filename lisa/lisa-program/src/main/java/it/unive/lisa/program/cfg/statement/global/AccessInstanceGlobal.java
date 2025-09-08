@@ -127,7 +127,7 @@ public class AccessInstanceGlobal
 		CodeLocation loc = getLocation();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		boolean atLeastOne = false;
 		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
 
@@ -164,7 +164,7 @@ public class AccessInstanceGlobal
 				rectypes.add(t.asPointerType().getInnerType());
 
 		if (rectypes.isEmpty())
-			return state.bottom();
+			return state.bottomExecution();
 
 		Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
 		GlobalVariable var = new GlobalVariable(Untyped.INSTANCE, target, new Annotations(), getLocation());

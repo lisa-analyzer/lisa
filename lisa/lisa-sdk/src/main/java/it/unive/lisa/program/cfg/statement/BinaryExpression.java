@@ -139,7 +139,7 @@ public abstract class BinaryExpression
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
 				result = result.lub(fwdBinarySemantics(interprocedural, state, left, right, expressions));
@@ -190,7 +190,7 @@ public abstract class BinaryExpression
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
 				result = result.lub(bwdBinarySemantics(interprocedural, state, left, right, expressions));

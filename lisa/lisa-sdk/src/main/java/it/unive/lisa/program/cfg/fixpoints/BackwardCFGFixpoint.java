@@ -62,7 +62,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 			Statement node,
 			CompoundState<A> entrystate)
 			throws SemanticException {
-		StatementStore<A> expressions = new StatementStore<>(entrystate.postState.bottom());
+		StatementStore<A> expressions = new StatementStore<>(entrystate.postState).bottom();
 		AnalysisState<A> approx = node.backwardSemantics(entrystate.postState, interprocedural, expressions);
 		if (node instanceof Expression)
 			// we forget the meta variables now as the values are popped from
@@ -96,7 +96,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 		if (!ids.isEmpty())
 			approx = approx.forgetIdentifiers(ids, edge.getSource());
 
-		return CompoundState.of(approx, new StatementStore<>(approx.bottom()));
+		return CompoundState.of(approx, new StatementStore<>(approx).bottom());
 	}
 
 	@Override

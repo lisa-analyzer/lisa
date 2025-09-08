@@ -43,7 +43,7 @@ public class TrueEdge
 			Analysis<A, D> analysis)
 			throws SemanticException {
 		ExpressionSet exprs = state.getExecutionExpressions();
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression expr : exprs)
 			result = result.lub(analysis.assume(state, expr, getSource(), getDestination()));
 		return result;

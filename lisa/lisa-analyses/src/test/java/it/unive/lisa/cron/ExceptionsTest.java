@@ -65,6 +65,8 @@ public class ExceptionsTest
 		conf.testDir = "exceptions";
 		conf.testSubDir = "smashed";
 		conf.programFile = "smashed.imp";
+		// conf.forceUpdate = true;
+		conf.analysisGraphs = CronConfiguration.GraphType.HTML_WITH_SUBNODES;
 		perform(conf);
 	}
 

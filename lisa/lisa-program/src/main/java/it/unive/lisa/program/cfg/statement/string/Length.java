@@ -78,7 +78,7 @@ public class Length
 			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (analysis.getRuntimeTypesOf(state, expr, this).stream().noneMatch(Type::isStringType))
-			return state.bottom();
+			return state.bottomExecution();
 
 		return analysis.smallStepSemantics(
 				state,

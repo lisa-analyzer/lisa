@@ -73,7 +73,7 @@ public class IMPArrayAccess
 				arraytypes.add(t.asPointerType().getInnerType());
 
 		if (arraytypes.isEmpty())
-			return state.bottom();
+			return state.bottomExecution();
 
 		Type cst = Type.commonSupertype(arraytypes, getStaticType());
 		Type inner = cst.isArrayType() ? cst.asArrayType().getInnerType() : Untyped.INSTANCE;

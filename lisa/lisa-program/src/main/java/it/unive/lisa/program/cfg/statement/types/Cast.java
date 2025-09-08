@@ -65,7 +65,7 @@ public class Cast
 			StatementStore<A> expressions)
 			throws SemanticException {
 		if (!(right instanceof Constant) || !(((Constant) right).getValue() instanceof Type))
-			return state.bottom();
+			return state.bottomExecution();
 
 		Type target = (Type) ((Constant) right).getValue();
 		if (target.isInMemoryType()) {

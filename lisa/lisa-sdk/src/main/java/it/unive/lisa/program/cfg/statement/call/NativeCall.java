@@ -208,7 +208,7 @@ public class NativeCall
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 
 		Expression[] parameters = getSubExpressions();
 		ParameterAssigningStrategy strategy = getProgram().getFeatures().getAssigningStrategy();

@@ -12,7 +12,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Exception
-		extends
+		implements
 		Continuation {
 
 	private final Type type;
@@ -93,6 +93,11 @@ public class Exception
 		} else if (!thrower.equals(other.thrower))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return representation().toString();
 	}
 
 	@Override

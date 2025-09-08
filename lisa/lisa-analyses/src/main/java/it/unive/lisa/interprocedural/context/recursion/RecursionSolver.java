@@ -166,8 +166,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 
 		LOG.info("Solving recursion at " + start.getLocation() + " for context " + recursion.getInvocationToken());
 
-		recursiveApprox = new GenericMapLattice<>(entryState.postState.bottom());
-		recursiveApprox = recursiveApprox.bottom();
+		recursiveApprox = new GenericMapLattice<CFGCall, AnalysisState<A>>(entryState.postState).bottom();
 		base = baseCases.find();
 
 		Expression[] actuals = start.getParameters();
@@ -190,6 +189,8 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 					.forwardSemanticsAux(this, entryState.postState, params, entryState.intermediateStates);
 
 			for (CFGCall end : ends)
+				// no need to lub: the keys are the calls and
+				// are thus unique
 				recursiveApprox = recursiveApprox.putState(end, transferToCallsite(start, end, post));
 
 			if (conf.recursionWideningThreshold < 0)

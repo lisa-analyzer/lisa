@@ -75,7 +75,7 @@ public class IMPAddOrConcat
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		BinaryOperator op;
 		TypeSystem types = getProgram().getTypes();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();

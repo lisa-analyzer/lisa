@@ -60,7 +60,7 @@ public class IMPAssert
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
 		if (types.stream().noneMatch(Type::isBooleanType))
-			return state.bottom();
+			return state.bottomExecution();
 		return analysis.smallStepSemantics(state, new Skip(getLocation()), this);
 	}
 

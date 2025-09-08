@@ -1,15 +1,16 @@
 package it.unive.lisa.analysis.continuations;
 
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A {@link Continuation} that represents an erroneous state caused by one or
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Exceptions
-		extends
+		implements 
 		Continuation {
 
 	private final Map<Type, Set<Statement>> types;

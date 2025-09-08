@@ -24,8 +24,11 @@ import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.context.recursion.RecursionSolver;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
+import it.unive.lisa.program.CodeUnit;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -158,21 +161,27 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			throws FixpointException {
 		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
+		
 		// new fixpoint execution: reset
-		this.results = null;
+		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
+		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
+		ContextSensitivityToken empty = (ContextSensitivityToken) token.startingId();
+		AnalyzedCFG<A> graph = conf.optimize 
+				? new OptimizedAnalyzedCFG<>(singleton, empty, entryState.bottom(), this)
+				: new AnalyzedCFG<>(singleton, empty, entryState);
+		CFGResults<A> value = new CFGResults<>(graph);
+		this.results = new FixpointResults<>(value.top());
 
 		if (app.getEntryPoints().isEmpty())
 			throw new NoEntryPointException();
-
-		int iter = 0;
-		ContextSensitivityToken empty = (ContextSensitivityToken) token.startingId();
-
+			
 		Collection<CFG> entryPoints = new TreeSet<>(
-				(
-						c1,
-						c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
-		entryPoints.addAll(app.getEntryPoints());
-
+			(
+				c1,
+				c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
+				entryPoints.addAll(app.getEntryPoints());
+					
+		int iter = 0;
 		do {
 			LOG.info("Performing {} fixpoint iteration", StringUtilities.ordinal(iter + 1));
 			triggers.clear();
@@ -256,8 +265,8 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					for (Expression actual : parameters)
 						params.put(
 								actual,
-								((OptimizedAnalyzedCFG<A, D>) res.getValue()).getUnwindedAnalysisStateAfter(actual,
-										conf));
+								((OptimizedAnalyzedCFG<A, D>) res.getValue())
+									.getUnwindedAnalysisStateAfter(actual, conf));
 				else
 					for (Expression actual : parameters)
 						params.put(actual, res.getValue().getAnalysisStateAfter(actual));
@@ -282,19 +291,12 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			Collection<CFG> entryPoints) {
 		for (CFG cfg : IterationLogger.iterate(LOG, entryPoints, "Processing entrypoints", "entries"))
 			try {
-				if (results == null) {
-					AnalyzedCFG<
-							A> graph = conf.optimize ? new OptimizedAnalyzedCFG<>(cfg, empty, entryState.bottom(), this)
-									: new AnalyzedCFG<>(cfg, empty, entryState);
-					CFGResults<A> value = new CFGResults<>(graph);
-					this.results = new FixpointResults<>(value.top());
-				}
-
 				token = empty;
 				AnalysisState<A> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
-				results
-						.putResult(cfg, empty,
-								cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
+				results.putResult(
+					cfg, 
+					empty,
+					cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
@@ -426,15 +428,15 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 
 			// we return bottom for now
 			if (call.returnsVoid(null))
-				return entryState.bottom();
+				return entryState.bottomExecution();
 			else
-				return entryState.bottom().withExecutionExpression(call.getMetaVariable());
+				return entryState.bottomExecution().withExecutionExpression(call.getMetaVariable());
 		}
 
 		ContextSensitivityToken callerToken = token;
 		token = token.push(call);
 		ScopeToken scope = new ScopeToken(call);
-		AnalysisState<A> result = entryState.bottom();
+		AnalysisState<A> result = entryState.bottomExecution();
 
 		// compute the result over all possible targets, and take the lub of
 		// the results
@@ -472,7 +474,6 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			// save the resulting state
 			ScopingStrategy strategy = call.getProgram().getFeatures().getScopingStrategy();
 			AnalysisState<A> callres = strategy.unscope(call, scope, exitState, analysis);
-			callres = analysis.mergeErrors(callres, entryState);
 			callres = analysis.transferThrowers(callres, call, cfg);
 			result = result.lub(callres);
 		}

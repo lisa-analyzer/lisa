@@ -151,7 +151,7 @@ public class MultiCall
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 
 		for (Call call : calls) {
 			result = result.lub(call.forwardSemanticsAux(interprocedural, state, params, expressions));

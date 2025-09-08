@@ -1,0 +1,1 @@
+{"name":"untyped B::B(B* this)","description":"['imp-testcases/exceptions/calls.imp':76:42, 'imp-testcases/exceptions/calls.imp':69:45, 'imp-testcases/exceptions/calls.imp':62:20]","nodes":[{"id":0,"text":"ret"}],"edges":[],"descriptions":[{"nodeId":0,"description":{"expressions":["skip"],"state":"_|_"}}]}

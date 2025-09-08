@@ -171,14 +171,15 @@ public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>, D extend
 			UnresolvedCall call,
 			AnalyzedCFG<A> result)
 			throws SemanticException {
-		StatementStore<A> store = new StatementStore<>(result.getEntryState().bottom());
+		StatementStore<A> store = new StatementStore<>(result.getEntryState()).bottom();
 		for (Expression e : call.getParameters())
 			store.put(e, result.getAnalysisStateAfter(e));
 
 		try {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			Analysis<A,
-					D> analysis = new Analysis(getConfiguration().analysis, getConfiguration().shouldSmashException);
+			Analysis<A, D> analysis = new Analysis(
+				getConfiguration().analysis, 
+				getConfiguration().shouldSmashException);
 			return callgraph.resolve(call, call.parameterTypes(store, analysis), null);
 		} catch (CallResolutionException e) {
 			return null;

@@ -121,8 +121,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 			CFG cfg)
 			throws SemanticException {
 		AnalysisState<A> prepared = entryState;
-		AnalysisState<A> st = entryState.bottom();
-		StatementStore<A> store = new StatementStore<>(st);
+		StatementStore<A> store = new StatementStore<>(entryState.bottom());
 
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
 			CodeLocation loc = arg.getLocation();

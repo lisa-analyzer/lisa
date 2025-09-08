@@ -17,13 +17,8 @@ import it.unive.lisa.util.representation.StructuredObject;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Continuation
-		implements
+public interface Continuation
+		extends
 		StructuredObject {
-
-	@Override
-	public final String toString() {
-		return representation().toString();
-	}
 
 }

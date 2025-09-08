@@ -87,9 +87,9 @@ public class Equals
 			throws SemanticException {
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (analysis.getRuntimeTypesOf(state, left, this).stream().noneMatch(Type::isStringType))
-			return state.bottom();
+			return state.bottomExecution();
 		if (analysis.getRuntimeTypesOf(state, right, this).stream().noneMatch(Type::isStringType))
-			return state.bottom();
+			return state.bottomExecution();
 
 		return analysis.smallStepSemantics(
 				state,

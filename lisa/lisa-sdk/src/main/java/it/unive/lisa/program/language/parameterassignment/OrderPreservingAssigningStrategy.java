@@ -42,7 +42,7 @@ public class OrderPreservingAssigningStrategy
 		// prepare the state for the call: assign the value to each parameter
 		AnalysisState<A> prepared = callState;
 		for (int i = 0; i < formals.length; i++) {
-			AnalysisState<A> temp = prepared.bottom();
+			AnalysisState<A> temp = prepared.bottomExecution();
 			for (SymbolicExpression exp : parameters[i])
 				temp = temp
 						.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp,

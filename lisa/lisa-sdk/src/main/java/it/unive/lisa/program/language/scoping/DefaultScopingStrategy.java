@@ -57,7 +57,7 @@ public class DefaultScopingStrategy
 			return analysis.assign(state, meta, inv, call).popScope(scope, call);
 		}
 
-		AnalysisState<A> tmp = state.bottom();
+		AnalysisState<A> tmp = state.bottomExecution();
 		for (SymbolicExpression ret : state.getExecutionExpressions())
 			tmp = tmp.lub(analysis.assign(state, meta, ret, call));
 

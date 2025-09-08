@@ -36,7 +36,8 @@ public class WorstCasePolicy
 			Analysis<A, D> analysis,
 			ExpressionSet[] params)
 			throws SemanticException {
-		AnalysisState<A> poststate = entryState.top();
+		// TODO should we assume that any exception can be thrown?
+		AnalysisState<A> poststate = entryState.topExecution();
 
 		if (call.getStaticType().isVoidType())
 			return analysis.smallStepSemantics(poststate, new Skip(call.getLocation()), call);

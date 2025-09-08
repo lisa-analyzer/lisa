@@ -158,7 +158,7 @@ public abstract class TernaryExpression
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
@@ -214,7 +214,7 @@ public abstract class TernaryExpression
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])

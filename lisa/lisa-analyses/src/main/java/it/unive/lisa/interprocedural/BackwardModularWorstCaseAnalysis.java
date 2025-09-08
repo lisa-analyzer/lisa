@@ -15,7 +15,10 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
+import it.unive.lisa.program.CodeUnit;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
@@ -85,22 +88,19 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			LOG.warn("Optimizations are turned on: this feature is experimental with backward analyses");
 
 		// new fixpoint iteration: restart
-		this.results = null;
+		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
+		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
+		AnalyzedCFG<A> graph = conf.optimize 
+				? new OptimizedAnalyzedCFG<>(singleton, ID, entryState.bottom(), this)
+				: new AnalyzedCFG<>(singleton, ID, entryState);
+		CFGResults<A> value = new CFGResults<>(graph);
+		this.results = new FixpointResults<>(value.top());
 
 		Collection<CFG> all = new TreeSet<>(ModularWorstCaseAnalysis::sorter);
 		all.addAll(app.getAllCFGs());
 
 		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program", "cfgs"))
 			try {
-				AnalysisState<A> st = entryState.bottom();
-
-				if (results == null) {
-					AnalyzedCFG<A> graph = conf.optimize ? new OptimizedAnalyzedCFG<>(cfg, ID, st, this)
-							: new AnalyzedCFG<>(cfg, ID, entryState);
-					CFGResults<A> value = new CFGResults<>(graph);
-					this.results = new FixpointResults<>(value.top());
-				}
-
 				results.putResult(
 						cfg,
 						ID,
