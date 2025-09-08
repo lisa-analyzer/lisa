@@ -26,7 +26,7 @@ import java.util.Map.Entry;
  */
 public class LocalVariableTracker {
 
-	private static class LocalVariable {
+	public static class LocalVariable {
 		private final CodeLocation location;
 		private final Statement scopeStart;
 		private final Annotations annotations;
@@ -39,6 +39,34 @@ public class LocalVariableTracker {
 			this.scopeStart = scopeStart;
 			this.annotations = annotations;
 		}
+
+		/**
+		 * Yields the location of local variable.
+		 * 
+		 * @return location the location of local variable.
+		 */
+		public CodeLocation getLocation() {
+			return location;
+		}
+
+		/**
+		 * Yields the scope start.
+		 * 
+		 * @return scopeStart the scope start.
+		 */
+		public Statement getScopeStart() {
+			return scopeStart;
+		}
+
+		/**
+		 * Yields the annotations of local variable.
+		 * 
+		 * @return annotations the annotations of local variable.
+		 */
+		public Annotations getAnnotations() {
+			return annotations;
+		}
+
 	}
 
 	private final CodeMemberDescriptor descriptor;
