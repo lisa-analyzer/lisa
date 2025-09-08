@@ -26,6 +26,10 @@ import java.util.Map.Entry;
  */
 public class LocalVariableTracker {
 
+	/**
+	 * An utility class that represents a local variable defined in a control
+	 * flow graph.
+	 */
 	public static class LocalVariable {
 		private final CodeLocation location;
 		private final Statement scopeStart;
