@@ -410,7 +410,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			SymbolicExpression expr = exprs.elements.iterator().next();
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
-			ValueExpression ve = (ValueExpression) expression;
+			ValueExpression ve = (ValueExpression) expr;
 			Satisfiability typesat = typeDomain.satisfies(mo.type, ve, pp, mo);
 			if (typesat == Satisfiability.BOTTOM)
 				return Satisfiability.BOTTOM;
