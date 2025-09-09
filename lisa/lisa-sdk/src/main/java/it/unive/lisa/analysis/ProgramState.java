@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.continuations.Continuation;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -14,14 +13,14 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * The abstract program state at a given program point, for an individual
- * {@link Continuation}. A program state is composed by an
- * {@link AbstractLattice} modeling the abstract values of program variables and
- * heap locations, and a collection of {@link SymbolicExpression}s keeping trace
- * of what has been evaluated and is available for later computations, but is
- * not stored in memory (i.e. the stack). Additionally, it maintains arbitrary
- * information that can be used to keep track of properties during fixpoint
- * computations, accessible through {@link #getFixpointInformation()}.
+ * The abstract program state at a given program point. A program state is
+ * composed by an {@link AbstractLattice} modeling the abstract values of
+ * program variables and heap locations, and a collection of
+ * {@link SymbolicExpression}s keeping trace of what has been evaluated and is
+ * available for later computations, but is not stored in memory (i.e. the
+ * stack). Additionally, it maintains arbitrary information that can be used to
+ * keep track of properties during fixpoint computations, accessible through
+ * {@link #getFixpointInformation()}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 

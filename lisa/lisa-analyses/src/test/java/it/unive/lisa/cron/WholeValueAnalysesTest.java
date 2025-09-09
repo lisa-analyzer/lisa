@@ -299,12 +299,12 @@ public class WholeValueAnalysesTest
 					perform("whole-value", "constr/" + testKey.replace(".imp", ""), test.getKey(), conf);
 					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
 					STATES.computeIfAbsent(
-									"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
-									k -> new HashMap<>())
+							"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
+							k -> new HashMap<>())
 							.put(test.getKey(), check.valuesAtFirstAssertion);
 					MESSAGES.computeIfAbsent(
-									"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
-									k -> new HashMap<>())
+							"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
+							k -> new HashMap<>())
 							.put(test.getKey(), check.assertions);
 				}
 	}

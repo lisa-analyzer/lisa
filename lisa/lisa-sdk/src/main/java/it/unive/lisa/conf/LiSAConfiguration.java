@@ -303,13 +303,13 @@ public class LiSAConfiguration
 	public boolean dumpForcesUnwinding = false;
 
 	/**
-	 * This predicate determines if an exception of a given type should have its
-	 * separate continuation in the {@link AnalysisState}, or if it should be
-	 * "smashed" into the summary exception continuation. All smashed exceptions
-	 * share a unique {@link ProgramState}, as they are deemed as mostly noise
-	 * or uninteresting.
+	 * This predicate determines if an error of a given type should have its
+	 * separate entry in the {@link AnalysisState} errors, or if it should be
+	 * "smashed" into the summary error state. All smashed errors share a unique
+	 * {@link ProgramState}, as they are deemed as mostly noise or
+	 * uninteresting.
 	 */
-	public Predicate<Type> shouldSmashException = null;
+	public Predicate<Type> shouldSmashError = null;
 
 	@Override
 	public String toString() {

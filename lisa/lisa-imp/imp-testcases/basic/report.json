@@ -30,7 +30,7 @@
     "semanticChecks" : "",
     "serializeInputs" : "true",
     "serializeResults" : "false",
-    "shouldSmashException" : "unset",
+    "shouldSmashError" : "unset",
     "syntacticChecks" : "",
     "useWideningPoints" : "true",
     "wideningThreshold" : "5",

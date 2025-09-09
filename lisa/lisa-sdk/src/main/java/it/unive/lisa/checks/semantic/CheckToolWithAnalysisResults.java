@@ -178,8 +178,8 @@ public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>, D extend
 		try {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			Analysis<A, D> analysis = new Analysis(
-				getConfiguration().analysis, 
-				getConfiguration().shouldSmashException);
+					getConfiguration().analysis,
+					getConfiguration().shouldSmashError);
 			return callgraph.resolve(call, call.parameterTypes(store, analysis), null);
 		} catch (CallResolutionException e) {
 			return null;

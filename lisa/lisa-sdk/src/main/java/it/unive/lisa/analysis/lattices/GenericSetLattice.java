@@ -1,6 +1,8 @@
 package it.unive.lisa.analysis.lattices;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -71,6 +73,66 @@ public class GenericSetLattice<E>
 	public GenericSetLattice<E> mk(
 			Set<E> set) {
 		return new GenericSetLattice<>(set);
+	}
+
+	/**
+	 * Adds the given element to this set. This operation has no side-effects,
+	 * i.e., this set is not modified.
+	 * 
+	 * @param element the element to add
+	 * 
+	 * @return a new set with the given element added
+	 */
+	public GenericSetLattice<E> add(
+			E element) {
+		Set<E> res = new HashSet<>(elements);
+		res.add(element);
+		return new GenericSetLattice<>(res);
+	}
+
+	/**
+	 * Adds the given elements to this set. This operation has no side-effects,
+	 * i.e., this set is not modified.
+	 * 
+	 * @param elements the elements to add
+	 * 
+	 * @return a new set with the given elements added
+	 */
+	public GenericSetLattice<E> addAll(
+			Collection<E> elements) {
+		Set<E> res = new HashSet<>(this.elements);
+		res.addAll(elements);
+		return new GenericSetLattice<>(res);
+	}
+
+	/**
+	 * Removes the given element from this set. This operation has no
+	 * side-effects, i.e., this set is not modified.
+	 * 
+	 * @param element the element to remove
+	 * 
+	 * @return a new set without the given element
+	 */
+	public GenericSetLattice<E> remove(
+			E element) {
+		Set<E> res = new HashSet<>(elements);
+		res.remove(element);
+		return new GenericSetLattice<>(res);
+	}
+
+	/**
+	 * Removes all the given elements from this set. This operation has no
+	 * side-effects, i.e., this set is not modified.
+	 * 
+	 * @param elements the elements to remove
+	 * 
+	 * @return a new set without the given elements
+	 */
+	public GenericSetLattice<E> removeAll(
+			Collection<E> elements) {
+		Set<E> res = new HashSet<>(this.elements);
+		res.removeAll(elements);
+		return new GenericSetLattice<>(res);
 	}
 
 }

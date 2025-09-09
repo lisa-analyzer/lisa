@@ -140,10 +140,10 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 		// information
 		// TODO what about heap?
 		return start.forwardSemanticsAux(
-			this, 
-			entryState.postState.withTopValues(), 
-			params, 
-			entryState.intermediateStates);
+				this,
+				entryState.postState.withTopValues(),
+				params,
+				entryState.intermediateStates);
 	}
 
 }

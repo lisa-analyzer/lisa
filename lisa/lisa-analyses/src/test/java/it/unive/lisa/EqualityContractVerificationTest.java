@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import guru.nidi.graphviz.model.Factory;
 import guru.nidi.graphviz.model.MutableGraph;
 import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.BackwardAnalyzedCFG;
 import it.unive.lisa.analysis.BackwardOptimizedAnalyzedCFG;
@@ -13,9 +14,6 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.continuations.Continuation;
-import it.unive.lisa.analysis.continuations.Execution;
-import it.unive.lisa.analysis.continuations.Halt;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.informationFlow.NonInterference;
@@ -585,11 +583,7 @@ public class EqualityContractVerificationTest {
 		for (Class<? extends TraceToken> token : scanner.getSubTypesOf(TraceToken.class))
 			verify(token);
 
-		for (Class<? extends Continuation> cont : scanner.getSubTypesOf(Continuation.class))
-			if (cont == Execution.class || cont == Halt.class)
-				verify(cont, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
-			else
-				verify(cont);
+		verify(AnalysisState.Error.class);
 	}
 
 	@Test

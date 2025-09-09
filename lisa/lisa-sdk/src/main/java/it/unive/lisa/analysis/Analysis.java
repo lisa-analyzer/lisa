@@ -1,10 +1,8 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.continuations.Continuation;
-import it.unive.lisa.analysis.continuations.Exception;
-import it.unive.lisa.analysis.continuations.Exceptions;
-import it.unive.lisa.analysis.continuations.Execution;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.GenericSetLattice;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.program.SyntheticLocation;
@@ -30,7 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -95,7 +92,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			ProgramPoint pp)
 			throws SemanticException {
 		A s = domain.assign(state.getExecutionState(), id, value, pp);
-		return state.withExecutionState(new ProgramState<>(s, new ExpressionSet(id), state.getExecutionInformation()));
+		return state.withExecution(new ProgramState<>(s, new ExpressionSet(id), state.getExecutionInformation()));
 	}
 
 	/**
@@ -132,7 +129,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
 				s = s.lub(domain.assign(sem.getExecutionState(), (Identifier) i, expression, pp));
-		return state.withExecutionState(new ProgramState<>(s, rewritten, state.getExecutionInformation()));
+		return state.withExecution(new ProgramState<>(s, rewritten, state.getExecutionInformation()));
 	}
 
 	@Override
@@ -142,9 +139,10 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			ProgramPoint pp)
 			throws SemanticException {
 		A s = domain.smallStepSemantics(state.getExecutionState(), expression, pp);
-		return state
-				.withExecutionState(
-						new ProgramState<>(s, new ExpressionSet(expression), state.getExecutionInformation()));
+		return state.withExecution(new ProgramState<>(
+				s,
+				new ExpressionSet(expression),
+				state.getExecutionInformation()));
 	}
 
 	@Override
@@ -157,11 +155,11 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		A assume = domain.assume(state.getExecutionState(), expression, src, dest);
 		if (assume.isBottom())
 			return state.bottomExecution();
-		return state.withExecutionState(
+		return state.withExecution(
 				new ProgramState<>(
-					assume, 
-					state.getExecutionExpressions(), 
-					state.getExecutionInformation()));
+						assume,
+						state.getExecutionExpressions(),
+						state.getExecutionInformation()));
 	}
 
 	@Override
@@ -375,11 +373,11 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 
 	/**
 	 * Sets the execution state to {@link ProgramState#bottom()} after moving
-	 * the current execution state to the given exception continuation. If a
-	 * state already exists for the given exception continuation, it is merged
-	 * with the current state. Moreover, if the given exception should be
-	 * smashed (see {@link LiSAConfiguration#shouldSmashException}), the state
-	 * is set/merged with the {@link Exceptions} continuation instead.
+	 * the current execution state to the given exception. If a state already
+	 * exists for the given exception, it is merged with the current state.
+	 * Moreover, if the given exception should be smashed (see
+	 * {@link LiSAConfiguration#shouldSmashError}), the state is set/merged with
+	 * the smashed errors state instead.
 	 * 
 	 * @param state     the current analysis state
 	 * @param exception the exception to move the execution state to
@@ -390,45 +388,29 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 */
 	public AnalysisState<A> moveExecutionToError(
 			AnalysisState<A> state,
-			Exception exception)
+			Error exception)
 			throws SemanticException {
-		if (state.isBottom())
-			return state;
-		ProgramState<A> exec = state.getState(Execution.INSTANCE);
-		if (exec.isBottom())
+		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
 			return state;
 		AnalysisState<A> result = state.bottomExecution();
 
-		if (shouldSmashException == null || !shouldSmashException.test(exception.getType())) {
-			ProgramState<A> exc = state.getState(exception);
-			return result.putState(exception, exec.lub(exc));
-		}
+		if (shouldSmashException == null || !shouldSmashException.test(exception.getType()))
+			return result.addError(exception, state.getExecution());
 
-		Optional<Exceptions> excs = state.getKeys().stream().filter(Exceptions.class::isInstance)
-				.map(Exceptions.class::cast).findFirst();
-		if (excs.isEmpty()) {
-			Exceptions exceptions = new Exceptions(exception.getType(), exception.getThrower());
-			return result.putState(exceptions, exec);
-		} else {
-			Exceptions exceptions = excs.get();
-			ProgramState<A> exc = state.getState(exceptions);
-			Exceptions newExceptions = exceptions.add(exception.getType(), exception.getThrower());
-			return result.putState(newExceptions, exec.lub(exc));
-		}
+		return result.addSmashedError(exception, state.getExecution());
 	}
 
 	/**
 	 * Moves the states corresponding to the given errors to the execution
-	 * state. This corresponds to collecting all states for {@link Exception}s
-	 * that (i) happened inside {@code protectedBlock}, and (ii) are subtypes of
-	 * a type in {@code targets} but not of a type in {@code excluded}, removing
-	 * them from the current state. The lub of all corresponding states is
-	 * placed as the state for the {@link Execution} continuation, discarding
-	 * the state currently associated with it. The {@link Exceptions}
-	 * continuation is also updated by removing the caught exceptions, and its
-	 * state is taken into the lub if at least one exception is removed. All
-	 * exception(s) not matching the given targets are removed from the
-	 * resulting state.
+	 * state. This corresponds to collecting all states for {@link Error}s that
+	 * (i) happened inside {@code protectedBlock}, and (ii) are subtypes of a
+	 * type in {@code targets} but not of a type in {@code excluded}. These are
+	 * removed from the given analysis state. The lub of all removed states is
+	 * placed as the state for the normal execution, discarding the state
+	 * currently associated with it. The smashed errors are also updated by
+	 * removing the caught errors, and their state is taken into the lub if at
+	 * least one error is removed. All error(s) not matching the given targets
+	 * are removed from the resulting state.
 	 * 
 	 * @param state          the current analysis state
 	 * @param protectedBlock the block that is being protected from the errors
@@ -449,12 +431,11 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			Collection<Type> excluded,
 			VariableRef variable)
 			throws SemanticException {
-		if (state.isBottom() || state.isTop() || state.function == null || state.function.isEmpty())
+		if (state.isBottom() || state.isTop())
 			return state;
 
 		Type varType = variable == null ? null : variable.getStaticType();
-		ProgramState<A> result = state.lattice.bottom();
-		Map<Continuation, ProgramState<A>> function = state.mkNewFunction(null, false);
+		ProgramState<A> result = state.getExecution().bottom();
 		Collection<SymbolicExpression> excs = new HashSet<>();
 
 		// either the type is excluded (precisely or through one of
@@ -466,37 +447,37 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				? protectedBlock.getBody().contains(((Expression) st).getRootStatement())
 				: protectedBlock.getBody().contains(st);
 
-		for (Entry<Continuation, ProgramState<A>> entry : state)
-			if (entry.getKey() instanceof Exception) {
-				Exception cont = (Exception) entry.getKey();
-				if (!isCaught.test(cont.getType()) || !isProtected.test(cont.getThrower()))
-					continue;
-				result = result.lub(entry.getValue());
-				if (variable != null)
-					for (SymbolicExpression e : entry.getValue().getComputedExpressions())
-						if (e.getStaticType().canBeAssignedTo(varType))
-							excs.add(e);
-			} else if (entry.getKey() instanceof Exceptions) {
-				Exceptions cont = (Exceptions) entry.getKey();
-				Map<Type, Set<Statement>> caught = new HashMap<>();
-				for (Entry<Type, Set<Statement>> ex : cont.getTypes().entrySet())
-					if (isCaught.test(ex.getKey())) {
-						Set<Statement> caughtThrowers = new HashSet<>();
-						for (Statement thrower : ex.getValue())
-							if (isProtected.test(thrower))
-								caughtThrowers.add(thrower);
-						if (!caughtThrowers.isEmpty())
-							caught.put(ex.getKey(), caughtThrowers);
-					}
+		Set<Error> caught = new HashSet<>();
+		Map<Type, Set<Statement>> caughtSmashed = new HashMap<>();
 
-				if (!caught.isEmpty()) {
-					result = result.lub(entry.getValue());
-					if (variable != null)
-						for (SymbolicExpression e : entry.getValue().getComputedExpressions())
-							if (e.getStaticType().canBeAssignedTo(varType))
-								excs.add(e);
-				}
+		for (Entry<Error, ProgramState<A>> entry : state.getErrors()) {
+			if (!isCaught.test(entry.getKey().getType()) || !isProtected.test(entry.getKey().getThrower()))
+				continue;
+			caught.add(entry.getKey());
+			result = result.lub(entry.getValue());
+			if (variable != null)
+				for (SymbolicExpression e : entry.getValue().getComputedExpressions())
+					if (e.getStaticType().canBeAssignedTo(varType))
+						excs.add(e);
+		}
+
+		for (Entry<Type, GenericSetLattice<Statement>> ex : state.getSmashedErrors())
+			if (isCaught.test(ex.getKey())) {
+				Set<Statement> caughtThrowers = new HashSet<>();
+				for (Statement thrower : ex.getValue())
+					if (isProtected.test(thrower))
+						caughtThrowers.add(thrower);
+				if (!caughtThrowers.isEmpty())
+					caughtSmashed.put(ex.getKey(), caughtThrowers);
 			}
+
+		if (!caughtSmashed.isEmpty()) {
+			result = result.lub(state.getSmashedErrorsState());
+			if (variable != null)
+				for (SymbolicExpression e : state.getSmashedErrorsState().getComputedExpressions())
+					if (e.getStaticType().canBeAssignedTo(varType))
+						excs.add(e);
+		}
 
 		if (result.isBottom())
 			// nothing to catch, result should be bottom
@@ -513,83 +494,81 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				assigned = assigned.lub(domain.assign(start, target, e, variable));
 			moved = assigned;
 			if (moved.isBottom()) {
-				// no exceptions have been assigned to the variable:
-				// this happens when the catch is in a different cfg
+				// no exceptions have been assigned to the variable
 				moved = domain.assign(start, target, new PushAny(varType, variable.getLocation()), variable);
 			}
 		}
 
-		function.put(Execution.INSTANCE, new ProgramState<>(
+		result = new ProgramState<>(
 				moved,
-				variable == null ? new Skip(SyntheticLocation.INSTANCE) : variable.getVariable()));
-		return new AnalysisState<>(state.lattice, function);
+				variable == null ? new Skip(SyntheticLocation.INSTANCE) : variable.getVariable());
+		// no uncaught exceptions should remain
+		// in the resulting state
+		// since they are not caught by this block
+		return state.removeAllErrors(false).withExecution(result);
 	}
 
 	/**
-	 * For all exceptional continuations in the given state, move all throwers
-	 * that are within {@code origin} to the given target. This is useful when
-	 * returning control to the caller of {@code origin}, as exceptions that are
-	 * not caught within origin are transferred from their original thrower to
-	 * the call, so that they can be caught by the appropriate protection
-	 * blocks.
+	 * For all (smashed) errors in the given state, move all throwers that are
+	 * within {@code origin} to the given target. This is useful when returning
+	 * control to the caller of {@code origin}, as errors that are not caught
+	 * within origin are transferred from their original thrower to the call, so
+	 * that they can be caught by the appropriate protection blocks.
 	 * 
 	 * @param state  the state to operate on
 	 * @param target the target to transfer the exceptional continuations to
 	 * @param origin the cfg containing the original throwers
 	 * 
 	 * @return a new state with the updated exceptional continuations
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public AnalysisState<A> transferThrowers(
 			AnalysisState<A> state,
 			Statement target,
-			CFG origin) {
-		if (state.isBottom() || state.isTop() || state.function == null || state.function.isEmpty())
+			CFG origin)
+			throws SemanticException {
+		if (state.isBottom() || state.isTop())
 			return state;
 
 		if (target instanceof Call)
 			target = ((Call) target).getSource();
 
-		Map<Continuation, ProgramState<A>> newFunction = new HashMap<>();
-		for (Entry<Continuation, ProgramState<A>> entry : state) {
-			Continuation cont = entry.getKey();
+		Set<Error> oldErrors = new HashSet<>();
+		Map<Error, ProgramState<A>> newErrors = new HashMap<>();
+		for (Entry<Error, ProgramState<A>> entry : state.getErrors()) {
+			Error cont = entry.getKey();
 			ProgramState<A> contState = entry.getValue();
 
-			if (cont instanceof Exception) {
-				Exception ex = (Exception) cont;
-				Statement thrower = ex.getThrower();
+			Statement thrower = cont.getThrower();
+			if (thrower instanceof Expression)
+				thrower = ((Expression) thrower).getRootStatement();
+
+			if (origin.containsNode(thrower)) {
+				Error newEx = cont.withThrower(target);
+				newErrors.put(newEx, contState);
+				oldErrors.add(cont);
+			}
+		}
+
+		Map<Type, Set<Statement>> toRemove = new HashMap<>();
+		Map<Type, Set<Statement>> toAdd = new HashMap<>();
+		for (Entry<Type, GenericSetLattice<Statement>> ex : state.getSmashedErrors())
+			for (Statement st : ex.getValue()) {
+				Statement thrower = st;
 				if (thrower instanceof Expression)
 					thrower = ((Expression) thrower).getRootStatement();
 
 				if (origin.containsNode(thrower)) {
-					Exception newEx = ex.withThrower(target);
-					newFunction.put(newEx, contState);
-				} else
-					newFunction.put(cont, contState);
-			} else if (cont instanceof Exceptions) {
-				Exceptions exs = (Exceptions) cont;
-				Map<Type, Set<Statement>> toRemove = new HashMap<>();
-				for (Entry<Type, Set<Statement>> ex : exs.getTypes().entrySet())
-					for (Statement st : ex.getValue()) {
-						Statement thrower = st;
-						if (thrower instanceof Expression)
-							thrower = ((Expression) thrower).getRootStatement();
-						if (origin.containsNode(thrower))
-							toRemove.computeIfAbsent(ex.getKey(), k -> new HashSet<>()).add(st);
-					}
-
-				if (toRemove.isEmpty())
-					newFunction.put(cont, contState);
-				else {
-					Exceptions newExs = exs.removeAll(toRemove);
-					for (Type t : toRemove.keySet())
-						newExs = newExs.add(t, target);
-					newFunction.put(newExs, contState);
+					toRemove.computeIfAbsent(ex.getKey(), k -> new HashSet<>()).add(st);
+					toAdd.computeIfAbsent(ex.getKey(), k -> new HashSet<>()).add(target);
 				}
-			} else
-				newFunction.put(cont, contState);
-		}
+			}
 
-		return new AnalysisState<>(state.lattice, newFunction);
+		return state.removeErrors(oldErrors)
+				.addErrors(newErrors)
+				.removeSmashedErrors(toRemove)
+				.addSmashedErrors(toAdd, state.getSmashedErrorsState());
 	}
 
 	/**
@@ -604,7 +583,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	public AnalysisState<A> removeCaughtErrors(
 			AnalysisState<A> state,
 			Statement source) {
-		if (state.isBottom() || state.isTop() || state.function == null || state.function.isEmpty())
+		if (state.isBottom() || state.isTop())
 			return state;
 
 		Set<Pair<Type, ProtectedBlock>> caught = source.getCFG().getOutgoingEdges(source)
@@ -624,53 +603,25 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 						: pb.getBody().contains(st);
 		Predicate<Statement> isProtected = st -> caught.stream().anyMatch(target -> aux.test(st, target.getRight()));
 
-		Map<Continuation, ProgramState<A>> newFunction = new HashMap<>();
-		for (Entry<Continuation, ProgramState<A>> entry : state) {
-			if (entry.getKey() instanceof Exception) {
-				Exception cont = (Exception) entry.getKey();
-				if (isCaught.test(cont.getType()) && isProtected.test(cont.getThrower()))
-					continue;
-				newFunction.put(cont, entry.getValue());
-			} else if (entry.getKey() instanceof Exceptions) {
-				Exceptions cont = (Exceptions) entry.getKey();
-				Map<Type, Set<Statement>> caughtSet = new HashMap<>();
-				for (Entry<Type, Set<Statement>> ex : cont.getTypes().entrySet())
-					if (isCaught.test(ex.getKey())) {
-						Set<Statement> caughtThrowers = new HashSet<>();
-						for (Statement thrower : ex.getValue())
-							if (isProtected.test(thrower))
-								caughtThrowers.add(thrower);
-						if (!caughtThrowers.isEmpty())
-							caughtSet.put(ex.getKey(), caughtThrowers);
-					}
+		Set<Error> caughtTypes = new HashSet<>();
+		for (Entry<Error, ProgramState<A>> entry : state.getErrors())
+			if (isCaught.test(entry.getKey().getType()) && isProtected.test(entry.getKey().getThrower()))
+				caughtTypes.add(entry.getKey());
 
-				if (!caughtSet.isEmpty()) {
-					Exceptions newCont = cont.removeAll(caughtSet);
-					if (!newCont.getTypes().isEmpty())
-						// put back the remaining exceptions
-						newFunction.put(newCont, entry.getValue());
-				}
-			} else
-				newFunction.put(entry.getKey(), entry.getValue());
-		}
+		AnalysisState<A> cleaned = state.removeErrors(caughtTypes);
 
-		return new AnalysisState<>(state.lattice, newFunction);
-	}
+		Map<Type, Set<Statement>> caughtSmashedTypes = new HashMap<>();
+		for (Entry<Type, GenericSetLattice<Statement>> ex : state.getSmashedErrors())
+			if (isCaught.test(ex.getKey())) {
+				Set<Statement> caughtThrowers = new HashSet<>();
+				for (Statement thrower : ex.getValue())
+					if (isProtected.test(thrower))
+						caughtThrowers.add(thrower);
+				if (!caughtThrowers.isEmpty())
+					caughtSmashedTypes.put(ex.getKey(), caughtThrowers);
+			}
 
-	/**
-	 * Yields a new state with all errors removed, containing only the
-	 * {@link Execution} continuation.
-	 * 
-	 * @param state the state to clean
-	 * 
-	 * @return the cleaned state
-	 */
-	public AnalysisState<A> removeAllErrors(
-			AnalysisState<A> state) {
-		if (state.isBottom() || state.isTop() || state.function == null || state.function.isEmpty())
-			return state;
-
-		return state.bottom().putState(Execution.INSTANCE, state.getState(Execution.INSTANCE));
+		return cleaned.removeSmashedErrors(caughtSmashedTypes);
 	}
 
 }

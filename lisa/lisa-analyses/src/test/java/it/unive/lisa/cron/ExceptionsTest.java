@@ -61,12 +61,10 @@ public class ExceptionsTest
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
-		conf.shouldSmashException = t -> t.toString().equals("D") || t.toString().equals("E");
+		conf.shouldSmashError = t -> t.toString().equals("D") || t.toString().equals("E");
 		conf.testDir = "exceptions";
 		conf.testSubDir = "smashed";
 		conf.programFile = "smashed.imp";
-		// conf.forceUpdate = true;
-		conf.analysisGraphs = CronConfiguration.GraphType.HTML_WITH_SUBNODES;
 		perform(conf);
 	}
 

@@ -161,12 +161,12 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			throws FixpointException {
 		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
-		
+
 		// new fixpoint execution: reset
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
 		ContextSensitivityToken empty = (ContextSensitivityToken) token.startingId();
-		AnalyzedCFG<A> graph = conf.optimize 
+		AnalyzedCFG<A> graph = conf.optimize
 				? new OptimizedAnalyzedCFG<>(singleton, empty, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, empty, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);
@@ -174,13 +174,13 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 
 		if (app.getEntryPoints().isEmpty())
 			throw new NoEntryPointException();
-			
+
 		Collection<CFG> entryPoints = new TreeSet<>(
-			(
-				c1,
-				c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
-				entryPoints.addAll(app.getEntryPoints());
-					
+				(
+						c1,
+						c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
+		entryPoints.addAll(app.getEntryPoints());
+
 		int iter = 0;
 		do {
 			LOG.info("Performing {} fixpoint iteration", StringUtilities.ordinal(iter + 1));
@@ -266,7 +266,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 						params.put(
 								actual,
 								((OptimizedAnalyzedCFG<A, D>) res.getValue())
-									.getUnwindedAnalysisStateAfter(actual, conf));
+										.getUnwindedAnalysisStateAfter(actual, conf));
 				else
 					for (Expression actual : parameters)
 						params.put(actual, res.getValue().getAnalysisStateAfter(actual));
@@ -294,9 +294,9 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 				token = empty;
 				AnalysisState<A> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 				results.putResult(
-					cfg, 
-					empty,
-					cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
+						cfg,
+						empty,
+						cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
@@ -436,11 +436,16 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		ContextSensitivityToken callerToken = token;
 		token = token.push(call);
 		ScopeToken scope = new ScopeToken(call);
+
+		// we exclude erroneous/halting executions from the
+		// initial states, since they will not be affected
+		// by the call; they are still part of the result
+		// and they will be lubbed with the return values
 		AnalysisState<A> result = entryState.bottomExecution();
+		AnalysisState<A> initialState = entryState.removeAllErrors(true);
 
 		// compute the result over all possible targets, and take the lub of
 		// the results
-		AnalysisState<A> initialState = analysis.removeAllErrors(entryState);
 		for (CFG cfg : call.getTargetedCFGs()) {
 			CFGResults<A> localResults = results.get(cfg);
 			AnalyzedCFG<A> states = localResults == null ? null : localResults.get(token);

@@ -48,7 +48,7 @@
     "semanticChecks" : "",
     "serializeInputs" : "false",
     "serializeResults" : "false",
-    "shouldSmashException" : "unset",
+    "shouldSmashError" : "unset",
     "syntacticChecks" : "VariableI",
     "useWideningPoints" : "true",
     "wideningThreshold" : "5",

@@ -213,7 +213,10 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	private void analyze(
 			FixpointConfiguration fixconf) {
 		AnalysisState<A> state = this.analysis.makeLattice()
-				.top()
+				// we set all continuations to bottom, except for
+				// the normal execution that starts at top
+				.bottom()
+				.topExecution()
 				.withExecutionExpression(new Skip(SyntheticLocation.INSTANCE));
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {

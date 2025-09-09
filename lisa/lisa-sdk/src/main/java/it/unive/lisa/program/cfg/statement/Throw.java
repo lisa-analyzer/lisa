@@ -4,9 +4,9 @@ import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.continuations.Exception;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -95,7 +95,7 @@ public class Throw
 		sem = sem.forgetIdentifiers(getSubExpression().getMetaVariables(), this);
 		Type thrown = expr.getStaticType().isReferenceType() ? expr.getStaticType().asReferenceType().getInnerType()
 				: expr.getStaticType();
-		AnalysisState<A> moved = analysis.moveExecutionToError(sem, new Exception(thrown, this));
+		AnalysisState<A> moved = analysis.moveExecutionToError(sem, new Error(thrown, this));
 		return moved;
 	}
 

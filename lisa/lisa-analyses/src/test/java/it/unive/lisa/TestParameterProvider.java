@@ -696,7 +696,7 @@ public class TestParameterProvider {
 		if (param == AnalysisState.class)
 			return (R) as;
 		if (param == ProgramState.class)
-			return (R) as.lattice;
+			return (R) as.getExecution();
 		if (param == Lattice.class)
 			return (R) IntInterval.TOP;
 		if (root == DefiniteIdSet.class && param == Set.class)

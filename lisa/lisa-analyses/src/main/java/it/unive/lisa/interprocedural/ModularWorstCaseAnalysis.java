@@ -91,7 +91,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 		// new fixpoint iteration: restart
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
-		AnalyzedCFG<A> graph = conf.optimize 
+		AnalyzedCFG<A> graph = conf.optimize
 				? new OptimizedAnalyzedCFG<>(singleton, ID, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, ID, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);
@@ -115,9 +115,9 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 				}
 
 				results.putResult(
-					cfg, 
-					ID,
-					cfg.fixpoint(prepared, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
+						cfg,
+						ID,
+						cfg.fixpoint(prepared, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
