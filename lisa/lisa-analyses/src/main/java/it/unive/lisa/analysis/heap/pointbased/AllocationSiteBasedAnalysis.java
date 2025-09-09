@@ -62,6 +62,8 @@ public abstract class AllocationSiteBasedAnalysis<
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		if (state.isBottom())
+			return state;
 		Pair<L, List<HeapReplacement>> sss = smallStepSemantics(state, expression, pp, oracle);
 		L result = state.bottom();
 		List<HeapReplacement> replacements = new LinkedList<>();
