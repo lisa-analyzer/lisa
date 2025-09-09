@@ -389,7 +389,11 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			AnalysisState<A> state,
 			Exception exception)
 			throws SemanticException {
+		if (state.isBottom())
+			return state;
 		ProgramState<A> exec = state.getState(Execution.INSTANCE);
+		if (exec.isBottom())
+			return state;
 		AnalysisState<A> result = state.putState(Execution.INSTANCE, exec.bottom());
 
 		if (shouldSmashException == null || !shouldSmashException.test(exception.getType())) {
