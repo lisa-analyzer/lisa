@@ -492,7 +492,12 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			Variable target = variable.getVariable();
 			for (SymbolicExpression e : excs)
 				assigned = assigned.lub(domain.assign(start, target, e, variable));
-			moved = assigned;
+			moved = assigned.forgetIdentifiers(
+					excs.stream()
+							.filter(Identifier.class::isInstance)
+							.map(Identifier.class::cast)
+							.collect(Collectors.toList()),
+					variable);
 			if (moved.isBottom()) {
 				// no exceptions have been assigned to the variable
 				moved = domain.assign(start, target, new PushAny(varType, variable.getLocation()), variable);

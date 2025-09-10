@@ -10,9 +10,9 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.symbolic.CFGThrow;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 
 /**
@@ -62,10 +62,7 @@ public class Throw
 
 	@Override
 	public final Identifier getMetaVariable() {
-		Expression e = getSubExpression();
-		String name = "thrown@" + getCFG().getDescriptor().getName();
-		Variable var = new Variable(e.getStaticType(), name, getLocation());
-		return var;
+		return new CFGThrow(getCFG(), getSubExpression().getStaticType(), getLocation());
 	}
 
 	@Override

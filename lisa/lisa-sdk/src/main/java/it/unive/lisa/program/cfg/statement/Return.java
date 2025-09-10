@@ -9,8 +9,8 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.CFGReturn;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * Returns an expression to the caller CFG, terminating the execution of the CFG
@@ -55,10 +55,7 @@ public class Return
 
 	@Override
 	public final Identifier getMetaVariable() {
-		Expression e = getSubExpression();
-		String name = "ret_value@" + getCFG().getDescriptor().getName();
-		Variable var = new Variable(e.getStaticType(), name, getLocation());
-		return var;
+		return new CFGReturn(getCFG(), getSubExpression().getStaticType(), getLocation());
 	}
 
 	@Override
