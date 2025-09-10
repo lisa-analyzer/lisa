@@ -761,7 +761,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			repr.put(new StringRepresentation(s.toString()), smashedErrorsState.representation());
 		}
 
-		if (repr.size() == 1)
+		if (repr.size() == 1 && repr.keySet().iterator().next().toString().equals("normal"))
 			// if we have only the execution, we dump that directly
 			return repr.values().iterator().next();
 		else

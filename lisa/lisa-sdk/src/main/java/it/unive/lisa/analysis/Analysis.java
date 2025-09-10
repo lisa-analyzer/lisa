@@ -26,6 +26,7 @@ import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -455,10 +456,8 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				continue;
 			caught.add(entry.getKey());
 			result = result.lub(entry.getValue());
-			if (variable != null)
-				for (SymbolicExpression e : entry.getValue().getComputedExpressions())
-					if (e.getStaticType().canBeAssignedTo(varType))
-						excs.add(e);
+			for (SymbolicExpression e : entry.getValue().getComputedExpressions())
+				excs.add(e);
 		}
 
 		for (Entry<Type, GenericSetLattice<Statement>> ex : state.getSmashedErrors())
@@ -473,10 +472,8 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 
 		if (!caughtSmashed.isEmpty()) {
 			result = result.lub(state.getSmashedErrorsState());
-			if (variable != null)
-				for (SymbolicExpression e : state.getSmashedErrorsState().getComputedExpressions())
-					if (e.getStaticType().canBeAssignedTo(varType))
-						excs.add(e);
+			for (SymbolicExpression e : state.getSmashedErrorsState().getComputedExpressions())
+				excs.add(e);
 		}
 
 		if (result.isBottom())
@@ -487,22 +484,24 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 
 		A start = result.getState();
 		A moved = start;
+		List<Identifier> toForget = excs.stream()
+				.filter(Identifier.class::isInstance)
+				.map(Identifier.class::cast)
+				.collect(Collectors.toList());
 		if (variable != null) {
 			A assigned = start.bottom();
 			Variable target = variable.getVariable();
 			for (SymbolicExpression e : excs)
 				assigned = assigned.lub(domain.assign(start, target, e, variable));
 			moved = assigned.forgetIdentifiers(
-					excs.stream()
-							.filter(Identifier.class::isInstance)
-							.map(Identifier.class::cast)
-							.collect(Collectors.toList()),
+					toForget,
 					variable);
 			if (moved.isBottom()) {
 				// no exceptions have been assigned to the variable
 				moved = domain.assign(start, target, new PushAny(varType, variable.getLocation()), variable);
 			}
-		}
+		} else
+			moved = moved.forgetIdentifiers(toForget, protectedBlock.getStart());
 
 		result = new ProgramState<>(
 				moved,
