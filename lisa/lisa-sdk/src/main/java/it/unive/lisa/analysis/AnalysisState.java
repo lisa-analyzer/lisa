@@ -612,8 +612,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 
 	/**
 	 * Yields a copy of this state where the inner {@link ProgramState}
-	 * corresponding to the normal execution (i.e., {@link Execution#INSTANCE})
-	 * has been set to top.
+	 * corresponding to the normal execution has been set to top.
 	 *
 	 * @return this state but with the top execution
 	 */
@@ -643,8 +642,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 
 	/**
 	 * Yields a copy of this state where the inner {@link ProgramState}
-	 * corresponding to the normal execution (i.e., {@link Execution#INSTANCE})
-	 * has been set to bottom.
+	 * corresponding to the normal execution has been set to bottom.
 	 *
 	 * @return this state but with the bottom execution
 	 */
