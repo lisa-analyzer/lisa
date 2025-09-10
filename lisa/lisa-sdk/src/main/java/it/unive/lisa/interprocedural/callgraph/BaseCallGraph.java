@@ -23,7 +23,7 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.ResolvedCall;
 import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
 import java.util.Arrays;
@@ -358,12 +358,16 @@ public abstract class BaseCallGraph
 				continue;
 
 			Set<CompilationUnit> seen = new HashSet<>();
-			HierarcyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
-			for (CompilationUnit cu : strategy.traverse(call, unit))
+			HierarchyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
+
+			hierarchyLoop: for (CompilationUnit cu : strategy.traverse(call, unit))
 				if (seen.add(cu))
 					// we inspect only the ones of the current unit
 					for (CodeMember cm : cu.getInstanceCodeMembers(false))
-						checkMember(call, types, targets, natives, aliasing, cm, true);
+						if (checkMember(call, types, targets, natives, aliasing, cm, true))
+							// we found a target, we stop looking in
+							// superclasses
+							break hierarchyLoop;
 		}
 	}
 
@@ -386,8 +390,11 @@ public abstract class BaseCallGraph
 	 * @param cm       the code member to match
 	 * @param instance whether or not the only instance or non-instance members
 	 *                     should be matched
+	 * 
+	 * @return {@code true} if {@code cm} has been added to either
+	 *             {@code targets} or {@code natives}, {@code false} otherwise
 	 */
-	public void checkMember(
+	public boolean checkMember(
 			UnresolvedCall call,
 			Set<Type>[] types,
 			Collection<CFG> targets,
@@ -397,7 +404,7 @@ public abstract class BaseCallGraph
 			boolean instance) {
 		CodeMemberDescriptor descr = cm.getDescriptor();
 		if (instance != descr.isInstance() || cm instanceof AbstractCodeMember)
-			return;
+			return false;
 
 		String qualifier = descr.getUnit().getName();
 		String name = descr.getName();
@@ -439,11 +446,16 @@ public abstract class BaseCallGraph
 			add = matchCodeMemberName(call, qualifier, name);
 
 		ParameterMatchingStrategy strategy = call.getProgram().getFeatures().getMatchingStrategy();
-		if (add && strategy.matches(call, descr.getFormals(), call.getParameters(), types))
-			if (cm instanceof CFG)
-				targets.add((CFG) cm);
+		if (add)
+			if (strategy.matches(call, descr.getFormals(), call.getParameters(), types))
+				if (cm instanceof CFG)
+					targets.add((CFG) cm);
+				else
+					natives.add((NativeCFG) cm);
 			else
-				natives.add((NativeCFG) cm);
+				add = false;
+
+		return add;
 	}
 
 	/**

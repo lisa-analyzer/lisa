@@ -10,14 +10,14 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * A {@link HierarcyTraversalStrategy} that assumes a single super unit per each
- * unit (Java-like).
+ * A {@link HierarchyTraversalStrategy} that assumes a single super unit per
+ * each unit (Java-like).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class SingleInheritanceTraversalStrategy
 		implements
-		HierarcyTraversalStrategy {
+		HierarchyTraversalStrategy {
 
 	/**
 	 * The singleton instance of this class.

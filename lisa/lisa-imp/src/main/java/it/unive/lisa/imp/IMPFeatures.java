@@ -1,7 +1,7 @@
 package it.unive.lisa.imp;
 
 import it.unive.lisa.program.language.LanguageFeatures;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
@@ -25,7 +25,7 @@ public class IMPFeatures
 	}
 
 	@Override
-	public HierarcyTraversalStrategy getTraversalStrategy() {
+	public HierarchyTraversalStrategy getTraversalStrategy() {
 		return SingleInheritanceTraversalStrategy.INSTANCE;
 	}
 

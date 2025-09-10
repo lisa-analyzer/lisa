@@ -1,6 +1,6 @@
 package it.unive.lisa.program.language;
 
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.language.scoping.DefaultScopingStrategy;
@@ -25,13 +25,13 @@ public abstract class LanguageFeatures {
 	public abstract ParameterMatchingStrategy getMatchingStrategy();
 
 	/**
-	 * Yields the {@link HierarcyTraversalStrategy} that expresses how a class
+	 * Yields the {@link HierarchyTraversalStrategy} that expresses how a class
 	 * hierarchy is traversed, starting from a leaf and visiting all of its
 	 * ancestors recursively, when searching for program members in it.
 	 * 
 	 * @return the traversal strategy
 	 */
-	public abstract HierarcyTraversalStrategy getTraversalStrategy();
+	public abstract HierarchyTraversalStrategy getTraversalStrategy();
 
 	/**
 	 * Yields the {@link ParameterAssigningStrategy} defining how actual

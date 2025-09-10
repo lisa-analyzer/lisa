@@ -15,7 +15,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface HierarcyTraversalStrategy {
+public interface HierarchyTraversalStrategy {
 
 	/**
 	 * Yields an iterable containing (or generating on-the-fly) compilation

@@ -1,7 +1,7 @@
 package it.unive.lisa;
 
 import it.unive.lisa.program.language.LanguageFeatures;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.program.language.parameterassignment.OrderPreservingAssigningStrategy;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
@@ -20,7 +20,7 @@ public class TestLanguageFeatures
 	}
 
 	@Override
-	public HierarcyTraversalStrategy getTraversalStrategy() {
+	public HierarchyTraversalStrategy getTraversalStrategy() {
 		return SingleInheritanceTraversalStrategy.INSTANCE;
 	}
 

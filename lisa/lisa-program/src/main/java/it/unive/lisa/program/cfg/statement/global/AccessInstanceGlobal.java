@@ -16,7 +16,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
@@ -141,7 +141,8 @@ public class AccessInstanceGlobal
 				CompilationUnit unit = inner.asUnitType().getUnit();
 
 				Set<CompilationUnit> seen = new HashSet<>();
-				HierarcyTraversalStrategy strategy = getProgram().getFeatures().getTraversalStrategy();
+				HierarchyTraversalStrategy strategy = getProgram().getFeatures().getTraversalStrategy();
+
 				for (CompilationUnit cu : strategy.traverse(this, unit))
 					if (seen.add(unit)) {
 						Global global = cu.getInstanceGlobal(target, false);
@@ -150,6 +151,7 @@ public class AccessInstanceGlobal
 							AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
 							result = result.lub(analysis.smallStepSemantics(state, access, this));
 							atLeastOne = true;
+							break;
 						}
 					}
 			}
