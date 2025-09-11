@@ -44,7 +44,7 @@
     "glbThreshold" : "5",
     "hotspots" : "set",
     "jsonOutput" : "true",
-    "openCallPolicy" : "WorstCasePolicy",
+    "openCallPolicy" : "TopExecutionPolicy",
     "optimize" : "false",
     "recursionWideningThreshold" : "5",
     "semanticChecks" : "NICheck",

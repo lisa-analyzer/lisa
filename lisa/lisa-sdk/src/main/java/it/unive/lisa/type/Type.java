@@ -233,6 +233,27 @@ public interface Type {
 
 	/**
 	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link ErrorType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isErrorType() {
+		return this instanceof ErrorType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link ErrorType}, only if
+	 * {@link #isErrorType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
+	 * 
+	 * @return this type casted as {@link ErrorType}, or {@code null}
+	 */
+	default ErrorType asErrorType() {
+		return isErrorType() ? (ErrorType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
 	 * {@link TypeTokenType}.
 	 * 
 	 * @return {@code true} if that condition holds

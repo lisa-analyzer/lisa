@@ -57,7 +57,11 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 */
 	public final D domain;
 
-	private final Predicate<Type> shouldSmashException;
+	/**
+	 * The predicate that, if non-null, is used to determine whether to smash
+	 * errors. See {@link LiSAConfiguration#shouldSmashError} for more details.
+	 */
+	public final Predicate<Type> shouldSmashError;
 
 	/**
 	 * Builds the analysis, wrapping the given domain.
@@ -82,7 +86,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			D domain,
 			Predicate<Type> shouldSmashException) {
 		this.domain = domain;
-		this.shouldSmashException = shouldSmashException;
+		this.shouldSmashError = shouldSmashException;
 	}
 
 	@Override
@@ -395,7 +399,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			return state;
 		AnalysisState<A> result = state.bottomExecution();
 
-		if (shouldSmashException == null || !shouldSmashException.test(exception.getType()))
+		if (shouldSmashError == null || !shouldSmashError.test(exception.getType()))
 			return result.addError(exception, state.getExecution());
 
 		return result.addSmashedError(exception, state.getExecution());
