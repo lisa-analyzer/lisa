@@ -29,7 +29,6 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.NullType;
-import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
@@ -68,9 +67,10 @@ public class InferredTypes
 				return new TypeSet(types, id.getStaticType().allInstances(types));
 			if (inner.isBottom())
 				return TypeSet.BOTTOM;
+			TypeSystem ts = pp.getProgram().getTypes();
 			return new TypeSet(
 					types,
-					inner.elements.stream().map(t -> new ReferenceType(t)).collect(Collectors.toSet()));
+					inner.elements.stream().map(t -> ts.getReference(t)).collect(Collectors.toSet()));
 		}
 		TypeSet eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp, oracle);
 		if (!eval.isTop())

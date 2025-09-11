@@ -29,7 +29,6 @@ import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -144,7 +143,7 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			types.registerType(types.getIntegerType());
 			for (Type t : types.getTypes())
 				if (types.canBeReferenced(t))
-					types.registerType(new ReferenceType(t));
+					types.registerType(types.getReference(t));
 
 			TimerLogger.execAction(LOG, "Finalizing input program", () -> {
 				try {

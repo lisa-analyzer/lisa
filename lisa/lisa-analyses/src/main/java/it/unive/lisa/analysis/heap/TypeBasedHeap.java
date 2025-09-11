@@ -16,7 +16,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collections;
@@ -177,7 +176,7 @@ public class TypeBasedHeap
 					Set<Type> rt = oracle.getRuntimeTypesOf(refExp, pp);
 					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
 					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(sup),
+							pp.getProgram().getTypes().getReference(sup),
 							(HeapLocation) refExp,
 							refExp.getCodeLocation());
 					result.add(e);

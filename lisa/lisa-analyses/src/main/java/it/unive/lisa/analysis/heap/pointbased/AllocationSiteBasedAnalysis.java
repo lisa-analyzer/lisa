@@ -25,7 +25,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -74,7 +73,7 @@ public abstract class AllocationSiteBasedAnalysis<
 		expression = expression.removeTypingExpressions();
 
 		if (expression instanceof Identifier) {
-			rhsExps = new ExpressionSet(resolveIdentifier(state, (Identifier) expression));
+			rhsExps = new ExpressionSet(resolveIdentifier(state, (Identifier) expression, pp));
 			rhsIsReceiver = ((Identifier) expression).isInstrumentedReceiver();
 		} else if (expression.mightNeedRewriting())
 			rhsExps = rewrite(state, expression, pp, oracle);
@@ -254,7 +253,7 @@ public abstract class AllocationSiteBasedAnalysis<
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(rewriter, state);
+		return expression.accept(rewriter, state, pp);
 	}
 
 	/**
@@ -265,19 +264,22 @@ public abstract class AllocationSiteBasedAnalysis<
 	 * 
 	 * @param state the current state of the analysis
 	 * @param v     the identifier to be resolved
+	 * @param pp    the program point where this resolution is applied
 	 * 
 	 * @return the set of allocation sites that {@code v} points to, or a set
 	 *             with {@code v} itself
 	 */
 	protected Set<SymbolicExpression> resolveIdentifier(
 			L state,
-			Identifier v) {
+			Identifier v,
+			ProgramPoint pp) {
 		if (v instanceof MemoryPointer || !state.getKeys().contains(v))
 			return Set.of(v);
 
 		Set<SymbolicExpression> result = new HashSet<>();
 		for (AllocationSite site : state.getState(v))
-			result.add(new MemoryPointer(new ReferenceType(site.getStaticType()), site, site.getCodeLocation()));
+			result.add(new MemoryPointer(pp.getProgram().getTypes().getReference(site.getStaticType()), site,
+					site.getCodeLocation()));
 
 		return result;
 	}
@@ -308,12 +310,13 @@ public abstract class AllocationSiteBasedAnalysis<
 			Set<SymbolicExpression> result = new HashSet<>();
 			@SuppressWarnings("unchecked")
 			L state = (L) params[0];
+			ProgramPoint pp = (ProgramPoint) params[1];
 
 			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression rec : receiver) {
 				rec = rec.removeTypingExpressions();
 				if (rec instanceof Identifier)
-					toProcess.addAll(resolveIdentifier(state, (Identifier) rec));
+					toProcess.addAll(resolveIdentifier(state, (Identifier) rec, pp));
 				else
 					toProcess.add(rec);
 			}
@@ -387,12 +390,13 @@ public abstract class AllocationSiteBasedAnalysis<
 			Set<SymbolicExpression> result = new HashSet<>();
 			@SuppressWarnings("unchecked")
 			L state = (L) params[0];
+			ProgramPoint pp = (ProgramPoint) params[1];
 
 			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression loc : arg) {
 				loc = loc.removeTypingExpressions();
 				if (loc instanceof Identifier)
-					toProcess.addAll(resolveIdentifier(state, (Identifier) loc));
+					toProcess.addAll(resolveIdentifier(state, (Identifier) loc, pp));
 				else
 					toProcess.add(loc);
 			}
@@ -401,7 +405,7 @@ public abstract class AllocationSiteBasedAnalysis<
 				if (loc instanceof AllocationSite) {
 					AllocationSite allocSite = (AllocationSite) loc;
 					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(loc.getStaticType()),
+							pp.getProgram().getTypes().getReference(loc.getStaticType()),
 							allocSite,
 							loc.getCodeLocation());
 
@@ -426,12 +430,13 @@ public abstract class AllocationSiteBasedAnalysis<
 			Set<SymbolicExpression> result = new HashSet<>();
 			@SuppressWarnings("unchecked")
 			L state = (L) params[0];
+			ProgramPoint pp = (ProgramPoint) params[1];
 
 			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression rec : arg) {
 				rec = rec.removeTypingExpressions();
 				if (rec instanceof Identifier)
-					toProcess.addAll(resolveIdentifier(state, (Identifier) rec));
+					toProcess.addAll(resolveIdentifier(state, (Identifier) rec, pp));
 				else
 					toProcess.add(rec);
 			}
@@ -443,7 +448,7 @@ public abstract class AllocationSiteBasedAnalysis<
 					// this could be aliasing!
 					Identifier id = (Identifier) ref;
 					if (state.getKeys().contains(id))
-						result.addAll(resolveIdentifier(state, id));
+						result.addAll(resolveIdentifier(state, id, pp));
 					else if (id instanceof Variable) {
 						// this is a variable from the program that we know
 						// nothing about

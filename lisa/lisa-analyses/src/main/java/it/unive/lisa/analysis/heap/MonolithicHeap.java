@@ -15,7 +15,6 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
-import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collections;
@@ -153,7 +152,9 @@ public class MonolithicHeap
 			Type refType = Type.commonSupertype(acc, Untyped.INSTANCE);
 
 			HeapLocation loc = (HeapLocation) ref.elements.iterator().next();
-			MemoryPointer e = new MemoryPointer(new ReferenceType(refType), loc, expression.getCodeLocation());
+			ProgramPoint pp = (ProgramPoint) params[0];
+			MemoryPointer e = new MemoryPointer(pp.getProgram().getTypes().getReference(refType), loc,
+					expression.getCodeLocation());
 			return new ExpressionSet(e);
 		}
 

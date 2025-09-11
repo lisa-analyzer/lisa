@@ -198,4 +198,24 @@ public abstract class TypeSystem {
 	public abstract boolean canBeReferenced(
 			Type type);
 
+	/**
+	 * Yields a {@link ReferenceType} that contains a reference to the given
+	 * type.
+	 * 
+	 * @param type the type to get the reference for
+	 * 
+	 * @return the reference type for the given type
+	 * 
+	 * @throws IllegalArgumentException if {@link #canBeReferenced(Type)}
+	 *                                      returns {@code false} for the given
+	 *                                      type
+	 */
+	public ReferenceType getReference(
+			Type type) {
+		if (!canBeReferenced(type))
+			throw new IllegalArgumentException("Type " + type + " cannot be referenced");
+
+		return new ReferenceType(type);
+	}
+
 }

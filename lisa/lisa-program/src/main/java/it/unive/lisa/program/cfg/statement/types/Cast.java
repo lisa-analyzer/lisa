@@ -69,7 +69,7 @@ public class Cast
 
 		Type target = (Type) ((Constant) right).getValue();
 		if (target.isInMemoryType()) {
-			ReferenceType ref = new ReferenceType(target);
+			ReferenceType ref = getProgram().getTypes().getReference(target);
 			right = new Constant(new TypeTokenType(Collections.singleton(ref)), ref, right.getCodeLocation());
 		}
 		return interprocedural.getAnalysis()

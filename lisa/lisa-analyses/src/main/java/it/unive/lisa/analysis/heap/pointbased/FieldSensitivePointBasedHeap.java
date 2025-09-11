@@ -123,7 +123,7 @@ public class FieldSensitivePointBasedHeap
 			ExpressionSet exprs;
 			SymbolicExpression cont = accessChild.getContainer();
 			if (cont instanceof Identifier)
-				exprs = new ExpressionSet(resolveIdentifier(st, (Identifier) cont));
+				exprs = new ExpressionSet(resolveIdentifier(st, (Identifier) cont, pp));
 			else if (cont.mightNeedRewriting())
 				exprs = rewrite(sss.getLeft(), cont, pp, oracle);
 			else
@@ -217,7 +217,7 @@ public class FieldSensitivePointBasedHeap
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(rewriter, state);
+		return expression.accept(rewriter, state, pp);
 	}
 
 	/**
@@ -239,12 +239,13 @@ public class FieldSensitivePointBasedHeap
 				throws SemanticException {
 			Set<SymbolicExpression> result = new HashSet<>();
 			HeapEnvWithFields state = (HeapEnvWithFields) params[0];
+			ProgramPoint pp = (ProgramPoint) params[1];
 
 			Set<SymbolicExpression> toProcess = new HashSet<>();
 			for (SymbolicExpression rec : receiver) {
 				rec = rec.removeTypingExpressions();
 				if (rec instanceof Identifier)
-					toProcess.addAll(resolveIdentifier(state, (Identifier) rec));
+					toProcess.addAll(resolveIdentifier(state, (Identifier) rec, pp));
 				else
 					toProcess.add(rec);
 			}
