@@ -1,9 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
@@ -17,6 +13,9 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A worst-case {@link OpenCallPolicy}, where the whole analysis state becomes
@@ -61,7 +60,7 @@ public class WorstCasePolicy
 			if (t.isErrorType())
 				if (analysis.shouldSmashError != null && analysis.shouldSmashError.test(t))
 					smashedErrors.put(t, Set.of(call));
-				else 
+				else
 					errors.put(new Error(t, call), top);
 
 		return result.addErrors(errors).addSmashedErrors(smashedErrors, top);

@@ -199,28 +199,28 @@ public class AllocationSites
 
 	/**
 	 * Returns the set of allocation sites that can be reached <b>only</b> from
-	 * the given identifier, and through no other path in the memory. This
+	 * the given identifiers, and through no other path in the memory. This
 	 * method assumes that the points-to information is available in the given
 	 * state in the form of a map from identifiers to sets of allocation sites.
 	 *
 	 * @param <F>   the type of the mapping for the points-to information
 	 * @param state the state containing the points-to information
-	 * @param id    the identifier for which to compute the reachable allocation
-	 *                  sites
+	 * @param ids   the identifiers for which to compute the reachable
+	 *                  allocation sites
 	 * 
 	 * @return the set of allocation sites reachable only from the given
-	 *             identifier
+	 *             identifiers
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	@Override
 	public <F extends FunctionalLattice<F, Identifier, AllocationSites>> Collection<Identifier> reachableOnlyFrom(
 			F state,
-			Identifier id)
+			Collection<Identifier> ids)
 			throws SemanticException {
 		// this gives us a quick way of checking if an id can be reached
 		// through multiple ancestors
-		Map<Identifier, Set<Identifier>> pointedTo = new HashMap<>();
+		Map<Identifier, Set<Identifier>> pointedBy = new HashMap<>();
 		for (Entry<Identifier, AllocationSites> entry : state) {
 			Identifier key = entry.getKey();
 			if (key instanceof AllocationSite)
@@ -228,21 +228,18 @@ public class AllocationSites
 				key = ((AllocationSite) key).withoutField();
 			for (AllocationSite site : entry.getValue())
 				// field information is not relevant for the cut
-				pointedTo.computeIfAbsent(site.withoutField(), k -> new HashSet<>()).add(key);
+				pointedBy.computeIfAbsent(site.withoutField(), k -> new HashSet<>()).add(key);
 		}
 
-		Set<Identifier> reachable = new HashSet<>();
-		Set<Identifier> frontier = new HashSet<>();
-
-		reachable.add(id);
-		frontier.add(id);
+		Set<Identifier> reachable = new HashSet<>(ids);
+		Set<Identifier> frontier = new HashSet<>(ids);
 
 		do {
 			Set<Identifier> tmp = new HashSet<>();
 			for (Identifier current : frontier)
 				for (AllocationSite site : state.getState(current)) {
 					site = site.withoutField();
-					if (!reachable.contains(site) && pointedTo.get(site).size() == 1) {
+					if (!reachable.contains(site) && reachable.containsAll(pointedBy.get(site))) {
 						reachable.add(site);
 						tmp.add(site);
 					}

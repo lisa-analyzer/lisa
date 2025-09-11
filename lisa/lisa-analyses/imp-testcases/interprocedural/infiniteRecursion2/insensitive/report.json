@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_infiniteRecursion.infiniteRecursion(infiniteRecursion__this,_untyped_n).json", "untyped_infiniteRecursion.infiniteRecursionAux1(infiniteRecursion__this,_untyped_n).json", "untyped_infiniteRecursion.infiniteRecursionAux2(infiniteRecursion__this,_untyped_n).json", "untyped_infiniteRecursion.main(infiniteRecursion__this,_untyped_a).json" ],
   "info" : {
     "cfgs" : "4",
-    "duration" : "26ms",
-    "end" : "2023-09-29T16:42:37.759+02:00",
+    "duration" : "1s 211ms",
+    "end" : "2025-09-11T13:17:26.551+02:00",
     "expressions" : "25",
     "files" : "4",
     "globals" : "0",
     "members" : "4",
     "programs" : "1",
-    "start" : "2023-09-29T16:42:37.733+02:00",
+    "start" : "2025-09-11T13:17:25.340+02:00",
     "statements" : "8",
     "units" : "1",
-    "version" : "0.1b8",
+    "version" : "0.1",
     "warnings" : "0"
   },
   "configuration" : {

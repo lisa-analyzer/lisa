@@ -11,9 +11,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 
 /**
- * An {@link OpenCallPolicy} where the whole execution state becomes
- * top and all information is lost. The return value, if any, is stored in the
- * call's meta variable. No errors are assumed to be thrown.
+ * An {@link OpenCallPolicy} where the whole execution state becomes top and all
+ * information is lost. The return value, if any, is stored in the call's meta
+ * variable. No errors are assumed to be thrown.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

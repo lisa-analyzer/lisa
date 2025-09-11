@@ -135,9 +135,9 @@ public class SingleHeapLattice
 	@Override
 	public <F extends FunctionalLattice<F, Identifier, SingleHeapLattice>> Collection<Identifier> reachableOnlyFrom(
 			F state,
-			Identifier id)
+			Collection<Identifier> ids)
 			throws SemanticException {
-		return Collections.singleton(id);
+		return ids;
 	}
 
 }

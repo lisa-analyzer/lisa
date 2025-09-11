@@ -243,8 +243,8 @@ public interface Type {
 
 	/**
 	 * Returns this type casted as a {@link ErrorType}, only if
-	 * {@link #isErrorType()} yields {@code true}. Otherwise, this method returns
-	 * {@code null}.
+	 * {@link #isErrorType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
 	 * 
 	 * @return this type casted as {@link ErrorType}, or {@code null}
 	 */

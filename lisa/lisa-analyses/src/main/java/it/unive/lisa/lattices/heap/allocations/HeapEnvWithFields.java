@@ -328,13 +328,12 @@ public class HeapEnvWithFields
 			HeapReplacement base)
 			throws SemanticException {
 		HeapReplacement sub = new HeapReplacement();
-		for (Identifier id : base.getSources())
-			lattice.reachableOnlyFrom(this, id).forEach(k -> {
-				sub.addSource(k);
-				if (k instanceof AllocationSite)
-					for (SymbolicExpression field : fields.getOtDefault((AllocationSite) k, new ExpressionSet()))
-						sub.addSource(((AllocationSite) k).withField(field));
-			});
+		lattice.reachableOnlyFrom(this, base.getSources()).forEach(k -> {
+			sub.addSource(k);
+			if (k instanceof AllocationSite)
+				for (SymbolicExpression field : fields.getOtDefault((AllocationSite) k, new ExpressionSet()))
+					sub.addSource(((AllocationSite) k).withField(field));
+		});
 		return List.of(sub);
 	}
 

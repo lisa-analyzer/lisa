@@ -3,17 +3,17 @@
   "files" : [ "report.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_-1504338471.json", "untyped_factorial.main(factorial__this,_untyped_a).json" ],
   "info" : {
     "cfgs" : "2",
-    "duration" : "32ms",
-    "end" : "2023-09-07T11:45:46.649+02:00",
+    "duration" : "942ms",
+    "end" : "2025-09-11T13:18:41.478+02:00",
     "expressions" : "16",
     "files" : "2",
     "globals" : "0",
     "members" : "2",
     "programs" : "1",
-    "start" : "2023-09-07T11:45:46.617+02:00",
+    "start" : "2025-09-11T13:18:40.536+02:00",
     "statements" : "6",
     "units" : "1",
-    "version" : "0.1b8",
+    "version" : "0.1",
     "warnings" : "0"
   },
   "configuration" : {

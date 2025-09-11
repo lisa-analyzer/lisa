@@ -249,8 +249,7 @@ public class HeapEnvironment<L extends HeapValue<L>>
 			HeapReplacement base)
 			throws SemanticException {
 		HeapReplacement sub = new HeapReplacement();
-		for (Identifier id : base.getSources())
-			lattice.reachableOnlyFrom(this, id).forEach(sub::addSource);
+		lattice.reachableOnlyFrom(this, base.getSources()).forEach(sub::addSource);
 		return List.of(sub);
 	}
 

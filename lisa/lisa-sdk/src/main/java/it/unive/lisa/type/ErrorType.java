@@ -5,6 +5,8 @@ package it.unive.lisa.type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface ErrorType extends UnitType{
+public interface ErrorType
+		extends
+		UnitType {
 
 }

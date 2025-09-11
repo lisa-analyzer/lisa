@@ -67,10 +67,8 @@ public abstract class CFGFixpoint<A extends AbstractLattice<A>,
 			throws SemanticException {
 		StatementStore<A> expressions = new StatementStore<>(entrystate.postState).bottom();
 		AnalysisState<A> approx = node.forwardSemantics(entrystate.postState, interprocedural, expressions);
-		if (node instanceof Expression)
-			// we forget the meta variables now as the values are popped from
-			// the stack here
-			approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables(), node);
+		// we do not remove the meta variables here, since they might be
+		// used for deciding whether or not to traverse an edge
 		return CompoundState.of(approx, expressions);
 	}
 
@@ -102,6 +100,12 @@ public abstract class CFGFixpoint<A extends AbstractLattice<A>,
 					.getExecutionExpressions())
 				ids.add((Identifier) expr);
 		}
+
+		if (edge.getSource() instanceof Expression)
+			// we forget the meta variables now as the values are popped from
+			// the stack after the execution of the source expression,
+			// and at this point we used them for evaluation of guards
+			ids.addAll(((Expression) edge.getSource()).getMetaVariables());
 
 		if (!ids.isEmpty())
 			approx = approx.forgetIdentifiers(ids, edge.getSource());
