@@ -35,7 +35,7 @@ public class IMPTypeSystem
 	@Override
 	public boolean canBeReferenced(
 			Type type) {
-		return type.isInMemoryType();
+		return type.isInMemoryType() || type.isUntyped();
 	}
 
 }

@@ -563,7 +563,7 @@ public class TestParameterProvider {
 
 		// types
 		if (param == Type.class)
-			return (R) StringType.INSTANCE;
+			return (R) Untyped.INSTANCE;
 
 		// symbolic expressions
 		if (param == PushAny.class || param == SymbolicExpression.class)

@@ -67,7 +67,7 @@ public class PointBasedHeapTest {
 
 		@Override
 		public CFG getCFG() {
-			return null;
+			return TestParameterProvider.cfg;
 		}
 
 	};
@@ -81,7 +81,7 @@ public class PointBasedHeapTest {
 
 		@Override
 		public CFG getCFG() {
-			return null;
+			return TestParameterProvider.cfg;
 		}
 
 	};
