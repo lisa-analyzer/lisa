@@ -752,7 +752,9 @@ public class AnalysisState<A extends AbstractLattice<A>>
 							e2) -> e1.getKey().toString().compareTo(e2.getKey().toString()))
 					.forEachOrdered(t -> s.append(t.getKey())
 							.append(" from ")
-							.append(t.getValue().elements.stream().map(Object::toString).sorted()
+							.append(t.getValue().elements.stream()
+									.map(thrower -> thrower + " at " + thrower.getLocation())
+									.sorted()
 									.collect(Collectors.joining(", ")))
 							.append("; "));
 			s.delete(s.length() - 2, s.length());
@@ -993,7 +995,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 
 		@Override
 		public StructuredRepresentation representation() {
-			return new StringRepresentation(type + " from " + thrower);
+			return new StringRepresentation(type + " from " + thrower + " at " + thrower.getLocation());
 		}
 	}
 
