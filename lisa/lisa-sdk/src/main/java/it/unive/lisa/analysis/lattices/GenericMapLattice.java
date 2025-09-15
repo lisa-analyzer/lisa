@@ -8,7 +8,8 @@ import java.util.function.Predicate;
 /**
  * A generic ready-to-use {@link FunctionalLattice} with no additional fields,
  * that relies on the underlying lattice instance for distinguishing top and
- * bottom values.
+ * bottom values. In this implementation, {@link #stateOfUnknown(Object)} always
+ * returns {@link Lattice#bottom()}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -63,7 +64,7 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 	@Override
 	public V stateOfUnknown(
 			K key) {
-		return isBottom() ? lattice.bottom() : lattice.top();
+		return lattice.bottom();
 	}
 
 	/**
