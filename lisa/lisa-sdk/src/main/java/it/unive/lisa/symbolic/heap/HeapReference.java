@@ -1,7 +1,9 @@
 package it.unive.lisa.symbolic.heap;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -102,6 +104,32 @@ public class HeapReference
 
 		SymbolicExpression e = expression.replace(source, target);
 		if (e == expression)
+			return this;
+		return new HeapReference(getStaticType(), e, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression pushScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		SymbolicExpression e = expression.pushScope(token, pp);
+		if (e == null)
+			return null;
+		if (e == expression || e.equals(expression))
+			return this;
+		return new HeapReference(getStaticType(), e, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression popScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		SymbolicExpression e = expression.popScope(token, pp);
+		if (e == null)
+			return null;
+		if (e == expression || e.equals(expression))
 			return this;
 		return new HeapReference(getStaticType(), e, getCodeLocation());
 	}

@@ -1,7 +1,9 @@
 package it.unive.lisa.symbolic.heap;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -131,6 +133,32 @@ public class AccessChild
 		if (cont == container && ch == child)
 			return this;
 		return new AccessChild(getStaticType(), cont, ch, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression pushScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		SymbolicExpression e = container.pushScope(token, pp);
+		if (e == null)
+			return null;
+		if (e == container || e.equals(container))
+			return this;
+		return new AccessChild(getStaticType(), e, child, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression popScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		SymbolicExpression e = container.popScope(token, pp);
+		if (e == null)
+			return null;
+		if (e == container || e.equals(container))
+			return this;
+		return new AccessChild(getStaticType(), e, child, getCodeLocation());
 	}
 
 }
