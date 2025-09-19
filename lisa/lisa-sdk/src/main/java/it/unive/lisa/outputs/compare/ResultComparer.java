@@ -112,11 +112,11 @@ public class ResultComparer {
 
 	private static final String GRAPH_DIFF = "Graphs have different structure";
 
-	private static final String NO_DESC = "%s graph does not have a desciption for node %d: %s";
+	private static final String NO_DESC = "%s graph does not have a description for node %d: %s";
 
-	private static final String DESC_DIFF = "Different desciption for node %d (%s)";
+	private static final String DESC_DIFF = "Different description for node %d (%s)";
 
-	private static final String DESC_DIFF_VERBOSE = "Different desciption for node %d (%s):\n%s";
+	private static final String DESC_DIFF_VERBOSE = "Different description for node %d (%s):\n%s";
 
 	private static final String FILES_ONLY = "Files only in the {} report:";
 
@@ -640,7 +640,7 @@ public class ResultComparer {
 		SerializableNode currentF = null;
 		SerializableNode currentS = null;
 
-		while (ol.hasNext() || or.hasNext()) {
+		while (ol.hasNext() || or.hasNext() || currentF != null || currentS != null) {
 			if (ol.hasNext() && currentF == null)
 				currentF = ol.next();
 			if (or.hasNext() && currentS == null)
