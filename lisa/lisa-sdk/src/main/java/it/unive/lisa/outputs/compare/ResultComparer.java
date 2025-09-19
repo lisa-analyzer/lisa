@@ -721,7 +721,7 @@ public class ResultComparer {
 		SerializableNodeDescription currentF = null;
 		SerializableNodeDescription currentS = null;
 
-		while (ol.hasNext() && or.hasNext()) {
+		while (ol.hasNext() && or.hasNext() || currentF != null || currentS != null) {
 			if (ol.hasNext() && currentF == null)
 				currentF = ol.next();
 			if (or.hasNext() && currentS == null)
