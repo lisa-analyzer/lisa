@@ -2,11 +2,11 @@ package it.unive.lisa.program.cfg.controlFlow;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link ControlFlowStructure} representing a loop.
@@ -57,8 +57,9 @@ public class Loop
 	}
 
 	@Override
-	public void simplify() {
-		body.removeIf(NoOp.class::isInstance);
+	public void simplify(
+			Set<Statement> targets) {
+		body.removeIf(targets::contains);
 	}
 
 	@Override

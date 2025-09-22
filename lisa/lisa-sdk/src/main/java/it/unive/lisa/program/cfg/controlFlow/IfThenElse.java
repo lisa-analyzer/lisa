@@ -2,11 +2,11 @@ package it.unive.lisa.program.cfg.controlFlow;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link ControlFlowStructure} representing a if-then-else.
@@ -76,9 +76,10 @@ public class IfThenElse
 	}
 
 	@Override
-	public void simplify() {
-		trueBranch.removeIf(NoOp.class::isInstance);
-		falseBranch.removeIf(NoOp.class::isInstance);
+	public void simplify(
+			Set<Statement> targets) {
+		trueBranch.removeIf(targets::contains);
+		falseBranch.removeIf(targets::contains);
 	}
 
 	@Override

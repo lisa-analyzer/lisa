@@ -1,10 +1,11 @@
 package it.unive.lisa.program.cfg.protection;
 
-import it.unive.lisa.program.cfg.statement.NoOp;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -75,10 +76,13 @@ public class CatchBlock {
 	}
 
 	/**
-	 * Simplifies this block, removing all {@link NoOp}s from its body.
+	 * Simplifies this block, removing the given targets from its body.
+	 * 
+	 * @param targets the set of statements that must be simplified
 	 */
-	public void simplify() {
-		body.getBody().removeIf(NoOp.class::isInstance);
+	public void simplify(
+			Set<Statement> targets) {
+		body.getBody().removeIf(targets::contains);
 	}
 
 	@Override

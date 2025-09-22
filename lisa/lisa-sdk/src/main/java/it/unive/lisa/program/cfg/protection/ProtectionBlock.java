@@ -1,11 +1,11 @@
 package it.unive.lisa.program.cfg.protection;
 
-import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
@@ -145,16 +145,19 @@ public class ProtectionBlock {
 	}
 
 	/**
-	 * Simplifies this block, removing all {@link NoOp}s from its body.
+	 * Simplifies this block, removing the given targets from its body.
+	 * 
+	 * @param targets the set of statements that must be simplified
 	 */
-	public void simplify() {
-		tryBlock.getBody().removeIf(NoOp.class::isInstance);
+	public void simplify(
+			Set<Statement> targets) {
+		tryBlock.getBody().removeIf(targets::contains);
 		for (CatchBlock cb : catchBlocks)
-			cb.simplify();
+			cb.simplify(targets);
 		if (elseBlock != null && !elseBlock.getBody().isEmpty())
-			elseBlock.getBody().removeIf(NoOp.class::isInstance);
+			elseBlock.getBody().removeIf(targets::contains);
 		if (finallyBlock != null && !finallyBlock.getBody().isEmpty())
-			finallyBlock.getBody().removeIf(NoOp.class::isInstance);
+			finallyBlock.getBody().removeIf(targets::contains);
 	}
 
 	@Override

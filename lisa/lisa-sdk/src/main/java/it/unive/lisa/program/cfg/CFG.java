@@ -227,8 +227,8 @@ public class CFG
 				.collect(Collectors.toSet());
 		targets.forEach(this::preSimplify);
 		list.simplify(targets, entrypoints, new LinkedList<>(), new HashMap<>());
-		descriptor.getControlFlowStructures().forEach(ControlFlowStructure::simplify);
-		descriptor.getProtectionBlocks().forEach(ProtectionBlock::simplify);
+		descriptor.getControlFlowStructures().forEach(cfs -> cfs.simplify(targets));
+		descriptor.getProtectionBlocks().forEach(pb -> pb.simplify(targets));
 	}
 
 	private boolean isNotSimplifiable(
