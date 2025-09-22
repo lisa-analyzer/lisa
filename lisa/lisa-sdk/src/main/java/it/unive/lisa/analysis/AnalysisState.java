@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.lattices.GenericSetLattice;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
@@ -922,6 +923,12 @@ public class AnalysisState<A extends AbstractLattice<A>>
 				Type type,
 				Statement thrower) {
 			this.type = type;
+			if (thrower instanceof Call) {
+				Call original = (Call) thrower;
+				while (original.getSource() != null)
+					original = original.getSource();
+				thrower = original;
+			}
 			this.thrower = thrower;
 		}
 
