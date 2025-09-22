@@ -223,12 +223,7 @@ public class CFG
 	public void simplify() {
 		Set<Statement> targets = getNodes().stream()
 				.filter(k -> k instanceof NoOp)
-				// removing the only node in a protected block
-				// would mean removing the whole block from the
-				// cfg, but that would make it different w.r.t.
-				// the source code, so we keep it. It is also
-				// problematic to remove if it is a noop-return
-				.filter(k -> !isNotSimplifiableInProtectedBlock(k))
+				.filter(k -> !isNotSimplifiable(k))
 				.collect(Collectors.toSet());
 		targets.forEach(this::preSimplify);
 		list.simplify(targets, entrypoints, new LinkedList<>(), new HashMap<>());
@@ -236,8 +231,17 @@ public class CFG
 		descriptor.getProtectionBlocks().forEach(ProtectionBlock::simplify);
 	}
 
-	private boolean isNotSimplifiableInProtectedBlock(
+	private boolean isNotSimplifiable(
 			Statement st) {
+		for (ControlFlowStructure cfs : descriptor.getControlFlowStructures())
+			if (cfs.getCondition() == st)
+				return true;
+
+		// removing the only node in a protected block
+		// would mean removing the whole block from the
+		// cfg, but that would make it different w.r.t.
+		// the source code, so we keep it. It is also
+		// problematic to remove if it is a noop-return
 		List<BiPredicate<ProtectedBlock, Statement>> exclusions = new LinkedList<>();
 		// single node in protected block
 		exclusions.add(
