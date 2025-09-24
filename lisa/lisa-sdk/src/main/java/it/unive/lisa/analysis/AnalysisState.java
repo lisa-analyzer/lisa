@@ -530,7 +530,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			throws SemanticException {
 		return new AnalysisState<>(
 				execution.pushScope(scope, pp),
-				halt.pushScope(scope, pp),
+				halt,
 				smashedErrors,
 				smashedErrorsState.pushScope(scope, pp),
 				errors.transform(k -> k, state -> state.pushScope(scope, pp), (
@@ -545,7 +545,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			throws SemanticException {
 		return new AnalysisState<>(
 				execution.popScope(scope, pp),
-				halt.popScope(scope, pp),
+				halt,
 				smashedErrors,
 				smashedErrorsState.popScope(scope, pp),
 				errors.transform(k -> k, state -> state.popScope(scope, pp), (
