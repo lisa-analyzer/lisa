@@ -193,7 +193,11 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 				Set<Recursion<A>> recursions = new HashSet<>();
 
 				for (Collection<CodeMember> rec : callgraph.getRecursions())
-					buildRecursion(entryState, recursions, rec);
+					try {
+						buildRecursion(entryState, recursions, rec);
+					} catch (SemanticException e) {
+						throw new FixpointException("Unable to build recursion", e);
+					}
 
 				solveRecursions(recursions);
 			}
@@ -240,7 +244,8 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	private void buildRecursion(
 			AnalysisState<A> entryState,
 			Set<Recursion<A>> recursions,
-			Collection<CodeMember> rec) {
+			Collection<CodeMember> rec)
+			throws SemanticException {
 		// these are the calls that start the recursion by invoking
 		// one of its members
 		Collection<Call> starters = callgraph.getCallSites(rec)
@@ -271,10 +276,14 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					for (Expression actual : parameters)
 						params.put(actual, res.getValue().getAnalysisStateAfter(actual));
 
-				entries.add(
-						Pair.of(
-								(ContextSensitivityToken) res.getKey(),
-								CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
+				if (parameters.length == 0)
+					entries.add(Pair.of((ContextSensitivityToken) res.getKey(),
+							CompoundState.of(res.getValue().getAnalysisStateBefore(starter), params)));
+				else
+					entries.add(
+							Pair.of(
+									(ContextSensitivityToken) res.getKey(),
+									CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
 			}
 
 			for (CFG head : heads)
