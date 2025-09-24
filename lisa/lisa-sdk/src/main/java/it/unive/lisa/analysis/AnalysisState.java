@@ -87,6 +87,18 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	}
 
 	/**
+	 * Stores the given state as the approximation for the halting execution.
+	 * 
+	 * @param state the state to store
+	 * 
+	 * @return a new instance with the updated mapping
+	 */
+	public AnalysisState<A> withHalt(
+			ProgramState<A> state) {
+		return new AnalysisState<>(execution, state, smashedErrors, smashedErrorsState, errors);
+	}
+
+	/**
 	 * Yields the {@link AbstractLattice} embedded into the program state of the
 	 * normal execution, containing abstract values for program variables and
 	 * memory locations.

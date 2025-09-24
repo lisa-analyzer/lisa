@@ -632,4 +632,24 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		return cleaned.removeSmashedErrors(caughtSmashedTypes);
 	}
 
+	/**
+	 * Sets the execution state to {@link ProgramState#bottom()} after moving
+	 * the current execution state to the halting state. If a state already
+	 * exists for halting, it is merged with the current state.
+	 * 
+	 * @param state the current analysis state
+	 * 
+	 * @return the updated analysis state
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public AnalysisState<A> moveExecutionToHalting(
+			AnalysisState<A> state)
+			throws SemanticException {
+		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
+			return state;
+		ProgramState<A> halt = state.getHalt().lub(state.getExecution());
+		return state.bottomExecution().withHalt(halt);
+	}
+
 }
