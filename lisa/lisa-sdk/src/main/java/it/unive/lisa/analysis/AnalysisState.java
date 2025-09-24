@@ -753,7 +753,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 		Map<StructuredRepresentation, StructuredRepresentation> repr = new TreeMap<>();
 		repr.put(new StringRepresentation("normal"), execution.representation());
 		if (!halt.isBottom())
-			repr.put(new StringRepresentation("halt"), execution.representation());
+			repr.put(new StringRepresentation("halt"), halt.representation());
 		for (Entry<Error, ProgramState<A>> e : errors)
 			repr.put(e.getKey().representation(), e.getValue().representation());
 		if (!smashedErrorsState.isBottom() && smashedErrors.function != null && !smashedErrors.function.isEmpty()) {
