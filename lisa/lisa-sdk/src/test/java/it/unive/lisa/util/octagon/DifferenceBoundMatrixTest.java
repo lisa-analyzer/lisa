@@ -1,7 +1,5 @@
 package it.unive.lisa.util.octagon;
 
-package it.unive.lisa.analysis.numeric;
-
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -14,6 +12,7 @@ import java.util.function.Predicate;
 
 import org.junit.Test;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
@@ -23,6 +22,8 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.DifferenceBoundMatrix;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -125,7 +126,7 @@ public class DifferenceBoundMatrixTest {
                 };
         }
 
-        private DifferenceBoundMatrix dbmFromMatrix(double[][] vals, Identifier... vars) {
+        public DifferenceBoundMatrix dbmFromMatrix(double[][] vals, Identifier... vars) {
                 int n = vals.length;
                 MathNumber[][] matrix = new MathNumber[n][n];
                 for (int i = 0; i < n; i++)
@@ -154,15 +155,16 @@ public class DifferenceBoundMatrixTest {
         static final double INF = Double.MAX_VALUE;
 
        
-        class BasicLatticeOperations {
+        //public class BasicLatticeOperations {
 
-                void testEmptyDbmIsBottom() {
+                @Test
+                public void testEmptyDbmIsBottom() {
                         assertTrue("Empty DBM should be bottom", dbm.isBottom());
                         assertFalse("Empty DBM should not be top", dbm.isTop());
                 }
 
                 @Test
-                void testTopDbm() {
+                public void testTopDbm() {
                         DifferenceBoundMatrix topDbm = dbm.top();
                         assertNotNull("Top DBM should not be null", topDbm);
 
@@ -185,7 +187,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testBottomDbm() {
+                public void testBottomDbm() {
                         DifferenceBoundMatrix bottomDbm = dbm.bottom();
                         assertNotNull("Bottom DBM should not be null", bottomDbm);
                         assertTrue("Bottom DBM should be bottom", bottomDbm.isBottom());
@@ -193,7 +195,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testLessOrEqualWithBottom() throws SemanticException {
+               public void testLessOrEqualWithBottom() throws SemanticException {
                         System.out.println("Testing LessOrEqual with Bottom elements");
                         DifferenceBoundMatrix bottom1 = dbm.bottom();
                         DifferenceBoundMatrix bottom2 = dbm.bottom();
@@ -213,7 +215,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testLessOrEqualWithTop() throws SemanticException {
+               public void testLessOrEqualWithTop() throws SemanticException {
                         // Create a DBM with variables to make top/non-top meaningful
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
@@ -225,7 +227,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testLessOrEqualWithNonBottoms() throws SemanticException {
+               public void testLessOrEqualWithNonBottoms() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(10), location);
@@ -236,18 +238,18 @@ public class DifferenceBoundMatrixTest {
                         // dbm1 has x = 5, dbm2 has x = 10
                         assertTrue("DBM with x=5 <= DBM with x=10 should be false", dbm1.lessOrEqual(dbm1.lub(dbm2)));
                 }
-        }
+        //}
 
-        class VariableManagement {
+        //public class VariableManagement {
 
                 @Test
-                void testKnowsIdentifierEmpty() {
+               public void testKnowsIdentifierEmpty() {
                         Variable x = new Variable(NumericType, "x", location);
                         assertFalse("Empty DBM should not know any identifier", dbm.knowsIdentifier(x));
                 }
 
                 @Test
-                void testKnowsIdentifierAfterAssignment() throws SemanticException {
+                public void testKnowsIdentifierAfterAssignment() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
 
@@ -258,7 +260,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testMultipleVariableAssignments() throws SemanticException {
+                public void testMultipleVariableAssignments() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
@@ -278,12 +280,12 @@ public class DifferenceBoundMatrixTest {
                         assertTrue("DBM should know first variable", result.knowsIdentifier(x));
                         assertTrue("DBM should know second variable", result.knowsIdentifier(y));
                 }
-        }
+        //}
 
-        class AssignmentOperations {
+        //public class AssignmentOperations {
 
                 @Test
-                void testSimpleConstantAssignment() throws SemanticException {
+                public void testSimpleConstantAssignment() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
 
@@ -300,7 +302,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testSelfDecrementAssignment() throws SemanticException { // ERROR
+                public void testSelfDecrementAssignment() throws SemanticException { // ERROR
                         Variable x = new Variable(NumericType, "x", location);
 
                         // x = 4
@@ -325,7 +327,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testCopyThenIncrementChain() throws SemanticException {
+                public void testCopyThenIncrementChain() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -366,7 +368,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testZeroOffsetEquivalence() throws SemanticException {
+                public void testZeroOffsetEquivalence() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -403,7 +405,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testReassignmentFromOtherVariable() throws SemanticException {
+                public void testReassignmentFromOtherVariable() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -439,7 +441,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testArithmeticAssignment() throws SemanticException { // CORRECT
+                public void testArithmeticAssignment() throws SemanticException { // CORRECT
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -467,7 +469,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testVariableReferenceAssignment() throws SemanticException { // CORRECT
+                public void testVariableReferenceAssignment() throws SemanticException { // CORRECT
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -508,7 +510,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testReassignment() throws SemanticException {
+                public void testReassignment() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(10), location);
@@ -526,7 +528,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testSubtractionAssignment() throws SemanticException {
+                public void testSubtractionAssignment() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -555,7 +557,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testSelfIncrementAssignment() throws SemanticException {
+               public void testSelfIncrementAssignment() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
 
                         // x = 1
@@ -579,7 +581,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testSelfNegationAssignment() throws SemanticException {
+                public void testSelfNegationAssignment() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
 
                         // x = 5
@@ -603,7 +605,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testSelfNegationWithOtherVariableAssignment() throws SemanticException {
+                public void testSelfNegationWithOtherVariableAssignment() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -634,7 +636,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testNegationAssignment() throws SemanticException {
+                public void testNegationAssignment() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -659,7 +661,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAdditionNegativeConstantEquivalence() throws SemanticException {
+                public void testAdditionNegativeConstantEquivalence() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -711,7 +713,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testChainedMultipleAssignments() throws SemanticException {
+                public void testChainedMultipleAssignments() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
                         Variable z = new Variable(NumericType, "z", location);
@@ -751,12 +753,12 @@ public class DifferenceBoundMatrixTest {
 
                         assertTrue(s4.knowsIdentifier(x) && s4.knowsIdentifier(y) && s4.knowsIdentifier(z));
                 }
-        }
+        //}
 
-        class ConstraintOperations {
+        //public class ConstraintOperations {
 
                 @Test
-                void testSimpleAssume() throws SemanticException {
+                public void testSimpleAssume() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(4), location);
@@ -781,7 +783,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testDifferenceConstraintAssume() throws SemanticException {
+                public void testDifferenceConstraintAssume() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
@@ -817,7 +819,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeSubAddConstLeZeroDoesNotThrow() throws SemanticException {
+                public void testAssumeSubAddConstLeZeroDoesNotThrow() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -845,7 +847,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testSumConstraintAssume() throws SemanticException {
+                public void testSumConstraintAssume() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
 
@@ -867,7 +869,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeGreaterThan() throws SemanticException {
+                public void testAssumeGreaterThan() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(3), location);
@@ -893,7 +895,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeLessThan() throws SemanticException {
+                public void testAssumeLessThan() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(10), location);
@@ -919,7 +921,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeGreaterOrEqual() throws SemanticException {
+                public void testAssumeGreaterOrEqual() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(3), location);
@@ -943,7 +945,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeLessOrEqual() throws SemanticException {
+                public void testAssumeLessOrEqual() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(7), location);
@@ -967,7 +969,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeEquality() throws SemanticException {
+                public void testAssumeEquality() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(5), location);
@@ -991,7 +993,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeInequality() throws SemanticException {
+                public void testAssumeInequality() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(3), location);
@@ -1015,7 +1017,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeLogicalAnd() throws SemanticException {
+                public void testAssumeLogicalAnd() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
@@ -1051,7 +1053,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeLogicalOr() throws SemanticException {
+                public void testAssumeLogicalOr() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
@@ -1087,7 +1089,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeNegatedConstraint() throws SemanticException {
+                public void testAssumeNegatedConstraint() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(3), location);
@@ -1114,7 +1116,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeInfeasibleConstraint() throws SemanticException {
+                public void testAssumeInfeasibleConstraint() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(3), location);
@@ -1136,7 +1138,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssumeNegatedXMinusHundred() throws SemanticException {
+                public void testAssumeNegatedXMinusHundred() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         // x = 10
                         Constant c10 = new Constant(NumericType, new MathNumber(10), location);
@@ -1168,12 +1170,12 @@ public class DifferenceBoundMatrixTest {
                                         { 20, 0 }
                         }, x)));
                 }
-        }
+        //}
 
-        class ForgetOperations {
+        //public class ForgetOperations {
 
                 @Test
-                void testForgetKnownIdentifier() throws SemanticException {
+                public void testForgetKnownIdentifier() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
 
@@ -1188,7 +1190,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testForgetUnknownIdentifier() throws SemanticException {
+                public void testForgetUnknownIdentifier() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
 
                         DifferenceBoundMatrix result = dbm.forgetIdentifier(x);
@@ -1198,7 +1200,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testForgetIdentifiersIf() throws SemanticException {
+                public void testForgetIdentifiersIf() throws SemanticException {
                         Predicate<Identifier> testPredicate = id -> id.getName().startsWith("temp");
 
                         DifferenceBoundMatrix result = dbm.forgetIdentifiersIf(testPredicate);
@@ -1207,12 +1209,12 @@ public class DifferenceBoundMatrixTest {
                         // Placeholder implementation should return unchanged DBM
                         assertEquals("Placeholder implementation should return unchanged DBM", dbm, result);
                 }
-        }
+        //}
 
-        class DomainConversions {
+        //public class DomainConversions {
 
                 @Test
-                void testEmptyDbmToInterval() throws SemanticException {
+                public void testEmptyDbmToInterval() throws SemanticException {
                         ValueEnvironment<Interval> result = dbm.toInterval();
 
                         assertNotNull("Conversion result should not be null", result);
@@ -1220,7 +1222,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testDbmWithVariablesToInterval() throws SemanticException {
+                public void testDbmWithVariablesToInterval() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
@@ -1236,7 +1238,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testIntervalDomainToDbm() throws SemanticException {
+                public void testIntervalDomainToDbm() throws SemanticException {
                         ValueEnvironment<Interval> env = new ValueEnvironment<>(new Interval());
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
@@ -1253,7 +1255,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testRoundTripConversion() throws SemanticException {
+                public void testRoundTripConversion() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
 
@@ -1264,12 +1266,12 @@ public class DifferenceBoundMatrixTest {
                         assertNotNull("Restored DBM should not be null", restored);
                         assertTrue("Restored DBM should know the variable", restored.knowsIdentifier(x));
                 }
-        }
+        //}
 
-        class LatticeJoinOperations {
+        //public class LatticeJoinOperations {
 
                 @Test
-                void testLubBottomBottom() throws SemanticException {
+                public void testLubBottomBottom() throws SemanticException {
                         DifferenceBoundMatrix bottom1 = dbm.bottom();
                         DifferenceBoundMatrix bottom2 = dbm.bottom();
 
@@ -1280,7 +1282,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testLubSameVariables() throws SemanticException {
+                public void testLubSameVariables() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(10), location);
@@ -1295,7 +1297,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testLubDifferentVariables() throws SemanticException {
+               public void testLubDifferentVariables() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Variable y = new Variable(NumericType, "y", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
@@ -1312,12 +1314,12 @@ public class DifferenceBoundMatrixTest {
                         {
                         }
                 }
-        }
+        //}
 
-        class WideningOperations {
+        //public class WideningOperations {
 
                 @Test
-                void testWideningWithNull() throws SemanticException {
+               public void testWideningWithNull() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
 
@@ -1332,7 +1334,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testWideningWithSame() throws SemanticException {
+                public void testWideningWithSame() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
 
@@ -1343,7 +1345,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testWideningWithDifferent() throws SemanticException {
+               public void testWideningWithDifferent() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c1 = new Constant(NumericType, new MathNumber(5), location);
                         Constant c2 = new Constant(NumericType, new MathNumber(10), location);
@@ -1355,12 +1357,12 @@ public class DifferenceBoundMatrixTest {
 
                         assertNotNull("Widening result should not be null", result);
                 }
-        }
+        //}
 
-        class ScopeOperations {
+        //public class ScopeOperations {
 
                 @Test
-                void testPushScope() throws SemanticException {
+                public void testPushScope() throws SemanticException {
                         ScopeToken token =  new ScopeToken(new CodeElement() {
 
                                 @Override
@@ -1379,7 +1381,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testPopScope() throws SemanticException {
+                public void testPopScope() throws SemanticException {
                         //ScopeToken token = mock(ScopeToken.class);
 
                         ScopeToken token = new ScopeToken(new CodeElement() {
@@ -1398,12 +1400,12 @@ public class DifferenceBoundMatrixTest {
                         // Placeholder implementation should return unchanged DBM
                         assertEquals("Placeholder pop scope should return unchanged DBM", dbm, result);
                 }
-        }
+        //}
 
-        class SatisfiabilityOperations {
+        //public class SatisfiabilityOperations {
 
                 @Test
-                void testSatisfies() throws SemanticException {
+                public void testSatisfies() throws SemanticException {
                         Variable x = new Variable(NumericType, "x", location);
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
 
@@ -1415,12 +1417,12 @@ public class DifferenceBoundMatrixTest {
                         // Placeholder implementation returns UNKNOWN
                         assertEquals("Placeholder implementation should return UNKNOWN", Satisfiability.UNKNOWN, result);
                 }
-        }
+        //}
 
-        class EdgeCasesAndErrorHandling {
+        //public class EdgeCasesAndErrorHandling {
 
                 @Test
-                void testAssignmentWithNullIdentifier() {
+                public void testAssignmentWithNullIdentifier() {
                         Constant c = new Constant(NumericType, new MathNumber(5), location);
 
                         try
@@ -1435,7 +1437,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testAssignmentWithNullExpression() {
+                public void testAssignmentWithNullExpression() {
                         Variable x = new Variable(NumericType, "x", location);
 
                         try
@@ -1449,7 +1451,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testLargeMatrixOperations() throws SemanticException {
+                public void testLargeMatrixOperations() throws SemanticException {
                         // Create a DBM with multiple variables to test matrix scaling
                         DifferenceBoundMatrix current = dbm;
 
@@ -1468,7 +1470,7 @@ public class DifferenceBoundMatrixTest {
                 }
 
                 @Test
-                void testConversionWithMalformedIntervals() throws SemanticException {
+                public void testConversionWithMalformedIntervals() throws SemanticException {
                         ValueEnvironment<Interval> env = new ValueEnvironment<>(new Interval());
 
                         // Test conversion with empty environment
@@ -1477,5 +1479,5 @@ public class DifferenceBoundMatrixTest {
                         assertNotNull("Conversion from empty interval environment should not be null", result);
                         assertTrue("Conversion from empty environment should produce bottom DBM", result.isBottom());
                 }
-        }
+        //}
 }
