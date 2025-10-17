@@ -1,15 +1,15 @@
 package it.unive.lisa.util.octagon;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 
 import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.analysis.numeric.DifferenceBoundMatrix;
 
 /**
  * Tests focused on closure() and strongClosure() transformations.
@@ -19,6 +19,8 @@ import it.unive.lisa.util.numeric.MathNumber;
  *         Shytermeja</a>
  */
 public class DifferenceBoundMatrixClosureTest {
+
+    private static final double INF = Double.MAX_VALUE;
 
     private static DifferenceBoundMatrix dbmFrom(double[][] vals) {
         int n = vals.length;
@@ -37,11 +39,9 @@ public class DifferenceBoundMatrixClosureTest {
         return new DifferenceBoundMatrix(matrix, new HashMap<Identifier, Integer>());
     }
 
-    private static final double INF = Double.MAX_VALUE;
-
     @Test
-    @DisplayName("strongClosure on provided matrix -> expected output")
-    void testStrongClosureProvidedMatrix() throws SemanticException {
+    // "strongClosure on provided matrix -> expected output"
+    public void testStrongClosureProvidedMatrix() throws SemanticException {
         // Input matrix
         DifferenceBoundMatrix in = dbmFrom(new double[][] {
                 { 0, 0, 0, INF },
@@ -59,12 +59,12 @@ public class DifferenceBoundMatrixClosureTest {
         });
 
         DifferenceBoundMatrix out = in.strongClosure();
-        assertTrue(out.equals(expected), "strongClosure result does not match the expected matrix");
+        assertTrue("strongClosure result does not match the expected matrix", out.equals(expected));
     }
 
     @Test
-    @DisplayName("closure then strongClosure equals direct strongClosure")
-    void testClosureThenStrongClosureEquivalence() throws SemanticException {
+    // "closure then strongClosure equals direct strongClosure"
+    public void testClosureThenStrongClosureEquivalence() throws SemanticException {
         // Direct strong closure
         DifferenceBoundMatrix directStrong = dbmFrom(new double[][] {
                 { 0, 0, 0, INF },
@@ -81,13 +81,13 @@ public class DifferenceBoundMatrixClosureTest {
                 { INF, 0, INF, 0 }
         }).closure().strongClosure();
 
-        assertTrue(directStrong.equals(afterClosureThenStrong),
-                "closure() followed by strongClosure() should match direct strongClosure()");
+        assertTrue("closure() followed by strongClosure() should match direct strongClosure()",
+                directStrong.equals(afterClosureThenStrong));
     }
 
     @Test
-    @DisplayName("closure on invalid matrix throws")
-    void testClosure2() throws SemanticException {
+    // "closure on invalid matrix throws"
+    public void testClosure2() throws SemanticException {
         // Input matrix
         DifferenceBoundMatrix in = dbmFrom(new double[][] {
                 { 0, -10 },
@@ -95,12 +95,12 @@ public class DifferenceBoundMatrixClosureTest {
         });
 
         DifferenceBoundMatrix out = in.closure();
-        assertTrue(out.isBottom(), "closure on invalid DBM should yield bottom");
+        assertTrue("closure on invalid DBM should yield bottom", out.isBottom());
     }
 
     @Test
-    @DisplayName("strong closure on invalid matrix throws")
-    void testStrongClosure2() throws SemanticException {
+    // "strong closure on invalid matrix throws"
+    public void testStrongClosure2() throws SemanticException {
         // Input matrix
         DifferenceBoundMatrix in = dbmFrom(new double[][] {
                 { 0, -10 },
@@ -108,6 +108,6 @@ public class DifferenceBoundMatrixClosureTest {
         });
 
         DifferenceBoundMatrix out = in.strongClosure();
-        assertTrue(out.isBottom(), "strong closure on invalid DBM should yield bottom");
+        assertTrue("strong closure on invalid DBM should yield bottom", out.isBottom());
     }
 }
