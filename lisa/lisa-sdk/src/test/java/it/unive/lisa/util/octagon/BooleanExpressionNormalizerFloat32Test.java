@@ -350,7 +350,7 @@ public class BooleanExpressionNormalizerFloat32Test {
     }
 
     @Test // not(x < 0) => -x <= 0
-    void notLtZeroFloat() throws SemanticException {
+    public void notLtZeroFloat() throws SemanticException {
         // Build not(x < 0)
         BinaryExpression lt = new BinaryExpression(BoolType.INSTANCE, x, c(0, Num, location),
                 ComparisonLt.INSTANCE, location);

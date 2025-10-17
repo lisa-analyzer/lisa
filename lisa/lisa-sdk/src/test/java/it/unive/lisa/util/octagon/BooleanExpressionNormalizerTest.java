@@ -8,6 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
@@ -43,7 +44,7 @@ import it.unive.lisa.util.numeric.MathNumber;
  */
 public class BooleanExpressionNormalizerTest {
 
-    private static CodeLocation location;
+    private static CodeLocation location = SyntheticLocation.INSTANCE;
     private static Type Num = Int32Type.INSTANCE;
 
     private static Variable x;
