@@ -1,6 +1,9 @@
 package it.unive.lisa.analysis.numeric;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -71,49 +74,89 @@ public class DifferenceBoundMatrix
     }
 
     @Override
-    public DifferenceBoundMatrix top() {
-        // Create a matrix with all +infinity values
-        MathNumber[][] topMatrix = new MathNumber[matrix.length][matrix.length];
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix.length; j++) {
-                topMatrix[i][j] = MathNumber.PLUS_INFINITY;
+public DifferenceBoundMatrix top() {
+    int size = 1;
+    if (matrix != null && matrix.length > 0) {
+        size = matrix.length;
+    }
+    
+    MathNumber[][] topMatrix = new MathNumber[size][size];
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            topMatrix[i][j] = MathNumber.PLUS_INFINITY;
+        }
+    }
+    
+    Map<Identifier, Integer> newIndex = new HashMap<>();
+    if (variableIndex != null) {
+        newIndex.putAll(variableIndex);
+    }
+    
+    return new DifferenceBoundMatrix(topMatrix, newIndex);
+}
+
+@Override
+public DifferenceBoundMatrix bottom() {
+    
+    int size = 1;
+    if (matrix != null && matrix.length > 0) {
+        size = matrix.length;
+    }
+    
+    MathNumber[][] bottomMatrix = new MathNumber[size][size];
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (i == j) {
+                bottomMatrix[i][j] = new MathNumber(-1);
+            } else {
+                bottomMatrix[i][j] = MathNumber.PLUS_INFINITY;
             }
         }
-        DifferenceBoundMatrix result = new DifferenceBoundMatrix(topMatrix, variableIndex);
-        return result;
     }
+    
+    Map<Identifier, Integer> newIndex = new HashMap<>();
+    if (variableIndex != null) {
+        newIndex.putAll(variableIndex);
+    }
+    
+    return new DifferenceBoundMatrix(bottomMatrix, newIndex);
+}
 
-    @Override
-    public DifferenceBoundMatrix bottom() {
-        // Create an empty matrix
-        DifferenceBoundMatrix result = new DifferenceBoundMatrix(new MathNumber[0][0],
-                new java.util.HashMap<Identifier, Integer>());
-        return result;
-    }
 
     @Override
     public boolean isTop() {
-        if (matrix == null || matrix.length == 0) {
-            return false; // empty matrix is not considered top
-        }
-        // all +inf -> top
-        for (int i = 0; i < matrix.length; i++)
-            for (int j = 0; j < matrix[i].length; j++)
-                if (matrix[i][j] != MathNumber.PLUS_INFINITY) {
+        if (matrix == null) return false;
+
+        if(matrix.length == 0) return false;
+        
+        for (int i = 0; i < matrix.length; i++) {
+            if (matrix[i] == null) return false;  // Controlla righe null
+            for (int j = 0; j < matrix[i].length; j++) {
+                MathNumber element = matrix[i][j];
+                // Usa equals() invece di != e gestisci null
+                if (element == null || !element.equals(MathNumber.PLUS_INFINITY)) {
                     return false;
                 }
+            }
+        }
         return true;
     }
 
     @Override
     public boolean isBottom() {
-        if (matrix.length == 0) {
-            return true; // empty matrix is considered bottom
-        }
-        // has negative elements on the diagonal -> bottom
+        if (matrix == null) return false;
+
+        if (matrix.length == 0) return true;
+
+        
+        // Matrice vuota non è più bottom - usa elementi diagonali negativi
         for (int i = 0; i < matrix.length; i++) {
-            if (matrix[i][i].lt(MathNumber.ZERO)) {
-                return true;
+            if (matrix[i] == null) return false;  // Controlla righe null
+            if (i < matrix[i].length) {  // Controlla bounds
+                MathNumber diag = matrix[i][i];
+                if (diag != null && diag.lt(MathNumber.ZERO)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -1375,35 +1418,20 @@ public class DifferenceBoundMatrix
         return true;
     }
 
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof DifferenceBoundMatrix))
-            return false;
-        DifferenceBoundMatrix other = (DifferenceBoundMatrix) o;
-        if (this.matrix.length != other.matrix.length)
-            return false;
-        for (int i = 0; i < this.matrix.length; i++) {
-            for (int j = 0; j < this.matrix.length; j++) {
-                MathNumber a = this.matrix[i][j];
-                MathNumber b = other.matrix[i][j];
-                if (a == null && b == null)
-                    continue;
-                if (a == null || b == null) {
-                    return false;
-                }
-                // Use numeric comparison to treat 3 and 3.0 as equal
-                if (a.compareTo(b) != 0) {
-                    return false;
-                }
-            }
-        }
-        if (!this.variableIndex.equals(other.variableIndex)) {
-            return false;
-        }
-        return true;
+     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        DifferenceBoundMatrix that = (DifferenceBoundMatrix) obj;
+        return isBottom() == that.isBottom() && isTop() == that.isTop() && Arrays.deepEquals(this.matrix, that.matrix)
+        && Objects.equals(this.variableIndex, that.variableIndex);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.deepHashCode(matrix), variableIndex);
+    }
+    
     // Control functions
     boolean verifyDoubleIndex(MathNumber[][] mat, int indexI, int indexJ, MathNumber valueI, MathNumber valueJ) {
         int I2 = indexI * 2 - 1;

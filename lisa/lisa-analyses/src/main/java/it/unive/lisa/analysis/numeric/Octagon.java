@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.numeric;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import it.unive.lisa.analysis.BaseLattice;
@@ -187,5 +188,19 @@ public class Octagon
 	public ValueEnvironment<Interval> toIntervalDomain() throws SemanticException {
 		return dbm.toInterval();
 	}
+
+	@Override
+public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    
+    Octagon that = (Octagon) obj;
+    return Objects.equals(this.dbm, that.dbm);
+}
+
+@Override
+public int hashCode() {
+    return Objects.hash(dbm);
+}
 
 }
