@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import java.util.Objects;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,6 +11,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Implementation of the octagons analysis of
@@ -21,7 +20,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso </a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
- *         Shytermeja</a>
+ *             Shytermeja</a>
  */
 public class Octagon
 		implements
@@ -37,29 +36,39 @@ public class Octagon
 		this(new DifferenceBoundMatrix());
 	}
 
-	Octagon(DifferenceBoundMatrix dbm) {
+	Octagon(
+			DifferenceBoundMatrix dbm) {
 		this.dbm = dbm;
 	}
 
-	private void debug(String message) {
+	private void debug(
+			String message) {
 		// System.out.println("Octagon: " + message);
 	}
 
 	@Override
-	public Octagon assign(Identifier id, ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
+	public Octagon assign(
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		debug("assign() - Assigning " + expression + " to " + id);
 		return new Octagon(dbm.assign(id, expression, pp, oracle));
 	}
 
 	@Override
-	public Octagon forgetIdentifier(Identifier id) throws SemanticException {
+	public Octagon forgetIdentifier(
+			Identifier id)
+			throws SemanticException {
 		debug("forgetIdentifier() - Forgetting " + id);
 		return new Octagon(dbm.forgetIdentifier(id));
 	}
 
 	@Override
-	public Octagon forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
+	public Octagon forgetIdentifiers(
+			Iterable<Identifier> ids)
+			throws SemanticException {
 		debug("forgetIdentifiers() - Forgetting identifiers: " + ids);
 		return ValueDomain.super.forgetIdentifiers(ids);
 	}
@@ -71,88 +80,119 @@ public class Octagon
 	}
 
 	@Override
-	public Octagon glbAux(Octagon other) throws SemanticException {
+	public Octagon glbAux(
+			Octagon other)
+			throws SemanticException {
 		debug("glbAux() - Computing glb with " + other);
 		return BaseLattice.super.glbAux(other);
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Octagon other) throws SemanticException {
+	public boolean lessOrEqualAux(
+			Octagon other)
+			throws SemanticException {
 		debug("lessOrEqualAux() - Checking less or equal with " + other);
 		return dbm.lessOrEqualAux(other.dbm);
 	}
 
 	@Override
-	public Octagon lubAux(Octagon other) throws SemanticException {
+	public Octagon lubAux(
+			Octagon other)
+			throws SemanticException {
 		debug("lubAux() - Computing lub with " + other);
 		return new Octagon(dbm.lubAux(other.dbm));
 	}
 
 	@Override
-	public Octagon narrowingAux(Octagon other) throws SemanticException {
+	public Octagon narrowingAux(
+			Octagon other)
+			throws SemanticException {
 		debug("narrowingAux() - Computing narrowing with " + other);
 		return BaseLattice.super.narrowingAux(other);
 	}
 
 	@Override
-	public Octagon wideningAux(Octagon other) throws SemanticException {
+	public Octagon wideningAux(
+			Octagon other)
+			throws SemanticException {
 		debug("wideningAux() - Computing widening with " + other);
 		return new Octagon(dbm.wideningAux(other.dbm));
 	}
 
 	@Override
-	public Octagon smallStepSemantics(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
+	public Octagon smallStepSemantics(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		debug("smallStepSemantics() - Computing small step semantics of " + expression);
 		return new Octagon(dbm.smallStepSemantics(expression, pp, oracle));
 	}
 
 	@Override
-	public Octagon assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest, SemanticOracle oracle)
+	public Octagon assume(
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
 			throws SemanticException {
 		debug("assume() - Assuming " + expression + " from " + src + " to " + dest);
 		return new Octagon(dbm.assume(expression, src, dest, oracle));
 	}
 
 	@Override
-	public boolean knowsIdentifier(Identifier id) {
+	public boolean knowsIdentifier(
+			Identifier id) {
 		debug("knowsIdentifier() - Checking if knows " + id);
 		return dbm.knowsIdentifier(id);
 	}
 
 	@Override
-	public Octagon forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+	public Octagon forgetIdentifiersIf(
+			Predicate<Identifier> test)
+			throws SemanticException {
 		debug("forgetIdentifiersIf() - Forgetting identifiers that satisfy a test");
 		return new Octagon(dbm.forgetIdentifiersIf(test));
 	}
 
 	@Override
-	public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp, SemanticOracle oracle)
+	public Satisfiability satisfies(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
 			throws SemanticException {
 		debug("satisfies() - Checking if satisfies " + expression);
 		return dbm.satisfies(expression, pp, oracle);
 	}
 
 	@Override
-	public Octagon pushScope(ScopeToken token) throws SemanticException {
+	public Octagon pushScope(
+			ScopeToken token)
+			throws SemanticException {
 		debug("pushScope() - Pushing scope " + token);
 		return new Octagon(dbm.pushScope(token));
 	}
 
 	@Override
-	public Octagon popScope(ScopeToken token) throws SemanticException {
+	public Octagon popScope(
+			ScopeToken token)
+			throws SemanticException {
 		debug("popScope() - Popping scope " + token);
 		return new Octagon(dbm.popScope(token));
 	}
 
 	@Override
-	public boolean lessOrEqual(Octagon other) throws SemanticException {
+	public boolean lessOrEqual(
+			Octagon other)
+			throws SemanticException {
 		debug("lessOrEqual() - Checking less or equal with " + other);
 		return BaseLattice.super.lessOrEqual(other);
 	}
 
 	@Override
-	public Octagon lub(Octagon other) throws SemanticException {
+	public Octagon lub(
+			Octagon other)
+			throws SemanticException {
 		debug("lub() - Computing lub with " + other);
 		return BaseLattice.super.lub(other);
 	}
@@ -181,7 +221,9 @@ public class Octagon
 		return dbm.isBottom();
 	}
 
-	public static Octagon fromIntervalDomain(ValueEnvironment<Interval> env) throws SemanticException {
+	public static Octagon fromIntervalDomain(
+			ValueEnvironment<Interval> env)
+			throws SemanticException {
 		return new Octagon(DifferenceBoundMatrix.fromIntervalDomain(env));
 	}
 
@@ -190,17 +232,20 @@ public class Octagon
 	}
 
 	@Override
-public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null || getClass() != obj.getClass()) return false;
-    
-    Octagon that = (Octagon) obj;
-    return Objects.equals(this.dbm, that.dbm);
-}
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || getClass() != obj.getClass())
+			return false;
 
-@Override
-public int hashCode() {
-    return Objects.hash(dbm);
-}
+		Octagon that = (Octagon) obj;
+		return Objects.equals(this.dbm, that.dbm);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(dbm);
+	}
 
 }

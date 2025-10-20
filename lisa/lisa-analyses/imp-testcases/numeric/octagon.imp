@@ -1,0 +1,74 @@
+class octagon_tests {
+
+	backward() {
+		def x = 10000;
+		while(x >= 1) {
+			x = x - 1;
+		}
+		return x; // expected 0
+	}
+
+	// Forward increasing loop, terminates when x >= 10
+	forward() {
+		def x = 0;
+		while (x < 10) {
+			x = x + 1;
+		}
+		return x; // expected 10
+	}
+
+	// Backward decreasing loop that terminates (guard x > -5)
+	backward_terminating() {
+		def x = 3;
+		while (x > -5) {
+			x = x - 2;
+		}
+		return x;
+	} 
+
+	// Infinite loop example (no state change that falsifies the guard)
+	infinite() {
+		def x = 0;
+		while (x >= 0) {
+			// no change to x keeps condition true
+		}
+		return x; // unreachable 
+	}
+
+	// Zero-iteration loop: guard false at entry
+	zero_iterations() {
+		def x = 5;
+		while (x < 0) {
+			x = x + 1;
+		}
+		return x; // expected 5 
+	}
+
+	// Loop with step of 2 (even progression)
+	step2() {
+		def x = 1;
+		while (x - 100 < 0) {
+			x = x + 2;
+		}
+		return x; // expected 100 
+	}
+
+	branches() {
+    	def x = 0;
+    	if (x > 0) {
+			x = 10;
+		} 
+		return x; 
+ 	}
+
+	// Loop with condition depending on two variables
+	mixed_guard() {
+		def x = 0;
+		def y = 3;
+		while (x < y) {
+			x = x + 1; 
+			y = y + 1; 
+		}
+		return x;  
+	}
+}
