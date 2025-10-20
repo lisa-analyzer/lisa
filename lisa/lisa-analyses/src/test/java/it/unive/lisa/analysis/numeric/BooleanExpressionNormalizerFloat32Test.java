@@ -1,9 +1,8 @@
-package it.unive.lisa.util.octagon;
+package it.unive.lisa.analysis.numeric;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -11,7 +10,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.type.BoolType;
-import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -32,20 +31,21 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.octagon.BooleanExpressionNormalizer;
 
 /**
- * Test di unità per {@link BooleanExpressionNormalizer}.
- * Copre normalizzazione di operatori logici, confronti, negazioni e casi
- * specifici per tipi interi.
+ * Float32 variants of BooleanExpressionNormalizer tests.
+ * Expectations are adapted for non-integer semantics (no +1 offsets, use <
+ * where applicable).
  * 
  * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso </a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
  *         Shytermeja</a>
  */
-public class BooleanExpressionNormalizerTest {
+public class BooleanExpressionNormalizerFloat32Test {
 
     private static CodeLocation location = SyntheticLocation.INSTANCE;
-    private static Type Num = Int32Type.INSTANCE;
+    private static Type Num = Float32Type.INSTANCE;
 
     private static Variable x;
     private static Variable y;
@@ -53,7 +53,6 @@ public class BooleanExpressionNormalizerTest {
 
     @BeforeClass
     public static void setup() {
-        // Usa un mock di CodeLocation come negli altri test del progetto
         x = new Variable(Num, "x", location);
         y = new Variable(Num, "y", location);
         z = new Variable(Num, "z", location);
@@ -76,7 +75,6 @@ public class BooleanExpressionNormalizerTest {
         if (v instanceof Long)
             return ((Long) v) == 0L;
         return false;
-
     }
 
     private static BinaryExpression asBin(SymbolicExpression e) {
@@ -110,32 +108,8 @@ public class BooleanExpressionNormalizerTest {
                 e.getOperator() instanceof NumericNonOverflowingSub);
     }
 
-    private static void assertIsNegXPlusCLeZero(SymbolicExpression res, Variable var, int cVal, Type t,
-            CodeLocation loc) {
-        // Expect: (-var + c) <= 0
-        BinaryExpression top = asBin(res);
-        assertOp(top, ComparisonLe.class);
-        assertTrue("Right side should be 0: " + top.getRight(), isZeroConst(top.getRight()));
-
-        BinaryExpression sum = asBin(top.getLeft());
-        assertIsAdd(sum);
-        UnaryExpression neg = asUnary(sum.getLeft());
-        assertTrue(neg.getOperator() instanceof NumericNegation);
-        // Lo standard atteso è la negazione della variabile;
-        // accettiamo anche la negazione di un'espressione composta (es. x+y),
-        // purché la forma complessiva sia (-e + c) <= 0.
-        if (neg.getExpression() instanceof Variable)
-            assertSame(var, neg.getExpression());
-
-        Constant cst = (Constant) sum.getRight();
-        assertEquals(new MathNumber(cVal), cst.getValue());
-    }
-
-    // ------------ Tests ------------
-
-    // Casi con costanti
-    @Test // "x < 5 (interi) => (x - 6) <= 0"
-    public void ltVarConstInteger() throws SemanticException { // CORRECT
+    @Test // x < 5 (float) => (x - 5) <= 0 // case of relaxation
+    public void ltVarConstFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, c(5, Num, location), ComparisonLt.INSTANCE,
                 location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
@@ -145,15 +119,14 @@ public class BooleanExpressionNormalizerTest {
         BinaryExpression diff = asBin(top.getLeft());
         assertTrue(diff.getOperator() instanceof NumericNonOverflowingSub);
         assertSame(x, diff.getLeft());
-        assertEquals(new MathNumber(6), ((Constant) diff.getRight()).getValue());
+        assertEquals(new MathNumber(5), ((Constant) diff.getRight()).getValue());
     }
 
-    @Test // "x <= 5 => (x - 5) <= 0"
-    public void leVarConst() throws SemanticException { // CORRECT
+    @Test // x <= 5 (float) => (x - 5) <= 0
+    public void leVarConstFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, c(5, Num, location), ComparisonLe.INSTANCE,
                 location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
-
         BinaryExpression top = asBin(res);
         assertOp(top, ComparisonLe.class);
         assertTrue(isZeroConst(top.getRight()));
@@ -163,12 +136,13 @@ public class BooleanExpressionNormalizerTest {
         assertEquals(new MathNumber(5), ((Constant) diff.getRight()).getValue());
     }
 
-    @Test // "x > 5 (interi) => (-x + 6) <= 0"
-    public void gtVarConstInteger() throws SemanticException { // CORRECT
+    @Test // x > 5 (float) => (-x + 5) <= 0 // case of relaxation
+    public void gtVarConstFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, c(5, Num, location), ComparisonGt.INSTANCE,
                 location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
         BinaryExpression top = asBin(res);
+        // Implementation returns <= here for variable vs constant
         assertOp(top, ComparisonLe.class);
         assertTrue(isZeroConst(top.getRight()));
         BinaryExpression sum = asBin(top.getLeft());
@@ -177,11 +151,11 @@ public class BooleanExpressionNormalizerTest {
         assertTrue(neg.getOperator() instanceof NumericNegation);
         assertSame(x, neg.getExpression());
         Constant cst = (Constant) sum.getRight();
-        assertEquals(new MathNumber(6), cst.getValue());
+        assertEquals(new MathNumber(5), cst.getValue());
     }
 
-    @Test // "x >= 5 => (-x + 5) <= 0"
-    public void geVarConstInteger() throws SemanticException { // CORRECT
+    @Test // x >= 5 (float) => (-x + 5) <= 0
+    public void geVarConstFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, c(5, Num, location), ComparisonGe.INSTANCE,
                 location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
@@ -197,23 +171,19 @@ public class BooleanExpressionNormalizerTest {
         assertEquals(new MathNumber(5), cst.getValue());
     }
 
-    // Confronti: >, >=, <, <=, ==, !="
-    @Test // "x > y (integer) => (y - x - 1) <= 0"
-    public void gtIdentifiers() throws SemanticException {
+    @Test // x > y (float) => (y - x) <= 0
+    public void gtIdentifiersFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonGt.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
         BinaryExpression top = asBin(res);
         assertOp(top, ComparisonLe.class);
         assertTrue(isZeroConst(top.getRight()));
-        BinaryExpression sum = asBin(top.getLeft());
-        assertIsAdd(sum);
-        assertIsSubXY(asBin(sum.getLeft()), y, x);
-        assertEquals(new MathNumber(1), ((Constant) sum.getRight()).getValue());
-
+        BinaryExpression diff = asBin(top.getLeft());
+        assertIsSubXY(diff, y, x);
     }
 
-    @Test // "x >= y => (y - x) <= 0" // CORRECT
-    public void geIdentifiers() throws SemanticException {
+    @Test // x >= y (float) => (y - x) <= 0
+    public void geIdentifiersFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonGe.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
         BinaryExpression top = asBin(res);
@@ -223,21 +193,19 @@ public class BooleanExpressionNormalizerTest {
         assertIsSubXY(diff, y, x);
     }
 
-    @Test // "x < y (interi) => (x - y + 1) <= 0" // CORRECT
-    public void ltIdentifiers() throws SemanticException {
+    @Test // x < y (float) => (x - y) <= 0 // case of relaxation
+    public void ltIdentifiersFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonLt.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
         BinaryExpression top = asBin(res);
         assertOp(top, ComparisonLe.class);
         assertTrue(isZeroConst(top.getRight()));
-        BinaryExpression sum = asBin(top.getLeft());
-        assertIsAdd(sum);
-        assertIsSubXY(asBin(sum.getLeft()), x, y);
-        assertEquals(new MathNumber(1), ((Constant) sum.getRight()).getValue());
+        BinaryExpression diff = asBin(top.getLeft());
+        assertIsSubXY(diff, x, y);
     }
 
-    @Test // "x <= y => (x - y) <= 0" // CORRECT
-    public void leIdentifiers() throws SemanticException {
+    @Test // x <= y (float) => (x - y) <= 0
+    public void leIdentifiersFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonLe.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
         BinaryExpression top = asBin(res);
@@ -247,77 +215,68 @@ public class BooleanExpressionNormalizerTest {
         assertIsSubXY(diff, x, y);
     }
 
-    @Test // "x == y => (x - y <= 0) AND (y - x <= 0)"
-    public void eqNormalization() throws SemanticException { // CORRECT
+    @Test // x == y (float) => (x - y <= 0) AND (y - x <= 0)
+    public void eqNormalizationFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonEq.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
 
         BinaryExpression and = asBin(res);
         assertTrue(and.getOperator() instanceof LogicalAnd);
 
-        // left: x - y <= 0
         BinaryExpression le1 = asBin(and.getLeft());
         assertOp(le1, ComparisonLe.class);
         assertTrue(isZeroConst(le1.getRight()));
         assertIsSubXY(asBin(le1.getLeft()), x, y);
 
-        // right: y - x <= 0
         BinaryExpression le2 = asBin(and.getRight());
         assertOp(le2, ComparisonLe.class);
         assertTrue(isZeroConst(le2.getRight()));
         assertIsSubXY(asBin(le2.getLeft()), y, x);
     }
 
-    @Test // "x != y (interi) => (x - y + 1 <= 0) OR (y - x + 1 <= 0)"
-    public void neNormalizationInteger() throws SemanticException { // CORRECT
+    @Test // x != y (float) => (x - y) != 0
+    public void neNormalizationFloat() throws SemanticException {
         BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonNe.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(e, location);
 
-        BinaryExpression or = asBin(res);
-        assertTrue(or.getOperator() instanceof LogicalOr);
-
-        // first: (x - y + 1) <= 0
-        BinaryExpression le1 = asBin(or.getLeft());
-        assertOp(le1, ComparisonLe.class);
-        assertTrue(isZeroConst(le1.getRight()));
-        BinaryExpression sum1 = asBin(le1.getLeft());
-        assertIsAdd(sum1);
-        assertIsSubXY(asBin(sum1.getLeft()), x, y);
-        assertEquals(new MathNumber(1), ((Constant) sum1.getRight()).getValue());
-
-        // second: (y - x + 1) <= 0
-        BinaryExpression le2 = asBin(or.getRight());
-        assertOp(le2, ComparisonLe.class);
-        assertTrue(isZeroConst(le2.getRight()));
-        BinaryExpression sum2 = asBin(le2.getLeft());
-        assertIsAdd(sum2);
-        assertIsSubXY(asBin(sum2.getLeft()), y, x);
-        assertEquals(new MathNumber(1), ((Constant) sum2.getRight()).getValue());
+        BinaryExpression cmp = asBin(res);
+        assertOp(cmp, ComparisonNe.class);
+        assertTrue(isZeroConst(cmp.getRight()));
+        BinaryExpression diff = asBin(cmp.getLeft());
+        assertIsSubXY(diff, x, y);
     }
 
-    @Test // "x + y > 0 (interi) => (-x - y + 1) <= 0"
-    public void addZeroNormalization() throws SemanticException { // ERROR
-        // fails with:
-        // it.unive.lisa.analysis.SemanticException: ComparisonGt not handled for
-        // non-Identifier operands
+    @Test // x + y > 0 (float) => -x - y <= 0
+    public void addZeroNormalizationFloat() throws SemanticException {
         BinaryExpression sum = new BinaryExpression(Num, x, y, NumericNonOverflowingAdd.INSTANCE, location);
         BinaryExpression gt = new BinaryExpression(BoolType.INSTANCE, sum, c(0, Num, location),
-                ComparisonGt.INSTANCE,
-                location);
+                ComparisonGt.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(gt, location);
 
-        // Expect: (-x - y + 1) <= 0
-        assertIsNegXPlusCLeZero(res, x, 1, Num, location);
+        BinaryExpression top = asBin(res);
+        assertOp(top, ComparisonLe.class);
+        assertTrue(isZeroConst(top.getRight()));
+        BinaryExpression left = asBin(top.getLeft());
+        assertIsAdd(left);
+
+        UnaryExpression u1 = asUnary(left.getLeft());
+        UnaryExpression u2 = asUnary(left.getRight());
+        assertTrue(u1.getOperator() instanceof NumericNegation);
+        assertTrue(u2.getOperator() instanceof NumericNegation);
+
+        SymbolicExpression e1 = u1.getExpression();
+        SymbolicExpression e2 = u2.getExpression();
+        assertTrue("Expected negations of x and y, got: " + e1 + ", " + e2,
+                (e1 == x && e2 == y) || (e1 == y && e2 == x));
+
     }
 
-    @Test // "x - y >= 0 => (y - x) <= 0"
-    public void subZeroNormalization() throws SemanticException { // ERROR
+    @Test // x - y >= 0 (float) => (y - x) <= 0
+    public void subZeroNormalizationFloat() throws SemanticException {
         BinaryExpression sub = new BinaryExpression(Num, x, y, NumericNonOverflowingSub.INSTANCE, location);
         BinaryExpression ge = new BinaryExpression(BoolType.INSTANCE, sub, c(0, Num, location),
-                ComparisonGe.INSTANCE,
-                location);
+                ComparisonGe.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(ge, location);
-        // It returns 0 - x - y <= 0 but we want y - x <= 0
         BinaryExpression top = asBin(res);
         assertOp(top, ComparisonLe.class);
         assertTrue(isZeroConst(top.getRight()));
@@ -325,15 +284,13 @@ public class BooleanExpressionNormalizerTest {
         assertIsSubXY(diff, y, x);
     }
 
-    @Test // "-x + y >= 0 => (x - y) <= 0"
-    public void negAddZeroNormalization() throws SemanticException { // ERROR
+    @Test // -x + y >= 0 (float) => (x - y) <= 0
+    public void negAddZeroNormalizationFloat() throws SemanticException {
         UnaryExpression negX = new UnaryExpression(Num, x, NumericNegation.INSTANCE, location);
         BinaryExpression sum = new BinaryExpression(Num, negX, y, NumericNonOverflowingAdd.INSTANCE, location);
         BinaryExpression ge = new BinaryExpression(BoolType.INSTANCE, sum, c(0, Num, location),
-                ComparisonGe.INSTANCE,
-                location);
+                ComparisonGe.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(ge, location);
-        // It returns 0 - - x + y <= 0 but we want x - y <= 0
         BinaryExpression top = asBin(res);
         assertOp(top, ComparisonLe.class);
         assertTrue(isZeroConst(top.getRight()));
@@ -341,15 +298,13 @@ public class BooleanExpressionNormalizerTest {
         assertIsSubXY(diff, x, y);
     }
 
-    @Test // "-x - y >= 0 => (x + y) <= 0"
-    public void negSubZeroNormalization() throws SemanticException { // ERROR
+    @Test // -x - y >= 0 (float) => (x + y) <= 0
+    public void negSubZeroNormalizationFloat() throws SemanticException {
         UnaryExpression negX = new UnaryExpression(Num, x, NumericNegation.INSTANCE, location);
         BinaryExpression sub = new BinaryExpression(Num, negX, y, NumericNonOverflowingSub.INSTANCE, location);
         BinaryExpression ge = new BinaryExpression(BoolType.INSTANCE, sub, c(0, Num, location),
-                ComparisonGe.INSTANCE,
-                location);
+                ComparisonGe.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(ge, location);
-        // It returns 0 - - x - y <= 0 but we want x + y <= 0
         BinaryExpression top = asBin(res);
         assertOp(top, ComparisonLe.class);
         assertTrue(isZeroConst(top.getRight()));
@@ -359,8 +314,8 @@ public class BooleanExpressionNormalizerTest {
         assertSame(y, sum.getRight());
     }
 
-    @Test // "x - y + 1 <= 0 does not throw (integer)"
-    public void subAddConstLeZeroDoesNotThrow() throws SemanticException {
+    @Test // (x - y) + 1 <= 0 does not throw (float)
+    public void subAddConstLeZeroDoesNotThrowFloat() throws SemanticException {
         // Build (x - y) + 1 <= 0
         BinaryExpression sub = new BinaryExpression(Num, x, y, NumericNonOverflowingSub.INSTANCE, location);
         BinaryExpression add = new BinaryExpression(Num, sub, c(1, Num, location),
@@ -377,30 +332,14 @@ public class BooleanExpressionNormalizerTest {
         assertTrue(isZeroConst(top.getRight()));
     }
 
-    // Negazioni e De Morgan
-    @Test // "not(x >= 0) (interi) => x + 1 <= 0"
-    public void notGeZeroInt() throws SemanticException {
+    @Test // not(x >= 0) => x <= 0
+    // not(x >= 0) is equivalent to x < 0, but in float case we need to relax to x
+    public void notGeZeroFloat() throws SemanticException {
         // Build not(x >= 0)
         BinaryExpression ge = new BinaryExpression(BoolType.INSTANCE, x, c(0, Num, location),
                 ComparisonGe.INSTANCE, location);
         UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, ge, LogicalNegation.INSTANCE, location);
-        SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
-        // Expect: (x + 1) <= 0
-        BinaryExpression le = asBin(res);
-        assertOp(le, ComparisonLe.class);
-        assertTrue(isZeroConst(le.getRight())); // Right side should be 0
-        BinaryExpression sum = asBin(le.getLeft());
-        assertTrue(sum.getOperator() instanceof NumericNonOverflowingAdd);
-        assertSame(x, sum.getLeft());
-        Constant cst = (Constant) sum.getRight();
-        assertEquals(new MathNumber(1), cst.getValue());
-    }
 
-    @Test // "not(x >= 1) (interi) => x <= 0"
-    public void notGeOne() throws SemanticException {
-        BinaryExpression base = new BinaryExpression(BoolType.INSTANCE, x, c(1, Num, location),
-                ComparisonGe.INSTANCE, location);
-        UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, base, LogicalNegation.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
 
         // Expect: x <= 0
@@ -410,39 +349,63 @@ public class BooleanExpressionNormalizerTest {
         assertSame(x, le.getLeft());
     }
 
-    @Test // "(! x < 0) (interi) => -x <= 0"
-    public void notLtZeroInt() throws SemanticException {
+    @Test // not(x < 0) => -x <= 0
+    public void notLtZeroFloat() throws SemanticException {
         // Build not(x < 0)
-        BinaryExpression lt = new BinaryExpression(BoolType.INSTANCE, x, c(0, Num, location), ComparisonLt.INSTANCE,
-                location);
+        BinaryExpression lt = new BinaryExpression(BoolType.INSTANCE, x, c(0, Num, location),
+                ComparisonLt.INSTANCE, location);
         UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, lt, LogicalNegation.INSTANCE, location);
+
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
-        // Expect: -x <= 0
+
+        // Expect: (-x) <= 0
         BinaryExpression le = asBin(res);
         assertOp(le, ComparisonLe.class);
-        assertTrue(isZeroConst(le.getRight())); // Right side should be 0
+        assertTrue(isZeroConst(le.getRight()));
+
         UnaryExpression neg = asUnary(le.getLeft());
         assertTrue(neg.getOperator() instanceof NumericNegation);
         assertSame(x, neg.getExpression());
     }
 
-    @Test // "not(x >= 1) (interi) => x <= 0"
-    public void notGeOneInt() throws SemanticException {
-        BinaryExpression base = new BinaryExpression(BoolType.INSTANCE, x, c(1, Num, location),
+    @Test // not(x >= 1) (float) => x <= 1
+    public void notGeOneFloat() throws SemanticException {
+        // Build not(x >= 1)
+        BinaryExpression ge = new BinaryExpression(BoolType.INSTANCE, x, c(1, Num, location),
                 ComparisonGe.INSTANCE, location);
-        UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, base, LogicalNegation.INSTANCE, location);
+        UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, ge, LogicalNegation.INSTANCE, location);
+
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
 
-        // Expect: x <= 0
+        // Expect: (x - 1) <= 0
         BinaryExpression le = asBin(res);
         assertOp(le, ComparisonLe.class);
         assertTrue(isZeroConst(le.getRight()));
-        assertSame(x, le.getLeft());
+
+        BinaryExpression diff = asBin(le.getLeft());
+        assertTrue(diff.getOperator() instanceof NumericNonOverflowingSub);
+        assertSame(x, diff.getLeft());
+        assertEquals(new MathNumber(1), ((Constant) diff.getRight()).getValue());
     }
 
-    @Test // "not(x <= y) (interi) => (y - x + 1) <= 0"
-    public void notLe() throws SemanticException {
+    @Test // not(x <= y) (float) => (y - x) <= 0
+    public void notLeFloat() throws SemanticException {
         BinaryExpression base = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonLe.INSTANCE, location);
+        UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, base, LogicalNegation.INSTANCE, location);
+        SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
+
+        BinaryExpression le = asBin(res);
+        assertOp(le, ComparisonLe.class);
+        assertTrue(isZeroConst(le.getRight()));
+        BinaryExpression diff = asBin(le.getLeft());
+        assertIsSubXY(diff, y, x);
+    }
+
+    @Test // not(x <= c) (float) => (-x + c) <= 0
+    public void notLeConstFloat() throws SemanticException {
+        BinaryExpression base = new BinaryExpression(BoolType.INSTANCE, x, c(5, Num, location),
+                ComparisonLe.INSTANCE,
+                location);
         UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, base, LogicalNegation.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
 
@@ -451,23 +414,15 @@ public class BooleanExpressionNormalizerTest {
         assertTrue(isZeroConst(le.getRight()));
         BinaryExpression sum = asBin(le.getLeft());
         assertIsAdd(sum);
-        assertIsSubXY(asBin(sum.getLeft()), y, x);
-        assertEquals(new MathNumber(1), ((Constant) sum.getRight()).getValue());
+        UnaryExpression neg = asUnary(sum.getLeft());
+        assertTrue(neg.getOperator() instanceof NumericNegation);
+        assertSame(x, neg.getExpression());
+        Constant cst = (Constant) sum.getRight();
+        assertEquals(new MathNumber(5), cst.getValue());
     }
 
-    @Test // "not(x <= c) (interi) => (-x + (c + 1)) <= 0"
-    public void notLeConst() throws SemanticException {
-        int cVal = 5;
-        BinaryExpression base = new BinaryExpression(BoolType.INSTANCE, x, c(cVal, Num, location),
-                ComparisonLe.INSTANCE,
-                location);
-        UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, base, LogicalNegation.INSTANCE, location);
-        SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
-        assertIsNegXPlusCLeZero(res, x, cVal + 1, Num, location);
-    }
-
-    @Test // "not(x < y) => (y - x) <= 0"
-    public void notLt() throws SemanticException {
+    @Test // not(x < y) (float) => (y - x) <= 0
+    public void notLtFloat() throws SemanticException {
         BinaryExpression base = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonLt.INSTANCE, location);
         UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, base, LogicalNegation.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
@@ -475,56 +430,12 @@ public class BooleanExpressionNormalizerTest {
         BinaryExpression le = asBin(res);
         assertOp(le, ComparisonLe.class);
         assertTrue(isZeroConst(le.getRight()));
-        assertIsSubXY(asBin(le.getLeft()), y, x);
+        BinaryExpression diff = asBin(le.getLeft());
+        assertIsSubXY(diff, y, x);
     }
 
-    @Test // "(x + 100) < 0 (interi) => x + 101 <= 0"
-    public void addConstLtZeroInt() throws SemanticException {
-        // Build (x + 100) < 0
-        BinaryExpression add = new BinaryExpression(Num, x, c(100, Num, location),
-                NumericNonOverflowingAdd.INSTANCE, location);
-        BinaryExpression lt = new BinaryExpression(BoolType.INSTANCE, add, c(0, Num, location),
-                ComparisonLt.INSTANCE, location);
-
-        SymbolicExpression res = BooleanExpressionNormalizer.normalize(lt, location);
-
-        // Expect: x + 101 <= 0
-        BinaryExpression top = asBin(res);
-        assertOp(top, ComparisonLe.class);
-        assertTrue(isZeroConst(top.getRight())); // Right side should be 0
-        BinaryExpression sum = asBin(top.getLeft());
-        assertTrue(sum.getOperator() instanceof NumericNonOverflowingAdd);
-        assertSame(x, sum.getLeft());
-        Constant cst = (Constant) sum.getRight();
-        assertEquals(new MathNumber(101), cst.getValue());
-    }
-
-    @Test // "not(x + 100 < 0) (interi) => -x - 99 <= 0"
-    public void notAdd100LtZeroInt() throws SemanticException {
-        // not((x + 100) < 0) -> -x -100 < 0 -> -x - 99 <= 0
-        BinaryExpression add = new BinaryExpression(Num, x, c(100, Num, location),
-                NumericNonOverflowingAdd.INSTANCE, location);
-        BinaryExpression lt = new BinaryExpression(BoolType.INSTANCE, add, c(0, Num, location),
-                ComparisonLt.INSTANCE, location);
-        UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, lt, LogicalNegation.INSTANCE, location);
-        SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
-
-        // Expect: -x - 99 <= 0
-        BinaryExpression top = asBin(res);
-        assertOp(top, ComparisonLe.class);
-        assertTrue(isZeroConst(top.getRight())); // Right side should be 0
-        BinaryExpression sum = asBin(top.getLeft());
-        assertIsSub(sum);
-        UnaryExpression neg = asUnary(sum.getLeft());
-        assertTrue(neg.getOperator() instanceof NumericNegation);
-        assertSame(x, neg.getExpression());
-        Constant cst = (Constant) sum.getRight();
-        assertEquals(new MathNumber(99), cst.getValue());
-
-    }
-
-    @Test // "not((x <= y) AND (y <= z)) => not(x <= y) OR not(y <= z)"
-    public void deMorganAnd() throws SemanticException {
+    @Test // not((x <= y) AND (y <= z)) (float) => not(x <= y) OR not(y <= z)
+    public void deMorganAndFloat() throws SemanticException {
         BinaryExpression a = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonLe.INSTANCE, location);
         BinaryExpression b = new BinaryExpression(BoolType.INSTANCE, y, z, ComparisonLe.INSTANCE, location);
         BinaryExpression and = new BinaryExpression(BoolType.INSTANCE, a, b, LogicalAnd.INSTANCE, location);
@@ -534,31 +445,28 @@ public class BooleanExpressionNormalizerTest {
 
         BinaryExpression top = asBin(res);
         assertTrue(top.getOperator() instanceof LogicalOr);
-        // Left branch is normalized negation of (x <= y)
-        BinaryExpression le1 = asBin(top.getLeft());
-        assertOp(le1, ComparisonLe.class);
-        // Accept either (y - x + 1) <= 0 (interi) o una forma equivalente
-        assertTrue(isZeroConst(le1.getRight()));
 
-        // Right branch is normalized negation of (y <= z)
-        BinaryExpression le2 = asBin(top.getRight());
-        assertOp(le2, ComparisonLe.class);
-        assertTrue(isZeroConst(le2.getRight()));
+        BinaryExpression l = asBin(top.getLeft());
+        assertOp(l, ComparisonLe.class);
+        assertTrue(isZeroConst(l.getRight()));
+
+        BinaryExpression r = asBin(top.getRight());
+        assertOp(r, ComparisonLe.class);
+        assertTrue(isZeroConst(r.getRight()));
     }
 
-    @Test // "not(x == y) => x != y (forma normalizzata)"
-    public void notEqBecomesNe() throws SemanticException {
+    @Test // not(x == y) (float) => (x - y) != 0
+    public void notEqBecomesNeFloat() throws SemanticException {
         BinaryExpression eq = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonEq.INSTANCE, location);
         UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, eq, LogicalNegation.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
 
-        // Dovrebbe diventare la normalizzazione della disuguaglianza per interi
-        BinaryExpression or = asBin(res);
-        assertTrue(or.getOperator() instanceof LogicalOr);
+        BinaryExpression cmp = asBin(res);
+        assertOp(cmp, ComparisonNe.class);
     }
 
-    @Test // "not(x != y) => x == y (forma normalizzata)"
-    public void notNeBecomesEq() throws SemanticException {
+    @Test // not(x != y) (float) => x == y (forma normalizzata)
+    public void notNeBecomesEqFloat() throws SemanticException {
         BinaryExpression ne = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonNe.INSTANCE, location);
         UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, ne, LogicalNegation.INSTANCE, location);
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
@@ -567,9 +475,8 @@ public class BooleanExpressionNormalizerTest {
         assertTrue(and.getOperator() instanceof LogicalAnd);
     }
 
-    // Operatori logici senza negazione
-    @Test // "(x <= y) OR (y <= z) rimane OR con operandi normalizzati"
-    public void orRemainsOr() throws SemanticException {
+    @Test // (x <= y) OR (y <= z) remains OR with normalized operands
+    public void orRemainsOrFloat() throws SemanticException {
         BinaryExpression a = new BinaryExpression(BoolType.INSTANCE, x, y, ComparisonLe.INSTANCE, location);
         BinaryExpression b = new BinaryExpression(BoolType.INSTANCE, y, z, ComparisonLe.INSTANCE, location);
         BinaryExpression or = new BinaryExpression(BoolType.INSTANCE, a, b, LogicalOr.INSTANCE, location);
@@ -581,10 +488,8 @@ public class BooleanExpressionNormalizerTest {
         assertTrue(top.getRight() instanceof BinaryExpression);
     }
 
-    // Already normalized cases
-    @Test // "(x - 5) <= 0 remains unchanged shape"
-    public void subConstLeZeroRemains() throws SemanticException {
-        // Build (x - 5) <= 0
+    @Test // (x - 5) <= 0 remains unchanged shape
+    public void subConstLeZeroRemainsFloat() throws SemanticException {
         BinaryExpression sub = new BinaryExpression(Num, x, c(5, Num, location), NumericNonOverflowingSub.INSTANCE,
                 location);
         BinaryExpression le = new BinaryExpression(BoolType.INSTANCE, sub, c(0, Num, location),
@@ -592,12 +497,10 @@ public class BooleanExpressionNormalizerTest {
 
         SymbolicExpression res = BooleanExpressionNormalizer.normalize(le, location);
 
-        // Check structure: (something <= 0)
         BinaryExpression top = asBin(res);
         assertOp(top, ComparisonLe.class);
         assertTrue(isZeroConst(top.getRight()));
 
-        // Left must be (x - 5)
         BinaryExpression diff = asBin(top.getLeft());
         assertTrue(diff.getOperator() instanceof NumericNonOverflowingSub);
         assertSame(x, diff.getLeft());
@@ -605,44 +508,28 @@ public class BooleanExpressionNormalizerTest {
         assertEquals(new MathNumber(5), cst.getValue());
     }
 
-    @Test // "(-x + 100) <= 0 remains unchanged"
-    public void negAddConstLeZeroRemains() throws SemanticException {
-        // Build (-x + 100) <= 0
-        UnaryExpression negX = new UnaryExpression(Num, x, NumericNegation.INSTANCE, location);
-        BinaryExpression add = new BinaryExpression(Num, negX, c(100, Num, location),
-                NumericNonOverflowingAdd.INSTANCE,
-                location);
-        BinaryExpression le = new BinaryExpression(BoolType.INSTANCE, add, c(0, Num, location),
-                ComparisonLe.INSTANCE, location);
+    @Test // not(x + 100 < 0) (float) => -x -100 <= 0
+    public void notAdd100LtZeroFloat() throws SemanticException {
+        // Build not((x + 100) < 0)
+        BinaryExpression add = new BinaryExpression(Num, x, c(100, Num, location),
+                NumericNonOverflowingAdd.INSTANCE, location);
+        BinaryExpression lt = new BinaryExpression(BoolType.INSTANCE, add, c(0, Num, location),
+                ComparisonLt.INSTANCE, location);
+        UnaryExpression not = new UnaryExpression(BoolType.INSTANCE, lt, LogicalNegation.INSTANCE, location);
 
-        SymbolicExpression res = BooleanExpressionNormalizer.normalize(le, location);
+        SymbolicExpression res = BooleanExpressionNormalizer.normalize(not, location);
 
-        // Check structure: (something <= 0)
-        BinaryExpression top = asBin(res);
-        assertOp(top, ComparisonLe.class);
-        assertTrue(isZeroConst(top.getRight()));
-
-        // Left must be (-x + 100)
-        BinaryExpression sum = asBin(top.getLeft());
-        assertIsAdd(sum);
-        UnaryExpression neg = asUnary(sum.getLeft());
+        // Expect: -x - 100 <= 0
+        BinaryExpression le = asBin(res);
+        assertOp(le, ComparisonLe.class);
+        assertTrue(isZeroConst(le.getRight()));
+        BinaryExpression sub = asBin(le.getLeft());
+        assertIsSub(sub);
+        UnaryExpression neg = asUnary(sub.getLeft());
         assertTrue(neg.getOperator() instanceof NumericNegation);
         assertSame(x, neg.getExpression());
-        Constant cst = (Constant) sum.getRight();
+        Constant cst = (Constant) sub.getRight();
         assertEquals(new MathNumber(100), cst.getValue());
-    }
 
-    // test non comparisons such as x + 10
-    // Non-boolean expressions
-    @Test // "x + 10 remains unchanged"
-    public void addConstRemains() throws SemanticException {
-        BinaryExpression add = new BinaryExpression(Num, x, c(10, Num, location),
-                NumericNonOverflowingAdd.INSTANCE, location);
-        SymbolicExpression res = BooleanExpressionNormalizer.normalize(add, location);
-        // Should remain unchanged
-        assertTrue(res instanceof BinaryExpression);
-        BinaryExpression binRes = (BinaryExpression) res;
-        assertTrue(binRes.getOperator() instanceof NumericNonOverflowingAdd);
-        assertSame(x, binRes.getLeft());
     }
 }

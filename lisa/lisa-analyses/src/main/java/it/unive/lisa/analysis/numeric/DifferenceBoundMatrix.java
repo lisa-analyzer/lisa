@@ -447,6 +447,7 @@ public class DifferenceBoundMatrix
 		}
 
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, workingVariableIndex);
+		//Floyd.printMatrix(result.matrix);
 		return result;
 
 	}
@@ -983,6 +984,8 @@ public class DifferenceBoundMatrix
 				// set to +∞
 				if (this.matrix[i][j].compareTo(other.matrix[i][j]) < 0) {
 					resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
+				} else if (this.matrix[i][j].compareTo(other.matrix[i][j]) > 0) {
+					resultMatrix[i][j] = MathNumber.MINUS_INFINITY;
 				} else {
 					resultMatrix[i][j] = this.matrix[i][j];
 				}

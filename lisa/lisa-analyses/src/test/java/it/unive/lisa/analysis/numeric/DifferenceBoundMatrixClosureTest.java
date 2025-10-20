@@ -1,4 +1,4 @@
-package it.unive.lisa.util.octagon;
+package it.unive.lisa.analysis.numeric;
 
 import static org.junit.Assert.assertTrue;
 

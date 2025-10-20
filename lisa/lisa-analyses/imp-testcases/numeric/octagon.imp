@@ -71,4 +71,57 @@ class octagon_tests {
 		}
 		return x;  
 	}
+
+	//Increasing loop counter
+	example1()
+	{
+		def x = 0;
+		def n = 10;
+
+		while(x < n)
+		{
+			x=x+1;
+		}
+
+		return x;
+	}
+
+	//Decreasing loop counter
+	example2()
+	{
+		def i=16;
+		def x=1;
+
+		while(i > 0)
+		{
+			x=x+1;
+			i=i-1;
+		}
+
+
+		return x;
+	}
+
+	//Absolute value
+	example3()
+	{
+		def x=50;
+		def y=x+0;
+
+		if(y<=0)
+		{
+			y=-y;
+		}
+		else
+		{
+			y=y+0;
+		}
+
+		if(y<=69)
+		{
+			y=y+0;
+		}
+
+		return y;
+	}
 }
