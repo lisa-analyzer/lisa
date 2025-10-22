@@ -28,8 +28,6 @@ dependencies {
 	// testing
     testImplementation 'junit:junit:4.12'
 	testImplementation 'org.reflections:reflections:0.9.12'
-	testImplementation project(':lisa-program')
-	testImplementation project(':lisa-analyses')
 }
 
 tasks.register('generateVersionInfo', Copy) {

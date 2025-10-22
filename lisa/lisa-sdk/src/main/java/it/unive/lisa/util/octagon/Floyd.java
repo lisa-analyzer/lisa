@@ -1,11 +1,10 @@
 package it.unive.lisa.util.octagon;
 
+import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
-
-import it.unive.lisa.util.numeric.MathNumber;
-import it.unive.lisa.util.numeric.MathNumberConversionException;
 
 /**
  * Implementation of the Floyd-Warshall algorithm and and its variants, used for
@@ -13,7 +12,7 @@ import it.unive.lisa.util.numeric.MathNumberConversionException;
  * 
  * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso </a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
- *         Shytermeja</a>
+ *             Shytermeja</a>
  */
 
 public class Floyd {
@@ -21,7 +20,9 @@ public class Floyd {
 	public static final int INF = Integer.MAX_VALUE / 2;
 	public static final int V = 6;
 
-	public static void TestNormalFloyd(MathNumber[][] mat) throws MathNumberConversionException {
+	public static void TestNormalFloyd(
+			MathNumber[][] mat)
+			throws MathNumberConversionException {
 		// generateMatrix(dist);
 
 		System.out.println("Negative cycles BFS: " + HasNegativeCycle(mat));
@@ -41,7 +42,9 @@ public class Floyd {
 
 	}
 
-	public static void TestCustomFloyd(MathNumber[][] mat) throws MathNumberConversionException {
+	public static void TestCustomFloyd(
+			MathNumber[][] mat)
+			throws MathNumberConversionException {
 		// generateMatrix(dist);
 
 		System.out.println("Negative cycles BFS: " + HasNegativeCycle(mat));
@@ -61,7 +64,9 @@ public class Floyd {
 
 	}
 
-	public static void TestStrongClosureFloyd(MathNumber[][] mat) throws MathNumberConversionException {
+	public static void TestStrongClosureFloyd(
+			MathNumber[][] mat)
+			throws MathNumberConversionException {
 		// generateMatrix(dist);
 
 		System.out.println("Negative cycles BFS: " + HasNegativeCycle(mat));
@@ -78,7 +83,9 @@ public class Floyd {
 
 	}
 
-	public static boolean equalMatrix(MathNumber[][] m1, MathNumber[][] m2) {
+	public static boolean equalMatrix(
+			MathNumber[][] m1,
+			MathNumber[][] m2) {
 		for (int y = 0; y < m1.length; y++) {
 			for (int x = 0; x < m1.length; x++) {
 				if (m1[y][x] != m2[y][x]) {
@@ -91,7 +98,8 @@ public class Floyd {
 		return true;
 	}
 
-	public static void initMem(MathNumber[][] matrix) {
+	public static void initMem(
+			MathNumber[][] matrix) {
 		int V = matrix.length;
 
 		for (int i = 0; i < V; i++) {
@@ -101,7 +109,9 @@ public class Floyd {
 		}
 	}
 
-	public static void copyArray(MathNumber[][] matrix1, MathNumber[][] matrix2) {
+	public static void copyArray(
+			MathNumber[][] matrix1,
+			MathNumber[][] matrix2) {
 		int V = matrix1.length;
 
 		for (int i = 0; i < V; i++) {
@@ -111,7 +121,8 @@ public class Floyd {
 		}
 	}
 
-	public static void generateMatrix(MathNumber[][] matrix) {
+	public static void generateMatrix(
+			MathNumber[][] matrix) {
 		int V = matrix.length;
 		Random rand = new Random();
 
@@ -128,7 +139,8 @@ public class Floyd {
 		}
 	}
 
-	public static void printMatrix(MathNumber[][] matrix) {
+	public static void printMatrix(
+			MathNumber[][] matrix) {
 		int V = matrix.length;
 
 		for (int i = 0; i < V; i++) {
@@ -139,7 +151,9 @@ public class Floyd {
 		}
 	}
 
-	public static void Floyd(MathNumber[][] matrix, MathNumber path[][]) {
+	public static void Floyd(
+			MathNumber[][] matrix,
+			MathNumber path[][]) {
 		int V = matrix.length;
 
 		for (int k = 0; k < V; k++) {
@@ -160,7 +174,9 @@ public class Floyd {
 		}
 	}
 
-	public static void WarshallFloyd(MathNumber[][] matrix, MathNumber[][] path) {
+	public static void WarshallFloyd(
+			MathNumber[][] matrix,
+			MathNumber[][] path) {
 		MathNumber[][] mem = new MathNumber[matrix.length][matrix.length];
 
 		for (int i = 0; i < matrix.length; i++) {
@@ -179,13 +195,19 @@ public class Floyd {
 		}
 	}
 
-	public static void Floyd2(MathNumber[][] matrix, int start, int n, MathNumber[][] mem, MathNumber[][] path) {
+	public static void Floyd2(
+			MathNumber[][] matrix,
+			int start,
+			int n,
+			MathNumber[][] mem,
+			MathNumber[][] path) {
 		if (n > 0) {
 			int V = matrix.length;
 			for (int j = 0; j < V; j++) {
 				for (int k = 0; k < V; k++) {
 					if (mem[k][j].compareTo(matrix[k][j]) > 0 && matrix[k][j] != MathNumber.PLUS_INFINITY) {
-						// To use neighbor "k", I need by inductive hypothesis that "k" and all its
+						// To use neighbor "k", I need by inductive hypothesis
+						// that "k" and all its
 						// neighbors are updated
 						Floyd2(matrix, k, n - 1, mem, path);
 
@@ -193,7 +215,8 @@ public class Floyd {
 								&& matrix[start][k] != MathNumber.PLUS_INFINITY) {
 							matrix[start][j] = matrix[start][k].add(matrix[k][j]);
 							path[start][j] = new MathNumber(k);
-							// Update all neighbors of start by inductive hypothesis since a value of
+							// Update all neighbors of start by inductive
+							// hypothesis since a value of
 							// start has been modified
 							Floyd2(matrix, start, n - 1, mem, path);
 						} else if (path[start][j] == MathNumber.MINUS_ONE) {
@@ -207,7 +230,8 @@ public class Floyd {
 								&& matrix[start][k] != MathNumber.PLUS_INFINITY) {
 							matrix[start][j] = matrix[start][k].add(mem[k][j]);
 							path[start][j] = new MathNumber(k);
-							// Update all neighbors of start by inductive hypothesis since a value of
+							// Update all neighbors of start by inductive
+							// hypothesis since a value of
 							// start has been modified
 							Floyd2(matrix, start, n - 1, mem, path);
 						} else if (path[start][j] == MathNumber.MINUS_ONE
@@ -221,7 +245,9 @@ public class Floyd {
 		}
 	}
 
-	public static boolean HasNegativeCycle(MathNumber[][] matrix) throws MathNumberConversionException {
+	public static boolean HasNegativeCycle(
+			MathNumber[][] matrix)
+			throws MathNumberConversionException {
 		String[] colors = new String[matrix.length];
 		MathNumber path[] = new MathNumber[matrix.length];
 
@@ -253,7 +279,12 @@ public class Floyd {
 		return false;
 	}
 
-	public static int DFS(MathNumber[][] matrix, int curr, String[] colors, int dist, MathNumber[] pass)
+	public static int DFS(
+			MathNumber[][] matrix,
+			int curr,
+			String[] colors,
+			int dist,
+			MathNumber[] pass)
 			throws MathNumberConversionException {
 		colors[curr] = "Gray";
 
@@ -283,8 +314,13 @@ public class Floyd {
 
 	}
 
-	public static MathNumber[] BFS(MathNumber[][] matrix, int start, String[] colors, MathNumber[] dist,
-			MathNumber[] pass) throws MathNumberConversionException {
+	public static MathNumber[] BFS(
+			MathNumber[][] matrix,
+			int start,
+			String[] colors,
+			MathNumber[] dist,
+			MathNumber[] pass)
+			throws MathNumberConversionException {
 		Queue<Integer> q = new LinkedList<>();
 		int curr = 0;
 		MathNumber path[][] = new MathNumber[matrix.length][matrix.length];
@@ -330,7 +366,8 @@ public class Floyd {
 
 	}
 
-	public static void strongClosureFloyd(MathNumber[][] matrix) {
+	public static void strongClosureFloyd(
+			MathNumber[][] matrix) {
 		int V = matrix.length;
 
 		for (int k = 1; k <= V / 2; k++) {
@@ -371,7 +408,11 @@ public class Floyd {
 		}
 	}
 
-	public static void printPath(int start, int finish, MathNumber[][] path) throws MathNumberConversionException {
+	public static void printPath(
+			int start,
+			int finish,
+			MathNumber[][] path)
+			throws MathNumberConversionException {
 		int curr = start;
 
 		System.out.println("Printing path");

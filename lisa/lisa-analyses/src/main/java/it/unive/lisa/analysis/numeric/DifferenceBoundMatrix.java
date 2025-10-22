@@ -67,6 +67,14 @@ public class DifferenceBoundMatrix
 		this.variableIndex = variableIndex;
 	}
 
+	public Map<Identifier, Integer> getVariableIndex() {
+		return variableIndex;
+	}
+
+	public MathNumber[][] getMatrix() {
+		return matrix;
+	}
+
 	private MathNumber[][] copyMatrix(
 			MathNumber[][] source) {
 		MathNumber[][] copy = new MathNumber[source.length][];
@@ -371,6 +379,7 @@ public class DifferenceBoundMatrix
 		} else if (!hasVariable(expression).equals(id.getName())
 				&& hasVariable(expression).charAt(0) != '-') {
 			// Case 3: Vi0 = Vj0 + constant with i0 != j0
+
 			Double c = 0.0;
 			if (expression instanceof BinaryExpression) {
 				try {
@@ -396,10 +405,10 @@ public class DifferenceBoundMatrix
 		} else if (hasVariable(expression).equals("- " + id.getName())) {
 			fourthCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id);
 		} else {
+
 			if (!hasVariable(expression).contains("- " + id.getName())
 					&& (expression.toString().split("- ").length == 2
 							&& expression.toString().split(Pattern.quote("+")).length == 1)) {
-
 				thirdCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id, 0, true);
 
 				fourthCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id);
@@ -407,33 +416,37 @@ public class DifferenceBoundMatrix
 			} else if (hasVariable(expression).contains("- " + id.getName())
 					&& expression.toString().split("- " + id.getName()).length > 1) {
 				double offset = 0;
-				CostantExpression costantExpression = new CostantExpression();
 
-				ValueExpression e = costantExpression.visit((UnaryExpression) expression, expression);
-
-				try {
-					offset = resolveCostantExpression((ValueExpression) ((BinaryExpression) e).getRight());
-				} catch (MathNumberConversionException ex) {
+				if(expression.toString().split("- ").length > 2)
+				{
+					offset = Double.parseDouble(expression.toString().split("- ")[2]);
+				}
+				else
+				{
+					offset = -Double.parseDouble(expression.toString().split("- ")[1].split("\\+")[1]);
 				}
 
-				fourthCaseAssignement(curMatrix, newVariableIndex, expression, id);
-				secondCaseAssignement(curMatrix, idToNeg(id, workingVariableIndex) / 2, expression, id, offset, true);
+
+				secondCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id, offset, true);
+				fourthCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id);
+
 			} else {
 				double offset = 0;
 
-				CostantExpression costantExpression = new CostantExpression();
-
-				ValueExpression e = costantExpression.visit((UnaryExpression) expression, expression);
-
-				try {
-					offset = resolveCostantExpression((ValueExpression) ((BinaryExpression) e).getRight());
-				} catch (MathNumberConversionException ex) {
+				if(expression.toString().split("- ").length > 2)
+				{
+					offset = Double.parseDouble(expression.toString().split("- ")[2]);
+				}
+				else
+				{
+					offset = -Double.parseDouble(expression.toString().split("- ")[1].split("\\+")[1]);
 				}
 
-				thirdCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id, 0, true);
-				fourthCaseAssignement(curMatrix, idToNeg(id, workingVariableIndex) / 2, expression, id);
 				secondCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id, offset,
 						true);
+				fourthCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id);
+				thirdCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id, 0, true);
+						
 			}
 		}
 
@@ -447,7 +460,9 @@ public class DifferenceBoundMatrix
 		}
 
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, workingVariableIndex);
-		//Floyd.printMatrix(result.matrix);
+		// Floyd.printMatrix(result.matrix);
+		Floyd.strongClosureFloyd(result.matrix);
+		//System.out.println(result.representation());
 		return result;
 
 	}
@@ -468,7 +483,7 @@ public class DifferenceBoundMatrix
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-
+		
 		SymbolicExpression normalized = BooleanExpressionNormalizer.normalize(expression, src.getLocation(),
 				src, oracle);
 		if (!(normalized instanceof BinaryExpression)) {
@@ -481,6 +496,7 @@ public class DifferenceBoundMatrix
 			// apply assume for both sides and then merge the results with glb
 			DifferenceBoundMatrix leftResult = this.assume((ValueExpression) be.getLeft(), src, dest, oracle);
 			DifferenceBoundMatrix rightResult = this.assume((ValueExpression) be.getRight(), src, dest, oracle);
+
 			return leftResult.glbAux(rightResult);
 		}
 
@@ -882,7 +898,7 @@ public class DifferenceBoundMatrix
 	}
 
 	// maps Vi to the positive V^'_(2i - 1) index in the matrix
-	private int idToPos(
+	public int idToPos(
 			Identifier id,
 			Map<Identifier, Integer> varIndex) {
 		if (!varIndex.containsKey(id))
@@ -893,7 +909,7 @@ public class DifferenceBoundMatrix
 	}
 
 	// maps Vi to the negative V^'_(2i) index in the matrix
-	private int idToNeg(
+	public int idToNeg(
 			Identifier id,
 			Map<Identifier, Integer> varIndex) {
 		if (!varIndex.containsKey(id))

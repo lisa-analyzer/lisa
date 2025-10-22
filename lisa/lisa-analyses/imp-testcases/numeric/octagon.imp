@@ -1,13 +1,49 @@
 class octagon_tests {
 
+	assign_relations()
+	{
+		def x = 10;
+		def y = -x;
+		def z = y + 100;
+
+		return z;
+	}
+
+	assign_relations2()
+	{
+		def x = 10;
+		def y = x + 50;
+		def z = y + 100;
+
+		return z;
+	}
+
+	assign_relations3()
+	{
+		def x = 10;
+		x = -x - 30;
+		
+		return x;
+	}
+
+	assign_relations4()
+	{
+		def x = 10;
+		def y = -x + 20;
+		
+		return x;
+	}
+
 	backward() {
-		def x = 10000;
+		def x = 1000;
+
 		while(x >= 1) {
 			x = x - 1;
 		}
 		return x; // expected 0
 	}
 
+	
 	// Forward increasing loop, terminates when x >= 10
 	forward() {
 		def x = 0;

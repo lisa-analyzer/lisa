@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.numeric;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -10,9 +16,8 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * Implementation of the octagons analysis of
@@ -76,8 +81,101 @@ public class Octagon
 	@Override
 	public StructuredRepresentation representation() {
 		debug("representation() - Getting representation");
-		return dbm.representation();
+		Map<Identifier, Integer> variableIndex = dbm.getVariableIndex();
+		String result1 = "";
+		String result2 = "";
+
+		
+		// Single index
+		for(Identifier id : variableIndex.keySet()) {
+			int I2 = dbm.idToNeg(id, variableIndex);
+			int I2_Minus1 = dbm.idToPos(id, variableIndex);
+			
+			for(int i=0;i<dbm.getMatrix().length;i++) {
+				for(int j=0;j<dbm.getMatrix().length;j++) {
+					// First condition
+					if (i == I2_Minus1 && j == I2) {
+						//System.out.println("-" + id.getName() + " - " + id.getName() + " <= " + dbm.getMatrix()[j][i]);
+						result1 += "{" + id.getName() + " -(-" + id.getName() + ") <= " + dbm.getMatrix()[j][i] + "}\n";
+					}
+
+					// Second condition
+					if (i == I2 && j == I2_Minus1) {// &&  dbm.getMatrix()[j][i] != MathNumber.PLUS_INFINITY) {
+						//System.out.println(id.getName() + " - ( - " + id.getName() + ") <= " + dbm.getMatrix()[j][i]);
+						result1 += "{-" + id.getName() + " -" + id.getName() + " <= " + dbm.getMatrix()[j][i] + "}\n";
+					}
+					//System.out.println();
+				}
+			}
+		}
+
+
+		// Double index
+		
+		for(Identifier id : variableIndex.keySet()) {
+			for(Identifier id2 : variableIndex.keySet()) {
+				if(!id.getName().equals(id2.getName())){
+
+					int I2 = dbm.idToNeg(id, variableIndex);
+					int I2_Minus1 = dbm.idToPos(id, variableIndex);
+					int J2 = dbm.idToNeg(id2, variableIndex);
+					int J2_Minus1 = dbm.idToPos(id2, variableIndex);
+
+					for (int i = 0; i <dbm.getMatrix().length; i++) {
+						for (int j = 0; j <dbm.getMatrix().length; j++) {
+							double matIJ = 0;
+							double matJI = 0;
+
+							try {
+								matIJ = dbm.getMatrix()[i][j].toDouble();
+								matJI = dbm.getMatrix()[j][i].toDouble();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+
+							
+							// First condition
+							if (i == I2_Minus1 && j == J2_Minus1) {
+								result2 += "{" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}\n";
+							}
+
+							if (i == I2 && j == J2) {
+								result2 += "{-" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
+							}
+
+							
+							// Second condition
+							if (i == I2_Minus1 && j == J2) {
+								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
+							}
+
+							if (i == I2 && j == J2_Minus1) {
+								result2 += "{-" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}\n";
+							}
+
+							
+							// Third condition
+							if (i == I2 && j == J2_Minus1) {
+								result2 += "{" + id2.getName() + " -(-" + id.getName() + ") <= " + matIJ + "}\n";
+							}
+
+							if (i == I2_Minus1 && j == J2) {
+								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
+							}
+						
+						}
+					}
+				}
+			}
+		}
+
+		String resultWithoutDuplicates = Arrays.stream(result2.split("\n")).distinct().collect(Collectors.joining("\n"));
+
+		//System.out.println(resultWithoutDuplicates);
+		return new StringRepresentation(result1 + "\n" + resultWithoutDuplicates);
 	}
+
+
 
 	@Override
 	public Octagon glbAux(
