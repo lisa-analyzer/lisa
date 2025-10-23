@@ -70,6 +70,12 @@ public class Octagon
 		// System.out.println("Octagon: " + message);
 	}
 
+	/**
+	 * Performs an assignment operation in the octagon domain.
+	 * 
+	 * @see DifferenceBoundMatrix#assign(Identifier, ValueExpression,
+	 *          ProgramPoint, SemanticOracle)
+	 */
 	@Override
 	public Octagon assign(
 			Identifier id,
@@ -81,6 +87,11 @@ public class Octagon
 		return new Octagon(dbm.assign(id, expression, pp, oracle));
 	}
 
+	/**
+	 * Forgets (removes constraints on) the specified identifier.
+	 * 
+	 * @see DifferenceBoundMatrix#forgetIdentifier(Identifier)
+	 */
 	@Override
 	public Octagon forgetIdentifier(
 			Identifier id)
@@ -97,6 +108,10 @@ public class Octagon
 		return ValueDomain.super.forgetIdentifiers(ids);
 	}
 
+	/**
+	 * Returns a structured representation of the octagon constraints as a set
+	 * of linear inequalities of the form ±x ± y ≤ c.
+	 */
 	@Override
 	public StructuredRepresentation representation() {
 		debug("representation() - Getting representation");
@@ -197,6 +212,11 @@ public class Octagon
 		return new StringRepresentation(result1 + "\n" + resultWithoutDuplicates);
 	}
 
+	/**
+	 * Computes the greatest lower bound (meet) of two octagons.
+	 * 
+	 * @see DifferenceBoundMatrix#glbAux(DifferenceBoundMatrix)
+	 */
 	@Override
 	public Octagon glbAux(
 			Octagon other)
@@ -205,6 +225,11 @@ public class Octagon
 		return BaseLattice.super.glbAux(other);
 	}
 
+	/**
+	 * Checks the partial order relation between two octagons.
+	 * 
+	 * @see DifferenceBoundMatrix#lessOrEqualAux(DifferenceBoundMatrix)
+	 */
 	@Override
 	public boolean lessOrEqualAux(
 			Octagon other)
@@ -213,6 +238,11 @@ public class Octagon
 		return dbm.lessOrEqualAux(other.dbm);
 	}
 
+	/**
+	 * Computes the least upper bound (join) of two octagons.
+	 * 
+	 * @see DifferenceBoundMatrix#lubAux(DifferenceBoundMatrix)
+	 */
 	@Override
 	public Octagon lubAux(
 			Octagon other)
@@ -221,6 +251,10 @@ public class Octagon
 		return new Octagon(dbm.lubAux(other.dbm));
 	}
 
+	/**
+	 * Computes the narrowing of two octagons to improve precision after
+	 * widening.
+	 */
 	@Override
 	public Octagon narrowingAux(
 			Octagon other)
@@ -229,6 +263,11 @@ public class Octagon
 		return BaseLattice.super.narrowingAux(other);
 	}
 
+	/**
+	 * Computes the widening of two octagons to ensure termination.
+	 * 
+	 * @see DifferenceBoundMatrix#wideningAux(DifferenceBoundMatrix)
+	 */
 	@Override
 	public Octagon wideningAux(
 			Octagon other)
@@ -237,6 +276,13 @@ public class Octagon
 		return new Octagon(dbm.wideningAux(other.dbm));
 	}
 
+	/**
+	 * Evaluates the small-step semantics of an expression in the octagon
+	 * domain.
+	 * 
+	 * @see DifferenceBoundMatrix#smallStepSemantics(ValueExpression,
+	 *          ProgramPoint, SemanticOracle)
+	 */
 	@Override
 	public Octagon smallStepSemantics(
 			ValueExpression expression,
@@ -247,6 +293,12 @@ public class Octagon
 		return new Octagon(dbm.smallStepSemantics(expression, pp, oracle));
 	}
 
+	/**
+	 * Refines the octagon by assuming a boolean constraint holds.
+	 * 
+	 * @see DifferenceBoundMatrix#assume(ValueExpression, ProgramPoint,
+	 *          ProgramPoint, SemanticOracle)
+	 */
 	@Override
 	public Octagon assume(
 			ValueExpression expression,
@@ -258,6 +310,11 @@ public class Octagon
 		return new Octagon(dbm.assume(expression, src, dest, oracle));
 	}
 
+	/**
+	 * Checks whether the octagon tracks the given identifier.
+	 * 
+	 * @see DifferenceBoundMatrix#knowsIdentifier(Identifier)
+	 */
 	@Override
 	public boolean knowsIdentifier(
 			Identifier id) {
@@ -265,6 +322,11 @@ public class Octagon
 		return dbm.knowsIdentifier(id);
 	}
 
+	/**
+	 * Forgets all identifiers that satisfy the given predicate.
+	 * 
+	 * @see DifferenceBoundMatrix#forgetIdentifiersIf(Predicate)
+	 */
 	@Override
 	public Octagon forgetIdentifiersIf(
 			Predicate<Identifier> test)
@@ -273,6 +335,12 @@ public class Octagon
 		return new Octagon(dbm.forgetIdentifiersIf(test));
 	}
 
+	/**
+	 * Checks whether the given expression is satisfied by this octagon.
+	 * 
+	 * @see DifferenceBoundMatrix#satisfies(ValueExpression, ProgramPoint,
+	 *          SemanticOracle)
+	 */
 	@Override
 	public Satisfiability satisfies(
 			ValueExpression expression,
@@ -283,6 +351,11 @@ public class Octagon
 		return dbm.satisfies(expression, pp, oracle);
 	}
 
+	/**
+	 * Pushes a new scope for scoped identifiers.
+	 * 
+	 * @see DifferenceBoundMatrix#pushScope(ScopeToken)
+	 */
 	@Override
 	public Octagon pushScope(
 			ScopeToken token)
@@ -291,6 +364,11 @@ public class Octagon
 		return new Octagon(dbm.pushScope(token));
 	}
 
+	/**
+	 * Pops a scope, removing scoped identifiers.
+	 * 
+	 * @see DifferenceBoundMatrix#popScope(ScopeToken)
+	 */
 	@Override
 	public Octagon popScope(
 			ScopeToken token)
@@ -299,6 +377,9 @@ public class Octagon
 		return new Octagon(dbm.popScope(token));
 	}
 
+	/**
+	 * Checks the partial order relation between two octagons.
+	 */
 	@Override
 	public boolean lessOrEqual(
 			Octagon other)
@@ -307,6 +388,9 @@ public class Octagon
 		return BaseLattice.super.lessOrEqual(other);
 	}
 
+	/**
+	 * Computes the least upper bound (join) of two octagons.
+	 */
 	@Override
 	public Octagon lub(
 			Octagon other)
@@ -315,24 +399,45 @@ public class Octagon
 		return BaseLattice.super.lub(other);
 	}
 
+	/**
+	 * Returns the top element (no constraints) of the octagon domain.
+	 * 
+	 * @see DifferenceBoundMatrix#top()
+	 */
 	@Override
 	public Octagon top() {
 		debug("top() - Getting top element");
 		return new Octagon(new DifferenceBoundMatrix().top());
 	}
 
+	/**
+	 * Returns the bottom element (inconsistent constraints) of the octagon
+	 * domain.
+	 * 
+	 * @see DifferenceBoundMatrix#bottom()
+	 */
 	@Override
 	public Octagon bottom() {
 		debug("bottom() - Getting bottom element");
 		return new Octagon(new DifferenceBoundMatrix().bottom());
 	}
 
+	/**
+	 * Checks whether this octagon represents the top element.
+	 * 
+	 * @see DifferenceBoundMatrix#isTop()
+	 */
 	@Override
 	public boolean isTop() {
 		debug("isTop() - Checking if is top");
 		return dbm.isTop();
 	}
 
+	/**
+	 * Checks whether this octagon represents the bottom element.
+	 * 
+	 * @see DifferenceBoundMatrix#isBottom()
+	 */
 	@Override
 	public boolean isBottom() {
 		debug("isBottom() - Checking if is bottom");
@@ -349,6 +454,8 @@ public class Octagon
 	 * @return the octagon representation of the interval constraints
 	 * 
 	 * @throws SemanticException if the conversion fails
+	 * 
+	 * @see DifferenceBoundMatrix#fromIntervalDomain(ValueEnvironment)
 	 */
 	public static Octagon fromIntervalDomain(
 			ValueEnvironment<Interval> env)
@@ -364,6 +471,8 @@ public class Octagon
 	 * @return the interval environment representation
 	 * 
 	 * @throws SemanticException if the conversion fails
+	 * 
+	 * @see DifferenceBoundMatrix#toInterval()
 	 */
 	public ValueEnvironment<Interval> toIntervalDomain() throws SemanticException {
 		return dbm.toInterval();
