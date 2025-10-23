@@ -177,11 +177,10 @@ public class DifferenceBoundMatrixTest {
 		return res;
 	}
 
-
 	public DifferenceBoundMatrix dbmFromMatrixMathNumbers(
 			MathNumber[][] matrix,
 			Identifier... vars) {
-		
+
 		java.util.Map<Identifier, Integer> index = new java.util.HashMap<>();
 		for (int i = 0; i < vars.length; i++)
 			index.put(vars[i], i);
@@ -311,18 +310,17 @@ public class DifferenceBoundMatrixTest {
 				.assign(y, c2, pp, oracle);
 		System.out.println(result.representation());
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-10), MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY},
-			{new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO},
-			{MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-20)},
-			{MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(20), MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-10), MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY },
+				{ new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO },
+				{ MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-20) },
+				{ MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(20), MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
 
-
-
-		assertTrue("DBM representation should match expected", result.equals(dbmFromMatrixMathNumbers(resultStrongClosure, x, y)));
+		assertTrue("DBM representation should match expected",
+				result.equals(dbmFromMatrixMathNumbers(resultStrongClosure, x, y)));
 
 		assertTrue("DBM should know first variable", result.knowsIdentifier(x));
 		assertTrue("DBM should know second variable", result.knowsIdentifier(y));
@@ -407,16 +405,14 @@ public class DifferenceBoundMatrixTest {
 		assertTrue(s4.knowsIdentifier(y));
 		assertFalse(s4.isBottom());
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-8), MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{new MathNumber(8), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO},
-			{MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-8), MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ new MathNumber(8), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO },
+				{ MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
-
-
 
 		assertTrue("DBM representation should match expected after copy/increment chain",
 				s4.equals(dbmFromMatrixMathNumbers(resultStrongClosure, y, x)));
@@ -452,15 +448,14 @@ public class DifferenceBoundMatrixTest {
 		assertTrue(res1.knowsIdentifier(y) && res2.knowsIdentifier(y));
 		assertTrue(res1.lessOrEqual(res2) && res2.lessOrEqual(res1));
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-14), MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{new MathNumber(14), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO},
-			{MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-14), MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ new MathNumber(14), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO },
+				{ MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
-
 
 		assertTrue("DBM representation should match expected for zero-offset equivalence",
 				res1.equals(dbmFromMatrixMathNumbers(resultStrongClosure, y, x)));
@@ -494,15 +489,14 @@ public class DifferenceBoundMatrixTest {
 		assertTrue(s3.knowsIdentifier(y));
 		assertFalse(s3.isBottom());
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(2), MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(-2)},
-			{new MathNumber(-2), MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-14)},
-			{MathNumber.PLUS_INFINITY, new MathNumber(2), new MathNumber(14), MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(2), MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(-2) },
+				{ new MathNumber(-2), MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-14) },
+				{ MathNumber.PLUS_INFINITY, new MathNumber(2), new MathNumber(14), MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
-
 
 		assertTrue("DBM representation should match expected after reassignment from other var",
 				s3.equals(dbmFromMatrixMathNumbers(resultStrongClosure, x, y)));
@@ -529,16 +523,14 @@ public class DifferenceBoundMatrixTest {
 		assertTrue("Result should know x", result.knowsIdentifier(x));
 		assertTrue("Result should know y", result.knowsIdentifier(y));
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-10), new MathNumber(3), MathNumber.PLUS_INFINITY},
-			{new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(-3)},
-			{new MathNumber(-3), MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, new MathNumber(3), MathNumber.PLUS_INFINITY, MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-10), new MathNumber(3), MathNumber.PLUS_INFINITY },
+				{ new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(-3) },
+				{ new MathNumber(-3), MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, new MathNumber(3), MathNumber.PLUS_INFINITY, MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
-
-
 
 		assertTrue("DBM representation should match expected for arithmetic assignment",
 				result.equals(dbmFromMatrixMathNumbers(resultStrongClosure, y, x)));
@@ -561,11 +553,11 @@ public class DifferenceBoundMatrixTest {
 		assertTrue("Result should know x", result.knowsIdentifier(x));
 		assertTrue("Result should know y", result.knowsIdentifier(y));
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-10), MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO},
-			{MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-10), MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO },
+				{ MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
@@ -582,11 +574,11 @@ public class DifferenceBoundMatrixTest {
 		assertTrue("Result2 should know x", result2.knowsIdentifier(x));
 		assertTrue("Result2 should know y", result2.knowsIdentifier(y));
 
-		MathNumber[][] resultStrongClosure2 = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-10), MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY},
-			{new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-10)},
-			{MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(10), MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure2 = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-10), MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY },
+				{ new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-10) },
+				{ MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(10), MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure2);
@@ -637,16 +629,14 @@ public class DifferenceBoundMatrixTest {
 		assertFalse("Result should not be bottom", result.isBottom());
 		// expected y=10, x=8
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-20), new MathNumber(-2), MathNumber.PLUS_INFINITY},
-			{new MathNumber(20), MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(2)},
-			{new MathNumber(2), MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, new MathNumber(-2), MathNumber.PLUS_INFINITY, MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-20), new MathNumber(-2), MathNumber.PLUS_INFINITY },
+				{ new MathNumber(20), MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(2) },
+				{ new MathNumber(2), MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, new MathNumber(-2), MathNumber.PLUS_INFINITY, MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
-
-
 
 		assertTrue("DBM representation should match expected for subtraction assignment",
 				result.equals(dbmFromMatrixMathNumbers(resultStrongClosure, y, x)));
@@ -725,17 +715,17 @@ public class DifferenceBoundMatrixTest {
 		assertFalse(res.isBottom());
 		// expected y=5, x=-8
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-10), MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY},
-			{new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(16)},
-			{MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-16), MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-10), MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY },
+				{ new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(16) },
+				{ MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-16), MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
 
-
-		assertTrue("DBM representation should match expected after negation", res.equals(dbmFromMatrixMathNumbers(resultStrongClosure, y, x)));
+		assertTrue("DBM representation should match expected after negation",
+				res.equals(dbmFromMatrixMathNumbers(resultStrongClosure, y, x)));
 	}
 
 	@Test
@@ -756,16 +746,15 @@ public class DifferenceBoundMatrixTest {
 		assertFalse("Result should not be bottom", result.isBottom());
 		// expected y=7, x=-7
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-14), MathNumber.PLUS_INFINITY, MathNumber.ZERO},
-			{new MathNumber(14), MathNumber.ZERO, MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-14), MathNumber.PLUS_INFINITY, MathNumber.ZERO },
+				{ new MathNumber(14), MathNumber.ZERO, MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
 
-		
 		assertTrue("DBM representation should match expected for negation assignment",
 				result.equals(dbmFromMatrixMathNumbers(resultStrongClosure, y, x)));
 	}
@@ -810,15 +799,14 @@ public class DifferenceBoundMatrixTest {
 		// "y + (-3) and y - 3 assignments should be equivalent");
 		// expected y=5, x=2
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-10), new MathNumber(-3), MathNumber.PLUS_INFINITY},
-			{new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(3)},
-			{new MathNumber(3), MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, new MathNumber(-3), MathNumber.PLUS_INFINITY, MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-10), new MathNumber(-3), MathNumber.PLUS_INFINITY },
+				{ new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(3) },
+				{ new MathNumber(3), MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, new MathNumber(-3), MathNumber.PLUS_INFINITY, MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
-
 
 		assertTrue("DBM representation should match expected for addition/subtraction equivalence",
 				res1.equals(dbmFromMatrixMathNumbers(resultStrongClosure, y, x)));
@@ -857,13 +845,19 @@ public class DifferenceBoundMatrixTest {
 		assertTrue("Should know z", s4.knowsIdentifier(z));
 		assertFalse("DBM should not be bottom after chained assignments", s4.isBottom());
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(-2), MathNumber.PLUS_INFINITY},
-			{MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(2)},
-			{MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-6), new MathNumber(-4), new MathNumber(-2)},
-			{MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(6), MathNumber.ZERO, new MathNumber(2), new MathNumber(4)},
-			{new MathNumber(2), MathNumber.PLUS_INFINITY, new MathNumber(4), new MathNumber(-2), MathNumber.ZERO, new MathNumber(2)},
-			{MathNumber.PLUS_INFINITY, new MathNumber(-2), new MathNumber(2), new MathNumber(-4), new MathNumber(-2), MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY,
+						new MathNumber(-2), MathNumber.PLUS_INFINITY },
+				{ MathNumber.PLUS_INFINITY, MathNumber.ZERO, MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY,
+						MathNumber.PLUS_INFINITY, new MathNumber(2) },
+				{ MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-6),
+						new MathNumber(-4), new MathNumber(-2) },
+				{ MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(6), MathNumber.ZERO,
+						new MathNumber(2), new MathNumber(4) },
+				{ new MathNumber(2), MathNumber.PLUS_INFINITY, new MathNumber(4), new MathNumber(-2), MathNumber.ZERO,
+						new MathNumber(2) },
+				{ MathNumber.PLUS_INFINITY, new MathNumber(-2), new MathNumber(2), new MathNumber(-4),
+						new MathNumber(-2), MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
@@ -929,15 +923,14 @@ public class DifferenceBoundMatrixTest {
 
 		// test the matrix directly
 
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-10), MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY},
-			{new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(3)},
-			{new MathNumber(3), MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-20)},
-			{MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(20), MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-10), MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY },
+				{ new MathNumber(10), MathNumber.ZERO, MathNumber.PLUS_INFINITY, new MathNumber(3) },
+				{ new MathNumber(3), MathNumber.PLUS_INFINITY, MathNumber.ZERO, new MathNumber(-20) },
+				{ MathNumber.PLUS_INFINITY, MathNumber.PLUS_INFINITY, new MathNumber(20), MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);
-
 
 		assertTrue("DBM representation should match expected after difference constraint assume",
 				result.equals(dbmFromMatrixMathNumbers(resultStrongClosure, x, y)));
@@ -1210,15 +1203,14 @@ public class DifferenceBoundMatrixTest {
 				rightConstraint,
 				LogicalOr.INSTANCE, location);
 
-
 		DifferenceBoundMatrix result = step1.assume(constraint, pp, pp, oracle);
 
 		// Matrice data da step1
-		MathNumber[][] resultStrongClosure = new MathNumber[][]{
-			{MathNumber.ZERO, new MathNumber(-10), new MathNumber(5), new MathNumber(-15)},
-			{new MathNumber(10.0), MathNumber.ZERO, new MathNumber(15), new MathNumber(-5)},
-			{new MathNumber(-5), new MathNumber(-15), MathNumber.ZERO, new MathNumber(-20)},
-			{new MathNumber(15), new MathNumber(5), new MathNumber(20), MathNumber.ZERO}
+		MathNumber[][] resultStrongClosure = new MathNumber[][] {
+				{ MathNumber.ZERO, new MathNumber(-10), new MathNumber(5), new MathNumber(-15) },
+				{ new MathNumber(10.0), MathNumber.ZERO, new MathNumber(15), new MathNumber(-5) },
+				{ new MathNumber(-5), new MathNumber(-15), MathNumber.ZERO, new MathNumber(-20) },
+				{ new MathNumber(15), new MathNumber(5), new MathNumber(20), MathNumber.ZERO }
 		};
 
 		Floyd.strongClosureFloyd(resultStrongClosure);

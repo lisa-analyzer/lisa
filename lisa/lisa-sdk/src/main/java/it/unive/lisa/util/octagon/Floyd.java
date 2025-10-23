@@ -7,17 +7,43 @@ import java.util.Queue;
 import java.util.Random;
 
 /**
- * Implementation of the Floyd-Warshall algorithm and and its variants, used for
- * octagon domain analysis
+ * Utility class providing implementations of the Floyd-Warshall algorithm and
+ * its variants for computing transitive closures and shortest paths in weighted
+ * graphs. These algorithms are fundamental for octagon domain analysis, where
+ * they are used to compute the strong closure of difference-bound matrices.
+ * <p>
+ * The class provides several variants:
+ * <ul>
+ * <li>{@link #Floyd(MathNumber[][], MathNumber[][])}: Standard Floyd-Warshall
+ * algorithm computing all-pairs shortest paths</li>
+ * <li>{@link #WarshallFloyd(MathNumber[][], MathNumber[][])}: Custom variant
+ * optimized for incremental updates</li>
+ * <li>{@link #strongClosureFloyd(MathNumber[][])}: Specialized variant for
+ * octagon strong closure computation</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Additionally, the class provides utility methods for negative cycle detection
+ * using BFS/DFS traversal, which is crucial for determining if an octagon
+ * constraint system is inconsistent (bottom).
+ * </p>
  * 
- * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso </a>
+ * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso</a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
  *             Shytermeja</a>
  */
 
 public class Floyd {
 
+	/**
+	 * Represents infinity for integer-based calculations (half of
+	 * Integer.MAX_VALUE to avoid overflow).
+	 */
 	public static final int INF = Integer.MAX_VALUE / 2;
+
+	/**
+	 * Number of vertices for testing purposes.
+	 */
 	public static final int V = 6;
 
 	public static void TestNormalFloyd(
@@ -151,6 +177,20 @@ public class Floyd {
 		}
 	}
 
+	/**
+	 * Implements the standard Floyd-Warshall algorithm for computing all-pairs
+	 * shortest paths in a weighted graph. The algorithm updates the input
+	 * matrix in place to contain the shortest path distances, and records the
+	 * path information in the path matrix.
+	 * <p>
+	 * Time complexity: O(n³) where n is the number of vertices.
+	 * </p>
+	 * 
+	 * @param matrix the distance matrix to be updated with shortest paths
+	 *                   (modified in place)
+	 * @param path   the path matrix recording intermediate vertices for path
+	 *                   reconstruction (modified in place)
+	 */
 	public static void Floyd(
 			MathNumber[][] matrix,
 			MathNumber path[][]) {
@@ -174,6 +214,20 @@ public class Floyd {
 		}
 	}
 
+	/**
+	 * Implements a custom variant of the Floyd-Warshall algorithm optimized for
+	 * incremental updates. This version uses memoization to track which edges
+	 * have been processed and performs two passes of incremental shortest path
+	 * computation.
+	 * <p>
+	 * Unlike the standard algorithm, this variant computes shortest paths
+	 * incrementally from each vertex, using recursive calls to ensure all
+	 * necessary neighbors are updated before computing a new shortest path.
+	 * </p>
+	 * 
+	 * @param matrix the distance matrix to be updated (modified in place)
+	 * @param path   the path matrix for reconstruction (modified in place)
+	 */
 	public static void WarshallFloyd(
 			MathNumber[][] matrix,
 			MathNumber[][] path) {
@@ -245,6 +299,24 @@ public class Floyd {
 		}
 	}
 
+	/**
+	 * Detects whether the given graph (represented as a distance matrix)
+	 * contains a negative cycle. A negative cycle indicates that the octagon
+	 * constraint system is inconsistent and represents the bottom element.
+	 * <p>
+	 * The algorithm performs a breadth-first search from each vertex, tracking
+	 * distances and detecting when a path to a vertex becomes shorter after
+	 * visiting it multiple times, which indicates a negative cycle.
+	 * </p>
+	 * 
+	 * @param matrix the distance matrix to check for negative cycles
+	 * 
+	 * @return {@code true} if a negative cycle is found, {@code false}
+	 *             otherwise
+	 * 
+	 * @throws MathNumberConversionException if number conversion fails during
+	 *                                           cycle detection
+	 */
 	public static boolean HasNegativeCycle(
 			MathNumber[][] matrix)
 			throws MathNumberConversionException {
@@ -366,6 +438,30 @@ public class Floyd {
 
 	}
 
+	/**
+	 * Computes the strong closure of an octagon constraint matrix. This
+	 * specialized variant of Floyd-Warshall is optimized for the specific
+	 * structure of octagon constraints, where variables appear in pairs (x and
+	 * -x) and coherence constraints must be maintained.
+	 * <p>
+	 * The algorithm iterates through variable pairs and considers all possible
+	 * paths through them, including:
+	 * <ul>
+	 * <li>Direct paths through positive or negative occurrences</li>
+	 * <li>Paths that go through both positive and negative occurrences</li>
+	 * <li>Coherence constraints ensuring consistency between x and -x</li>
+	 * </ul>
+	 * After each iteration, the algorithm enforces coherence by ensuring that
+	 * constraints involving opposite signs are properly related through
+	 * division by 2, as required by the octagon normal form.
+	 * </p>
+	 * <p>
+	 * Time complexity: O(n³) where n is the number of variables (matrix size is
+	 * 2n × 2n).
+	 * </p>
+	 * 
+	 * @param matrix the octagon constraint matrix to close (modified in place)
+	 */
 	public static void strongClosureFloyd(
 			MathNumber[][] matrix) {
 		int V = matrix.length;
@@ -408,6 +504,18 @@ public class Floyd {
 		}
 	}
 
+	/**
+	 * Reconstructs and prints the shortest path from a start vertex to a finish
+	 * vertex using the path matrix computed by Floyd-Warshall algorithm. Prints
+	 * the sequence of vertices along the path, or indicates if no path exists.
+	 * 
+	 * @param start  the starting vertex
+	 * @param finish the destination vertex
+	 * @param path   the path matrix containing intermediate vertices
+	 * 
+	 * @throws MathNumberConversionException if number conversion fails during
+	 *                                           path reconstruction
+	 */
 	public static void printPath(
 			int start,
 			int finish,

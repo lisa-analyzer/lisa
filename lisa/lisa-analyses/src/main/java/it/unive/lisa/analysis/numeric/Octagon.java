@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -18,12 +12,28 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
- * Implementation of the octagons analysis of
- * <a href="https://arxiv.org/pdf/cs/0703084">this paper</a>.
+ * The octagon abstract domain for relational numerical analysis, implementing
+ * constraints of the form ±x ± y ≤ c where x and y are program variables and c
+ * is a constant. This domain is more precise than intervals as it can express
+ * relationships between variables, while being more efficient than full
+ * polyhedra. It is implemented as a {@link ValueDomain}, handling top and
+ * bottom values through its underlying {@link DifferenceBoundMatrix}
+ * representation. Top and bottom cases for lattice operations are handled by
+ * {@link BaseLattice}.
+ * <p>
+ * The implementation is based on the octagon abstract domain described in
+ * <a href="https://arxiv.org/pdf/cs/0703084">Miné's paper on the Octagon
+ * Abstract Domain</a>.
+ * </p>
  * 
- * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso </a>
+ * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso</a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
  *             Shytermeja</a>
  */
@@ -32,15 +42,24 @@ public class Octagon
 		ValueDomain<Octagon>,
 		BaseLattice<Octagon> {
 
+	/**
+	 * The underlying difference-bound matrix representation of the octagon
+	 * constraints.
+	 */
 	private final DifferenceBoundMatrix dbm;
 
 	/**
-	 * Builds a new octagon instance.
+	 * Builds a new empty octagon instance (top element).
 	 */
 	public Octagon() {
 		this(new DifferenceBoundMatrix());
 	}
 
+	/**
+	 * Builds an octagon from the given difference-bound matrix.
+	 * 
+	 * @param dbm the underlying {@link DifferenceBoundMatrix}
+	 */
 	Octagon(
 			DifferenceBoundMatrix dbm) {
 		this.dbm = dbm;
@@ -85,44 +104,49 @@ public class Octagon
 		String result1 = "";
 		String result2 = "";
 
-		
 		// Single index
-		for(Identifier id : variableIndex.keySet()) {
+		for (Identifier id : variableIndex.keySet()) {
 			int I2 = dbm.idToNeg(id, variableIndex);
 			int I2_Minus1 = dbm.idToPos(id, variableIndex);
-			
-			for(int i=0;i<dbm.getMatrix().length;i++) {
-				for(int j=0;j<dbm.getMatrix().length;j++) {
+
+			for (int i = 0; i < dbm.getMatrix().length; i++) {
+				for (int j = 0; j < dbm.getMatrix().length; j++) {
 					// First condition
 					if (i == I2_Minus1 && j == I2) {
-						//System.out.println("-" + id.getName() + " - " + id.getName() + " <= " + dbm.getMatrix()[j][i]);
+						// System.out.println("-" + id.getName() + " - " +
+						// id.getName() + " <= " +
+						// dbm.getMatrix()[j][i]);
 						result1 += "{" + id.getName() + " -(-" + id.getName() + ") <= " + dbm.getMatrix()[j][i] + "}\n";
 					}
 
 					// Second condition
-					if (i == I2 && j == I2_Minus1) {// &&  dbm.getMatrix()[j][i] != MathNumber.PLUS_INFINITY) {
-						//System.out.println(id.getName() + " - ( - " + id.getName() + ") <= " + dbm.getMatrix()[j][i]);
+					if (i == I2 && j == I2_Minus1) {// && dbm.getMatrix()[j][i]
+													// !=
+													// MathNumber.PLUS_INFINITY)
+													// {
+						// System.out.println(id.getName() + " - ( - " +
+						// id.getName() + ") <= " +
+						// dbm.getMatrix()[j][i]);
 						result1 += "{-" + id.getName() + " -" + id.getName() + " <= " + dbm.getMatrix()[j][i] + "}\n";
 					}
-					//System.out.println();
+					// System.out.println();
 				}
 			}
 		}
 
-
 		// Double index
-		
-		for(Identifier id : variableIndex.keySet()) {
-			for(Identifier id2 : variableIndex.keySet()) {
-				if(!id.getName().equals(id2.getName())){
+
+		for (Identifier id : variableIndex.keySet()) {
+			for (Identifier id2 : variableIndex.keySet()) {
+				if (!id.getName().equals(id2.getName())) {
 
 					int I2 = dbm.idToNeg(id, variableIndex);
 					int I2_Minus1 = dbm.idToPos(id, variableIndex);
 					int J2 = dbm.idToNeg(id2, variableIndex);
 					int J2_Minus1 = dbm.idToPos(id2, variableIndex);
 
-					for (int i = 0; i <dbm.getMatrix().length; i++) {
-						for (int j = 0; j <dbm.getMatrix().length; j++) {
+					for (int i = 0; i < dbm.getMatrix().length; i++) {
+						for (int j = 0; j < dbm.getMatrix().length; j++) {
 							double matIJ = 0;
 							double matJI = 0;
 
@@ -133,7 +157,6 @@ public class Octagon
 								e.printStackTrace();
 							}
 
-							
 							// First condition
 							if (i == I2_Minus1 && j == J2_Minus1) {
 								result2 += "{" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}\n";
@@ -143,7 +166,6 @@ public class Octagon
 								result2 += "{-" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
 							}
 
-							
 							// Second condition
 							if (i == I2_Minus1 && j == J2) {
 								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
@@ -153,7 +175,6 @@ public class Octagon
 								result2 += "{-" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}\n";
 							}
 
-							
 							// Third condition
 							if (i == I2 && j == J2_Minus1) {
 								result2 += "{" + id2.getName() + " -(-" + id.getName() + ") <= " + matIJ + "}\n";
@@ -162,20 +183,19 @@ public class Octagon
 							if (i == I2_Minus1 && j == J2) {
 								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
 							}
-						
+
 						}
 					}
 				}
 			}
 		}
 
-		String resultWithoutDuplicates = Arrays.stream(result2.split("\n")).distinct().collect(Collectors.joining("\n"));
+		String resultWithoutDuplicates = Arrays.stream(result2.split("\n")).distinct()
+				.collect(Collectors.joining("\n"));
 
-		//System.out.println(resultWithoutDuplicates);
+		// System.out.println(resultWithoutDuplicates);
 		return new StringRepresentation(result1 + "\n" + resultWithoutDuplicates);
 	}
-
-
 
 	@Override
 	public Octagon glbAux(
@@ -319,12 +339,32 @@ public class Octagon
 		return dbm.isBottom();
 	}
 
+	/**
+	 * Converts an interval domain environment to an octagon domain. This allows
+	 * lifting non-relational interval constraints to the relational octagon
+	 * domain.
+	 * 
+	 * @param env the interval environment to convert
+	 * 
+	 * @return the octagon representation of the interval constraints
+	 * 
+	 * @throws SemanticException if the conversion fails
+	 */
 	public static Octagon fromIntervalDomain(
 			ValueEnvironment<Interval> env)
 			throws SemanticException {
 		return new Octagon(DifferenceBoundMatrix.fromIntervalDomain(env));
 	}
 
+	/**
+	 * Converts this octagon to an interval domain environment. This projects
+	 * the relational octagon constraints to non-relational interval constraints
+	 * for each variable.
+	 * 
+	 * @return the interval environment representation
+	 * 
+	 * @throws SemanticException if the conversion fails
+	 */
 	public ValueEnvironment<Interval> toIntervalDomain() throws SemanticException {
 		return dbm.toInterval();
 	}

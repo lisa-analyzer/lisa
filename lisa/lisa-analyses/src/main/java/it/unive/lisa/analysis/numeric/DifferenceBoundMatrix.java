@@ -25,7 +25,6 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.octagon.BooleanExpressionNormalizer;
-import it.unive.lisa.util.octagon.CostantExpression;
 import it.unive.lisa.util.octagon.Floyd;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -37,10 +36,23 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
- * Implementation of the difference-bound matrices abstract domain from
- * <a href="https://arxiv.org/pdf/cs/0703084">this paper</a>.
+ * The Difference Bound Matrix (DBM) abstract domain for representing octagon
+ * constraints. A DBM is a square matrix of size 2n × 2n for n program
+ * variables, where each entry m[i][j] represents the upper bound constraint V_i
+ * - V_j ≤ m[i][j]. The matrix provides an efficient representation for octagon
+ * constraints of the form ±x ± y ≤ c, which are fundamental for relational
+ * numerical analysis. It is implemented as a {@link ValueDomain}, handling top
+ * and bottom values for lattice operations. Top and bottom cases are managed by
+ * {@link BaseLattice}.
+ * <p>
+ * The implementation follows the octagon abstract domain described in
+ * <a href="https://arxiv.org/pdf/cs/0703084">Miné's paper on the Octagon
+ * Abstract Domain</a>, using difference-bound matrices as the underlying
+ * representation with strong closure computation via the Floyd-Warshall
+ * algorithm.
+ * </p>
  * 
- * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso </a>
+ * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso</a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
  *             Shytermeja</a>
  */
@@ -50,16 +62,36 @@ public class DifferenceBoundMatrix
 		BaseLattice<DifferenceBoundMatrix>,
 		ValueDomain<DifferenceBoundMatrix> {
 
-	private final MathNumber[][] matrix; // of size 2n x 2n for n variables
+	/**
+	 * The underlying matrix representation of size 2n × 2n for n variables.
+	 * Each entry matrix[i][j] represents the constraint V_i - V_j ≤
+	 * matrix[i][j].
+	 */
+	private final MathNumber[][] matrix;
 
+	/**
+	 * Mapping from program identifiers to their corresponding indices in the
+	 * matrix. Each variable x is associated with two indices: 2k (for x) and
+	 * 2k+1 (for -x).
+	 */
 	private final Map<Identifier, Integer> variableIndex;
 
+	/**
+	 * Builds an empty difference-bound matrix with no variables.
+	 */
 	public DifferenceBoundMatrix() {
 		this.matrix = new MathNumber[0][0];
 		this.variableIndex = new java.util.HashMap<Identifier, Integer>();
 
 	}
 
+	/**
+	 * Builds a difference-bound matrix from the given matrix and variable index
+	 * mapping.
+	 * 
+	 * @param matrix        the 2n × 2n matrix of constraints
+	 * @param variableIndex the mapping from identifiers to matrix indices
+	 */
 	public DifferenceBoundMatrix(
 			MathNumber[][] matrix,
 			Map<Identifier, Integer> variableIndex) {
@@ -67,14 +99,31 @@ public class DifferenceBoundMatrix
 		this.variableIndex = variableIndex;
 	}
 
+	/**
+	 * Returns the variable index mapping.
+	 * 
+	 * @return the map from identifiers to matrix indices
+	 */
 	public Map<Identifier, Integer> getVariableIndex() {
 		return variableIndex;
 	}
 
+	/**
+	 * Returns the underlying constraint matrix.
+	 * 
+	 * @return the 2n × 2n matrix of difference bounds
+	 */
 	public MathNumber[][] getMatrix() {
 		return matrix;
 	}
 
+	/**
+	 * Creates a deep copy of the given matrix.
+	 * 
+	 * @param source the matrix to copy
+	 * 
+	 * @return a new matrix with the same values
+	 */
 	private MathNumber[][] copyMatrix(
 			MathNumber[][] source) {
 		MathNumber[][] copy = new MathNumber[source.length][];
@@ -144,10 +193,9 @@ public class DifferenceBoundMatrix
 
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] == null)
-				return false; // Controlla righe null
+				return false;
 			for (int j = 0; j < matrix[i].length; j++) {
 				MathNumber element = matrix[i][j];
-				// Usa equals() invece di != e gestisci null
 				if (element == null || !element.equals(MathNumber.PLUS_INFINITY)) {
 					return false;
 				}
@@ -164,11 +212,10 @@ public class DifferenceBoundMatrix
 		if (matrix.length == 0)
 			return true;
 
-		// Matrice vuota non è più bottom - usa elementi diagonali negativi
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] == null)
-				return false; // Controlla righe null
-			if (i < matrix[i].length) { // Controlla bounds
+				return false;
+			if (i < matrix[i].length) {
 				MathNumber diag = matrix[i][i];
 				if (diag != null && diag.lt(MathNumber.ZERO)) {
 					return true;
@@ -297,7 +344,6 @@ public class DifferenceBoundMatrix
 		if (isTop()) {
 			return Lattice.topRepresentation();
 		}
-		// create a string representation of the full matrix
 		String matrixStr = "\n";
 		for (int i = 0; i < matrix.length; i++) {
 			matrixStr += "|";
@@ -318,6 +364,30 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
+	/**
+	 * Performs an assignment operation in the octagon domain. This method
+	 * encodes the assignment {@code id = expression} into the DBM by updating
+	 * the constraint matrix. The implementation handles various assignment
+	 * patterns:
+	 * <ul>
+	 * <li>Direct constant assignment: {@code Vi = c}</li>
+	 * <li>Self-modification: {@code Vi = Vi + c}</li>
+	 * <li>Variable-to-variable with offset: {@code Vi = Vj + c}</li>
+	 * <li>Negation assignments: {@code Vi = -Vj + c}</li>
+	 * </ul>
+	 * If the identifier is not already tracked in the matrix, it is added with
+	 * appropriate initialization. After encoding the assignment, strong closure
+	 * is applied to maintain the canonical form.
+	 * 
+	 * @param id         the identifier being assigned to
+	 * @param expression the expression being assigned
+	 * @param pp         the program point where the assignment occurs
+	 * @param oracle     the semantic oracle for resolving expression semantics
+	 * 
+	 * @return a new DBM reflecting the assignment
+	 * 
+	 * @throws SemanticException if the assignment cannot be encoded
+	 */
 	@Override
 	public DifferenceBoundMatrix assign(
 			Identifier id,
@@ -351,12 +421,9 @@ public class DifferenceBoundMatrix
 					if (i < matrix.length && j < matrix.length) {
 						newMatrix[i][j] = matrix[i][j];
 					} else if (i == j) {
-						newMatrix[i][j] = MathNumber.ZERO; // distance to self
-															// is 0
+						newMatrix[i][j] = MathNumber.ZERO;
 					} else {
-						newMatrix[i][j] = MathNumber.PLUS_INFINITY; // unknown
-																	// distances
-																	// are +inf
+						newMatrix[i][j] = MathNumber.PLUS_INFINITY;
 					}
 				}
 			}
@@ -417,28 +484,22 @@ public class DifferenceBoundMatrix
 					&& expression.toString().split("- " + id.getName()).length > 1) {
 				double offset = 0;
 
-				if(expression.toString().split("- ").length > 2)
-				{
+				if (expression.toString().split("- ").length > 2) {
 					offset = Double.parseDouble(expression.toString().split("- ")[2]);
-				}
-				else
-				{
+				} else {
 					offset = -Double.parseDouble(expression.toString().split("- ")[1].split("\\+")[1]);
 				}
 
-
-				secondCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id, offset, true);
+				secondCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id, offset,
+						true);
 				fourthCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id);
 
 			} else {
 				double offset = 0;
 
-				if(expression.toString().split("- ").length > 2)
-				{
+				if (expression.toString().split("- ").length > 2) {
 					offset = Double.parseDouble(expression.toString().split("- ")[2]);
-				}
-				else
-				{
+				} else {
 					offset = -Double.parseDouble(expression.toString().split("- ")[1].split("\\+")[1]);
 				}
 
@@ -446,7 +507,7 @@ public class DifferenceBoundMatrix
 						true);
 				fourthCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id);
 				thirdCaseAssignement(curMatrix, idToPos(id, workingVariableIndex) / 2 + 1, expression, id, 0, true);
-						
+
 			}
 		}
 
@@ -462,7 +523,7 @@ public class DifferenceBoundMatrix
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, workingVariableIndex);
 		// Floyd.printMatrix(result.matrix);
 		Floyd.strongClosureFloyd(result.matrix);
-		//System.out.println(result.representation());
+		// System.out.println(result.representation());
 		return result;
 
 	}
@@ -476,6 +537,31 @@ public class DifferenceBoundMatrix
 		return this;
 	}
 
+	/**
+	 * Refines this DBM by assuming a boolean expression holds. This method
+	 * encodes conditional constraints into the matrix, narrowing the possible
+	 * values of variables based on the assumed condition. The implementation
+	 * normalizes the expression and handles various constraint forms:
+	 * <ul>
+	 * <li>Logical conjunctions (AND): applies both constraints and takes their
+	 * glb</li>
+	 * <li>Logical disjunctions (OR): applies both constraints and takes their
+	 * lub</li>
+	 * <li>Difference constraints: {@code b - a ≤ c}</li>
+	 * <li>Variable bounds: {@code x ≤ c} or {@code x ≥ c}</li>
+	 * </ul>
+	 * This operation is crucial for handling conditional branches and loop
+	 * conditions in program analysis.
+	 * 
+	 * @param expression the boolean expression to assume
+	 * @param src        the source program point
+	 * @param dest       the destination program point
+	 * @param oracle     the semantic oracle for resolving expression semantics
+	 * 
+	 * @return a new DBM refined by the assumed constraint
+	 * 
+	 * @throws SemanticException if the constraint cannot be encoded
+	 */
 	@Override
 	public DifferenceBoundMatrix assume(
 			ValueExpression expression,
@@ -483,7 +569,7 @@ public class DifferenceBoundMatrix
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		
+
 		SymbolicExpression normalized = BooleanExpressionNormalizer.normalize(expression, src.getLocation(),
 				src, oracle);
 		if (!(normalized instanceof BinaryExpression)) {
@@ -723,6 +809,20 @@ public class DifferenceBoundMatrix
 		return this;
 	}
 
+	/**
+	 * Forgets (removes constraints on) a specific identifier from the DBM. This
+	 * operation sets all constraints involving the identifier to their most
+	 * permissive values (infinity), effectively removing any information about
+	 * the variable while maintaining consistency for other variables. This is
+	 * typically used when a variable goes out of scope or when its value
+	 * becomes unknown.
+	 * 
+	 * @param id the identifier to forget
+	 * 
+	 * @return this DBM after forgetting the identifier (modified in place)
+	 * 
+	 * @throws SemanticException if the forget operation fails
+	 */
 	@Override
 	public DifferenceBoundMatrix forgetIdentifier(
 			Identifier id)
@@ -778,28 +878,57 @@ public class DifferenceBoundMatrix
 		return this;
 	}
 
-	// normal closure algorithm
+	/**
+	 * Computes the normal closure of this DBM using the standard Floyd-Warshall
+	 * algorithm. The closure ensures all transitive constraints are made
+	 * explicit in the matrix. Unlike {@link #strongClosure()}, this does not
+	 * enforce octagon-specific coherence properties.
+	 * 
+	 * @return this DBM after applying closure (modified in place)
+	 * 
+	 * @throws SemanticException if the closure computation fails
+	 */
 	public DifferenceBoundMatrix closure() throws SemanticException {
 		Floyd.Floyd(this.matrix, new MathNumber[matrix.length][matrix.length]);
 		return this;
 	}
 
-	// strong closure algorithm
-	// Needs to be applied when:
-	// - Testing inclusion (lessOrEqual) or equality (equals)
-	// - Abstract union (lub)
-	// - Converting to interval domain (toInterval)
-	// - Exact forget operation (forgetIdentifier)
-	// - Max accuracy on innaccurate operations
+	/**
+	 * Computes the strong closure of this difference-bound matrix. The strong
+	 * closure ensures that the matrix represents the tightest possible set of
+	 * constraints that are implied by the current constraints. This operation
+	 * uses a specialized Floyd-Warshall algorithm optimized for octagon
+	 * constraints.
+	 * <p>
+	 * The strong closure must be applied when:
+	 * <ul>
+	 * <li>Testing inclusion (lessOrEqual) or equality (equals)</li>
+	 * <li>Computing abstract union (lub)</li>
+	 * <li>Converting to interval domain (toInterval)</li>
+	 * <li>Performing exact forget operations (forgetIdentifier)</li>
+	 * <li>Maximizing accuracy in potentially inaccurate operations</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @return this DBM after applying strong closure (modified in place)
+	 * 
+	 * @throws SemanticException if the closure computation fails
+	 */
 	public DifferenceBoundMatrix strongClosure() throws SemanticException {
 		Floyd.strongClosureFloyd(this.matrix);
 		return this;
 	}
 
-	/*
-	 * The formal definition of πi(m) is as follows: - πi(m) def= ∅ if m• = ⊥DBM
-	 * (i.e., if the octagon is empty). - [−m•(2i−1)(2i)/2, m•(2i)(2i−1)/2] if
+	/**
+	 * Converts this difference-bound matrix to an interval domain environment.
+	 * This projection extracts the bounds for each variable by reading the
+	 * appropriate entries from the closed DBM. The formal definition is: πi(m)
+	 * = ∅ if m• = ⊥DBM (empty octagon), or [−m•(2i−1)(2i)/2, m•(2i)(2i−1)/2] if
 	 * m• ≠ ⊥DBM.
+	 * 
+	 * @return the interval environment with bounds for each variable
+	 * 
+	 * @throws SemanticException if the conversion fails
 	 */
 	public ValueEnvironment<Interval> toInterval() throws SemanticException {
 		ValueEnvironment<Interval> env = new ValueEnvironment<>(new Interval());
@@ -825,9 +954,18 @@ public class DifferenceBoundMatrix
 		return env;
 	}
 
-	/*
-	 * (Oct(X))i j def= - 2 × snd (X(Vk)) if i = 2k, j = 2k − 1 - -2 × fst
-	 * (X(Vk)) if j = 2k, i = 2k − 1 - +∞ otherwise
+	/**
+	 * Converts an interval domain environment to a difference-bound matrix.
+	 * This lifting operation creates octagon constraints from non-relational
+	 * interval bounds. The formal definition is: (Oct(X))_ij = 2 × snd(X(Vk))
+	 * if i = 2k, j = 2k − 1; −2 × fst(X(Vk)) if j = 2k, i = 2k − 1; +∞
+	 * otherwise.
+	 * 
+	 * @param env the interval environment to convert
+	 * 
+	 * @return the DBM representation of the interval constraints
+	 * 
+	 * @throws SemanticException if the conversion fails
 	 */
 	public static DifferenceBoundMatrix fromIntervalDomain(
 			ValueEnvironment<Interval> env)
@@ -897,7 +1035,19 @@ public class DifferenceBoundMatrix
 		}
 	}
 
-	// maps Vi to the positive V^'_(2i - 1) index in the matrix
+	/**
+	 * Maps a program variable identifier to its positive index in the matrix.
+	 * For a variable Vi with index i in the variable map, this returns the
+	 * index V'_(2i-1) = 2i in the DBM matrix.
+	 * 
+	 * @param id       the identifier to map
+	 * @param varIndex the variable index map
+	 * 
+	 * @return the positive matrix index for the variable
+	 * 
+	 * @throws IllegalArgumentException if the identifier is not in the variable
+	 *                                      index
+	 */
 	public int idToPos(
 			Identifier id,
 			Map<Identifier, Integer> varIndex) {
@@ -908,7 +1058,19 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
-	// maps Vi to the negative V^'_(2i) index in the matrix
+	/**
+	 * Maps a program variable identifier to its negative index in the matrix.
+	 * For a variable Vi with index i in the variable map, this returns the
+	 * index V'_(2i) = 2i+1 in the DBM matrix, representing -Vi.
+	 * 
+	 * @param id       the identifier to map
+	 * @param varIndex the variable index map
+	 * 
+	 * @return the negative matrix index for the variable
+	 * 
+	 * @throws IllegalArgumentException if the identifier is not in the variable
+	 *                                      index
+	 */
 	public int idToNeg(
 			Identifier id,
 			Map<Identifier, Integer> varIndex) {
@@ -949,7 +1111,30 @@ public class DifferenceBoundMatrix
 
 	}
 
-	// Helper function to add a constraint of the type b - a + c <= 0
+	/**
+	 * Adds a relational constraint of the form {@code ±b ± a ≤ c} to the DBM.
+	 * This helper method encodes difference constraints between two variables
+	 * into the matrix. The negation flags determine which form of the
+	 * constraint is added:
+	 * <ul>
+	 * <li>{@code b - a ≤ c} (both false)</li>
+	 * <li>{@code -b - a ≤ c} (firstNegated=true, secondNegated=false)</li>
+	 * <li>{@code b + a ≤ c} (firstNegated=false, secondNegated=true)</li>
+	 * <li>{@code -b + a ≤ c} (both true)</li>
+	 * </ul>
+	 * The constraint is added by updating the appropriate matrix entries to
+	 * maintain the tightest bounds.
+	 * 
+	 * @param a             the first variable
+	 * @param b             the second variable
+	 * @param c             the constant bound
+	 * @param firstNegated  whether the first variable is negated
+	 * @param secondNegated whether the second variable is negated
+	 * 
+	 * @return a new DBM with the constraint added
+	 * 
+	 * @throws SemanticException if the constraint cannot be added
+	 */
 	private DifferenceBoundMatrix addConstraint(
 			Identifier a,
 			Identifier b,
@@ -982,6 +1167,27 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
+	/**
+	 * Computes the widening of this DBM with another DBM. Widening is a
+	 * critical operation for ensuring termination of fixpoint computations in
+	 * program analysis. The implementation compares corresponding matrix
+	 * entries:
+	 * <ul>
+	 * <li>If {@code this[i][j] < other[i][j]}, the constraint is weakening, so
+	 * set to +∞ (no constraint)</li>
+	 * <li>If {@code this[i][j] > other[i][j]}, the constraint is strengthening,
+	 * so set to -∞ (inconsistent)</li>
+	 * <li>Otherwise, keep the current value</li>
+	 * </ul>
+	 * This ensures that the widening eventually stabilizes by forcing
+	 * constraints to their limit values when they keep changing.
+	 * 
+	 * @param other the DBM to widen with
+	 * 
+	 * @return a new DBM representing the widening of this and other
+	 * 
+	 * @throws SemanticException if the widening operation fails
+	 */
 	@Override
 	public DifferenceBoundMatrix wideningAux(
 			DifferenceBoundMatrix other)
@@ -1038,6 +1244,18 @@ public class DifferenceBoundMatrix
 		return exp.toString();
 	}
 
+	/**
+	 * Recursively evaluates a constant expression to compute its numeric value.
+	 * This method handles arithmetic operations (+, -, *, /) on numeric
+	 * constants, performing recursive evaluation for nested binary expressions.
+	 * 
+	 * @param exp the constant expression to evaluate
+	 * 
+	 * @return the numeric value of the expression, or 0 if evaluation fails
+	 * 
+	 * @throws MathNumberConversionException if number conversion fails during
+	 *                                           evaluation
+	 */
 	private double resolveCostantExpression(
 			ValueExpression exp)
 			throws MathNumberConversionException {
@@ -1120,8 +1338,15 @@ public class DifferenceBoundMatrix
 	}
 
 	/**
-	 * Handles the assignment case involving negation or copying from the same
-	 * variable, such as Vi = -Vi.
+	 * Handles the fourth case of assignment: negation assignments like
+	 * {@code Vi = -Vj} or {@code Vi = -Vi}. This operation swaps the roles of
+	 * the positive and negative indices for the variable in the matrix,
+	 * effectively implementing the negation constraint.
+	 * 
+	 * @param curMatrix        the current matrix being modified
+	 * @param newVariableIndex the index of the variable being assigned
+	 * @param expression       the assignment expression
+	 * @param id               the identifier being assigned to
 	 */
 	public void fourthCaseAssignement(
 			MathNumber[][] curMatrix,
@@ -1171,9 +1396,18 @@ public class DifferenceBoundMatrix
 	}
 
 	/**
-	 * Handles the assignment case where a variable is assigned the value of
-	 * another variable plus a constant: Vi = Vj + c, where i != j. Updates the
-	 * matrix to link the variables and incorporate the constant offset.
+	 * Handles the third case of assignment: variable-to-variable with offset
+	 * like {@code Vi = Vj + c} where {@code i ≠ j}. This method updates the
+	 * matrix by transferring constraints from the source variable to the target
+	 * variable, adjusted by the constant offset. It performs strong closure on
+	 * a copy of the matrix to ensure all transitive constraints are considered.
+	 * 
+	 * @param curMatrix        the current matrix being modified
+	 * @param newVariableIndex the index of the variable being assigned
+	 * @param expression       the assignment expression
+	 * @param id               the identifier being assigned to
+	 * @param offset           the constant offset value
+	 * @param isOffset         whether an explicit offset is provided
 	 */
 	public void thirdCaseAssignement(
 			MathNumber[][] curMatrix,
@@ -1258,9 +1492,18 @@ public class DifferenceBoundMatrix
 	}
 
 	/**
-	 * Handles the assignment case where a variable is incremented by a
-	 * constant: Vi = Vi + c. Adjusts the matrix entries to account for the
-	 * addition to the variable's bounds.
+	 * Handles the second case of assignment: self-modification with a constant
+	 * like {@code Vi = Vi + c} or {@code Vi = Vi - c}. This method adjusts all
+	 * constraints involving the variable by adding or subtracting the constant
+	 * offset from the appropriate matrix entries. The offset effectively shifts
+	 * the bounds of the variable.
+	 * 
+	 * @param curMatrix        the current matrix being modified
+	 * @param newVariableIndex the index of the variable being assigned
+	 * @param expression       the assignment expression
+	 * @param id               the identifier being assigned to
+	 * @param offset           the constant offset value
+	 * @param isOffset         whether an explicit offset is provided
 	 */
 	public void secondCaseAssignement(
 			MathNumber[][] curMatrix,
@@ -1316,9 +1559,18 @@ public class DifferenceBoundMatrix
 	}
 
 	/**
-	 * Handles the assignment case where a variable is assigned a constant
-	 * value: Vi = c. Updates the DBM matrix to reflect the new bounds for the
-	 * variable by setting appropriate constraints.
+	 * Handles the first case of assignment: constant assignment like
+	 * {@code Vi = c}. This method sets tight bounds for the variable by
+	 * encoding the constraint that the variable equals the constant. It applies
+	 * strong closure on a copy to compute proper constraint propagation and
+	 * then updates the matrix entries for both the positive and negative
+	 * occurrences of the variable.
+	 * 
+	 * @param curMatrix        the current matrix being modified
+	 * @param newVariableIndex the index of the variable being assigned
+	 * @param expression       the constant expression being assigned
+	 * @param id               the identifier being assigned to
+	 * @param varIndex         the variable index mapping
 	 */
 	public void firstCaseAssignement(
 			MathNumber[][] curMatrix,
