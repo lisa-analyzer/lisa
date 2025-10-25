@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.numeric;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -10,13 +16,9 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * The octagon abstract domain for relational numerical analysis, implementing
@@ -119,6 +121,7 @@ public class Octagon
 		String result1 = "";
 		String result2 = "";
 
+		
 		// Single index
 		for (Identifier id : variableIndex.keySet()) {
 			int I2 = dbm.idToNeg(id, variableIndex);
@@ -126,6 +129,7 @@ public class Octagon
 
 			for (int i = 0; i < dbm.getMatrix().length; i++) {
 				for (int j = 0; j < dbm.getMatrix().length; j++) {
+					
 					// First condition
 					if (i == I2_Minus1 && j == I2) {
 						// System.out.println("-" + id.getName() + " - " +
@@ -162,12 +166,13 @@ public class Octagon
 
 					for (int i = 0; i < dbm.getMatrix().length; i++) {
 						for (int j = 0; j < dbm.getMatrix().length; j++) {
-							double matIJ = 0;
-							double matJI = 0;
+
+							MathNumber matIJ = MathNumber.ZERO;
+							MathNumber matJI = MathNumber.ZERO;
 
 							try {
-								matIJ = dbm.getMatrix()[i][j].toDouble();
-								matJI = dbm.getMatrix()[j][i].toDouble();
+								matIJ = dbm.getMatrix()[i][j];
+								matJI = dbm.getMatrix()[j][i];
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -210,6 +215,7 @@ public class Octagon
 
 		// System.out.println(resultWithoutDuplicates);
 		return new StringRepresentation(result1 + "\n" + resultWithoutDuplicates);
+		//return this.dbm.representation();
 	}
 
 	/**
