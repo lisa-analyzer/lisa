@@ -280,7 +280,7 @@ public class DifferenceBoundMatrix
 		
 		for (int i = 0; i < first.matrix.length; i++) {
      	   for (int j = 0; j < first.matrix.length; j++) {
-            if (first.matrix[i][j].compareTo(second.matrix[i][j]) != 0) {
+            if (first.matrix[i][j].compareTo(second.matrix[i][j]) > 0) {
                 return false;
             }
         }
