@@ -37,6 +37,19 @@ class octagon_tests {
 		return x;
 	}
 
+	loopInfinite() {
+		def x=0;
+
+		while(x<10)
+		{
+			x = x - 1;
+		}
+
+		def z = 10;
+
+		return x;
+	}
+
 	backward() {
 		def x = 1000;
 
@@ -64,15 +77,6 @@ class octagon_tests {
 		}
 		return x;
 	} 
-
-	// Infinite loop example (no state change that falsifies the guard)
-	infinite() {
-		def x = 0;
-		while (x >= 0) {
-			// no change to x keeps condition true
-		}
-		return x; // unreachable 
-	}
 
 	// Zero-iteration loop: guard false at entry
 	zero_iterations() {

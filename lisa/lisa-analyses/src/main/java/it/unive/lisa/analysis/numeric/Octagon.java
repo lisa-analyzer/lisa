@@ -17,6 +17,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.octagon.Floyd;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
@@ -85,8 +86,27 @@ public class Octagon
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		debug("assign() - Assigning " + expression + " to " + id);
-		return new Octagon(dbm.assign(id, expression, pp, oracle));
+		 
+    debug("assign() - Assigning " + expression + " to " + id);
+    
+    // STAMPA STATO PRIMA
+    System.out.println("=== PRIMA ASSEGNAMENTO ===");
+    System.out.println("Istruzione: " + id + " = " + expression);
+    System.out.println("Stato corrente: " + this.representation());
+    System.out.println("Matrice PRIMA:");
+    Floyd.printMatrix(this.dbm.getMatrix());
+    
+    // Esegui l'assegnamento
+    DifferenceBoundMatrix newDBM = dbm.assign(id, expression, pp, oracle);
+    
+    // STAMPA STATO DOPO  
+    System.out.println("=== DOPO ASSEGNAMENTO ===");
+    System.out.println("Nuovo stato: " + newDBM.representation());
+    System.out.println("Matrice DOPO:");
+    Floyd.printMatrix(newDBM.getMatrix());
+    System.out.println("=========================");
+    
+    return new Octagon(newDBM);
 	}
 
 	/**

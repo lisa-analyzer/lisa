@@ -7,6 +7,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import javax.lang.model.util.ElementScanner14;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -266,7 +268,7 @@ public class DifferenceBoundMatrix
 		 */
 
 		// compute m• ⊑DBM n
-
+		
 		for (int i = 0; i < first.matrix.length; i++) {
 			for (int j = 0; j < first.matrix.length; j++) {
 				if (first.matrix[i][j].compareTo(second.matrix[i][j]) > 0) {
@@ -305,10 +307,12 @@ public class DifferenceBoundMatrix
 			return first;
 		}
 
+
 		MathNumber[][] newMatrix = new MathNumber[this.matrix.length][this.matrix.length];
 		for (int i = 0; i < this.matrix.length; i++) {
 			for (int j = 0; j < this.matrix.length; j++) {
-				if (first.matrix[i][j].compareTo(second.matrix[i][j]) > 0) {
+				if ((first.matrix[i][j].isPositive() && second.matrix[i][j].isPositive() && first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)
+					|| (first.matrix[i][j].isNegative() && second.matrix[i][j].isNegative() && first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)) {
 					newMatrix[i][j] = first.matrix[i][j];
 				} else {
 					newMatrix[i][j] = second.matrix[i][j];
@@ -316,6 +320,11 @@ public class DifferenceBoundMatrix
 			}
 		}
 
+
+		Floyd.printMatrix(first.matrix);
+		Floyd.printMatrix(second.matrix);
+		Floyd.printMatrix(newMatrix);
+		
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(newMatrix, this.variableIndex);
 		return result;
 	}
@@ -1209,6 +1218,7 @@ public class DifferenceBoundMatrix
 
 		int size = this.matrix.length;
 		MathNumber[][] resultMatrix = new MathNumber[size][size];
+		boolean flag=true;
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
@@ -1216,32 +1226,37 @@ public class DifferenceBoundMatrix
 				// getting weaker, so
 				// set to +∞
 
+				if(!this.matrix[i][j].isFinite())
+				{
+					resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
+					continue;
+				}
+
 				if (i != j) {
-					if (i % 2 == 0 && j % 2 == 1 && j == i + 1
-							&& this.matrix[i][j].compareTo(this.matrix[j][i].multiply(new MathNumber(-1))) != 0) {
-						if (this.matrix[i][j].isPositive() && this.matrix[i][j].compareTo(this.matrix[j][i]) > 0) {
-							resultMatrix[i][j] = this.matrix[i][j].min(this.matrix[j][i]);
-							resultMatrix[i][j] = resultMatrix[i][j].multiply(new MathNumber(-1));
-							resultMatrix[j][i] = resultMatrix[i][j].multiply(new MathNumber(-1));
-						} else {
-							resultMatrix[j][i] = this.matrix[j][i].max(this.matrix[i][j]);
-							resultMatrix[i][j] = resultMatrix[j][i].multiply(new MathNumber(-1));
-							resultMatrix[j][i] = resultMatrix[j][i].multiply(new MathNumber(-1));
-							resultMatrix[i][j] = resultMatrix[j][i].multiply(new MathNumber(-1));
-						}
-					} else if (i % 2 == 1 && j % 2 == 0 && i == j + 1) {
-						resultMatrix[i][j] = this.matrix[j][i];
-						resultMatrix[j][i] = this.matrix[i][j];
-					} else {
+					if(flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) > 0)
+					{
 						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
+						flag=false;
 					}
-				} else {
+					else if(flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) < 0)
+					{
+						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
+						flag = false;
+					}
+					else
+					{
+						resultMatrix[i][j] = this.matrix[i][j].min(this.matrix[j][i]);
+					}
+				}
+				else
+				{
 					resultMatrix[i][j] = MathNumber.ZERO;
 				}
 			}
 		}
 
-		Floyd.strongClosureFloyd(resultMatrix);
+		Floyd.printMatrix(resultMatrix);
+		//Floyd.strongClosureFloyd(resultMatrix);
 		final DifferenceBoundMatrix result = new DifferenceBoundMatrix(resultMatrix, this.variableIndex);
 		return result;
 
@@ -1568,6 +1583,7 @@ public class DifferenceBoundMatrix
 		} catch (MathNumberConversionException ex) {
 		}
 
+
 		for (int i = 0; i < curMatrix.length; i++) {
 			for (int j = 0; j < curMatrix.length; j++) {
 				if ((i == 2 * newVariableIndex - 2 && j != 2 * newVariableIndex - 2 && j != 2 * newVariableIndex - 1) ||
@@ -1586,6 +1602,7 @@ public class DifferenceBoundMatrix
 				}
 			}
 		}
+
 	}
 
 	/**
