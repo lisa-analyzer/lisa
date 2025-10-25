@@ -1,5 +1,12 @@
 package it.unive.lisa.analysis.numeric;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -29,15 +36,6 @@ import it.unive.lisa.util.octagon.Floyd;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-
-import javax.lang.model.util.ElementScanner14;
-
 /**
  * The Difference Bound Matrix (DBM) abstract domain for representing octagon
  * constraints. A DBM is a square matrix of size 2n × 2n for n program
@@ -57,7 +55,7 @@ import javax.lang.model.util.ElementScanner14;
  * 
  * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso</a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
- *             Shytermeja</a>
+ *         Shytermeja</a>
  */
 
 public class DifferenceBoundMatrix
@@ -259,32 +257,23 @@ public class DifferenceBoundMatrix
 				new java.util.HashMap<Identifier, Integer>(this.variableIndex));
 		DifferenceBoundMatrix second = new DifferenceBoundMatrix(copyMatrix(other.matrix),
 				new java.util.HashMap<Identifier, Integer>(other.variableIndex));
-		
 
-		/*for (int i = 0; i < first.matrix.length; i++) {
-     	   for (int j = 0; j < first.matrix.length; j++) {
-			if(i%2 == 0 && j%2 == 1 && j == i+1)
-				{
-					return true;
-				}
-				else if(i%2 == 1 && j%2 == 0 && i == j+1)
-				{
-					return true;
-				}
+		/*
+		 * for (int i = 0; i < first.matrix.length; i++) { for (int j = 0; j <
+		 * first.matrix.length; j++) { if(i%2 == 0 && j%2 == 1 && j == i+1) {
+		 * return true; } else if(i%2 == 1 && j%2 == 0 && i == j+1) { return
+		 * true; } } }
+		 */
 
-		   }
-		}*/
-
-		
 		// compute m• ⊑DBM n
-		
+
 		for (int i = 0; i < first.matrix.length; i++) {
-     	   for (int j = 0; j < first.matrix.length; j++) {
-            if (first.matrix[i][j].compareTo(second.matrix[i][j]) > 0) {
-                return false;
-            }
-        }
-    }
+			for (int j = 0; j < first.matrix.length; j++) {
+				if (first.matrix[i][j].compareTo(second.matrix[i][j]) > 0) {
+					return false;
+				}
+			}
+		}
 		return true;
 
 	}
@@ -320,10 +309,10 @@ public class DifferenceBoundMatrix
 		for (int i = 0; i < this.matrix.length; i++) {
 			for (int j = 0; j < this.matrix.length; j++) {
 				if (first.matrix[i][j].compareTo(second.matrix[i][j]) > 0) {
-            		newMatrix[i][j] = first.matrix[i][j];
-		        } else {
-            		newMatrix[i][j] = second.matrix[i][j];
-        		}
+					newMatrix[i][j] = first.matrix[i][j];
+				} else {
+					newMatrix[i][j] = second.matrix[i][j];
+				}
 			}
 		}
 
@@ -331,7 +320,6 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
-	
 	/*
 	 * (m ⊓^DBM n)i j = min(mi j, ni j)
 	 */
@@ -545,8 +533,8 @@ public class DifferenceBoundMatrix
 		Floyd.strongClosureFloyd(curMatrix);
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, workingVariableIndex);
 		// Floyd.printMatrix(result.matrix);
-	
-		//System.out.println(result.representation());
+
+		// System.out.println(result.representation());
 		return result;
 
 	}
@@ -1069,7 +1057,7 @@ public class DifferenceBoundMatrix
 	 * @return the positive matrix index for the variable
 	 * 
 	 * @throws IllegalArgumentException if the identifier is not in the variable
-	 *                                      index
+	 *                                  index
 	 */
 	public int idToPos(
 			Identifier id,
@@ -1092,7 +1080,7 @@ public class DifferenceBoundMatrix
 	 * @return the negative matrix index for the variable
 	 * 
 	 * @throws IllegalArgumentException if the identifier is not in the variable
-	 *                                      index
+	 *                                  index
 	 */
 	public int idToNeg(
 			Identifier id,
@@ -1227,52 +1215,37 @@ public class DifferenceBoundMatrix
 				// Widening: if this[i][j] < other[i][j], the constraint is
 				// getting weaker, so
 				// set to +∞
-				
-				if(i != j)
-				{
-				
-					if(i%2 == 0 && j%2 == 1 && j == i+1 && this.matrix[i][j].compareTo(this.matrix[j][i].multiply(new MathNumber(-1))) != 0)
-					{
-						if(this.matrix[i][j].isPositive() && this.matrix[i][j].compareTo(this.matrix[j][i]) > 0)
-						{
-							resultMatrix[i][j] =  this.matrix[i][j].min(this.matrix[j][i]);
+
+				if (i != j) {
+					if (i % 2 == 0 && j % 2 == 1 && j == i + 1
+							&& this.matrix[i][j].compareTo(this.matrix[j][i].multiply(new MathNumber(-1))) != 0) {
+						if (this.matrix[i][j].isPositive() && this.matrix[i][j].compareTo(this.matrix[j][i]) > 0) {
+							resultMatrix[i][j] = this.matrix[i][j].min(this.matrix[j][i]);
 							resultMatrix[i][j] = resultMatrix[i][j].multiply(new MathNumber(-1));
 							resultMatrix[j][i] = resultMatrix[i][j].multiply(new MathNumber(-1));
-												
-						}
-						else
-						{
-							resultMatrix[j][i] =  this.matrix[j][i].max(this.matrix[i][j]);
+						} else {
+							resultMatrix[j][i] = this.matrix[j][i].max(this.matrix[i][j]);
 							resultMatrix[i][j] = resultMatrix[j][i].multiply(new MathNumber(-1));
 							resultMatrix[j][i] = resultMatrix[j][i].multiply(new MathNumber(-1));
 							resultMatrix[i][j] = resultMatrix[j][i].multiply(new MathNumber(-1));
 						}
-					}
-					else if(i%2 == 1 && j%2 == 0 && i == j+1)
-					{
+					} else if (i % 2 == 1 && j % 2 == 0 && i == j + 1) {
 						resultMatrix[i][j] = this.matrix[j][i];
 						resultMatrix[j][i] = this.matrix[i][j];
-					}
-					else
-					{
+					} else {
 						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
 					}
-				}
-				else
-				{
+				} else {
 					resultMatrix[i][j] = MathNumber.ZERO;
 				}
 			}
 		}
 
-		
-		
 		Floyd.strongClosureFloyd(resultMatrix);
 		final DifferenceBoundMatrix result = new DifferenceBoundMatrix(resultMatrix, this.variableIndex);
 		return result;
 
 	}
-
 
 	private double resolveVariableExpression(
 			ValueExpression exp)
@@ -1310,7 +1283,7 @@ public class DifferenceBoundMatrix
 	 * @return the numeric value of the expression, or 0 if evaluation fails
 	 * 
 	 * @throws MathNumberConversionException if number conversion fails during
-	 *                                           evaluation
+	 *                                       evaluation
 	 */
 	private double resolveCostantExpression(
 			ValueExpression exp)

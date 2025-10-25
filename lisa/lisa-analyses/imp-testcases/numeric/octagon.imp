@@ -3,11 +3,13 @@ class octagon_tests {
 	
 	assign_relations()
 	{
-		def x = 10;
-		def y = -x;
-		def z = y + 100;
+		def x = 0;
+		def y = 0;
+		x = 5;
+		y = x;
+		y = -y;
 
-		return z;
+		return 0;
 	}
 
 	assign_relations2()

@@ -1,7 +1,5 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
@@ -17,6 +15,7 @@ import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.conf.LiSAConfiguration.GraphType;
+import org.junit.Test;
 
 public class NumericAnalysesTest extends AnalysisTestExecutor {
 

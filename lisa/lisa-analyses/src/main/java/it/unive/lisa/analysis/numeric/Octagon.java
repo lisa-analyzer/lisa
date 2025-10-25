@@ -37,7 +37,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso</a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
- *             Shytermeja</a>
+ *         Shytermeja</a>
  */
 public class Octagon
 		implements
@@ -76,7 +76,7 @@ public class Octagon
 	 * Performs an assignment operation in the octagon domain.
 	 * 
 	 * @see DifferenceBoundMatrix#assign(Identifier, ValueExpression,
-	 *          ProgramPoint, SemanticOracle)
+	 *      ProgramPoint, SemanticOracle)
 	 */
 	@Override
 	public Octagon assign(
@@ -121,7 +121,6 @@ public class Octagon
 		String result1 = "";
 		String result2 = "";
 
-		
 		// Single index
 		for (Identifier id : variableIndex.keySet()) {
 			int I2 = dbm.idToNeg(id, variableIndex);
@@ -129,13 +128,14 @@ public class Octagon
 
 			for (int i = 0; i < dbm.getMatrix().length; i++) {
 				for (int j = 0; j < dbm.getMatrix().length; j++) {
-					
+
 					// First condition
 					if (i == I2_Minus1 && j == I2) {
 						// System.out.println("-" + id.getName() + " - " +
 						// id.getName() + " <= " +
 						// dbm.getMatrix()[j][i]);
-						result1 += "{" + id.getName() + " -(-" + id.getName() + ") <= " + dbm.getMatrix()[j][i] + "}\n";
+						result1 += "{" + id.getName() + " -(-" + id.getName() + ") <= " + dbm.getMatrix()[j][i]
+								+ "}<br>";
 					}
 
 					// Second condition
@@ -146,7 +146,7 @@ public class Octagon
 						// System.out.println(id.getName() + " - ( - " +
 						// id.getName() + ") <= " +
 						// dbm.getMatrix()[j][i]);
-						result1 += "{-" + id.getName() + " -" + id.getName() + " <= " + dbm.getMatrix()[j][i] + "}\n";
+						result1 += "{-" + id.getName() + " -" + id.getName() + " <= " + dbm.getMatrix()[j][i] + "}<br>";
 					}
 					// System.out.println();
 				}
@@ -179,29 +179,29 @@ public class Octagon
 
 							// First condition
 							if (i == I2_Minus1 && j == J2_Minus1) {
-								result2 += "{" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}\n";
+								result2 += "{" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}<br>";
 							}
 
 							if (i == I2 && j == J2) {
-								result2 += "{-" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
+								result2 += "{-" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}<br>";
 							}
 
 							// Second condition
 							if (i == I2_Minus1 && j == J2) {
-								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
+								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}<br>";
 							}
 
 							if (i == I2 && j == J2_Minus1) {
-								result2 += "{-" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}\n";
+								result2 += "{-" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}<br>";
 							}
 
 							// Third condition
 							if (i == I2 && j == J2_Minus1) {
-								result2 += "{" + id2.getName() + " -(-" + id.getName() + ") <= " + matIJ + "}\n";
+								result2 += "{" + id2.getName() + " -(-" + id.getName() + ") <= " + matIJ + "}<br>";
 							}
 
 							if (i == I2_Minus1 && j == J2) {
-								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}\n";
+								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}<br>";
 							}
 
 						}
@@ -210,12 +210,12 @@ public class Octagon
 			}
 		}
 
-		String resultWithoutDuplicates = Arrays.stream(result2.split("\n")).distinct()
-				.collect(Collectors.joining("\n"));
+		String resultWithoutDuplicates = Arrays.stream(result2.split("<br>")).distinct()
+				.collect(Collectors.joining("<br>"));
 
 		// System.out.println(resultWithoutDuplicates);
-		return new StringRepresentation(result1 + "\n" + resultWithoutDuplicates);
-		//return this.dbm.representation();
+		return new StringRepresentation("<br>" + result1 + "<br>" + resultWithoutDuplicates);
+		// return this.dbm.representation();
 	}
 
 	/**
@@ -287,7 +287,7 @@ public class Octagon
 	 * domain.
 	 * 
 	 * @see DifferenceBoundMatrix#smallStepSemantics(ValueExpression,
-	 *          ProgramPoint, SemanticOracle)
+	 *      ProgramPoint, SemanticOracle)
 	 */
 	@Override
 	public Octagon smallStepSemantics(
@@ -303,7 +303,7 @@ public class Octagon
 	 * Refines the octagon by assuming a boolean constraint holds.
 	 * 
 	 * @see DifferenceBoundMatrix#assume(ValueExpression, ProgramPoint,
-	 *          ProgramPoint, SemanticOracle)
+	 *      ProgramPoint, SemanticOracle)
 	 */
 	@Override
 	public Octagon assume(
@@ -345,7 +345,7 @@ public class Octagon
 	 * Checks whether the given expression is satisfied by this octagon.
 	 * 
 	 * @see DifferenceBoundMatrix#satisfies(ValueExpression, ProgramPoint,
-	 *          SemanticOracle)
+	 *      SemanticOracle)
 	 */
 	@Override
 	public Satisfiability satisfies(
