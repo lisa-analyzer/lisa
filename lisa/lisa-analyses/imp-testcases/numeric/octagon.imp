@@ -1,6 +1,5 @@
 class octagon_tests {
 
-	
 	assign_relations()
 	{
 		def x = 5;

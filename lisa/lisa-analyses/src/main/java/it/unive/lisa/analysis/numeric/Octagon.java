@@ -89,6 +89,10 @@ public class Octagon
 		 
     debug("assign() - Assigning " + expression + " to " + id);
     
+	 if (this.isBottom()) {
+        return this;
+    }
+
     // STAMPA STATO PRIMA
     System.out.println("=== PRIMA ASSEGNAMENTO ===");
     System.out.println("Istruzione: " + id + " = " + expression);
