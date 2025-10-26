@@ -1666,7 +1666,7 @@ public class DifferenceBoundMatrix
 					curMatrix[i][j] = value.multiply(new MathNumber(2));
 				} else {
 					try {
-						
+						// Prova
 						curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
 								.forgetIdentifier(id).matrix[i][j];
 						
