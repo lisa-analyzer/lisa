@@ -5,9 +5,11 @@ class octagon_tests {
 	{
 		def x = 5;
 		def y = 10;
+		
+		y = -y;
 
-		y =-y;
-	
+		y = 8;
+
 		return 0;
 	}
 
@@ -24,6 +26,8 @@ class octagon_tests {
 	{
 		def x = 10;
 		x = -x - 30;
+
+		def y = 100;
 		
 		return x;
 	}

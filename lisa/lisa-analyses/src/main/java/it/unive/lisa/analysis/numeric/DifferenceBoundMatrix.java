@@ -314,12 +314,8 @@ public class DifferenceBoundMatrix
 				if ((first.matrix[i][j].isPositive() && second.matrix[i][j].isPositive() && first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)
 					|| (first.matrix[i][j].isNegative() && second.matrix[i][j].isNegative() && first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)) {
 					newMatrix[i][j] = first.matrix[i][j];
-				} else if(second.matrix[i][j] != MathNumber.ZERO){
+				} else{
 					newMatrix[i][j] = second.matrix[i][j];
-				}
-				else
-				{
-					newMatrix[i][j] = first.matrix[i][j];
 				}
 			}
 		}
@@ -546,7 +542,8 @@ public class DifferenceBoundMatrix
 			}
 		}
 
-		Floyd.strongClosureFloyd(curMatrix);
+	
+		Floyd.strongClosureFloyd(curMatrix);	
 
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, workingVariableIndex);
 		return result;
@@ -855,7 +852,7 @@ public class DifferenceBoundMatrix
 		if (!variableIndex.containsKey(id)) {
 			return this;
 		}
-		int pos = idToPos(id, this.variableIndex) + 1;
+		int pos = idToPos(id, this.variableIndex)+1;
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix.length; j++) {
 				if (i != 2 * pos - 2 && i != 2 * pos - 1 && j != 2 * pos - 2 && j != 2 * pos - 1) {
@@ -1530,16 +1527,9 @@ public class DifferenceBoundMatrix
 					curMatrix[i][j] = value;
 				} else {
 					try {
-						if(Floyd.HasNegativeCycle(copyMatrix))
-						{
 						curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
 								.forgetIdentifier(id).matrix[i][j];
-						}
-						else if(!(i < this.matrix.length && j < this.matrix.length))
-						{
-							curMatrix[i][j] = MathNumber.PLUS_INFINITY;
-						}
-
+					
 					} catch (SemanticException e) {
 						e.printStackTrace();
 					}
@@ -1676,16 +1666,10 @@ public class DifferenceBoundMatrix
 					curMatrix[i][j] = value.multiply(new MathNumber(2));
 				} else {
 					try {
-						if(!Floyd.HasNegativeCycle(copyMatrix))
-						{
-							curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
+						
+						curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
 								.forgetIdentifier(id).matrix[i][j];
-						}
-						else if(!(i < this.matrix.length && j < this.matrix.length))
-						{
-							curMatrix[i][j] = MathNumber.PLUS_INFINITY;
-						}
-
+						
 					} catch (SemanticException e) {
 						e.printStackTrace();
 					}

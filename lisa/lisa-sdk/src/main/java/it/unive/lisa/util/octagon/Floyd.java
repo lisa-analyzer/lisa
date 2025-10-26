@@ -447,38 +447,46 @@ public class Floyd {
 			MathNumber[][] matrix) {
 		int V = matrix.length;
 
+		MathNumber copy[][] = new MathNumber[matrix.length][matrix.length];
+		copyArray(copy, matrix);
+
 		for (int k = 1; k <= V / 2; k++) {
 			for (int i = 0; i < V; i++) {
 				for (int j = 0; j < V; j++) {
-					MathNumber part1 = MathNumber.PLUS_INFINITY, part2 = MathNumber.PLUS_INFINITY,
-							part3 = MathNumber.PLUS_INFINITY, part4 = MathNumber.PLUS_INFINITY;
+					MathNumber part1 = MathNumber.ZERO, part2 = MathNumber.ZERO,
+							part3 = MathNumber.ZERO, part4 = MathNumber.ZERO;
 
 					// See which cycle is better
 
-					part1 = matrix[i][2 * k - 2].add(matrix[2 * k - 2][j]);
-					part3 = matrix[i][2 * k - 2].add(matrix[2 * k - 2][2 * k - 1].add(matrix[2 * k - 1][j]));
-					part4 = matrix[i][2 * k - 1].add(matrix[2 * k - 1][2 * k - 2].add(matrix[2 * k - 2][j]));
+					part1 = copy[i][2 * k - 2].add(copy[2 * k - 2][j]);
+					part3 = copy[i][2 * k - 2].add(copy[2 * k - 2][2 * k - 1].add(copy[2 * k - 1][j]));
+					part4 = copy[i][2 * k - 1].add(copy[2 * k - 1][2 * k - 2].add(copy[2 * k - 2][j]));
 
-					part2 = matrix[i][2 * k - 1].add(matrix[2 * k - 1][j]);
+					part2 = copy[i][2 * k - 1].add(copy[2 * k - 1][j]);
 
-					matrix[i][j] = matrix[i][j].min(part1.min(part2.min(part3.min(part4))));
+					if(i==3 && j==2)
+					{
+						System.out.println("OK");
+					}
+					matrix[i][j] = copy[i][j].min(part1.min(part2.min(part3.min(part4))));
 				}
 			}
+			
 
 			for (int i = 0; i < V; i++) {
 				for (int j = 0; j < V; j++) {
 					if (i % 2 == 0 && j % 2 == 0) {
-						matrix[i][j] = matrix[i][j]
-								.min((matrix[i][i + 1].add(matrix[j + 1][j])).divide(new MathNumber(2)));
+						matrix[i][j] = copy[i][j]
+								.min((copy[i][i + 1].add(copy[j + 1][j])).divide(new MathNumber(2)));
 					} else if (i % 2 == 1 && j % 2 == 0) {
-						matrix[i][j] = matrix[i][j]
-								.min((matrix[i][i - 1].add(matrix[j + 1][j])).divide(new MathNumber(2)));
+						matrix[i][j] = copy[i][j]
+								.min((copy[i][i - 1].add(copy[j + 1][j])).divide(new MathNumber(2)));
 					} else if (i % 2 == 0 && j % 2 == 1) {
-						matrix[i][j] = matrix[i][j]
-								.min((matrix[i][i + 1].add(matrix[j - 1][j])).divide(new MathNumber(2)));
+						matrix[i][j] = copy[i][j]
+								.min((copy[i][i + 1].add(copy[j - 1][j])).divide(new MathNumber(2)));
 					} else if (i % 2 == 1 && j % 2 == 1) {
-						matrix[i][j] = matrix[i][j]
-								.min((matrix[i][i - 1].add(matrix[j - 1][j])).divide(new MathNumber(2)));
+						matrix[i][j] = copy[i][j]
+								.min((copy[i][i - 1].add(copy[j - 1][j])).divide(new MathNumber(2)));
 					}
 				}
 			}
