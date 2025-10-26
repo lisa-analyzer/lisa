@@ -314,15 +314,22 @@ public class DifferenceBoundMatrix
 				if ((first.matrix[i][j].isPositive() && second.matrix[i][j].isPositive() && first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)
 					|| (first.matrix[i][j].isNegative() && second.matrix[i][j].isNegative() && first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)) {
 					newMatrix[i][j] = first.matrix[i][j];
-				} else {
+				} else if(second.matrix[i][j] != MathNumber.ZERO){
 					newMatrix[i][j] = second.matrix[i][j];
+				}
+				else
+				{
+					newMatrix[i][j] = first.matrix[i][j];
 				}
 			}
 		}
 
 
+		System.out.println("--- prima matrice");
 		Floyd.printMatrix(first.matrix);
+		System.out.println("--- seconda matrice");
 		Floyd.printMatrix(second.matrix);
+		System.out.println("--- risultato matrice");
 		Floyd.printMatrix(newMatrix);
 		
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(newMatrix, this.variableIndex);
@@ -540,12 +547,10 @@ public class DifferenceBoundMatrix
 		}
 
 		Floyd.strongClosureFloyd(curMatrix);
+
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, workingVariableIndex);
-		// Floyd.printMatrix(result.matrix);
-
-		// System.out.println(result.representation());
 		return result;
-
+		
 	}
 
 	@Override
@@ -1525,8 +1530,16 @@ public class DifferenceBoundMatrix
 					curMatrix[i][j] = value;
 				} else {
 					try {
+						if(Floyd.HasNegativeCycle(copyMatrix))
+						{
 						curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
 								.forgetIdentifier(id).matrix[i][j];
+						}
+						else if(!(i < this.matrix.length && j < this.matrix.length))
+						{
+							curMatrix[i][j] = MathNumber.PLUS_INFINITY;
+						}
+
 					} catch (SemanticException e) {
 						e.printStackTrace();
 					}
@@ -1663,8 +1676,15 @@ public class DifferenceBoundMatrix
 					curMatrix[i][j] = value.multiply(new MathNumber(2));
 				} else {
 					try {
-						curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
+						if(!Floyd.HasNegativeCycle(copyMatrix))
+						{
+							curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
 								.forgetIdentifier(id).matrix[i][j];
+						}
+						else if(!(i < this.matrix.length && j < this.matrix.length))
+						{
+							curMatrix[i][j] = MathNumber.PLUS_INFINITY;
+						}
 
 					} catch (SemanticException e) {
 						e.printStackTrace();
@@ -1673,6 +1693,7 @@ public class DifferenceBoundMatrix
 
 			}
 		}
+		
 	}
 
 	public double resolveStringMath(

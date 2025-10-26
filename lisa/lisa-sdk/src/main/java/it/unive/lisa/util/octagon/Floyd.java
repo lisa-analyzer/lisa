@@ -1,10 +1,11 @@
 package it.unive.lisa.util.octagon;
 
-import it.unive.lisa.util.numeric.MathNumber;
-import it.unive.lisa.util.numeric.MathNumberConversionException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+
+import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 
 /**
  * Utility class providing implementations of the Floyd-Warshall algorithm and
@@ -318,35 +319,15 @@ public class Floyd {
 	 *                                           cycle detection
 	 */
 	public static boolean HasNegativeCycle(
-			MathNumber[][] matrix)
-			throws MathNumberConversionException {
-		String[] colors = new String[matrix.length];
-		MathNumber path[] = new MathNumber[matrix.length];
+			MathNumber[][] matrix){
 
-		for (int v = 0; v < matrix.length; v++) {
-			for (int i = 0; i < matrix.length; i++) {
-				colors[i] = "White";
-			}
-
-			MathNumber[] dist = new MathNumber[matrix.length];
-			MathNumber[] pass = new MathNumber[matrix.length];
-
-			for (int k = 0; k < dist.length; k++) {
-				dist[k] = MathNumber.ZERO;
-				pass[k] = MathNumber.ZERO;
-			}
-
-			path = BFS(matrix, v, colors, dist, pass);
-
-			if (path != null) {
-				System.out.println("Start node: " + v);
-				for (int i = 0; i < path.length; i += 1) {
-					System.out.println(path[i]);
+			for(int i=0;i<matrix.length;i++)
+			{
+				if(matrix[i][i] == MathNumber.ZERO)
+				{
+					return true;
 				}
-				return true;
 			}
-
-		}
 
 		return false;
 	}

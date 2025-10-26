@@ -3,12 +3,11 @@ class octagon_tests {
 	
 	assign_relations()
 	{
-		def x = 0;
-		def y = 0;
-		x = 5;
-		y = x;
-		y = -y;
+		def x = 5;
+		def y = 10;
 
+		y =-y;
+	
 		return 0;
 	}
 
@@ -121,7 +120,7 @@ class octagon_tests {
 		def x = 0;
 		def n = 10;
 
-		while(x < 100)
+		while(x < 5)
 		{
 			x=x+1;
 		}
