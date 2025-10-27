@@ -323,7 +323,7 @@ public class Floyd {
 
 			for(int i=0;i<matrix.length;i++)
 			{
-				if(matrix[i][i] == MathNumber.ZERO)
+				if(matrix[i][i] != MathNumber.ZERO && matrix[i][i] != MathNumber.PLUS_INFINITY)
 				{
 					return true;
 				}

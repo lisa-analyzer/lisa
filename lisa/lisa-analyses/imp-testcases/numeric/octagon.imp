@@ -121,7 +121,6 @@ class octagon_tests {
 	example1()
 	{
 		def x = 0;
-		def n = 10;
 
 		while(x < 5)
 		{
