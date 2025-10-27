@@ -56,7 +56,6 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
  *             Shytermeja</a>
  */
-
 public class DifferenceBoundMatrix
 		implements
 		BaseLattice<DifferenceBoundMatrix>,
@@ -134,6 +133,14 @@ public class DifferenceBoundMatrix
 		return copy;
 	}
 
+	/**
+	 * Builds a new difference-bound matrix representing the top element of the
+	 * lattice. The top element has a matrix of the same size as the current
+	 * one, with all entries initialized to positive infinity, representing no
+	 * constraints.
+	 *
+	 * @return the top DBM
+	 */
 	@Override
 	public DifferenceBoundMatrix top() {
 		int size = 1;
@@ -144,7 +151,11 @@ public class DifferenceBoundMatrix
 		MathNumber[][] topMatrix = new MathNumber[size][size];
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				topMatrix[i][j] = MathNumber.PLUS_INFINITY;
+				if (i == j) {
+					topMatrix[i][j] = MathNumber.ZERO;
+				} else {
+					topMatrix[i][j] = MathNumber.PLUS_INFINITY;
+				}
 			}
 		}
 
@@ -156,6 +167,14 @@ public class DifferenceBoundMatrix
 		return new DifferenceBoundMatrix(topMatrix, newIndex);
 	}
 
+	/**
+	 * Builds a new difference-bound matrix representing the bottom element of
+	 * the lattice. The bottom element indicates an infeasible state (a
+	 * contradiction). It is represented by a matrix with a negative value on
+	 * the diagonal, which signifies an impossible constraint (e.g., x - x < 0).
+	 *
+	 * @return the bottom DBM
+	 */
 	@Override
 	public DifferenceBoundMatrix bottom() {
 
@@ -183,6 +202,12 @@ public class DifferenceBoundMatrix
 		return new DifferenceBoundMatrix(bottomMatrix, newIndex);
 	}
 
+	/**
+	 * Checks if this DBM is the top element of the lattice. A DBM is top if all
+	 * its entries are positive infinity, meaning there are no constraints.
+	 *
+	 * @return {@code true} if this DBM is top, {@code false} otherwise
+	 */
 	@Override
 	public boolean isTop() {
 		if (matrix == null)
@@ -204,6 +229,14 @@ public class DifferenceBoundMatrix
 		return true;
 	}
 
+	/**
+	 * Checks if this DBM is the bottom element of the lattice. A DBM is bottom
+	 * if it contains a contradiction, which is detected by finding a negative
+	 * value on the diagonal of its matrix after closure. A negative diagonal
+	 * m[i][i] implies a constraint of the form V - V < 0, which is impossible.
+	 *
+	 * @return {@code true} if this DBM is bottom, {@code false} otherwise
+	 */
 	@Override
 	public boolean isBottom() {
 		if (matrix == null)
@@ -225,8 +258,19 @@ public class DifferenceBoundMatrix
 		return false;
 	}
 
-	/*
-	 * m• ⊑DBM n ⇐⇒γ Oct(m) ⊆γ Oct(n)
+	/**
+	 * Performs the less-or-equal check between this DBM and another. This
+	 * operation is defined as m• ⊑DBM n ⇐⇒ γOct(m) ⊆ γOct(n), which simplifies
+	 * to checking if every entry in this matrix is less than or equal to the
+	 * corresponding entry in the other matrix.
+	 *
+	 * @param other the other DBM to compare against
+	 * 
+	 * @return {@code true} if this DBM is less or equal than the other,
+	 *             {@code false} otherwise
+	 * 
+	 * @throws SemanticException if the matrices have different dimensions or
+	 *                               variable sets
 	 */
 	@Override
 	public boolean lessOrEqualAux(
@@ -277,8 +321,17 @@ public class DifferenceBoundMatrix
 
 	}
 
-	/*
-	 * (m ⊔^DBM n)i j = max(mi j, ni j)
+	/**
+	 * Computes the least upper bound (LUB) of this DBM and another. The LUB is
+	 * computed pointwise by taking the maximum of the corresponding entries in
+	 * the two matrices: (m ⊔^DBM n)ij = max(mij, nij). The resulting matrix
+	 * represents the most precise set of constraints that satisfies both DBMs.
+	 *
+	 * @param other the other DBM
+	 * 
+	 * @return the LUB of the two DBMs
+	 * 
+	 * @throws SemanticException if the DBMs have different variable sets
 	 */
 	@Override
 	public DifferenceBoundMatrix lubAux(
@@ -329,8 +382,17 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
-	/*
-	 * (m ⊓^DBM n)i j = min(mi j, ni j)
+	/**
+	 * Computes the greatest lower bound (GLB) of this DBM and another. The GLB
+	 * is computed pointwise by taking the minimum of the corresponding entries
+	 * in the two matrices: (m ⊓^DBM n)ij = min(mij, nij). The resulting matrix
+	 * is then closed to ensure all implied constraints are made explicit.
+	 *
+	 * @param other the other DBM
+	 * 
+	 * @return the GLB of the two DBMs
+	 * 
+	 * @throws SemanticException if the DBMs have different variable sets
 	 */
 	@Override
 	public DifferenceBoundMatrix glbAux(
@@ -355,6 +417,13 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
+	/**
+	 * Returns a structured representation of this DBM. If the DBM is top or
+	 * bottom, it returns a standard representation for those. Otherwise, it
+	 * provides a string representation of the underlying matrix.
+	 *
+	 * @return the structured representation of this DBM
+	 */
 	@Override
 	public StructuredRepresentation representation() {
 		if (isBottom()) {
@@ -376,6 +445,14 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
+	/**
+	 * Checks if this DBM knows about a given identifier.
+	 *
+	 * @param id the identifier to check
+	 * 
+	 * @return {@code true} if the identifier is tracked in the DBM,
+	 *             {@code false} otherwise
+	 */
 	@Override
 	public boolean knowsIdentifier(
 			Identifier id) {
@@ -567,6 +644,16 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
+	/**
+	 * Resets constraints that cause a negative cycle in the matrix. This method
+	 * is a recovery mechanism used when an assignment or assumption leads to a
+	 * contradiction (a negative cycle). It identifies the problematic
+	 * constraints (typically those involving direct relationships like x - y)
+	 * and resets them to a consistent state, effectively weakening the DBM to
+	 * restore satisfiability.
+	 *
+	 * @param mat the matrix to be corrected
+	 */
 	private void removeNegativeCycle(
 			MathNumber mat[][]) {
 		for (int i = 0; i < mat.length; i++) {
@@ -591,6 +678,20 @@ public class DifferenceBoundMatrix
 		}
 	}
 
+	/**
+	 * Performs a small-step semantics evaluation of a value expression. In the
+	 * context of DBM, this method currently returns the DBM unchanged, as the
+	 * main logic for state modification is handled in {@link #assign} and
+	 * {@link #assume}.
+	 *
+	 * @param expression the expression to evaluate
+	 * @param pp         the program point
+	 * @param oracle     the semantic oracle
+	 * 
+	 * @return the (unchanged) DBM
+	 * 
+	 * @throws SemanticException if an error occurs
+	 */
 	@Override
 	public DifferenceBoundMatrix smallStepSemantics(
 			ValueExpression expression,
@@ -909,6 +1010,17 @@ public class DifferenceBoundMatrix
 		return this;
 	}
 
+	/**
+	 * Forgets identifiers that satisfy a given predicate. This method iterates
+	 * through all tracked identifiers and forgets those for which the predicate
+	 * returns {@code true}.
+	 *
+	 * @param test the predicate to test identifiers against
+	 * 
+	 * @return the DBM after forgetting the selected identifiers
+	 * 
+	 * @throws SemanticException if an error occurs
+	 */
 	@Override
 	public DifferenceBoundMatrix forgetIdentifiersIf(
 			Predicate<Identifier> test)
@@ -917,6 +1029,21 @@ public class DifferenceBoundMatrix
 		return this;
 	}
 
+	/**
+	 * Checks if a given boolean expression is satisfied by this DBM. This
+	 * method determines whether the constraints encoded in the DBM imply that
+	 * the expression is true, false, or cannot be determined.
+	 *
+	 * @param expression the expression to check
+	 * @param pp         the program point
+	 * @param oracle     the semantic oracle
+	 * 
+	 * @return {@link Satisfiability#SATISFIED},
+	 *             {@link Satisfiability#NOT_SATISFIED}, or
+	 *             {@link Satisfiability#UNKNOWN}
+	 * 
+	 * @throws SemanticException if an error occurs
+	 */
 	@Override
 	public Satisfiability satisfies(
 			ValueExpression expression,
@@ -927,6 +1054,16 @@ public class DifferenceBoundMatrix
 		return Satisfiability.UNKNOWN;
 	}
 
+	/**
+	 * Pushes a new scope, which is currently a no-op for this domain. In more
+	 * complex domains, this would handle scoping of variables.
+	 *
+	 * @param token the scope token
+	 * 
+	 * @return the unchanged DBM
+	 * 
+	 * @throws SemanticException if an error occurs
+	 */
 	@Override
 	public DifferenceBoundMatrix pushScope(
 			ScopeToken token)
@@ -934,6 +1071,16 @@ public class DifferenceBoundMatrix
 		return this;
 	}
 
+	/**
+	 * Pops a scope, which is currently a no-op for this domain. In more complex
+	 * domains, this would handle scoping of variables.
+	 *
+	 * @param token the scope token
+	 * 
+	 * @return the unchanged DBM
+	 * 
+	 * @throws SemanticException if an error occurs
+	 */
 	@Override
 	public DifferenceBoundMatrix popScope(
 			ScopeToken token)
@@ -1073,9 +1220,17 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
-	// Convert a generic object (coming from Constant.getValue()) into
-	// MathNumber,
-	// if possible
+	/**
+	 * Converts a generic object (typically from a {@link Constant}) into a
+	 * {@link MathNumber}. This method handles various numeric types, including
+	 * Integer, Long, Double, and Float, and attempts to parse from a string as
+	 * a fallback.
+	 *
+	 * @param v the object to convert
+	 * 
+	 * @return the corresponding {@link MathNumber}, or {@code null} if
+	 *             conversion is not possible
+	 */
 	private MathNumber toMathNumber(
 			Object v) {
 		if (v == null)
@@ -1144,10 +1299,24 @@ public class DifferenceBoundMatrix
 		return result;
 	}
 
-	// Helper function to add a constraint of the type x - c <= 0
-	// m(2k)(2k-1) = min(m(2k)(2k-1), 2*c)
-	// In negated case we have a constraint of the type -x - c <= 0
-	// m(2k-1)(2k) = min(m(2k-1)(2k), 2*c)
+	/**
+	 * Adds a unary constraint of the form {@code ±a ≤ c} to the DBM. This
+	 * helper method encodes an upper or lower bound for a single variable.
+	 * <ul>
+	 * <li>If {@code isNegated} is false, it adds the constraint
+	 * {@code a ≤ c}.</li>
+	 * <li>If {@code isNegated} is true, it adds {@code -a ≤ c} (i.e.,
+	 * {@code a ≥ -c}).</li>
+	 * </ul>
+	 *
+	 * @param a         the variable to constrain
+	 * @param c         the constant bound
+	 * @param isNegated whether the variable is negated
+	 * 
+	 * @return a new DBM with the constraint added
+	 * 
+	 * @throws SemanticException if the constraint cannot be added
+	 */
 	private DifferenceBoundMatrix addConstraint(
 			Identifier a,
 			MathNumber c,
@@ -1297,6 +1466,17 @@ public class DifferenceBoundMatrix
 
 	}
 
+	/**
+	 * Resolves the value of a variable expression from the DBM. This method
+	 * extracts the value of a variable by querying its bounds from the matrix.
+	 * It is used internally to get the current known value of a variable.
+	 *
+	 * @param exp the variable expression to resolve
+	 * 
+	 * @return the numeric value of the variable
+	 * 
+	 * @throws MathNumberConversionException if the value cannot be converted
+	 */
 	private double resolveVariableExpression(
 			ValueExpression exp)
 			throws MathNumberConversionException {
@@ -1309,7 +1489,15 @@ public class DifferenceBoundMatrix
 		return Double.NaN;
 	}
 
-	// It is assumed that the expression can have at most one variable
+	/**
+	 * Checks if a value expression contains a variable and returns its name.
+	 * This method recursively traverses the expression to find any variables.
+	 * It assumes that the expression contains at most one variable.
+	 *
+	 * @param exp the expression to check
+	 * 
+	 * @return the name of the variable if found, otherwise an empty string
+	 */
 	private String hasVariable(
 			ValueExpression exp) {
 		if (isDouble(exp.toString())) {
@@ -1406,6 +1594,14 @@ public class DifferenceBoundMatrix
 		return 0;
 	}
 
+	/**
+	 * Checks if a given string can be parsed as a double.
+	 *
+	 * @param s the string to check
+	 * 
+	 * @return {@code true} if the string is a valid double, {@code false}
+	 *             otherwise
+	 */
 	public static boolean isDouble(
 			String s) {
 		try {
@@ -1729,6 +1925,17 @@ public class DifferenceBoundMatrix
 
 	}
 
+	/**
+	 * Recursively evaluates a mathematical expression represented as a string.
+	 * This method handles parentheses and the four basic arithmetic operations
+	 * (+, -, *, /) by recursively parsing and evaluating the expression.
+	 * 
+	 * @param expr the string representation of the mathematical expression to
+	 *                 evaluate
+	 * 
+	 * @return the numeric result of the expression evaluation, or 0 if parsing
+	 *             fails
+	 */
 	public double resolveStringMath(
 			String expr) {
 		if (isDouble(expr)) {
@@ -1820,6 +2027,18 @@ public class DifferenceBoundMatrix
 		return 0;
 	}
 
+	/**
+	 * Validates whether the constraints in the given matrix are consistent with
+	 * octagon constraint properties. This method checks if the difference
+	 * constraints between variables satisfy the coherence properties required
+	 * by the octagon domain, ensuring that the relationships between variables
+	 * and their negations are properly maintained.
+	 * 
+	 * @param matrix the constraint matrix to validate
+	 * 
+	 * @return {@code true} if all constraints are valid and coherent,
+	 *             {@code false} if any inconsistency is detected
+	 */
 	public boolean isValidConstraint(
 			MathNumber[][] matrix) {
 		for (int i = 0; i < matrix.length; i++) {
@@ -1872,6 +2091,15 @@ public class DifferenceBoundMatrix
 		return true;
 	}
 
+	/**
+	 * Checks if this DBM is equal to another object. Two DBMs are considered
+	 * equal if they have the same top/bottom state, the same constraint matrix
+	 * (element-wise comparison), and the same variable index mapping.
+	 * 
+	 * @param obj the object to compare with
+	 * 
+	 * @return {@code true} if the objects are equal, {@code false} otherwise
+	 */
 	@Override
 	public boolean equals(
 			Object obj) {
@@ -1884,12 +2112,34 @@ public class DifferenceBoundMatrix
 				&& Objects.equals(this.variableIndex, that.variableIndex);
 	}
 
+	/**
+	 * Computes the hash code for this DBM based on its constraint matrix and
+	 * variable index mapping. This ensures that equal DBMs produce the same
+	 * hash code.
+	 * 
+	 * @return the hash code value for this DBM
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(Arrays.deepHashCode(matrix), variableIndex);
 	}
 
-	// Control functions
+	/**
+	 * Verifies that the constraints involving two variables (Vi and Vj) are
+	 * consistent with their assigned values in the matrix. This method checks
+	 * the coherence properties of octagon constraints for pairs of variables,
+	 * ensuring that the difference bounds between the variables respect the
+	 * assigned values.
+	 * 
+	 * @param mat    the constraint matrix to verify
+	 * @param indexI the index of the first variable
+	 * @param indexJ the index of the second variable
+	 * @param valueI the assigned value for the first variable
+	 * @param valueJ the assigned value for the second variable
+	 * 
+	 * @return {@code true} if the constraints are consistent with the assigned
+	 *             values, {@code false} otherwise
+	 */
 	boolean verifyDoubleIndex(
 			MathNumber[][] mat,
 			int indexI,
@@ -1949,6 +2199,20 @@ public class DifferenceBoundMatrix
 		return true;
 	}
 
+	/**
+	 * Verifies that the constraints involving a single variable (Vi) are
+	 * consistent with its assigned value in the matrix. This method checks the
+	 * coherence properties between the positive and negative occurrences of a
+	 * variable (V'_(2i-1) and V'_(2i)) to ensure they properly represent the
+	 * bounds of the original variable.
+	 * 
+	 * @param mat    the constraint matrix to verify
+	 * @param indexI the index of the variable to verify
+	 * @param valueI the assigned value for the variable
+	 * 
+	 * @return {@code true} if the constraints are consistent with the assigned
+	 *             value, {@code false} otherwise
+	 */
 	boolean verifySingleIndex(
 			MathNumber[][] mat,
 			int indexI,
