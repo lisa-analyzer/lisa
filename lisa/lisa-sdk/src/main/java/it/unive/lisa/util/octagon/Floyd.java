@@ -1,11 +1,10 @@
 package it.unive.lisa.util.octagon;
 
+import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
-
-import it.unive.lisa.util.numeric.MathNumber;
-import it.unive.lisa.util.numeric.MathNumberConversionException;
 
 /**
  * Utility class providing implementations of the Floyd-Warshall algorithm and
@@ -319,15 +318,13 @@ public class Floyd {
 	 *                                           cycle detection
 	 */
 	public static boolean HasNegativeCycle(
-			MathNumber[][] matrix){
+			MathNumber[][] matrix) {
 
-			for(int i=0;i<matrix.length;i++)
-			{
-				if(matrix[i][i] != MathNumber.ZERO && matrix[i][i] != MathNumber.PLUS_INFINITY)
-				{
-					return true;
-				}
+		for (int i = 0; i < matrix.length; i++) {
+			if (matrix[i][i] != MathNumber.ZERO && matrix[i][i] != MathNumber.PLUS_INFINITY) {
+				return true;
 			}
+		}
 
 		return false;
 	}
@@ -467,7 +464,6 @@ public class Floyd {
 					matrix[i][j] = matrix[i][j].min(part1.min(part2.min(part3.min(part4))));
 				}
 			}
-			
 
 			for (int i = 0; i < V; i++) {
 				for (int j = 0; j < V; j++) {

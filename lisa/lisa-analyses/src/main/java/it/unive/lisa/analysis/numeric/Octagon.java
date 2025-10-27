@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -20,6 +14,11 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.octagon.Floyd;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * The octagon abstract domain for relational numerical analysis, implementing
@@ -38,7 +37,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso</a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
- *         Shytermeja</a>
+ *             Shytermeja</a>
  */
 public class Octagon
 		implements
@@ -77,7 +76,7 @@ public class Octagon
 	 * Performs an assignment operation in the octagon domain.
 	 * 
 	 * @see DifferenceBoundMatrix#assign(Identifier, ValueExpression,
-	 *      ProgramPoint, SemanticOracle)
+	 *          ProgramPoint, SemanticOracle)
 	 */
 	@Override
 	public Octagon assign(
@@ -86,31 +85,31 @@ public class Octagon
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		 
-    debug("assign() - Assigning " + expression + " to " + id);
-    
-	 if (this.isBottom()) {
-        return this;
-    }
 
-    // STAMPA STATO PRIMA
-    System.out.println("=== PRIMA ASSEGNAMENTO ===");
-    System.out.println("Istruzione: " + id + " = " + expression);
-    System.out.println("Stato corrente: " + this.representation());
-    System.out.println("Matrice PRIMA:");
-    Floyd.printMatrix(this.dbm.getMatrix());
-    
-    // Esegui l'assegnamento
-    DifferenceBoundMatrix newDBM = dbm.assign(id, expression, pp, oracle);
-    
-    // STAMPA STATO DOPO  
-    System.out.println("=== DOPO ASSEGNAMENTO ===");
-    System.out.println("Nuovo stato: " + newDBM.representation());
-    System.out.println("Matrice DOPO:");
-    Floyd.printMatrix(newDBM.getMatrix());
-    System.out.println("=========================");
-    
-    return new Octagon(newDBM);
+		debug("assign() - Assigning " + expression + " to " + id);
+
+		if (this.isBottom()) {
+			return this;
+		}
+
+		// STAMPA STATO PRIMA
+		System.out.println("=== PRIMA ASSEGNAMENTO ===");
+		System.out.println("Istruzione: " + id + " = " + expression);
+		System.out.println("Stato corrente: " + this.representation());
+		System.out.println("Matrice PRIMA:");
+		Floyd.printMatrix(this.dbm.getMatrix());
+
+		// Esegui l'assegnamento
+		DifferenceBoundMatrix newDBM = dbm.assign(id, expression, pp, oracle);
+
+		// STAMPA STATO DOPO
+		System.out.println("=== DOPO ASSEGNAMENTO ===");
+		System.out.println("Nuovo stato: " + newDBM.representation());
+		System.out.println("Matrice DOPO:");
+		Floyd.printMatrix(newDBM.getMatrix());
+		System.out.println("=========================");
+
+		return new Octagon(newDBM);
 	}
 
 	/**
@@ -311,7 +310,7 @@ public class Octagon
 	 * domain.
 	 * 
 	 * @see DifferenceBoundMatrix#smallStepSemantics(ValueExpression,
-	 *      ProgramPoint, SemanticOracle)
+	 *          ProgramPoint, SemanticOracle)
 	 */
 	@Override
 	public Octagon smallStepSemantics(
@@ -327,7 +326,7 @@ public class Octagon
 	 * Refines the octagon by assuming a boolean constraint holds.
 	 * 
 	 * @see DifferenceBoundMatrix#assume(ValueExpression, ProgramPoint,
-	 *      ProgramPoint, SemanticOracle)
+	 *          ProgramPoint, SemanticOracle)
 	 */
 	@Override
 	public Octagon assume(
@@ -369,7 +368,7 @@ public class Octagon
 	 * Checks whether the given expression is satisfied by this octagon.
 	 * 
 	 * @see DifferenceBoundMatrix#satisfies(ValueExpression, ProgramPoint,
-	 *      SemanticOracle)
+	 *          SemanticOracle)
 	 */
 	@Override
 	public Satisfiability satisfies(

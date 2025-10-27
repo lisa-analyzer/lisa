@@ -1,14 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-
-import javax.lang.model.util.ElementScanner14;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -37,6 +28,12 @@ import it.unive.lisa.util.octagon.BooleanExpressionNormalizer;
 import it.unive.lisa.util.octagon.Floyd;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * The Difference Bound Matrix (DBM) abstract domain for representing octagon
@@ -57,7 +54,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @author <a href="mailto:lorenzo.mioso@studenti.univr.it">Lorenzo Mioso</a>
  * @author <a href="mailto:marjo.shytermeja@studenti.univr.it">Marjo
- *         Shytermeja</a>
+ *             Shytermeja</a>
  */
 
 public class DifferenceBoundMatrix
@@ -268,7 +265,7 @@ public class DifferenceBoundMatrix
 		 */
 
 		// compute m• ⊑DBM n
-		
+
 		for (int i = 0; i < first.matrix.length; i++) {
 			for (int j = 0; j < first.matrix.length; j++) {
 				if (first.matrix[i][j].compareTo(second.matrix[i][j]) > 0) {
@@ -307,19 +304,19 @@ public class DifferenceBoundMatrix
 			return first;
 		}
 
-
 		MathNumber[][] newMatrix = new MathNumber[this.matrix.length][this.matrix.length];
 		for (int i = 0; i < this.matrix.length; i++) {
 			for (int j = 0; j < this.matrix.length; j++) {
-				if ((first.matrix[i][j].isPositive() && second.matrix[i][j].isPositive() && first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)
-					|| (first.matrix[i][j].isNegative() && second.matrix[i][j].isNegative() && first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)) {
+				if ((first.matrix[i][j].isPositive() && second.matrix[i][j].isPositive()
+						&& first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)
+						|| (first.matrix[i][j].isNegative() && second.matrix[i][j].isNegative()
+								&& first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)) {
 					newMatrix[i][j] = first.matrix[i][j];
-				} else{
+				} else {
 					newMatrix[i][j] = second.matrix[i][j];
 				}
 			}
 		}
-
 
 		System.out.println("--- prima matrice");
 		Floyd.printMatrix(first.matrix);
@@ -327,7 +324,7 @@ public class DifferenceBoundMatrix
 		Floyd.printMatrix(second.matrix);
 		System.out.println("--- risultato matrice");
 		Floyd.printMatrix(newMatrix);
-		
+
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(newMatrix, this.variableIndex);
 		return result;
 	}
@@ -422,8 +419,8 @@ public class DifferenceBoundMatrix
 
 		// Work on a local matrix reference so we can add a variable and still
 		// continue
-		MathNumber[][] curMatrix = this.matrix;
-		
+		MathNumber[][] curMatrix = copyMatrix(this.matrix);
+
 		// add a new variable to the matrix if not already present
 		if (!workingVariableIndex.containsKey(id)) {
 			// skip synthetic 'this' identifier used by the analysis
@@ -453,8 +450,7 @@ public class DifferenceBoundMatrix
 			curMatrix = newMatrix;
 		}
 
-		if(Floyd.HasNegativeCycle(this.matrix))
-		{
+		if (Floyd.HasNegativeCycle(this.matrix)) {
 			return this.bottom();
 		}
 
@@ -547,8 +543,6 @@ public class DifferenceBoundMatrix
 			}
 		}
 
-	
-
 		MathNumber copy[][] = new MathNumber[curMatrix.length][curMatrix.length];
 
 		Floyd.copyArray(copy, curMatrix);
@@ -558,9 +552,8 @@ public class DifferenceBoundMatrix
 		Floyd.printMatrix(copy);
 		System.out.println("--------------");
 		Floyd.printMatrix(curMatrix);
-		
-		if(Floyd.HasNegativeCycle(copy))
-		{
+
+		if (Floyd.HasNegativeCycle(copy)) {
 			Floyd.printMatrix(curMatrix);
 			removeNegativeCycle(curMatrix);
 			Floyd.printMatrix(curMatrix);
@@ -571,32 +564,27 @@ public class DifferenceBoundMatrix
 		}
 
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(copy, workingVariableIndex);
-		return result;		
+		return result;
 	}
 
-
-	private void removeNegativeCycle(MathNumber mat[][])
-	{
+	private void removeNegativeCycle(
+			MathNumber mat[][]) {
 		for (int i = 0; i < mat.length; i++) {
 			for (int j = 0; j < mat.length; j++) {
-				if(Math.abs(i-j) == 1){
-					if ((mat[i][j].isPositive() || mat[i][j].isZero()) && (mat[i][j].subtract(mat[j][i])).leq(MathNumber.ZERO)) {
+				if (Math.abs(i - j) == 1) {
+					if ((mat[i][j].isPositive() || mat[i][j].isZero())
+							&& (mat[i][j].subtract(mat[j][i])).leq(MathNumber.ZERO)) {
 						mat[j][i] = mat[j][i].multiply(MathNumber.MINUS_ONE).multiply(new MathNumber(2));
-					}
-					else if ((mat[i][j].isNegative() || mat[i][j].isZero()) && (mat[j][i].add(mat[i][j])).lt(MathNumber.ZERO)) {
-						mat[j][i] = mat[i][j].abs().multiply(new MathNumber(2));;
-					}
-					else
-					{
+					} else if ((mat[i][j].isNegative() || mat[i][j].isZero())
+							&& (mat[j][i].add(mat[i][j])).lt(MathNumber.ZERO)) {
+						mat[j][i] = mat[i][j].abs().multiply(new MathNumber(2));
+						;
+					} else {
 						mat[i][j] = mat[j][i].abs();
 					}
-				}
-				else if(i==j)
-				{
+				} else if (i == j) {
 					mat[i][j] = MathNumber.ZERO;
-				}
-				else
-				{
+				} else {
 					mat[i][j] = MathNumber.PLUS_INFINITY;
 				}
 			}
@@ -905,7 +893,7 @@ public class DifferenceBoundMatrix
 		if (!variableIndex.containsKey(id)) {
 			return this;
 		}
-		int pos = idToPos(id, this.variableIndex)+1;
+		int pos = idToPos(id, this.variableIndex) + 1;
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix.length; j++) {
 				if (i != 2 * pos - 2 && i != 2 * pos - 1 && j != 2 * pos - 2 && j != 2 * pos - 1) {
@@ -1121,7 +1109,7 @@ public class DifferenceBoundMatrix
 	 * @return the positive matrix index for the variable
 	 * 
 	 * @throws IllegalArgumentException if the identifier is not in the variable
-	 *                                  index
+	 *                                      index
 	 */
 	public int idToPos(
 			Identifier id,
@@ -1144,7 +1132,7 @@ public class DifferenceBoundMatrix
 	 * @return the negative matrix index for the variable
 	 * 
 	 * @throws IllegalArgumentException if the identifier is not in the variable
-	 *                                  index
+	 *                                      index
 	 */
 	public int idToNeg(
 			Identifier id,
@@ -1273,7 +1261,7 @@ public class DifferenceBoundMatrix
 
 		int size = this.matrix.length;
 		MathNumber[][] resultMatrix = new MathNumber[size][size];
-		boolean flag=true;
+		boolean flag = true;
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
@@ -1281,37 +1269,29 @@ public class DifferenceBoundMatrix
 				// getting weaker, so
 				// set to +∞
 
-				if(!this.matrix[i][j].isFinite())
-				{
+				if (!this.matrix[i][j].isFinite()) {
 					resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
 					continue;
 				}
 
 				if (i != j) {
-					if(flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) > 0)
-					{
-						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
-						flag=false;
-					}
-					else if(flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) < 0)
-					{
+					if (flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) > 0) {
 						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
 						flag = false;
-					}
-					else
-					{
+					} else if (flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) < 0) {
+						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
+						flag = false;
+					} else {
 						resultMatrix[i][j] = this.matrix[i][j].min(this.matrix[j][i]);
 					}
-				}
-				else
-				{
+				} else {
 					resultMatrix[i][j] = MathNumber.ZERO;
 				}
 			}
 		}
 
 		Floyd.printMatrix(resultMatrix);
-		//Floyd.strongClosureFloyd(resultMatrix);
+		// Floyd.strongClosureFloyd(resultMatrix);
 		final DifferenceBoundMatrix result = new DifferenceBoundMatrix(resultMatrix, this.variableIndex);
 		return result;
 
@@ -1353,7 +1333,7 @@ public class DifferenceBoundMatrix
 	 * @return the numeric value of the expression, or 0 if evaluation fails
 	 * 
 	 * @throws MathNumberConversionException if number conversion fails during
-	 *                                       evaluation
+	 *                                           evaluation
 	 */
 	private double resolveCostantExpression(
 			ValueExpression exp)
@@ -1579,30 +1559,22 @@ public class DifferenceBoundMatrix
 						(i == 2 * newVariableIndex - 1 && j == 2 * indexOtherVariable - 1)) {
 					curMatrix[i][j] = value;
 				} else {
-					if(i != 2 * newVariableIndex - 2 && i != 2 * newVariableIndex - 1 &&
-					j != 2 * newVariableIndex - 2 && j != 2 * newVariableIndex - 1)
-					{
-						if(!Floyd.HasNegativeCycle(copyMatrix))
-						{
+					if (i != 2 * newVariableIndex - 2 && i != 2 * newVariableIndex - 1 &&
+							j != 2 * newVariableIndex - 2 && j != 2 * newVariableIndex - 1) {
+						if (!Floyd.HasNegativeCycle(copyMatrix)) {
 							curMatrix[i][j] = copyMatrix[i][j];
 						}
-					}
-					else if(i==j && (i==2 * newVariableIndex - 2 || i == 2 * newVariableIndex - 1))
-					{
+					} else if (i == j && (i == 2 * newVariableIndex - 2 || i == 2 * newVariableIndex - 1)) {
 						curMatrix[i][j] = MathNumber.ZERO;
-					}
-					else
-					{
+					} else {
 						curMatrix[i][j] = MathNumber.PLUS_INFINITY;
 					}
-					/*try {
-						
-						curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
-								.forgetIdentifier(id).matrix[i][j];
-						
-					} catch (SemanticException e) {
-						e.printStackTrace();
-					}*/
+					/*
+					 * try { curMatrix[i][j] = (new
+					 * DifferenceBoundMatrix(copyMatrix, this.variableIndex))
+					 * .forgetIdentifier(id).matrix[i][j]; } catch
+					 * (SemanticException e) { e.printStackTrace(); }
+					 */
 				}
 			}
 		}
@@ -1655,7 +1627,6 @@ public class DifferenceBoundMatrix
 
 		} catch (MathNumberConversionException ex) {
 		}
-
 
 		for (int i = 0; i < curMatrix.length; i++) {
 			for (int j = 0; j < curMatrix.length; j++) {
@@ -1735,35 +1706,27 @@ public class DifferenceBoundMatrix
 				} else if (i == 2 * newVariableIndex - 1 && j == 2 * newVariableIndex - 2) {
 					curMatrix[i][j] = value.multiply(new MathNumber(2));
 				} else {
-					if(i != 2 * newVariableIndex - 2 && i != 2 * newVariableIndex - 1 &&
-					j != 2 * newVariableIndex - 2 && j != 2 * newVariableIndex - 1)
-					{
-						if(!Floyd.HasNegativeCycle(copyMatrix))
-						{
+					if (i != 2 * newVariableIndex - 2 && i != 2 * newVariableIndex - 1 &&
+							j != 2 * newVariableIndex - 2 && j != 2 * newVariableIndex - 1) {
+						if (!Floyd.HasNegativeCycle(copyMatrix)) {
 							curMatrix[i][j] = copyMatrix[i][j];
 						}
-					}
-					else if(i==j && (i==2 * newVariableIndex - 2 || i == 2 * newVariableIndex - 1))
-					{
+					} else if (i == j && (i == 2 * newVariableIndex - 2 || i == 2 * newVariableIndex - 1)) {
 						curMatrix[i][j] = MathNumber.ZERO;
-					}
-					else
-					{
+					} else {
 						curMatrix[i][j] = MathNumber.PLUS_INFINITY;
 					}
-					/*try {
-						
-						curMatrix[i][j] = (new DifferenceBoundMatrix(copyMatrix, this.variableIndex))
-								.forgetIdentifier(id).matrix[i][j];
-						
-					} catch (SemanticException e) {
-						e.printStackTrace();
-					}*/
+					/*
+					 * try { curMatrix[i][j] = (new
+					 * DifferenceBoundMatrix(copyMatrix, this.variableIndex))
+					 * .forgetIdentifier(id).matrix[i][j]; } catch
+					 * (SemanticException e) { e.printStackTrace(); }
+					 */
 				}
 
 			}
 		}
-		
+
 	}
 
 	public double resolveStringMath(
