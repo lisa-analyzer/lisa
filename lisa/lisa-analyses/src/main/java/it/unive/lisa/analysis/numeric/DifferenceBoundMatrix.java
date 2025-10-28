@@ -151,11 +151,7 @@ public class DifferenceBoundMatrix
 		MathNumber[][] topMatrix = new MathNumber[size][size];
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				if (i == j) {
-					topMatrix[i][j] = MathNumber.ZERO;
-				} else {
-					topMatrix[i][j] = MathNumber.PLUS_INFINITY;
-				}
+				topMatrix[i][j] = MathNumber.PLUS_INFINITY;
 			}
 		}
 
@@ -371,13 +367,6 @@ public class DifferenceBoundMatrix
 			}
 		}
 
-		System.out.println("--- prima matrice");
-		Floyd.printMatrix(first.matrix);
-		System.out.println("--- seconda matrice");
-		Floyd.printMatrix(second.matrix);
-		System.out.println("--- risultato matrice");
-		Floyd.printMatrix(newMatrix);
-
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(newMatrix, this.variableIndex);
 		return result;
 	}
@@ -432,16 +421,16 @@ public class DifferenceBoundMatrix
 		if (isTop()) {
 			return Lattice.topRepresentation();
 		}
-		String matrixStr = "\n";
+		StringBuilder matrixStr = new StringBuilder("\n");
 		for (int i = 0; i < matrix.length; i++) {
-			matrixStr += "|";
+			matrixStr.append("|");
 			for (int j = 0; j < matrix.length; j++) {
-				matrixStr += matrix[i][j] + " ";
+				matrixStr.append(matrix[i][j]).append(" ");
 			}
-			matrixStr += "|\n";
+			matrixStr.append("|\n");
 		}
 		StringRepresentation result = new StringRepresentation(
-				"DBM[" + matrix.length + "x" + matrix.length + "]\n" + matrixStr);
+				"DBM[" + matrix.length + "x" + matrix.length + "]\n" + matrixStr.toString());
 		return result;
 	}
 
@@ -626,17 +615,10 @@ public class DifferenceBoundMatrix
 
 		Floyd.strongClosureFloyd(copy);
 
-		Floyd.printMatrix(copy);
-		System.out.println("--------------");
-		Floyd.printMatrix(curMatrix);
-
 		if (Floyd.HasNegativeCycle(copy)) {
-			Floyd.printMatrix(curMatrix);
 			removeNegativeCycle(curMatrix);
-			Floyd.printMatrix(curMatrix);
 			DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, workingVariableIndex);
 			Floyd.strongClosureFloyd(curMatrix);
-			Floyd.printMatrix(curMatrix);
 			return result;
 		}
 
@@ -758,7 +740,6 @@ public class DifferenceBoundMatrix
 		}
 
 		if (!be.getOperator().equals(ComparisonLe.INSTANCE)) {
-
 			return this
 					.addConstraint((Identifier) (((BinaryExpression) be.getLeft()).getRight()),
 							new MathNumber(Double.parseDouble(((BinaryExpression) be.getLeft()).getLeft().toString())),
@@ -822,7 +803,8 @@ public class DifferenceBoundMatrix
 			// Objective: call addConstraint(Identifier a, Identifier b,
 			// MathNumber c)
 			if (a instanceof Constant && b instanceof SymbolicExpression) {
-				MathNumber c1 = toMathNumber(((Constant) a).getValue());
+
+				MathNumber c1 = toMathNumber(((Constant) a).getValue()).multiply(new MathNumber(-1));
 				if (c1 == null)
 					return this;
 
@@ -1125,8 +1107,9 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if the closure computation fails
 	 */
 	public DifferenceBoundMatrix strongClosure() throws SemanticException {
-		Floyd.strongClosureFloyd(this.matrix);
-		return this;
+		DifferenceBoundMatrix dbm = new DifferenceBoundMatrix(this.copyMatrix(matrix), this.variableIndex);
+		Floyd.strongClosureFloyd(dbm.matrix);
+		return dbm;
 	}
 
 	/**
@@ -1337,9 +1320,12 @@ public class DifferenceBoundMatrix
 			j = idToPos(a, variableIndex);
 		}
 
-		curMatrix[i][j] = c.multiply(new MathNumber(-2));
+		MathNumber newValue = c.multiply(new MathNumber(-2));
+		curMatrix[i][j] = newValue;
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, this.variableIndex);
-		return result;
+		// compute string closure to ensure the assume function returns bottom
+		// in the
+		return result.strongClosure();
 
 	}
 
@@ -1396,7 +1382,7 @@ public class DifferenceBoundMatrix
 		curMatrix[negB][posA] = curMatrix[negB][posA].min(c);
 
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, this.variableIndex);
-		return result;
+		return result.strongClosure();
 	}
 
 	/**
@@ -1459,8 +1445,6 @@ public class DifferenceBoundMatrix
 			}
 		}
 
-		Floyd.printMatrix(resultMatrix);
-		// Floyd.strongClosureFloyd(resultMatrix);
 		final DifferenceBoundMatrix result = new DifferenceBoundMatrix(resultMatrix, this.variableIndex);
 		return result;
 

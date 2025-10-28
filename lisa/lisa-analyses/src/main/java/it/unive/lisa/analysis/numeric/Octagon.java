@@ -14,11 +14,9 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.octagon.Floyd;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * The octagon abstract domain for relational numerical analysis, implementing
@@ -141,104 +139,72 @@ public class Octagon
 	public StructuredRepresentation representation() {
 		debug("representation() - Getting representation");
 		Map<Identifier, Integer> variableIndex = dbm.getVariableIndex();
-		String result1 = "";
-		String result2 = "";
+		MathNumber[][] matrix = dbm.getMatrix();
 
-		// Single index
+		// Use a set to automatically handle duplicates
+		java.util.Set<String> constraints = new java.util.LinkedHashSet<>();
+
+		// Single variable constraints (±x ± x ≤ c)
 		for (Identifier id : variableIndex.keySet()) {
-			int I2 = dbm.idToNeg(id, variableIndex);
-			int I2_Minus1 = dbm.idToPos(id, variableIndex);
+			int posIdx = dbm.idToPos(id, variableIndex);
+			int negIdx = dbm.idToNeg(id, variableIndex);
 
-			for (int i = 0; i < dbm.getMatrix().length; i++) {
-				for (int j = 0; j < dbm.getMatrix().length; j++) {
+			// x - (-x) ≤ c
+			if (posIdx < matrix.length && negIdx < matrix.length) {
+				constraints.add("{" + id.getName() + " -(-" + id.getName() + ") <= "
+						+ matrix[negIdx][posIdx] + "}");
+			}
 
-					// First condition
-					if (i == I2_Minus1 && j == I2) {
-						// System.out.println("-" + id.getName() + " - " +
-						// id.getName() + " <= " +
-						// dbm.getMatrix()[j][i]);
-						result1 += "{" + id.getName() + " -(-" + id.getName() + ") <= " + dbm.getMatrix()[j][i]
-								+ "}<br>";
-					}
-
-					// Second condition
-					if (i == I2 && j == I2_Minus1) {// && dbm.getMatrix()[j][i]
-													// !=
-													// MathNumber.PLUS_INFINITY)
-													// {
-						// System.out.println(id.getName() + " - ( - " +
-						// id.getName() + ") <= " +
-						// dbm.getMatrix()[j][i]);
-						result1 += "{-" + id.getName() + " -" + id.getName() + " <= " + dbm.getMatrix()[j][i] + "}<br>";
-					}
-					// System.out.println();
-				}
+			// -x - x ≤ c
+			if (negIdx < matrix.length && posIdx < matrix.length) {
+				constraints.add("{-" + id.getName() + " -" + id.getName() + " <= "
+						+ matrix[posIdx][negIdx] + "}");
 			}
 		}
 
-		// Double index
+		// Two variable constraints (±x ± y ≤ c)
+		for (Identifier id1 : variableIndex.keySet()) {
+			int pos1 = dbm.idToPos(id1, variableIndex);
+			int neg1 = dbm.idToNeg(id1, variableIndex);
 
-		for (Identifier id : variableIndex.keySet()) {
 			for (Identifier id2 : variableIndex.keySet()) {
-				if (!id.getName().equals(id2.getName())) {
-
-					int I2 = dbm.idToNeg(id, variableIndex);
-					int I2_Minus1 = dbm.idToPos(id, variableIndex);
-					int J2 = dbm.idToNeg(id2, variableIndex);
-					int J2_Minus1 = dbm.idToPos(id2, variableIndex);
-
-					for (int i = 0; i < dbm.getMatrix().length; i++) {
-						for (int j = 0; j < dbm.getMatrix().length; j++) {
-
-							MathNumber matIJ = MathNumber.ZERO;
-							MathNumber matJI = MathNumber.ZERO;
-
-							try {
-								matIJ = dbm.getMatrix()[i][j];
-								matJI = dbm.getMatrix()[j][i];
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-
-							// First condition
-							if (i == I2_Minus1 && j == J2_Minus1) {
-								result2 += "{" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}<br>";
-							}
-
-							if (i == I2 && j == J2) {
-								result2 += "{-" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}<br>";
-							}
-
-							// Second condition
-							if (i == I2_Minus1 && j == J2) {
-								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}<br>";
-							}
-
-							if (i == I2 && j == J2_Minus1) {
-								result2 += "{-" + id.getName() + " - " + id2.getName() + " <= " + matJI + "}<br>";
-							}
-
-							// Third condition
-							if (i == I2 && j == J2_Minus1) {
-								result2 += "{" + id2.getName() + " -(-" + id.getName() + ") <= " + matIJ + "}<br>";
-							}
-
-							if (i == I2_Minus1 && j == J2) {
-								result2 += "{" + id.getName() + " -(-" + id2.getName() + ") <= " + matJI + "}<br>";
-							}
-
-						}
-					}
+				if (id1.getName().equals(id2.getName())) {
+					continue;
 				}
+
+				int pos2 = dbm.idToPos(id2, variableIndex);
+				int neg2 = dbm.idToNeg(id2, variableIndex);
+
+				if (pos1 >= matrix.length || neg1 >= matrix.length ||
+						pos2 >= matrix.length || neg2 >= matrix.length) {
+					continue;
+				}
+
+				// x - y ≤ c
+				constraints.add("{" + id1.getName() + " - " + id2.getName() + " <= "
+						+ matrix[pos2][pos1] + "}");
+
+				// -x - (-y) ≤ c
+				constraints.add("{-" + id1.getName() + " -(-" + id2.getName() + ") <= "
+						+ matrix[pos2][neg1] + "}");
+
+				// x - (-y) ≤ c
+				constraints.add("{" + id1.getName() + " -(-" + id2.getName() + ") <= "
+						+ matrix[neg2][pos1] + "}");
+
+				// -x - y ≤ c
+				constraints.add("{-" + id1.getName() + " - " + id2.getName() + " <= "
+						+ matrix[pos2][neg1] + "}");
 			}
 		}
 
-		String resultWithoutDuplicates = Arrays.stream(result2.split("<br>")).distinct()
-				.collect(Collectors.joining("<br>"));
+		// Build final result
+		StringBuilder result = new StringBuilder("<br>");
+		for (String constraint : constraints) {
+			result.append(constraint).append("<br>");
+		}
 
-		// System.out.println(resultWithoutDuplicates);
-		return new StringRepresentation("<br>" + result1 + "<br>" + resultWithoutDuplicates);
-		// return this.dbm.representation();
+		return new StringRepresentation(result.toString());
 	}
 
 	/**

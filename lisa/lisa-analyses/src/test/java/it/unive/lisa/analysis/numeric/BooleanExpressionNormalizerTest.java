@@ -150,7 +150,7 @@ public class BooleanExpressionNormalizerTest {
 	// ------------ Tests ------------
 
 	// Casi con costanti
-	@Test // "x < 5 (interi) => (x - 6) <= 0"
+	@Test // "x < 5 (interi) => (x - 4) <= 0"
 	public void ltVarConstInteger() throws SemanticException { // CORRECT
 		BinaryExpression e = new BinaryExpression(BoolType.INSTANCE, x, c(5, Num, location), ComparisonLt.INSTANCE,
 				location);
@@ -161,7 +161,7 @@ public class BooleanExpressionNormalizerTest {
 		BinaryExpression diff = asBin(top.getLeft());
 		assertTrue(diff.getOperator() instanceof NumericNonOverflowingSub);
 		assertSame(x, diff.getLeft());
-		assertEquals(new MathNumber(6), ((Constant) diff.getRight()).getValue());
+		assertEquals(new MathNumber(4), ((Constant) diff.getRight()).getValue());
 	}
 
 	@Test // "x <= 5 => (x - 5) <= 0"

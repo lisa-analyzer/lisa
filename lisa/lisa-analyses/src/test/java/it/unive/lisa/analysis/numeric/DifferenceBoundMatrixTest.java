@@ -887,14 +887,7 @@ public class DifferenceBoundMatrixTest {
 		DifferenceBoundMatrix result = step1.assume(constraint, pp, pp, oracle);
 		System.out.println(result.representation());
 
-		assertTrue("DBM representation should match expected before assume",
-				result.equals(dbmFromMatrix(new double[][] {
-						{ 0, -10 },
-						{ 8, 0 }
-				}, x)));
-
-		assertNotNull("Assume result should not be null", result);
-		assertTrue("Feasible constraint should not make DBM bottom", result.closure().isBottom());
+		assertTrue("Unfeasible constraint should drive DBM to bottom", result.isBottom());
 	}
 
 	@Test
@@ -1025,7 +1018,7 @@ public class DifferenceBoundMatrixTest {
 		// Create x = 5
 		DifferenceBoundMatrix step1 = dbm.assign(x, c1, pp, oracle);
 
-		// Assume x < 10 (should be normalized to x - 11 <= 0)
+		// Assume x < 10 (should be normalized to x - 9 <= 0)
 		BinaryExpression constraint = new BinaryExpression(BoolType.INSTANCE, x, c2,
 				ComparisonLt.INSTANCE,
 				location);
@@ -1036,7 +1029,7 @@ public class DifferenceBoundMatrixTest {
 		assertTrue("DBM representation should match expected before assume",
 				result.equals(dbmFromMatrix(new double[][] {
 						{ 0, -10 },
-						{ 22, 0 }
+						{ 18, 0 }
 				}, x)));
 
 		assertNotNull("Assume result should not be null", result);
@@ -1265,11 +1258,8 @@ public class DifferenceBoundMatrixTest {
 				location);
 		DifferenceBoundMatrix result = step1.assume(constraint, pp, pp, oracle);
 
-		assertTrue("DBM representation should match expected before assume",
-				result.equals(dbmFromMatrix(new double[][] {
-						{ 0, -10 },
-						{ 6, 0 }
-				}, x)));
+		assertTrue("DBM should be bottom after infeasible assume",
+				result.isBottom());
 		assertNotNull("Assume result should not be null", result);
 	}
 
@@ -1302,7 +1292,7 @@ public class DifferenceBoundMatrixTest {
 
 		// Expect no stronger constraint than the original assignment (x == 10)
 		assertTrue("DBM representation should match expected after assume", result.equals(dbmFromMatrix(new double[][] {
-				{ 0, -200 },
+				{ 0, 200 },
 				{ 20, 0 }
 		}, x)));
 	}

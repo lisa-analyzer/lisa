@@ -499,11 +499,11 @@ public class BooleanExpressionNormalizer implements ExpressionVisitor<SymbolicEx
 		} else if (operator instanceof ComparisonLt) {
 
 			if (left instanceof Variable && right instanceof Constant) {
-				// x < c becomes x - (c+1) <= 0 for integers
+				// x < c becomes x - (c-1) <= 0 for integers
 				if (isIntegerType(left) && isIntegerType(right)) {
 					Constant rightConst = (Constant) right;
-					Constant incrementedRight = inc(rightConst, 1);
-					return cmp(simplifiedSub(left, incrementedRight), zero(left.getStaticType()), ComparisonLe.INSTANCE,
+					Constant decrementedRight = inc(rightConst, -1);
+					return cmp(simplifiedSub(left, decrementedRight), zero(left.getStaticType()), ComparisonLe.INSTANCE,
 							expression.getStaticType());
 				}
 			}
