@@ -120,8 +120,8 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.testDir = "numeric";
 		conf.testSubDir = "octagon";
-		conf.programFile = "octagon.imp";
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
+		conf.programFile = "octagon.imp";
 		conf.wideningThreshold = 100;
 		perform(conf);
 	}
