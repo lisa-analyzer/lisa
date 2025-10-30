@@ -356,14 +356,7 @@ public class DifferenceBoundMatrix
 		MathNumber[][] newMatrix = new MathNumber[this.matrix.length][this.matrix.length];
 		for (int i = 0; i < this.matrix.length; i++) {
 			for (int j = 0; j < this.matrix.length; j++) {
-				if ((first.matrix[i][j].isPositive() && second.matrix[i][j].isPositive()
-						&& first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)
-						|| (first.matrix[i][j].isNegative() && second.matrix[i][j].isNegative()
-								&& first.matrix[i][j].compareTo(second.matrix[i][j]) > 0)) {
-					newMatrix[i][j] = first.matrix[i][j];
-				} else {
-					newMatrix[i][j] = second.matrix[i][j];
-				}
+				newMatrix[i][j] = first.matrix[i][j].max(second.matrix[i][j]);
 			}
 		}
 
@@ -623,6 +616,7 @@ public class DifferenceBoundMatrix
 		}
 
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(copy, workingVariableIndex);
+
 		return result;
 	}
 
@@ -728,15 +722,16 @@ public class DifferenceBoundMatrix
 			// apply assume for both sides and then merge the results with glb
 			DifferenceBoundMatrix leftResult = this.assume((ValueExpression) be.getLeft(), src, dest, oracle);
 			DifferenceBoundMatrix rightResult = this.assume((ValueExpression) be.getRight(), src, dest, oracle);
-
-			return leftResult.glbAux(rightResult);
+			DifferenceBoundMatrix glbResult = leftResult.glbAux(rightResult);
+			return glbResult;
 		}
 
 		if (be.getOperator().equals(LogicalOr.INSTANCE)) {
 			// apply assume for both sides and then merge the results with lub
 			DifferenceBoundMatrix leftResult = this.assume((ValueExpression) be.getLeft(), src, dest, oracle);
 			DifferenceBoundMatrix rightResult = this.assume((ValueExpression) be.getRight(), src, dest, oracle);
-			return leftResult.lubAux(rightResult);
+			DifferenceBoundMatrix lubResult = leftResult.lubAux(rightResult);
+			return lubResult;
 		}
 
 		if (!be.getOperator().equals(ComparisonLe.INSTANCE)) {
@@ -767,7 +762,6 @@ public class DifferenceBoundMatrix
 				return this;
 
 			if (a instanceof Identifier && b instanceof UnaryExpression) {
-				// -b - a <= c
 				UnaryExpression ub = (UnaryExpression) b;
 				if (ub.getOperator().equals(NumericNegation.INSTANCE)
 						&& ub.getExpression() instanceof Identifier) {
@@ -787,7 +781,7 @@ public class DifferenceBoundMatrix
 					return this;
 				MathNumber ub = cVal.add(k);
 
-				return this.addConstraint((Identifier) b, ub.multiply(new MathNumber(-1)), false);
+				return this.addConstraint((Identifier) b, ub, false);
 			}
 
 			if (a instanceof Identifier && b instanceof Constant) {
@@ -796,7 +790,8 @@ public class DifferenceBoundMatrix
 				if (k == null)
 					return this;
 				MathNumber val = cVal.subtract(k);
-				return this.addConstraint((Identifier) a, val.multiply(new MathNumber(-1)), true);
+
+				return this.addConstraint((Identifier) a, val, true);
 			}
 
 			// handle the case x - y - c1 <= c2
@@ -808,7 +803,7 @@ public class DifferenceBoundMatrix
 				if (c1 == null)
 					return this;
 
-				MathNumber adjusted = cVal.add(c1);
+				MathNumber adjusted = cVal.subtract(c1);
 
 				if (b instanceof UnaryExpression) {
 					UnaryExpression ub = (UnaryExpression) b;
@@ -825,8 +820,9 @@ public class DifferenceBoundMatrix
 				BinaryExpression bExpr = (BinaryExpression) b;
 				Identifier b1 = bExpr.getLeft() instanceof Identifier ? (Identifier) bExpr.getLeft() : null;
 				Identifier b2 = bExpr.getRight() instanceof Identifier ? (Identifier) bExpr.getRight() : null;
-				if (b1 == null || b2 == null)
+				if (b1 == null || b2 == null) {
 					return this;
+				}
 
 				if (bExpr.getOperator().equals(NumericNonOverflowingSub.INSTANCE)) {
 					// b1 - b2 - const <= 0
@@ -893,7 +889,8 @@ public class DifferenceBoundMatrix
 					return this;
 
 				MathNumber val = cVal.subtract(k);
-				return this.addConstraint((Identifier) ua.getExpression(), val.multiply(new MathNumber(-1)), true);
+
+				return this.addConstraint((Identifier) ua.getExpression(), val, true);
 			}
 
 			// const + (-x) <= c
@@ -908,27 +905,33 @@ public class DifferenceBoundMatrix
 					return this;
 
 				MathNumber val = cVal.subtract(k);
-				return this.addConstraint((Identifier) ub.getExpression(), val.multiply(new MathNumber(-1)), true);
+
+				return this.addConstraint((Identifier) ub.getExpression(), val, true);
 			}
 
+			// x + const <= c
 			if (a instanceof Identifier && b instanceof Constant) {
 				MathNumber k = toMathNumber(((Constant) b).getValue());
 				if (k == null)
 					return this;
 
 				MathNumber ub = cVal.subtract(k);
-				return this.addConstraint((Identifier) a, ub.multiply(new MathNumber(-1)), false);
+
+				return this.addConstraint((Identifier) a, ub, false);
 			}
 
+			// const + y <= c
 			if (a instanceof Constant && b instanceof Identifier) {
 				MathNumber k = toMathNumber(((Constant) a).getValue());
 				if (k == null)
 					return this;
 
 				MathNumber ub = cVal.subtract(k);
-				return this.addConstraint((Identifier) b, ub.multiply(new MathNumber(-1)), false);
+
+				return this.addConstraint((Identifier) b, ub, false);
 			}
 
+			// y + x <= c
 			if (a instanceof Identifier && b instanceof Identifier) {
 				return this.addConstraint((Identifier) a, (Identifier) b, cVal, false, false);
 			}
@@ -1308,6 +1311,7 @@ public class DifferenceBoundMatrix
 
 		// Work on a copy of the matrix
 		MathNumber[][] curMatrix = copyMatrix(this.matrix);
+		MathNumber constraintValue;
 
 		int i = 0;
 		int j = 0;
@@ -1315,18 +1319,22 @@ public class DifferenceBoundMatrix
 		if (isNegated) {
 			i = idToPos(a, variableIndex);
 			j = idToNeg(a, variableIndex);
+			constraintValue = c.multiply(new MathNumber(2));
 		} else {
 			i = idToNeg(a, variableIndex);
 			j = idToPos(a, variableIndex);
+			constraintValue = c.multiply(new MathNumber(2));
 		}
 
-		MathNumber newValue = c.multiply(new MathNumber(-2));
-		curMatrix[i][j] = newValue;
+		MathNumber oldValue = curMatrix[i][j];
+		curMatrix[i][j] = curMatrix[i][j].min(constraintValue);
+
 		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, this.variableIndex);
+
 		// compute string closure to ensure the assume function returns bottom
 		// in the
-		return result.strongClosure();
-
+		DifferenceBoundMatrix finalResult = result.strongClosure();
+		return finalResult;
 	}
 
 	/**
@@ -1364,25 +1372,43 @@ public class DifferenceBoundMatrix
 		// Work on a copy of the matrix
 		MathNumber[][] curMatrix = copyMatrix(this.matrix);
 
-		// Add the constraint b - a <= c
-		/*
-		 * V_j0 - V_i0 <= c = m[2i-1][2j-1] = min(m[2i-1][2j-1], 2*c) (1)
-		 * m[2j][2i] = min(m[2j][2i], 2*c) (2) Vj0 + Vi0 <= c = m[2i][2j-1] =
-		 * min(m[2i][2j-1], 2*c) (3) m[2j][2i] = min(m[2j][2i], 2*c) (4) -Vj0 -
-		 * Vi0 <= c = m[2i-1][2j] = min(m[2i-1][2j], 2*c) (5) m[2j-1][2i] =
-		 * min(m[2j-1][2i], 2*c) (6)
-		 */
-		int posA = firstNegated ? idToNeg(a, variableIndex) : idToPos(a, variableIndex);
-		int negA = firstNegated ? idToPos(a, variableIndex) : idToNeg(a, variableIndex);
-		int posB = secondNegated ? idToNeg(b, variableIndex) : idToPos(b, variableIndex);
-		int negB = secondNegated ? idToPos(b, variableIndex) : idToNeg(b, variableIndex);
+		int i1, j1, i2, j2;
+		if (!firstNegated && !secondNegated) {
+			// b + a <= c
+			i1 = idToNeg(a, variableIndex);
+			j1 = idToPos(b, variableIndex);
+			i2 = idToNeg(b, variableIndex);
+			j2 = idToPos(a, variableIndex);
+		} else if (firstNegated && secondNegated) {
+			// -b - a <= c
+			i1 = idToPos(a, variableIndex);
+			j1 = idToNeg(b, variableIndex);
+			i2 = idToPos(b, variableIndex);
+			j2 = idToNeg(a, variableIndex);
+		} else if (!firstNegated && secondNegated) {
+			// b - a <= c
+			j1 = idToPos(a, variableIndex);
+			i1 = idToPos(b, variableIndex);
+			i2 = idToNeg(a, variableIndex);
+			j2 = idToNeg(b, variableIndex);
+		} else {
+			// -b + a <= c
+			i1 = idToPos(b, variableIndex);
+			j1 = idToPos(a, variableIndex);
+			i2 = idToNeg(a, variableIndex);
+			j2 = idToNeg(b, variableIndex);
+		}
 
-		curMatrix[negA][posB] = curMatrix[negA][posB].min(c);
+		curMatrix[i1][j1] = curMatrix[i1][j1].min(c);
 
-		curMatrix[negB][posA] = curMatrix[negB][posA].min(c);
+		curMatrix[i2][j2] = curMatrix[i2][j2].min(c);
 
-		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, this.variableIndex);
-		return result.strongClosure();
+		DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix,
+				this.variableIndex);
+
+		DifferenceBoundMatrix finalResult = result
+				.strongClosure();
+		return finalResult;
 	}
 
 	/**
@@ -1416,31 +1442,16 @@ public class DifferenceBoundMatrix
 
 		int size = this.matrix.length;
 		MathNumber[][] resultMatrix = new MathNumber[size][size];
-		boolean flag = true;
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				// Widening: if this[i][j] < other[i][j], the constraint is
 				// getting weaker, so
 				// set to +∞
-
-				if (!this.matrix[i][j].isFinite()) {
+				if (this.matrix[i][j].compareTo(other.matrix[i][j]) < 0) {
 					resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
-					continue;
-				}
-
-				if (i != j) {
-					if (flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) > 0) {
-						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
-						flag = false;
-					} else if (flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) < 0) {
-						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
-						flag = false;
-					} else {
-						resultMatrix[i][j] = this.matrix[i][j].min(this.matrix[j][i]);
-					}
 				} else {
-					resultMatrix[i][j] = MathNumber.ZERO;
+					resultMatrix[i][j] = this.matrix[i][j];
 				}
 			}
 		}

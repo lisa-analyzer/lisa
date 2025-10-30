@@ -122,7 +122,6 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 		conf.testSubDir = "octagon";
 		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		conf.programFile = "octagon.imp";
-		conf.wideningThreshold = 100;
 		perform(conf);
 	}
 }
