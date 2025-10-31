@@ -380,7 +380,7 @@ public class Sign implements BaseNonRelationalValueDomain<Sign> {
 			return environment.bottom();
 		if (sat == Satisfiability.SATISFIED)
 			return environment;
-		
+
 		Identifier id;
 		Sign eval;
 		boolean rightIsExpr;
