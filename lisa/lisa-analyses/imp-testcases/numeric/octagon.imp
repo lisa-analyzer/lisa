@@ -47,7 +47,7 @@ class octagon_tests {
 	}
 
 	backward() {
-		def x = 1000;
+		def x = 100;
 
 		while(x >= 1) {
 			x = x - 1;

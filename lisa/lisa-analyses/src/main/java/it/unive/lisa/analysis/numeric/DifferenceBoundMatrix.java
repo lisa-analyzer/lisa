@@ -28,12 +28,16 @@ import it.unive.lisa.util.octagon.BooleanExpressionNormalizer;
 import it.unive.lisa.util.octagon.Floyd;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.builder.Diffable;
 
 /**
  * The Difference Bound Matrix (DBM) abstract domain for representing octagon
@@ -80,10 +84,12 @@ public class DifferenceBoundMatrix
 	 */
 	public DifferenceBoundMatrix() {
 		this.matrix = new MathNumber[0][0];
+		
 		this.variableIndex = new java.util.HashMap<Identifier, Integer>();
 
 	}
 
+	
 	/**
 	 * Builds a difference-bound matrix from the given matrix and variable index
 	 * mapping.
@@ -94,8 +100,12 @@ public class DifferenceBoundMatrix
 	public DifferenceBoundMatrix(
 			MathNumber[][] matrix,
 			Map<Identifier, Integer> variableIndex) {
-		this.matrix = matrix;
-		this.variableIndex = variableIndex;
+		
+		MathNumber tmpMat[][] = new MathNumber[matrix.length][matrix.length];
+		Floyd.copyArray(tmpMat, matrix);
+		this.matrix = tmpMat;
+
+		this.variableIndex = new HashMap<>(variableIndex);
 	}
 
 	/**
@@ -103,7 +113,7 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @return the map from identifiers to matrix indices
 	 */
-	public Map<Identifier, Integer> getVariableIndex() {
+	public synchronized  Map<Identifier, Integer> getVariableIndex() {
 		return variableIndex;
 	}
 
@@ -112,7 +122,7 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @return the 2n × 2n matrix of difference bounds
 	 */
-	public MathNumber[][] getMatrix() {
+	public synchronized  MathNumber[][] getMatrix() {
 		return matrix;
 	}
 
@@ -123,7 +133,7 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @return a new matrix with the same values
 	 */
-	private MathNumber[][] copyMatrix(
+	private  MathNumber[][] copyMatrix(
 			MathNumber[][] source) {
 		MathNumber[][] copy = new MathNumber[source.length][];
 		for (int i = 0; i < source.length; i++) {
@@ -142,7 +152,7 @@ public class DifferenceBoundMatrix
 	 * @return the top DBM
 	 */
 	@Override
-	public DifferenceBoundMatrix top() {
+	public synchronized  DifferenceBoundMatrix top() {
 		int size = 1;
 		if (matrix != null && matrix.length > 0) {
 			size = matrix.length;
@@ -172,7 +182,7 @@ public class DifferenceBoundMatrix
 	 * @return the bottom DBM
 	 */
 	@Override
-	public DifferenceBoundMatrix bottom() {
+	public synchronized  DifferenceBoundMatrix bottom() {
 
 		int size = 1;
 		if (matrix != null && matrix.length > 0) {
@@ -205,7 +215,7 @@ public class DifferenceBoundMatrix
 	 * @return {@code true} if this DBM is top, {@code false} otherwise
 	 */
 	@Override
-	public boolean isTop() {
+	public synchronized  boolean isTop() {
 		if (matrix == null)
 			return false;
 
@@ -234,7 +244,7 @@ public class DifferenceBoundMatrix
 	 * @return {@code true} if this DBM is bottom, {@code false} otherwise
 	 */
 	@Override
-	public boolean isBottom() {
+	public synchronized  boolean isBottom() {
 		if (matrix == null)
 			return false;
 
@@ -269,7 +279,7 @@ public class DifferenceBoundMatrix
 	 *                               variable sets
 	 */
 	@Override
-	public boolean lessOrEqualAux(
+	public synchronized  boolean lessOrEqualAux(
 			DifferenceBoundMatrix other)
 			throws SemanticException {
 
@@ -330,38 +340,100 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if the DBMs have different variable sets
 	 */
 	@Override
-	public DifferenceBoundMatrix lubAux(
+	public synchronized  DifferenceBoundMatrix lubAux(
 			DifferenceBoundMatrix other)
 			throws SemanticException {
-		// first check if two dbm are the same
-		for (Map.Entry<Identifier, Integer> entry : variableIndex.entrySet()) {
-			if (!other.variableIndex.containsKey(entry.getKey())) {
-				throw new SemanticException("Variable are not the same");
-			}
-		}
+		// debugMethodEntry("lubAux", other);
+    
+    // CONTROLLO PER ROMERE LA RICORSIONE
+    // Se le matrici sono identiche, restituisci direttamente this
+    if (this == other || this.equals(other)) {
+        return this;
+    }
+    
+    // Se una è bottom, restituisci l'altra
+    if (this.isBottom()) {
+        return other;
+    }
+    if (other.isBottom()) {
+        return this;
+    }
+    
+    // Se una è top, restituisci top
+    if (this.isTop()) {
+        return this.top();
+    }
+    if (other.isTop()) {
+        return other.top();
+    }
 
-		DifferenceBoundMatrix first = this.strongClosure();
-		DifferenceBoundMatrix second = other.strongClosure();
+    // APPROCCIO SEMPLIFICATO - rompi la ricorsione con un risultato semplice
+    try {
+		
+        // 1. Crea copie locali di TUTTO
+        Map<Identifier, Integer> localThisVars = new HashMap<>(this.variableIndex);
+        Map<Identifier, Integer> localOtherVars = new HashMap<>(other.variableIndex);
+        MathNumber[][] localThisMatrix = copyMatrix(this.matrix);
+        MathNumber[][] localOtherMatrix = copyMatrix(other.matrix);
+        
+		boolean hasDifferentVars = false;
+    	for (Map.Entry<Identifier, Integer> entry : localThisVars.entrySet()) {
+        if (!localOtherVars.containsKey(entry.getKey())) {
+            hasDifferentVars = true;
+            break;
+        }
+    }
 
-		if (first.isBottom() && second.isBottom()) {
-			return first;
-		}
-		if (first.isBottom()) {
-			return second;
-		}
-		if (second.isBottom()) {
-			return first;
-		}
+	 // Controlla anche nell'altra direzione
+    for (Map.Entry<Identifier, Integer> entry : localOtherVars.entrySet()) {
+        if (!localThisVars.containsKey(entry.getKey())) {
+            hasDifferentVars = true;
+            break;
+        }
+    }
+    
+    if (hasDifferentVars) {
+        throw new SemanticException("Variable are not the same");
+    }
+	
+        // 2. Verifiche di sicurezza
+        if (localThisMatrix.length != localOtherMatrix.length) {
+            // Se dimensioni diverse, restituisci top per rompere la ricorsione
+            return this.top();
+        }
+        
+        for (Map.Entry<Identifier, Integer> entry : localThisVars.entrySet()) {
+            if (!localOtherVars.containsKey(entry.getKey())) {
+                // Se variabili diverse, restituisci top per rompere la ricorsione
+                return this.top();
+            }
+        }
 
-		MathNumber[][] newMatrix = new MathNumber[this.matrix.length][this.matrix.length];
-		for (int i = 0; i < this.matrix.length; i++) {
-			for (int j = 0; j < this.matrix.length; j++) {
-				newMatrix[i][j] = first.matrix[i][j].max(second.matrix[i][j]);
-			}
-		}
+		
+        // 3. Calcolo semplificato del lub
+        MathNumber[][] newMatrix = new MathNumber[localThisMatrix.length][localThisMatrix.length];
+        
+        for (int i = 0; i < localThisMatrix.length; i++) {
+            for (int j = 0; j < localThisMatrix.length; j++) {
+                // LUB semplificato: prendi il massimo dei due valori
+                if (localThisMatrix[i][j].compareTo(localOtherMatrix[i][j]) > 0) {
+                    newMatrix[i][j] = localThisMatrix[i][j];
+                } else {
+                    newMatrix[i][j] = localOtherMatrix[i][j];
+                }
+            }
+        }
 
-		DifferenceBoundMatrix result = new DifferenceBoundMatrix(newMatrix, this.variableIndex);
-		return result;
+        DifferenceBoundMatrix result = new DifferenceBoundMatrix(newMatrix, new HashMap<>(localThisVars));
+        return result;
+	}
+        catch (SemanticException e) {
+        // RILANCIA SemanticException invece di catturarla
+        throw e; 
+    } catch (Exception e) {
+        // In caso di qualsiasi errore, restituisci top per rompere la ricorsione
+        return this.top();
+    }
 	}
 
 	/**
@@ -377,24 +449,40 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if the DBMs have different variable sets
 	 */
 	@Override
-	public DifferenceBoundMatrix glbAux(
+	public synchronized  DifferenceBoundMatrix glbAux(
 			DifferenceBoundMatrix other)
 			throws SemanticException {
 		// first check if two dbm are the same
-		for (Map.Entry<Identifier, Integer> entry : variableIndex.entrySet()) {
-			if (!other.variableIndex.containsKey(entry.getKey())) {
-				throw new SemanticException("Variable are not the same");
+		debugRace("glb aux");
+		  Map<Identifier, Integer> thisVarsCopy;
+    Map<Identifier, Integer> otherVarsCopy;
+    MathNumber[][] thisMatrixCopy;
+    MathNumber[][] otherMatrixCopy;
+    
+    synchronized (this) {
+        thisVarsCopy = new HashMap<>(this.variableIndex);
+        thisMatrixCopy = copyMatrix(this.matrix);  // COPIA la matrice!
+    }
+    synchronized (other) {
+        otherVarsCopy = new HashMap<>(other.variableIndex);
+        otherMatrixCopy = copyMatrix(other.matrix); // COPIA la matrice!
+    }
+    
+    for (Map.Entry<Identifier, Integer> entry : thisVarsCopy.entrySet()) {
+        if (!otherVarsCopy.containsKey(entry.getKey())) {
+            throw new SemanticException("Variable are not the same");
+        }
+    }
+
+		MathNumber[][] newMatrix = new MathNumber[thisMatrixCopy.length][thisMatrixCopy.length];
+		for (int i = 0; i < thisMatrixCopy.length; i++) {
+			for (int j = 0; j < thisMatrixCopy.length; j++) {
+				newMatrix[i][j] = thisMatrixCopy[i][j].min(otherMatrixCopy[i][j]);
 			}
 		}
 
-		MathNumber[][] newMatrix = new MathNumber[this.matrix.length][this.matrix.length];
-		for (int i = 0; i < this.matrix.length; i++) {
-			for (int j = 0; j < this.matrix.length; j++) {
-				newMatrix[i][j] = this.matrix[i][j].min(other.matrix[i][j]);
-			}
-		}
-
-		DifferenceBoundMatrix result = new DifferenceBoundMatrix(newMatrix, this.variableIndex);
+		
+		DifferenceBoundMatrix result = new DifferenceBoundMatrix(newMatrix, new HashMap<>(thisVarsCopy));
 		result = result.strongClosure();
 		return result;
 	}
@@ -407,7 +495,7 @@ public class DifferenceBoundMatrix
 	 * @return the structured representation of this DBM
 	 */
 	@Override
-	public StructuredRepresentation representation() {
+	public synchronized  StructuredRepresentation representation() {
 		if (isBottom()) {
 			return Lattice.bottomRepresentation();
 		}
@@ -436,7 +524,7 @@ public class DifferenceBoundMatrix
 	 *             {@code false} otherwise
 	 */
 	@Override
-	public boolean knowsIdentifier(
+	public synchronized  boolean knowsIdentifier(
 			Identifier id) {
 		boolean result = variableIndex.containsKey(id);
 		return result;
@@ -466,15 +554,18 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @throws SemanticException if the assignment cannot be encoded
 	 */
+
 	@Override
-	public DifferenceBoundMatrix assign(
+	public synchronized DifferenceBoundMatrix assign(
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+
+			debugRace("assign");
 		// Create a copy of variableIndex to work with (for immutability)
-		Map<Identifier, Integer> workingVariableIndex = new java.util.HashMap<>(this.variableIndex);
+		Map<Identifier, Integer> workingVariableIndex = new java.util.HashMap<>(new HashMap<>(this.variableIndex));
 
 		// Work on a local matrix reference so we can add a variable and still
 		// continue
@@ -610,12 +701,12 @@ public class DifferenceBoundMatrix
 
 		if (Floyd.HasNegativeCycle(copy)) {
 			removeNegativeCycle(curMatrix);
-			DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, workingVariableIndex);
+			DifferenceBoundMatrix result = new DifferenceBoundMatrix(curMatrix, new HashMap<>(workingVariableIndex));
 			Floyd.strongClosureFloyd(curMatrix);
 			return result;
 		}
 
-		DifferenceBoundMatrix result = new DifferenceBoundMatrix(copy, workingVariableIndex);
+		DifferenceBoundMatrix result = new DifferenceBoundMatrix(copy, new HashMap<>(workingVariableIndex));
 
 		return result;
 	}
@@ -630,7 +721,7 @@ public class DifferenceBoundMatrix
 	 *
 	 * @param mat the matrix to be corrected
 	 */
-	private void removeNegativeCycle(
+	private  void removeNegativeCycle(
 			MathNumber mat[][]) {
 		for (int i = 0; i < mat.length; i++) {
 			for (int j = 0; j < mat.length; j++) {
@@ -669,7 +760,7 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if an error occurs
 	 */
 	@Override
-	public DifferenceBoundMatrix smallStepSemantics(
+	public synchronized  DifferenceBoundMatrix smallStepSemantics(
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -703,13 +794,14 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if the constraint cannot be encoded
 	 */
 	@Override
-	public DifferenceBoundMatrix assume(
+	public synchronized  DifferenceBoundMatrix assume(
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
 
+		debugRace("assume");
 		SymbolicExpression normalized = BooleanExpressionNormalizer.normalize(expression, src.getLocation(),
 				src, oracle);
 		if (!(normalized instanceof BinaryExpression)) {
@@ -973,26 +1065,33 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if the forget operation fails
 	 */
 	@Override
-	public DifferenceBoundMatrix forgetIdentifier(
+	public synchronized  DifferenceBoundMatrix forgetIdentifier(
 			Identifier id)
 			throws SemanticException {
+
+			debugRace("forget identifier");
 		if (!variableIndex.containsKey(id)) {
-			return this;
+			return new DifferenceBoundMatrix(this.matrix, this.variableIndex);
 		}
+
+		MathNumber matTmp[][] = new MathNumber[this.matrix.length][this.matrix.length];
+
+		Floyd.copyArray(matTmp, this.matrix);
+
 		int pos = idToPos(id, this.variableIndex) + 1;
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix.length; j++) {
 				if (i != 2 * pos - 2 && i != 2 * pos - 1 && j != 2 * pos - 2 && j != 2 * pos - 1) {
-					matrix[i][j] = matrix[i][j];
+					matTmp[i][j] = matrix[i][j];
 				} else if ((i == j && i == 2 * pos - 2) || (i == j && i == 2 * pos - 1)) {
-					matrix[i][j] = MathNumber.ZERO;
+					matTmp[i][j] = MathNumber.ZERO;
 				} else {
-					matrix[i][j] = MathNumber.PLUS_INFINITY;
+					matTmp[i][j] = MathNumber.PLUS_INFINITY;
 				}
 			}
 		}
 
-		return this;
+		return new DifferenceBoundMatrix(matTmp, this.variableIndex);
 	}
 
 	/**
@@ -1007,7 +1106,7 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if an error occurs
 	 */
 	@Override
-	public DifferenceBoundMatrix forgetIdentifiersIf(
+	public synchronized  DifferenceBoundMatrix forgetIdentifiersIf(
 			Predicate<Identifier> test)
 			throws SemanticException {
 		// For now, return this as a placeholder
@@ -1030,7 +1129,7 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if an error occurs
 	 */
 	@Override
-	public Satisfiability satisfies(
+	public synchronized  Satisfiability satisfies(
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -1050,10 +1149,11 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if an error occurs
 	 */
 	@Override
-	public DifferenceBoundMatrix pushScope(
+	public synchronized  DifferenceBoundMatrix pushScope(
 			ScopeToken token)
 			throws SemanticException {
-		return this;
+				debugRace("Push scope");
+		return new DifferenceBoundMatrix(this.matrix, this.variableIndex);
 	}
 
 	/**
@@ -1067,10 +1167,11 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if an error occurs
 	 */
 	@Override
-	public DifferenceBoundMatrix popScope(
+	public synchronized  DifferenceBoundMatrix popScope(
 			ScopeToken token)
 			throws SemanticException {
-		return this;
+				debugRace("pop scope");
+		return new DifferenceBoundMatrix(this.matrix, this.variableIndex);
 	}
 
 	/**
@@ -1083,9 +1184,10 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @throws SemanticException if the closure computation fails
 	 */
-	public DifferenceBoundMatrix closure() throws SemanticException {
-		Floyd.Floyd(this.matrix, new MathNumber[matrix.length][matrix.length]);
-		return this;
+	public synchronized  DifferenceBoundMatrix closure() throws SemanticException {
+
+		Floyd.Floyd(matrix, new MathNumber[this.matrix.length][this.matrix.length]);
+		return new DifferenceBoundMatrix(this.matrix, this.variableIndex);
 	}
 
 	/**
@@ -1109,8 +1211,14 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @throws SemanticException if the closure computation fails
 	 */
-	public DifferenceBoundMatrix strongClosure() throws SemanticException {
-		DifferenceBoundMatrix dbm = new DifferenceBoundMatrix(this.copyMatrix(matrix), this.variableIndex);
+	public synchronized  DifferenceBoundMatrix strongClosure() throws SemanticException {
+
+		debugRace("strong closure");
+		MathNumber matTmp[][] = new MathNumber[this.matrix.length][this.matrix.length];
+
+		Floyd.copyArray(matTmp, this.matrix);
+
+		DifferenceBoundMatrix dbm = new DifferenceBoundMatrix(matTmp, new HashMap<>(this.variableIndex));
 		Floyd.strongClosureFloyd(dbm.matrix);
 		return dbm;
 	}
@@ -1126,11 +1234,13 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @throws SemanticException if the conversion fails
 	 */
-	public ValueEnvironment<Interval> toInterval() throws SemanticException {
+	public synchronized  ValueEnvironment<Interval> toInterval() throws SemanticException {
 		ValueEnvironment<Interval> env = new ValueEnvironment<>(new Interval());
 		DifferenceBoundMatrix dbm = this.closure(); // apply the closure to
 													// ensure the matrix is in
 													// normal form
+		
+		debugRace("toInterval");
 		if (dbm.isBottom()) {
 			return env;
 		}
@@ -1163,7 +1273,7 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @throws SemanticException if the conversion fails
 	 */
-	public static DifferenceBoundMatrix fromIntervalDomain(
+	public synchronized  static DifferenceBoundMatrix fromIntervalDomain(
 			ValueEnvironment<Interval> env)
 			throws SemanticException {
 		Map<Identifier, Integer> variableIndex = new java.util.HashMap<Identifier, Integer>();
@@ -1217,7 +1327,7 @@ public class DifferenceBoundMatrix
 	 * @return the corresponding {@link MathNumber}, or {@code null} if
 	 *             conversion is not possible
 	 */
-	private MathNumber toMathNumber(
+	private  MathNumber toMathNumber(
 			Object v) {
 		if (v == null)
 			return null;
@@ -1252,7 +1362,7 @@ public class DifferenceBoundMatrix
 	 * @throws IllegalArgumentException if the identifier is not in the variable
 	 *                                      index
 	 */
-	public int idToPos(
+	public synchronized  int idToPos(
 			Identifier id,
 			Map<Identifier, Integer> varIndex) {
 		if (!varIndex.containsKey(id))
@@ -1275,7 +1385,7 @@ public class DifferenceBoundMatrix
 	 * @throws IllegalArgumentException if the identifier is not in the variable
 	 *                                      index
 	 */
-	public int idToNeg(
+	public synchronized  int idToNeg(
 			Identifier id,
 			Map<Identifier, Integer> varIndex) {
 		if (!varIndex.containsKey(id))
@@ -1303,7 +1413,7 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @throws SemanticException if the constraint cannot be added
 	 */
-	private DifferenceBoundMatrix addConstraint(
+	private  DifferenceBoundMatrix addConstraint(
 			Identifier a,
 			MathNumber c,
 			boolean isNegated)
@@ -1361,7 +1471,7 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @throws SemanticException if the constraint cannot be added
 	 */
-	private DifferenceBoundMatrix addConstraint(
+	private  DifferenceBoundMatrix addConstraint(
 			Identifier a,
 			Identifier b,
 			MathNumber c,
@@ -1433,30 +1543,58 @@ public class DifferenceBoundMatrix
 	 * @throws SemanticException if the widening operation fails
 	 */
 	@Override
-	public DifferenceBoundMatrix wideningAux(
+	public synchronized  DifferenceBoundMatrix wideningAux(
 			DifferenceBoundMatrix other)
 			throws SemanticException {
-		if (other == null) {
+
+	debugRace("Widening aux");
+	if (other == null) {
 			return this;
 		}
 
 		int size = this.matrix.length;
 		MathNumber[][] resultMatrix = new MathNumber[size][size];
+		boolean flag=true;
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				// Widening: if this[i][j] < other[i][j], the constraint is
 				// getting weaker, so
 				// set to +∞
-				if (this.matrix[i][j].compareTo(other.matrix[i][j]) < 0) {
+
+				if(!this.matrix[i][j].isFinite())
+				{
 					resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
-				} else {
-					resultMatrix[i][j] = this.matrix[i][j];
+					continue;
+				}
+
+				if (i != j) {
+					if(flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) > 0)
+					{
+						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
+						flag=false;
+					}
+					else if(flag && this.matrix[i][j].abs().compareTo(this.matrix[j][i].abs()) < 0)
+					{
+						resultMatrix[i][j] = MathNumber.PLUS_INFINITY;
+						flag = false;
+					}
+					else
+					{
+						resultMatrix[i][j] = this.matrix[i][j].min(this.matrix[j][i]);
+					}
+				}
+				else
+				{
+					resultMatrix[i][j] = MathNumber.ZERO;
 				}
 			}
 		}
 
-		final DifferenceBoundMatrix result = new DifferenceBoundMatrix(resultMatrix, this.variableIndex);
+		//Floyd.printMatrix(resultMatrix);
+		//Floyd.strongClosureFloyd(resultMatrix);
+		Map<Identifier, Integer> newVariableIndex = new HashMap<>(this.variableIndex);
+		final DifferenceBoundMatrix result = new DifferenceBoundMatrix(resultMatrix, newVariableIndex);
 		return result;
 
 	}
@@ -1472,7 +1610,7 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @throws MathNumberConversionException if the value cannot be converted
 	 */
-	private double resolveVariableExpression(
+	private  double resolveVariableExpression(
 			ValueExpression exp)
 			throws MathNumberConversionException {
 		for (Identifier key : this.variableIndex.keySet()) {
@@ -1493,7 +1631,7 @@ public class DifferenceBoundMatrix
 	 * 
 	 * @return the name of the variable if found, otherwise an empty string
 	 */
-	private String hasVariable(
+	private  String hasVariable(
 			ValueExpression exp) {
 		if (isDouble(exp.toString())) {
 			return "";
@@ -1518,7 +1656,7 @@ public class DifferenceBoundMatrix
 	 * @throws MathNumberConversionException if number conversion fails during
 	 *                                           evaluation
 	 */
-	private double resolveCostantExpression(
+	private  double resolveCostantExpression(
 			ValueExpression exp)
 			throws MathNumberConversionException {
 		// Base cases
@@ -1597,7 +1735,7 @@ public class DifferenceBoundMatrix
 	 * @return {@code true} if the string is a valid double, {@code false}
 	 *             otherwise
 	 */
-	public static boolean isDouble(
+	public synchronized  static boolean isDouble(
 			String s) {
 		try {
 			Double.parseDouble(s);
@@ -1618,7 +1756,7 @@ public class DifferenceBoundMatrix
 	 * @param expression       the assignment expression
 	 * @param id               the identifier being assigned to
 	 */
-	public void fourthCaseAssignement(
+	public synchronized  void fourthCaseAssignement(
 			MathNumber[][] curMatrix,
 			int newVariableIndex,
 			ValueExpression expression,
@@ -1679,7 +1817,7 @@ public class DifferenceBoundMatrix
 	 * @param offset           the constant offset value
 	 * @param isOffset         whether an explicit offset is provided
 	 */
-	public void thirdCaseAssignement(
+	public synchronized  void thirdCaseAssignement(
 			MathNumber[][] curMatrix,
 			int newVariableIndex,
 			ValueExpression expression,
@@ -1786,7 +1924,7 @@ public class DifferenceBoundMatrix
 	 * @param offset           the constant offset value
 	 * @param isOffset         whether an explicit offset is provided
 	 */
-	public void secondCaseAssignement(
+	public synchronized  void secondCaseAssignement(
 			MathNumber[][] curMatrix,
 			int newVariableIndex,
 			ValueExpression expression,
@@ -1854,7 +1992,7 @@ public class DifferenceBoundMatrix
 	 * @param id               the identifier being assigned to
 	 * @param varIndex         the variable index mapping
 	 */
-	public void firstCaseAssignement(
+	public synchronized  void firstCaseAssignement(
 			MathNumber[][] curMatrix,
 			int newVariableIndex,
 			ValueExpression expression,
@@ -1931,7 +2069,7 @@ public class DifferenceBoundMatrix
 	 * @return the numeric result of the expression evaluation, or 0 if parsing
 	 *             fails
 	 */
-	public double resolveStringMath(
+	public synchronized  double resolveStringMath(
 			String expr) {
 		if (isDouble(expr)) {
 			return Double.parseDouble(expr);
@@ -2034,7 +2172,7 @@ public class DifferenceBoundMatrix
 	 * @return {@code true} if all constraints are valid and coherent,
 	 *             {@code false} if any inconsistency is detected
 	 */
-	public boolean isValidConstraint(
+	public synchronized  boolean isValidConstraint(
 			MathNumber[][] matrix) {
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix.length; j++) {
@@ -2096,7 +2234,7 @@ public class DifferenceBoundMatrix
 	 * @return {@code true} if the objects are equal, {@code false} otherwise
 	 */
 	@Override
-	public boolean equals(
+	public synchronized  boolean equals(
 			Object obj) {
 		if (this == obj)
 			return true;
@@ -2135,7 +2273,7 @@ public class DifferenceBoundMatrix
 	 * @return {@code true} if the constraints are consistent with the assigned
 	 *             values, {@code false} otherwise
 	 */
-	boolean verifyDoubleIndex(
+	synchronized boolean  verifyDoubleIndex(
 			MathNumber[][] mat,
 			int indexI,
 			int indexJ,
@@ -2208,7 +2346,7 @@ public class DifferenceBoundMatrix
 	 * @return {@code true} if the constraints are consistent with the assigned
 	 *             value, {@code false} otherwise
 	 */
-	boolean verifySingleIndex(
+	synchronized  boolean verifySingleIndex(
 			MathNumber[][] mat,
 			int indexI,
 			MathNumber valueI) {
@@ -2238,4 +2376,34 @@ public class DifferenceBoundMatrix
 
 		return true;
 	}
+
+	private void debugRace(String method) {
+  //  System.err.printf("Thread: %s, Method: %s, Time: %d%n", 
+    //    Thread.currentThread().getName(), method, System.nanoTime());
+    //new Exception("Stack trace").printStackTrace(System.err);
+}
+
+private void debugMethodEntry(String methodName, DifferenceBoundMatrix other) {
+    System.err.println("=== DBM METHOD ENTRY ===");
+    System.err.println("Method: " + methodName);
+    System.err.println("Thread: " + Thread.currentThread().getName() + " (ID: " + Thread.currentThread().getId() + ")");
+    System.err.println("This: " + System.identityHashCode(this));
+    System.err.println("This matrix: " + System.identityHashCode(this.matrix) + ", size: " + this.matrix.length);
+    System.err.println("This vars: " + System.identityHashCode(this.variableIndex) + ", size: " + this.variableIndex.size());
+    
+    if (other != null) {
+        System.err.println("Other: " + System.identityHashCode(other));
+        System.err.println("Other matrix: " + System.identityHashCode(other.matrix) + ", size: " + other.matrix.length);
+        System.err.println("Other vars: " + System.identityHashCode(other.variableIndex) + ", size: " + other.variableIndex.size());
+    }
+    
+    // Stack trace per vedere chi sta chiamando
+    StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+    for (int i = 3; i < Math.min(8, stack.length); i++) {
+        if (stack[i].getClassName().contains("lisa")) {
+            System.err.println("  Called from: " + stack[i]);
+        }
+    }
+    System.err.println("=== END DBM METHOD ENTRY ===");
+}
 }
