@@ -554,7 +554,10 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 
 			if (origin.containsNode(thrower)) {
 				Error newEx = cont.withThrower(target);
-				newErrors.put(newEx, contState);
+				if (newErrors.containsKey(newEx))
+					newErrors.put(newEx, contState.lub(newErrors.get(newEx)));
+				else
+					newErrors.put(newEx, contState);
 				oldErrors.add(cont);
 			}
 		}
