@@ -14,7 +14,6 @@ import it.unive.lisa.analysis.numeric.Pentagon;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
-import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import org.junit.Test;
 
 public class NumericAnalysesTest extends AnalysisTestExecutor {
@@ -119,10 +118,11 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 				new Octagon(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.testDir = "numeric";
+		conf.optimize = false;
+		conf.compareWithOptimization = false;
 		conf.testSubDir = "octagon";
 		conf.programFile = "octagon.imp";
-		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
-
+		// conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		perform(conf);
 	}
 }
