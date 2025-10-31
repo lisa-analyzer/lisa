@@ -890,6 +890,26 @@ public class DifferenceBoundMatrixTest {
 		assertTrue("Unfeasible constraint should drive DBM to bottom", result.isBottom());
 	}
 
+	// x <= 0
+	@Test
+	public void testSimpleAssumeZero() throws SemanticException {
+		Variable x = new Variable(NumericType, "x", location);
+		Constant c1 = new Constant(NumericType, new MathNumber(0), location);
+		Constant c2 = new Constant(NumericType, new MathNumber(0), location);
+
+		// Create x = 0
+		DifferenceBoundMatrix step1 = dbm.assign(x, c1, pp, oracle);
+
+		// Assume x <= 0 (which is true since x = 5)
+		BinaryExpression constraint = new BinaryExpression(BoolType.INSTANCE, x, c2,
+				ComparisonLe.INSTANCE,
+				location);
+		DifferenceBoundMatrix result = step1.assume(constraint, pp, pp, oracle);
+		System.out.println(result.representation());
+
+		assertFalse("Feasible constraint should not make DBM bottom", result.isBottom());
+	}
+
 	@Test
 	public void testDifferenceConstraintAssume() throws SemanticException {
 		Variable x = new Variable(NumericType, "x", location);
@@ -899,7 +919,8 @@ public class DifferenceBoundMatrixTest {
 		Constant c3 = new Constant(NumericType, new MathNumber(3), location);
 
 		// Create x = 5, y = 10
-		DifferenceBoundMatrix step1 = dbm.assign(x, c1, pp, oracle)
+		DifferenceBoundMatrix step1 = dbm
+				.assign(x, c1, pp, oracle)
 				.assign(y, c2, pp, oracle);
 
 		// Assume x - y <= 3 (which is 5 - 10 <= 3, i.e., -5 <= 3, true)

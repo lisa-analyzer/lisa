@@ -1,11 +1,10 @@
 package it.unive.lisa.util.octagon;
 
+import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
-
-import it.unive.lisa.util.numeric.MathNumber;
-import it.unive.lisa.util.numeric.MathNumberConversionException;
 
 /**
  * Utility class providing implementations of the Floyd-Warshall algorithm and
@@ -485,8 +484,7 @@ public class Floyd {
 			}
 		}
 
-		synchronized (matrix)
-		{
+		synchronized (matrix) {
 			copyArray(matrix, copy);
 		}
 	}

@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis.numeric;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -17,6 +13,9 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * The octagon abstract domain for relational numerical analysis, implementing
@@ -198,21 +197,21 @@ public class Octagon
 	public Octagon glbAux(
 			Octagon other)
 			throws SemanticException {
-		 debug("glbAux() - Computing glb with " + other);
-    
-    // ELIMINA questa linea che causa ricorsione:
-    // return BaseLattice.super.glbAux(other);
-    
-    // Sostituisci con:
-    DifferenceBoundMatrix newDBM;
-    
-    synchronized (this.dbm) {
-        synchronized (other.dbm) {
-            newDBM = this.dbm.glbAux(other.dbm);
-        }
-    }
-    
-    return new Octagon(newDBM);
+		debug("glbAux() - Computing glb with " + other);
+
+		// ELIMINA questa linea che causa ricorsione:
+		// return BaseLattice.super.glbAux(other);
+
+		// Sostituisci con:
+		DifferenceBoundMatrix newDBM;
+
+		synchronized (this.dbm) {
+			synchronized (other.dbm) {
+				newDBM = this.dbm.glbAux(other.dbm);
+			}
+		}
+
+		return new Octagon(newDBM);
 	}
 
 	/**
@@ -225,12 +224,12 @@ public class Octagon
 			Octagon other)
 			throws SemanticException {
 		debug("lessOrEqualAux() - Checking less or equal with " + other);
-		
-		 synchronized (this.dbm) {
-        synchronized (other.dbm) {
-            return dbm.lessOrEqualAux(other.dbm);
-        }
-    }
+
+		synchronized (this.dbm) {
+			synchronized (other.dbm) {
+				return dbm.lessOrEqualAux(other.dbm);
+			}
+		}
 	}
 
 	/**
@@ -242,17 +241,17 @@ public class Octagon
 	public Octagon lubAux(
 			Octagon other)
 			throws SemanticException {
-		
-				 // CREA NUOVI DBM invece di usare quelli esistenti
-     DifferenceBoundMatrix newDBM;
-    
-    synchronized (this.dbm) {
-        synchronized (other.dbm) {
-            newDBM = this.dbm.lubAux(other.dbm);
-        }
-    }
-    
-    return new Octagon(newDBM);
+
+		// CREA NUOVI DBM invece di usare quelli esistenti
+		DifferenceBoundMatrix newDBM;
+
+		synchronized (this.dbm) {
+			synchronized (other.dbm) {
+				newDBM = this.dbm.lubAux(other.dbm);
+			}
+		}
+
+		return new Octagon(newDBM);
 	}
 
 	/**
@@ -277,15 +276,15 @@ public class Octagon
 			Octagon other)
 			throws SemanticException {
 		debug("wideningAux() - Computing widening with " + other);
-		 DifferenceBoundMatrix newDBM;
-    
-    synchronized (this.dbm) {
-        synchronized (other.dbm) {
-            newDBM = dbm.wideningAux(other.dbm);
-        }
-    }
-    
-    return new Octagon(newDBM);
+		DifferenceBoundMatrix newDBM;
+
+		synchronized (this.dbm) {
+			synchronized (other.dbm) {
+				newDBM = dbm.wideningAux(other.dbm);
+			}
+		}
+
+		return new Octagon(newDBM);
 	}
 
 	/**
@@ -396,13 +395,13 @@ public class Octagon
 	public boolean lessOrEqual(
 			Octagon other)
 			throws SemanticException {
-		
-				 // Non chiamare super.lessOrEqual() che potrebbe causare ricorsione
-    synchronized (this.dbm) {
-        synchronized (other.dbm) {
-            return this.dbm.lessOrEqualAux(other.dbm);
-        }
-    }
+
+		// Non chiamare super.lessOrEqual() che potrebbe causare ricorsione
+		synchronized (this.dbm) {
+			synchronized (other.dbm) {
+				return this.dbm.lessOrEqualAux(other.dbm);
+			}
+		}
 	}
 
 	/**
@@ -413,15 +412,14 @@ public class Octagon
 			Octagon other)
 			throws SemanticException {
 		debug("lub() - Computing lub with " + other);
-		
-		 
-    // Non chiamare super.lub() che potrebbe causare ricorsione
-    synchronized (this.dbm) {
-        synchronized (other.dbm) {
-            DifferenceBoundMatrix newDBM = this.dbm.lubAux(other.dbm);
-            return new Octagon(newDBM);
-        }
-    }
+
+		// Non chiamare super.lub() che potrebbe causare ricorsione
+		synchronized (this.dbm) {
+			synchronized (other.dbm) {
+				DifferenceBoundMatrix newDBM = this.dbm.lubAux(other.dbm);
+				return new Octagon(newDBM);
+			}
+		}
 	}
 
 	/**
