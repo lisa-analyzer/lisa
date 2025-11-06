@@ -14,10 +14,10 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
@@ -70,10 +70,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (state.isBottom())
-			return state;
-
-		if (!canProcess(expression, pp, oracle))
+		if (state.isBottom() || !id.canBeAssigned() || !canProcess(expression, pp, oracle))
 			return state;
 
 		Map<Identifier, L> func = state.mkNewFunction(state.function, false);
@@ -147,6 +144,14 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			AccessChild expression,
 			L receiver,
 			L child,
+			Object... params)
+			throws SemanticException {
+		throw new SemanticException(CANNOT_PROCESS_ERROR);
+	}
+
+	@Override
+	default L visit(
+			NullConstant expression,
 			Object... params)
 			throws SemanticException {
 		throw new SemanticException(CANNOT_PROCESS_ERROR);
@@ -470,27 +475,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			throws SemanticException {
 		ProgramPoint pp = (ProgramPoint) params[1];
 		SemanticOracle oracle = (SemanticOracle) params[2];
-		if (expression instanceof NullConstant)
-			return evalNullConstant(pp, oracle);
-		return evalNonNullConstant(expression, pp, oracle);
-	}
-
-	/**
-	 * Yields the evaluation of the null constant {@link NullConstant}.
-	 * 
-	 * @param pp     the program point that where this operation is being
-	 *                   evaluated
-	 * @param oracle the oracle for inter-domain communication
-	 * 
-	 * @return the evaluation of the constant
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default L evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return top();
+		return evalConstant(expression, pp, oracle);
 	}
 
 	/**
@@ -505,7 +490,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L evalNonNullConstant(
+	default L evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -637,11 +622,8 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 		if (expression instanceof Identifier)
 			return satisfiesAbstractValue(state.getState((Identifier) expression), pp, oracle);
 
-		if (expression instanceof NullConstant)
-			return satisfiesNullConstant(pp, oracle);
-
 		if (expression instanceof Constant)
-			return satisfiesNonNullConstant((Constant) expression, pp, oracle);
+			return satisfiesConstant((Constant) expression, pp, oracle);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -728,30 +710,6 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 	}
 
 	/**
-	 * Yields the satisfiability of the null constant {@link NullConstant} on
-	 * this abstract domain.
-	 * 
-	 * @param pp     the program point that where this operation is being
-	 *                   evaluated
-	 * @param oracle the oracle for inter-domain communication
-	 * 
-	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
-	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
-	 *             not satisfied, or {@link Satisfiability#UNKNOWN} if it is
-	 *             either impossible to determine if it satisfied, or if it is
-	 *             satisfied by some values and not by some others (this is
-	 *             equivalent to a TOP boolean value)
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default Satisfiability satisfiesNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return Satisfiability.UNKNOWN;
-	}
-
-	/**
 	 * Yields the satisfiability of the given non-null constant on this abstract
 	 * domain.
 	 * 
@@ -769,7 +727,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default Satisfiability satisfiesNonNullConstant(
+	default Satisfiability satisfiesConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)

@@ -297,7 +297,7 @@ public class CharInclusion
 	}
 
 	@Override
-	public CI evalNonNullConstant(
+	public CI evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

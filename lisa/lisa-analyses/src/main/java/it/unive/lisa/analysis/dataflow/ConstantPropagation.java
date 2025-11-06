@@ -10,6 +10,7 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -171,6 +172,14 @@ public class ConstantPropagation
 		@Override
 		public Integer visit(
 				PushInv expression,
+				Object... params)
+				throws SemanticException {
+			return null;
+		}
+
+		@Override
+		public Integer visit(
+				NullConstant expression,
 				Object... params)
 				throws SemanticException {
 			return null;

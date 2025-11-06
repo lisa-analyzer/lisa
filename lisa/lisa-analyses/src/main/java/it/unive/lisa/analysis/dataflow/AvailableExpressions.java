@@ -10,6 +10,7 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -228,6 +229,14 @@ public class AvailableExpressions
 		@Override
 		public Collection<Identifier> visit(
 				Constant expression,
+				Object... params)
+				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(
+				NullConstant expression,
 				Object... params)
 				throws SemanticException {
 			return result;

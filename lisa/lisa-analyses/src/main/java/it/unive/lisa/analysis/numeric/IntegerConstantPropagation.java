@@ -45,14 +45,7 @@ public class IntegerConstantPropagation
 		SmashedSumIntDomain<IntegerConstant> {
 
 	@Override
-	public IntegerConstant evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return IntegerConstant.TOP;
-	}
-
-	@Override
-	public IntegerConstant evalNonNullConstant(
+	public IntegerConstant evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

@@ -127,15 +127,7 @@ public abstract class BaseTaint<L extends TaintLattice<L>>
 	}
 
 	@Override
-	public L evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return clean();
-	}
-
-	@Override
-	public L evalNonNullConstant(
+	public L evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)

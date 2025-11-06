@@ -207,7 +207,7 @@ public final class ArrayType
 					throws SemanticException {
 				Analysis<A, D> analysis = interprocedural.getAnalysis();
 				Type type = getStaticType();
-				ReferenceType reftype = new ReferenceType(type);
+				ReferenceType reftype = cfg.getProgram().getTypes().getReference(type);
 				MemoryAllocation creation = new MemoryAllocation(type, getLocation(), false);
 				HeapReference ref = new HeapReference(reftype, creation, getLocation());
 

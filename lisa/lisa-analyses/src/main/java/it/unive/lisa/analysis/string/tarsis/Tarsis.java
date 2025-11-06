@@ -42,7 +42,7 @@ public class Tarsis
 		WholeValueStringDomain<RegexAutomaton> {
 
 	@Override
-	public RegexAutomaton evalNonNullConstant(
+	public RegexAutomaton evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)

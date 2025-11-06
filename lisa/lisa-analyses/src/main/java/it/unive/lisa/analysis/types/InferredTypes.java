@@ -28,7 +28,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
-import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
@@ -100,14 +99,7 @@ public class InferredTypes
 	}
 
 	@Override
-	public TypeSet evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return new TypeSet(pp.getProgram().getTypes(), NullType.INSTANCE);
-	}
-
-	@Override
-	public TypeSet evalNonNullConstant(
+	public TypeSet evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

@@ -41,7 +41,7 @@ public class FSA
 		SmashedSumStringDomain<SimpleAutomaton> {
 
 	@Override
-	public SimpleAutomaton evalNonNullConstant(
+	public SimpleAutomaton evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)

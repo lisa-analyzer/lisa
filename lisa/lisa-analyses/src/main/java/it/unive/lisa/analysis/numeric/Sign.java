@@ -39,14 +39,7 @@ public class Sign
 		BaseNonRelationalValueDomain<SignLattice> {
 
 	@Override
-	public SignLattice evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return top();
-	}
-
-	@Override
-	public SignLattice evalNonNullConstant(
+	public SignLattice evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

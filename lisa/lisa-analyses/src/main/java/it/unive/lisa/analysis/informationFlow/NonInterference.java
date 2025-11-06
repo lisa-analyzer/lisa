@@ -118,15 +118,7 @@ public class NonInterference
 	}
 
 	@Override
-	public NonInterferenceValue evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return NonInterferenceValue.LOW_HIGH;
-	}
-
-	@Override
-	public NonInterferenceValue evalNonNullConstant(
+	public NonInterferenceValue evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)

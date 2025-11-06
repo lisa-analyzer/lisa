@@ -95,17 +95,17 @@ public class WholeValueAnalysis<N extends WholeValueElement<N>,
 	}
 
 	@Override
-	public WholeValue<N, S, B> evalNonNullConstant(
+	public WholeValue<N, S, B> evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (constant.getValue() instanceof Integer)
-			return mkInt(intDom.evalNonNullConstant(constant, pp, oracle));
+			return mkInt(intDom.evalConstant(constant, pp, oracle));
 		else if (constant.getValue() instanceof String)
-			return mkString(strDom.evalNonNullConstant(constant, pp, oracle));
+			return mkString(strDom.evalConstant(constant, pp, oracle));
 		else if (constant.getValue() instanceof Boolean)
-			return mkBool(boolDom.evalNonNullConstant(constant, pp, oracle));
+			return mkBool(boolDom.evalConstant(constant, pp, oracle));
 		return top();
 	}
 

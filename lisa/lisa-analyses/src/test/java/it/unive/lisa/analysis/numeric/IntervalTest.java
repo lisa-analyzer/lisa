@@ -72,7 +72,7 @@ public class IntervalTest {
 			int val = rand.nextInt();
 			assertTrue(
 					"eval(" + val + ") did not return [" + val + ", " + val + "]",
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle)
+					singleton.evalConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle)
 							.is(val));
 		}
 	}
@@ -82,7 +82,7 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
 			assertTrue(
 					"eval(-" + val + ") did not return [-" + val + ", -" + val + "]",
 					singleton.evalUnaryExpression(unary, aval, pp, oracle).is(-val));
@@ -95,9 +95,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval exp = aval1.plus(aval2);
 			assertEquals(
 					"eval(" + val1 + " + " + val2 + ") did not return " + exp,
@@ -112,9 +112,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval exp = aval1.diff(aval2);
 			assertEquals(
 					"eval(" + val1 + " - " + val2 + ") did not return " + exp,
@@ -134,9 +134,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval exp = aval1.mul(aval2);
 			assertEquals(
 					"eval(" + val1 + " * " + val2 + ") did not return " + exp,
@@ -156,9 +156,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval exp = aval1.div(aval2, false, false);
 			assertEquals(
 					"eval(" + val1 + " / " + val2 + ") did not return " + exp,
@@ -179,9 +179,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			IntInterval lub = aval1.lub(aval2);
 			IntInterval widen = aval1.widening(aval2);
 			IntInterval glb = aval1.glb(aval2);
@@ -222,9 +222,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 == val2);
 			assertEquals(
 					"satisfies(" + val1 + " == " + val2 + ") did not return " + exp,
@@ -241,9 +241,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 != val2);
 			assertEquals(
 					"satisfies(" + val1 + " != " + val2 + ") did not return " + exp,
@@ -260,9 +260,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 > val2);
 			assertEquals(
 					"satisfies(" + val1 + " > " + val2 + ") did not return " + exp,
@@ -279,9 +279,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 >= val2);
 			assertEquals(
 					"satisfies(" + val1 + " >= " + val2 + ") did not return " + exp,
@@ -298,9 +298,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 < val2);
 			assertEquals(
 					"satisfies(" + val1 + " < " + val2 + ") did not return " + exp,
@@ -317,9 +317,9 @@ public class IntervalTest {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
 			IntInterval aval1 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 			IntInterval aval2 = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 <= val2);
 			assertEquals(
 					"satisfies(" + val1 + " <= " + val2 + ") did not return " + exp,
@@ -336,7 +336,7 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
 					"assume(" + variable + " == " + val + ") did not return " + exp,
@@ -361,10 +361,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val + 1, pp.getLocation()), pp, oracle);
 			// val + 1, +inf
 			aval = aval.widening(
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp,
+					singleton.evalConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp,
 							oracle));
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
@@ -390,10 +390,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
 			// val, +inf
 			aval = aval.widening(
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp,
+					singleton.evalConstant(new Constant(Int32Type.INSTANCE, val + 2, pp.getLocation()), pp,
 							oracle));
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
@@ -419,10 +419,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 1, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val - 1, pp.getLocation()), pp, oracle);
 			// -inf, val - 1
 			aval = aval.widening(
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp,
+					singleton.evalConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp,
 							oracle));
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
@@ -448,10 +448,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			IntInterval aval = singleton
-					.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
+					.evalConstant(new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, oracle);
 			// -inf, val
 			aval = aval.widening(
-					singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp,
+					singleton.evalConstant(new Constant(Int32Type.INSTANCE, val - 2, pp.getLocation()), pp,
 							oracle));
 			ValueEnvironment<IntInterval> exp = env.putState(variable, aval);
 			assertEquals(
@@ -476,9 +476,9 @@ public class IntervalTest {
 			int val2)
 			throws SemanticException {
 		IntInterval aval1 = singleton
-				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
+				.evalConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp, oracle);
 		IntInterval aval2 = singleton
-				.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
+				.evalConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp, oracle);
 		return aval1.lub(aval2);
 	}
 

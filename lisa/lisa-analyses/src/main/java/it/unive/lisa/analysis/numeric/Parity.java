@@ -32,14 +32,7 @@ public class Parity
 		BaseNonRelationalValueDomain<ParityLattice> {
 
 	@Override
-	public ParityLattice evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return ParityLattice.TOP;
-	}
-
-	@Override
-	public ParityLattice evalNonNullConstant(
+	public ParityLattice evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

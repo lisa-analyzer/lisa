@@ -8,6 +8,7 @@ import it.unive.lisa.lattices.heap.allocations.AllocationSite;
 import it.unive.lisa.lattices.heap.allocations.AllocationSites;
 import it.unive.lisa.lattices.heap.allocations.HeapAllocationSite;
 import it.unive.lisa.lattices.heap.allocations.HeapEnvWithFields;
+import it.unive.lisa.lattices.heap.allocations.NullAllocationSite;
 import it.unive.lisa.lattices.heap.allocations.StackAllocationSite;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -253,10 +254,16 @@ public class FieldSensitivePointBasedHeap
 			for (SymbolicExpression rec : toProcess) {
 				if (rec instanceof MemoryPointer) {
 					AllocationSite site = (AllocationSite) ((MemoryPointer) rec).getReferencedLocation();
-					populate(expression, child, result, site);
+					if (site.equals(NullAllocationSite.INSTANCE))
+						result.add(site);
+					else
+						populate(expression, child, result, site);
 				} else if (rec instanceof AllocationSite) {
 					AllocationSite site = (AllocationSite) rec;
-					populate(expression, child, result, site);
+					if (site.equals(NullAllocationSite.INSTANCE))
+						result.add(site);
+					else
+						populate(expression, child, result, site);
 				}
 			}
 

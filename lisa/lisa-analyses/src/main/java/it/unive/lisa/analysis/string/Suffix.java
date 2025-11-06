@@ -37,7 +37,7 @@ public class Suffix
 		WholeValueStringDomain<StrSuffix> {
 
 	@Override
-	public StrSuffix evalNonNullConstant(
+	public StrSuffix evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

@@ -7,7 +7,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -29,7 +28,7 @@ public class BooleanPowerset
 		BaseNonRelationalValueDomain<Satisfiability> {
 
 	@Override
-	public Satisfiability evalNonNullConstant(
+	public Satisfiability evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -85,9 +84,7 @@ public class BooleanPowerset
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (expression instanceof NullConstant)
-			return environment;
-		if (evalNonNullConstant(expression, src, oracle) == Satisfiability.NOT_SATISFIED)
+		if (evalConstant(expression, src, oracle) == Satisfiability.NOT_SATISFIED)
 			return environment.bottom();
 		return environment;
 	}
@@ -196,12 +193,12 @@ public class BooleanPowerset
 	}
 
 	@Override
-	public Satisfiability satisfiesNonNullConstant(
+	public Satisfiability satisfiesConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return evalNonNullConstant(constant, pp, oracle);
+		return evalConstant(constant, pp, oracle);
 	}
 
 	@Override

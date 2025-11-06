@@ -95,17 +95,17 @@ public class SmashedSum<I extends Lattice<I>,
 	}
 
 	@Override
-	public SmashedValue<I, S> evalNonNullConstant(
+	public SmashedValue<I, S> evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (constant.getValue() instanceof Integer)
-			return mkInt(intDom.evalNonNullConstant(constant, pp, oracle));
+			return mkInt(intDom.evalConstant(constant, pp, oracle));
 		else if (constant.getValue() instanceof String)
-			return mkString(strDom.evalNonNullConstant(constant, pp, oracle));
+			return mkString(strDom.evalConstant(constant, pp, oracle));
 		else if (constant.getValue() instanceof Boolean)
-			return mkBool(boolDom.evalNonNullConstant(constant, pp, oracle));
+			return mkBool(boolDom.evalConstant(constant, pp, oracle));
 		return top();
 	}
 
@@ -185,7 +185,7 @@ public class SmashedSum<I extends Lattice<I>,
 							temp = partial.lub(strDom.substring(left.getStringValue(), b, e));
 						else if (b == e)
 							temp = partial.lub(
-									this.strDom.evalNonNullConstant(
+									this.strDom.evalConstant(
 											new Constant(Untyped.INSTANCE, "", SyntheticLocation.INSTANCE),
 											null,
 											oracle));

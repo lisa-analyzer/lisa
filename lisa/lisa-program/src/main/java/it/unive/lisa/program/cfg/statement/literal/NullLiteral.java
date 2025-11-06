@@ -8,7 +8,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.symbolic.value.NullConstant;
+import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.type.NullType;
 
 /**

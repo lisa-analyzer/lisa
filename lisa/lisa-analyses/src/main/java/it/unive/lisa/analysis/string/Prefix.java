@@ -38,7 +38,7 @@ public class Prefix
 		WholeValueStringDomain<StrPrefix> {
 
 	@Override
-	public StrPrefix evalNonNullConstant(
+	public StrPrefix evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

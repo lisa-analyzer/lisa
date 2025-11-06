@@ -46,7 +46,7 @@ public class Interval
 		SmashedSumIntDomain<IntInterval> {
 
 	@Override
-	public IntInterval evalNonNullConstant(
+	public IntInterval evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

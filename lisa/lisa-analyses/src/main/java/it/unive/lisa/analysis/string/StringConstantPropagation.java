@@ -36,14 +36,7 @@ public class StringConstantPropagation
 		BaseNonRelationalValueDomain<StringConstant> {
 
 	@Override
-	public StringConstant evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return StringConstant.TOP;
-	}
-
-	@Override
-	public StringConstant evalNonNullConstant(
+	public StringConstant evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

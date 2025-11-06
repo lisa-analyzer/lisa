@@ -49,13 +49,13 @@ public class NullType
 	@Override
 	public boolean canBeAssignedTo(
 			Type other) {
-		return other.isPointerType() || other.isUntyped();
+		return other.isInMemoryType() || other.isUntyped();
 	}
 
 	@Override
 	public Type commonSupertype(
 			Type other) {
-		return other != null && other.isPointerType() ? other : Untyped.INSTANCE;
+		return other != null && other.isInMemoryType() ? other : Untyped.INSTANCE;
 	}
 
 	@Override

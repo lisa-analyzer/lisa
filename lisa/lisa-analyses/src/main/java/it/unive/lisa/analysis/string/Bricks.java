@@ -739,7 +739,7 @@ public class Bricks
 	}
 
 	@Override
-	public BrickList evalNonNullConstant(
+	public BrickList evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)

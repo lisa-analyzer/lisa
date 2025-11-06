@@ -10,6 +10,7 @@ import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.lattices.heap.allocations.AllocationSite;
 import it.unive.lisa.lattices.heap.allocations.AllocationSites;
 import it.unive.lisa.lattices.heap.allocations.HeapAllocationSite;
+import it.unive.lisa.lattices.heap.allocations.NullAllocationSite;
 import it.unive.lisa.lattices.heap.allocations.StackAllocationSite;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -20,11 +21,20 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.heap.NullConstant;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -154,6 +164,10 @@ public abstract class AllocationSiteBasedAnalysis<
 			Identifier id,
 			AllocationSite site)
 			throws SemanticException {
+		if (id instanceof NullAllocationSite)
+			// if we are assigning something to the null identifier
+			// we skip the assignment
+			return state.bottom();
 		if (site.isAllocation())
 			// we never store the allocation version of a site,
 			// otherwise it would be considered an allocation
@@ -233,7 +247,105 @@ public abstract class AllocationSiteBasedAnalysis<
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return Pair.of(state, List.of());
+		Satisfiability sat = satisfies(state, expression, dest, oracle);
+		if (sat == Satisfiability.SATISFIED || sat == Satisfiability.UNKNOWN)
+			return Pair.of(state, List.of());
+		else
+			return Pair.of(state.bottom(), List.of());
+	}
+
+	@Override
+	public Satisfiability satisfies(
+			L state,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Satisfiability.UNKNOWN;
+
+		// negation
+		if (expression instanceof UnaryExpression) {
+			UnaryExpression un = (UnaryExpression) expression;
+			if (un.getOperator() == LogicalNegation.INSTANCE)
+				return satisfies(state, un.getExpression(), pp, oracle).negate();
+		}
+
+		if (expression instanceof BinaryExpression) {
+			BinaryExpression bin = (BinaryExpression) expression;
+			if (bin.getOperator() == LogicalAnd.INSTANCE)
+				return satisfies(state, bin.getLeft(), pp, oracle).and(satisfies(state, bin.getRight(), pp, oracle));
+			else if (bin.getOperator() == LogicalOr.INSTANCE)
+				return satisfies(state, bin.getLeft(), pp, oracle).or(satisfies(state, bin.getRight(), pp, oracle));
+			else if (bin.getOperator() == ComparisonNe.INSTANCE) {
+				BinaryExpression negatedBin = new BinaryExpression(
+						bin.getStaticType(),
+						bin.getLeft(),
+						bin.getRight(),
+						ComparisonEq.INSTANCE,
+						expression.getCodeLocation());
+				return satisfies(state, negatedBin, pp, oracle).negate();
+			} else if (bin.getOperator() == ComparisonEq.INSTANCE) {
+				SymbolicExpression leftExpr = bin.getLeft();
+				SymbolicExpression rightExpr = bin.getRight();
+
+				ExpressionSet rhsExps;
+				ExpressionSet lhsExps;
+				if (leftExpr instanceof Identifier)
+					lhsExps = new ExpressionSet(resolveIdentifier(state, (Identifier) leftExpr, pp));
+				else if (expression.mightNeedRewriting())
+					lhsExps = rewrite(state, leftExpr, pp, oracle);
+				else
+					lhsExps = new ExpressionSet(leftExpr);
+
+				if (rightExpr instanceof Identifier)
+					rhsExps = new ExpressionSet(resolveIdentifier(state, (Identifier) rightExpr, pp));
+				else if (expression.mightNeedRewriting())
+					rhsExps = rewrite(state, rightExpr, pp, oracle);
+				else
+					rhsExps = new ExpressionSet(rightExpr);
+
+				Satisfiability sat = Satisfiability.BOTTOM;
+				for (SymbolicExpression l : lhsExps)
+					for (SymbolicExpression r : rhsExps)
+						if (l instanceof MemoryPointer && r instanceof MemoryPointer) {
+							HeapLocation lp = ((MemoryPointer) l).getReferencedLocation();
+							HeapLocation rp = ((MemoryPointer) r).getReferencedLocation();
+
+							// left is null
+							if (lp.equals(NullAllocationSite.INSTANCE))
+								if (rp.equals(NullAllocationSite.INSTANCE))
+									sat = sat.lub(Satisfiability.SATISFIED);
+								else
+									sat = sat.lub(Satisfiability.NOT_SATISFIED);
+							// right is null
+							else if (rp.equals(NullAllocationSite.INSTANCE))
+								sat = sat.lub(Satisfiability.NOT_SATISFIED);
+
+							// right is strong
+							else if (!rp.isWeak())
+								if (rp.equals(lp))
+									sat = sat.lub(Satisfiability.SATISFIED);
+								else if (!lp.isWeak())
+									sat = sat.lub(Satisfiability.NOT_SATISFIED);
+								else
+									sat = sat.lub(Satisfiability.UNKNOWN);
+							// left is strong
+							else if (!lp.isWeak())
+								if (rp.equals(lp))
+									sat = sat.lub(Satisfiability.SATISFIED);
+								else if (!rp.isWeak())
+									sat = sat.lub(Satisfiability.NOT_SATISFIED);
+								else
+									sat = sat.lub(Satisfiability.UNKNOWN);
+						}
+
+				// FIXME: we may improve this check
+				return sat != Satisfiability.BOTTOM ? sat : Satisfiability.UNKNOWN;
+			}
+		}
+
+		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
@@ -492,7 +604,11 @@ public abstract class AllocationSiteBasedAnalysis<
 			if (expression.getStaticType().isPointerType()) {
 				Type inner = expression.getStaticType().asPointerType().getInnerType();
 				CodeLocation loc = expression.getCodeLocation();
-				HeapAllocationSite site = new HeapAllocationSite(inner, "unknown@" + loc.getCodeLocation(), false, loc);
+				HeapAllocationSite site = new HeapAllocationSite(
+						inner,
+						"unknown@" + loc.getCodeLocation(),
+						false,
+						loc);
 				return new ExpressionSet(new MemoryPointer(expression.getStaticType(), site, loc));
 			} else if (expression.getStaticType().isInMemoryType()) {
 				Type type = expression.getStaticType();
@@ -505,6 +621,19 @@ public abstract class AllocationSiteBasedAnalysis<
 				return new ExpressionSet(new MemoryPointer(expression.getStaticType(), site, loc));
 			}
 			return new ExpressionSet(expression);
+		}
+
+		@Override
+		public ExpressionSet visit(
+				NullConstant expression,
+				Object... params)
+				throws SemanticException {
+			ProgramPoint pp = (ProgramPoint) params[1];
+			MemoryPointer mp = new MemoryPointer(
+					pp.getProgram().getTypes().getReference(NullType.INSTANCE),
+					NullAllocationSite.INSTANCE,
+					expression.getCodeLocation());
+			return new ExpressionSet(mp);
 		}
 
 	}

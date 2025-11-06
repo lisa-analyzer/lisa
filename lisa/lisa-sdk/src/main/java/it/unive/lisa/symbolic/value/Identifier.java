@@ -199,4 +199,19 @@ public abstract class Identifier
 		return false;
 	}
 
+	/**
+	 * Yields whether or not this identifier can be assigned to a value. There
+	 * are identifiers that represent read-only locations, such as ones modeling
+	 * the special uninitialized heap location {@code null}, that cannot be
+	 * assigned to a value. This method provides a modular way to check for
+	 * that. If this method returns {@code false}, any attempt to assign a value
+	 * to this identifier should fail.
+	 * 
+	 * @return {@code true} if this identifier can be assigned to a value,
+	 *             {@code false} otherwise
+	 */
+	public boolean canBeAssigned() {
+		return true;
+	}
+
 }

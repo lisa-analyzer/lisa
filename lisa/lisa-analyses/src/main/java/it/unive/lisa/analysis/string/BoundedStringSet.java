@@ -220,7 +220,7 @@ public class BoundedStringSet
 	}
 
 	@Override
-	public BSS evalNonNullConstant(
+	public BSS evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {

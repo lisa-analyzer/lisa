@@ -12,9 +12,11 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collections;
@@ -167,6 +169,25 @@ public class MonolithicHeap
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
 			return deref;
+		}
+
+		@Override
+		public ExpressionSet visit(
+				NullConstant expression,
+				Object... params)
+				throws SemanticException {
+			ProgramPoint pp = (ProgramPoint) params[0];
+			HeapLocation e = new HeapLocation(
+					expression.getStaticType(),
+					MONOLITH_NAME,
+					true,
+					expression.getCodeLocation());
+			e.setAllocation(false);
+			MemoryPointer mp = new MemoryPointer(
+					pp.getProgram().getTypes().getReference(NullType.INSTANCE),
+					e,
+					expression.getCodeLocation());
+			return new ExpressionSet(mp);
 		}
 
 	}

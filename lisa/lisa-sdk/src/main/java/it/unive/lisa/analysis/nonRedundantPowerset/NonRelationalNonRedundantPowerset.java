@@ -56,13 +56,13 @@ public class NonRelationalNonRedundantPowerset<S extends NonRedundantSetLattice<
 	}
 
 	@Override
-	public S evalNonNullConstant(
+	public S evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		Set<L> newSet = new HashSet<>();
-		newSet.add(valueDomain.evalNonNullConstant(constant, pp, oracle));
+		newSet.add(valueDomain.evalConstant(constant, pp, oracle));
 		return singleton.mk(newSet).removeRedundancy().removeOverlapping();
 	}
 

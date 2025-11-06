@@ -22,7 +22,6 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
-import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
@@ -73,14 +72,7 @@ public class StaticTypes
 	}
 
 	@Override
-	public Supertype evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		return new Supertype(pp.getProgram().getTypes(), NullType.INSTANCE);
-	}
-
-	@Override
-	public Supertype evalNonNullConstant(
+	public Supertype evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
