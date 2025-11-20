@@ -136,4 +136,5 @@ public class SCCs<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends E
 
 		return index;
 	}
+
 }

@@ -1,6 +1,7 @@
 package it.unive.lisa.program.language.parameterassignment;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -49,7 +50,9 @@ import org.apache.commons.lang3.tuple.Pair;
  *          "https://docs.python.org/3/reference/expressions.html#calls">Python
  *          Language Reference: calls</a>
  */
-public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
+public class PythonLikeAssigningStrategy
+		implements
+		ParameterAssigningStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -61,10 +64,10 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
 			Call call,
 			AnalysisState<A> callState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			Parameter[] formals,
 			ExpressionSet[] parameters)
@@ -81,10 +84,10 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 			if (def != null) {
 				callState = def.forwardSemantics(callState, interprocedural, expressions);
 				expressions.put(def, callState);
-				defaults[pos] = callState.getComputedExpressions();
+				defaults[pos] = callState.getExecutionExpressions();
 				Set<Type> types = new HashSet<>();
 				for (SymbolicExpression e : defaults[pos])
-					types.addAll(callState.getState().getRuntimeTypesOf(e, call, callState.getState()));
+					types.addAll(interprocedural.getAnalysis().getRuntimeTypesOf(callState, e, call));
 				defaultTypes[pos] = types;
 			}
 		}
@@ -93,26 +96,28 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 				formals,
 				actuals,
 				parameters,
-				call.parameterTypes(expressions),
+				call.parameterTypes(expressions, interprocedural.getAnalysis()),
 				defaults,
 				defaultTypes,
 				slots,
 				slotsTypes,
-				callState.bottom());
+				callState.bottomExecution());
 		if (logic != null)
 			return Pair.of(logic, parameters);
 
 		// prepare the state for the call: assign the value to each parameter
 		AnalysisState<A> prepared = callState;
 		for (int i = 0; i < formals.length; i++) {
-			AnalysisState<A> temp = prepared.bottom();
+			AnalysisState<A> temp = prepared.bottomExecution();
 			for (SymbolicExpression exp : slots[i])
-				temp = temp.lub(prepared.assign(formals[i].toSymbolicVariable(), exp, call));
+				temp = temp
+						.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp,
+								call));
 			prepared = temp;
 		}
 
 		// we remove expressions from the stack
-		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet(), prepared.getFixpointInformation());
+		prepared = prepared.withExecutionExpressions(new ExpressionSet());
 		return Pair.of(prepared, slots);
 	}
 

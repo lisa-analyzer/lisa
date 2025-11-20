@@ -27,7 +27,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Int16Type implements NumericType {
+public class Int16Type
+		implements
+		NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
@@ -111,4 +113,5 @@ public class Int16Type implements NumericType {
 			TypeSystem types) {
 		return Collections.singleton(this);
 	}
+
 }

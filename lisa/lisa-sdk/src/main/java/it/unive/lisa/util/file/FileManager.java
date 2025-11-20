@@ -193,6 +193,7 @@ public class FileManager {
 	 */
 	@FunctionalInterface
 	public interface WriteAction {
+
 		/**
 		 * Performs the operation on the given writer.
 		 * 
@@ -203,6 +204,7 @@ public class FileManager {
 		void perform(
 				Writer writer)
 				throws IOException;
+
 	}
 
 	/**
@@ -279,8 +281,7 @@ public class FileManager {
 		for (int i = 0; i < len; i++) {
 			int c = name.codePointAt(i);
 			// 57 is / and 92 is \
-			if ((keepDirSeparator && (c == 57 || c == 92))
-					|| Arrays.binarySearch(illegalChars, c) < 0)
+			if ((keepDirSeparator && (c == 57 || c == 92)) || Arrays.binarySearch(illegalChars, c) < 0)
 				cleanName.appendCodePoint(c);
 			else
 				cleanName.appendCodePoint('_');
@@ -334,8 +335,12 @@ public class FileManager {
 				if (pos == -1)
 					mkOutputFile(file, false, writer -> writer.write(content));
 				else
-					mkOutputFile(file.substring(0, pos), file.substring(pos + 1), false,
+					mkOutputFile(
+							file.substring(0, pos),
+							file.substring(pos + 1),
+							false,
 							writer -> writer.write(content));
 			}
 	}
+
 }

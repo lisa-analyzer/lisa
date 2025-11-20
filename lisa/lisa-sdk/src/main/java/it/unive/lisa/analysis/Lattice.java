@@ -1,10 +1,13 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.IterableArray;
 import it.unive.lisa.util.functional.BiFunction;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * An interface for elements that follow a lattice structure. Implementers of
@@ -15,7 +18,9 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  * 
  * @param <L> the concrete {@link Lattice} instance
  */
-public interface Lattice<L extends Lattice<L>> extends StructuredObject {
+public interface Lattice<L extends Lattice<L>>
+		extends
+		StructuredObject {
 
 	/**
 	 * A string constant that can be used to represent top values.
@@ -91,9 +96,12 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	default L lub(
 			L... others)
 			throws SemanticException {
-		return compress((L) this, new IterableArray<>(others), (
-				l1,
-				l2) -> l1.lub(l2));
+		return compress(
+				(L) this,
+				new IterableArray<>(others),
+				(
+						l1,
+						l2) -> l1.lub(l2));
 	}
 
 	/**
@@ -111,9 +119,12 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	default L lub(
 			Iterable<L> others)
 			throws SemanticException {
-		return compress((L) this, others, (
-				l1,
-				l2) -> l1.lub(l2));
+		return compress(
+				(L) this,
+				others,
+				(
+						l1,
+						l2) -> l1.lub(l2));
 	}
 
 	/**
@@ -147,9 +158,12 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	default L glb(
 			L... others)
 			throws SemanticException {
-		return compress((L) this, new IterableArray<>(others), (
-				l1,
-				l2) -> l1.glb(l2));
+		return compress(
+				(L) this,
+				new IterableArray<>(others),
+				(
+						l1,
+						l2) -> l1.glb(l2));
 	}
 
 	/**
@@ -167,9 +181,12 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	default L glb(
 			Iterable<L> others)
 			throws SemanticException {
-		return compress((L) this, others, (
-				l1,
-				l2) -> l1.glb(l2));
+		return compress(
+				(L) this,
+				others,
+				(
+						l1,
+						l2) -> l1.glb(l2));
 	}
 
 	/**
@@ -254,9 +271,12 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	default L widening(
 			L... others)
 			throws SemanticException {
-		return compress((L) this, new IterableArray<>(others), (
-				l1,
-				l2) -> l1.widening(l2));
+		return compress(
+				(L) this,
+				new IterableArray<>(others),
+				(
+						l1,
+						l2) -> l1.widening(l2));
 	}
 
 	/**
@@ -274,9 +294,12 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	default L widening(
 			Iterable<L> others)
 			throws SemanticException {
-		return compress((L) this, others, (
-				l1,
-				l2) -> l1.widening(l2));
+		return compress(
+				(L) this,
+				others,
+				(
+						l1,
+						l2) -> l1.widening(l2));
 	}
 
 	/**
@@ -312,9 +335,12 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	default L narrowing(
 			L... others)
 			throws SemanticException {
-		return compress((L) this, new IterableArray<>(others), (
-				l1,
-				l2) -> l1.narrowing(l2));
+		return compress(
+				(L) this,
+				new IterableArray<>(others),
+				(
+						l1,
+						l2) -> l1.narrowing(l2));
 	}
 
 	/**
@@ -332,9 +358,12 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 	default L narrowing(
 			Iterable<L> others)
 			throws SemanticException {
-		return compress((L) this, others, (
-				l1,
-				l2) -> l1.narrowing(l2));
+		return compress(
+				(L) this,
+				others,
+				(
+						l1,
+						l2) -> l1.narrowing(l2));
 	}
 
 	private static <L extends Lattice<L>> L compress(
@@ -347,4 +376,80 @@ public interface Lattice<L extends Lattice<L>> extends StructuredObject {
 			cursor = combiner.apply(cursor, o);
 		return cursor;
 	}
+
+	/**
+	 * Yields an abstract element that should be used whenever a functional
+	 * lattice using this element as values is queried for the state of a
+	 * variable not currently part of its mapping. Abstraction for such a
+	 * variable might have been lost, for instance, due to a call to
+	 * {@link Lattice#top()} on the function itself. The default implementation
+	 * of this method returns {@link Lattice#top()}.
+	 * 
+	 * @param id the variable that is missing from the mapping
+	 * 
+	 * @return a default abstraction for the variable
+	 */
+	default L unknownValue(
+			Identifier id) {
+		return top();
+	}
+
+	/**
+	 * Yields a unique instance of a specific lattice, of class {@code domain},
+	 * contained inside this lattice, also recursively querying inner lattices
+	 * (enabling retrieval through Cartesian products or other types of
+	 * combinations).<br>
+	 * <br>
+	 * The default implementation of this method lubs together (using
+	 * {@link Lattice#lub(Lattice)}) all instances returned by
+	 * {@link #getAllLatticeInstances(Class)}, defaulting to {@code null} if no
+	 * instance is returned.
+	 * 
+	 * @param <D>    the type of lattice to retrieve
+	 * @param domain the class of the lattice instance to retrieve
+	 * 
+	 * @return the instance of that lattice, or {@code null}
+	 * 
+	 * @throws SemanticException if an exception happens while lubbing the
+	 *                               results
+	 */
+	default <D extends Lattice<D>> D getLatticeInstance(
+			Class<D> domain)
+			throws SemanticException {
+		Collection<D> all = getAllLatticeInstances(domain);
+		D result = null;
+		for (D instance : all)
+			if (result == null)
+				result = instance;
+			else
+				result = result.lub(instance);
+
+		return result;
+	}
+
+	/**
+	 * Yields all of the instances of a specific lattice, of class
+	 * {@code lattice}, contained inside this lattice element, also recursively
+	 * querying inner lattices (enabling retrieval through Cartesian products or
+	 * other types of combinations).<br>
+	 * <br>
+	 * The default implementation of this method returns a singleton collection
+	 * containing {@code this} if {@code domain.isAssignableFrom(getClass())}
+	 * holds, otherwise it returns an empty collection.
+	 * 
+	 * @param <D>    the type of lattice to retrieve
+	 * @param domain the class of the lattice instance to retrieve
+	 * 
+	 * @return the instances of that lattice
+	 */
+	@SuppressWarnings("unchecked")
+	default <D extends Lattice<D>> Collection<D> getAllLatticeInstances(
+			Class<D> domain) {
+		Collection<D> result = new HashSet<>();
+		if (domain.isAssignableFrom(getClass()))
+			result.add((D) this);
+
+		return result;
+	}
+
 }

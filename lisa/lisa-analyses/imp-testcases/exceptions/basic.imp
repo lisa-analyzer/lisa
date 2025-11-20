@@ -1,0 +1,123 @@
+class A { ~A() {} }
+class B extends A { ~B() {} }
+class C extends A { ~C() {} }
+class D extends B { ~D() {} }
+class E extends B { ~E() {} }
+
+class exceptions {
+
+    noException() {
+        def x = 0;
+        def y = 0;
+        def z = 0;
+        try {
+            x = 1;
+        } catch (E) {
+            y = 4;
+        } catch (D e) {
+            y = 6;
+        } catch (A, B e) {
+            y = 8;
+        } else {
+            x = 10;
+        } finally {
+            z = x + y;
+        }
+        return z;
+    }
+
+    specificException() {
+        def x = 0;
+        def y = 0;
+        def z = 0;
+        try {
+            x = 1;
+            throw new E();
+        } catch (E) {
+            y = 4;
+        } catch (D e) {
+            y = 6;
+        } catch (A, B e) {
+            y = 8;
+        } finally {
+            z = x + y;
+        }
+        return z;
+    }
+
+    specificExceptionWithVar() {
+        def x = 0;
+        def y = 0;
+        def z = 0;
+        try {
+            x = 1;
+            throw new D();
+        } catch (E) {
+            y = 4;
+        } catch (D e) {
+            y = 6;
+        } catch (A, B e) {
+            y = 8;
+        } finally {
+            z = x + y;
+        }
+        return z;
+    }
+
+    lessSpecificException() {
+        def x = 0;
+        def y = 0;
+        def z = 0;
+        try {
+            x = 1;
+            throw new A();
+        } catch (E) {
+            y = 4;
+        } catch (D e) {
+            y = 6;
+        } catch (A, B e) {
+            y = 8;
+        } finally {
+            z = x + y;
+        }
+        return z;
+    }
+
+    conditionalException(b) {
+        def x = 0;
+        def y = 0;
+        def z = 0;
+        try {
+            x = 1;
+            if (b)
+                throw new E();
+        } catch (E) {
+            y = 4;
+        } catch (D e) {
+            y = 6;
+        } catch (A, B e) {
+            y = 8;
+        } else {
+            x = 10;
+        } finally {
+            z = x + y;
+        }
+        return z;
+    }
+
+    uncaught() {
+        def x = 0;
+        def y = 0;
+        def z = 0;
+        try {
+            x = 1;
+            throw new E();
+        } catch (D e) {
+            y = 6;
+        } finally {
+            z = x + y;
+        }
+        return z;
+    }
+
+}

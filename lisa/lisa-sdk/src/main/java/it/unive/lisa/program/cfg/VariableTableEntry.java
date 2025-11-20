@@ -16,7 +16,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class VariableTableEntry implements CodeElement {
+public class VariableTableEntry
+		implements
+		CodeElement {
 
 	/**
 	 * The index of the variable
@@ -340,4 +342,5 @@ public class VariableTableEntry implements CodeElement {
 			Annotation ann) {
 		annotations.addAnnotation(ann);
 	}
+
 }

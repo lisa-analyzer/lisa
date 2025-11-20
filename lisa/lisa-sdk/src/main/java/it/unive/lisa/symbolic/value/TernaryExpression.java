@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
@@ -14,7 +15,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TernaryExpression extends ValueExpression {
+public class TernaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The left-hand side operand of this expression
@@ -100,19 +103,31 @@ public class TernaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		TernaryExpression expr = new TernaryExpression(getStaticType(), left.pushScope(token), middle.pushScope(token),
-				right.pushScope(token), operator, getCodeLocation());
+		TernaryExpression expr = new TernaryExpression(
+				getStaticType(),
+				left.pushScope(token, pp),
+				middle.pushScope(token, pp),
+				right.pushScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 
 	@Override
 	public SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		TernaryExpression expr = new TernaryExpression(getStaticType(), left.popScope(token), middle.popScope(token),
-				right.popScope(token), operator, getCodeLocation());
+		TernaryExpression expr = new TernaryExpression(
+				getStaticType(),
+				left.popScope(token, pp),
+				middle.popScope(token, pp),
+				right.popScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 
@@ -190,4 +205,30 @@ public class TernaryExpression extends ValueExpression {
 			TernaryOperator operator) {
 		return new TernaryExpression(getStaticType(), left, middle, right, operator, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression l = this.left.removeTypingExpressions();
+		SymbolicExpression m = this.middle.removeTypingExpressions();
+		SymbolicExpression r = this.right.removeTypingExpressions();
+		if (l == left && m == middle && r == this.right)
+			return this;
+		return new TernaryExpression(getStaticType(), l, m, r, operator, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression l = left.replace(source, target);
+		SymbolicExpression m = middle.replace(source, target);
+		SymbolicExpression r = right.replace(source, target);
+		if (l == left && m == middle && r == right)
+			return this;
+		return new TernaryExpression(getStaticType(), l, m, r, operator, getCodeLocation());
+	}
+
 }

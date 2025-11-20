@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.edge;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CFG;
@@ -14,7 +16,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
+public abstract class Edge
+		implements
+		CodeEdge<CFG, Statement, Edge> {
 
 	/**
 	 * The source node.
@@ -100,16 +104,21 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 	 * destination, optionally modifying the given {@code sourceState} by
 	 * applying semantic assumptions.
 	 * 
-	 * @param <A>   the concrete {@link AbstractState} instance
-	 * @param state the {@link AnalysisState} computed at the source of this
-	 *                  edge
+	 * @param <A>      the kind of {@link AbstractLattice} produced by the
+	 *                     domain {@code D}
+	 * @param <D>      the kind of {@link AbstractDomain} to run during the
+	 *                     analysis
+	 * @param state    the {@link AnalysisState} computed at the source of this
+	 *                     edge
+	 * @param analysis the {@link Analysis} that is being executed
 	 * 
 	 * @return the {@link AnalysisState} after traversing this edge
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> traverseForward(
-			AnalysisState<A> state)
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
 			throws SemanticException;
 
 	/**
@@ -117,16 +126,21 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 	 * source, optionally modifying the given {@code sourceState} by applying
 	 * semantic assumptions.
 	 * 
-	 * @param <A>   the concrete {@link AbstractState} instance
-	 * @param state the {@link AnalysisState} computed at the destination of
-	 *                  this edge
+	 * @param <A>      the kind of {@link AbstractLattice} produced by the
+	 *                     domain {@code D}
+	 * @param <D>      the kind of {@link AbstractDomain} to run during the
+	 *                     analysis
+	 * @param state    the {@link AnalysisState} computed at the destination of
+	 *                     this edge
+	 * @param analysis the {@link Analysis} that is being executed
 	 * 
 	 * @return the {@link AnalysisState} after traversing this edge
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> traverseBackwards(
-			AnalysisState<A> state)
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
 			throws SemanticException;
 
 	@Override
@@ -146,4 +160,17 @@ public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 			return cmp;
 		return getClass().getName().compareTo(o.getClass().getName());
 	}
+
+	/**
+	 * Yields the label of this edge, if any. The label is used mainly as a tool
+	 * for discriminating edges with the same kind and endpoints but with
+	 * different properties, e.g., different exceptions caught.
+	 * 
+	 * @return the label of this edge, or {@code null} if this edge does not
+	 *             have a label
+	 */
+	public String getLabel() {
+		return null;
+	}
+
 }

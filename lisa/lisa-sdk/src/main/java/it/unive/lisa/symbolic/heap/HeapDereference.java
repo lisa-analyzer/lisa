@@ -1,7 +1,9 @@
 package it.unive.lisa.symbolic.heap;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -9,9 +11,11 @@ import it.unive.lisa.type.Type;
 /**
  * A heap dereference expression.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class HeapDereference extends HeapExpression {
+public class HeapDereference
+		extends
+		HeapExpression {
 
 	/**
 	 * The symbolic expression to be dereferenced.
@@ -82,4 +86,52 @@ public class HeapDereference extends HeapExpression {
 	public String toString() {
 		return "*(" + toDeref + ")";
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression e = toDeref.removeTypingExpressions();
+		if (e == toDeref)
+			return this;
+		return new HeapDereference(getStaticType(), e, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression e = toDeref.replace(source, target);
+		if (e == toDeref)
+			return this;
+		return new HeapDereference(getStaticType(), e, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression pushScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		SymbolicExpression e = toDeref.pushScope(token, pp);
+		if (e == null)
+			return null;
+		if (e == toDeref || e.equals(toDeref))
+			return this;
+		return new HeapDereference(getStaticType(), e, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression popScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		SymbolicExpression e = toDeref.popScope(token, pp);
+		if (e == null)
+			return null;
+		if (e == toDeref || e.equals(toDeref))
+			return this;
+		return new HeapDereference(getStaticType(), e, getCodeLocation());
+	}
+
 }

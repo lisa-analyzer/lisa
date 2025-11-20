@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -14,7 +15,11 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HeapLocation extends Identifier {
+public class HeapLocation
+		extends
+		Identifier {
+
+	private boolean isAllocation = false;
 
 	/**
 	 * Builds the heap location.
@@ -43,6 +48,9 @@ public class HeapLocation extends Identifier {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		// isAllocation is not considered in hashCode, as it is a property
+		// that is not relevant for the identity of the heap location
+		// (it is just a property that can be used to refine reasoning)
 		result = prime * result + (isWeak() ? 1231 : 1237);
 		return result;
 	}
@@ -59,6 +67,9 @@ public class HeapLocation extends Identifier {
 		HeapLocation other = (HeapLocation) obj;
 		if (isWeak() != other.isWeak())
 			return false;
+		// isAllocation is not considered in equals, as it is a property
+		// that is not relevant for the identity of the heap location
+		// (it is just a property that can be used to refine reasoning)
 		return true;
 	}
 
@@ -67,8 +78,12 @@ public class HeapLocation extends Identifier {
 			Identifier other)
 			throws SemanticException {
 		if (!getName().equals(other.getName()))
-			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
-					+ "' and '" + other + "'");
+			throw new SemanticException(
+					"Cannot perform the least upper bound between different identifiers: '"
+							+ this
+							+ "' and '"
+							+ other
+							+ "'");
 		return isWeak() ? this : other;
 	}
 
@@ -79,13 +94,15 @@ public class HeapLocation extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token) {
+			ScopeToken token,
+			ProgramPoint pp) {
 		return this;
 	}
 
 	@Override
 	public SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
@@ -97,4 +114,51 @@ public class HeapLocation extends Identifier {
 			throws SemanticException {
 		return visitor.visit(this, params);
 	}
+
+	/**
+	 * Returns whether this heap location is a reference to a region being
+	 * freshly allocated or not. Value/type domains can exploit this information
+	 * to refine their reasoning.
+	 * 
+	 * @return whether this heap location is an allocation site or not
+	 */
+	public boolean isAllocation() {
+		return isAllocation;
+	}
+
+	/**
+	 * Sets whether this heap location is a reference to a region being freshly
+	 * allocated or not. Value/type domains can exploit this information to
+	 * refine their reasoning.
+	 * 
+	 * @param isAllocation whether this heap location is an allocation site or
+	 *                         not
+	 */
+	public void setAllocation(
+			boolean isAllocation) {
+		this.isAllocation = isAllocation;
+	}
+
+	/**
+	 * Returns a non-allocation version of this location, that is, a version
+	 * where {@link #isAllocation()} returns false.
+	 * 
+	 * @return the non-allocation version of this location
+	 */
+	public HeapLocation asNonAllocation() {
+		if (!isAllocation)
+			return this;
+		else
+			return new HeapLocation(getStaticType(), getName(), isWeak(), getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+		return this;
+	}
+
 }

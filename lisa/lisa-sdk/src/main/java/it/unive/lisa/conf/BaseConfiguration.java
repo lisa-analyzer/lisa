@@ -48,4 +48,5 @@ public abstract class BaseConfiguration {
 		}
 		return true;
 	}
+
 }

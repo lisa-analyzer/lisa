@@ -8,9 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * An array annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ArrayAnnotationValue implements AnnotationValue {
+public class ArrayAnnotationValue
+		implements
+		AnnotationValue {
 
 	private final BasicAnnotationValue[] arr;
 
@@ -63,9 +65,10 @@ public class ArrayAnnotationValue implements AnnotationValue {
 		if ((cmp = Integer.compare(arr.length, other.arr.length)) != 0)
 			return cmp;
 
-		CollectionsDiffBuilder<
-				BasicAnnotationValue> builder = new CollectionsDiffBuilder<>(BasicAnnotationValue.class, List.of(arr),
-						List.of(other.arr));
+		CollectionsDiffBuilder<BasicAnnotationValue> builder = new CollectionsDiffBuilder<>(
+				BasicAnnotationValue.class,
+				List.of(arr),
+				List.of(other.arr));
 		builder.compute(BasicAnnotationValue::compareTo);
 
 		if (builder.sameContent())
@@ -73,4 +76,5 @@ public class ArrayAnnotationValue implements AnnotationValue {
 
 		return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
 	}
+
 }

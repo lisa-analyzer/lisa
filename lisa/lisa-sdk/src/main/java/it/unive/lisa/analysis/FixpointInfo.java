@@ -21,12 +21,16 @@ import org.apache.commons.collections4.SetUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Entry<String, Lattice<?>>> {
+public class FixpointInfo
+		implements
+		BaseLattice<FixpointInfo>,
+		Iterable<Map.Entry<String, Lattice<?>>> {
 
 	/**
 	 * The unique bottom instance of this class.
 	 */
 	public static final FixpointInfo BOTTOM = new FixpointInfo() {
+
 		@Override
 		public boolean isBottom() {
 			return true;
@@ -36,6 +40,7 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 		public boolean isTop() {
 			return false;
 		}
+
 	};
 
 	/**
@@ -143,9 +148,12 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 		// lub invocation
 		Lattice prev = get(key);
 		if (prev.getClass() != info.getClass())
-			throw new IllegalArgumentException("The given lattice instance has a different type ("
-					+ info.getClass().getName() + ") from the one already associated with the given key ("
-					+ prev.getClass().getName() + ")");
+			throw new IllegalArgumentException(
+					"The given lattice instance has a different type ("
+							+ info.getClass().getName()
+							+ ") from the one already associated with the given key ("
+							+ prev.getClass().getName()
+							+ ")");
 		result.put(key, prev != null ? prev.lub(info) : info);
 		return new FixpointInfo(result);
 	}
@@ -362,4 +370,15 @@ public class FixpointInfo implements BaseLattice<FixpointInfo>, Iterable<Map.Ent
 
 		return new MapRepresentation(function, StringRepresentation::new, Lattice::representation);
 	}
+
+	/**
+	 * Yields whether this object is empty, that is, it contains no information
+	 * at all (i.e., it is either top or bottom, or the mapping is empty).
+	 * 
+	 * @return whether this mapping is empty
+	 */
+	public boolean isEmpty() {
+		return isTop() || isBottom() || function == null || function.isEmpty();
+	}
+
 }

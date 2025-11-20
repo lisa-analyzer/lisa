@@ -5,7 +5,7 @@ import it.unive.lisa.program.annotations.Annotation;
 /**
  * Interface for an annotation matcher.
  *
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 @FunctionalInterface
 public interface AnnotationMatcher {
@@ -21,4 +21,5 @@ public interface AnnotationMatcher {
 	 */
 	boolean matches(
 			Annotation annotation);
+
 }

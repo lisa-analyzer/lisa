@@ -21,26 +21,44 @@ import org.junit.Test;
 
 public class WarningsTest {
 
-	private static final ClassUnit unit1 = new ClassUnit(new SourceCodeLocation("fake", 1, 0),
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "fake1", false);
-	private static final ClassUnit unit2 = new ClassUnit(new SourceCodeLocation("fake", 1, 1),
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "fake2", false);
+	private static final ClassUnit unit1 = new ClassUnit(
+			new SourceCodeLocation("fake", 1, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"fake1",
+			false);
+
+	private static final ClassUnit unit2 = new ClassUnit(
+			new SourceCodeLocation("fake", 1, 1),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"fake2",
+			false);
 
 	private static final Global global1 = new Global(new SourceCodeLocation("fake", 15, 0), unit1, "fake1", false);
+
 	private static final Global global2 = new Global(new SourceCodeLocation("fake", 15, 1), unit2, "fake2", false);
 
 	private static final CodeMemberDescriptor descriptor1 = new CodeMemberDescriptor(
-			new SourceCodeLocation("fake", 2, 0), unit1,
-			false, "foo1");
+			new SourceCodeLocation("fake", 2, 0),
+			unit1,
+			false,
+			"foo1");
+
 	private static final CFG cfg1 = new CFG(descriptor1);
+
 	private static final Statement st1 = new NoOp(cfg1, new SourceCodeLocation("fake", 3, 0));
+
 	private static final Expression e1 = new VariableRef(cfg1, new SourceCodeLocation("fake", 4, 0), "x");
 
 	private static final CodeMemberDescriptor descriptor2 = new CodeMemberDescriptor(
-			new SourceCodeLocation("fake", 2, 1), unit2,
-			false, "foo2");
+			new SourceCodeLocation("fake", 2, 1),
+			unit2,
+			false,
+			"foo2");
+
 	private static final CFG cfg2 = new CFG(descriptor2);
+
 	private static final Statement st2 = new NoOp(cfg2, new SourceCodeLocation("fake", 3, 1));
+
 	private static final Expression e2 = new VariableRef(cfg2, new SourceCodeLocation("fake", 4, 1), "x");
 
 	@Test
@@ -142,9 +160,13 @@ public class WarningsTest {
 			for (int j = 0; j < warns.size(); j++)
 				if (i != j) {
 					Warning w1 = warns.get(i), w2 = warns.get(j);
-					assertNotEquals(w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(), 0,
+					assertNotEquals(
+							w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(),
+							0,
 							w1.compareTo(w2));
-					assertNotEquals(w2.getClass().getSimpleName() + " == " + w1.getClass().getSimpleName(), 0,
+					assertNotEquals(
+							w2.getClass().getSimpleName() + " == " + w1.getClass().getSimpleName(),
+							0,
 							w2.compareTo(w1));
 
 					// these are here just to ensure that they don't throw
@@ -153,4 +175,5 @@ public class WarningsTest {
 					w2.toString();
 				}
 	}
+
 }

@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -13,7 +14,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class PushInv extends ValueExpression {
+public class PushInv
+		extends
+		ValueExpression {
 
 	/**
 	 * Builds the push invalid.
@@ -52,13 +55,15 @@ public class PushInv extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token) {
+			ScopeToken token,
+			ProgramPoint pp) {
 		return this;
 	}
 
 	@Override
 	public SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		return this;
 	}
@@ -75,4 +80,19 @@ public class PushInv extends ValueExpression {
 	public boolean mightNeedRewriting() {
 		return false;
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		return this;
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+		return this;
+	}
+
 }

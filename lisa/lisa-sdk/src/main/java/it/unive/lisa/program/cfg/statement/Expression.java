@@ -18,7 +18,9 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Expression extends Statement {
+public abstract class Expression
+		extends
+		Statement {
 
 	private static final Logger LOG = LogManager.getLogger(Expression.class);
 
@@ -225,4 +227,5 @@ public abstract class Expression extends Statement {
 
 		return parent.getStatementEvaluatedAfter(this);
 	}
+
 }

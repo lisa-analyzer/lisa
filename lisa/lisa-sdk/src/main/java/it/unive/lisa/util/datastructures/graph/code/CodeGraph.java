@@ -6,11 +6,7 @@ import it.unive.lisa.util.datastructures.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link Graph} that contains a list of nodes, backed by a {@link NodeList}.
@@ -220,49 +216,4 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 		return list.toString();
 	}
 
-	/**
-	 * Simplifies the adjacency matrix beneath this graph, removing all nodes
-	 * that are instances of {@code <T>} and rewriting the edge set accordingly.
-	 * This method will throw an {@link UnsupportedOperationException} if one of
-	 * the nodes being simplified has an outgoing edge that is not simplifiable,
-	 * according to {@link CodeEdge#isUnconditional()}.
-	 *
-	 * @param target        the class of the {@link CodeNode} that needs to be
-	 *                          simplified
-	 * @param removedEdges  the collections of edges that got removed during the
-	 *                          simplification, filled by this method (the
-	 *                          collection will be cleared before simplifying)
-	 * @param replacedEdges the map of edges that got replaced during the
-	 *                          simplification, filled by this method (the map
-	 *                          will be cleared before simplifying); each entry
-	 *                          refers to a single simplified edge, and is in
-	 *                          the form
-	 *                          {@code <<ingoing removed, outgoing removed>, added>}
-	 * 
-	 * @return the set of nodes that have been simplified
-	 * 
-	 * @throws UnsupportedOperationException if there exists at least one node
-	 *                                           being simplified with an
-	 *                                           outgoing non-simplifiable edge
-	 */
-	public Set<N> simplify(
-			Class<? extends N> target,
-			Collection<E> removedEdges,
-			Map<Pair<E, E>, E> replacedEdges) {
-		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
-				.collect(Collectors.toSet());
-		targets.forEach(this::preSimplify);
-		list.simplify(targets, entrypoints, removedEdges, replacedEdges);
-		return targets;
-	}
-
-	/**
-	 * Callback that is invoked on a node before simplifying it.
-	 * 
-	 * @param node the node about to be simplified
-	 */
-	public void preSimplify(
-			N node) {
-		// nothing to do, but subclasses might redefine
-	}
 }

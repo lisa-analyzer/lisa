@@ -10,9 +10,12 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Aliases extends SetLattice<Aliases, Symbol> {
+public class Aliases
+		extends
+		SetLattice<Aliases, Symbol> {
 
 	private static final Aliases TOP = new Aliases();
+
 	private static final Aliases BOTTOM = new Aliases(Collections.emptySet(), false);
 
 	/**
@@ -78,4 +81,5 @@ public class Aliases extends SetLattice<Aliases, Symbol> {
 			Class<T> type) {
 		return new CastIterable<>(this, type);
 	}
+
 }

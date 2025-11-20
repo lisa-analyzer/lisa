@@ -85,4 +85,5 @@ public class CommonAlphabetTest {
 
 		assertEquals(a.commonAlphabet(a2), sigma);
 	}
+
 }

@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticExceptionWrapper;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionUtilities;
@@ -17,9 +18,11 @@ import java.util.stream.Collectors;
 /**
  * A set lattice containing a set of symbolic expressions.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
+public class ExpressionSet
+		extends
+		SetLattice<ExpressionSet, SymbolicExpression>
 		implements
 		ScopedObject<ExpressionSet> {
 
@@ -113,9 +116,13 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 
 		// identifiers are added after lubbing the ones with the same name
 		Set<Identifier> idlub = new HashSet<>();
-		CollectionUtilities.join(onlyIds(), other.onlyIds(), idlub, (
-				id1,
-				id2) -> id1.getName().equals(id2.getName()),
+		CollectionUtilities.join(
+				onlyIds(),
+				other.onlyIds(),
+				idlub,
+				(
+						id1,
+						id2) -> id1.getName().equals(id2.getName()),
 				ExpressionSet::wrapper);
 		idlub.forEach(lub::add);
 
@@ -133,27 +140,32 @@ public class ExpressionSet extends SetLattice<ExpressionSet, SymbolicExpression>
 	}
 
 	private Collection<Identifier> onlyIds() {
-		return elements.stream().filter(Identifier.class::isInstance).map(Identifier.class::cast)
+		return elements.stream()
+				.filter(Identifier.class::isInstance)
+				.map(Identifier.class::cast)
 				.collect(Collectors.toSet());
 	}
 
 	@Override
 	public ExpressionSet pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		Set<SymbolicExpression> mapped = new HashSet<>();
 		for (SymbolicExpression exp : elements)
-			mapped.add(exp.pushScope(token));
+			mapped.add(exp.pushScope(token, pp));
 		return new ExpressionSet(mapped);
 	}
 
 	@Override
 	public ExpressionSet popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		Set<SymbolicExpression> mapped = new HashSet<>();
 		for (SymbolicExpression exp : elements)
-			mapped.add(exp.popScope(token));
+			mapped.add(exp.popScope(token, pp));
 		return new ExpressionSet(mapped);
 	}
+
 }

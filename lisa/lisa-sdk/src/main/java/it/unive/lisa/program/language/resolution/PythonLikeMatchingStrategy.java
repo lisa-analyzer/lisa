@@ -43,7 +43,9 @@ import java.util.Set;
  *          "https://docs.python.org/3/reference/expressions.html#calls">Python
  *          Language Reference: calls</a>
  */
-public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
+public class PythonLikeMatchingStrategy
+		implements
+		ParameterMatchingStrategy {
 
 	private final FixedOrderMatchingStrategy delegate;
 
@@ -78,16 +80,8 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 			}
 		}
 
-		Boolean logic = PythonLikeMatchingStrategy.pythonLogic(
-				formals,
-				actuals,
-				actuals,
-				types,
-				defaults,
-				defaultTypes,
-				slots,
-				slotTypes,
-				false);
+		Boolean logic = PythonLikeMatchingStrategy
+				.pythonLogic(formals, actuals, actuals, types, defaults, defaultTypes, slots, slotTypes, false);
 		if (logic != null)
 			return logic;
 
@@ -185,4 +179,5 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 
 		return null;
 	}
+
 }

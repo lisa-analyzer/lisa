@@ -23,7 +23,7 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.ResolvedCall;
 import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
 import java.util.Arrays;
@@ -51,7 +51,9 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph extends CallGraph {
+public abstract class BaseCallGraph
+		extends
+		CallGraph {
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
@@ -144,8 +146,9 @@ public abstract class BaseCallGraph extends CallGraph {
 			resolveInstance(tempCall, types, targets, nativeTargets, aliasing);
 
 			if (!(params[0] instanceof VariableRef)) {
-				LOG.debug(call
-						+ ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
+				LOG.debug(
+						call
+								+ ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
 				break;
 			}
 
@@ -224,10 +227,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& !nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& !nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && !nativeTargets.isEmpty() && targetsNoRec.isEmpty() && !nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyCFGTargets(
@@ -235,10 +235,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return !targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& !targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return !targets.isEmpty() && nativeTargets.isEmpty() && !targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyRewritingTargets(
@@ -246,10 +243,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& !targetsNoRec.isEmpty()
-				&& !nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && nativeTargets.isEmpty() && !targetsNoRec.isEmpty() && !nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyRewritingNativeTargets(
@@ -257,10 +251,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& !nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && nativeTargets.isEmpty() && targetsNoRec.isEmpty() && !nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyRewritingCFGTargets(
@@ -268,10 +259,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& !targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && nativeTargets.isEmpty() && !targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyNonRewritingTargets(
@@ -279,10 +267,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return !targets.isEmpty()
-				&& !nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return !targets.isEmpty() && !nativeTargets.isEmpty() && targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyNonRewritingNativeTargets(
@@ -290,10 +275,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& !nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && !nativeTargets.isEmpty() && targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean onlyNonRewritingCFGTargets(
@@ -301,10 +283,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return !targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return !targets.isEmpty() && nativeTargets.isEmpty() && targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	private boolean noTargets(
@@ -312,10 +291,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
-		return targets.isEmpty()
-				&& nativeTargets.isEmpty()
-				&& targetsNoRec.isEmpty()
-				&& nativeTargetsNoRec.isEmpty();
+		return targets.isEmpty() && nativeTargets.isEmpty() && targetsNoRec.isEmpty() && nativeTargetsNoRec.isEmpty();
 	}
 
 	/**
@@ -382,12 +358,16 @@ public abstract class BaseCallGraph extends CallGraph {
 				continue;
 
 			Set<CompilationUnit> seen = new HashSet<>();
-			HierarcyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
-			for (CompilationUnit cu : strategy.traverse(call, unit))
+			HierarchyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
+
+			hierarchyLoop: for (CompilationUnit cu : strategy.traverse(call, unit))
 				if (seen.add(cu))
 					// we inspect only the ones of the current unit
 					for (CodeMember cm : cu.getInstanceCodeMembers(false))
-						checkMember(call, types, targets, natives, aliasing, cm, true);
+						if (checkMember(call, types, targets, natives, aliasing, cm, true))
+							// we found a target, we stop looking in
+							// superclasses
+							break hierarchyLoop;
 		}
 	}
 
@@ -410,8 +390,11 @@ public abstract class BaseCallGraph extends CallGraph {
 	 * @param cm       the code member to match
 	 * @param instance whether or not the only instance or non-instance members
 	 *                     should be matched
+	 * 
+	 * @return {@code true} if {@code cm} has been added to either
+	 *             {@code targets} or {@code natives}, {@code false} otherwise
 	 */
-	public void checkMember(
+	public boolean checkMember(
 			UnresolvedCall call,
 			Set<Type>[] types,
 			Collection<CFG> targets,
@@ -421,7 +404,7 @@ public abstract class BaseCallGraph extends CallGraph {
 			boolean instance) {
 		CodeMemberDescriptor descr = cm.getDescriptor();
 		if (instance != descr.isInstance() || cm instanceof AbstractCodeMember)
-			return;
+			return false;
 
 		String qualifier = descr.getUnit().getName();
 		String name = descr.getName();
@@ -463,11 +446,16 @@ public abstract class BaseCallGraph extends CallGraph {
 			add = matchCodeMemberName(call, qualifier, name);
 
 		ParameterMatchingStrategy strategy = call.getProgram().getFeatures().getMatchingStrategy();
-		if (add && strategy.matches(call, descr.getFormals(), call.getParameters(), types))
-			if (cm instanceof CFG)
-				targets.add((CFG) cm);
+		if (add)
+			if (strategy.matches(call, descr.getFormals(), call.getParameters(), types))
+				if (cm instanceof CFG)
+					targets.add((CFG) cm);
+				else
+					natives.add((NativeCFG) cm);
 			else
-				natives.add((NativeCFG) cm);
+				add = false;
+
+		return add;
 	}
 
 	/**
@@ -516,4 +504,5 @@ public abstract class BaseCallGraph extends CallGraph {
 			CodeMember cm) {
 		return callsites.getOrDefault(cm, Collections.emptyList());
 	}
+
 }

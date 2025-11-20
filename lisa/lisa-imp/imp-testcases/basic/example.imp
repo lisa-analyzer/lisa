@@ -1,0 +1,212 @@
+// this is a line comment
+
+/* while this is a block comment */
+
+/*
+ * Few characteristics of the IMP language:
+ * - IMP is dynamically typed, all declarations do not specify typing information
+ * - IMP has no visibility modifiers (public, private, ...)
+ * - IMP has no concept of static or final members
+ */
+
+/* 
+ * similarly to java, an imp file contains zero or more classes 
+ * whose body is enclosed within braces
+ */
+class first {}
+
+/*
+ * an imp class can also have one superclass
+ */
+class second extends first {}
+
+/*
+ * imp provides interfaces
+ */
+interface anInterface {}
+
+/*
+ * imp provides abstract classes
+ */
+ abstract class fourth {
+ 	a();
+ 	b();
+ 	c();
+ 	d() {
+ 		return 1;
+ 	}
+ }
+
+/*
+ * an imp class can be annotated with one or more annotation.
+ * annotation can optionally have one or more members
+ */
+[ann1, inheritedann2, ann3(i = 1, j = true, k = [1, 2 ,3])]
+class third extends second {}
+
+/*
+ * the body of a class is a list of fields, constructors and methods
+ */
+class example {
+	
+	/* 
+	 * fields are declared by just specifying their name
+	 * and do not support in-place initialization.
+	 * Field can be annotated 
+	 */
+	[ann1, ann2, ann3(i = 1, j = true, k = [1, 2 ,3])]
+	field;
+	
+	/*
+	 * fields can also have compile-time non-null constant values 
+	 */
+	const field1 = 5;
+	
+	/*
+	 * methods are declared by specifying their name and their parameters.
+	 * Methods and method parameters can be annotated
+	 */
+	[ann1, ann2, ann3(i = 1, j = true, k = [1, 2 ,3])]
+	foo1() {}
+	foo2() { 
+		// void methods can also have explicit return statements
+		return; 
+	}
+	foo3([notnull] i, [tainted] j) { 
+		// return statements can return something
+		return i + j; 
+	}
+	
+	/*
+	 * methods starting with ~ are constructors and cannot be overridden,
+	 * but you can omit the ~ to invoke them.
+	 * Also constructors can be annotated.
+	 */
+	[tainted]
+	~example() {
+		// variable definitions are preceeded by the def keyword
+		// and can be annotated
+		[ann1, ann2, ann3] def x = 10;
+	}
+	
+	types() {
+		// 6 types are supported in imp:
+		// - boolean
+		// - integer
+		// - float
+		// - string
+		// - reference types defined by the classes
+		// - arrays of the types above
+	}
+	
+	expressions(e1, e2) {
+		// an expression can be:
+		
+		// 1) a literal 
+		5; "s"; true; null; -5.2;
+		
+		// 2) an identifier of some sort
+		this; super; e1;
+		
+		// 3) a logical operation on other expressions
+		!e1; e1 && e2; e1 || e2;
+		
+		// 4) an arithmetic expression
+		-e1; e1 + e2; e1 - e2; e1 / e2; e1 % e2;
+		// + can also be used to join strings!
+		
+		// 5) a comparison
+		e1 > e2; e1 >= e2; e1 < e2; e1 <= e2; e1 == e2; e1 != e2;
+		
+		// 6) an array creation
+		def intArray = new int[5]; 
+		new float[5]; new boolean[5]; new example[5];
+		
+		// 7) an object creation
+		def obj = new example(); // as method calls, constructor calls can also receive parameters
+
+		// 8) an array creation statically allocated
+		def staticArray = bump int[5]; 
+		
+		// 9) an object creation statically allocated
+		def staticObj = bump example(); // as method calls
+
+		// 10) an access to an array element 
+		// only arrays stored in variables or parameters are supported
+		intArray[2];
+		
+		// 11) a field access
+		// the receiver must always be explicit (this, super or a variable/parameter)
+		this.field;
+		obj.field;
+		
+		// 12) a method call
+		// the receiver must always be explicit (this, super or a variable/parameter)
+		obj.foo();
+		obj.foo3(5, 3);
+		// arguments of calls can be:
+		// - literals
+		// - variables
+		// - this
+		// - a field access
+		// - an array access
+		// - another method call
+		
+		// all expressions can also be grouped between parenthesis!
+		
+		// string operations directly supported (i.e., not in the form of receiver.method(params))
+		strlen("x"); // length of a string
+		strcat("x", "y"); // string concatenation
+		streq("x", "y"); // check if the strings are equal
+		strcon("x", "y"); // check if the second string is contained into the first one
+		strstarts("x", "y"); // check if the first string starts with the second one
+		strends("x", "y"); // check if the first string ends with the second one
+		strindex("x", "y"); // yield the index of the first occourrence of the second string into the first one
+		strrep("x", "y", "z"); // replace all occurrences of the second string inside the first one with the third string
+		strsub("x", 0, 1); // yield the substring of the string, from the first integer (inclusive) to the second one (exclusive)
+		
+		
+		// array operations directly supported (i.e., not in the form of receiver.method(params))
+		arraylen(intArray); // yields the length of the array
+	}
+	
+	// methods can be final to avoid overriding by subclasses
+	final statements(x) {
+		// each line must end with a semicolon!
+		
+		// variable definitions are preceeded by the def keyword
+		// scoping of variables is the same as java
+		def y = 10;
+		
+		// assignments can be performed by assigning an expression to:
+		// - variables
+		// - fields (through field accesses)
+		// - array elements (through array accesses)
+		
+		// conditional execution
+		if (y != 5) {
+			return y;
+		} else {
+			y = y + 1;
+		}
+		
+		if (x != y)
+			// braces can also be omitted in case of a single instuction
+			return y;
+		// the else branch is optional and can be entirely omitted
+		
+		// loops
+		// as with conditional executions, braces are not required if the body
+		// of the loop contains a single instruction
+		while (y < 100)
+			y = y * 2;
+		for (def i = 0; i < 20; i = i + 1)
+			y = y % 5;
+		
+		// you can write assertions
+		assert y == 10;
+		
+		// you can throw any object to raise errors
+		throw new example();
+	}
+}

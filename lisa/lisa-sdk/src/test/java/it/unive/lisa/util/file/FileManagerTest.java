@@ -117,7 +117,9 @@ public class FileManagerTest {
 			fail("The file has not been created");
 
 		assertEquals("FileManager did not track the correct number of files", 1, manager.createdFiles().size());
-		assertEquals("FileManager did not track the created file", "sub/foo.txt",
+		assertEquals(
+				"FileManager did not track the created file",
+				"sub/foo.txt",
 				manager.createdFiles().iterator().next());
 	}
 
@@ -140,7 +142,9 @@ public class FileManagerTest {
 			fail("The file has not been created");
 
 		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
-		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(),
+		assertEquals(
+				"FileManager did not track the created file",
+				manager.createdFiles().iterator().next(),
 				file.getName());
 	}
 
@@ -163,7 +167,9 @@ public class FileManagerTest {
 			fail("The file has not been created");
 
 		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
-		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(),
+		assertEquals(
+				"FileManager did not track the created file",
+				manager.createdFiles().iterator().next(),
 				file.getName());
 	}
 
@@ -186,7 +192,10 @@ public class FileManagerTest {
 			fail("The file has not been created");
 
 		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
-		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(),
+		assertEquals(
+				"FileManager did not track the created file",
+				manager.createdFiles().iterator().next(),
 				file.getName());
 	}
+
 }

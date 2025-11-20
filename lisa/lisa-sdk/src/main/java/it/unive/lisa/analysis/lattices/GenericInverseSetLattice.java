@@ -12,7 +12,9 @@ import java.util.Set;
  * 
  * @param <E> the type of elements of this set
  */
-public class GenericInverseSetLattice<E> extends InverseSetLattice<GenericInverseSetLattice<E>, E> {
+public class GenericInverseSetLattice<E>
+		extends
+		InverseSetLattice<GenericInverseSetLattice<E>, E> {
 
 	/**
 	 * Builds an empty set representing the top element.
@@ -70,4 +72,5 @@ public class GenericInverseSetLattice<E> extends InverseSetLattice<GenericInvers
 			Set<E> set) {
 		return new GenericInverseSetLattice<>(set);
 	}
+
 }

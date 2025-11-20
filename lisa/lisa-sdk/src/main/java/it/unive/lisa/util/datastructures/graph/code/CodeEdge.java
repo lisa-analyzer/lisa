@@ -11,7 +11,9 @@ import it.unive.lisa.util.datastructures.graph.Edge;
  * @param <N> the type of the {@link CodeNode}s in this list
  * @param <E> the type of the {@link CodeEdge}s in this list
  */
-public interface CodeEdge<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
+public interface CodeEdge<G extends CodeGraph<G, N, E>,
+		N extends CodeNode<G, N, E>,
+		E extends CodeEdge<G, N, E>>
 		extends
 		Edge<G, N, E>,
 		Comparable<E> {
@@ -28,6 +30,15 @@ public interface CodeEdge<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N,
 	boolean isUnconditional();
 
 	/**
+	 * Yields {@code true} if and only if this edge is used to handle errors.
+	 * This includes, for instance, edges leaving statements of a Java's
+	 * try-block and going into one of the catch blocks.
+	 * 
+	 * @return whether or not this edge is used for error handling
+	 */
+	boolean isErrorHandling();
+
+	/**
 	 * Builds a new instance of this edge, connecting the given nodes.
 	 * 
 	 * @param source      the source node
@@ -38,4 +49,5 @@ public interface CodeEdge<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N,
 	E newInstance(
 			N source,
 			N destination);
+
 }

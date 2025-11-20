@@ -30,7 +30,9 @@ import org.apache.commons.text.StringEscapeUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DotGraph extends VisualGraph {
+public class DotGraph
+		extends
+		VisualGraph {
 
 	/**
 	 * The wrapped graph.
@@ -46,37 +48,31 @@ public class DotGraph extends VisualGraph {
 	 */
 	public DotGraph(
 			String title) {
-		this.graph = Factory.mutGraph(title)
-				.setDirected(true);
+		this.graph = Factory.mutGraph(title).setDirected(true);
 		this.title = title;
 	}
 
 	private static MutableGraph buildLegend() {
 		MutableGraph legend = Factory.mutGraph("legend")
-				.graphAttrs().add(Label.html("Legend"))
-				.graphAttrs().add("style", "dotted")
+				.graphAttrs()
+				.add(Label.html("Legend"))
+				.graphAttrs()
+				.add("style", "dotted")
 				.setCluster(true);
 
 		StringBuilder builder = new StringBuilder();
+		String row = "<tr><td align=\"right\">%s&nbsp;</td><td align=\"left\"><font color=\"%s\">%s</font>, %s</td></tr>";
 		builder.append("<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">");
-		builder.append(
-				"<tr><td align=\"right\">node border&nbsp;</td><td align=\"left\"><font color=\"gray\">gray</font>, single</td></tr>");
-		builder.append(
-				"<tr><td align=\"right\">entrypoint border&nbsp;</td><td align=\"left\"><font color=\"black\">black</font>, dashed</td></tr>");
-		builder.append(
-				"<tr><td align=\"right\">exitpoint border&nbsp;</td><td align=\"left\"><font color=\"black\">black</font>, solid</td></tr>");
-		builder.append(
-				"<tr><td align=\"right\">sequential edge&nbsp;</td><td align=\"left\"><font color=\"black\">black</font>, solid</td></tr>");
-		builder.append(
-				"<tr><td align=\"right\">true edge&nbsp;</td><td align=\"left\"><font color=\"blue\">blue</font>, dashed</td></tr>");
-		builder.append(
-				"<tr><td align=\"right\">false edge&nbsp;</td><td align=\"left\"><font color=\"red\">red</font>, dashed</td></tr>");
+		builder.append(String.format(row, "node border", "gray", "gray", "single"));
+		builder.append(String.format(row, "entrypoint border", "black", "black", "dashed"));
+		builder.append(String.format(row, "exitpoint border", "black", "black", "solid"));
+		builder.append(String.format(row, "sequential edge", "black", "black", "solid"));
+		builder.append(String.format(row, "true edge", "blue", "blue", "dashed"));
+		builder.append(String.format(row, "false edge", "red", "red", "dashed"));
+		builder.append(String.format(row, "error edge", "orange", "orange", "dashed"));
 		builder.append("</table>");
 
-		MutableNode n = Factory.mutNode("legend")
-				.setName("legend")
-				.add(Label.html(builder.toString()))
-				.add(Shape.NONE);
+		MutableNode n = Factory.mutNode("legend").setName("legend").add(Label.html(builder.toString())).add(Shape.NONE);
 
 		legend.add(n);
 
@@ -130,9 +126,7 @@ public class DotGraph extends VisualGraph {
 				// we keep trace of what was the original id of the node
 				.add("id", nodeName);
 
-		if (entry || exit)
-			n = n.add(Color.BLACK);
-		else
+		if (!entry && !exit)
 			n = n.add(Color.GRAY);
 
 		if (entry)
@@ -204,9 +198,25 @@ public class DotGraph extends VisualGraph {
 			link = link.with(Style.DASHED);
 			link = link.with(Color.RED);
 			break;
+		case "ErrorEdge":
+			link = link.with(Label.of(edge.getLabel()));
+			link = link.with(Style.DASHED);
+			link = link.with(Color.ORANGE);
+			break;
+		case "BeginFinallyEdge":
+			link = link.with(Label.of(edge.getLabel()));
+			link = link.with(Style.DASHED);
+			link = link.with(Color.GREEN);
+			break;
+		case "EndFinallyEdge":
+			link = link.with(Label.of(edge.getLabel()));
+			link = link.with(Style.DASHED);
+			link = link.with(Color.PURPLE);
+			break;
 		case "SequentialEdge":
 		default:
-			link = link.with(Color.BLACK);
+			// black is the default
+			// link = link.with(Color.BLACK);
 			break;
 		}
 
@@ -221,8 +231,7 @@ public class DotGraph extends VisualGraph {
 			Writer writer)
 			throws IOException {
 		MutableGraph copy = graph.copy();
-		copy.graphAttrs().add(Label.of(title))
-				.graphAttrs().add("labelloc", "t");
+		copy.graphAttrs().add(Label.of(title)).graphAttrs().add("labelloc", "t");
 		copy.add(buildLegend());
 		String exportedGraph = Graphviz.fromGraph(copy).render(Format.DOT).toString();
 		writer.write(exportedGraph);
@@ -241,4 +250,5 @@ public class DotGraph extends VisualGraph {
 		String exportedGraph = Graphviz.fromGraph(graph).render(Format.DOT).toString();
 		writer.write(exportedGraph);
 	}
+
 }

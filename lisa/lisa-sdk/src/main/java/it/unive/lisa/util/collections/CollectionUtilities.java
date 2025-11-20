@@ -210,7 +210,9 @@ public final class CollectionUtilities {
 	 * 
 	 * @param <E> the type of the elements to be sorted
 	 */
-	public static class SortedSetCollector<E> implements Collector<E, SortedSet<E>, SortedSet<E>> {
+	public static class SortedSetCollector<E>
+			implements
+			Collector<E, SortedSet<E>, SortedSet<E>> {
 
 		@Override
 		public Supplier<SortedSet<E>> supplier() {
@@ -243,6 +245,7 @@ public final class CollectionUtilities {
 		public Set<Characteristics> characteristics() {
 			return Set.of(Characteristics.IDENTITY_FINISH);
 		}
+
 	}
 
 	/**
@@ -254,7 +257,9 @@ public final class CollectionUtilities {
 	 * 
 	 * @param <E> the type of the elements to be sorted
 	 */
-	public static class StringCollector<E> implements Collector<E, StringBuilder, String> {
+	public static class StringCollector<E>
+			implements
+			Collector<E, StringBuilder, String> {
 
 		private final String separator;
 
@@ -301,5 +306,7 @@ public final class CollectionUtilities {
 		public Set<Characteristics> characteristics() {
 			return Collections.emptySet();
 		}
+
 	}
+
 }

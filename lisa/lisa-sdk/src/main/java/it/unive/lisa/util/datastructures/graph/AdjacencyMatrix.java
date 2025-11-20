@@ -208,7 +208,8 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * @return the collection of edges
 	 */
 	public Collection<E> getEdges() {
-		return matrix.values().stream()
+		return matrix.values()
+				.stream()
 				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
 				.distinct()
 				.collect(Collectors.toSet());
@@ -332,7 +333,10 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * @return the entries nodes
 	 */
 	public Collection<N> getEntries() {
-		return matrix.entrySet().stream().filter(e -> e.getValue().ingoing.isEmpty()).map(Entry::getKey)
+		return matrix.entrySet()
+				.stream()
+				.filter(e -> e.getValue().ingoing.isEmpty())
+				.map(Entry::getKey)
 				.collect(Collectors.toSet());
 	}
 
@@ -343,7 +347,10 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * @return the exit nodes
 	 */
 	public Collection<N> getExits() {
-		return matrix.entrySet().stream().filter(e -> e.getValue().outgoing.isEmpty()).map(Entry::getKey)
+		return matrix.entrySet()
+				.stream()
+				.filter(e -> e.getValue().outgoing.isEmpty())
+				.map(Entry::getKey)
 				.collect(Collectors.toSet());
 	}
 
@@ -445,11 +452,11 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 			E edge)
 			throws ProgramValidationException {
 		if (!nodes.contains(edge.getSource()))
-			throw new ProgramValidationException("Invalid edge: '" + edge
-					+ "' originates in a node that is not part of the graph");
+			throw new ProgramValidationException(
+					"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
 		else if (!nodes.contains(edge.getDestination()))
-			throw new ProgramValidationException("Invalid edge: '" + edge
-					+ "' reaches a node that is not part of the graph");
+			throw new ProgramValidationException(
+					"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
 	}
 
 	/**
@@ -464,7 +471,9 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	 * @param <E> the type of the {@link Edge}s in the containing matrix
 	 */
 	public static class NodeEdges<G extends BaseGraph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
+
 		private final Set<E> ingoing;
+
 		private final Set<E> outgoing;
 
 		private NodeEdges() {
@@ -532,6 +541,7 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 		public String toString() {
 			return "ins: " + ingoing + ", outs: " + outgoing;
 		}
+
 	}
 
 	/**
@@ -540,4 +550,5 @@ public class AdjacencyMatrix<G extends BaseGraph<G, N, E>, N extends Node<G, N, 
 	public void clear() {
 		matrix.clear();
 	}
+
 }

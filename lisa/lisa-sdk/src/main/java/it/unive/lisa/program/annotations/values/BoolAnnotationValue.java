@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * A Boolean annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class BoolAnnotationValue implements BasicAnnotationValue {
+public class BoolAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final boolean b;
 
@@ -56,4 +58,5 @@ public class BoolAnnotationValue implements BasicAnnotationValue {
 		BoolAnnotationValue other = (BoolAnnotationValue) o;
 		return Boolean.compare(b, other.b);
 	}
+
 }

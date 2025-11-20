@@ -127,4 +127,5 @@ public class ComplementTest {
 
 		assertEquals(exp, a.complement(sigma));
 	}
+
 }

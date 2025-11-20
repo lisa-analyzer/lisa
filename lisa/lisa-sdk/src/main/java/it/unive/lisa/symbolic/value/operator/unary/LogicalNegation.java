@@ -19,7 +19,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LogicalNegation implements LogicalOperator, UnaryOperator {
+public class LogicalNegation
+		implements
+		LogicalOperator,
+		UnaryOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -52,4 +55,5 @@ public class LogicalNegation implements LogicalOperator, UnaryOperator {
 			return Collections.emptySet();
 		return Collections.singleton(types.getBooleanType());
 	}
+
 }

@@ -1,0 +1,18 @@
+class C {
+    ~C() {
+        this.a = 100;
+    }
+}
+
+class B {
+	~B() {
+		this.c = new C();
+	}
+}
+
+class F {
+    main() {
+        def b1 = new B();
+        def b2 = new B();
+    }
+}

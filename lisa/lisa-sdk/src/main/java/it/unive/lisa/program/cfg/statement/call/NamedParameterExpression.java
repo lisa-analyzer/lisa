@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -24,7 +25,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NamedParameterExpression extends UnaryExpression {
+public class NamedParameterExpression
+		extends
+		UnaryExpression {
 
 	private final String parameterName;
 
@@ -89,12 +92,13 @@ public class NamedParameterExpression extends UnaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return state.smallStepSemantics(expr, this);
+		return interprocedural.getAnalysis().smallStepSemantics(state, expr, this);
 	}
+
 }

@@ -57,4 +57,5 @@ public class AccessModifiers {
 		if (!failures.isEmpty())
 			fail("The following expressions do not have a visible constructor: " + failures);
 	}
+
 }

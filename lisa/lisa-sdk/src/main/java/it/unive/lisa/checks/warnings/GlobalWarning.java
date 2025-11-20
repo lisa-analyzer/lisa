@@ -9,7 +9,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class GlobalWarning extends WarningWithLocation {
+public class GlobalWarning
+		extends
+		WarningWithLocation {
 
 	/**
 	 * The nit containing the global where this warning was reported on
@@ -114,7 +116,13 @@ public class GlobalWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + unit.getName() + "::" + global.getName() + "': "
+		return getLocationWithBrackets()
+				+ " on '"
+				+ unit.getName()
+				+ "::"
+				+ global.getName()
+				+ "': "
 				+ getTaggedMessage();
 	}
+
 }

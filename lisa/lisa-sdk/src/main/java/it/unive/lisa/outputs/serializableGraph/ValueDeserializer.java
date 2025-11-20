@@ -19,7 +19,9 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ValueDeserializer extends StdDeserializer<SerializableValue> {
+public class ValueDeserializer
+		extends
+		StdDeserializer<SerializableValue> {
 
 	private static final long serialVersionUID = -5817422267160292909L;
 
@@ -75,7 +77,8 @@ public class ValueDeserializer extends StdDeserializer<SerializableValue> {
 				SortedMap<String, SerializableValue> map = new TreeMap<>();
 				while (objFields.hasNext()) {
 					Entry<String, JsonNode> objField = objFields.next();
-					map.put(objField.getKey(),
+					map.put(
+							objField.getKey(),
 							ctxt.readValue(objField.getValue().traverse(p.getCodec()), SerializableValue.class));
 				}
 				return new SerializableObject(properties, map);
@@ -96,7 +99,8 @@ public class ValueDeserializer extends StdDeserializer<SerializableValue> {
 				SortedMap<String, SerializableValue> map = new TreeMap<>();
 				while (objFields.hasNext()) {
 					Entry<String, JsonNode> objField = objFields.next();
-					map.put(objField.getKey(),
+					map.put(
+							objField.getKey(),
 							ctxt.readValue(objField.getValue().traverse(p.getCodec()), SerializableValue.class));
 				}
 				return new SerializableObject(properties, map);
@@ -112,4 +116,5 @@ public class ValueDeserializer extends StdDeserializer<SerializableValue> {
 				throw new IllegalArgumentException("Node type not supported: " + node.getNodeType());
 			}
 	}
+
 }

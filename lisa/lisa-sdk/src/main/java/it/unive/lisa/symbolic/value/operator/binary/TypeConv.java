@@ -25,7 +25,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TypeConv implements TypeOperator, BinaryOperator {
+public class TypeConv
+		implements
+		TypeOperator,
+		BinaryOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -57,4 +60,5 @@ public class TypeConv implements TypeOperator, BinaryOperator {
 			return Collections.emptySet();
 		return set;
 	}
+
 }

@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -21,7 +22,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class NaryStatement extends Statement {
+public abstract class NaryStatement
+		extends
+		Statement {
 
 	/**
 	 * The sub-expressions of this statement
@@ -77,8 +80,7 @@ public abstract class NaryStatement extends Statement {
 		super(cfg, location);
 		Objects.requireNonNull(subExpressions, "The array of sub-expressions of a statement cannot be null");
 		for (int i = 0; i < subExpressions.length; i++)
-			Objects.requireNonNull(subExpressions[i],
-					"The " + i + "-th sub-expression of a statement cannot be null");
+			Objects.requireNonNull(subExpressions[i], "The " + i + "-th sub-expression of a statement cannot be null");
 		Objects.requireNonNull(constructName, "The name of the native construct of a statement cannot be null");
 		Objects.requireNonNull(order, "The evaluation order of a statement cannot be null");
 		this.constructName = constructName;
@@ -238,9 +240,9 @@ public abstract class NaryStatement extends Statement {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
@@ -251,7 +253,7 @@ public abstract class NaryStatement extends Statement {
 		for (Expression sub : subExpressions)
 			// we forget the meta variables now as the values are popped from
 			// the stack here
-			result = result.forgetIdentifiers(sub.getMetaVariables());
+			result = result.forgetIdentifiers(sub.getMetaVariables(), this);
 		return result;
 	}
 
@@ -260,7 +262,10 @@ public abstract class NaryStatement extends Statement {
 	 * all sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this call returns.
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the statement is to be evaluated
@@ -277,8 +282,8 @@ public abstract class NaryStatement extends Statement {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
@@ -293,9 +298,9 @@ public abstract class NaryStatement extends Statement {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> backwardSemantics(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemantics(
 			AnalysisState<A> exitState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		ExpressionSet[] computed = new ExpressionSet[subExpressions.length];
@@ -309,7 +314,7 @@ public abstract class NaryStatement extends Statement {
 		for (Expression sub : subExpressions)
 			// we forget the meta variables now as the values are popped from
 			// the stack here
-			result = result.forgetIdentifiers(sub.getMetaVariables());
+			result = result.forgetIdentifiers(sub.getMetaVariables(), this);
 		return result;
 	}
 
@@ -322,7 +327,10 @@ public abstract class NaryStatement extends Statement {
 	 * as it is fine for most atomic statements. One should redefine this method
 	 * if a statement's semantics is composed of a series of smaller operations.
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the statement is to be evaluated
@@ -339,12 +347,13 @@ public abstract class NaryStatement extends Statement {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return forwardSemanticsAux(interprocedural, state, params, expressions);
 	}
+
 }

@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -8,8 +9,8 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.CFGReturn;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * Returns an expression to the caller CFG, terminating the execution of the CFG
@@ -18,7 +19,12 @@ import it.unive.lisa.symbolic.value.Variable;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Return extends UnaryStatement implements MetaVariableCreator {
+public class Return
+		extends
+		UnaryStatement
+		implements
+		MetaVariableCreator,
+		YieldsValue {
 
 	/**
 	 * Builds the return, returning {@code expression} to the caller CFG,
@@ -49,20 +55,29 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		Expression e = getSubExpression();
-		String name = "ret_value@" + getCFG().getDescriptor().getName();
-		Variable var = new Variable(e.getStaticType(), name, getLocation());
-		return var;
+		return new CFGReturn(getCFG(), getSubExpression().getStaticType(), getLocation());
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public Expression yieldedValue() {
+		return getSubExpression();
+	}
+
+	@Override
+	public Statement withValue(
+			Expression value) {
+		return new Return(getCFG(), getLocation(), value);
+	}
+
+	@Override
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Identifier meta = getMetaVariable();
-		return state.assign(meta, expr, this);
+		return interprocedural.getAnalysis().assign(state, meta, expr, this);
 	}
+
 }

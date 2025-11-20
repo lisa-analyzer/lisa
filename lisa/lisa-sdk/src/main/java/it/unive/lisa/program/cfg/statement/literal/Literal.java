@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.literal;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -21,7 +22,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @param <E> the type of constant represented by this literal
  */
-public abstract class Literal<E> extends Expression {
+public abstract class Literal<E>
+		extends
+		Expression {
 
 	/**
 	 * The value of this literal
@@ -96,12 +99,13 @@ public abstract class Literal<E> extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return entryState.smallStepSemantics(new Constant(getStaticType(), getValue(), getLocation()), this);
+		return interprocedural.getAnalysis()
+				.smallStepSemantics(entryState, new Constant(getStaticType(), getValue(), getLocation()), this);
 	}
 
 	@Override
@@ -110,4 +114,5 @@ public abstract class Literal<E> extends Expression {
 			V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
+
 }

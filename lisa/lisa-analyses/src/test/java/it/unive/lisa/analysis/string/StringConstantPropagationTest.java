@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import static org.junit.Assert.assertEquals;
 
+import it.unive.lisa.lattices.string.StringConstant;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -14,56 +15,48 @@ import org.junit.Test;
 public class StringConstantPropagationTest {
 
 	@Test
-	public void testConstructor() {
-		new StringConstantPropagation();
-	}
-
-	@Test
-	public void testConstructor1() {
-		new StringConstantPropagation("Hello World!");
-	}
-
-	@Test
 	public void testEvalBinary() {
 		StringConstantPropagation domain = new StringConstantPropagation();
-		StringConstantPropagation s1 = new StringConstantPropagation("abc");
-		StringConstantPropagation s2 = new StringConstantPropagation("def");
+		StringConstant s1 = new StringConstant("abc");
+		StringConstant s2 = new StringConstant("def");
 
-		domain = domain.evalBinaryExpression(new BinaryExpression(
-				StringType.INSTANCE,
-				new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
-				new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
-				StringConcat.INSTANCE,
-				SyntheticLocation.INSTANCE),
+		StringConstant res = domain.evalBinaryExpression(
+				new BinaryExpression(
+						StringType.INSTANCE,
+						new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
+						new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
+						StringConcat.INSTANCE,
+						SyntheticLocation.INSTANCE),
 				s1,
 				s2,
 				null,
 				null);
 
-		assertEquals(domain, new StringConstantPropagation("abcdef"));
+		assertEquals(res, new StringConstant("abcdef"));
 	}
 
 	@Test
 	public void testEvalTernary() {
 		StringConstantPropagation domain = new StringConstantPropagation();
-		StringConstantPropagation s1 = new StringConstantPropagation("aaa");
-		StringConstantPropagation s2 = new StringConstantPropagation("aa");
-		StringConstantPropagation s3 = new StringConstantPropagation("b");
+		StringConstant s1 = new StringConstant("aaa");
+		StringConstant s2 = new StringConstant("aa");
+		StringConstant s3 = new StringConstant("b");
 
-		domain = domain.evalTernaryExpression(new TernaryExpression(
-				StringType.INSTANCE,
-				new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
-				new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
-				new Variable(StringType.INSTANCE, "z", SyntheticLocation.INSTANCE),
-				StringReplace.INSTANCE,
-				SyntheticLocation.INSTANCE),
+		StringConstant res = domain.evalTernaryExpression(
+				new TernaryExpression(
+						StringType.INSTANCE,
+						new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
+						new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE),
+						new Variable(StringType.INSTANCE, "z", SyntheticLocation.INSTANCE),
+						StringReplace.INSTANCE,
+						SyntheticLocation.INSTANCE),
 				s1,
 				s2,
 				s3,
 				null,
 				null);
 
-		assertEquals(domain, new StringConstantPropagation("ba"));
+		assertEquals(res, new StringConstant("ba"));
 	}
 
 }

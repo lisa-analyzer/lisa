@@ -30,8 +30,11 @@ import org.junit.Test;
 
 public class SerializableGraphTest {
 
-	private static final ClassUnit unit = new ClassUnit(SyntheticLocation.INSTANCE,
-			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "Testing", false);
+	private static final ClassUnit unit = new ClassUnit(
+			SyntheticLocation.INSTANCE,
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
+			"Testing",
+			false);
 
 	private static void addNode(
 			SortedSet<SerializableNode> nodes,
@@ -49,7 +52,7 @@ public class SerializableGraphTest {
 			Edge e,
 			int src,
 			int dest) {
-		edges.add(new SerializableEdge(src, dest, e.getClass().getSimpleName()));
+		edges.add(new SerializableEdge(src, dest, e.getClass().getSimpleName(), null));
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package it.unive.lisa.program.language.parameterassignment;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -33,7 +34,10 @@ public interface ParameterAssigningStrategy {
 	 * preserving their evaluation order (Java-like), or they may be passed
 	 * by-name (Python-like).
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param call            the call to be prepared
 	 * @param callState       the analysis state where the call is to be
 	 *                            executed
@@ -52,12 +56,13 @@ public interface ParameterAssigningStrategy {
 	 * @throws SemanticException if something goes wrong while preparing the
 	 *                               entry-state
 	 */
-	<A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
 			Call call,
 			AnalysisState<A> callState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			Parameter[] formals,
 			ExpressionSet[] actuals)
 			throws SemanticException;
+
 }

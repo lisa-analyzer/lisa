@@ -69,4 +69,5 @@ public class SymbolicChar {
 	public String toString() {
 		return String.valueOf(ch);
 	}
+
 }

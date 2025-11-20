@@ -1,309 +1,199 @@
 package it.unive.lisa.analysis.dataflow;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.util.representation.SetRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.functional.Supplier;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 
 /**
- * A dataflow domain that collects instances of {@link DataflowElement}. A
- * dataflow domain is a value domain that is represented as a set of elements,
- * that can be retrieved through {@link #getDataflowElements()}.
+ * A dataflow domain that collects instances of {@link DataflowElement} either
+ * in a {@link PossibleSet} or a {@link DefiniteSet}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <D> the concrete type of {@link DataflowDomain}
+ * @param <L> the type of {@link DataflowDomainLattice} that this domain
+ *                operates on
  * @param <E> the concrete type of {@link DataflowElement} contained in this
  *                domain
  */
-public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends DataflowElement<D, E>>
+public abstract class DataflowDomain<L extends DataflowDomainLattice<L, E>,
+		E extends DataflowElement<E>>
 		implements
-		BaseLattice<D>,
-		ValueDomain<D> {
-
-	private final boolean isTop;
-
-	private final boolean isBottom;
-
-	private final Set<E> elements;
-
-	/**
-	 * The underlying domain.
-	 */
-	public final E domain;
-
-	/**
-	 * Builds the domain.
-	 * 
-	 * @param domain   a singleton instance to be used during semantic
-	 *                     operations to perform <i>kill</i> and <i>gen</i>
-	 *                     operations
-	 * @param elements the set of elements contained in this domain
-	 * @param isTop    whether or not this domain is the top of the lattice
-	 * @param isBottom whether or not this domain is the bottom of the lattice
-	 */
-	public DataflowDomain(
-			E domain,
-			Set<E> elements,
-			boolean isTop,
-			boolean isBottom) {
-		this.elements = elements;
-		this.domain = domain;
-		this.isTop = isTop;
-		this.isBottom = isBottom;
-	}
-
-	/**
-	 * Utility for creating a concrete instance of {@link DataflowDomain} given
-	 * its core fields.
-	 * 
-	 * @param domain   the underlying domain
-	 * @param elements the elements contained in the instance to be created
-	 * @param isTop    whether the created domain is the top element of the
-	 *                     lattice
-	 * @param isBottom whether the created domain is the bottom element of the
-	 *                     lattice
-	 * 
-	 * @return the concrete instance of domain
-	 */
-	public abstract D mk(
-			E domain,
-			Set<E> elements,
-			boolean isTop,
-			boolean isBottom);
+		ValueDomain<L>,
+		SemanticEvaluator {
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public D assign(
+	public L assign(
+			L state,
 			Identifier id,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		// if id cannot be tracked by the underlying lattice,
-		// or if the expression cannot be processed, return this
-		return update(() -> !domain.canProcess(expression, pp, oracle),
-				() -> domain.gen(id, expression, pp, (D) this),
-				() -> domain.kill(id, expression, pp, (D) this));
+		return update(
+				state,
+				() -> !canProcess(expression, pp, oracle),
+				() -> gen(state, id, expression, pp),
+				() -> kill(state, id, expression, pp));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public D smallStepSemantics(
+	public L smallStepSemantics(
+			L state,
 			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		// if expression cannot be processed, return this
-		return update(() -> !domain.canProcess(expression, pp, oracle),
-				() -> domain.gen(expression, pp, (D) this),
-				() -> domain.kill(expression, pp, (D) this));
+		return update(
+				state,
+				() -> !canProcess(expression, pp, oracle),
+				() -> gen(state, expression, pp),
+				() -> kill(state, expression, pp));
 	}
 
-	private interface SemanticElementsSupplier<E> {
-		Collection<E> get() throws SemanticException;
-	}
-
-	@SuppressWarnings("unchecked")
-	private D update(
+	private L update(
+			L state,
 			BooleanSupplier guard,
-			SemanticElementsSupplier<E> gen,
-			SemanticElementsSupplier<E> kill)
+			Supplier<Set<E>, SemanticException> gen,
+			Supplier<Set<E>, SemanticException> kill)
 			throws SemanticException {
-		if (isBottom())
-			return (D) this;
+		if (state.isBottom())
+			return state;
 
 		if (guard.getAsBoolean())
-			return (D) this;
+			return state;
 
-		Set<E> updated = new HashSet<>(getDataflowElements());
-		for (E killed : kill.get())
-			updated.remove(killed);
-		for (E generated : gen.get())
-			updated.add(generated);
-
-		return mk(domain, updated, false, false);
+		return state.update(kill.get(), gen.get());
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public D assume(
+	public L assume(
+			L state,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return (D) this;
+		return state;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public D forgetIdentifier(
-			Identifier id)
-			throws SemanticException {
-		if (isTop())
-			return (D) this;
+	public boolean canProcess(
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		if (expression instanceof PushInv)
+			// the type approximation of a pushinv is bottom, so the below check
+			// will always fail regardless of the kind of value we are tracking
+			return expression.getStaticType().isValueType();
 
-		Collection<E> toRemove = new LinkedList<>();
-		for (E e : elements)
-			if (e.getInvolvedIdentifiers().contains(id))
-				toRemove.add(e);
+		Set<Type> rts = null;
+		try {
+			rts = oracle.getRuntimeTypesOf(expression, pp);
+		} catch (SemanticException e) {
+			return false;
+		}
 
-		if (toRemove.isEmpty())
-			return (D) this;
-
-		Set<E> updated = new HashSet<>(elements);
-		updated.removeAll(toRemove);
-		return mk(domain, updated, false, false);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public D forgetIdentifiersIf(
-			Predicate<Identifier> test)
-			throws SemanticException {
-		if (isTop())
-			return (D) this;
-
-		Collection<E> toRemove = new LinkedList<>();
-		for (E e : elements)
-			if (e.getInvolvedIdentifiers().stream().anyMatch(test::test))
-				toRemove.add(e);
-
-		if (toRemove.isEmpty())
-			return (D) this;
-
-		Set<E> updated = new HashSet<>(elements);
-		updated.removeAll(toRemove);
-		return mk(domain, updated, false, false);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((domain == null) ? 0 : domain.hashCode());
-		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
-		result = prime * result + (isBottom ? 1231 : 1237);
-		result = prime * result + (isTop ? 1231 : 1237);
-		return result;
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
+		if (rts == null || rts.isEmpty())
+			// if we have no runtime types, either the type domain has no type
+			// information for the given expression (thus it can be anything,
+			// also something that we can track) or the computation returned
+			// bottom (and the whole state is likely going to go to bottom
+			// anyway).
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DataflowDomain<?, ?> other = (DataflowDomain<?, ?>) obj;
-		if (domain == null) {
-			if (other.domain != null)
-				return false;
-		} else if (!domain.equals(other.domain))
-			return false;
-		if (elements == null) {
-			if (other.elements != null)
-				return false;
-		} else if (!elements.equals(other.elements))
-			return false;
-		if (isBottom != other.isBottom)
-			return false;
-		if (isTop != other.isTop)
-			return false;
-		return true;
-	}
 
-	@Override
-	public StructuredRepresentation representation() {
-		return new SetRepresentation(elements, DataflowElement::representation);
-	}
-
-	@Override
-	public D top() {
-		return mk(domain, new HashSet<>(), true, false);
-	}
-
-	@Override
-	public boolean isTop() {
-		return elements.isEmpty() && isTop;
-	}
-
-	@Override
-	public D bottom() {
-		return mk(domain, new HashSet<>(), false, true);
-	}
-
-	@Override
-	public boolean isBottom() {
-		return elements.isEmpty() && isBottom;
+		return rts.stream().anyMatch(Type::isValueType);
 	}
 
 	/**
-	 * Yields the {@link DataflowElement}s contained in this domain instance.
+	 * The dataflow <i>gen</i> operation, yielding the dataflow elements that
+	 * are generated by the assignment of the given {@code expression} to the
+	 * given {@code id}.
 	 * 
-	 * @return the elements
+	 * @param state      the current dataflow elements
+	 * @param id         the {@link Identifier} being assigned
+	 * @param expression the expressions that is being assigned to {@code id}
+	 * @param pp         the program point where this operation happens
+	 * 
+	 * @return the collection of dataflow elements that are generated by the
+	 *             assignment
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public final Set<E> getDataflowElements() {
-		return elements;
-	}
+	public abstract Set<E> gen(
+			L state,
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp)
+			throws SemanticException;
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public D pushScope(
-			ScopeToken scope)
-			throws SemanticException {
-		if (isTop() || isBottom())
-			return (D) this;
+	/**
+	 * The dataflow <i>gen</i> operation, yielding the dataflow elements that
+	 * are generated by evaluating the given non-assigning {@code expression}.
+	 * 
+	 * @param state      the current dataflow elements
+	 * @param expression the expressions that is being evaluated
+	 * @param pp         the program point where this operation happens
+	 * 
+	 * @return the collection of dataflow elements that are generated by the
+	 *             expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public abstract Set<E> gen(
+			L state,
+			ValueExpression expression,
+			ProgramPoint pp)
+			throws SemanticException;
 
-		Set<E> result = new HashSet<>();
-		E pushed;
-		for (E element : this.elements)
-			if ((pushed = element.pushScope(scope)) != null)
-				result.add(pushed);
+	/**
+	 * The dataflow <i>kill</i> operation, yielding the dataflow elements that
+	 * are killed by the assignment of the given {@code expression} to the given
+	 * {@code id}.
+	 * 
+	 * @param state      the current dataflow elements
+	 * @param id         the {@link Identifier} being assigned
+	 * @param expression the expressions that is being assigned to {@code id}
+	 * @param pp         the program point where this operation happens
+	 * 
+	 * @return the collection of dataflow elements that are killed by the
+	 *             assignment
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public abstract Set<E> kill(
+			L state,
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp)
+			throws SemanticException;
 
-		return mk(domain, result, false, false);
-	}
+	/**
+	 * The dataflow <i>kill</i> operation, yielding the dataflow elements that
+	 * are killed by evaluating the given non-assigning {@code expression}.
+	 * 
+	 * @param state      the current dataflow elements
+	 * @param expression the expressions that is being evaluated
+	 * @param pp         the program point where this operation happens
+	 * 
+	 * @return the collection of dataflow elements that are killed by the
+	 *             expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public abstract Set<E> kill(
+			L state,
+			ValueExpression expression,
+			ProgramPoint pp)
+			throws SemanticException;
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public D popScope(
-			ScopeToken scope)
-			throws SemanticException {
-		if (isTop() || isBottom())
-			return (D) this;
-
-		Set<E> result = new HashSet<>();
-		E popped;
-		for (E element : this.elements)
-			if ((popped = element.popScope(scope)) != null)
-				result.add(popped);
-
-		return mk(domain, result, false, false);
-	}
-
-	@Override
-	public final String toString() {
-		return representation().toString();
-	}
-
-	@Override
-	public boolean knowsIdentifier(
-			Identifier id) {
-		return elements.stream().anyMatch(e -> e.getInvolvedIdentifiers().contains(id));
-	}
 }

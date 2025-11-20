@@ -1,6 +1,8 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -17,7 +19,9 @@ import it.unive.lisa.symbolic.value.Skip;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ReturnTopPolicy implements OpenCallPolicy {
+public class ReturnTopPolicy
+		implements
+		OpenCallPolicy {
 
 	/**
 	 * The singleton instance of this class.
@@ -28,18 +32,19 @@ public class ReturnTopPolicy implements OpenCallPolicy {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> apply(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> apply(
 			OpenCall call,
 			AnalysisState<A> entryState,
+			Analysis<A, D> analysis,
 			ExpressionSet[] params)
 			throws SemanticException {
 
 		if (call.getStaticType().isVoidType())
-			return entryState.smallStepSemantics(new Skip(call.getLocation()), call);
+			return analysis.smallStepSemantics(entryState, new Skip(call.getLocation()), call);
 		else {
 			PushAny pushany = new PushAny(call.getStaticType(), call.getLocation());
 			Identifier var = call.getMetaVariable();
-			return entryState.assign(var, pushany, call);
+			return analysis.assign(entryState, var, pushany, call);
 		}
 	}
 

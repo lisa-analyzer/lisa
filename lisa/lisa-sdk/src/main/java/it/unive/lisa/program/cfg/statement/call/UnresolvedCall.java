@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -25,7 +26,9 @@ import it.unive.lisa.type.Untyped;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnresolvedCall extends Call {
+public class UnresolvedCall
+		extends
+		Call {
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
@@ -141,8 +144,8 @@ public class UnresolvedCall extends Call {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
@@ -151,8 +154,8 @@ public class UnresolvedCall extends Call {
 		try {
 			resolved = interprocedural.resolve(
 					this,
-					parameterTypes(expressions),
-					state.getInfo(SymbolAliasing.INFO_KEY, SymbolAliasing.class));
+					parameterTypes(expressions, interprocedural.getAnalysis()),
+					state.getExecutionInfo(SymbolAliasing.INFO_KEY, SymbolAliasing.class));
 		} catch (CallResolutionException e) {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}
@@ -160,4 +163,5 @@ public class UnresolvedCall extends Call {
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
 	}
+
 }

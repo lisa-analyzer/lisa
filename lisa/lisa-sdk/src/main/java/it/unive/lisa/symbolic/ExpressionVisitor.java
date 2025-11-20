@@ -6,6 +6,7 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -325,4 +326,22 @@ public interface ExpressionVisitor<T> {
 			Identifier expression,
 			Object... params)
 			throws SemanticException;
+
+	/**
+	 * Visits a {@link NullConstant}.
+	 * 
+	 * @param expression the null constant
+	 * @param params     the additional parameters provided to
+	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
+	 *                       if any
+	 * 
+	 * @return the value produced by visiting the null constant
+	 * 
+	 * @throws SemanticException if an error occurs during the visit operation
+	 */
+	T visit(
+			NullConstant expression,
+			Object... params)
+			throws SemanticException;
+
 }

@@ -1,8 +1,10 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.DomainLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
@@ -12,10 +14,10 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
@@ -30,26 +32,87 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * Base implementation for {@link NonRelationalDomain}s that can target
- * {@link ValueExpression}. This class extends {@link BaseLattice} and
- * implements
- * {@link NonRelationalDomain#eval(SymbolicExpression, Environment, ProgramPoint, SemanticOracle)}
+ * Base implementation for {@link NonRelationalDomain}s that can evaluate
+ * {@link ValueExpression}s, and whose transformers simply return functional
+ * lattices. This class implements
+ * {@link #eval(FunctionalLattice, ValueExpression, ProgramPoint, SemanticOracle)}
  * by taking care of the recursive computation of inner expressions evaluation.
- * 
+ * It also defines
+ * {@link #assign(FunctionalLattice, Identifier, ValueExpression, ProgramPoint, SemanticOracle)},
+ * {@link #smallStepSemantics(FunctionalLattice, ValueExpression, ProgramPoint, SemanticOracle)},
+ * {@link #assume(FunctionalLattice, ValueExpression, ProgramPoint, ProgramPoint, SemanticOracle)}
+ * and
+ * {@link #satisfies(FunctionalLattice, ValueExpression, ProgramPoint, SemanticOracle)}
+ * by exploiting eval. Callbacks for customizing the evaluation, assumption, and
+ * satisfiability of specific expressions are also provided.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <T> the concrete type of this domain
- * @param <F> the type of environments to use with this domain
+ * @param <L> the lattice structure that appears values in the functional
+ *                lattices
+ * @param <M> the type of environments to use with this domain
  */
-public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>,
-		F extends Environment<F, ValueExpression, T>>
+public interface BaseNonRelationalDomain<L extends Lattice<L>,
+		M extends FunctionalLattice<M, Identifier, L> & DomainLattice<M, M>>
 		extends
-		BaseLattice<T>,
-		NonRelationalDomain<T, ValueExpression, F>,
-		ExpressionVisitor<T> {
+		NonRelationalDomain<L, M, M, ValueExpression>,
+		ExpressionVisitor<L> {
+
+	@Override
+	default M assign(
+			M state,
+			Identifier id,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isBottom() || !id.canBeAssigned() || !canProcess(expression, pp, oracle))
+			return state;
+
+		Map<Identifier, L> func = state.mkNewFunction(state.function, false);
+		L value = eval(state, expression, pp, oracle);
+		L v = fixedVariable(id, pp, oracle);
+		if (!v.isBottom())
+			// some domains might provide fixed representations
+			// for some variables
+			value = v;
+		else if (id.isWeak() && state.function != null && state.function.containsKey(id))
+			// if we have a weak identifier for which we already have
+			// information, we we perform a weak assignment
+			value = value.lub(state.getState(id));
+		func.put(id, value);
+		return state.mk(state.lattice, func);
+	}
+
+	@Override
+	default M smallStepSemantics(
+			M state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		// environments do not change without assignments
+		return state;
+	}
+
+	@Override
+	default L fixedVariable(
+			Identifier id,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return bottom();
+	}
+
+	@Override
+	default L unknownValue(
+			Identifier id) {
+		return top();
+	}
 
 	/**
 	 * The error message thrown when a heap expression is encountered while
@@ -58,9 +121,9 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with a non-relational value domain";
 
 	@Override
-	default T eval(
+	default L eval(
+			M environment,
 			ValueExpression expression,
-			F environment,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -68,26 +131,34 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			HeapExpression expression,
-			T[] subExpressions,
+			L[] subExpressions,
 			Object... params)
 			throws SemanticException {
 		throw new SemanticException(CANNOT_PROCESS_ERROR);
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			AccessChild expression,
-			T receiver,
-			T child,
+			L receiver,
+			L child,
 			Object... params)
 			throws SemanticException {
 		throw new SemanticException(CANNOT_PROCESS_ERROR);
 	}
 
 	@Override
-	default T visit(
+	default L visit(
+			NullConstant expression,
+			Object... params)
+			throws SemanticException {
+		throw new SemanticException(CANNOT_PROCESS_ERROR);
+	}
+
+	@Override
+	default L visit(
 			MemoryAllocation expression,
 			Object... params)
 			throws SemanticException {
@@ -95,27 +166,27 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			HeapReference expression,
-			T arg,
+			L arg,
 			Object... params)
 			throws SemanticException {
 		throw new SemanticException(CANNOT_PROCESS_ERROR);
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			HeapDereference expression,
-			T arg,
+			L arg,
 			Object... params)
 			throws SemanticException {
 		throw new SemanticException(CANNOT_PROCESS_ERROR);
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			UnaryExpression expression,
-			T arg,
+			L arg,
 			Object... params)
 			throws SemanticException {
 		if (arg.isBottom())
@@ -142,20 +213,20 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalUnaryExpression(
+	default L evalUnaryExpression(
 			UnaryExpression expression,
-			T arg,
+			L arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return top();
+		return arg.top();
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			BinaryExpression expression,
-			T left,
-			T right,
+			L left,
+			L right,
 			Object... params)
 			throws SemanticException {
 		if (left.isBottom())
@@ -190,14 +261,14 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalTypeCast(
+	default L evalTypeCast(
 			BinaryExpression cast,
-			T left,
-			T right,
+			L left,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return oracle.getRuntimeTypesOf(cast, pp, oracle).isEmpty() ? bottom() : left;
+		return oracle.getRuntimeTypesOf(cast, pp).isEmpty() ? left.bottom() : left;
 	}
 
 	/**
@@ -215,14 +286,14 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalTypeConv(
+	default L evalTypeConv(
 			BinaryExpression conv,
-			T left,
-			T right,
+			L left,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return oracle.getRuntimeTypesOf(conv, pp, oracle).isEmpty() ? bottom() : left;
+		return oracle.getRuntimeTypesOf(conv, pp).isEmpty() ? left.bottom() : left;
 	}
 
 	/**
@@ -245,22 +316,22 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalBinaryExpression(
+	default L evalBinaryExpression(
 			BinaryExpression expression,
-			T left,
-			T right,
+			L left,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return top();
+		return left.top();
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			TernaryExpression expression,
-			T left,
-			T middle,
-			T right,
+			L left,
+			L middle,
+			L right,
 			Object... params)
 			throws SemanticException {
 		if (left.isBottom())
@@ -296,19 +367,19 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalTernaryExpression(
+	default L evalTernaryExpression(
 			TernaryExpression expression,
-			T left,
-			T middle,
-			T right,
+			L left,
+			L middle,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return top();
+		return left.top();
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			Skip expression,
 			Object... params)
 			throws SemanticException {
@@ -329,7 +400,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalSkip(
+	default L evalSkip(
 			Skip skip,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -338,7 +409,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			PushAny expression,
 			Object... params)
 			throws SemanticException {
@@ -359,7 +430,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalPushAny(
+	default L evalPushAny(
 			PushAny pushAny,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -368,7 +439,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			PushInv expression,
 			Object... params)
 			throws SemanticException {
@@ -389,7 +460,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalPushInv(
+	default L evalPushInv(
 			PushInv pushInv,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -398,33 +469,13 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			Constant expression,
 			Object... params)
 			throws SemanticException {
 		ProgramPoint pp = (ProgramPoint) params[1];
 		SemanticOracle oracle = (SemanticOracle) params[2];
-		if (expression instanceof NullConstant)
-			return evalNullConstant(pp, oracle);
-		return evalNonNullConstant(expression, pp, oracle);
-	}
-
-	/**
-	 * Yields the evaluation of the null constant {@link NullConstant}.
-	 * 
-	 * @param pp     the program point that where this operation is being
-	 *                   evaluated
-	 * @param oracle the oracle for inter-domain communication
-	 * 
-	 * @return the evaluation of the constant
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default T evalNullConstant(
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return top();
+		return evalConstant(expression, pp, oracle);
 	}
 
 	/**
@@ -439,7 +490,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalNonNullConstant(
+	default L evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -448,12 +499,12 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			Identifier expression,
 			Object... params)
 			throws SemanticException {
 		@SuppressWarnings("unchecked")
-		F environment = (F) params[0];
+		M environment = (M) params[0];
 		ProgramPoint pp = (ProgramPoint) params[1];
 		SemanticOracle oracle = (SemanticOracle) params[2];
 		return evalIdentifier(expression, environment, pp, oracle);
@@ -472,9 +523,9 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalIdentifier(
+	default L evalIdentifier(
 			Identifier id,
-			F environment,
+			M environment,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -482,16 +533,16 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	@Override
-	default T visit(
+	default L visit(
 			ValueExpression expression,
-			T[] subExpressions,
+			L[] subExpressions,
 			Object... params)
 			throws SemanticException {
 		ProgramPoint pp = (ProgramPoint) params[1];
 		SemanticOracle oracle = (SemanticOracle) params[2];
 
 		if (subExpressions != null)
-			for (T sub : subExpressions)
+			for (L sub : subExpressions)
 				if (sub.isBottom())
 					return sub;
 
@@ -521,9 +572,9 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T evalValueExpression(
+	default L evalValueExpression(
 			ValueExpression expression,
-			T[] subExpressions,
+			L[] subExpressions,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -542,7 +593,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 
 		Set<Type> rts = null;
 		try {
-			rts = oracle.getRuntimeTypesOf(expression, pp, oracle);
+			rts = oracle.getRuntimeTypesOf(expression, pp);
 		} catch (SemanticException e) {
 			return false;
 		}
@@ -560,27 +611,27 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 
 	@Override
 	default Satisfiability satisfies(
+			M state,
 			ValueExpression expression,
-			F environment,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (expression instanceof Identifier)
-			return satisfiesAbstractValue(environment.getState((Identifier) expression), pp, oracle);
+		if (state.isBottom())
+			return Satisfiability.BOTTOM;
 
-		if (expression instanceof NullConstant)
-			return satisfiesNullConstant(pp, oracle);
+		if (expression instanceof Identifier)
+			return satisfiesAbstractValue(state.getState((Identifier) expression), pp, oracle);
 
 		if (expression instanceof Constant)
-			return satisfiesNonNullConstant((Constant) expression, pp, oracle);
+			return satisfiesConstant((Constant) expression, pp, oracle);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 			ValueExpression e = (ValueExpression) unary.getExpression();
 			if (unary.getOperator() == LogicalNegation.INSTANCE)
-				return satisfies(e, environment, pp, oracle).negate();
+				return satisfies(state, e, pp, oracle).negate();
 			else {
-				T arg = eval(e, environment, pp, oracle);
+				L arg = eval(state, e, pp, oracle);
 				if (arg.isBottom())
 					return Satisfiability.BOTTOM;
 
@@ -594,15 +645,15 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 			ValueExpression eright = (ValueExpression) binary.getRight();
 
 			if (binary.getOperator() == LogicalAnd.INSTANCE)
-				return satisfies(eleft, environment, pp, oracle).and(satisfies(eright, environment, pp, oracle));
+				return satisfies(state, eleft, pp, oracle).and(satisfies(state, eright, pp, oracle));
 			else if (binary.getOperator() == LogicalOr.INSTANCE)
-				return satisfies(eleft, environment, pp, oracle).or(satisfies(eright, environment, pp, oracle));
+				return satisfies(state, eleft, pp, oracle).or(satisfies(state, eright, pp, oracle));
 			else {
-				T left = eval(eleft, environment, pp, oracle);
+				L left = eval(state, eleft, pp, oracle);
 				if (left.isBottom())
 					return Satisfiability.BOTTOM;
 
-				T right = eval(eright, environment, pp, oracle);
+				L right = eval(state, eright, pp, oracle);
 				if (right.isBottom())
 					return Satisfiability.BOTTOM;
 
@@ -613,17 +664,17 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression ternary = (TernaryExpression) expression;
 			ValueExpression eleft = (ValueExpression) ternary.getLeft();
-			T left = eval(eleft, environment, pp, oracle);
+			L left = eval(state, eleft, pp, oracle);
 			if (left.isBottom())
 				return Satisfiability.BOTTOM;
 
 			ValueExpression emiddle = (ValueExpression) ternary.getMiddle();
-			T middle = eval(emiddle, environment, pp, oracle);
+			L middle = eval(state, emiddle, pp, oracle);
 			if (middle.isBottom())
 				return Satisfiability.BOTTOM;
 
 			ValueExpression eright = (ValueExpression) ternary.getRight();
-			T right = eval(eright, environment, pp, oracle);
+			L right = eval(state, eright, pp, oracle);
 			if (right.isBottom())
 				return Satisfiability.BOTTOM;
 
@@ -651,31 +702,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	default Satisfiability satisfiesAbstractValue(
-			T value,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		return Satisfiability.UNKNOWN;
-	}
-
-	/**
-	 * Yields the satisfiability of the null constant {@link NullConstant} on
-	 * this abstract domain.
-	 * 
-	 * @param pp     the program point that where this operation is being
-	 *                   evaluated
-	 * @param oracle the oracle for inter-domain communication
-	 * 
-	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
-	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
-	 *             not satisfied, or {@link Satisfiability#UNKNOWN} if it is
-	 *             either impossible to determine if it satisfied, or if it is
-	 *             satisfied by some values and not by some others (this is
-	 *             equivalent to a TOP boolean value)
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default Satisfiability satisfiesNullConstant(
+			L value,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -700,7 +727,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default Satisfiability satisfiesNonNullConstant(
+	default Satisfiability satisfiesConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -733,7 +760,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 */
 	default Satisfiability satisfiesUnaryExpression(
 			UnaryExpression expression,
-			T arg,
+			L arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -770,8 +797,8 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 */
 	default Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			T left,
-			T right,
+			L left,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -809,9 +836,9 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 */
 	default Satisfiability satisfiesTernaryExpression(
 			TernaryExpression expression,
-			T left,
-			T middle,
-			T right,
+			L left,
+			L middle,
+			L right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
@@ -819,13 +846,22 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	}
 
 	@Override
-	default F assume(
-			F environment,
+	default M assume(
+			M environment,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
+		if (environment.isBottom())
+			return environment;
+
+		if (expression instanceof Identifier)
+			return assumeIdentifier(environment, (Identifier) expression, src, dest, oracle);
+
+		if (expression instanceof Constant)
+			return assumeConstant(environment, (Constant) expression, src, dest, oracle);
+
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 			UnaryOperator op = unary.getOperator();
@@ -858,12 +894,17 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 		if (expression instanceof TernaryExpression)
 			return assumeTernaryExpression(environment, (TernaryExpression) expression, src, dest, oracle);
 
+		if (expression instanceof ValueExpression)
+			return assumeValueExpression(environment, (ValueExpression) expression, src, dest, oracle);
+
+		// other simple expressions (e.g., skip, push-any) don't really need
+		// their separate callbacks
 		return environment;
 	}
 
 	/**
-	 * Yields the environment {@code environment} assuming that an unary
-	 * expression.
+	 * Yields the environment {@code environment} assuming that a constant
+	 * holds.
 	 * 
 	 * @param environment the environment on which the expression must be
 	 *                        assumed
@@ -875,14 +916,71 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 *                        the expression has been assumed
 	 * @param oracle      the oracle for inter-domain communication
 	 * 
-	 * @return the environment {@code environment} assuming that an unary
-	 *             expression with operator {@code operator} and argument
-	 *             {@code expression} holds.
+	 * @return the environment {@code environment} assuming that the given
+	 *             expression holds
 	 * 
 	 * @throws SemanticException if something goes wrong during the assumption
 	 */
-	default F assumeUnaryExpression(
-			F environment,
+	default M assumeConstant(
+			M environment,
+			Constant expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return environment;
+	}
+
+	/**
+	 * Yields the environment {@code environment} assuming that an identifier
+	 * holds.
+	 * 
+	 * @param environment the environment on which the expression must be
+	 *                        assumed
+	 * @param expression  the expression to assume
+	 * @param src         the program point that where this operation is being
+	 *                        evaluated, corresponding to the one that generated
+	 *                        the given expression
+	 * @param dest        the program point where the execution will move after
+	 *                        the expression has been assumed
+	 * @param oracle      the oracle for inter-domain communication
+	 * 
+	 * @return the environment {@code environment} assuming that the given
+	 *             expression holds
+	 * 
+	 * @throws SemanticException if something goes wrong during the assumption
+	 */
+	default M assumeIdentifier(
+			M environment,
+			Identifier expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return environment;
+	}
+
+	/**
+	 * Yields the environment {@code environment} assuming that an unary
+	 * expression holds.
+	 * 
+	 * @param environment the environment on which the expression must be
+	 *                        assumed
+	 * @param expression  the expression to assume
+	 * @param src         the program point that where this operation is being
+	 *                        evaluated, corresponding to the one that generated
+	 *                        the given expression
+	 * @param dest        the program point where the execution will move after
+	 *                        the expression has been assumed
+	 * @param oracle      the oracle for inter-domain communication
+	 * 
+	 * @return the environment {@code environment} assuming that the given
+	 *             expression holds
+	 * 
+	 * @throws SemanticException if something goes wrong during the assumption
+	 */
+	default M assumeUnaryExpression(
+			M environment,
 			UnaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
@@ -907,14 +1005,13 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 *                        the expression has been assumed
 	 * @param oracle      the oracle for inter-domain communication
 	 * 
-	 * @return the environment {@code environment} assuming that a binary
-	 *             expression with operator {@code operator}, left argument
-	 *             {@code left}, and right argument {@code right} holds
+	 * @return the environment {@code environment} assuming that the given
+	 *             expression holds
 	 * 
 	 * @throws SemanticException if something goes wrong during the assumption
 	 */
-	default F assumeBinaryExpression(
-			F environment,
+	default M assumeBinaryExpression(
+			M environment,
 			BinaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
@@ -925,7 +1022,7 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 
 	/**
 	 * Yields the environment {@code environment} assuming that a ternary
-	 * expression.
+	 * expression holds.
 	 * 
 	 * @param environment the environment on which the expression must be
 	 *                        assumed
@@ -937,15 +1034,13 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 	 *                        the expression has been assumed
 	 * @param oracle      the oracle for inter-domain communication
 	 * 
-	 * @return the environment {@code environment} assuming that a ternary
-	 *             expression with operator {@code operator}, left argument
-	 *             {@code left}, middle argument {@code middle},and right
-	 *             argument {@code right} holds
+	 * @return the environment {@code environment} assuming that the given
+	 *             expression holds
 	 * 
 	 * @throws SemanticException if something goes wrong during the assumption
 	 */
-	default F assumeTernaryExpression(
-			F environment,
+	default M assumeTernaryExpression(
+			M environment,
 			TernaryExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
@@ -953,4 +1048,48 @@ public interface BaseNonRelationalDomain<T extends BaseNonRelationalDomain<T, F>
 			throws SemanticException {
 		return environment;
 	}
+
+	/**
+	 * Yields the environment {@code environment} assuming that a value
+	 * expression holds.
+	 * 
+	 * @param environment the environment on which the expression must be
+	 *                        assumed
+	 * @param expression  the expression to assume
+	 * @param src         the program point that where this operation is being
+	 *                        evaluated, corresponding to the one that generated
+	 *                        the given expression
+	 * @param dest        the program point where the execution will move after
+	 *                        the expression has been assumed
+	 * @param oracle      the oracle for inter-domain communication
+	 * 
+	 * @return the environment {@code environment} assuming that the given
+	 *             expression holds
+	 * 
+	 * @throws SemanticException if something goes wrong during the assumption
+	 */
+	default M assumeValueExpression(
+			M environment,
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return environment;
+	}
+
+	/**
+	 * Yields the top element of the environment's values.
+	 * 
+	 * @return the top element
+	 */
+	L top();
+
+	/**
+	 * Yields the bottom element of the environment's values.
+	 * 
+	 * @return the bottom element
+	 */
+	L bottom();
+
 }

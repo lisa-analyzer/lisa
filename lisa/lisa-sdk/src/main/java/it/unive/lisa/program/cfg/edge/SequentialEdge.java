@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.edge;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -11,7 +13,9 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SequentialEdge extends Edge {
+public class SequentialEdge
+		extends
+		Edge {
 
 	/**
 	 * Builds an "empty" edge, meaning that it does not have endpoints.
@@ -38,16 +42,18 @@ public class SequentialEdge extends Edge {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> traverseForward(
-			AnalysisState<A> state) {
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis) {
 		return state;
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> traverseBackwards(
-			AnalysisState<A> state)
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis)
 			throws SemanticException {
-		return traverseForward(state);
+		return traverseForward(state, analysis);
 	}
 
 	@Override
@@ -56,9 +62,15 @@ public class SequentialEdge extends Edge {
 	}
 
 	@Override
+	public boolean isErrorHandling() {
+		return false;
+	}
+
+	@Override
 	public SequentialEdge newInstance(
 			Statement source,
 			Statement destination) {
 		return new SequentialEdge(source, destination);
 	}
+
 }

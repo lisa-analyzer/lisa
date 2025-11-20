@@ -1,19 +1,26 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.VoidType;
 import it.unive.lisa.util.collections.CollectionUtilities;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -24,7 +31,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Call extends NaryExpression {
+public abstract class Call
+		extends
+		NaryExpression {
 
 	/**
 	 * Possible types of a call, identifying the type of targets (instance or
@@ -279,9 +288,13 @@ public abstract class Call extends NaryExpression {
 	 * Yields an array containing the runtime types of the parameters of this
 	 * call, retrieved by accessing the given {@link StatementStore}.
 	 * 
-	 * @param <A>         the type of {@link AbstractState}
+	 * @param <A>         the kind of {@link AbstractLattice} produced by the
+	 *                        domain {@code D}
+	 * @param <D>         the kind of {@link AbstractDomain} to run during the
+	 *                        analysis
 	 * @param expressions the store containing the computed states for the
 	 *                        parameters
+	 * @param analysis    the {@link Analysis} that is being executed
 	 * 
 	 * @return the array of parameter types
 	 * 
@@ -289,18 +302,81 @@ public abstract class Call extends NaryExpression {
 	 *                               types
 	 */
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A>> Set<Type>[] parameterTypes(
-			StatementStore<A> expressions)
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Set<Type>[] parameterTypes(
+			StatementStore<A> expressions,
+			Analysis<A, D> analysis)
 			throws SemanticException {
 		Expression[] actuals = getParameters();
 		Set<Type>[] types = new Set[actuals.length];
 		for (int i = 0; i < actuals.length; i++) {
 			AnalysisState<A> state = expressions.getState(actuals[i]);
 			Set<Type> t = new HashSet<>();
-			for (SymbolicExpression e : state.getComputedExpressions())
-				t.addAll(state.getState().getRuntimeTypesOf(e, this, state.getState()));
+			for (SymbolicExpression e : state.getExecutionExpressions())
+				t.addAll(analysis.getRuntimeTypesOf(state, e, this));
 			types[i] = t;
 		}
 		return types;
 	}
+
+	/**
+	 * Assuming that the result of executing this call is {@code returned}, this
+	 * method yields whether or not this call returned no value or its return
+	 * type is {@link VoidType}. If this method returns {@code true}, then no
+	 * value should be assigned to the call's meta variable.
+	 * 
+	 * @param <A>      the type of {@link AbstractDomain} in the analysis state
+	 * @param returned the post-state of the call
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public <A extends AbstractLattice<A>> boolean returnsVoid(
+			AnalysisState<A> returned) {
+		if (getStaticType().isVoidType())
+			return true;
+
+		if (!getStaticType().isUntyped())
+			return false;
+
+		if (this instanceof CFGCall) {
+			CFGCall cfgcall = (CFGCall) this;
+			Collection<CFG> targets = cfgcall.getTargetedCFGs();
+			if (!targets.isEmpty())
+				return !targets.iterator()
+						.next()
+						.getNormalExitpoints()
+						.stream()
+						// returned values will be stored in meta variables
+						.anyMatch(st -> st instanceof MetaVariableCreator);
+		}
+
+		if (this instanceof NativeCall) {
+			NativeCall nativecall = (NativeCall) this;
+			Collection<NativeCFG> targets = nativecall.getTargetedConstructs();
+			if (!targets.isEmpty())
+				// native cfgs will always rewrite to expressions and return a
+				// value
+				return false;
+		}
+
+		if (this instanceof TruncatedParamsCall)
+			return ((TruncatedParamsCall) this).getInnerCall().returnsVoid(returned);
+
+		if (this instanceof MultiCall) {
+			MultiCall multicall = (MultiCall) this;
+			Collection<Call> targets = multicall.getCalls();
+			if (!targets.isEmpty())
+				// we get the return type from one of its targets
+				return targets.iterator().next().returnsVoid(returned);
+		}
+
+		if (returned != null)
+			if (returned.getExecutionExpressions().isEmpty())
+				return true;
+			else if (returned.getExecutionExpressions().size() == 1
+					&& returned.getExecutionExpressions().iterator().next() instanceof Skip)
+				return true;
+
+		return false;
+	}
+
 }

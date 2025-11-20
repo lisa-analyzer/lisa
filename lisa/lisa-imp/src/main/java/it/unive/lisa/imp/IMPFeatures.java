@@ -1,7 +1,7 @@
 package it.unive.lisa.imp;
 
 import it.unive.lisa.program.language.LanguageFeatures;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
@@ -15,7 +15,9 @@ import it.unive.lisa.program.language.validation.ProgramValidationLogic;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPFeatures extends LanguageFeatures {
+public class IMPFeatures
+		extends
+		LanguageFeatures {
 
 	@Override
 	public ParameterMatchingStrategy getMatchingStrategy() {
@@ -23,7 +25,7 @@ public class IMPFeatures extends LanguageFeatures {
 	}
 
 	@Override
-	public HierarcyTraversalStrategy getTraversalStrategy() {
+	public HierarchyTraversalStrategy getTraversalStrategy() {
 		return SingleInheritanceTraversalStrategy.INSTANCE;
 	}
 
@@ -36,4 +38,5 @@ public class IMPFeatures extends LanguageFeatures {
 	public ProgramValidationLogic getProgramValidationLogic() {
 		return new BaseValidationLogic();
 	}
+
 }

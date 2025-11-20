@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis.combination.constraints;
 
-import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
@@ -28,14 +27,14 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import it.unive.lisa.util.representation.StringRepresentation;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Set;
 
 /**
  * The constraint-based whole-value analysis between a non-relational Boolean
  * abstract domain, a non-relational numeric abstract domain, and a
- * non-relational string abstract domain.
+ * non-relational string abstract domain. This domains tracks environments of
+ * whole-value elements, which are values of one of the types produced by the
+ * client domains.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -43,290 +42,173 @@ import java.util.Set;
  * @param <S> the non-relational string abstract domain
  * @param <B> the non-relational Boolean abstract domain
  */
-public class WholeValueAnalysis<
-		N extends WholeValueDomain<N>,
-		S extends WholeValueStringDomain<S>,
-		B extends WholeValueDomain<B>>
+public class WholeValueAnalysis<N extends WholeValueElement<N>,
+		S extends WholeValueElement<S>,
+		B extends WholeValueElement<B>>
 		implements
-		BaseNonRelationalValueDomain<WholeValueAnalysis<N, S, B>> {
-
-	private final N intValue;
-	private final S stringValue;
-	private final B boolValue;
+		BaseNonRelationalValueDomain<WholeValue<N, S, B>> {
 
 	/**
-	 * Builds an abstract element of this domain.
+	 * The non-relational integer abstract domain.
+	 */
+	public final BaseNonRelationalValueDomain<N> intDom;
+
+	/**
+	 * The non-relational string abstract domain.
+	 */
+	public final WholeValueStringDomain<S> strDom;
+
+	/**
+	 * The non-relational Boolean abstract domain.
+	 */
+	public final BaseNonRelationalValueDomain<B> boolDom;
+
+	/**
+	 * Builds a whole-value analysis.
 	 * 
-	 * @param intValue    the abstract value for intergers
-	 * @param stringValue the abstract value for strings
-	 * @param boolValue   the abstract value for booleans
+	 * @param intDom  the non-relational integer abstract domain
+	 * @param strDom  the non-relational string abstract domain
+	 * @param boolDom the non-relational Boolean abstract domain
 	 */
 	public WholeValueAnalysis(
-			N intValue,
-			S stringValue,
-			B boolValue) {
-		this.intValue = intValue;
-		this.stringValue = stringValue;
-		this.boolValue = boolValue;
+			BaseNonRelationalValueDomain<N> intDom,
+			WholeValueStringDomain<S> strDom,
+			BaseNonRelationalValueDomain<B> boolDom) {
+		this.intDom = intDom;
+		this.strDom = strDom;
+		this.boolDom = boolDom;
 	}
 
-	/**
-	 * Yields the integer abstract value.
-	 * 
-	 * @return the integer abstract value
-	 */
-	public N getIntValue() {
-		return intValue;
-	}
-
-	/**
-	 * Yields the string abstract value.
-	 * 
-	 * @return the string abstract value
-	 */
-	public S getStringValue() {
-		return stringValue;
-	}
-
-	/**
-	 * Yields the boolean abstract value.
-	 *
-	 * @return the boolean abstract value
-	 */
-	public B getBoolValue() {
-		return boolValue;
-	}
-
-	@Override
-	public WholeValueAnalysis<N, S, B> lubAux(
-			WholeValueAnalysis<N, S, B> other)
-			throws SemanticException {
-		return new WholeValueAnalysis<>(
-				this.intValue.lub(other.intValue),
-				this.stringValue.lub(other.stringValue),
-				this.boolValue.lub(other.boolValue));
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			WholeValueAnalysis<N, S, B> other)
-			throws SemanticException {
-		return this.intValue.lessOrEqual(other.intValue) &&
-				this.stringValue.lessOrEqual(other.stringValue) &&
-				this.boolValue.lessOrEqual(other.boolValue);
-	}
-
-	@Override
-	public WholeValueAnalysis<N, S, B> wideningAux(
-			WholeValueAnalysis<N, S, B> other)
-			throws SemanticException {
-		return new WholeValueAnalysis<>(
-				this.intValue.widening(other.intValue),
-				this.stringValue.widening(other.stringValue),
-				this.boolValue.widening(other.boolValue));
-	}
-
-	@Override
-	public boolean isTop() {
-		return intValue.isTop() && stringValue.isTop() && boolValue.isTop();
-	}
-
-	@Override
-	public WholeValueAnalysis<N, S, B> top() {
-		return new WholeValueAnalysis<>(intValue.top(), stringValue.top(), boolValue.top());
-	}
-
-	@Override
-	public boolean isBottom() {
-		return intValue.isBottom() && stringValue.isBottom() && boolValue.isBottom();
-	}
-
-	@Override
-	public WholeValueAnalysis<N, S, B> bottom() {
-		return new WholeValueAnalysis<>(intValue.bottom(), stringValue.bottom(), boolValue.bottom());
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((intValue == null) ? 0 : intValue.hashCode());
-		result = prime * result + ((stringValue == null) ? 0 : stringValue.hashCode());
-		result = prime * result + ((boolValue == null) ? 0 : boolValue.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		WholeValueAnalysis<?, ?, ?> other = (WholeValueAnalysis<?, ?, ?>) obj;
-		if (intValue == null) {
-			if (other.intValue != null)
-				return false;
-		} else if (!intValue.equals(other.intValue))
-			return false;
-		if (stringValue == null) {
-			if (other.stringValue != null)
-				return false;
-		} else if (!stringValue.equals(other.stringValue))
-			return false;
-		if (boolValue == null) {
-			if (other.boolValue != null)
-				return false;
-		} else if (!boolValue.equals(other.boolValue))
-			return false;
-		return true;
-	}
-
-	@Override
-	public StructuredRepresentation representation() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
-		if (isTop())
-			return Lattice.topRepresentation();
-		if (isString())
-			return stringValue.representation();
-		if (isNumber())
-			return intValue.representation();
-		if (isBool())
-			return boolValue.representation();
-		return new StringRepresentation(
-				"(" + intValue.representation().toString() + ", "
-						+ stringValue.representation().toString() + ", "
-						+ boolValue.representation().toString() + ")");
-	}
-
-	@Override
-	public String toString() {
-		return representation().toString();
-	}
-
-	private boolean sameKind(
-			WholeValueAnalysis<N, S, B> other) {
-		return (intValue.isBottom() == other.intValue.isBottom())
-				&& (stringValue.isBottom() == other.stringValue.isBottom())
-				&& (boolValue.isBottom() == other.boolValue.isBottom());
-	}
-
-	private boolean isNumber() {
-		return isTop() || (!isBottom() && stringValue.isBottom() && boolValue.isBottom());
-	}
-
-	private boolean isString() {
-		return isTop() || (!isBottom() && intValue.isBottom() && boolValue.isBottom());
-	}
-
-	private boolean isBool() {
-		return isTop() || (!isBottom() && stringValue.isBottom() && intValue.isBottom());
-	}
-
-	private WholeValueAnalysis<N, S, B> mkStringValue(
-			S stringValue) {
-		return new WholeValueAnalysis<>(intValue.bottom(), stringValue, boolValue.bottom());
-	}
-
-	private WholeValueAnalysis<N, S, B> mkIntValue(
+	private WholeValue<N, S, B> mkInt(
 			N intValue) {
-		return new WholeValueAnalysis<>(intValue, stringValue.bottom(), boolValue.bottom());
+		return new WholeValue<>(intValue, strDom.bottom(), boolDom.bottom());
 	}
 
-	private WholeValueAnalysis<N, S, B> mkBoolValue(
+	private WholeValue<N, S, B> mkString(
+			S stringValue) {
+		return new WholeValue<>(intDom.bottom(), stringValue, boolDom.bottom());
+	}
+
+	private WholeValue<N, S, B> mkBool(
 			B boolValue) {
-		return new WholeValueAnalysis<>(intValue.bottom(), stringValue.bottom(), boolValue);
+		return new WholeValue<>(intDom.bottom(), strDom.bottom(), boolValue);
 	}
 
 	@Override
-	public WholeValueAnalysis<N, S, B> evalNonNullConstant(
+	public WholeValue<N, S, B> evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		if (constant.getValue() instanceof Integer)
-			return mkIntValue(intValue.evalNonNullConstant(constant, pp, oracle));
+			return mkInt(intDom.evalConstant(constant, pp, oracle));
 		else if (constant.getValue() instanceof String)
-			return mkStringValue(stringValue.evalNonNullConstant(constant, pp, oracle));
+			return mkString(strDom.evalConstant(constant, pp, oracle));
 		else if (constant.getValue() instanceof Boolean)
-			return mkBoolValue(boolValue.evalNonNullConstant(constant, pp, oracle));
+			return mkBool(boolDom.evalConstant(constant, pp, oracle));
 		return top();
 	}
 
 	@Override
-	public WholeValueAnalysis<N, S, B> evalUnaryExpression(
+	public WholeValue<N, S, B> evalUnaryExpression(
 			UnaryExpression expression,
-			WholeValueAnalysis<N, S, B> arg,
+			WholeValue<N, S, B> arg,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		UnaryOperator operator = expression.getOperator();
 		if (operator == StringLength.INSTANCE && arg.isString())
-			return mkIntValue(intValue
-					.generate(arg.stringValue.constraints((ValueExpression) expression.getExpression(), pp), pp));
+			return mkInt(
+					arg.getIntValue()
+							.generate(
+									arg.getStringValue().constraints((ValueExpression) expression.getExpression(), pp),
+									pp));
 		if (operator == NumericNegation.INSTANCE && arg.isNumber())
-			return mkIntValue(intValue.evalUnaryExpression(expression, arg.intValue, pp, oracle));
+			return mkInt(intDom.evalUnaryExpression(expression, arg.getIntValue(), pp, oracle));
 		if (operator == LogicalNegation.INSTANCE && arg.isBool())
-			return mkBoolValue(boolValue.evalUnaryExpression(expression, arg.boolValue, pp, oracle));
+			return mkBool(boolDom.evalUnaryExpression(expression, arg.getBoolValue(), pp, oracle));
 		return top();
 	}
 
 	@Override
-	public WholeValueAnalysis<N, S, B> evalBinaryExpression(
+	public WholeValue<N, S, B> evalBinaryExpression(
 			BinaryExpression expression,
-			WholeValueAnalysis<N, S, B> left,
-			WholeValueAnalysis<N, S, B> right,
+			WholeValue<N, S, B> left,
+			WholeValue<N, S, B> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof NumericOperation && left.isNumber() && right.isNumber())
-			return mkIntValue(
-					intValue.evalBinaryExpression(expression, left.intValue, right.intValue, pp, oracle));
+			return mkInt(intDom.evalBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle));
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
-			return mkBoolValue(
-					boolValue.evalBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle));
+			return mkBool(
+					boolDom.evalBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle));
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
-			return mkBoolValue(boolValue
-					.generate(intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle)
-							.constraints(expression, pp), pp));
+			return mkBool(
+					left.getBoolValue()
+							.generate(
+									intDom
+											.satisfiesBinaryExpression(expression, left.getIntValue(),
+													right.getIntValue(), pp, oracle)
+											.constraints(expression, pp),
+									pp));
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE)
-			return mkBoolValue(boolValue.generate(
-					satisfiesBinaryExpression(expression, left, right, pp, oracle).constraints(expression, pp), pp));
+			return mkBool(
+					left.getBoolValue()
+							.generate(
+									satisfiesBinaryExpression(expression, left, right, pp, oracle)
+											.constraints(expression, pp),
+									pp));
 		if (operator == StringIndexOf.INSTANCE && left.isString() && right.isString())
-			return mkIntValue(
-					intValue.generate(left.stringValue.indexOf_constr(expression, right.stringValue, pp), pp));
+			return mkInt(
+					left.getIntValue()
+							.generate(
+									strDom.indexOf_constr(expression, left.getStringValue(), right.getStringValue(),
+											pp),
+									pp));
 		if (operator == StringConcat.INSTANCE && left.isString() && right.isString())
-			return mkStringValue(
-					stringValue.evalBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle));
+			return mkString(
+					strDom.evalBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle));
 		if (operator instanceof StringOperation && left.isString() && right.isString())
-			return mkBoolValue(boolValue.generate(
-					stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle)
-							.constraints(expression, pp),
-					pp));
+			return mkBool(
+					left.getBoolValue()
+							.generate(
+									strDom
+											.satisfiesBinaryExpression(
+													expression,
+													left.getStringValue(),
+													right.getStringValue(),
+													pp,
+													oracle)
+											.constraints(expression, pp),
+									pp));
 		return top();
 	}
 
 	@Override
-	public WholeValueAnalysis<N, S, B> evalTernaryExpression(
+	public WholeValue<N, S, B> evalTernaryExpression(
 			TernaryExpression expression,
-			WholeValueAnalysis<N, S, B> left,
-			WholeValueAnalysis<N, S, B> middle,
-			WholeValueAnalysis<N, S, B> right,
+			WholeValue<N, S, B> left,
+			WholeValue<N, S, B> middle,
+			WholeValue<N, S, B> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		TernaryOperator operator = expression.getOperator();
 		if (operator == StringSubstring.INSTANCE && left.isString() && middle.isNumber() && right.isNumber()) {
-			Set<BinaryExpression> begin = middle.intValue.constraints((ValueExpression) expression.getLeft(), pp);
-			Set<BinaryExpression> end = right.intValue.constraints((ValueExpression) expression.getRight(), pp);
-			return mkStringValue(left.stringValue.substring(begin, end, pp));
+			Set<BinaryExpression> begin = middle.getIntValue().constraints((ValueExpression) expression.getLeft(), pp);
+			Set<BinaryExpression> end = right.getIntValue().constraints((ValueExpression) expression.getRight(), pp);
+			return mkString(strDom.substring(left.getStringValue(), begin, end, pp));
 		} else if (operator == StringReplace.INSTANCE && left.isString() && middle.isString() && right.isString())
-			return mkStringValue(stringValue.evalTernaryExpression(expression, left.stringValue, middle.stringValue,
-					right.stringValue, pp, oracle));
+			return mkString(
+					strDom.evalTernaryExpression(
+							expression,
+							left.getStringValue(),
+							middle.getStringValue(),
+							right.getStringValue(),
+							pp,
+							oracle));
 
 		return top();
 	}
@@ -334,56 +216,79 @@ public class WholeValueAnalysis<
 	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
-			WholeValueAnalysis<N, S, B> left,
-			WholeValueAnalysis<N, S, B> right,
+			WholeValue<N, S, B> left,
+			WholeValue<N, S, B> right,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		BinaryOperator operator = expression.getOperator();
 		if (operator instanceof StringOperation && left.isString() && right.isString())
-			return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp, oracle);
+			return strDom
+					.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp, oracle);
 		if (operator instanceof NumericComparison && left.isNumber() && right.isNumber())
-			return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
+			return intDom.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 		if (operator instanceof LogicalOperation && left.isBool() && right.isBool())
-			return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
+			return boolDom.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		if (operator == ComparisonEq.INSTANCE) {
 			if (!left.sameKind(right))
 				return Satisfiability.NOT_SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp,
-						oracle);
+				return strDom
+						.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
+								oracle);
 			if (left.isNumber())
-				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
+				return intDom
+						.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 			if (left.isBool())
-				return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
+				return boolDom
+						.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		}
 		if (operator == ComparisonNe.INSTANCE) {
 			if (!left.sameKind(right))
 				return Satisfiability.SATISFIED;
 			if (left.isString())
-				return stringValue.satisfiesBinaryExpression(expression, left.stringValue, right.stringValue, pp,
-						oracle);
+				return strDom
+						.satisfiesBinaryExpression(expression, left.getStringValue(), right.getStringValue(), pp,
+								oracle);
 			if (left.isNumber())
-				return intValue.satisfiesBinaryExpression(expression, left.intValue, right.intValue, pp, oracle);
+				return intDom
+						.satisfiesBinaryExpression(expression, left.getIntValue(), right.getIntValue(), pp, oracle);
 			if (left.isBool())
-				return boolValue.satisfiesBinaryExpression(expression, left.boolValue, right.boolValue, pp, oracle);
+				return boolDom
+						.satisfiesBinaryExpression(expression, left.getBoolValue(), right.getBoolValue(), pp, oracle);
 		}
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public ValueEnvironment<WholeValueAnalysis<N, S, B>> assume(
-			ValueEnvironment<WholeValueAnalysis<N, S, B>> environment,
+	public ValueEnvironment<WholeValue<N, S, B>> assume(
+			ValueEnvironment<WholeValue<N, S, B>> environment,
 			ValueExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest,
 			SemanticOracle oracle)
 			throws SemanticException {
-		Satisfiability sat = satisfies(expression, environment, src, oracle);
+		Satisfiability sat = satisfies(environment, expression, src, oracle);
 		if (sat == Satisfiability.NOT_SATISFIED)
 			return environment.bottom();
 		if (sat == Satisfiability.SATISFIED)
 			return environment;
 		return BaseNonRelationalValueDomain.super.assume(environment, expression, src, dest, oracle);
 	}
+
+	@Override
+	public WholeValue<N, S, B> top() {
+		return new WholeValue<>(intDom.top(), strDom.top(), boolDom.top());
+	}
+
+	@Override
+	public WholeValue<N, S, B> bottom() {
+		return new WholeValue<>(intDom.bottom(), strDom.bottom(), boolDom.bottom());
+	}
+
+	@Override
+	public ValueEnvironment<WholeValue<N, S, B>> makeLattice() {
+		return new ValueEnvironment<>(top());
+	}
+
 }

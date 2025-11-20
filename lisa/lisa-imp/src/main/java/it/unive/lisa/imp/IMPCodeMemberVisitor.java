@@ -13,6 +13,7 @@ import it.unive.lisa.imp.antlr.IMPParser.BasicExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.BinaryStringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.BlockContext;
 import it.unive.lisa.imp.antlr.IMPParser.BlockOrStatementContext;
+import it.unive.lisa.imp.antlr.IMPParser.CatchBlockContext;
 import it.unive.lisa.imp.antlr.IMPParser.ExpressionContext;
 import it.unive.lisa.imp.antlr.IMPParser.FieldAccessContext;
 import it.unive.lisa.imp.antlr.IMPParser.ForLoopContext;
@@ -29,7 +30,9 @@ import it.unive.lisa.imp.antlr.IMPParser.ReceiverContext;
 import it.unive.lisa.imp.antlr.IMPParser.StatementContext;
 import it.unive.lisa.imp.antlr.IMPParser.StringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.TernaryStringExprContext;
+import it.unive.lisa.imp.antlr.IMPParser.TryBlockContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnaryStringExprContext;
+import it.unive.lisa.imp.antlr.IMPParser.UnitNameContext;
 import it.unive.lisa.imp.antlr.IMPParser.WhileLoopContext;
 import it.unive.lisa.imp.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.imp.constructs.ArrayLength;
@@ -47,20 +50,27 @@ import it.unive.lisa.imp.expressions.IMPArrayAccess;
 import it.unive.lisa.imp.expressions.IMPAssert;
 import it.unive.lisa.imp.expressions.IMPNewArray;
 import it.unive.lisa.imp.expressions.IMPNewObj;
+import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.ClassType;
+import it.unive.lisa.imp.types.InterfaceType;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
-import it.unive.lisa.program.cfg.VariableTableEntry;
-import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.Break;
+import it.unive.lisa.program.cfg.statement.Continue;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
@@ -85,6 +95,7 @@ import it.unive.lisa.program.cfg.statement.literal.Literal;
 import it.unive.lisa.program.cfg.statement.literal.NullLiteral;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
+import it.unive.lisa.program.cfg.statement.literal.TypeLiteral;
 import it.unive.lisa.program.cfg.statement.logic.And;
 import it.unive.lisa.program.cfg.statement.logic.Not;
 import it.unive.lisa.program.cfg.statement.logic.Or;
@@ -93,23 +104,29 @@ import it.unive.lisa.program.cfg.statement.numeric.Multiplication;
 import it.unive.lisa.program.cfg.statement.numeric.Negation;
 import it.unive.lisa.program.cfg.statement.numeric.Remainder;
 import it.unive.lisa.program.cfg.statement.numeric.Subtraction;
+import it.unive.lisa.program.cfg.statement.types.Cast;
+import it.unive.lisa.program.cfg.statement.types.IsInstance;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
+import it.unive.lisa.util.frontend.CFGTweaker;
+import it.unive.lisa.util.frontend.ControlFlowTracker;
+import it.unive.lisa.util.frontend.LocalVariableTracker;
+import it.unive.lisa.util.frontend.ParsedBlock;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or
@@ -117,7 +134,9 @@ import org.apache.commons.lang3.tuple.Triple;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
+class IMPCodeMemberVisitor
+		extends
+		IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
@@ -125,9 +144,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final Collection<Statement> entrypoints;
 
-	private final Collection<ControlFlowStructure> cfs;
+	private final LocalVariableTracker tracker;
 
-	private final Map<String, Pair<VariableRef, Annotations>> visibleIds;
+	private final ControlFlowTracker control;
 
 	private final CFG cfg;
 
@@ -147,13 +166,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		this.descriptor = descriptor;
 		list = new NodeList<>(new SequentialEdge());
 		entrypoints = new HashSet<>();
-		cfs = new LinkedList<>();
 		// side effects on entrypoints and matrix will affect the cfg
 		cfg = new CFG(descriptor, entrypoints, list);
-
-		visibleIds = new HashMap<>();
-		for (VariableTableEntry par : descriptor.getVariables())
-			visibleIds.put(par.getName(), Pair.of(par.createReference(cfg), par.getAnnotations()));
+		tracker = new LocalVariableTracker(cfg, descriptor);
+		control = new ControlFlowTracker();
 	}
 
 	/**
@@ -166,81 +182,71 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	 */
 	CFG visitCodeMember(
 			BlockContext ctx) {
-		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visited = visitBlock(ctx);
-		entrypoints.add(visited.getLeft());
-		list.mergeWith(visited.getMiddle());
-		cfs.forEach(cf -> cfg.addControlFlowStructure(cf));
+		ParsedBlock visited = visitBlock(ctx);
 
-		if (cfg.getAllExitpoints().isEmpty()) {
-			Ret ret = new Ret(cfg, descriptor.getLocation());
-			if (cfg.getNodesCount() == 0) {
-				// empty method, so the ret is also the entrypoint
-				list.addNode(ret);
-				entrypoints.add(ret);
-			} else {
-				// every non-throwing instruction that does not have a follower
-				// is ending the method
-				Collection<Statement> preExits = new LinkedList<>();
-				for (Statement st : list.getNodes())
-					if (!st.stopsExecution() && list.followersOf(st).isEmpty())
-						preExits.add(st);
-				list.addNode(ret);
-				for (Statement st : preExits)
-					list.addEdge(new SequentialEdge(st, ret));
+		if (!control.getModifiers().isEmpty())
+			throw new IMPSyntaxException(
+					"Unclosed control flow statements detected: "
+							+ String.join(
+									", ",
+									control.getModifiers()
+											.stream()
+											.map(Pair::getLeft)
+											.map(Statement::getLocation)
+											.map(CodeLocation::toString)
+											.collect(Collectors.toList())));
 
-				for (VariableTableEntry entry : descriptor.getVariables())
-					if (preExits.contains(entry.getScopeEnd()))
-						entry.setScopeEnd(ret);
-			}
-		}
-
+		entrypoints.add(visited.getBegin());
+		list.mergeWith(visited.getBody());
+		CFGTweaker.splitProtectedYields(cfg, IMPSyntaxException::new);
+		CFGTweaker.addFinallyEdges(cfg, IMPSyntaxException::new);
+		CFGTweaker.addReturns(cfg, IMPSyntaxException::new);
 		cfg.simplify();
 		return cfg;
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitBlock(
+	public ParsedBlock visitBlock(
 			BlockContext ctx) {
-		Map<String, Pair<VariableRef,
-				Annotations>> backup = new HashMap<>(visibleIds);
+		tracker.enterScope();
 		NodeList<CFG, Statement, Edge> block = new NodeList<>(new SequentialEdge());
 
 		Statement first = null, last = null;
+		boolean canProceed = true;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
-			Triple<Statement, NodeList<CFG, Statement, Edge>,
-					Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
-			block.mergeWith(st.getMiddle());
+			if (!canProceed)
+				throw new IMPSyntaxException(
+						"Deadcode detected at "
+								+ new SourceCodeLocation(
+										file,
+										getLine(ctx.blockOrStatement(i)),
+										getCol(ctx.blockOrStatement(i))));
+			ParsedBlock st = visitBlockOrStatement(ctx.blockOrStatement(i));
+			block.mergeWith(st.getBody());
 			if (first == null)
-				first = st.getLeft();
+				first = st.getBegin();
 			if (last != null)
-				block.addEdge(new SequentialEdge(last, st.getLeft()));
-			last = st.getRight();
+				block.addEdge(new SequentialEdge(last, st.getBegin()));
+			last = st.getEnd();
+			canProceed = st.canBeContinued();
 		}
 
-		Collection<String> toRemove = new HashSet<>();
-		for (Entry<String, Pair<VariableRef, Annotations>> id : visibleIds.entrySet())
-			if (!backup.containsKey(id.getKey())) {
-				VariableRef ref = id.getValue().getLeft();
-				descriptor.addVariable(new VariableTableEntry(ref.getLocation(),
-						0, ref.getRootStatement(), last, id.getKey(), Untyped.INSTANCE, id.getValue().getRight()));
-				toRemove.add(id.getKey());
-			}
-
-		if (!toRemove.isEmpty())
-			toRemove.forEach(visibleIds::remove);
+		tracker.exitScope(last);
 
 		if (first == null && last == null) {
 			// empty block: instrument it with a noop
-			NoOp instrumented = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
+			NoOp instrumented = new NoOp(
+					cfg,
+					new SourceCodeLocation(file, getLine(ctx.LBRACE()), getCol(ctx.LBRACE())));
 			first = last = instrumented;
 			block.addNode(instrumented);
 		}
 
-		return Triple.of(first, block, last);
+		return new ParsedBlock(first, block, last);
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitBlockOrStatement(
+	public ParsedBlock visitBlockOrStatement(
 			BlockOrStatementContext ctx) {
 		if (ctx.statement() != null)
 			return visitStatement(ctx.statement());
@@ -249,7 +255,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitStatement(
+	public ParsedBlock visitStatement(
 			StatementContext ctx) {
 		Statement st;
 		if (ctx.localDeclaration() != null)
@@ -258,12 +264,16 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			st = new IMPAssert(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
 		else if (ctx.RETURN() != null)
 			if (ctx.expression() != null)
-				st = new Return(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				st = new Return(
+						cfg,
+						new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 						visitExpression(ctx.expression()));
 			else
 				st = new Ret(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 		else if (ctx.THROW() != null)
-			st = new Throw(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+			st = new Throw(
+					cfg,
+					new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 					visitExpression(ctx.expression()));
 		else if (ctx.skip != null)
 			st = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
@@ -271,6 +281,12 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return visitIf(ctx);
 		else if (ctx.loop() != null)
 			return visitLoop(ctx.loop());
+		else if (ctx.tryBlock() != null)
+			return visitTryBlock(ctx.tryBlock());
+		else if (ctx.BREAK() != null)
+			st = visitBreak(ctx);
+		else if (ctx.CONTINUE() != null)
+			st = visitContinue(ctx);
 		else if (ctx.command != null)
 			st = visitExpression(ctx.command);
 		else
@@ -278,39 +294,49 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		NodeList<CFG, Statement, Edge> adj = new NodeList<>(new SequentialEdge());
 		adj.addNode(st);
-		return Triple.of(st, adj, st);
+		return new ParsedBlock(st, adj, st);
 	}
 
-	private Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitIf(
+	private ParsedBlock visitIf(
 			StatementContext ctx) {
 		NodeList<CFG, Statement, Edge> ite = new NodeList<>(new SequentialEdge());
 
 		Statement condition = visitParExpr(ctx.parExpr());
 		ite.addNode(condition);
 
-		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> then = visitBlockOrStatement(ctx.then);
-		ite.mergeWith(then.getMiddle());
-		ite.addEdge(new TrueEdge(condition, then.getLeft()));
+		ParsedBlock then = visitBlockOrStatement(ctx.then);
+		ite.mergeWith(then.getBody());
+		ite.addEdge(new TrueEdge(condition, then.getBegin()));
 
-		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> otherwise = null;
+		ParsedBlock otherwise = null;
 		if (ctx.otherwise != null) {
 			otherwise = visitBlockOrStatement(ctx.otherwise);
-			ite.mergeWith(otherwise.getMiddle());
-			ite.addEdge(new FalseEdge(condition, otherwise.getLeft()));
+			ite.mergeWith(otherwise.getBody());
+			ite.addEdge(new FalseEdge(condition, otherwise.getBegin()));
 		}
 
+		boolean needsNoop = then.canBeContinued() || otherwise == null || otherwise.canBeContinued();
 		Statement noop = new NoOp(cfg, condition.getLocation());
-		ite.addNode(noop);
-		ite.addEdge(new SequentialEdge(then.getRight(), noop));
-		if (otherwise != null)
-			ite.addEdge(new SequentialEdge(otherwise.getRight(), noop));
-		else
+		if (needsNoop)
+			ite.addNode(noop);
+
+		if (then.canBeContinued())
+			ite.addEdge(new SequentialEdge(then.getEnd(), noop));
+		if (otherwise != null) {
+			if (otherwise.canBeContinued())
+				ite.addEdge(new SequentialEdge(otherwise.getEnd(), noop));
+		} else
 			ite.addEdge(new FalseEdge(condition, noop));
 
-		cfs.add(new IfThenElse(list, condition, noop, then.getMiddle().getNodes(),
-				otherwise == null ? Collections.emptyList() : otherwise.getMiddle().getNodes()));
+		descriptor.addControlFlowStructure(
+				new IfThenElse(
+						list,
+						condition,
+						needsNoop ? noop : null,
+						then.getBody().getNodes(),
+						otherwise == null ? Collections.emptyList() : otherwise.getBody().getNodes()));
 
-		return Triple.of(condition, ite, noop);
+		return new ParsedBlock(condition, ite, needsNoop ? noop : null);
 	}
 
 	@Override
@@ -325,51 +351,68 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Expression expression = visitExpression(ctx.expression());
 		VariableRef ref = visitVar(ctx.IDENTIFIER(), false);
 
-		if (visibleIds.containsKey(ref.getName()))
-			throw new IMPSyntaxException(
-					"Duplicate variable '" + ref.getName() + "' declared at " + ref.getLocation());
+		if (tracker.hasVariable(ref.getName()))
+			throw new IMPSyntaxException("Duplicate variable '" + ref.getName() + "' declared at " + ref.getLocation());
 
-		visibleIds.put(ref.getName(), Pair.of(ref, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations())));
+		tracker.addVariable(ref.getName(), ref, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
+
 		// the variable table entry will be generated at the end of the
 		// containing block
 
 		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ref, expression);
 	}
 
-	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitLoop(
-			LoopContext ctx) {
-		if (ctx.whileLoop() != null)
-			return visitWhileLoop(ctx.whileLoop());
-		else
-			return visitForLoop(ctx.forLoop());
+	private Statement visitBreak(
+			StatementContext ctx) {
+		String label = ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText();
+		Break br = new Break(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), label);
+		control.addModifier(br, label);
+		return br;
+	}
+
+	private Statement visitContinue(
+			StatementContext ctx) {
+		String label = ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText();
+		Continue c = new Continue(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), label);
+		control.addModifier(c, label);
+		return c;
 	}
 
 	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitWhileLoop(
-			WhileLoopContext ctx) {
+	public ParsedBlock visitLoop(
+			LoopContext ctx) {
+		if (ctx.whileLoop() != null)
+			return visitWhileLoop(ctx.whileLoop(), ctx.IDENTIFIER());
+		else
+			return visitForLoop(ctx.forLoop(), ctx.IDENTIFIER());
+	}
+
+	private ParsedBlock visitWhileLoop(
+			WhileLoopContext ctx,
+			TerminalNode label) {
 		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		Statement condition = visitParExpr(ctx.parExpr());
 		loop.addNode(condition);
 
-		Triple<Statement, NodeList<CFG, Statement, Edge>,
-				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
-		loop.mergeWith(body.getMiddle());
-		loop.addEdge(new TrueEdge(condition, body.getLeft()));
-		loop.addEdge(new SequentialEdge(body.getRight(), condition));
+		ParsedBlock body = visitBlockOrStatement(ctx.blockOrStatement());
+		loop.mergeWith(body.getBody());
+		loop.addEdge(new TrueEdge(condition, body.getBegin()));
+		if (body.canBeContinued())
+			loop.addEdge(new SequentialEdge(body.getEnd(), condition));
 
 		Statement noop = new NoOp(cfg, condition.getLocation());
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
-		cfs.add(new Loop(list, condition, noop, body.getMiddle().getNodes()));
+		control.endControlFlowOf(loop, condition, noop, condition, label == null ? null : label.getText());
+		descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getBody().getNodes()));
 
-		return Triple.of(condition, loop, noop);
+		return new ParsedBlock(condition, loop, noop);
 	}
 
-	@Override
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitForLoop(
-			ForLoopContext ctx) {
+	private ParsedBlock visitForLoop(
+			ForLoopContext ctx,
+			TerminalNode label) {
 		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		LocalDeclarationContext initDecl = ctx.forDeclaration().initDecl;
 		ExpressionContext initExpr = ctx.forDeclaration().initExpr;
@@ -398,35 +441,41 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			loop.addEdge(new SequentialEdge(first, condition));
 
-		Triple<Statement, NodeList<CFG, Statement, Edge>,
-				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
-		loop.mergeWith(body.getMiddle());
-		loop.addEdge(new TrueEdge(condition, body.getLeft()));
-		last = body.getRight();
+		ParsedBlock body = visitBlockOrStatement(ctx.blockOrStatement());
+		loop.mergeWith(body.getBody());
+		loop.addEdge(new TrueEdge(condition, body.getBegin()));
+		last = body.getEnd();
 
 		if (post != null) {
 			Statement inc = visitExpression(post);
 			loop.addNode(inc);
-			loop.addEdge(new SequentialEdge(body.getRight(), inc));
+			if (body.canBeContinued())
+				loop.addEdge(new SequentialEdge(body.getEnd(), inc));
 			last = inc;
 		}
 
-		loop.addEdge(new SequentialEdge(last, condition));
+		if (last != null && !last.stopsExecution())
+			loop.addEdge(new SequentialEdge(last, condition));
 
 		Statement noop = new NoOp(cfg, condition.getLocation());
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
+		control.endControlFlowOf(
+				loop,
+				condition,
+				noop,
+				post == null ? condition : last,
+				label == null ? null : label.getText());
 		if (post == null)
-			cfs.add(new Loop(list, condition, noop, body.getMiddle().getNodes()));
+			descriptor.addControlFlowStructure(new Loop(list, condition, noop, body.getBody().getNodes()));
 		else {
-			NodeList<CFG, Statement, Edge> tmp = new NodeList<>(body.getMiddle());
+			NodeList<CFG, Statement, Edge> tmp = new NodeList<>(body.getBody());
 			tmp.addNode(last);
-			loop.addEdge(new SequentialEdge(body.getRight(), last));
-			cfs.add(new Loop(list, condition, noop, tmp.getNodes()));
+			descriptor.addControlFlowStructure(new Loop(list, condition, noop, tmp.getNodes()));
 		}
 
-		return Triple.of(first, loop, noop);
+		return new ParsedBlock(first, loop, noop);
 	}
 
 	@Override
@@ -441,8 +490,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.arrayAccess() != null)
 			target = visitArrayAccess(ctx.arrayAccess());
 		else
-			throw new IMPSyntaxException("Target of the assignment at " + expression.getLocation()
-					+ " is neither an identifier, a field access or an array access");
+			throw new IMPSyntaxException(
+					"Target of the assignment at "
+							+ expression.getLocation()
+							+ " is neither an identifier, a field access or an array access");
 
 		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), target, expression);
 	}
@@ -450,10 +501,12 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	private VariableRef visitVar(
 			TerminalNode identifier,
 			boolean localReference) {
-		VariableRef ref = new VariableRef(cfg,
+		VariableRef ref = new VariableRef(
+				cfg,
 				new SourceCodeLocation(file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol())),
-				identifier.getText(), Untyped.INSTANCE);
-		if (localReference && !visibleIds.containsKey(ref.getName()))
+				identifier.getText(),
+				Untyped.INSTANCE);
+		if (localReference && !tracker.hasVariable(ref.getName()))
 			throw new IMPSyntaxException(
 					"Referencing undeclared variable '" + ref.getName() + "' at " + ref.getLocation());
 		return ref;
@@ -463,7 +516,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	public AccessInstanceGlobal visitFieldAccess(
 			FieldAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
-		return new AccessInstanceGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver,
+		return new AccessInstanceGlobal(
+				cfg,
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				receiver,
 				ctx.name.getText());
 	}
 
@@ -495,7 +551,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (ctx.IDENTIFIER() != null)
 			return visitVar(ctx.IDENTIFIER(), true);
 		else
-			return new Int32Literal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+			return new Int32Literal(
+					cfg,
+					new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 					Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 	}
 
@@ -517,43 +575,98 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 				return new Negation(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
 		else if (ctx.left != null && ctx.right != null)
 			if (ctx.MUL() != null)
-				return new Multiplication(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Multiplication(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.DIV() != null)
-				return new Division(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Division(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.MOD() != null)
-				return new Remainder(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Remainder(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.ADD() != null)
 				return new IMPAddOrConcat(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
 			else if (ctx.SUB() != null)
-				return new Subtraction(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Subtraction(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.GT() != null)
-				return new GreaterThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new GreaterThan(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.GE() != null)
-				return new GreaterOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new GreaterOrEqual(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.LT() != null)
-				return new LessThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new LessThan(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.LE() != null)
-				return new LessOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new LessOrEqual(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.EQUAL() != null)
-				return new Equal(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Equal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.NOTEQUAL() != null)
-				return new NotEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new NotEqual(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.AND() != null)
-				return new And(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new And(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else
-				return new Or(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+				return new Or(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
 						visitExpression(ctx.right));
+		else if (ctx.left != null && ctx.type != null)
+			if (ctx.IS() != null)
+				return new IsInstance(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						new TypeLiteral(
+								cfg,
+								new SourceCodeLocation(file, line, col),
+								makeType(ctx.type.getText(), ctx.type)));
+			else
+				return new Cast(
+						cfg,
+						new SourceCodeLocation(file, line, col),
+						visitExpression(ctx.left),
+						new TypeLiteral(
+								cfg,
+								new SourceCodeLocation(file, line, col),
+								makeType(ctx.type.getText(), ctx.type)));
 		else if (ctx.NEW() != null)
 			if (ctx.newBasicArrayExpr() != null)
 				return visitNewBasicArrayExpr(ctx.newBasicArrayExpr());
@@ -576,6 +689,35 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return visitArrayExpr(ctx.arrayExpr());
 
 		throw new UnsupportedOperationException("Type of expression not supported: " + ctx);
+	}
+
+	private Type makeType(
+			String name,
+			ParserRuleContext ctx) {
+		SourceCodeLocation location = new SourceCodeLocation(file, getLine(ctx), getCol(ctx));
+		switch (name) {
+		case "int":
+			return Int32Type.INSTANCE;
+		case "float":
+			return Float32Type.INSTANCE;
+		case "bool":
+			return BoolType.INSTANCE;
+		case "string":
+			return StringType.INSTANCE;
+		default:
+			Type t = ClassType.lookup(name);
+			if (t != null)
+				return t;
+			t = InterfaceType.lookup(name);
+			if (t != null)
+				return t;
+			if (name.contains("[")) {
+				t = ArrayType.lookup(makeType(name.substring(0, name.indexOf("[")), ctx), 1);
+				if (t != null)
+					return t;
+			}
+			throw new IMPSyntaxException("Type '" + name + "' not found at " + location);
+		}
 	}
 
 	@Override
@@ -616,23 +758,53 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	public Expression visitBinaryStringExpr(
 			BinaryStringExprContext ctx) {
 		if (ctx.STRCAT() != null)
-			return new StringConcat.IMPStringConcat(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringConcat.IMPStringConcat(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRCONTAINS() != null)
-			return new StringContains.IMPStringContains(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringContains.IMPStringContains(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRENDS() != null)
-			return new StringEndsWith.IMPStringEndsWith(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringEndsWith.IMPStringEndsWith(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STREQ() != null)
-			return new StringEquals.IMPStringEquals(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringEquals.IMPStringEquals(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRINDEXOF() != null)
-			return new StringIndexOf.IMPStringIndexOf(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+			return new StringIndexOf.IMPStringIndexOf(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRSTARTS() != null)
-			return new StringStartsWith.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
-					visitExpression(ctx.left), visitExpression(ctx.right));
+			return new StringStartsWith.IMPStringStartsWith(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.right));
 
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
@@ -641,27 +813,50 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	public Expression visitTernaryStringExpr(
 			TernaryStringExprContext ctx) {
 		if (ctx.STRREPLACE() != null)
-			return new StringReplace.IMPStringReplace(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
-					visitExpression(ctx.middle), visitExpression(ctx.right));
-		else if (ctx.STRSUB() != null)
-			return new StringSubstring.IMPStringSubstring(cfg, file, getLine(ctx), getCol(ctx),
+			return new StringReplace.IMPStringReplace(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
 					visitExpression(ctx.left),
-					visitExpression(ctx.middle), visitExpression(ctx.right));
+					visitExpression(ctx.middle),
+					visitExpression(ctx.right));
+		else if (ctx.STRSUB() != null)
+			return new StringSubstring.IMPStringSubstring(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.middle),
+					visitExpression(ctx.right));
 
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
 
 	private Expression visitBumpBasicArrayExpr(
 			NewBasicArrayExprContext ctx) {
-		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				true, visitArrayCreatorRest(ctx.arrayCreatorRest()));
+		return new IMPNewArray(
+				cfg,
+				file,
+				getLine(ctx),
+				getCol(ctx),
+				visitPrimitiveType(ctx.primitiveType()),
+				true,
+				visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
 	public Expression visitNewBasicArrayExpr(
 			NewBasicArrayExprContext ctx) {
-		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				false, visitArrayCreatorRest(ctx.arrayCreatorRest()));
+		return new IMPNewArray(
+				cfg,
+				file,
+				getLine(ctx),
+				getCol(ctx),
+				visitPrimitiveType(ctx.primitiveType()),
+				false,
+				visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
@@ -688,9 +883,15 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			NewReferenceTypeContext ctx) {
 		// null since we do not want to create a new one, class types should
 		// have been created during the preprocessing
-		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
+		Type base = ClassType.lookup(ctx.IDENTIFIER().getText());
 		if (ctx.arrayCreatorRest() != null)
-			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base, true,
+			return new IMPNewArray(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					base,
+					true,
 					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
 			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, true, visitArguments(ctx.arguments()));
@@ -701,9 +902,15 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			NewReferenceTypeContext ctx) {
 		// null since we do not want to create a new one, class types should
 		// have been created during the preprocessing
-		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
+		Type base = ClassType.lookup(ctx.IDENTIFIER().getText());
 		if (ctx.arrayCreatorRest() != null)
-			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base, false,
+			return new IMPNewArray(
+					cfg,
+					file,
+					getLine(ctx),
+					getCol(ctx),
+					base,
+					false,
 					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
 			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, false, visitArguments(ctx.arguments()));
@@ -742,8 +949,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Expression receiver = visitReceiver(ctx.receiver());
 		String name = ctx.name.getText();
 		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
-		return new UnresolvedCall(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), CallType.INSTANCE, null,
-				name, args);
+		return new UnresolvedCall(
+				cfg,
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				CallType.INSTANCE,
+				null,
+				name,
+				args);
 	}
 
 	@Override
@@ -775,17 +987,25 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), clean(ctx));
 		else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
-				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
+				return new Float32Literal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
 						-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 			else
-				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
+				return new Float32Literal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
 						Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 		else if (ctx.LITERAL_DECIMAL() != null)
 			if (ctx.SUB() != null)
-				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
+				return new Int32Literal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
 						-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 			else
-				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
+				return new Int32Literal(
+						cfg,
+						new SourceCodeLocation(file, line, col),
 						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
@@ -805,4 +1025,153 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return text.substring(1, text.length() - 1);
 		return text;
 	}
+
+	@Override
+	public ParsedBlock visitTryBlock(
+			TryBlockContext ctx) {
+		NodeList<CFG, Statement, Edge> trycatch = new NodeList<>(new SequentialEdge());
+
+		// normal exit points of the try-catch in case there is no finally
+		// block:
+		// in this case, we have to add a noop at the end of the whole try-catch
+		// to use it as unique exit point in the returned triple
+		Collection<Statement> normalExits = new LinkedList<>();
+
+		// we parse the body of the try block normally
+		ParsedBlock body = visitBlock(ctx.body);
+		trycatch.mergeWith(body.getBody());
+		ProtectedBlock tryBlock = new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes());
+
+		// if there is an else block, we parse it immediately and connect it
+		// to the end of the try block *only* if it does not end with a
+		// return/throw
+		// (as it would be deadcode)
+		ParsedBlock elseBlock = null;
+		if (body.canBeContinued())
+			if (ctx.else_ == null)
+				// non-stopping last statement with no else
+				normalExits.add(body.getEnd());
+			else {
+				elseBlock = visitBlock(ctx.else_);
+				trycatch.mergeWith(elseBlock.getBody());
+				trycatch.addEdge(new SequentialEdge(body.getEnd(), elseBlock.getBegin()));
+				if (elseBlock.canBeContinued())
+					// non-stopping last statement
+					normalExits.add(elseBlock.getEnd());
+			}
+		else if (ctx.else_ != null)
+			// the else is deadcode
+			throw new IMPSyntaxException(
+					"Deadcode detected at " + new SourceCodeLocation(file, getLine(ctx.else_), getCol(ctx.else_)));
+
+		// we then parse each catch block, and we connect *every* instruction
+		// that can end the try block to the beginning of each catch block
+		List<CatchBlock> catches = new LinkedList<>();
+		List<ParsedBlock> catchBodies = new LinkedList<>();
+		for (CatchBlockContext ex : ctx.catchBlock()) {
+			Pair<CatchBlock, ParsedBlock> tmp = visitCatchBlock(ex);
+			CatchBlock block = tmp.getLeft();
+			ParsedBlock visit = tmp.getRight();
+			catches.add(block);
+			catchBodies.add(visit);
+			trycatch.mergeWith(visit.getBody());
+			if (body.canBeContinued())
+				trycatch.addEdge(new ErrorEdge(
+						body.getEnd(),
+						visit.getBegin(),
+						block.getIdentifier(),
+						tryBlock,
+						block.getExceptions()));
+			for (Statement st : body.getBody().getNodes())
+				if (st.stopsExecution())
+					trycatch.addEdge(new ErrorEdge(
+							st,
+							visit.getBegin(),
+							block.getIdentifier(),
+							tryBlock,
+							block.getExceptions()));
+			if (visit.canBeContinued())
+				// non-stopping last statement
+				normalExits.add(visit.getEnd());
+		}
+
+		// lastly, we parse the finally block and
+		// we connect it with the body (or the else block if it exists) and with
+		// each catch block
+		ParsedBlock finalBlock = null;
+		if (ctx.final_ != null) {
+			finalBlock = visitBlock(ctx.final_);
+			trycatch.mergeWith(finalBlock.getBody());
+		}
+
+		// this is the noop closing the whole try-catch, only if there is at
+		// least one path that does
+		// not return/throw anything
+		Statement noop = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx.TRY()), getCol(ctx.TRY())));
+		boolean usedNoop = !normalExits.isEmpty();
+		if (usedNoop) {
+			trycatch.addNode(noop);
+			if (finalBlock == null)
+				// if there is no finally block, we connect the noop to the
+				// end of all non-terminating inner blocks. otherwise,
+				// the CFGTweaker will add the edges to the finally block
+				// and back to the noop
+				for (Statement st : normalExits)
+					trycatch.addEdge(new SequentialEdge(st, noop));
+		}
+
+		// build protection block
+		descriptor.addProtectionBlock(
+				new ProtectionBlock(
+						tryBlock,
+						catches,
+						elseBlock == null ? null
+								: new ProtectedBlock(elseBlock.getBegin(), elseBlock.getEnd(),
+										elseBlock.getBody().getNodes()),
+						finalBlock == null ? null
+								: new ProtectedBlock(
+										finalBlock.getBegin(),
+										finalBlock.getEnd(),
+										finalBlock.getBody().getNodes()),
+						usedNoop ? noop : null));
+
+		return new ParsedBlock(body.getBegin(), trycatch, usedNoop ? noop : null);
+	}
+
+	@Override
+	public Pair<CatchBlock, ParsedBlock> visitCatchBlock(
+			CatchBlockContext ctx) {
+		List<Type> exceptions = new LinkedList<>();
+		for (UnitNameContext name : ctx.unitNames().unitName()) {
+			Type t = ClassType.lookup(name.getText());
+			if (t == null)
+				throw new IMPSyntaxException(
+						"Type '"
+								+ name.getText()
+								+ "' not found at "
+								+ new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
+			exceptions.add(t);
+		}
+
+		VariableRef variable = null;
+		tracker.enterScope();
+		if (ctx.IDENTIFIER() != null) {
+			variable = visitVar(ctx.IDENTIFIER(), false);
+			tracker.addVariable(variable.getName(), variable, new Annotations());
+		}
+
+		ParsedBlock body = visitBlock(ctx.body);
+		Statement last = body.getEnd();
+
+		tracker.exitScope(last);
+
+		CatchBlock catchBlock = new CatchBlock(
+				variable,
+				new ProtectedBlock(body.getBegin(), body.getEnd(), body.getBody().getNodes()),
+				exceptions.toArray(Type[]::new));
+
+		Pair<CatchBlock, ParsedBlock> result = Pair.of(catchBlock, body);
+		return result;
+	}
+
 }

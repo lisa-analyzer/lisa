@@ -1,27 +1,26 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
-import it.unive.lisa.analysis.nonRedundantSet.NonRedundantPowersetOfInterval;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.numeric.NonRedundantIntervals;
 import it.unive.lisa.analysis.numeric.Parity;
 import it.unive.lisa.analysis.numeric.Pentagon;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import org.junit.Test;
 
-public class NumericAnalysesTest extends AnalysisTestExecutor {
+public class NumericAnalysesTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testSign() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Sign()),
+				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "sign";
@@ -33,9 +32,9 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 	public void testParity() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Parity()),
+				new Parity(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "parity";
@@ -47,9 +46,9 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 	public void testInterval() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Interval()),
+				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "interval";
@@ -61,9 +60,9 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 	public void testIntegerConstantPropagation() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new IntegerConstantPropagation()),
+				new IntegerConstantPropagation(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "int-const";
@@ -75,9 +74,9 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 	public void testNonRedundantSetOfInterval() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new NonRedundantPowersetOfInterval()),
+				new NonRedundantIntervals(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
 		conf.testSubDir = "interval-set";
@@ -85,8 +84,8 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 		conf.descendingPhaseType = DescendingPhaseType.GLB;
 		conf.glbThreshold = 5;
 		// there seem to be one less round of redundancy removal
-		// that avoid compacting two elements into a single one when running an
-		// optimized analysis. the result is still sound and more precice
+		// that avoids compacting two elements into a single one when running an
+		// optimized analysis. the result is still sound and more precise
 		// however.
 		conf.compareWithOptimization = false;
 		perform(conf);
@@ -96,7 +95,7 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 	public void testPentagons() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Pentagon(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -105,4 +104,5 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 		conf.programFile = "pentagons.imp";
 		perform(conf);
 	}
+
 }

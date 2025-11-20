@@ -8,11 +8,15 @@ import java.util.Set;
  * holding references to entities that leave in the heap. For instance, where
  * creating an array if {@code int32}, the location in memory containing the
  * array will have type {@code int32[]}, while all variables referencing that
- * location will have type {@code referenceType(int32[])}.
+ * location will have type {@code referenceType(int32[])}. Subclasses should
+ * override at least {@link #commonSupertype(Type)} and
+ * {@link #allInstances(TypeSystem)} to ensure consistency.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ReferenceType implements PointerType {
+public class ReferenceType
+		implements
+		PointerType {
 
 	private final Type innerType;
 
@@ -90,4 +94,5 @@ public class ReferenceType implements PointerType {
 	public String toString() {
 		return innerType + "*";
 	}
+
 }

@@ -135,7 +135,12 @@ public final class Counter {
 			return;
 
 		logging = false;
-		logger.log(level, "{} [stop] [{} {} in {}]", message, count, objects,
+		logger.log(
+				level,
+				"{} [stop] [{} {} in {}]",
+				message,
+				count,
+				objects,
 				TimeFormat.UP_TO_SECONDS.format(System.nanoTime() - startTime));
 	}
 
@@ -151,4 +156,5 @@ public final class Counter {
 
 		logger.log(level, msg);
 	}
+
 }

@@ -1,0 +1,139 @@
+class A { ~A() {} }
+class B extends A { ~B() {} }
+class C extends A { ~C() {} }
+class D extends B { ~D() {} }
+class E extends B { ~E() {} }
+
+class exceptions {
+
+    tryCatchElseFinallyWithComplexControlFlow(b) {
+        def x = 0;
+        def y = 0;
+        def z = 0;
+        try {
+            if (b)
+                x = 1;
+            else 
+                throw new D();
+        } catch (E) {
+            y = 4;
+            if (b)
+                y = 5;
+        } catch (D e) {
+            while (b)
+                y = 6;
+            return y + x;
+        } catch (A, B e) {
+            while (b)
+                y = 9;
+        } else {
+            x = 10;
+            return x + y;
+        } finally {
+            if (b)
+                z = 13;
+        }
+        return z;
+    }
+
+    tryInLoopWithLabel(b) {
+        def x = 0;
+        def y = 0;
+        loop: while (b) {
+            x = x * 2;
+            while (b) {
+                try {
+                    x = x + 1;
+                    if (x > 10)
+                        break loop;
+                    x = x - 1;
+                    if (x < 7)
+                        throw new A();
+                } catch (A e) {
+                    y = 1;
+                } else {
+                    x = 2;
+                } finally {
+                    x = 3;
+                }
+            }
+        }
+        
+        return x;
+    }
+
+    nestedOverlapping1(b) {
+        def x = 0;
+        def y = 0;
+        try {
+            x = 1;
+            try {
+                x = 10;
+                if (b)
+                    throw new A();
+                x = 30;
+            } catch (A e2) {
+                y = 40;
+            } else {
+                x = 60;
+            }
+            x = 3;
+        } catch (A e) {
+            y = 4;
+        } else {
+            x = 6;
+        }
+        return x;
+    }
+
+    nestedOverlapping2(b) {
+        def x = 0;
+        def y = 0;
+        try {
+            x = 1;
+            try {
+                x = 10;
+            } catch (A e2) {
+                y = 40;
+            } else {
+                x = 60;
+                if (b)
+                    throw new A();
+                x = 70;
+            }
+            x = 3;
+        } catch (A e) {
+            y = 4;
+        } else {
+            x = 6;
+        }
+        return x;
+    }
+
+    nestedNonOverlapping(b) {
+        def x = 0;
+        def y = 0;
+        try {
+            x = 1;
+            try {
+                x = 10;
+                if (b)
+                    throw new A();
+                x = 30;
+                if (b)
+                    throw new B();
+            } catch (B e2) {
+                y = 40;
+            } else {
+                x = 60;
+            }
+            x = 3;
+        } catch (A e) {
+            y = 4;
+        } else {
+            x = 6;
+        }
+        return x;
+    }
+
+}

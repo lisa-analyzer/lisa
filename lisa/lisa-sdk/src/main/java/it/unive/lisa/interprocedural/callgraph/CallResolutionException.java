@@ -7,7 +7,9 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CallResolutionException extends Exception {
+public class CallResolutionException
+		extends
+		Exception {
 
 	private static final long serialVersionUID = -284151525683946469L;
 

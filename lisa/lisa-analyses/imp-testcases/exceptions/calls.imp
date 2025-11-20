@@ -1,0 +1,79 @@
+class A { ~A() {} }
+class B extends A { ~B() {} }
+class C extends A { ~C() {} }
+class D extends B { ~D() {} }
+class E extends B { ~E() {} }
+
+class exceptions {
+
+    thrower(b) {
+        if (b)
+            return 1;
+        else 
+            throw new D();
+    }
+
+    catchAfterCall(b) {
+        def x = 0;
+        try {
+            x = this.thrower(b);
+        } catch (A e) {
+            x = 5;
+        }
+        return x;
+    }
+
+    tryAfterThrow(b) {
+        def x = this.thrower(b);
+        try {
+            x = 0;
+        } catch (A e) {
+            x = 5;
+        }
+        return x;
+    }
+
+    intermediate3(b) {
+        def x = this.thrower(b);
+        if (b)
+            return x + 2;
+        return x;
+    }
+
+    intermediate2(b) {
+        return this.intermediate3(b) + 5;
+    }
+
+    intermediate1(b) {
+        return this.intermediate2(b);
+    }
+
+    catchAfterCallChain(b) {
+        def x = 0;
+        try {
+            x = this.intermediate1(b);
+        } catch (A e) {
+            x = -1;
+        }
+        return x;
+    }
+
+    unconditionalThrow() {
+        throw new B();
+    }
+
+    assignAfterException() {
+        def x = 1;
+        this.unconditionalThrow();
+        def z = 1;
+        def j = 10 / this.unconditionalThrow();
+    }
+
+    main(b) {
+        def x = this.catchAfterCall(b);
+        def y = this.tryAfterThrow(b);
+        def z = this.catchAfterCallChain(b);
+        def w = this.assignAfterException();
+    }
+
+}

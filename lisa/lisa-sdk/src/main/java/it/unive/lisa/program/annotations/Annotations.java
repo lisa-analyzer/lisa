@@ -11,9 +11,11 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * A collection of annotations.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class Annotations implements Iterable<Annotation> {
+public class Annotations
+		implements
+		Iterable<Annotation> {
 
 	private final Set<Annotation> annotations;
 
@@ -42,8 +44,7 @@ public class Annotations implements Iterable<Annotation> {
 	 */
 	public Annotations(
 			Collection<Annotation> annotations) {
-		this.annotations = annotations instanceof TreeSet<?>
-				? (TreeSet<Annotation>) annotations
+		this.annotations = annotations instanceof TreeSet<?> ? (TreeSet<Annotation>) annotations
 				: new TreeSet<>(annotations);
 	}
 
@@ -137,4 +138,5 @@ public class Annotations implements Iterable<Annotation> {
 	public final boolean isEmpty() {
 		return annotations.isEmpty();
 	}
+
 }

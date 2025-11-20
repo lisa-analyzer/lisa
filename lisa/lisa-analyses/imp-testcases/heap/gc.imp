@@ -1,0 +1,26 @@
+class gc {
+    x;
+    y;
+
+    ~gc() {
+        this.x = 1;
+        this.y = 2;
+    }
+
+    ~gc(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    main(nondet) {
+        def i = 10;
+        if (nondet) {
+            def a = new gc();
+        }
+
+        def b = new gc(5, 6);
+        if (nondet) {
+            b = new gc(15, 16);
+        }
+    }
+}

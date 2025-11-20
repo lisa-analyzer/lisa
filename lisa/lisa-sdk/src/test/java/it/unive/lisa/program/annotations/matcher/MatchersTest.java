@@ -25,4 +25,5 @@ public class MatchersTest {
 		Annotation ann = new Annotation("foo", List.of(new AnnotationMember("f", new IntAnnotationValue(5))));
 		assertTrue(new Annotations(new Annotation("bar"), ann).contains(matcher));
 	}
+
 }

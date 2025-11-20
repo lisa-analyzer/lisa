@@ -246,4 +246,5 @@ public class DeterminizeTest {
 
 		assertEquals(expected, a.determinize());
 	}
+
 }

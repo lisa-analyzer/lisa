@@ -45,4 +45,5 @@ public class TotalizeTest {
 
 		assertEquals(exp, a.totalize(sigma));
 	}
+
 }

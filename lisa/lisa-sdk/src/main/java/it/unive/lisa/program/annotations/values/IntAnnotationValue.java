@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * An integer annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class IntAnnotationValue implements BasicAnnotationValue {
+public class IntAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final int i;
 
@@ -56,4 +58,5 @@ public class IntAnnotationValue implements BasicAnnotationValue {
 		IntAnnotationValue other = (IntAnnotationValue) o;
 		return Integer.compare(i, other.i);
 	}
+
 }

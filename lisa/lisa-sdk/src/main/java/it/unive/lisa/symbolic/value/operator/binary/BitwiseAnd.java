@@ -16,7 +16,11 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BitwiseAnd extends NumericOperation implements BitwiseOperator {
+public class BitwiseAnd
+		extends
+		NumericOperation
+		implements
+		BitwiseOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -35,4 +39,5 @@ public class BitwiseAnd extends NumericOperation implements BitwiseOperator {
 	public String toString() {
 		return "&";
 	}
+
 }

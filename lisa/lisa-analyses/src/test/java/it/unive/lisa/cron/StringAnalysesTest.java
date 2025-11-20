@@ -1,29 +1,28 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.string.BoundedStringSet;
+import it.unive.lisa.analysis.string.Bricks;
 import it.unive.lisa.analysis.string.CharInclusion;
 import it.unive.lisa.analysis.string.Prefix;
 import it.unive.lisa.analysis.string.SubstringDomain;
 import it.unive.lisa.analysis.string.SubstringDomainWithConstants;
 import it.unive.lisa.analysis.string.Suffix;
-import it.unive.lisa.analysis.string.bricks.Bricks;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.tarsis.Tarsis;
 import org.junit.Test;
 
-public class StringAnalysesTest extends AnalysisTestExecutor {
+public class StringAnalysesTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void testPrefix() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Prefix()),
+				new Prefix(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "prefix";
@@ -35,9 +34,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	public void testSuffix() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Suffix()),
+				new Suffix(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "suffix";
@@ -49,9 +48,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	public void testCharInclusion() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new CharInclusion()),
+				new CharInclusion(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "char-inclusion";
@@ -63,9 +62,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	public void testBricks() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Bricks()),
+				new Bricks(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "bricks";
@@ -86,10 +85,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	public void testFSA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
-				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new FSA()),
-				DefaultConfiguration.defaultTypeDomain());
+		conf.analysis = DefaultConfiguration
+				.simpleDomain(DefaultConfiguration.defaultHeapDomain(), new FSA(),
+						DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "fsa";
 		conf.programFile = "strings.imp";
@@ -100,9 +98,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	public void testTarsis() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new Tarsis()),
+				new Tarsis(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "tarsis";
@@ -114,9 +112,9 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	public void testBoundedStringSet() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
-				new ValueEnvironment<>(new BoundedStringSet()),
+				new BoundedStringSet(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "bounded-string-set";
@@ -127,8 +125,8 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	@Test
 	public void testSubstringDomain() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true; // dump results
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.serializeResults = true;
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new SubstringDomain(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -142,8 +140,8 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 	@Test
 	public void testSubstringDomainWithConstants() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true; // dump results
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.serializeResults = true;
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new SubstringDomainWithConstants(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -152,4 +150,5 @@ public class StringAnalysesTest extends AnalysisTestExecutor {
 		conf.programFile = "strings-subs-constants.imp";
 		perform(conf);
 	}
+
 }

@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.operator.NegatableOperator;
@@ -17,7 +18,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnaryExpression extends ValueExpression {
+public class UnaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The inner expression
@@ -70,17 +73,23 @@ public class UnaryExpression extends ValueExpression {
 	@Override
 	public ValueExpression removeNegations() {
 		if (operator instanceof LogicalNegation && expression instanceof BinaryExpression) {
-			BinaryExpression binary = (BinaryExpression) expression;
-			ValueExpression left = (ValueExpression) binary.getLeft();
-			ValueExpression right = (ValueExpression) binary.getRight();
-			BinaryOperator op = binary.getOperator();
+			ValueExpression left = (ValueExpression) ((BinaryExpression) expression).getLeft();
+			ValueExpression right = (ValueExpression) ((BinaryExpression) expression).getRight();
+			BinaryOperator op = ((BinaryExpression) expression).getOperator();
 			BinaryOperator oppositeOp = op instanceof NegatableOperator
 					? (BinaryOperator) ((NegatableOperator) op).opposite()
 					: op;
-			BinaryExpression expr = new BinaryExpression(binary.getStaticType(), left.removeNegations(),
-					right.removeNegations(),
-					oppositeOp, getCodeLocation());
-			return expr;
+			ValueExpression oppositeLeft = left.removeNegations();
+			ValueExpression oppositeRight = right.removeNegations();
+			if (op == oppositeOp && left == oppositeLeft && right == oppositeRight)
+				// if nothing changed, preserve reference equality
+				return this;
+			return new BinaryExpression(
+					expression.getStaticType(),
+					oppositeLeft,
+					oppositeRight,
+					oppositeOp,
+					getCodeLocation());
 		}
 
 		return this;
@@ -88,18 +97,26 @@ public class UnaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		UnaryExpression expr = new UnaryExpression(getStaticType(), expression.pushScope(token), operator,
+		UnaryExpression expr = new UnaryExpression(
+				getStaticType(),
+				expression.pushScope(token, pp),
+				operator,
 				getCodeLocation());
 		return expr;
 	}
 
 	@Override
 	public SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		UnaryExpression expr = new UnaryExpression(getStaticType(), expression.popScope(token), operator,
+		UnaryExpression expr = new UnaryExpression(
+				getStaticType(),
+				expression.popScope(token, pp),
+				operator,
 				getCodeLocation());
 		return expr;
 	}
@@ -163,4 +180,26 @@ public class UnaryExpression extends ValueExpression {
 			UnaryOperator operator) {
 		return new UnaryExpression(getStaticType(), expression, operator, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression e = expression.removeTypingExpressions();
+		if (expression == e)
+			return this;
+		return new UnaryExpression(getStaticType(), e, operator, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression e = expression.replace(source, target);
+		if (expression == e)
+			return this;
+		return new UnaryExpression(getStaticType(), e, operator, getCodeLocation());
+	}
+
 }

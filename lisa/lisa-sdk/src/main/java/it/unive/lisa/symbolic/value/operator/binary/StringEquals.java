@@ -18,7 +18,9 @@ import it.unive.lisa.type.TypeSystem;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringEquals extends StringOperation {
+public class StringEquals
+		extends
+		StringOperation {
 
 	/**
 	 * The singleton instance of this class.
@@ -43,4 +45,5 @@ public class StringEquals extends StringOperation {
 			TypeSystem types) {
 		return types.getBooleanType();
 	}
+
 }

@@ -11,9 +11,10 @@ import java.util.Map;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState}
+ * @param <A> the type of {@link AbstractLattice}
  */
-public class StatementStore<A extends AbstractState<A>>
+public class StatementStore<
+		A extends AbstractLattice<A>>
 		extends
 		FunctionalLattice<StatementStore<A>, Statement, AnalysisState<A>> {
 
@@ -87,4 +88,5 @@ public class StatementStore<A extends AbstractState<A>>
 			Statement key) {
 		return lattice.bottom();
 	}
+
 }

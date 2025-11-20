@@ -44,4 +44,5 @@ public class AcceptsEmptyLanguageTest {
 
 		assertFalse(a.acceptsEmptyLanguage());
 	}
+
 }

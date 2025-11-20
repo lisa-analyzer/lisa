@@ -5,18 +5,22 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.string.Bricks;
+import it.unive.lisa.analysis.string.Bricks.Brick;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
 
 public class BrickTest {
+
 	@Test
 	public void testGetReps() {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
-		Brick brick = new Brick(1, 2, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 2, hashSet);
 
 		Set<String> result = new HashSet<>();
 		result.add("mo");
@@ -34,7 +38,8 @@ public class BrickTest {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("abc");
 
-		Brick brick = new Brick(1, 1, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 1, hashSet);
 
 		Set<String> result = new HashSet<>();
 		result.add("abc");
@@ -49,7 +54,8 @@ public class BrickTest {
 		hashSet.add("de");
 		hashSet.add("re");
 
-		Brick brick = new Brick(1, 2, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 2, hashSet);
 
 		Set<String> result = new HashSet<>();
 		result.add("mo");
@@ -76,7 +82,8 @@ public class BrickTest {
 		hashSet.add("re");
 		hashSet.add("ve");
 
-		Brick brick = new Brick(1, 4, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 4, hashSet);
 
 		assertTrue(brick.getReps().contains("derevemo"));
 	}
@@ -87,7 +94,8 @@ public class BrickTest {
 
 		hashSet.add("straw");
 
-		Brick brick = new Brick(0, 1, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(0, 1, hashSet);
 
 		Set<String> result = new HashSet<>();
 
@@ -104,7 +112,8 @@ public class BrickTest {
 		set.add("a");
 		set.add("b");
 
-		Brick brick = new Brick(2, 2, set);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(2, 2, set);
 
 		Set<String> result = new HashSet<>();
 
@@ -123,98 +132,109 @@ public class BrickTest {
 		hashSet.add("de");
 		hashSet.add("re");
 
-		Brick brick = new Brick(1, 2, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 2, hashSet);
 
 		assertEquals(brick.representation().toString(), "[{de, mo, re}](1,2)");
 	}
 
 	@Test
-	public void testLessOrEqualsAux() throws SemanticException {
+	public void testLessOrEqualsAux()
+			throws SemanticException {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
-		Brick brick = new Brick(1, 2, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 2, hashSet);
 
 		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("mo");
 		hashSet1.add("de");
 		hashSet1.add("re");
 
-		Brick brick1 = new Brick(0, 3, hashSet1);
+		Brick brick1 = domain.new Brick(0, 3, hashSet1);
 
 		assertTrue(brick.lessOrEqualAux(brick1));
 	}
 
 	@Test
-	public void testLessOrEqualsAux1() throws SemanticException {
+	public void testLessOrEqualsAux1()
+			throws SemanticException {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
 
-		Brick brick = new Brick(1, 2, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 2, hashSet);
 
 		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("mo");
 		hashSet1.add("de");
 
-		Brick brick1 = new Brick(0, 3, hashSet1);
+		Brick brick1 = domain.new Brick(0, 3, hashSet1);
 
 		assertFalse(brick.lessOrEqualAux(brick1));
 	}
 
 	@Test
-	public void testLessOrEqualsAux2() throws SemanticException {
+	public void testLessOrEqualsAux2()
+			throws SemanticException {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
-		Brick brick = new Brick(0, 2, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(0, 2, hashSet);
 
 		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("mo");
 		hashSet1.add("de");
 		hashSet1.add("re");
 
-		Brick brick1 = new Brick(1, 3, hashSet1);
+		Brick brick1 = domain.new Brick(1, 3, hashSet1);
 
 		assertFalse(brick.lessOrEqualAux(brick1));
 	}
 
 	@Test
-	public void testLessOrEqualsAux3() throws SemanticException {
+	public void testLessOrEqualsAux3()
+			throws SemanticException {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
-		Brick brick = new Brick(1, 4, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 4, hashSet);
 
 		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("mo");
 		hashSet1.add("de");
 		hashSet1.add("re");
 
-		Brick brick1 = new Brick(0, 3, hashSet1);
+		Brick brick1 = domain.new Brick(0, 3, hashSet1);
 
 		assertFalse(brick.lessOrEqualAux(brick1));
 	}
 
 	@Test
-	public void testLubAux() throws SemanticException {
+	public void testLubAux()
+			throws SemanticException {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
 
-		Brick brick = new Brick(1, 4, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 4, hashSet);
 
 		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("le");
 		hashSet1.add("de");
 		hashSet1.add("lo");
 
-		Brick brick1 = new Brick(0, 3, hashSet1);
+		Brick brick1 = domain.new Brick(0, 3, hashSet1);
 
 		Set<String> resultHashSet = new HashSet<>();
 
@@ -224,24 +244,26 @@ public class BrickTest {
 		resultHashSet.add("le");
 		resultHashSet.add("lo");
 
-		Brick resultBrick = new Brick(0, 4, resultHashSet);
+		Brick resultBrick = domain.new Brick(0, 4, resultHashSet);
 
 		assertEquals(brick.lubAux(brick1), resultBrick);
 	}
 
 	@Test
-	public void testLubAux1() throws SemanticException {
+	public void testLubAux1()
+			throws SemanticException {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("a");
 		hashSet.add("b");
 
-		Brick brick = new Brick(1, 3, hashSet);
+		Bricks domain = new Bricks();
+		Brick brick = domain.new Brick(1, 3, hashSet);
 
 		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("a");
 		hashSet1.add("c");
 
-		Brick brick1 = new Brick(0, 2, hashSet1);
+		Brick brick1 = domain.new Brick(0, 2, hashSet1);
 
 		Set<String> resultHashSet = new HashSet<>();
 
@@ -249,8 +271,9 @@ public class BrickTest {
 		resultHashSet.add("c");
 		resultHashSet.add("b");
 
-		Brick resultBrick = new Brick(0, 3, resultHashSet);
+		Brick resultBrick = domain.new Brick(0, 3, resultHashSet);
 
 		assertEquals(brick.lubAux(brick1), resultBrick);
 	}
+
 }

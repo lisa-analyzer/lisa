@@ -15,7 +15,11 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NumericNonOverflowingDiv extends NumericOperation implements DivisionOperator {
+public class NumericNonOverflowingDiv
+		extends
+		NumericOperation
+		implements
+		DivisionOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -34,4 +38,5 @@ public class NumericNonOverflowingDiv extends NumericOperation implements Divisi
 	public String toString() {
 		return "/";
 	}
+
 }

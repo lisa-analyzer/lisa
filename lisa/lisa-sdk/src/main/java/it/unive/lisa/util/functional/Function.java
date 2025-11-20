@@ -26,4 +26,5 @@ public interface Function<T, R, E extends Exception> {
 	R apply(
 			T t)
 			throws E;
+
 }

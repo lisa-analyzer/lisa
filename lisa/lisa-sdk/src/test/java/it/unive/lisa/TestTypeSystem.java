@@ -7,7 +7,9 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import java.util.Set;
 
-public class TestTypeSystem extends TypeSystem {
+public class TestTypeSystem
+		extends
+		TypeSystem {
 
 	@Override
 	public BooleanType getBooleanType() {
@@ -30,6 +32,7 @@ public class TestTypeSystem extends TypeSystem {
 					TypeSystem types) {
 				return null;
 			}
+
 		};
 	}
 
@@ -54,6 +57,7 @@ public class TestTypeSystem extends TypeSystem {
 					TypeSystem types) {
 				return null;
 			}
+
 		};
 	}
 
@@ -108,6 +112,7 @@ public class TestTypeSystem extends TypeSystem {
 			public boolean is16Bits() {
 				return false;
 			}
+
 		};
 	}
 

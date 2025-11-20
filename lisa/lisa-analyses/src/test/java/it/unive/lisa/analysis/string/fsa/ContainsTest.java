@@ -6,6 +6,8 @@ import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
+import it.unive.lisa.lattices.string.fsa.StringSymbol;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.StringType;
@@ -22,6 +24,7 @@ import org.junit.Test;
 public class ContainsTest {
 
 	private final SemanticOracle oracle = TestParameterProvider.provideParam(null, SemanticOracle.class);
+
 	private final BinaryExpression expr = new BinaryExpression(
 			BoolType.INSTANCE,
 			new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE),
@@ -30,7 +33,8 @@ public class ContainsTest {
 			SyntheticLocation.INSTANCE);
 
 	@Test
-	public void test01() throws SemanticException {
+	public void test01()
+			throws SemanticException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(0, true, false);
@@ -58,15 +62,14 @@ public class ContainsTest {
 
 		SimpleAutomaton a2 = new SimpleAutomaton(states2, delta2);
 
-		FSA fsa = new FSA(a);
-		FSA fsa1 = new FSA(a2);
+		FSA domain = new FSA();
 
-		assertEquals(Satisfiability.UNKNOWN,
-				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
+		assertEquals(Satisfiability.UNKNOWN, domain.satisfiesBinaryExpression(expr, a, a2, null, oracle));
 	}
 
 	@Test
-	public void test02() throws SemanticException {
+	public void test02()
+			throws SemanticException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(0, true, false);
@@ -94,15 +97,14 @@ public class ContainsTest {
 
 		SimpleAutomaton a2 = new SimpleAutomaton(states2, delta2);
 
-		FSA fsa = new FSA(a);
-		FSA fsa1 = new FSA(a2);
+		FSA domain = new FSA();
 
-		assertEquals(Satisfiability.NOT_SATISFIED,
-				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
+		assertEquals(Satisfiability.NOT_SATISFIED, domain.satisfiesBinaryExpression(expr, a, a2, null, oracle));
 	}
 
 	@Test
-	public void test03() throws SemanticException {
+	public void test03()
+			throws SemanticException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(0, true, false);
@@ -130,15 +132,14 @@ public class ContainsTest {
 
 		SimpleAutomaton a2 = new SimpleAutomaton(states2, delta2);
 
-		FSA fsa = new FSA(a);
-		FSA fsa1 = new FSA(a2);
+		FSA domain = new FSA();
 
-		assertEquals(Satisfiability.SATISFIED,
-				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
+		assertEquals(Satisfiability.SATISFIED, domain.satisfiesBinaryExpression(expr, a, a2, null, oracle));
 	}
 
 	@Test
-	public void test04() throws SemanticException {
+	public void test04()
+			throws SemanticException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(0, true, false);
@@ -168,15 +169,14 @@ public class ContainsTest {
 
 		SimpleAutomaton a2 = new SimpleAutomaton(states2, delta2);
 
-		FSA fsa = new FSA(a);
-		FSA fsa1 = new FSA(a2);
+		FSA domain = new FSA();
 
-		assertEquals(Satisfiability.UNKNOWN,
-				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
+		assertEquals(Satisfiability.UNKNOWN, domain.satisfiesBinaryExpression(expr, a, a2, null, oracle));
 	}
 
 	@Test
-	public void test05() throws SemanticException {
+	public void test05()
+			throws SemanticException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(0, true, false);
@@ -203,11 +203,9 @@ public class ContainsTest {
 
 		SimpleAutomaton a2 = new SimpleAutomaton(states2, delta2);
 
-		FSA fsa = new FSA(a);
-		FSA fsa1 = new FSA(a2);
+		FSA domain = new FSA();
 
-		assertEquals(Satisfiability.UNKNOWN,
-				fsa.satisfiesBinaryExpression(expr, fsa, fsa1, null, oracle));
+		assertEquals(Satisfiability.UNKNOWN, domain.satisfiesBinaryExpression(expr, a, a2, null, oracle));
 	}
 
 }

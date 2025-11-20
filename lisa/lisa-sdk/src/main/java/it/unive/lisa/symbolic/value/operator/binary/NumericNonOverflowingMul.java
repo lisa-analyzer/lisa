@@ -16,7 +16,11 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NumericNonOverflowingMul extends NumericOperation implements MultiplicationOperator {
+public class NumericNonOverflowingMul
+		extends
+		NumericOperation
+		implements
+		MultiplicationOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -35,4 +39,5 @@ public class NumericNonOverflowingMul extends NumericOperation implements Multip
 	public String toString() {
 		return "*";
 	}
+
 }

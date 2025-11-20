@@ -1,0 +1,118 @@
+class program {
+
+    whileBreak(b) {
+        def x = 0;
+        while (b) {
+            x = x + 1;
+            if (x > 10)
+                break;
+        }
+        return x;
+    }
+
+    whileBreakLabel(b) {
+        def x = 0;
+        loop: while (b) {
+            x = x + 1;
+            if (x > 10)
+                break loop;
+        }
+        return x;
+    }
+
+    forBreak() {
+        def x = 0;
+        for (def i = 0; i < 10; i = i + 1) {
+            x = x + 1;
+            if (x > 10)
+                break;
+        }
+        return x;
+    }
+
+    forBreakLabel() {
+        def x = 0;
+        loop: for (def i = 0; i < 10; i = i + 1) {
+            x = x + 1;
+            if (x > 10)
+                break loop;
+        }
+        return x;
+    }
+
+    whileContinue(b) {
+        def x = 0;
+        while (b) {
+            x = x + 1;
+            if (x > 10)
+                continue;
+        }
+        return x;
+    }
+
+    whileContinueLabel(b) {
+        def x = 0;
+        loop: while (b) {
+            x = x + 1;
+            if (x > 10)
+                continue loop;
+        }
+        return x;
+    }
+
+    forContinue() {
+        def x = 0;
+        for (def i = 0; i < 10; i = i + 1) {
+            x = x + 1;
+            if (x > 10)
+                continue;
+        }
+        return x;
+    }
+
+    forContinueLabel() {
+        def x = 0;
+        loop: for (def i = 0; i < 10; i = i + 1) {
+            x = x + 1;
+            if (x > 10)
+                continue loop;
+        }
+        return x;
+    }
+
+    nestedBreak(b) {
+        def x = 0;
+        loop: for (def i = 0; i < 10; i = i + 1) {
+            x = x + 1;
+            while (x < 10) {
+                x = x * 2;
+                if (x == 7)
+                    break;
+            }             
+            while (b) {
+                x = x / 2;
+                break loop;
+            }
+            x = x - 1;
+        }
+        return x;
+    }
+
+    nestedContinue(b) {
+        def x = 0;
+        loop: for (def i = 0; i < 10; i = i + 1) {
+            x = x + 1;
+            while (x < 10) {
+                x = x * 2;
+                if (x == 7)
+                    continue;
+            }             
+            while (b) {
+                x = x / 2;
+                continue loop;
+            }
+            x = x - 1;
+        }
+        return x;
+    }
+}

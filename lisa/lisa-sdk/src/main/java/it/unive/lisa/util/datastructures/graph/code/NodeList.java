@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A list of nodes of a {@link CodeGraph}, together with the edges connecting
@@ -35,6 +37,8 @@ import org.apache.commons.lang3.tuple.Pair;
 public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>, E extends CodeEdge<G, N, E>>
 		implements
 		Iterable<N> {
+
+	private static final Logger LOG = LogManager.getLogger(NodeList.class);
 
 	private static final String EDGE_SIMPLIFY_ERROR = "Cannot simplify an edge with class ";
 
@@ -160,23 +164,23 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		cutoff.removeAll(interesting);
 		interesting.forEach(i -> cutoff.add(i - 1));
 
-		if (target != 0)
-			if (target != nodes.size()) { // we don't remove 1 since we want to
-											// compare wrt the 'old' position
-				N pred = nodes.get(target - 1);
-				N succ = nodes.get(target); // before was at target+1
-				NodeEdges<G, N, E> predEdges = extraEdges.get(pred);
-				if (predEdges != null) {
-					E seq = sequentialSingleton.newInstance(pred, succ);
-					if (predEdges.outgoing.contains(seq)) {
-						// sequential edge can be encoded in the list
-						removeEdge(seq);
-						cutoff.remove(target - 1);
-					} else
-						cutoff.add(target - 1);
+		if (target != 0 && target != nodes.size()) {
+			// in the second condition we don't remove 1 since we want to
+			// compare wrt the 'old' position
+			N pred = nodes.get(target - 1);
+			N succ = nodes.get(target); // before was at target+1
+			NodeEdges<G, N, E> predEdges = extraEdges.get(pred);
+			if (predEdges != null) {
+				E seq = sequentialSingleton.newInstance(pred, succ);
+				if (predEdges.outgoing.contains(seq)) {
+					// sequential edge can be encoded in the list
+					removeEdge(seq);
+					cutoff.remove(target - 1);
 				} else
 					cutoff.add(target - 1);
-			}
+			} else
+				cutoff.add(target - 1);
+		}
 	}
 
 	/**
@@ -365,7 +369,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the collection of edges
 	 */
 	public final Collection<E> getEdges() {
-		Set<E> result = extraEdges.values().stream()
+		Set<E> result = extraEdges.values()
+				.stream()
 				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
 				.distinct()
 				.collect(Collectors.toSet());
@@ -474,8 +479,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 				// this is a entry node
 				for (E out : outgoing) {
 					if (!out.isUnconditional())
-						throw new UnsupportedOperationException(
-								EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
+						throw new UnsupportedOperationException(EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
 
 					// remove the edge
 					removedEdges.add(out);
@@ -486,8 +490,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 				// this is an exit node
 				for (E in : ingoing) {
 					if (!in.isUnconditional())
-						throw new UnsupportedOperationException(
-								EDGE_SIMPLIFY_ERROR + in.getClass().getSimpleName());
+						throw new UnsupportedOperationException(EDGE_SIMPLIFY_ERROR + in.getClass().getSimpleName());
 
 					// remove the edge
 					removedEdges.add(in);
@@ -496,13 +499,17 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 				// normal intermediate edge
 				for (E in : ingoing)
 					for (E out : outgoing) {
-						if (!out.isUnconditional())
+						if (!out.isUnconditional() && !out.isErrorHandling())
 							throw new UnsupportedOperationException(
 									EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
 
+						E _new;
 						// replicate the edge from ingoing.source to
 						// outgoing.dest
-						E _new = in.newInstance(in.getSource(), out.getDestination());
+						if (out.isErrorHandling())
+							_new = out.newInstance(in.getSource(), out.getDestination());
+						else
+							_new = in.newInstance(in.getSource(), out.getDestination());
 						replacedEdges.put(Pair.of(in, out), _new);
 						addEdge(_new);
 					}
@@ -541,7 +548,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1 || dest == -1)
 			return false;
 
-		if (src == dest - 1 && !cutoff.contains(src)
+		if (src == dest - 1
+				&& !cutoff.contains(src)
 				&& edge.isUnconditional()
 				&& sequentialSingleton.newInstance(edge.getSource(), edge.getDestination()).equals(edge))
 			return true;
@@ -768,8 +776,12 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	public void validate(
 			Collection<N> entrypoints)
 			throws ProgramValidationException {
-		// all edges should be connected to statements inside the list
 		for (N node : nodes) {
+			// no deadcode
+			if (getIngoingEdges(node).isEmpty() && !entrypoints.contains(node))
+				LOG.warn("Unreachable node is not marked as entrypoint: " + node);
+
+			// all edges should be connected to statements inside the list
 			NodeEdges<G, N, E> edges = extraEdges.get(node);
 			if (edges == null)
 				continue;
@@ -779,14 +791,6 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 
 			for (E out : edges.outgoing)
 				validateEdge(nodes, out);
-
-			// no deadcode
-			int idx = nodes.indexOf(node);
-			if (edges.ingoing.isEmpty()
-					&& (idx == 0 || cutoff.contains(idx - 1))
-					&& !entrypoints.contains(node))
-				throw new ProgramValidationException(
-						"Unreachable node that is not marked as entrypoint: " + node);
 		}
 	}
 
@@ -795,11 +799,11 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 			E edge)
 			throws ProgramValidationException {
 		if (!nodes.contains(edge.getSource()))
-			throw new ProgramValidationException("Invalid edge: '" + edge
-					+ "' originates in a node that is not part of the graph");
+			throw new ProgramValidationException(
+					"Invalid edge: '" + edge + "' originates in a node that is not part of the graph");
 		else if (!nodes.contains(edge.getDestination()))
-			throw new ProgramValidationException("Invalid edge: '" + edge
-					+ "' reaches a node that is not part of the graph");
+			throw new ProgramValidationException(
+					"Invalid edge: '" + edge + "' reaches a node that is not part of the graph");
 	}
 
 	/**
@@ -816,7 +820,9 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	public static class NodeEdges<G extends CodeGraph<G, N, E>,
 			N extends CodeNode<G, N, E>,
 			E extends CodeEdge<G, N, E>> {
+
 		private final Set<E> ingoing;
+
 		private final Set<E> outgoing;
 
 		private NodeEdges() {
@@ -884,5 +890,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		public String toString() {
 			return "ins: " + ingoing + ", outs: " + outgoing;
 		}
+
 	}
+
 }

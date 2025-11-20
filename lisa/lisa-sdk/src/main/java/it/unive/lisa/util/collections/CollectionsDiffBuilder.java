@@ -24,10 +24,15 @@ import org.apache.commons.lang3.tuple.Pair;
 public class CollectionsDiffBuilder<T> {
 
 	private final Class<T> elementType;
+
 	private final Collection<T> first;
+
 	private final Collection<T> second;
+
 	private final List<T> onlyFirst = new ArrayList<>();
+
 	private final List<Pair<T, T>> commons = new ArrayList<>();
+
 	private final List<T> onlySecond = new ArrayList<>();
 
 	/**
@@ -192,4 +197,5 @@ public class CollectionsDiffBuilder<T> {
 	public boolean sameContent() {
 		return onlyFirst.isEmpty() && onlySecond.isEmpty();
 	}
+
 }

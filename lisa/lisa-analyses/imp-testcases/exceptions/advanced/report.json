@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this).json", "untyped_A.A(A__this)_569697217.json", "untyped_A.A(A__this)_569698085.json", "untyped_A.A(A__this)_569698705.json", "untyped_A.A(A__this)_569700379.json", "untyped_B.B(B__this).json", "untyped_B.B(B__this)_569698798.json", "untyped_C.C(C__this).json", "untyped_D.D(D__this).json", "untyped_D.D(D__this)_569691637.json", "untyped_E.E(E__this).json", "untyped_exceptions.nestedNonOverlapping(exceptions__this,_untyped_b).json", "untyped_exceptions.nestedOverlapping1(exceptions__this,_untyped_b).json", "untyped_exceptions.nestedOverlapping2(exceptions__this,_untyped_b).json", "untyped_exceptions.tryCatchElseFinallyWithComplexControlFlow(exceptions__this,_untyped_b).json", "untyped_exceptions.tryInLoopWithLabel(exceptions__this,_untyped_b).json" ],
+  "info" : {
+    "cfgs" : "10",
+    "duration" : "317ms",
+    "end" : "2025-09-15T16:03:24.490+02:00",
+    "expressions" : "139",
+    "files" : "16",
+    "globals" : "0",
+    "members" : "10",
+    "programs" : "1",
+    "start" : "2025-09-15T16:03:24.173+02:00",
+    "statements" : "88",
+    "units" : "6",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "10",
+    "workdir" : "test-outputs/exceptions/advanced"
+  }
+}

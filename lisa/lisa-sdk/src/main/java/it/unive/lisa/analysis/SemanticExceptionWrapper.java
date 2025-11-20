@@ -6,7 +6,9 @@ package it.unive.lisa.analysis;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SemanticExceptionWrapper extends RuntimeException {
+public class SemanticExceptionWrapper
+		extends
+		RuntimeException {
 
 	private static final long serialVersionUID = 7246029205296168336L;
 

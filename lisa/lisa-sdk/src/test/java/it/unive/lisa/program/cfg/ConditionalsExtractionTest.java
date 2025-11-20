@@ -33,9 +33,11 @@ import org.junit.Test;
 
 public class ConditionalsExtractionTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0),
+	private static final ClassUnit unit = new ClassUnit(
+			new SourceCodeLocation("unknown", 0, 0),
 			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
-			"Testing", false);
+			"Testing",
+			false);
 
 	private static void checkMatrix(
 			String label,
@@ -51,8 +53,7 @@ public class ConditionalsExtractionTest {
 		if (!extraNodes.isEmpty())
 			System.err.println("The following nodes are spurious in " + label + ": " + extraNodes);
 
-		assertTrue("Set of nodes does not match the expected results",
-				missingNodes.isEmpty() && extraNodes.isEmpty());
+		assertTrue("Set of nodes does not match the expected results", missingNodes.isEmpty() && extraNodes.isEmpty());
 	}
 
 	private void assertIf(
@@ -83,10 +84,8 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "simpleIf"));
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef condition = new VariableRef(cfg, unknown, "b");
-		Assignment a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "l"), constant);
-		Assignment a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "r"), constant);
+		Assignment a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "l"), constant);
+		Assignment a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "r"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
@@ -134,10 +133,8 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyBranch"));
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef condition = new VariableRef(cfg, unknown, "b");
-		Assignment a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "l"), constant);
-		Assignment a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "r"), constant);
+		Assignment a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "l"), constant);
+		Assignment a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "r"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
@@ -164,12 +161,9 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "asymmetricIf"));
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef condition = new VariableRef(cfg, unknown, "b");
-		Assignment a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "l"), constant);
-		Assignment a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "r"), constant);
-		Assignment a3 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "x"), constant);
+		Assignment a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "l"), constant);
+		Assignment a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "r"), constant);
+		Assignment a3 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "x"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
@@ -198,18 +192,12 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "bigAsymmetricIf"));
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef condition = new VariableRef(cfg, unknown, "b");
-		Assignment a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "l"), constant);
-		Assignment a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "r"), constant);
-		Assignment a3 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "x"), constant);
-		Assignment a4 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "y"), constant);
-		Assignment a5 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "z"), constant);
-		Assignment a6 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "w"), constant);
+		Assignment a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "l"), constant);
+		Assignment a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "r"), constant);
+		Assignment a3 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "x"), constant);
+		Assignment a4 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "y"), constant);
+		Assignment a5 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "z"), constant);
+		Assignment a6 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "w"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
@@ -244,10 +232,8 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "simpleLoop"));
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef condition = new VariableRef(cfg, unknown, "b");
-		Assignment a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "l"), constant);
-		Assignment a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "r"), constant);
+		Assignment a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "l"), constant);
+		Assignment a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "r"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
@@ -274,10 +260,8 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyLoop"));
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef condition = new VariableRef(cfg, unknown, "b");
-		Assignment a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "l"), constant);
-		Assignment a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "r"), constant);
+		Assignment a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "l"), constant);
+		Assignment a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "r"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
@@ -303,18 +287,12 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "longLoop"));
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef condition = new VariableRef(cfg, unknown, "b");
-		Assignment a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "l"), constant);
-		Assignment a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "r"), constant);
-		Assignment a3 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "x"), constant);
-		Assignment a4 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "y"), constant);
-		Assignment a5 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "z"), constant);
-		Assignment a6 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "w"), constant);
+		Assignment a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "l"), constant);
+		Assignment a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "r"), constant);
+		Assignment a3 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "x"), constant);
+		Assignment a4 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "y"), constant);
+		Assignment a5 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "z"), constant);
+		Assignment a6 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "w"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
@@ -349,22 +327,12 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "nested"));
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef loop_condition = new VariableRef(cfg, unknown, "b");
-		Assignment loop_a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "loop_a1"),
-				constant);
-		Assignment loop_a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "loop_a2"),
-				constant);
+		Assignment loop_a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "loop_a1"), constant);
+		Assignment loop_a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "loop_a2"), constant);
 		VariableRef if_condition = new VariableRef(cfg, unknown, "c");
-		Assignment if_a1 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "if_a1"),
-				constant);
-		Assignment if_a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "if_a2"),
-				constant);
-		Assignment if_a3 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "if_a3"),
-				constant);
+		Assignment if_a1 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "if_a1"), constant);
+		Assignment if_a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "if_a2"), constant);
+		Assignment if_a3 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "if_a3"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 
 		cfg.addNode(loop_condition, true);
@@ -402,8 +370,11 @@ public class ConditionalsExtractionTest {
 			ith = (IfThenElse) second;
 			loop = (Loop) first;
 		} else
-			fail("Wrong conditional structures: excpected one loop and one if-then-else, but got a "
-					+ first.getClass().getSimpleName() + " and a " + second.getClass().getSimpleName());
+			fail(
+					"Wrong conditional structures: excpected one loop and one if-then-else, but got a "
+							+ first.getClass().getSimpleName()
+							+ " and a "
+							+ second.getClass().getSimpleName());
 
 		assertIf(if_condition, loop_a2, collect(if_a1, if_a3), collect(if_a2), ith);
 		assertLoop(loop_condition, ret, collect(loop_a1, if_condition, if_a1, if_a3, if_a2, loop_a2), loop);
@@ -416,15 +387,10 @@ public class ConditionalsExtractionTest {
 		VariableRef constant = new VariableRef(cfg, unknown, "a");
 		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		VariableRef inner = new VariableRef(cfg, unknown, "l");
-		UnresolvedCall a1 = new UnresolvedCall(cfg, unknown,
-				CallType.STATIC,
-				null,
-				"foo",
-				inner);
+		UnresolvedCall a1 = new UnresolvedCall(cfg, unknown, CallType.STATIC, null, "foo", inner);
 		Call resolved = new OpenCall(a1);
 		resolved.setSource(a1);
-		Assignment a2 = new Assignment(cfg, unknown,
-				new VariableRef(cfg, unknown, "r"), constant);
+		Assignment a2 = new Assignment(cfg, unknown, new VariableRef(cfg, unknown, "r"), constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
@@ -440,4 +406,5 @@ public class ConditionalsExtractionTest {
 		assertTrue("No guards registered for inner expression", cfg.getGuards(inner).contains(condition));
 		assertTrue("No guards registered for resolved call", cfg.getGuards(resolved).contains(condition));
 	}
+
 }

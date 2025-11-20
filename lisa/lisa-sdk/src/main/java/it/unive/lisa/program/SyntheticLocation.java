@@ -5,9 +5,11 @@ import it.unive.lisa.program.cfg.CodeLocation;
 /**
  * A synthetic code location.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class SyntheticLocation implements CodeLocation {
+public class SyntheticLocation
+		implements
+		CodeLocation {
 
 	/**
 	 * Singleton instance of the synthetic location.
@@ -27,4 +29,5 @@ public class SyntheticLocation implements CodeLocation {
 			CodeLocation o) {
 		return o instanceof SyntheticLocation ? 0 : -1;
 	}
+
 }

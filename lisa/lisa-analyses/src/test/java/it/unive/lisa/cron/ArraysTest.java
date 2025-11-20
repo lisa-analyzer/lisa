@@ -1,20 +1,20 @@
 package it.unive.lisa.cron;
 
-import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import org.junit.Test;
 
-public class ArraysTest extends AnalysisTestExecutor {
+public class ArraysTest
+		extends
+		IMPCronExecutor {
 
 	@Test
 	public void monolithTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				new MonolithicHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -28,7 +28,7 @@ public class ArraysTest extends AnalysisTestExecutor {
 	public void fieldInsensitiveTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				new PointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -42,7 +42,7 @@ public class ArraysTest extends AnalysisTestExecutor {
 	public void fieldSensitiveTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
-		conf.abstractState = DefaultConfiguration.simpleState(
+		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -51,4 +51,5 @@ public class ArraysTest extends AnalysisTestExecutor {
 		conf.programFile = "arrays.imp";
 		perform(conf);
 	}
+
 }

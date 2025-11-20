@@ -5,9 +5,11 @@ import it.unive.lisa.program.annotations.Annotation;
 /**
  * An annotation matcher based on the annotation name.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class BasicAnnotationMatcher implements AnnotationMatcher {
+public class BasicAnnotationMatcher
+		implements
+		AnnotationMatcher {
 
 	private final String annotationName;
 
@@ -62,4 +64,5 @@ public class BasicAnnotationMatcher implements AnnotationMatcher {
 			return false;
 		return true;
 	}
+
 }

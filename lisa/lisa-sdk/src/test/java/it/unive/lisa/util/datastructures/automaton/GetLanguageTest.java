@@ -10,7 +10,8 @@ import org.junit.Test;
 public class GetLanguageTest {
 
 	@Test
-	public void test01() throws CyclicAutomatonException {
+	public void test01()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		SortedSet<Transition<TestSymbol>> tr = new TreeSet<>();
 		State[] st = new State[3];
@@ -28,7 +29,8 @@ public class GetLanguageTest {
 	}
 
 	@Test(expected = CyclicAutomatonException.class)
-	public void test02() throws CyclicAutomatonException {
+	public void test02()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[2];
 		st[0] = new State(0, true, false);
@@ -46,7 +48,8 @@ public class GetLanguageTest {
 	}
 
 	@Test
-	public void test03() throws CyclicAutomatonException {
+	public void test03()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[6];
 		st[0] = new State(0, true, false);
@@ -73,7 +76,8 @@ public class GetLanguageTest {
 	}
 
 	@Test
-	public void test04() throws CyclicAutomatonException {
+	public void test04()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(0, true, false);
@@ -99,7 +103,8 @@ public class GetLanguageTest {
 	}
 
 	@Test
-	public void test05() throws CyclicAutomatonException {
+	public void test05()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(0, true, false);
@@ -125,7 +130,8 @@ public class GetLanguageTest {
 	}
 
 	@Test
-	public void test06() throws CyclicAutomatonException {
+	public void test06()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[8];
 		st[0] = new State(0, true, false);
@@ -157,7 +163,8 @@ public class GetLanguageTest {
 	}
 
 	@Test
-	public void test07() throws CyclicAutomatonException {
+	public void test07()
+			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(0, true, false);
@@ -178,4 +185,5 @@ public class GetLanguageTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		assertEquals(exp, a.getLanguage());
 	}
+
 }

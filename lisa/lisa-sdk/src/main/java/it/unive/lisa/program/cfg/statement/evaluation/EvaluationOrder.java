@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.evaluation;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -74,7 +75,10 @@ public interface EvaluationOrder {
 	 * while also setting the runtime types for the expressions left on the
 	 * stack.
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param subExpressions  the sub-expressions to evaluate
 	 * @param entryState      the state to use as starting point for the
 	 *                            evaluation
@@ -93,10 +97,10 @@ public interface EvaluationOrder {
 	 * 
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
-	<A extends AbstractState<A>> AnalysisState<A> evaluate(
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> evaluate(
 			Expression[] subExpressions,
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			ExpressionSet[] computed)
 			throws SemanticException;
@@ -105,7 +109,10 @@ public interface EvaluationOrder {
 	 * Evaluates the given sub-expressions according to this order, but in
 	 * reverse order and using the backward semantics.
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param subExpressions  the sub-expressions to evaluate
 	 * @param entryState      the state to use as starting point for the
 	 *                            evaluation
@@ -124,11 +131,12 @@ public interface EvaluationOrder {
 	 * 
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
-	<A extends AbstractState<A>> AnalysisState<A> bwdEvaluate(
+	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> bwdEvaluate(
 			Expression[] subExpressions,
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			ExpressionSet[] computed)
 			throws SemanticException;
+
 }

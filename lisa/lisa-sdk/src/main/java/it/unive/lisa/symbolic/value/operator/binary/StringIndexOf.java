@@ -19,7 +19,9 @@ import it.unive.lisa.type.TypeSystem;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringIndexOf extends StringOperation {
+public class StringIndexOf
+		extends
+		StringOperation {
 
 	/**
 	 * The singleton instance of this class.
@@ -44,4 +46,5 @@ public class StringIndexOf extends StringOperation {
 			TypeSystem types) {
 		return types.getIntegerType();
 	}
+
 }

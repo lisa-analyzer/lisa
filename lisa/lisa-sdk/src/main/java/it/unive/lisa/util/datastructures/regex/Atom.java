@@ -13,7 +13,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Atom extends RegularExpression {
+public class Atom
+		extends
+		RegularExpression {
 
 	/**
 	 * A unique constant for the epsilon (empty) string.
@@ -80,9 +82,8 @@ public class Atom extends RegularExpression {
 	}
 
 	@Override
-	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory) {
+	public <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory) {
 		return isEmpty() ? factory.emptyString() : factory.singleString(string);
 	}
 
@@ -98,11 +99,17 @@ public class Atom extends RegularExpression {
 			result.add(new PartialSubstring(SymbolicString.mkEmptyString(), charsToSkip - len, missingChars));
 		else if (charsToSkip + missingChars > len)
 			// partially inside the string
-			result.add(new PartialSubstring(SymbolicString.mkString(string.substring(charsToSkip)), 0,
-					missingChars - len + charsToSkip));
+			result.add(
+					new PartialSubstring(
+							SymbolicString.mkString(string.substring(charsToSkip)),
+							0,
+							missingChars - len + charsToSkip));
 		else
-			result.add(new PartialSubstring(
-					SymbolicString.mkString(string.substring(charsToSkip, charsToSkip + missingChars)), 0, 0));
+			result.add(
+					new PartialSubstring(
+							SymbolicString.mkString(string.substring(charsToSkip, charsToSkip + missingChars)),
+							0,
+							0));
 
 		return result;
 	}
@@ -187,7 +194,9 @@ public class Atom extends RegularExpression {
 
 	@Override
 	public RegularExpression[] explode() {
-		return string.chars().mapToObj(ch -> String.valueOf((char) ch)).map(Atom::new)
+		return string.chars()
+				.mapToObj(ch -> String.valueOf((char) ch))
+				.map(Atom::new)
 				.toArray(RegularExpression[]::new);
 	}
 
@@ -230,4 +239,5 @@ public class Atom extends RegularExpression {
 	protected boolean readsWhiteSpaceString() {
 		return string.trim().isEmpty();
 	}
+
 }

@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.evaluation;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -14,7 +15,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LeftToRightEvaluation implements EvaluationOrder {
+public class LeftToRightEvaluation
+		implements
+		EvaluationOrder {
 
 	/**
 	 * The singleton instance of this class.
@@ -25,10 +28,10 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> evaluate(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> evaluate(
 			Expression[] subExpressions,
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			ExpressionSet[] computed)
 			throws SemanticException {
@@ -39,7 +42,7 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 		for (int i = 0; i < computed.length; i++) {
 			AnalysisState<A> tmp = subExpressions[i].forwardSemantics(postState, interprocedural, expressions);
 			expressions.put(subExpressions[i], tmp);
-			computed[i] = tmp.getComputedExpressions();
+			computed[i] = tmp.getExecutionExpressions();
 			postState = tmp;
 		}
 
@@ -47,10 +50,10 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> bwdEvaluate(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> bwdEvaluate(
 			Expression[] subExpressions,
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			ExpressionSet[] computed)
 			throws SemanticException {
@@ -61,7 +64,7 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 		for (int i = computed.length - 1; i >= 0; i--) {
 			AnalysisState<A> tmp = subExpressions[i].backwardSemantics(postState, interprocedural, expressions);
 			expressions.put(subExpressions[i], tmp);
-			computed[i] = tmp.getComputedExpressions();
+			computed[i] = tmp.getExecutionExpressions();
 			postState = tmp;
 		}
 
@@ -93,4 +96,5 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 			int len) {
 		return len - 1;
 	}
+
 }

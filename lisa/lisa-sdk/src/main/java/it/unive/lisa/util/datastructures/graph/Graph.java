@@ -286,4 +286,5 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 
 		return result;
 	}
+
 }

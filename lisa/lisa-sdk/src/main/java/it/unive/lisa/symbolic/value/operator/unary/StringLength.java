@@ -19,7 +19,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringLength implements StringOperator, UnaryOperator {
+public class StringLength
+		implements
+		StringOperator,
+		UnaryOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -47,4 +50,5 @@ public class StringLength implements StringOperator, UnaryOperator {
 			return Collections.emptySet();
 		return Collections.singleton(types.getIntegerType());
 	}
+
 }

@@ -1,19 +1,13 @@
 package it.unive.lisa.analysis.lattices;
 
+import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.combination.constraints.WholeValueDomain;
+import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
-import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
-import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
-import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -28,11 +22,14 @@ import java.util.Set;
  */
 public enum Satisfiability
 		implements
-		WholeValueDomain<Satisfiability> {
+		BaseLattice<Satisfiability>,
+		WholeValueElement<Satisfiability> {
+
 	/**
 	 * Represent the fact that an expression is satisfied.
 	 */
 	SATISFIED {
+
 		@Override
 		public Satisfiability negate() {
 			return NOT_SATISFIED;
@@ -49,12 +46,14 @@ public enum Satisfiability
 				Satisfiability other) {
 			return this;
 		}
+
 	},
 
 	/**
 	 * Represent the fact that an expression is not satisfied.
 	 */
 	NOT_SATISFIED {
+
 		@Override
 		public Satisfiability negate() {
 			return SATISFIED;
@@ -71,6 +70,7 @@ public enum Satisfiability
 				Satisfiability other) {
 			return other;
 		}
+
 	},
 
 	/**
@@ -78,6 +78,7 @@ public enum Satisfiability
 	 * expression is satisfied.
 	 */
 	UNKNOWN {
+
 		@Override
 		public Satisfiability negate() {
 			return this;
@@ -100,6 +101,7 @@ public enum Satisfiability
 
 			return this;
 		}
+
 	},
 
 	/**
@@ -107,6 +109,7 @@ public enum Satisfiability
 	 * error.
 	 */
 	BOTTOM {
+
 		@Override
 		public Satisfiability negate() {
 			return this;
@@ -123,6 +126,7 @@ public enum Satisfiability
 				Satisfiability other) {
 			return this;
 		}
+
 	};
 
 	/**
@@ -220,55 +224,6 @@ public enum Satisfiability
 	}
 
 	@Override
-	public Satisfiability evalNonNullConstant(
-			Constant constant,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (constant.getValue() instanceof Boolean)
-			return fromBoolean((Boolean) constant.getValue());
-		return UNKNOWN;
-	}
-
-	@Override
-	public Satisfiability evalUnaryExpression(
-			UnaryExpression expression,
-			Satisfiability arg,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (expression.getOperator() == LogicalNegation.INSTANCE)
-			return arg.negate();
-		return UNKNOWN;
-	}
-
-	@Override
-	public Satisfiability evalBinaryExpression(
-			BinaryExpression expression,
-			Satisfiability left,
-			Satisfiability right,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		BinaryOperator operator = expression.getOperator();
-		if (operator == LogicalAnd.INSTANCE)
-			return left.and(right);
-		if (operator == LogicalOr.INSTANCE)
-			return left.or(right);
-		if (operator == ComparisonEq.INSTANCE)
-			if (left == UNKNOWN || right == UNKNOWN)
-				return UNKNOWN;
-			else
-				return fromBoolean(left.equals(right));
-		if (operator == ComparisonNe.INSTANCE)
-			if (left == UNKNOWN || right == UNKNOWN)
-				return UNKNOWN;
-			else
-				return fromBoolean(!left.equals(right));
-		return UNKNOWN;
-	}
-
-	@Override
 	public Set<BinaryExpression> constraints(
 			ValueExpression e,
 			ProgramPoint pp)
@@ -279,12 +234,13 @@ public enum Satisfiability
 			return null;
 
 		BooleanType boolType = pp.getProgram().getTypes().getBooleanType();
-		return Collections.singleton(new BinaryExpression(
-				boolType,
-				new Constant(boolType, this == SATISFIED ? true : false, e.getCodeLocation()),
-				e,
-				ComparisonEq.INSTANCE,
-				e.getCodeLocation()));
+		return Collections.singleton(
+				new BinaryExpression(
+						boolType,
+						new Constant(boolType, this == SATISFIED ? true : false, e.getCodeLocation()),
+						e,
+						ComparisonEq.INSTANCE,
+						e.getCodeLocation()));
 	}
 
 	@Override
@@ -308,4 +264,5 @@ public enum Satisfiability
 
 		return UNKNOWN;
 	}
+
 }

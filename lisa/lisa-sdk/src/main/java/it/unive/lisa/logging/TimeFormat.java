@@ -13,61 +13,72 @@ public enum TimeFormat {
 	 * Formats the given elapsed nanos as nanoseconds.
 	 */
 	NANOS {
+
 		@Override
 		public String format(
 				long nanos) {
 			return String.valueOf(nanos) + UNIT_NANOS;
 		}
+
 	},
 
 	/**
 	 * Formats the given elapsed nanos as milliseconds.
 	 */
 	MILLIS {
+
 		@Override
 		public String format(
 				long nanos) {
 			return String.valueOf(TimeUnit.NANOSECONDS.toMillis(nanos)) + UNIT_MILLIS;
 		}
+
 	},
 
 	/**
 	 * Formats the given elapsed nanos as seconds.
 	 */
 	SECONDS {
+
 		@Override
 		public String format(
 				long nanos) {
 			return String.valueOf(TimeUnit.NANOSECONDS.toSeconds(nanos)) + UNIT_SECONDS;
 		}
+
 	},
 
 	/**
 	 * Formats the given elapsed nanos as minutes.
 	 */
 	MINUTES {
+
 		@Override
 		public String format(
 				long nanos) {
 			return String.valueOf(TimeUnit.NANOSECONDS.toMinutes(nanos)) + UNIT_MINUTES;
 		}
+
 	},
 
 	/**
 	 * Formats the given elapsed nanos as hours.
 	 */
 	HOURS {
+
 		@Override
 		public String format(
 				long nanos) {
 			return String.valueOf(TimeUnit.NANOSECONDS.toHours(nanos)) + UNIT_HOURS;
 		}
+
 	},
 
 	/**
 	 * Formats the given elapsed nanos as seconds and milliseconds.
 	 */
 	SECONDS_AND_MILLIS {
+
 		@Override
 		public String format(
 				long nanos) {
@@ -77,12 +88,14 @@ public enum TimeFormat {
 			else
 				return SECONDS.format(nanos) + " " + MILLIS.format(nanos - TimeUnit.SECONDS.toNanos(seconds));
 		}
+
 	},
 
 	/**
 	 * Formats the given elapsed nanos as minutes and seconds.
 	 */
 	MINUTES_AND_SECONDS {
+
 		@Override
 		public String format(
 				long nanos) {
@@ -92,12 +105,14 @@ public enum TimeFormat {
 			else
 				return MINUTES.format(nanos) + " " + SECONDS.format(nanos - TimeUnit.MINUTES.toNanos(minutes));
 		}
+
 	},
 
 	/**
 	 * Formats the given elapsed nanos as milliseconds and nanoseconds.
 	 */
 	UP_TO_MILLIS {
+
 		@Override
 		public String format(
 				long nanos) {
@@ -107,12 +122,14 @@ public enum TimeFormat {
 			else
 				return MILLIS.format(nanos) + " " + NANOS.format(nanos - TimeUnit.MILLISECONDS.toNanos(millis));
 		}
+
 	},
 
 	/**
 	 * Formats the given elapsed nanos as seconds, milliseconds and nanoseconds.
 	 */
 	UP_TO_SECONDS {
+
 		@Override
 		public String format(
 				long nanos) {
@@ -127,6 +144,7 @@ public enum TimeFormat {
 			else
 				return SECONDS.format(nanos) + " " + UP_TO_MILLIS.format(diff);
 		}
+
 	},
 
 	/**
@@ -134,6 +152,7 @@ public enum TimeFormat {
 	 * nanoseconds.
 	 */
 	UP_TO_MINUTES {
+
 		@Override
 		public String format(
 				long nanos) {
@@ -152,6 +171,7 @@ public enum TimeFormat {
 			else
 				return MINUTES.format(nanos) + " " + UP_TO_SECONDS.format(diff);
 		}
+
 	},
 
 	/**
@@ -159,6 +179,7 @@ public enum TimeFormat {
 	 * and nanoseconds.
 	 */
 	UP_TO_HOURS {
+
 		@Override
 		public String format(
 				long nanos) {
@@ -182,12 +203,17 @@ public enum TimeFormat {
 			else
 				return HOURS.format(nanos) + " " + UP_TO_MINUTES.format(diff);
 		}
+
 	};
 
 	private static final String UNIT_HOURS = "h";
+
 	private static final String UNIT_MINUTES = "m";
+
 	private static final String UNIT_SECONDS = "s";
+
 	private static final String UNIT_MILLIS = "ms";
+
 	private static final String UNIT_NANOS = "ns";
 
 	/**
@@ -201,4 +227,5 @@ public enum TimeFormat {
 			long nanos) {
 		return String.valueOf(nanos);
 	}
+
 }

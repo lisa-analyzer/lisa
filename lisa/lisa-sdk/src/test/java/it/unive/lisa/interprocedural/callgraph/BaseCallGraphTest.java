@@ -35,7 +35,10 @@ import org.junit.Test;
 
 public class BaseCallGraphTest {
 
-	private final class StrType implements StringType {
+	private final class StrType
+			implements
+			StringType {
+
 		@Override
 		public Type commonSupertype(
 				Type other) {
@@ -53,9 +56,13 @@ public class BaseCallGraphTest {
 				TypeSystem types) {
 			return Collections.singleton(this);
 		}
+
 	}
 
-	private final class BoolType implements BooleanType {
+	private final class BoolType
+			implements
+			BooleanType {
+
 		@Override
 		public Type commonSupertype(
 				Type other) {
@@ -73,20 +80,28 @@ public class BaseCallGraphTest {
 				TypeSystem types) {
 			return Collections.singleton(this);
 		}
+
 	}
 
 	/**
 	 * @see <a href="https://github.com/lisa-analyzer/lisa/issues/145">#145</a>
 	 */
 	@Test
-	public void issue145() throws CallResolutionException, ProgramValidationException, CallGraphConstructionException {
+	public void issue145()
+			throws CallResolutionException,
+			ProgramValidationException,
+			CallGraphConstructionException {
 		CallGraph cg = new TestCallGraph();
 
 		Program p = new Program(new TestLanguageFeatures(), new TestTypeSystem());
 
 		CFG cfg1 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
-		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0), CallType.STATIC,
-				p.getName(), "cfg2");
+		UnresolvedCall call = new UnresolvedCall(
+				cfg1,
+				new SourceCodeLocation("fake1", 1, 0),
+				CallType.STATIC,
+				p.getName(),
+				"cfg2");
 		cfg1.addNode(call, true);
 		Ret ret = new Ret(cfg1, new SourceCodeLocation("fake1", 2, 0));
 		cfg1.addNode(ret, false);
@@ -126,24 +141,42 @@ public class BaseCallGraphTest {
 	 */
 	@Test
 	@SuppressWarnings("unchecked")
-	public void issue252() throws CallResolutionException, ProgramValidationException, CallGraphConstructionException {
+	public void issue252()
+			throws CallResolutionException,
+			ProgramValidationException,
+			CallGraphConstructionException {
 		CallGraph cg = new TestCallGraph();
 
 		Program p = new Program(new TestLanguageFeatures(), new TestTypeSystem());
 
 		CFG cfg1 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
-		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0), CallType.STATIC,
-				p.getName(), "cfg2", new VariableRef(cfg1, new SourceCodeLocation("fake1", 1, 1), "x"));
+		UnresolvedCall call = new UnresolvedCall(
+				cfg1,
+				new SourceCodeLocation("fake1", 1, 0),
+				CallType.STATIC,
+				p.getName(),
+				"cfg2",
+				new VariableRef(cfg1, new SourceCodeLocation("fake1", 1, 1), "x"));
 		cfg1.addNode(call, true);
 		Ret ret = new Ret(cfg1, new SourceCodeLocation("fake1", 2, 0));
 		cfg1.addNode(ret, false);
 		cfg1.addEdge(new SequentialEdge(call, ret));
 
-		CFG cfg2_1 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake2", 0, 0), p, false, "cfg2",
-				new Parameter(new SourceCodeLocation("fake2", 0, 1), "x", new StrType())));
+		CFG cfg2_1 = new CFG(
+				new CodeMemberDescriptor(
+						new SourceCodeLocation("fake2", 0, 0),
+						p,
+						false,
+						"cfg2",
+						new Parameter(new SourceCodeLocation("fake2", 0, 1), "x", new StrType())));
 		cfg2_1.addNode(new Ret(cfg2_1, new SourceCodeLocation("fake2", 1, 0)), true);
-		CFG cfg2_2 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake2", 2, 0), p, false, "cfg2",
-				new Parameter(new SourceCodeLocation("fake2", 2, 1), "x", new BoolType())));
+		CFG cfg2_2 = new CFG(
+				new CodeMemberDescriptor(
+						new SourceCodeLocation("fake2", 2, 0),
+						p,
+						false,
+						"cfg2",
+						new Parameter(new SourceCodeLocation("fake2", 2, 1), "x", new BoolType())));
 		cfg2_2.addNode(new Ret(cfg2_2, new SourceCodeLocation("fake2", 3, 0)), true);
 
 		p.addCodeMember(cfg1);
@@ -154,18 +187,19 @@ public class BaseCallGraphTest {
 		Application app = new Application(p);
 		cg.init(app);
 
-		CFGCall resolved = (CFGCall) cg.resolve(call, new Set[] { Collections.singleton(new StrType()) },
-				new SymbolAliasing());
+		CFGCall resolved = (CFGCall) cg
+				.resolve(call, new Set[] { Collections.singleton(new StrType()) }, new SymbolAliasing());
 
 		Collection<CodeMember> callees = resolved.getTargets();
 		assertEquals(1, callees.size());
 		assertSame(cfg2_1, callees.iterator().next());
 
-		resolved = (CFGCall) cg.resolve(call, new Set[] { Collections.singleton(new BoolType()) },
-				new SymbolAliasing());
+		resolved = (CFGCall) cg
+				.resolve(call, new Set[] { Collections.singleton(new BoolType()) }, new SymbolAliasing());
 
 		callees = resolved.getTargets();
 		assertEquals(1, callees.size());
 		assertSame(cfg2_2, callees.iterator().next());
 	}
+
 }

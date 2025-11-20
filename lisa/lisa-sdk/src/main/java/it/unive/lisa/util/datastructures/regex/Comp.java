@@ -13,7 +13,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class Comp extends RegularExpression {
+public final class Comp
+		extends
+		RegularExpression {
 
 	/**
 	 * The first regular expression
@@ -116,26 +118,35 @@ public final class Comp extends RegularExpression {
 			result = second;
 
 		// a*.(x.a*)* = (a + x)*
-		else if (first.isStar() && second.isStar() && second.asStar().getOperand().isComp()
+		else if (first.isStar()
+				&& second.isStar()
+				&& second.asStar().getOperand().isComp()
 				&& second.asStar().getOperand().asComp().second.isStar()
-				&& second.asStar().getOperand().asComp().second.asStar().getOperand()
+				&& second.asStar().getOperand().asComp().second.asStar()
+						.getOperand()
 						.equals(first.asStar().getOperand()))
 			result = first.asStar().getOperand().or(second.asStar().getOperand().asComp().first).star();
 
 		// a.((b.a)*.b) = (a.b)*
-		else if (first.isAtom() && second.isComp() && second.asComp().first.isStar()
+		else if (first.isAtom()
+				&& second.isComp()
+				&& second.asComp().first.isStar()
 				&& second.asComp().second.isAtom()
-				&& second.asComp().second.asAtom().comp(first.asAtom())
+				&& second.asComp().second.asAtom()
+						.comp(first.asAtom())
 						.equals(second.asComp().first.asStar().getOperand()))
 			result = first.asAtom().comp(second.asComp().second.asAtom()).star();
 
 		// a*.(a*.b) = a*b
-		else if (first.isStar() && second.isComp() && second.asComp().first.isStar()
+		else if (first.isStar()
+				&& second.isComp()
+				&& second.asComp().first.isStar()
 				&& first.asStar().getOperand().equals(second.asComp().first.asStar().getOperand()))
 			result = first.comp(second.asComp().second);
 
 		// r*.r* = r*
-		else if (first instanceof Star && second instanceof Star
+		else if (first instanceof Star
+				&& second instanceof Star
 				&& first.asStar().getOperand().equals(second.asStar().getOperand()))
 			result = first;
 
@@ -143,9 +154,8 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory) {
+	public <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory) {
 		return first.toAutomaton(factory).concat(second.toAutomaton(factory));
 	}
 
@@ -350,4 +360,5 @@ public final class Comp extends RegularExpression {
 	protected boolean readsWhiteSpaceString() {
 		return first.readsWhiteSpaceString() && second.readsWhiteSpaceString();
 	}
+
 }

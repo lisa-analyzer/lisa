@@ -84,4 +84,5 @@ public interface WorkingSet<E> {
 	 * @return the elements
 	 */
 	Collection<E> getContents();
+
 }

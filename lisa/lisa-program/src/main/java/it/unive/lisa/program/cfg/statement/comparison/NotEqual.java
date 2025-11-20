@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.statement.comparison;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -20,7 +22,9 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpression {
+public class NotEqual
+		extends
+		it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the inequality test.
@@ -45,20 +49,18 @@ public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdBinarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return state.smallStepSemantics(
-				new BinaryExpression(
-						getStaticType(),
-						left,
-						right,
-						ComparisonNe.INSTANCE,
-						getLocation()),
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		return analysis.smallStepSemantics(
+				state,
+				new BinaryExpression(getStaticType(), left, right, ComparisonNe.INSTANCE, getLocation()),
 				this);
 	}
+
 }

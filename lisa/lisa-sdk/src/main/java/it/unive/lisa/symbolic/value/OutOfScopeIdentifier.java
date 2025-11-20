@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -13,7 +14,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public class OutOfScopeIdentifier extends Identifier {
+public class OutOfScopeIdentifier
+		extends
+		Identifier {
 
 	private final ScopeToken scope;
 
@@ -44,13 +47,15 @@ public class OutOfScopeIdentifier extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token) {
+			ScopeToken token,
+			ProgramPoint pp) {
 		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override
 	public Identifier popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (getScope().equals(token))
 			return this.id;
@@ -83,4 +88,19 @@ public class OutOfScopeIdentifier extends Identifier {
 			throws SemanticException {
 		return visitor.visit(this, params);
 	}
+
+	@Override
+	public boolean isInstrumentedReceiver() {
+		return id.isInstrumentedReceiver();
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+		return this;
+	}
+
 }

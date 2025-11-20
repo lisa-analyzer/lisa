@@ -1,0 +1,1 @@
+{"name":"untyped example::foo3(example* this, untyped i, untyped j)","description":null,"nodes":[{"id":0,"subNodes":[1],"text":"return +(i, j)"},{"id":1,"subNodes":[2,3],"text":"+(i, j)"},{"id":2,"text":"i"},{"id":3,"text":"j"}],"edges":[],"descriptions":[]}

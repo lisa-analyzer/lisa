@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this)_cfg.json", "untyped_B.B(B__this)_cfg.json", "untyped_C.C(C__this)_cfg.json", "untyped_D.D(D__this)_cfg.json", "untyped_E.E(E__this)_cfg.json", "untyped_errors.allEmpty(errors__this)_cfg.json", "untyped_errors.allEmptyCatches(errors__this)_cfg.json", "untyped_errors.allEmptyCatchesFinally(errors__this)_cfg.json", "untyped_errors.allEmptyExceptFinally(errors__this)_cfg.json", "untyped_errors.emptyCatch(errors__this)_cfg.json", "untyped_errors.emptyCatchFinally(errors__this)_cfg.json", "untyped_errors.emptyElse(errors__this)_cfg.json", "untyped_errors.emptyFinally(errors__this)_cfg.json", "untyped_errors.emptyTry(errors__this)_cfg.json", "untyped_errors.emptyTryElse(errors__this)_cfg.json", "untyped_errors.emptyTryElseCatch(errors__this)_cfg.json" ],
+  "info" : {
+    "cfgs" : "16",
+    "duration" : "986ms",
+    "end" : "2025-08-21T18:58:57.833+02:00",
+    "expressions" : "193",
+    "files" : "16",
+    "globals" : "0",
+    "members" : "16",
+    "programs" : "1",
+    "start" : "2025-08-21T18:58:56.847+02:00",
+    "statements" : "136",
+    "units" : "6",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "true",
+    "serializeResults" : "false",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/errors-empty"
+  }
+}

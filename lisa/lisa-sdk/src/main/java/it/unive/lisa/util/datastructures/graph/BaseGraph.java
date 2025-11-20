@@ -207,4 +207,5 @@ public abstract class BaseGraph<G extends BaseGraph<G, N, E>, N extends Node<G, 
 	public String toString() {
 		return adjacencyMatrix.toString();
 	}
+
 }

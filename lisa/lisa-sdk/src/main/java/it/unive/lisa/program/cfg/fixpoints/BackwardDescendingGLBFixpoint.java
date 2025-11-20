@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -16,12 +17,17 @@ import java.util.Map;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardDescendingGLBFixpoint<A extends AbstractState<A>> extends BackwardCFGFixpoint<A> {
+public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		extends
+		BackwardCFGFixpoint<A, D> {
 
 	private final int maxGLBs;
+
 	private final Map<Statement, Integer> glbs;
 
 	/**
@@ -34,7 +40,7 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractState<A>> extends B
 	 */
 	public BackwardDescendingGLBFixpoint(
 			CFG target,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration config) {
 		super(target, interprocedural);
 		this.maxGLBs = config.glbThreshold;
@@ -66,4 +72,5 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractState<A>> extends B
 			throws SemanticException {
 		return old.lessOrEqual(approx);
 	}
+
 }

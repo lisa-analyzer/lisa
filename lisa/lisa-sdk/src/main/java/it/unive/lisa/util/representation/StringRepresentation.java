@@ -1,14 +1,15 @@
 package it.unive.lisa.util.representation;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A {@link StructuredRepresentation} in the form of a single string element.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringRepresentation extends StructuredRepresentation {
+public class StringRepresentation
+		extends
+		StructuredRepresentation {
 
 	/**
 	 * The textual representation.
@@ -38,7 +39,7 @@ public class StringRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public SerializableValue toSerializableValue() {
+	public SerializableString toSerializableValue() {
 		return new SerializableString(getProperties(), String.valueOf(representation));
 	}
 
@@ -72,4 +73,5 @@ public class StringRepresentation extends StructuredRepresentation {
 			return false;
 		return true;
 	}
+
 }

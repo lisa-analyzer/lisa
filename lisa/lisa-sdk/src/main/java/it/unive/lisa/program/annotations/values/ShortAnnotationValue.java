@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * A short annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ShortAnnotationValue implements BasicAnnotationValue {
+public class ShortAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final short s;
 
@@ -56,4 +58,5 @@ public class ShortAnnotationValue implements BasicAnnotationValue {
 		ShortAnnotationValue other = (ShortAnnotationValue) o;
 		return Short.compare(s, other.s);
 	}
+
 }

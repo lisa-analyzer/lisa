@@ -17,7 +17,9 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric8BitMul extends NumericOperation
+public class Numeric8BitMul
+		extends
+		NumericOperation
 		implements
 		MultiplicationOperator,
 		OverflowingOperator {
@@ -39,4 +41,5 @@ public class Numeric8BitMul extends NumericOperation
 	public String toString() {
 		return "*";
 	}
+
 }

@@ -1,11 +1,15 @@
 package it.unive.lisa.outputs.json;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.LiSARunInfo;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.util.representation.ObjectRepresentation;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -31,11 +35,28 @@ public class JsonReport {
 
 	private final Map<String, String> configuration;
 
+	private static class NonEmptyFilter {
+
+		@Override
+		public boolean equals(
+				Object obj) {
+			if (obj instanceof SerializableObject) {
+				SerializableObject map = (SerializableObject) obj;
+				return map.getFields().isEmpty();
+			}
+			return obj == null;
+		}
+
+	}
+
+	@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NonEmptyFilter.class)
+	private final SerializableObject additionalInfo;
+
 	/**
 	 * Builds an empty report.
 	 */
 	public JsonReport() {
-		this(Collections.emptyList(), Collections.emptyList(), Map.of(), Map.of());
+		this(Collections.emptyList(), Collections.emptyList(), Map.of(), Map.of(), Map.of());
 	}
 
 	/**
@@ -45,21 +66,29 @@ public class JsonReport {
 	 */
 	public JsonReport(
 			LiSAReport report) {
-		this(report.getWarnings(), report.getCreatedFiles(), report.getInfo().toPropertyBag(),
-				report.getConfiguration().toPropertyBag());
+		this(
+				report.getWarnings(),
+				report.getCreatedFiles(),
+				report.getRunInfo().toPropertyBag(),
+				report.getConfiguration().toPropertyBag(),
+				report.getAdditionalInfo());
 	}
 
 	private JsonReport(
 			Collection<Warning> warnings,
 			Collection<String> files,
 			Map<String, String> info,
-			Map<String, String> configuration) {
+			Map<String, String> configuration,
+			Map<String, StructuredRepresentation> additionalInfo) {
 		this.files = new TreeSet<>(files);
 		this.info = info;
 		this.configuration = configuration;
 		this.warnings = new TreeSet<>();
 		for (Warning warn : warnings)
 			this.warnings.add(new JsonWarning(warn));
+
+		ObjectRepresentation obj = new ObjectRepresentation(additionalInfo);
+		this.additionalInfo = obj.toSerializableValue();
 	}
 
 	/**
@@ -107,6 +136,17 @@ public class JsonReport {
 	}
 
 	/**
+	 * Yields the additional information about the analysis, in the form of a
+	 * property bag. This corresponds to the object returned by
+	 * {@link LiSAReport#getAdditionalInfo()}.
+	 * 
+	 * @return the additional information
+	 */
+	public SerializableObject getAdditionalInfo() {
+		return additionalInfo;
+	}
+
+	/**
 	 * Dumps this report to the given {@link Writer} instance, serializing it as
 	 * a json object.
 	 * 
@@ -148,6 +188,7 @@ public class JsonReport {
 		result = prime * result + ((warnings == null) ? 0 : warnings.hashCode());
 		result = prime * result + ((info == null) ? 0 : info.hashCode());
 		result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
+		result = prime * result + ((additionalInfo == null) ? 0 : additionalInfo.hashCode());
 		return result;
 	}
 
@@ -181,13 +222,27 @@ public class JsonReport {
 				return false;
 		} else if (!configuration.equals(other.configuration))
 			return false;
+		if (additionalInfo == null) {
+			if (other.additionalInfo != null)
+				return false;
+		} else if (!additionalInfo.equals(other.additionalInfo))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "JsonReport [warnings=" + warnings + ", files=" + files + ", info=" + info + ", configuration="
-				+ configuration + "]";
+		return "JsonReport [warnings="
+				+ warnings
+				+ ", files="
+				+ files
+				+ ", info="
+				+ info
+				+ ", configuration="
+				+ configuration
+				+ ", additionalInfo="
+				+ additionalInfo
+				+ "]";
 	}
 
 	/**
@@ -195,7 +250,9 @@ public class JsonReport {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class JsonWarning implements Comparable<JsonWarning> {
+	public static class JsonWarning
+			implements
+			Comparable<JsonWarning> {
 
 		private String message;
 
@@ -272,5 +329,7 @@ public class JsonReport {
 				JsonWarning o) {
 			return message.compareTo(o.message);
 		}
+
 	}
+
 }

@@ -1,20 +1,21 @@
 package it.unive.lisa.analysis.nonrelational.value;
 
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
-import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
- * A non-relational value domain, that is able to compute the value of a
- * {@link ValueExpression} by knowing the values of all program variables.
- * Instances of this class can be wrapped inside an {@link ValueEnvironment} to
- * represent abstract values of individual {@link Identifier}s.
+ * A {@link NonRelationalDomain} that focuses on the values of program
+ * variables. Instances of this class use {@link ValueEnvironment}s as lattice
+ * elements, and are able to process any {@link ValueExpression}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <T> the concrete type of the domain
+ * @param <L> the lattice used as values in the environments
  */
-public interface NonRelationalValueDomain<T extends NonRelationalValueDomain<T>>
+public interface NonRelationalValueDomain<L extends Lattice<L>>
 		extends
-		NonRelationalDomain<T, ValueExpression, ValueEnvironment<T>> {
+		ValueDomain<ValueEnvironment<L>>,
+		NonRelationalDomain<L, ValueEnvironment<L>, ValueEnvironment<L>, ValueExpression> {
 }

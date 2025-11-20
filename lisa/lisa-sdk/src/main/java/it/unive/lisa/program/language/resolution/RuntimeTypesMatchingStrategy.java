@@ -16,7 +16,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class RuntimeTypesMatchingStrategy extends FixedOrderMatchingStrategy {
+public class RuntimeTypesMatchingStrategy
+		extends
+		FixedOrderMatchingStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -35,4 +37,5 @@ public class RuntimeTypesMatchingStrategy extends FixedOrderMatchingStrategy {
 			Set<Type> types) {
 		return types.stream().anyMatch(rt -> rt.canBeAssignedTo(formal.getStaticType()));
 	}
+
 }

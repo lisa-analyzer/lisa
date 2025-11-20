@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * A double annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class DoubleAnnotationValue implements BasicAnnotationValue {
+public class DoubleAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final double d;
 
@@ -58,4 +60,5 @@ public class DoubleAnnotationValue implements BasicAnnotationValue {
 		DoubleAnnotationValue other = (DoubleAnnotationValue) o;
 		return Double.compare(d, other.d);
 	}
+
 }

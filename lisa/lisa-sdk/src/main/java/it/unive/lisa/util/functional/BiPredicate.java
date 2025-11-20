@@ -29,4 +29,5 @@ public interface BiPredicate<T, U, E extends Exception> {
 			T t,
 			U u)
 			throws E;
+
 }

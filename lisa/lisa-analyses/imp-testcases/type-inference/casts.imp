@@ -1,0 +1,41 @@
+class typing {
+
+	~typing() {}
+
+	main() {
+		def a = new typing();
+		def b = new sub();
+
+		def x = 0;
+		if (a is typing)
+			x = 10;
+		
+		if (b is typing)
+			x = 5;
+		
+		if (a is sub)
+			x = 7;
+		
+		if (b is sub)
+			x = 2;
+		
+		def c = a as sub;
+		def d = b as sub;
+
+		if (c is typing)
+			x = 1;
+		
+		if (d is typing)
+			x = 3;
+		
+		if (c is sub)
+			x = 9;
+		
+		if (d is sub)
+			x = 6;
+	}
+}
+
+class sub extends typing {
+	~sub(){}
+}

@@ -43,8 +43,7 @@ public class ToRegexTest {
 
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// (ad*b+c)*ad*
-		RegularExpression exp = new Atom("c").or(
-				new Atom("a").comp(new Atom("d").star().comp(new Atom("b"))))
+		RegularExpression exp = new Atom("c").or(new Atom("a").comp(new Atom("d").star().comp(new Atom("b"))))
 				.star()
 				.comp(new Atom("a").comp(new Atom("d").star()));
 		assertEquals(exp, a.toRegex().simplify());
@@ -210,4 +209,5 @@ public class ToRegexTest {
 		RegularExpression exp = new Atom("a").comp(new Atom("a").or(new Atom("b")).star());
 		assertEquals(exp, a.toRegex().simplify());
 	}
+
 }

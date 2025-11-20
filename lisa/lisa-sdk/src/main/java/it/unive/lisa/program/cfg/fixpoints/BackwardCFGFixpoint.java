@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -23,10 +24,12 @@ import java.util.List;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state computed by the fixpoint
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
+public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
 		implements
 		FixpointImplementation<Statement, Edge, CompoundState<A>> {
 
@@ -38,7 +41,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 	/**
 	 * The {@link InterproceduralAnalysis} to use for semantics invocations.
 	 */
-	protected final InterproceduralAnalysis<A> interprocedural;
+	protected final InterproceduralAnalysis<A, D> interprocedural;
 
 	/**
 	 * Builds the fixpoint implementation.
@@ -49,7 +52,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 	 */
 	public BackwardCFGFixpoint(
 			CFG graph,
-			InterproceduralAnalysis<A> interprocedural) {
+			InterproceduralAnalysis<A, D> interprocedural) {
 		this.graph = graph;
 		this.interprocedural = interprocedural;
 	}
@@ -59,12 +62,12 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 			Statement node,
 			CompoundState<A> entrystate)
 			throws SemanticException {
-		StatementStore<A> expressions = new StatementStore<>(entrystate.postState.bottom());
+		StatementStore<A> expressions = new StatementStore<>(entrystate.postState).bottom();
 		AnalysisState<A> approx = node.backwardSemantics(entrystate.postState, interprocedural, expressions);
 		if (node instanceof Expression)
 			// we forget the meta variables now as the values are popped from
 			// the stack here
-			approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables());
+			approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables(), node);
 		return CompoundState.of(approx, expressions);
 	}
 
@@ -73,7 +76,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 			Edge edge,
 			CompoundState<A> entrystate)
 			throws SemanticException {
-		AnalysisState<A> approx = edge.traverseBackwards(entrystate.postState);
+		AnalysisState<A> approx = edge.traverseBackwards(entrystate.postState, interprocedural.getAnalysis());
 
 		// we remove out of scope variables here
 		List<VariableTableEntry> toRemove = new LinkedList<>();
@@ -84,14 +87,16 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 		Collection<Identifier> ids = new LinkedList<>();
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(graph).getVariable();
-			for (SymbolicExpression expr : approx.smallStepSemantics(v, edge.getSource()).getComputedExpressions())
+			for (SymbolicExpression expr : interprocedural.getAnalysis()
+					.smallStepSemantics(approx, v, edge.getSource())
+					.getExecutionExpressions())
 				ids.add((Identifier) expr);
 		}
 
 		if (!ids.isEmpty())
-			approx = approx.forgetIdentifiers(ids);
+			approx = approx.forgetIdentifiers(ids, edge.getSource());
 
-		return CompoundState.of(approx, new StatementStore<>(approx.bottom()));
+		return CompoundState.of(approx, new StatementStore<>(approx).bottom());
 	}
 
 	@Override
@@ -102,4 +107,5 @@ public abstract class BackwardCFGFixpoint<A extends AbstractState<A>>
 			throws SemanticException {
 		return left.lub(right);
 	}
+
 }

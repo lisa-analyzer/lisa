@@ -10,7 +10,9 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class FixpointConfiguration extends BaseConfiguration {
+public class FixpointConfiguration
+		extends
+		BaseConfiguration {
 
 	/**
 	 * Holder of {@link LiSAConfiguration#fixpointWorkingSet}.
@@ -69,4 +71,5 @@ public class FixpointConfiguration extends BaseConfiguration {
 		this.hotspots = parent.hotspots;
 		this.useWideningPoints = parent.useWideningPoints;
 	}
+
 }

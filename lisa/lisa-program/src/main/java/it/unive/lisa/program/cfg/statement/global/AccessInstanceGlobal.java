@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.statement.global;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -14,7 +16,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
@@ -29,7 +31,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessInstanceGlobal extends UnaryExpression {
+public class AccessInstanceGlobal
+		extends
+		UnaryExpression {
 
 	/**
 	 * The global being accessed
@@ -114,17 +118,18 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		CodeLocation loc = getLocation();
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
 
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		boolean atLeastOne = false;
-		Set<Type> types = state.getState().getRuntimeTypesOf(expr, this, state.getState());
+		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
 
 		for (Type recType : types)
 			if (recType.isPointerType()) {
@@ -136,15 +141,17 @@ public class AccessInstanceGlobal extends UnaryExpression {
 				CompilationUnit unit = inner.asUnitType().getUnit();
 
 				Set<CompilationUnit> seen = new HashSet<>();
-				HierarcyTraversalStrategy strategy = getProgram().getFeatures().getTraversalStrategy();
+				HierarchyTraversalStrategy strategy = getProgram().getFeatures().getTraversalStrategy();
+
 				for (CompilationUnit cu : strategy.traverse(this, unit))
 					if (seen.add(unit)) {
 						Global global = cu.getInstanceGlobal(target, false);
 						if (global != null) {
 							GlobalVariable var = global.toSymbolicVariable(loc);
 							AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
-							result = result.lub(state.smallStepSemantics(access, this));
+							result = result.lub(analysis.smallStepSemantics(state, access, this));
 							atLeastOne = true;
+							break;
 						}
 					}
 			}
@@ -159,12 +166,13 @@ public class AccessInstanceGlobal extends UnaryExpression {
 				rectypes.add(t.asPointerType().getInnerType());
 
 		if (rectypes.isEmpty())
-			return state.bottom();
+			return state.bottomExecution();
 
 		Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
 		GlobalVariable var = new GlobalVariable(Untyped.INSTANCE, target, new Annotations(), getLocation());
 		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
 		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
-		return state.smallStepSemantics(access, this);
+		return analysis.smallStepSemantics(state, access, this);
 	}
+
 }

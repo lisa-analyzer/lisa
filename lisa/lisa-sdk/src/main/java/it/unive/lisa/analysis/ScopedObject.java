@@ -1,9 +1,12 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.program.cfg.ProgramPoint;
+
 /**
  * An object that can react to the introduction or removal of scopes, modifying
  * the variables currently in view. Scoping happens through
- * {@link #pushScope(ScopeToken)} and {@link #popScope(ScopeToken)}.
+ * {@link #pushScope(ScopeToken, ProgramPoint)} and
+ * {@link #popScope(ScopeToken, ProgramPoint)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -16,9 +19,11 @@ public interface ScopedObject<T> {
 	 * Pushes a new scope, identified by the give token, in this object. This
 	 * causes all variables not associated with a scope (and thus visible) to be
 	 * mapped to the given scope and hidden away, until the scope is popped with
-	 * {@link #popScope(ScopeToken)}.
+	 * {@link #popScope(ScopeToken, ProgramPoint)}.
 	 *
 	 * @param token the token identifying the scope to push
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
 	 * 
 	 * @return a copy of this object where the local unscoped variables have
 	 *             been hidden
@@ -26,7 +31,8 @@ public interface ScopedObject<T> {
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	T pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException;
 
 	/**
@@ -36,6 +42,8 @@ public interface ScopedObject<T> {
 	 * scope token (and thus hidden) will become visible again.
 	 *
 	 * @param token the token of the scope to be restored
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
 	 * 
 	 * @return a copy of this object where the local variables have been
 	 *             removed, while the variables mapped to the given scope are
@@ -44,6 +52,8 @@ public interface ScopedObject<T> {
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	T popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException;
+
 }

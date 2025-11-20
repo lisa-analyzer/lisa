@@ -5,6 +5,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
@@ -14,7 +16,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Identifier extends ValueExpression {
+public abstract class Identifier
+		extends
+		ValueExpression {
 
 	/**
 	 * The name of the identifier
@@ -87,12 +91,14 @@ public abstract class Identifier extends ValueExpression {
 	}
 
 	/**
-	 * Yields {@code true} if a call to {@link #pushScope(ScopeToken)} on this
-	 * identifier yields a new {@link OutOfScopeIdentifier} associated with the
-	 * given scope, that can then be removed by {@link #popScope(ScopeToken)}.
-	 * If this method returns {@code false}, then {@link #pushScope(ScopeToken)}
-	 * and {@link #popScope(ScopeToken)} will always return this identifier
-	 * instead.
+	 * Yields {@code true} if a call to
+	 * {@link #pushScope(ScopeToken, ProgramPoint)} on this identifier yields a
+	 * new {@link OutOfScopeIdentifier} associated with the given scope, that
+	 * can then be removed by {@link #popScope(ScopeToken, ProgramPoint)}. If
+	 * this method returns {@code false}, then
+	 * {@link #pushScope(ScopeToken, ProgramPoint)} and
+	 * {@link #popScope(ScopeToken, ProgramPoint)} will always return this
+	 * identifier instead.
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
@@ -160,8 +166,12 @@ public abstract class Identifier extends ValueExpression {
 			Identifier other)
 			throws SemanticException {
 		if (!equals(other))
-			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
-					+ "' and '" + other + "'");
+			throw new SemanticException(
+					"Cannot perform the least upper bound between different identifiers: '"
+							+ this
+							+ "' and '"
+							+ other
+							+ "'");
 		return this;
 	}
 
@@ -170,4 +180,38 @@ public abstract class Identifier extends ValueExpression {
 		Type t = getStaticType();
 		return !t.isValueType() || t.isUntyped();
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		return this;
+	}
+
+	/**
+	 * Yields whether or not this identifier is an instrumented receiver, that
+	 * is, a special variable reference that is used to represent objects,
+	 * arrays, or other data structures that are being initialized and that have
+	 * not been assigned to a variable yet, and thus live on the stack.
+	 * 
+	 * @return {@code true} if this identifier is an instrumented receiver,
+	 *             {@code false} otherwise
+	 */
+	public boolean isInstrumentedReceiver() {
+		return false;
+	}
+
+	/**
+	 * Yields whether or not this identifier can be assigned to a value. There
+	 * are identifiers that represent read-only locations, such as ones modeling
+	 * the special uninitialized heap location {@code null}, that cannot be
+	 * assigned to a value. This method provides a modular way to check for
+	 * that. If this method returns {@code false}, any attempt to assign a value
+	 * to this identifier should fail.
+	 * 
+	 * @return {@code true} if this identifier can be assigned to a value,
+	 *             {@code false} otherwise
+	 */
+	public boolean canBeAssigned() {
+		return true;
+	}
+
 }

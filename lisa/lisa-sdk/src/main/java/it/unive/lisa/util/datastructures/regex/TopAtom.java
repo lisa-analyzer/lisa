@@ -13,7 +13,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class TopAtom extends Atom {
+public final class TopAtom
+		extends
+		Atom {
 
 	/**
 	 * The string used to represent this regular expression.
@@ -30,9 +32,8 @@ public final class TopAtom extends Atom {
 	}
 
 	@Override
-	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory) {
+	public <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory) {
 		return factory.unknownString();
 	}
 
@@ -167,6 +168,7 @@ public final class TopAtom extends Atom {
 					String s) {
 				return s.isEmpty(); // epsilon is contained everywhere
 			}
+
 		};
 	}
 
@@ -190,4 +192,5 @@ public final class TopAtom extends Atom {
 			RegularExpression other) {
 		return 0;
 	}
+
 }

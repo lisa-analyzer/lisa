@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.statement.global;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -21,7 +23,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessGlobal extends Expression {
+public class AccessGlobal
+		extends
+		Expression {
 
 	/**
 	 * The receiver of the access
@@ -127,17 +131,20 @@ public class AccessGlobal extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (target instanceof ConstantGlobal)
-			return entryState.smallStepSemantics(((ConstantGlobal) target).getConstant(), this);
+			return analysis.smallStepSemantics(entryState, ((ConstantGlobal) target).getConstant(), this);
 
 		// unit globals are unique, we can directly access those
-		return entryState.smallStepSemantics(
+		return analysis.smallStepSemantics(
+				entryState,
 				new GlobalVariable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
 				this);
 	}
+
 }

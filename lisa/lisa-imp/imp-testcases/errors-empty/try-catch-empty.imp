@@ -1,0 +1,220 @@
+class A { ~A() {} }
+class B extends A { ~B() {} }
+class C extends A { ~C() {} }
+class D extends B { ~D() {} }
+class E extends B { ~E() {} }
+
+class errors {
+
+    emptyTry() {
+        def x = 0;
+        try {
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    emptyCatch() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    allEmptyCatches() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+        } catch (D e) {
+        } catch (A, B e) {
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    emptyElse() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    emptyTryElse() {
+        def x = 0;
+        try {
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    allEmptyExceptFinally() {
+        def x = 0;
+        try {
+        } catch (E) {
+        } catch (D e) {
+        } catch (A, B e) {
+        } else {
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    emptyTryElseCatch() {
+        def x = 0;
+        try {
+        } catch (E) {
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+        } finally {
+            x = 12;
+            x = 13;
+        }
+        return x;
+    }
+
+    emptyFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+            x = 6;
+            x = 7;
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+        }
+        return x;
+    }
+
+    emptyCatchFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+            x = 4;
+            x = 5;
+        } catch (D e) {
+        } catch (A, B e) {
+            x = 8;
+            x = 9;
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+        }
+        return x;
+    }
+
+    allEmptyCatchesFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            x = 3;
+        } catch (E) {
+        } catch (D e) {
+        } catch (A, B e) {
+        } else {
+            x = 10;
+            x = 11;
+        } finally {
+        }
+        return x;
+    }
+
+    allEmpty() {
+        def x = 0;
+        try {
+        } catch (E) {
+        } catch (D e) {
+        } catch (A, B e) {
+        } else {
+        } finally {
+        }
+        return x;
+    }
+}

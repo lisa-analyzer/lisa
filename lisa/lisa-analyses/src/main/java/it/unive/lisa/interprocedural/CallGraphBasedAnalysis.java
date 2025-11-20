@@ -1,6 +1,8 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -23,11 +25,14 @@ import java.util.Set;
 /**
  * An interprocedural analysis based on a call graph.
  * 
- * @param <A> The {@link AbstractState} of the analysis
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
+public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
 		implements
-		InterproceduralAnalysis<A> {
+		InterproceduralAnalysis<A, D> {
 
 	/**
 	 * The call graph used to resolve method calls.
@@ -45,6 +50,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 	protected OpenCallPolicy policy;
 
 	/**
+	 * The analysis that is being run.
+	 */
+	protected Analysis<A, D> analysis;
+
+	/**
 	 * Builds the analysis.
 	 */
 	protected CallGraphBasedAnalysis() {
@@ -56,10 +66,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 	 * @param other the original analysis to copy
 	 */
 	protected CallGraphBasedAnalysis(
-			CallGraphBasedAnalysis<A> other) {
+			CallGraphBasedAnalysis<A, D> other) {
 		this.callgraph = other.callgraph;
 		this.app = other.app;
 		this.policy = other.policy;
+		this.analysis = other.analysis;
 	}
 
 	@Override
@@ -68,14 +79,21 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 	}
 
 	@Override
+	public Analysis<A, D> getAnalysis() {
+		return analysis;
+	}
+
+	@Override
 	public void init(
 			Application app,
 			CallGraph callgraph,
-			OpenCallPolicy policy)
+			OpenCallPolicy policy,
+			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.app = app;
 		this.policy = policy;
+		this.analysis = analysis;
 	}
 
 	@Override
@@ -103,19 +121,20 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 			CFG cfg)
 			throws SemanticException {
 		AnalysisState<A> prepared = entryState;
-		AnalysisState<A> st = entryState.bottom();
-		StatementStore<A> store = new StatementStore<>(st);
+		StatementStore<A> store = new StatementStore<>(entryState.bottom());
 
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
 			CodeLocation loc = arg.getLocation();
-			Assignment a = new Assignment(cfg, loc,
+			Assignment a = new Assignment(
+					cfg,
+					loc,
 					new VariableRef(cfg, loc, arg.getName()),
 					arg.getStaticType().unknownValue(cfg, loc));
 			prepared = a.forwardSemantics(prepared, this, store);
 		}
 
 		// the stack has to be empty
-		return new AnalysisState<>(prepared.getState(), new ExpressionSet());
+		return prepared.withExecutionExpressions(new ExpressionSet());
 	}
 
 	@Override
@@ -125,6 +144,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A>>
 			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return policy.apply(call, entryState, parameters);
+		return policy.apply(call, entryState, analysis, parameters);
 	}
+
 }

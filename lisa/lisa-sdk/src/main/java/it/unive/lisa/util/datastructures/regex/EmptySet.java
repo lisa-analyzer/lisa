@@ -11,7 +11,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class EmptySet extends RegularExpression {
+public final class EmptySet
+		extends
+		RegularExpression {
 
 	/**
 	 * The singleton instance.
@@ -43,9 +45,8 @@ public final class EmptySet extends RegularExpression {
 	}
 
 	@Override
-	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory) {
+	public <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory) {
 		return factory.emptyLanguage();
 	}
 
@@ -165,4 +166,5 @@ public final class EmptySet extends RegularExpression {
 	protected boolean readsWhiteSpaceString() {
 		return false;
 	}
+
 }

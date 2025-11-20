@@ -2,10 +2,13 @@ package it.unive.lisa.outputs.serializableGraph;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -13,13 +16,17 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableEdge implements Comparable<SerializableEdge> {
+public class SerializableEdge
+		implements
+		Comparable<SerializableEdge> {
 
 	private final int sourceId;
 
 	private final int destId;
 
 	private final String kind;
+
+	private final String label;
 
 	// Capture all other fields that Jackson does not match during
 	// deserialization
@@ -29,7 +36,7 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 	 * Builds an empty (invalid) edge.
 	 */
 	public SerializableEdge() {
-		this(-1, -1, null);
+		this(-1, -1, null, null);
 	}
 
 	/**
@@ -38,14 +45,17 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 	 * @param sourceId the id of the source {@link SerializableNode}
 	 * @param destId   the id of the destination {@link SerializableNode}
 	 * @param kind     the kind of this edge
+	 * @param label    the label of this edge
 	 */
 	public SerializableEdge(
 			int sourceId,
 			int destId,
-			String kind) {
+			String kind,
+			String label) {
 		this.sourceId = sourceId;
 		this.destId = destId;
 		this.kind = kind;
+		this.label = label;
 		unknownFields = new TreeMap<>();
 	}
 
@@ -77,6 +87,16 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 	}
 
 	/**
+	 * Yields the label of this edge.
+	 * 
+	 * @return the label
+	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	public String getLabel() {
+		return label;
+	}
+
+	/**
 	 * Yields all fields that were unrecognized during deserialization.
 	 * 
 	 * @return the other fields
@@ -105,6 +125,7 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 		int result = 1;
 		result = prime * result + destId;
 		result = prime * result + ((kind == null) ? 0 : kind.hashCode());
+		result = prime * result + ((label == null) ? 0 : label.hashCode());
 		result = prime * result + sourceId;
 		result = prime * result + ((unknownFields == null) ? 0 : unknownFields.hashCode());
 		return result;
@@ -127,6 +148,11 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 				return false;
 		} else if (!kind.equals(other.kind))
 			return false;
+		if (label == null) {
+			if (other.label != null)
+				return false;
+		} else if (!label.equals(other.label))
+			return false;
 		if (sourceId != other.sourceId)
 			return false;
 		if (unknownFields == null) {
@@ -139,6 +165,8 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 
 	@Override
 	public String toString() {
+		if (label != null && !label.isEmpty())
+			return sourceId + "-" + kind + "-" + label + "->" + destId;
 		return sourceId + "-" + kind + "->" + destId;
 	}
 
@@ -154,10 +182,13 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 			return cmp;
 		if ((cmp = CollectionUtilities.nullSafeCompare(true, kind, o.kind, String::compareTo)) != 0)
 			return cmp;
+		if ((cmp = CollectionUtilities.nullSafeCompare(true, label, o.label, String::compareTo)) != 0)
+			return cmp;
 
-		CollectionsDiffBuilder<
-				String> builder = new CollectionsDiffBuilder<>(String.class, unknownFields.keySet(),
-						o.unknownFields.keySet());
+		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
+				String.class,
+				unknownFields.keySet(),
+				o.unknownFields.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())
@@ -173,5 +204,63 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 				return cmp;
 
 		return 0;
+	}
+
+	/**
+	 * Yields true if this edge is equal to the given one, ignoring the ids of
+	 * the source and destination nodes. This is useful when comparing edges in
+	 * two graphs that have been serialized, where the ids of the nodes might
+	 * not match. For this method to return {@code true}, the source and
+	 * destination nodes must be equal up to ids (i.e.,
+	 * {@link SerializableNode#equalsUpToIds(SerializableNode, Collection, Collection)}).
+	 * 
+	 * @param other             the edge to compare to
+	 * @param nodesInThisGraph  the nodes in this graph
+	 * @param nodesInOtherGraph the nodes in the other graph
+	 * 
+	 * @return {@code true} if the edges are equal up to ids, {@code false}
+	 *             otherwise
+	 */
+	public boolean equalsUpToIds(
+			SerializableEdge other,
+			Collection<SerializableNode> nodesInThisGraph,
+			Collection<SerializableNode> nodesInOtherGraph) {
+		if (this == other)
+			return true;
+		if (other == null)
+			return false;
+		if (getClass() != other.getClass())
+			return false;
+
+		if (!Objects.equals(kind, other.kind))
+			return false;
+		if (!Objects.equals(label, other.label))
+			return false;
+		if (!Objects.equals(unknownFields, other.unknownFields))
+			return false;
+
+		SerializableNode thisSource = nodesInThisGraph.stream()
+				.filter(n -> n.getId() == sourceId)
+				.findFirst()
+				.orElse(null);
+		SerializableNode otherSource = nodesInOtherGraph.stream()
+				.filter(n -> n.getId() == other.sourceId)
+				.findFirst()
+				.orElse(null);
+		SerializableNode thisDest = nodesInThisGraph.stream().filter(n -> n.getId() == destId).findFirst().orElse(null);
+		SerializableNode otherDest = nodesInOtherGraph.stream()
+				.filter(n -> n.getId() == other.destId)
+				.findFirst()
+				.orElse(null);
+		if (thisSource == null || otherSource == null)
+			return false;
+		if (thisDest == null || otherDest == null)
+			return false;
+		if (!thisSource.equalsUpToIds(otherSource, nodesInThisGraph, nodesInOtherGraph))
+			return false;
+		if (!thisDest.equalsUpToIds(otherDest, nodesInThisGraph, nodesInOtherGraph))
+			return false;
+
+		return true;
 	}
 }

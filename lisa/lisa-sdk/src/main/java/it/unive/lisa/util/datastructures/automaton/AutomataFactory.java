@@ -55,4 +55,5 @@ public interface AutomataFactory<A extends Automaton<A, T>, T extends Transition
 	A from(
 			SortedSet<State> states,
 			SortedSet<Transition<T>> transitions);
+
 }

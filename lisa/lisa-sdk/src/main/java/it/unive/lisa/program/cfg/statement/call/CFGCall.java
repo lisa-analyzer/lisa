@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -27,7 +28,11 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGCall extends CallWithResult implements CanRemoveReceiver {
+public class CFGCall
+		extends
+		CallWithResult
+		implements
+		CanRemoveReceiver {
 
 	/**
 	 * The targets of this call
@@ -105,8 +110,14 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	public CFGCall(
 			UnresolvedCall source,
 			Collection<CFG> targets) {
-		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
-				targets, source.getParameters());
+		this(
+				source.getCFG(),
+				source.getLocation(),
+				source.getCallType(),
+				source.getQualifier(),
+				source.getTargetName(),
+				targets,
+				source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);
@@ -197,9 +208,9 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> compute(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> compute(
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			ExpressionSet[] parameters)
 			throws SemanticException {
@@ -209,7 +220,15 @@ public class CFGCall extends CallWithResult implements CanRemoveReceiver {
 	@Override
 	public TruncatedParamsCall removeFirstParameter() {
 		return new TruncatedParamsCall(
-				new CFGCall(getCFG(), getLocation(), getCallType(), getQualifier(), getFullTargetName(), getOrder(),
-						targets, CanRemoveReceiver.truncate(getParameters())));
+				new CFGCall(
+						getCFG(),
+						getLocation(),
+						getCallType(),
+						getQualifier(),
+						getFullTargetName(),
+						getOrder(),
+						targets,
+						CanRemoveReceiver.truncate(getParameters())));
 	}
+
 }

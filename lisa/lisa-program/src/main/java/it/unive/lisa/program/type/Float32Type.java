@@ -27,7 +27,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Float32Type implements NumericType {
+public class Float32Type
+		implements
+		NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
@@ -111,4 +113,5 @@ public class Float32Type implements NumericType {
 			TypeSystem types) {
 		return Collections.singleton(this);
 	}
+
 }

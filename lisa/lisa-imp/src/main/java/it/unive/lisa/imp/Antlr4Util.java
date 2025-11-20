@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Vocabulary;
 import org.antlr.v4.runtime.misc.IntervalSet;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +37,7 @@ public class Antlr4Util {
 	 * @return a {@link ParsingException} contained more detailed information
 	 *             about the one thrown by ANTLR4
 	 */
-	static ParsingException handleRecognitionException(
+	public static ParsingException handleRecognitionException(
 			String file,
 			RecognitionException e) {
 		Token problem = e.getOffendingToken();
@@ -98,8 +99,11 @@ public class Antlr4Util {
 			RecognitionException e,
 			Token problem,
 			StringBuilder message) {
-		message.append("matched '").append(problem.getText()).append("' as <")
-				.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary())).append(">, expecting <")
+		message.append("matched '")
+				.append(problem.getText())
+				.append("' as <")
+				.append(tokenName(problem.getType(), e.getRecognizer().getVocabulary()))
+				.append(">, expecting <")
 				.append(tokenNames(((InputMismatchException) e).getExpectedTokens(), e.getRecognizer().getVocabulary()))
 				.append(">");
 	}
@@ -107,8 +111,12 @@ public class Antlr4Util {
 	private static StringBuilder errorHeader(
 			String file,
 			Token problem) {
-		return new StringBuilder().append(file).append(":").append(problem.getLine()).append(":")
-				.append(problem.getCharPositionInLine()).append(" - ");
+		return new StringBuilder().append(file)
+				.append(":")
+				.append(problem.getLine())
+				.append(":")
+				.append(problem.getCharPositionInLine())
+				.append(" - ");
 	}
 
 	private static String tokenName(
@@ -136,7 +144,7 @@ public class Antlr4Util {
 	 * 
 	 * @return the line number where the context appears
 	 */
-	static int getLine(
+	public static int getLine(
 			ParserRuleContext ctx) {
 		return ctx.getStart().getLine();
 	}
@@ -148,7 +156,7 @@ public class Antlr4Util {
 	 * 
 	 * @return the column number where the context appears
 	 */
-	static int getCol(
+	public static int getCol(
 			ParserRuleContext ctx) {
 		return ctx.getStop().getCharPositionInLine();
 	}
@@ -160,7 +168,7 @@ public class Antlr4Util {
 	 * 
 	 * @return the line number where the token appears
 	 */
-	static int getLine(
+	public static int getLine(
 			Token tok) {
 		return tok.getLine();
 	}
@@ -172,8 +180,33 @@ public class Antlr4Util {
 	 * 
 	 * @return the column number where the token appears
 	 */
-	static int getCol(
+	public static int getCol(
 			Token tok) {
 		return tok.getCharPositionInLine();
 	}
+
+	/**
+	 * Extracts the column number from an antlr terminal node.
+	 * 
+	 * @param node the terminal node
+	 * 
+	 * @return the column number where the terminal node appears
+	 */
+	public static int getCol(
+			TerminalNode node) {
+		return getCol(node.getSymbol());
+	}
+
+	/**
+	 * Extracts the line number from an antlr terminal node.
+	 * 
+	 * @param node the terminal node
+	 * 
+	 * @return the line number where the terminal node appears
+	 */
+	public static int getLine(
+			TerminalNode node) {
+		return getLine(node.getSymbol());
+	}
+
 }

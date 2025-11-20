@@ -2,18 +2,20 @@ package it.unive.lisa.program.cfg.controlFlow;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link ControlFlowStructure} representing a loop.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Loop extends ControlFlowStructure {
+public class Loop
+		extends
+		ControlFlowStructure {
 
 	private final Collection<Statement> body;
 
@@ -55,8 +57,9 @@ public class Loop extends ControlFlowStructure {
 	}
 
 	@Override
-	public void simplify() {
-		body.removeIf(NoOp.class::isInstance);
+	public void simplify(
+			Set<Statement> targets) {
+		body.removeIf(targets::contains);
 	}
 
 	@Override
@@ -96,4 +99,21 @@ public class Loop extends ControlFlowStructure {
 		targeted.add(getCondition());
 		return targeted;
 	}
+
+	@Override
+	public void addWith(
+			Statement toAdd,
+			Statement reference) {
+		if (body.contains(reference))
+			body.add(toAdd);
+	}
+
+	@Override
+	public void replace(
+			Statement original,
+			Statement replacement) {
+		if (body.remove(original))
+			body.add(replacement);
+	}
+
 }

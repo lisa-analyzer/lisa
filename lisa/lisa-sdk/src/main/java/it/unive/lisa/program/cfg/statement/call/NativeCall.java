@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -29,7 +30,12 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall {
+public class NativeCall
+		extends
+		Call
+		implements
+		CanRemoveReceiver,
+		ResolvedCall {
 
 	/**
 	 * The native targets of this call
@@ -109,8 +115,14 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	public NativeCall(
 			UnresolvedCall source,
 			Collection<NativeCFG> targets) {
-		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
-				targets, source.getParameters());
+		this(
+				source.getCFG(),
+				source.getLocation(),
+				source.getCallType(),
+				source.getQualifier(),
+				source.getTargetName(),
+				targets,
+				source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);
@@ -190,20 +202,20 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 
 		Expression[] parameters = getSubExpressions();
 		ParameterAssigningStrategy strategy = getProgram().getFeatures().getAssigningStrategy();
 		for (NativeCFG nat : targets)
 			try {
-				Pair<AnalysisState<A>, ExpressionSet[]> prepared = strategy.prepare(this,
-						state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
+				Pair<AnalysisState<A>, ExpressionSet[]> prepared = strategy
+						.prepare(this, state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
 
 				NaryExpression rewritten = nat.rewrite(this, parameters);
 				result = result
@@ -219,7 +231,15 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 	@Override
 	public TruncatedParamsCall removeFirstParameter() {
 		return new TruncatedParamsCall(
-				new NativeCall(getCFG(), getLocation(), getCallType(), getQualifier(), getFullTargetName(), getOrder(),
-						targets, CanRemoveReceiver.truncate(getParameters())));
+				new NativeCall(
+						getCFG(),
+						getLocation(),
+						getCallType(),
+						getQualifier(),
+						getFullTargetName(),
+						getOrder(),
+						targets,
+						CanRemoveReceiver.truncate(getParameters())));
 	}
+
 }

@@ -15,7 +15,9 @@ import it.unive.lisa.type.BooleanType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LogicalAnd extends LogicalOperation {
+public class LogicalAnd
+		extends
+		LogicalOperation {
 
 	/**
 	 * The singleton instance of this class.
@@ -39,4 +41,5 @@ public class LogicalAnd extends LogicalOperation {
 	public LogicalOperator opposite() {
 		return LogicalOr.INSTANCE;
 	}
+
 }

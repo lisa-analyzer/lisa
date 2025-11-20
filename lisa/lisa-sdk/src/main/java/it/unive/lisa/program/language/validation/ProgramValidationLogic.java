@@ -31,4 +31,5 @@ public interface ProgramValidationLogic {
 	void validateAndFinalize(
 			Program program)
 			throws ProgramValidationException;
+
 }

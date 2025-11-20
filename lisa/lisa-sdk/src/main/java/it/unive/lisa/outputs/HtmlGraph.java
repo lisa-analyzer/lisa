@@ -34,7 +34,9 @@ import org.thymeleaf.templateresolver.StringTemplateResolver;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HtmlGraph extends VisualGraph {
+public class HtmlGraph
+		extends
+		VisualGraph {
 
 	private final SerializableGraph graph;
 
@@ -149,8 +151,7 @@ public class HtmlGraph extends VisualGraph {
 				.append(d.getValue().getLeft())
 				.append("</span></div>\n");
 		populate(descrs, tabs + 1, d.getValue().getRight().getDescription());
-		descrs.append("\t".repeat(tabs))
-				.append("</div>\n");
+		descrs.append("\t".repeat(tabs)).append("</div>\n");
 	}
 
 	private void nodeDescriptionWithSubnodes(
@@ -164,8 +165,7 @@ public class HtmlGraph extends VisualGraph {
 				.append(nodeName)
 				.append("\" class=\"header-info header-hidden\">\n");
 		singleSubNodeAccordion(descrs, true, entry.getKey(), entry.getValue(), inners, tabs + 1);
-		descrs.append("\t".repeat(tabs))
-				.append("</div>\n");
+		descrs.append("\t".repeat(tabs)).append("</div>\n");
 	}
 
 	private void singleSubNodeAccordion(
@@ -188,15 +188,12 @@ public class HtmlGraph extends VisualGraph {
 		populate(descrs, tabs + 1, d.getRight().getDescription());
 		List<Integer> subs = inners.getOrDefault(id, Collections.emptyList());
 		if (!subs.isEmpty()) {
-			descrs.append("\t".repeat(tabs))
-					.append("<div class=\"description-nest\">\n");
+			descrs.append("\t".repeat(tabs)).append("<div class=\"description-nest\">\n");
 			for (Integer i : subs)
 				singleSubNodeAccordion(descrs, false, i, descriptions.get(i), inners, tabs + 1);
-			descrs.append("\t".repeat(tabs))
-					.append("</div>\n");
+			descrs.append("\t".repeat(tabs)).append("</div>\n");
 		}
-		descrs.append("\t".repeat(tabs))
-				.append("</div>\n");
+		descrs.append("\t".repeat(tabs)).append("</div>\n");
 	}
 
 	private static void populate(
@@ -221,8 +218,7 @@ public class HtmlGraph extends VisualGraph {
 							.append("<span class=\"description-header\">Element ")
 							.append(i)
 							.append(":</span><br/>\n");
-					descrs.append("\t".repeat(depth))
-							.append("<div class=\"description-nest\">\n");
+					descrs.append("\t".repeat(depth)).append("<div class=\"description-nest\">\n");
 					populate(descrs, depth + 1, array.getElements().get(i));
 					descrs.append("\t".repeat(depth)).append("</div>\n");
 				}
@@ -251,7 +247,10 @@ public class HtmlGraph extends VisualGraph {
 	private static boolean isStringLike(
 			SerializableValue value) {
 		return value instanceof SerializableString
-				|| (value instanceof SerializableArray && ((SerializableArray) value).getElements().stream()
-						.allMatch(SerializableString.class::isInstance));
+				|| (value instanceof SerializableArray
+						&& ((SerializableArray) value).getElements()
+								.stream()
+								.allMatch(SerializableString.class::isInstance));
 	}
+
 }

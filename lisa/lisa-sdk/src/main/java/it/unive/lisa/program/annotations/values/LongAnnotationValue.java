@@ -3,9 +3,11 @@ package it.unive.lisa.program.annotations.values;
 /**
  * A long annotation value.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class LongAnnotationValue implements BasicAnnotationValue {
+public class LongAnnotationValue
+		implements
+		BasicAnnotationValue {
 
 	private final long l;
 
@@ -56,4 +58,5 @@ public class LongAnnotationValue implements BasicAnnotationValue {
 		LongAnnotationValue other = (LongAnnotationValue) o;
 		return Long.compare(l, other.l);
 	}
+
 }

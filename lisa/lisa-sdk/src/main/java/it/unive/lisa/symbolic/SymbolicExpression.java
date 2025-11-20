@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.ScopedObject;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
@@ -18,7 +19,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class SymbolicExpression implements ScopedObject<SymbolicExpression> {
+public abstract class SymbolicExpression
+		implements
+		ScopedObject<SymbolicExpression> {
 
 	/**
 	 * The code location of the statement that has generated this symbolic
@@ -76,7 +79,8 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 	 */
 	@Override
 	public abstract SymbolicExpression pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException;
 
 	/**
@@ -97,7 +101,8 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 	 */
 	@Override
 	public abstract SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException;
 
 	/**
@@ -169,4 +174,29 @@ public abstract class SymbolicExpression implements ScopedObject<SymbolicExpress
 	 * @return whether or not this expression might need rewriting
 	 */
 	public abstract boolean mightNeedRewriting();
+
+	/**
+	 * Extracts the inner expressions from casts/conversions. If {@code this} is
+	 * of the form {@code e cast/conv type}, this method returns
+	 * {@code removeTypingExpressions(e)}. Otherwise, {@code this} is returned
+	 * after invoking this method on all sub-expressions.
+	 * 
+	 * @return the typing expression-free version of {@code this}
+	 */
+	public abstract SymbolicExpression removeTypingExpressions();
+
+	/**
+	 * Replaces all occurrences of the given source expression with the target
+	 * expression in this expression. If the source is not present, this
+	 * expression is returned as-is.
+	 * 
+	 * @param source the expression to be replaced
+	 * @param target the expression to replace with
+	 * 
+	 * @return the updated expression
+	 */
+	public abstract SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target);
+
 }

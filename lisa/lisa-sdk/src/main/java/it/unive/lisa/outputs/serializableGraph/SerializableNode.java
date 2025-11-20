@@ -6,10 +6,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -17,7 +19,9 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SerializableNode implements Comparable<SerializableNode> {
+public class SerializableNode
+		implements
+		Comparable<SerializableNode> {
 
 	private final int id;
 
@@ -125,9 +129,10 @@ public class SerializableNode implements Comparable<SerializableNode> {
 		if ((cmp = Integer.compare(unknownFields.keySet().size(), o.unknownFields.keySet().size())) != 0)
 			return cmp;
 
-		CollectionsDiffBuilder<
-				String> builder = new CollectionsDiffBuilder<>(String.class, unknownFields.keySet(),
-						o.unknownFields.keySet());
+		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
+				String.class,
+				unknownFields.keySet(),
+				o.unknownFields.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.sameContent())
@@ -189,5 +194,58 @@ public class SerializableNode implements Comparable<SerializableNode> {
 	@Override
 	public String toString() {
 		return id + "(" + subNodes + "):" + text;
+	}
+
+	/**
+	 * Checks if this node is equal to another node, ignoring the ids of the
+	 * nodes themselves and their subnodes. This is useful to compare nodes that
+	 * are structurally equal, but that may have been assigned different ids in
+	 * different graphs.
+	 * 
+	 * @param other             the node to compare this one with
+	 * @param nodesInThisGraph  the nodes in the graph that contains this node
+	 * @param nodesInOtherGraph the nodes in the graph that contains the other
+	 *                              node
+	 * 
+	 * @return {@code true} if this node is equal to the other one, ignoring
+	 *             ids; {@code false} otherwise
+	 */
+	public boolean equalsUpToIds(
+			SerializableNode other,
+			Collection<SerializableNode> nodesInThisGraph,
+			Collection<SerializableNode> nodesInOtherGraph) {
+		if (this == other)
+			return true;
+		if (other == null)
+			return false;
+		if (getClass() != other.getClass())
+			return false;
+
+		if (!Objects.equals(text, other.text))
+			return false;
+		if (!Objects.equals(unknownFields, other.unknownFields))
+			return false;
+
+		if (Objects.equals(subNodes, other.subNodes))
+			return true;
+		if (subNodes.size() != other.subNodes.size())
+			return false;
+		for (int i = 0; i < subNodes.size(); i++) {
+			Integer thisSubNodeId = subNodes.get(i);
+			Integer otherSubNodeId = other.subNodes.get(i);
+			SerializableNode thisSubNode = nodesInThisGraph.stream()
+					.filter(n -> n.id == thisSubNodeId)
+					.findFirst()
+					.orElse(null);
+			SerializableNode otherSubNode = nodesInOtherGraph.stream()
+					.filter(n -> n.id == otherSubNodeId)
+					.findFirst()
+					.orElse(null);
+			if (thisSubNode == null || otherSubNode == null)
+				return false;
+			if (!thisSubNode.equalsUpToIds(otherSubNode, nodesInThisGraph, nodesInOtherGraph))
+				return false;
+		}
+		return true;
 	}
 }

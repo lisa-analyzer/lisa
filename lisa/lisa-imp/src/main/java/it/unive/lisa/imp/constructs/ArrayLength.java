@@ -1,6 +1,8 @@
 package it.unive.lisa.imp.constructs;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -33,7 +35,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ArrayLength extends NativeCFG {
+public class ArrayLength
+		extends
+		NativeCFG {
 
 	/**
 	 * Builds the construct.
@@ -44,8 +48,14 @@ public class ArrayLength extends NativeCFG {
 	public ArrayLength(
 			CodeLocation location,
 			Program program) {
-		super(new CodeMemberDescriptor(location, program, false, "arraylen", Int32Type.INSTANCE,
-				new Parameter(location, "a", Untyped.INSTANCE)),
+		super(
+				new CodeMemberDescriptor(
+						location,
+						program,
+						false,
+						"arraylen",
+						Int32Type.INSTANCE,
+						new Parameter(location, "a", Untyped.INSTANCE)),
 				IMPArrayLength.class);
 	}
 
@@ -56,7 +66,11 @@ public class ArrayLength extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPArrayLength extends UnaryExpression implements PluggableStatement {
+	public static class IMPArrayLength
+			extends
+			UnaryExpression
+			implements
+			PluggableStatement {
 
 		/**
 		 * The statement that originated this one.
@@ -126,20 +140,21 @@ public class ArrayLength extends NativeCFG {
 		}
 
 		@Override
-		public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-				InterproceduralAnalysis<A> interprocedural,
+		public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+				InterproceduralAnalysis<A, D> interprocedural,
 				AnalysisState<A> state,
 				SymbolicExpression expr,
 				StatementStore<A> expressions)
 				throws SemanticException {
 			Set<Type> arraytypes = new HashSet<>();
-			Set<Type> types = state.getState().getRuntimeTypesOf(expr, this, state.getState());
+			Analysis<A, D> analysis = interprocedural.getAnalysis();
+			Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
 			for (Type t : types)
 				if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
 					arraytypes.add(t.asPointerType().getInnerType());
 
 			if (arraytypes.isEmpty())
-				return state.bottom();
+				return state.bottomExecution();
 
 			Type cst = Type.commonSupertype(arraytypes, getStaticType());
 			HeapDereference container = new HeapDereference(cst, expr, getLocation());
@@ -149,7 +164,9 @@ public class ArrayLength extends NativeCFG {
 					new Variable(Untyped.INSTANCE, "len", getLocation()),
 					getLocation());
 
-			return state.smallStepSemantics(len, this);
+			return analysis.smallStepSemantics(state, len, this);
 		}
+
 	}
+
 }

@@ -7,7 +7,10 @@ import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.Set;
 
-public class TestCallGraph extends BaseCallGraph {
+public class TestCallGraph
+		extends
+		BaseCallGraph {
+
 	@Override
 	public Collection<Type> getPossibleTypesOfReceiver(
 			Expression receiver,
@@ -15,4 +18,5 @@ public class TestCallGraph extends BaseCallGraph {
 			throws CallResolutionException {
 		return receiver.getStaticType().allInstances(receiver.getProgram().getTypes());
 	}
+
 }

@@ -12,7 +12,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class Or extends RegularExpression {
+public final class Or
+		extends
+		RegularExpression {
 
 	/**
 	 * The first regular expression
@@ -140,18 +142,26 @@ public final class Or extends RegularExpression {
 			result = first;
 
 		// epsilon + ee* = e*
-		else if (first.isEpsilon() && second.isComp() && second.asComp().getSecond().isStar()
+		else if (first.isEpsilon()
+				&& second.isComp()
+				&& second.asComp().getSecond().isStar()
 				&& second.asComp().getFirst().equals(second.asComp().getSecond().asStar().getOperand()))
 			result = second.asComp().getFirst().star();
-		else if (second.isEpsilon() && first.isComp() && first.asComp().getSecond().isStar()
+		else if (second.isEpsilon()
+				&& first.isComp()
+				&& first.asComp().getSecond().isStar()
 				&& first.asComp().getFirst().equals(first.asComp().getSecond().asStar().getOperand()))
 			result = first.asComp().getFirst().star();
 
 		// epsilon + e*e = e*
-		else if (first.isEpsilon() && second.isComp() && second.asComp().getFirst().isStar()
+		else if (first.isEpsilon()
+				&& second.isComp()
+				&& second.asComp().getFirst().isStar()
 				&& second.asComp().getSecond().equals(second.asComp().getFirst().asStar().getOperand()))
 			result = second.asComp().getFirst().star();
-		else if (second.isEpsilon() && first.isComp() && first.asComp().getFirst().isStar()
+		else if (second.isEpsilon()
+				&& first.isComp()
+				&& first.asComp().getFirst().isStar()
 				&& first.asComp().getSecond().equals(first.asComp().getFirst().asStar().getOperand()))
 			result = first.asComp().getFirst().star();
 
@@ -160,20 +170,24 @@ public final class Or extends RegularExpression {
 		// a(b + c)* + a((b + c)*b + (b + c)*c)(b + c)*
 		// this is equivalent to a(b + c)*
 		// IMPORTANT!! keep this as the last case
-		else if (first.isComp() && first.asComp().getSecond().isStar()
+		else if (first.isComp()
+				&& first.asComp().getSecond().isStar()
 				&& first.asComp().getSecond().asStar().getOperand().isOr()) {
 			RegularExpression a = first.asComp().getFirst();
 			Star bORcSTAR = first.asComp().getSecond().asStar();
 			RegularExpression b = bORcSTAR.getOperand().asOr().getFirst();
 			RegularExpression c = bORcSTAR.getOperand().asOr().getSecond();
 
-			if (second.isComp() && second.asComp().getFirst().equals(a)
+			if (second.isComp()
+					&& second.asComp().getFirst().equals(a)
 					&& second.asComp().getSecond().isComp()
 					&& second.asComp().getSecond().asComp().getSecond().equals(bORcSTAR)
 					&& second.asComp().getSecond().asComp().getFirst().isOr()) {
 				Or or = second.asComp().getSecond().asComp().getFirst().asOr();
-				if (or.getFirst().isComp() && or.getFirst().asComp().getFirst().equals(bORcSTAR)
-						&& or.getFirst().asComp().getSecond().equals(b) && or.getSecond().isComp()
+				if (or.getFirst().isComp()
+						&& or.getFirst().asComp().getFirst().equals(bORcSTAR)
+						&& or.getFirst().asComp().getSecond().equals(b)
+						&& or.getSecond().isComp()
 						&& or.getSecond().asComp().getFirst().equals(bORcSTAR)
 						&& or.getSecond().asComp().getSecond().equals(c)) {
 					result = first;
@@ -185,9 +199,8 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	public <A extends Automaton<A, T>,
-			T extends TransitionSymbol<T>> A toAutomaton(
-					AutomataFactory<A, T> factory) {
+	public <A extends Automaton<A, T>, T extends TransitionSymbol<T>> A toAutomaton(
+			AutomataFactory<A, T> factory) {
 		return first.toAutomaton(factory).union(second.toAutomaton(factory));
 	}
 
@@ -314,4 +327,5 @@ public final class Or extends RegularExpression {
 	protected boolean readsWhiteSpaceString() {
 		return first.readsWhiteSpaceString() || second.readsWhiteSpaceString();
 	}
+
 }

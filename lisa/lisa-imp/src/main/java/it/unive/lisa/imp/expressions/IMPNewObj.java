@@ -1,6 +1,8 @@
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -9,9 +11,9 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.InstrumentedReceiverRef;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -35,7 +37,9 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewObj extends NaryExpression {
+public class IMPNewObj
+		extends
+		NaryExpression {
 
 	private final boolean staticallyAllocated;
 
@@ -60,7 +64,11 @@ public class IMPNewObj extends NaryExpression {
 			Type type,
 			boolean staticallyAllocated,
 			Expression... parameters) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type, type,
+		super(
+				cfg,
+				new SourceCodeLocation(sourceFile, line, col),
+				(staticallyAllocated ? "" : "new ") + type,
+				staticallyAllocated ? type : new ReferenceType(type),
 				parameters);
 		this.staticallyAllocated = staticallyAllocated;
 	}
@@ -72,55 +80,66 @@ public class IMPNewObj extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		Type type = getStaticType();
-		ReferenceType reftype = new ReferenceType(type);
-		MemoryAllocation created = new MemoryAllocation(type, getLocation(), staticallyAllocated);
-		HeapReference ref = new HeapReference(reftype, created, getLocation());
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		Type staticType = getStaticType();
+		Type type = staticType.isReferenceType() ? staticType.asReferenceType().getInnerType() : staticType;
+		ReferenceType reftype = staticType.isReferenceType() ? staticType.asReferenceType()
+				: new ReferenceType(staticType);
+		MemoryAllocation creation = new MemoryAllocation(type, getLocation(), staticallyAllocated);
+		HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
-		// we need to add the receiver to the parameters
-		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$lisareceiver", reftype);
+		// we start by allocating the memory region
+		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
+
+		// we need to add the receiver to the parameters of the constructor call
+		InstrumentedReceiverRef paramThis = new InstrumentedReceiverRef(getCFG(), getLocation(), false, reftype);
 		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
 
 		// we also have to add the receiver inside the state
-		AnalysisState<A> callstate = paramThis.forwardSemantics(state, interprocedural, expressions);
-		AnalysisState<A> tmp = state.bottom();
-		for (SymbolicExpression v : callstate.getComputedExpressions())
-			tmp = tmp.lub(callstate.assign(v, ref, paramThis));
-		ExpressionSet[] fullParams = ArrayUtils.insert(0, params,
-				callstate.getComputedExpressions());
+		AnalysisState<A> callstate = paramThis.forwardSemantics(allocated, interprocedural, expressions);
+		ExpressionSet[] fullParams = ArrayUtils.insert(0, params, callstate.getExecutionExpressions());
+
+		// we store a reference to the newly created region in the receiver
+		AnalysisState<A> tmp = state.bottomExecution();
+		for (SymbolicExpression rec : callstate.getExecutionExpressions())
+			tmp = tmp.lub(analysis.assign(callstate, rec, ref, paramThis));
+		// we store the approximation of the receiver in the sub-expressions
 		expressions.put(paramThis, tmp);
 
-		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(), CallType.INSTANCE, type.toString(),
-				type.toString(), fullExpressions);
+		// constructor call
+		UnresolvedCall call = new UnresolvedCall(
+				getCFG(),
+				getLocation(),
+				CallType.INSTANCE,
+				type.toString(),
+				type.toString(),
+				fullExpressions);
 		AnalysisState<A> sem = call.forwardSemanticsAux(interprocedural, tmp, fullParams, expressions);
 
 		// now remove the instrumented receiver
 		expressions.forget(paramThis);
-		for (SymbolicExpression v : callstate.getComputedExpressions())
+		for (SymbolicExpression v : callstate.getExecutionExpressions())
 			if (v instanceof Identifier)
-				sem = sem.forgetIdentifier((Identifier) v);
+				// we leave the instrumented receiver in the program variables
+				// until it is popped from the stack to keep a reference to the
+				// newly created object and its fields
+				getMetaVariables().add((Identifier) v);
 
-		sem = sem.smallStepSemantics(created, this);
-
-		AnalysisState<A> result = state.bottom();
-		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-			ReferenceType staticType = new ReferenceType(loc.getStaticType());
-			HeapReference locref = new HeapReference(staticType, loc, getLocation());
-			result = result.lub(sem.smallStepSemantics(locref, call));
-		}
-
-		return result;
+		// finally, we leave a reference to the newly created object on the
+		// stack; this correponds to the state after the constructor call
+		// but with the receiver left on the stack
+		return sem.withExecutionExpressions(callstate.getExecutionExpressions());
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
@@ -150,4 +169,5 @@ public class IMPNewObj extends NaryExpression {
 		IMPNewObj other = (IMPNewObj) obj;
 		return staticallyAllocated == other.staticallyAllocated;
 	}
+
 }

@@ -1,11 +1,14 @@
 package it.unive.lisa.type;
 
+import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.DefaultParamInitialization;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
 import java.util.Set;
 
@@ -14,7 +17,7 @@ import java.util.Set;
  * unique and implemented following the singleton design pattern (see for
  * instance {@link Untyped} class).
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public interface Type {
 
@@ -230,6 +233,27 @@ public interface Type {
 
 	/**
 	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link ErrorType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isErrorType() {
+		return this instanceof ErrorType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link ErrorType}, only if
+	 * {@link #isErrorType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
+	 * 
+	 * @return this type casted as {@link ErrorType}, or {@code null}
+	 */
+	default ErrorType asErrorType() {
+		return isErrorType() ? (ErrorType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
 	 * {@link TypeTokenType}.
 	 * 
 	 * @return {@code true} if that condition holds
@@ -322,7 +346,7 @@ public interface Type {
 	 * default value. The returned expression's semantics function should leave
 	 * a {@link SymbolicExpression} on the stack that can be used as second
 	 * parameter in a
-	 * {@link SemanticDomain#assign(it.unive.lisa.symbolic.value.Identifier, SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint, it.unive.lisa.analysis.SemanticOracle)}
+	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, ProgramPoint)}
 	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
 	 * for instance, define fields or second-level memory regions initialized
 	 * together with the main target of the returned expression (e.g., if the
@@ -350,7 +374,7 @@ public interface Type {
 	 * statically unknown value. The returned expression's semantics function
 	 * should leave a {@link SymbolicExpression} on the stack that can be used
 	 * as second parameter in a
-	 * {@link SemanticDomain#assign(it.unive.lisa.symbolic.value.Identifier, SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint, it.unive.lisa.analysis.SemanticOracle)}
+	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, ProgramPoint)}
 	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
 	 * for instance, define fields or second-level memory regions initialized
 	 * together with the main target of the returned expression (e.g., if the
@@ -395,4 +419,20 @@ public interface Type {
 				result = result.commonSupertype(t);
 		return result;
 	}
+
+	/**
+	 * Yields whether casting a value towards this type entails a conversion of
+	 * the value to this type. This is different from casting, which just
+	 * changes the static type of the value without modifying its runtime type.
+	 * Instead, when a conversion happens, the value is converted to a value of
+	 * this type. This is the case, for instance, when casting a Java integer to
+	 * a Java double.
+	 * 
+	 * @return whether casting a value towards this type entails a conversion of
+	 *             the value to this type
+	 */
+	default boolean castIsConversion() {
+		return false;
+	}
+
 }

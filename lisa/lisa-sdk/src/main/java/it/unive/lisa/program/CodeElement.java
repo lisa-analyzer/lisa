@@ -17,4 +17,5 @@ public interface CodeElement {
 	 * @return the location where this code element appears in the program
 	 */
 	CodeLocation getLocation();
+
 }

@@ -1,6 +1,8 @@
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -20,7 +22,9 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAssert extends UnaryStatement {
+public class IMPAssert
+		extends
+		UnaryStatement {
 
 	/**
 	 * Builds the assertion.
@@ -47,15 +51,17 @@ public class IMPAssert extends UnaryStatement {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		Set<Type> types = state.getState().getRuntimeTypesOf(expr, this, state.getState());
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
 		if (types.stream().noneMatch(Type::isBooleanType))
-			return state.bottom();
-		return state.smallStepSemantics(new Skip(getLocation()), this);
+			return state.bottomExecution();
+		return analysis.smallStepSemantics(state, new Skip(getLocation()), this);
 	}
+
 }

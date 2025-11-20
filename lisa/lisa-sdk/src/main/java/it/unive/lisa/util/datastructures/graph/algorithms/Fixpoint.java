@@ -180,6 +180,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 				T approx,
 				T old)
 				throws Exception;
+
 	}
 
 	/**
@@ -260,9 +261,10 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			}
 
 			T oldApprox = result.get(current);
+			T postApprox = newApprox;
 			if (oldApprox != null)
 				try {
-					newApprox = implementation.operation(current, newApprox, oldApprox);
+					postApprox = implementation.operation(current, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
@@ -273,8 +275,8 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 						|| oldApprox == null
 						// or if we got a result that should not be considered
 						// equal
-						|| !implementation.equality(current, newApprox, oldApprox)) {
-					result.put(current, newApprox);
+						|| !implementation.equality(current, postApprox, oldApprox)) {
+					result.put(current, postApprox);
 					for (N instr : graph.followersOf(current))
 						ws.push(instr);
 				}
@@ -333,4 +335,5 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 		return entrystate;
 	}
+
 }

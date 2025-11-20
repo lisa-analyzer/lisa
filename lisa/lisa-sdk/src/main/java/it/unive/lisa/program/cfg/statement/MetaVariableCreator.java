@@ -21,4 +21,5 @@ public interface MetaVariableCreator {
 	 * @return the meta variable introduced by this object
 	 */
 	Identifier getMetaVariable();
+
 }

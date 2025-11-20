@@ -25,7 +25,9 @@ public interface CodeMember {
 	 * @throws ProgramValidationException if one of the aforementioned checks
 	 *                                        fail
 	 */
-	default public void validate() throws ProgramValidationException {
+	default public void validate()
+			throws ProgramValidationException {
 		// nothing to do by default
 	}
+
 }

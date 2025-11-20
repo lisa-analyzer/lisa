@@ -42,4 +42,5 @@ public interface Edge<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	<V> boolean accept(
 			GraphVisitor<G, N, E, V> visitor,
 			V tool);
+
 }

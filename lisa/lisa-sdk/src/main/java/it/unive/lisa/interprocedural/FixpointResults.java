@@ -1,6 +1,7 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
@@ -16,10 +17,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
+ * @param <A> the type of {@link AbstractDomain} contained into the analysis
  *                state
  */
-public class FixpointResults<A extends AbstractState<A>>
+public class FixpointResults<
+		A extends AbstractLattice<A>>
 		extends
 		FunctionalLattice<FixpointResults<A>, CFG, CFGResults<A>> {
 
@@ -128,4 +130,5 @@ public class FixpointResults<A extends AbstractState<A>>
 			CFG key) {
 		return lattice.bottom();
 	}
+
 }

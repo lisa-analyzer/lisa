@@ -11,7 +11,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class WarningWithLocation extends Warning {
+public abstract class WarningWithLocation
+		extends
+		Warning {
 
 	private final CodeLocation location;
 
@@ -91,4 +93,5 @@ public abstract class WarningWithLocation extends Warning {
 
 	@Override
 	public abstract String toString();
+
 }

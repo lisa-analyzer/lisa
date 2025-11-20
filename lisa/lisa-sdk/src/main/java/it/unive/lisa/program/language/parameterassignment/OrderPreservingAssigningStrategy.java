@@ -1,6 +1,7 @@
 package it.unive.lisa.program.language.parameterassignment;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -17,7 +18,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OrderPreservingAssigningStrategy implements ParameterAssigningStrategy {
+public class OrderPreservingAssigningStrategy
+		implements
+		ParameterAssigningStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -28,10 +31,10 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 	}
 
 	@Override
-	public <A extends AbstractState<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepare(
 			Call call,
 			AnalysisState<A> callState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			Parameter[] formals,
 			ExpressionSet[] parameters)
@@ -39,14 +42,16 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 		// prepare the state for the call: assign the value to each parameter
 		AnalysisState<A> prepared = callState;
 		for (int i = 0; i < formals.length; i++) {
-			AnalysisState<A> temp = prepared.bottom();
+			AnalysisState<A> temp = prepared.bottomExecution();
 			for (SymbolicExpression exp : parameters[i])
-				temp = temp.lub(prepared.assign(formals[i].toSymbolicVariable(), exp, call));
+				temp = temp
+						.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp,
+								call));
 			prepared = temp;
 		}
 
 		// we remove expressions from the stack
-		prepared = new AnalysisState<>(prepared.getState(), new ExpressionSet(), prepared.getFixpointInformation());
+		prepared = prepared.withExecutionExpressions(new ExpressionSet());
 		return Pair.of(prepared, parameters);
 	}
 

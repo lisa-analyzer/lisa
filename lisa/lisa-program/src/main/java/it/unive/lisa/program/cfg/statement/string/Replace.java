@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg.statement.string;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -33,7 +35,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpression {
+public class Replace
+		extends
+		it.unive.lisa.program.cfg.statement.TernaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -59,8 +63,14 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 			Expression left,
 			Expression middle,
 			Expression right) {
-		super(cfg, location, "replace", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
-				middle, right);
+		super(
+				cfg,
+				location,
+				"replace",
+				cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(),
+				left,
+				middle,
+				right);
 	}
 
 	@Override
@@ -70,29 +80,26 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdTernarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdTernarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,
 			SymbolicExpression middle,
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		if (state.getState().getRuntimeTypesOf(left, this, state.getState()).stream().noneMatch(Type::isStringType))
-			return state.bottom();
-		if (state.getState().getRuntimeTypesOf(middle, this, state.getState()).stream().noneMatch(Type::isStringType))
-			return state.bottom();
-		if (state.getState().getRuntimeTypesOf(right, this, state.getState()).stream().noneMatch(Type::isStringType))
-			return state.bottom();
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		if (analysis.getRuntimeTypesOf(state, left, this).stream().noneMatch(Type::isStringType))
+			return state.bottomExecution();
+		if (analysis.getRuntimeTypesOf(state, middle, this).stream().noneMatch(Type::isStringType))
+			return state.bottomExecution();
+		if (analysis.getRuntimeTypesOf(state, right, this).stream().noneMatch(Type::isStringType))
+			return state.bottomExecution();
 
-		return state.smallStepSemantics(
-				new TernaryExpression(
-						getStaticType(),
-						left,
-						middle,
-						right,
-						StringReplace.INSTANCE,
-						getLocation()),
+		return analysis.smallStepSemantics(
+				state,
+				new TernaryExpression(getStaticType(), left, middle, right, StringReplace.INSTANCE, getLocation()),
 				originating == null ? this : originating);
 	}
+
 }

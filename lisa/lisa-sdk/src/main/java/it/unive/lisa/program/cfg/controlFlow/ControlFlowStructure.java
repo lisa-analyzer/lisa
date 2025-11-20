@@ -3,11 +3,11 @@ package it.unive.lisa.program.cfg.controlFlow;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
-import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A control flow structure of a {@link CFG}.
@@ -105,9 +105,12 @@ public abstract class ControlFlowStructure {
 			Statement st);
 
 	/**
-	 * Simplifies this structure, removing all {@link NoOp}s from its body.
+	 * Simplifies this structure, removing the given targets from its body.
+	 * 
+	 * @param targets the set of statements that must be simplified
 	 */
-	public abstract void simplify();
+	public abstract void simplify(
+			Set<Statement> targets);
 
 	/**
 	 * Yields the minimum distance, in terms of number of edges to traverse,
@@ -210,4 +213,27 @@ public abstract class ControlFlowStructure {
 	 * @return the targeted statements
 	 */
 	public abstract Collection<Statement> getTargetedStatements();
+
+	/**
+	 * Adds the statement {@code toAdd} in all the branches that also contain
+	 * {@code reference}.
+	 * 
+	 * @param toAdd     the statement to add
+	 * @param reference the statement to match
+	 */
+	public abstract void addWith(
+			Statement toAdd,
+			Statement reference);
+
+	/**
+	 * Replaces all occurrences of {@code original} in all branches with
+	 * {@code replacement}.
+	 * 
+	 * @param original    the statement to replace
+	 * @param replacement the statement to replace with
+	 */
+	public abstract void replace(
+			Statement original,
+			Statement replacement);
+
 }

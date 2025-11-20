@@ -78,4 +78,5 @@ public class ExternalSetTest {
 		assertTrue(universal.contains("foo"));
 		assertFalse(universal.contains(new Object()));
 	}
+
 }

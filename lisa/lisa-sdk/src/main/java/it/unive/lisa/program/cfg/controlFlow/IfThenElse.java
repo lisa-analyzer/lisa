@@ -2,18 +2,20 @@ package it.unive.lisa.program.cfg.controlFlow;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link ControlFlowStructure} representing a if-then-else.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IfThenElse extends ControlFlowStructure {
+public class IfThenElse
+		extends
+		ControlFlowStructure {
 
 	private final Collection<Statement> trueBranch;
 
@@ -74,9 +76,10 @@ public class IfThenElse extends ControlFlowStructure {
 	}
 
 	@Override
-	public void simplify() {
-		trueBranch.removeIf(NoOp.class::isInstance);
-		falseBranch.removeIf(NoOp.class::isInstance);
+	public void simplify(
+			Set<Statement> targets) {
+		trueBranch.removeIf(targets::contains);
+		falseBranch.removeIf(targets::contains);
 	}
 
 	@Override
@@ -124,4 +127,25 @@ public class IfThenElse extends ControlFlowStructure {
 			targeted.add(follower);
 		return targeted;
 	}
+
+	@Override
+	public void addWith(
+			Statement toAdd,
+			Statement reference) {
+		if (trueBranch.contains(reference))
+			trueBranch.add(toAdd);
+		if (falseBranch.contains(reference))
+			falseBranch.add(toAdd);
+	}
+
+	@Override
+	public void replace(
+			Statement original,
+			Statement replacement) {
+		if (trueBranch.remove(original))
+			trueBranch.add(replacement);
+		if (falseBranch.remove(original))
+			falseBranch.add(replacement);
+	}
+
 }

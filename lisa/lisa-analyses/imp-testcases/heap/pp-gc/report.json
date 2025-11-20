@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_gc.gc(gc__this)_-907911451.json", "untyped_gc.gc(gc__this,_untyped_x,_untyped_y)_-907909374.json", "untyped_gc.gc(gc__this,_untyped_x,_untyped_y)_-907911358.json", "untyped_gc.main(gc__this,_untyped_nondet).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "478ms",
+    "end" : "2025-09-11T16:15:43.693+02:00",
+    "expressions" : "24",
+    "files" : "4",
+    "globals" : "2",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2025-09-11T16:15:43.215+02:00",
+    "statements" : "13",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/heap/pp-gc"
+  }
+}

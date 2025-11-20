@@ -17,7 +17,11 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BitwiseUnsignedShiftRight extends NumericOperation implements BitwiseOperator {
+public class BitwiseUnsignedShiftRight
+		extends
+		NumericOperation
+		implements
+		BitwiseOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -36,4 +40,5 @@ public class BitwiseUnsignedShiftRight extends NumericOperation implements Bitwi
 	public String toString() {
 		return ">>>";
 	}
+
 }

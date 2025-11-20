@@ -17,7 +17,12 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric32BitDiv extends NumericOperation implements DivisionOperator, OverflowingOperator {
+public class Numeric32BitDiv
+		extends
+		NumericOperation
+		implements
+		DivisionOperator,
+		OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -36,4 +41,5 @@ public class Numeric32BitDiv extends NumericOperation implements DivisionOperato
 	public String toString() {
 		return "/";
 	}
+
 }

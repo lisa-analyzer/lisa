@@ -25,7 +25,9 @@ import java.util.Set;
  * @param <K> the concrete type of the keys of this function
  * @param <V> the concrete {@link Lattice} type of the values of this function
  */
-public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K, V extends Lattice<V>>
+public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
+		K,
+		V extends Lattice<V>>
 		implements
 		BaseLattice<F>,
 		Iterable<Map.Entry<K, V>> {
@@ -189,36 +191,52 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	public F lubAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(other, lattice.bottom(), this::lubKeys, (
-				o1,
-				o2) -> o1 == null ? o2 : o1.lub(o2));
+		return functionalLift(
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
 	public F glbAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(other, lattice.top(), this::glbKeys, (
-				o1,
-				o2) -> o1 == null ? o2 : o1.glb(o2));
+		return functionalLift(
+				other,
+				lattice.top(),
+				this::glbKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
 	@Override
 	public F wideningAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(other, lattice.bottom(), this::lubKeys, (
-				o1,
-				o2) -> o1 == null ? o2 : o1.widening(o2));
+		return functionalLift(
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
 	@Override
 	public F narrowingAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(other, lattice.top(), this::glbKeys, (
-				o1,
-				o2) -> o1 == null ? o2 : o1.narrowing(o2));
+		return functionalLift(
+				other,
+				lattice.top(),
+				this::glbKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.narrowing(o2));
 	}
 
 	/**
@@ -245,6 +263,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		V transform(
 				V value)
 				throws SemanticException;
+
 	}
 
 	/**
@@ -272,12 +291,13 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 				V first,
 				V second)
 				throws SemanticException;
+
 	}
 
 	/**
 	 * Interface for the left of key sets.
 	 * 
-	 * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+	 * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
 	 *
 	 * @param <K> the key type
 	 */
@@ -299,6 +319,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 				Set<K> first,
 				Set<K> second)
 				throws SemanticException;
+
 	}
 
 	/**
@@ -532,4 +553,5 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 
 		return new MapRepresentation(function, StringRepresentation::new, Lattice::representation);
 	}
+
 }

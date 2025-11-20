@@ -4,7 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import guru.nidi.graphviz.model.Factory;
 import guru.nidi.graphviz.model.MutableGraph;
-import it.unive.lisa.LiSAFactory.ConfigurableComponent;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.BackwardAnalyzedCFG;
 import it.unive.lisa.analysis.BackwardOptimizedAnalyzedCFG;
@@ -12,25 +13,22 @@ import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
-import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.informationFlow.NonInterference;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.SetLattice;
-import it.unive.lisa.analysis.nonInterference.NonInterference;
-import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.lattices.SingleHeapLattice;
+import it.unive.lisa.analysis.lattices.SingleTypeLattice;
+import it.unive.lisa.analysis.lattices.SingleValueLattice;
 import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
-import it.unive.lisa.analysis.string.fsa.StringSymbol;
-import it.unive.lisa.analysis.string.tarsis.RegexAutomaton;
+import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.Symbol;
-import it.unive.lisa.analysis.traces.ExecutionTrace;
-import it.unive.lisa.analysis.traces.TraceToken;
-import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.cron.CronConfiguration;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -41,6 +39,15 @@ import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
+import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
+import it.unive.lisa.lattices.numeric.NonRedundantIntervalSet;
+import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
+import it.unive.lisa.lattices.string.fsa.StringSymbol;
+import it.unive.lisa.lattices.string.tarsis.RegexAutomaton;
+import it.unive.lisa.lattices.traces.ExecutionTrace;
+import it.unive.lisa.lattices.traces.TraceToken;
+import it.unive.lisa.lattices.types.Supertype;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
@@ -70,9 +77,14 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.InstrumentedReceiverRef;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.NaryStatement;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
@@ -118,10 +130,12 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
+import it.unive.lisa.util.frontend.ParsedBlock;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import it.unive.lisa.util.testing.TestConfiguration;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
@@ -145,38 +159,69 @@ import org.reflections.scanners.SubTypesScanner;
 public class EqualityContractVerificationTest {
 
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
-	private static final ClassUnit unit1 = new ClassUnit(loc, new Program(new IMPFeatures(), new IMPTypeSystem()),
-			"fake1", false);
-	private static final ClassUnit unit2 = new ClassUnit(loc, new Program(new IMPFeatures(), new IMPTypeSystem()),
-			"fake2", false);
-	private static final InterfaceUnit interface1 = new InterfaceUnit(loc,
-			new Program(new IMPFeatures(), new IMPTypeSystem()), "fake1", false);
-	private static final InterfaceUnit interface2 = new InterfaceUnit(loc,
-			new Program(new IMPFeatures(), new IMPTypeSystem()), "fake2", false);
+
+	private static final ClassUnit unit1 = new ClassUnit(
+			loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake1",
+			false);
+
+	private static final ClassUnit unit2 = new ClassUnit(
+			loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake2",
+			false);
+
+	private static final InterfaceUnit interface1 = new InterfaceUnit(
+			loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake1",
+			false);
+
+	private static final InterfaceUnit interface2 = new InterfaceUnit(
+			loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake2",
+			false);
+
 	private static final CodeMemberDescriptor descr1 = new CodeMemberDescriptor(loc, unit1, false, "fake1");
+
 	private static final CodeMemberDescriptor descr2 = new CodeMemberDescriptor(loc, unit2, false, "fake2");
+
 	private static final CFG cfg1 = new CFG(descr1);
+
 	private static final CFG cfg2 = new CFG(descr2);
+
 	private static final CodeMemberDescriptor signDescr1 = new CodeMemberDescriptor(loc, interface1, true, "fake1");
+
 	private static final CodeMemberDescriptor signDescr2 = new CodeMemberDescriptor(loc, interface1, true, "fake2");
+
 	private static final AbstractCodeMember signCfg1 = new AbstractCodeMember(signDescr1);
+
 	private static final AbstractCodeMember signCfg2 = new AbstractCodeMember(signDescr2);
+
 	private static final NodeList<CFG, Statement, Edge> adj1 = new NodeList<>(new SequentialEdge());
+
 	private static final NodeList<CFG, Statement, Edge> adj2 = new NodeList<>(new SequentialEdge());
 
 	private static final RegularExpression re1 = new Atom("a");
+
 	private static final RegularExpression re2 = new Atom("b");
 
-	private static final Interval int1 = Interval.TOP;
-	private static final Interval int2 = Interval.BOTTOM;
-
 	private static final StructuredRepresentation dr1 = new StringRepresentation("foo");
+
 	private static final StructuredRepresentation dr2 = new StringRepresentation("bar");
+
 	private static final MutableGraph g1 = Factory.mutGraph("a");
+
 	private static final MutableGraph g2 = Factory.mutGraph("b");
+
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
+
 	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, CallType.STATIC, "bar", "bar");
+
 	private static final Set<Type> s1 = Collections.singleton(Untyped.INSTANCE);
+
 	private static final Set<Type> s2 = Collections.singleton(Int32Type.INSTANCE);
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
@@ -188,11 +233,14 @@ public class EqualityContractVerificationTest {
 	}
 
 	private static Reflections mkReflections() {
-		return new Reflections("it.unive.lisa", new SubTypesScanner(false));
+		return new Reflections("it.unive.lisa", SemanticOracle.class, new SubTypesScanner(false));
 	}
 
 	@AfterClass
-	public static void ensureAllTested() throws ClassNotFoundException, NoSuchMethodException, SecurityException {
+	public static void ensureAllTested()
+			throws ClassNotFoundException,
+			NoSuchMethodException,
+			SecurityException {
 		Reflections scanner = mkReflections();
 		Set<String> all = scanner.getAllTypes();
 		Class<?> clazz;
@@ -211,7 +259,10 @@ public class EqualityContractVerificationTest {
 					&& clazz != ContextInsensitiveToken.class
 					// some testing classes that we do not care about end up
 					// here
-					&& !clazz.getName().contains("Test"))
+					&& !clazz.getName().contains("Test")
+					// this is a private class that we cannot reach in any other
+					// way
+					&& !clazz.getName().contains("JsonReport$NonEmptyFilter"))
 				notTested.add(clazz);
 		}
 
@@ -257,7 +308,8 @@ public class EqualityContractVerificationTest {
 			boolean getClass,
 			Consumer<SingleTypeEqualsVerifierApi<T>> extra,
 			Warning... suppressions) {
-		if (clazz.isAnonymousClass() || Modifier.isAbstract(clazz.getModifiers())
+		if (clazz.isAnonymousClass()
+				|| Modifier.isAbstract(clazz.getModifiers())
 				|| Modifier.isInterface(clazz.getModifiers()))
 			return;
 
@@ -274,11 +326,21 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(StructuredRepresentation.class, dr1, dr2)
 				.withPrefabValues(RegularExpression.class, re1, re2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
-				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
+				.withPrefabValues(NonInterferenceValue.class, new NonInterference().top(),
+						new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(Set.class, s1, s2)
-				.withPrefabValues(MutableGraph.class, g1, g2)
-				.withPrefabValues(BaseNonRelationalValueDomain.class, int1, int2);
+				.withPrefabValues(
+						AbstractDomain.class,
+						DefaultConfiguration.simpleDomain(
+								DefaultConfiguration.defaultHeapDomain(),
+								new Interval(),
+								DefaultConfiguration.defaultTypeDomain()),
+						DefaultConfiguration.simpleDomain(
+								DefaultConfiguration.defaultHeapDomain(),
+								new Sign(),
+								DefaultConfiguration.defaultTypeDomain()))
+				.withPrefabValues(MutableGraph.class, g1, g2);
 
 		if (getClass)
 			verifier = verifier.usingGetClass();
@@ -295,7 +357,7 @@ public class EqualityContractVerificationTest {
 		verify(LiSAConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(DefaultConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(FixpointConfiguration.class);
-		verify(ConfigurableComponent.class);
+		verify(TestConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(CronConfiguration.class, Warning.NONFINAL_FIELDS);
 	}
 
@@ -315,8 +377,7 @@ public class EqualityContractVerificationTest {
 
 		verify(AdjacencyMatrix.class);
 		verify(NodeEdges.class);
-		verify(NodeList.class,
-				verifier -> verifier.withIgnoredFields("sequentialSingleton"));
+		verify(NodeList.class, verifier -> verifier.withIgnoredFields("sequentialSingleton"));
 		verify(it.unive.lisa.util.datastructures.graph.code.NodeList.NodeEdges.class);
 
 		verify(ConcurrentFIFOWorkingSet.class);
@@ -390,8 +451,7 @@ public class EqualityContractVerificationTest {
 		// with null fields (not possible) and this would cause warnings
 
 		List<String> statementFields = List.of("cfg");
-		List<String> expressionFields = ListUtils.union(statementFields,
-				List.of("parent", "metaVariables"));
+		List<String> expressionFields = ListUtils.union(statementFields, List.of("parent", "metaVariables"));
 
 		Reflections scanner = mkReflections();
 		for (Class<? extends Statement> st : scanner.getSubTypesOf(Statement.class))
@@ -402,11 +462,14 @@ public class EqualityContractVerificationTest {
 						// string statements are already pluggable-friendly
 						|| st.getPackageName().equals("it.unive.lisa.program.cfg.statement.string"))
 					extra.add("originating");
+				if (st == InstrumentedReceiverRef.class)
+					extra.add("isArray");
 				if (Call.class.isAssignableFrom(st))
 					extra.add("source");
 				if (NaryExpression.class.isAssignableFrom(st))
 					extra.add("order");
-				verify(st,
+				verify(
+						st,
 						verifier -> verifier
 								.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)),
 						Warning.NULL_FIELDS);
@@ -414,7 +477,8 @@ public class EqualityContractVerificationTest {
 				List<String> extra = new LinkedList<>();
 				if (NaryStatement.class.isAssignableFrom(st))
 					extra.add("order");
-				verify(st,
+				verify(
+						st,
 						verifier -> verifier
 								.withIgnoredFields(ListUtils.union(statementFields, extra).toArray(String[]::new)),
 						Warning.NULL_FIELDS);
@@ -425,7 +489,10 @@ public class EqualityContractVerificationTest {
 	public void testEdges() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Edge> edge : scanner.getSubTypesOf(Edge.class))
-			verify(edge);
+			if (edge == ErrorEdge.class)
+				verify(edge, verifier -> verifier.withIgnoredFields("protectedBlock"));
+			else
+				verify(edge);
 	}
 
 	@Test
@@ -453,8 +520,6 @@ public class EqualityContractVerificationTest {
 		Reflections scanner = mkReflections();
 		Collection<Class<?>> testable = new HashSet<>();
 		testable.addAll(scanner.getSubTypesOf(Lattice.class));
-		testable.addAll(scanner.getSubTypesOf(SemanticDomain.class));
-		testable.addAll(scanner.getSubTypesOf(NonRelationalDomain.class));
 		testable.addAll(scanner.getSubTypesOf(DataflowElement.class));
 
 		for (Class<?> subject : testable)
@@ -468,8 +533,17 @@ public class EqualityContractVerificationTest {
 					|| FixpointInfo.class == subject)
 				// fields function and elements and guards can be null
 				verify(subject, Warning.NONFINAL_FIELDS);
-			else if (subject == StaticTypes.class)
+			else if (subject == Supertype.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("types"));
+			else if (subject == NonRedundantIntervalSet.class)
+				verify(subject, verifier -> verifier.withIgnoredFields("singleton"));
+			else if (subject == RegexAutomaton.class || subject == SimpleAutomaton.class)
+				verify(subject, verifier -> verifier.withIgnoredFields("deterministic", "minimized"));
+			else if (subject == SingleHeapLattice.class
+					|| subject == SingleTypeLattice.class
+					|| subject == SingleValueLattice.class
+					|| subject == Monolith.class)
+				verify(subject, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
 			else if (subject != AnalyzedCFG.class
 					&& subject != OptimizedAnalyzedCFG.class
 					&& subject != BackwardAnalyzedCFG.class
@@ -480,27 +554,36 @@ public class EqualityContractVerificationTest {
 
 	@Test
 	public void testAnalysisObjects() {
-		verify(HeapReplacement.class);
+		verify(HeapDomain.HeapReplacement.class);
 		verify(ScopeToken.class);
 		verify(CompoundState.class);
 		// we consider only fields that compose the results
 		// id is mutable
-		verify(AnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+		verify(
+				AnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
 				Warning.NONFINAL_FIELDS);
-		verify(BackwardAnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
+		verify(
+				BackwardAnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
 				Warning.NONFINAL_FIELDS);
 		// we do not consider the expanded results or interprocedural
 		// as they do not identify the results
-		verify(OptimizedAnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+		verify(
+				OptimizedAnalyzedCFG.class,
+				verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
 				Warning.NONFINAL_FIELDS);
-		verify(BackwardOptimizedAnalyzedCFG.class,
+		verify(
+				BackwardOptimizedAnalyzedCFG.class,
 				verifier -> verifier.withOnlyTheseFields("id", "results", "exitStates"),
 				Warning.NONFINAL_FIELDS);
 
 		verify(ExecutionTrace.class);
 		Reflections scanner = mkReflections();
-		for (Class<? extends TraceToken> warning : scanner.getSubTypesOf(TraceToken.class))
-			verify(warning);
+		for (Class<? extends TraceToken> token : scanner.getSubTypesOf(TraceToken.class))
+			verify(token);
+
+		verify(AnalysisState.Error.class);
 	}
 
 	@Test
@@ -551,6 +634,12 @@ public class EqualityContractVerificationTest {
 		for (Class<? extends ControlFlowStructure> struct : scanner.getSubTypesOf(ControlFlowStructure.class))
 			// first follower is mutable
 			verify(struct, Warning.NONFINAL_FIELDS);
+		verify(CatchBlock.class);
+		// end and start are mutable
+		verify(ProtectedBlock.class, Warning.NONFINAL_FIELDS);
+		// closing is mutable
+		verify(ProtectionBlock.class, Warning.NONFINAL_FIELDS);
+		verify(ParsedBlock.class, Warning.NONFINAL_FIELDS);
 		for (Class<? extends Unit> unit : scanner.getSubTypesOf(Unit.class))
 			verify(unit, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		for (Class<? extends CodeMember> cm : scanner.getSubTypesOf(CodeMember.class))
@@ -580,4 +669,5 @@ public class EqualityContractVerificationTest {
 		for (Class<? extends Symbol> sym : scanner.getSubTypesOf(Symbol.class))
 			verify(sym);
 	}
+
 }

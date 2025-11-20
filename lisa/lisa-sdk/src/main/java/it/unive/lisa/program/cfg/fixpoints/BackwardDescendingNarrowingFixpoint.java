@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -16,12 +17,17 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardDescendingNarrowingFixpoint<A extends AbstractState<A>> extends BackwardCFGFixpoint<A> {
+public class BackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		extends
+		BackwardCFGFixpoint<A, D> {
 
 	private final FixpointConfiguration config;
+
 	private final Collection<Statement> wideningPoints;
 
 	/**
@@ -34,7 +40,7 @@ public class BackwardDescendingNarrowingFixpoint<A extends AbstractState<A>> ext
 	 */
 	public BackwardDescendingNarrowingFixpoint(
 			CFG target,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration config) {
 		super(target, interprocedural);
 		this.config = config;
@@ -72,4 +78,5 @@ public class BackwardDescendingNarrowingFixpoint<A extends AbstractState<A>> ext
 			throws SemanticException {
 		return old.lessOrEqual(approx);
 	}
+
 }

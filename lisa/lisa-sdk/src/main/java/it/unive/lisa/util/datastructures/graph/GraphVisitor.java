@@ -86,4 +86,5 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	default boolean visitSubNodesFirst() {
 		return true;
 	}
+
 }

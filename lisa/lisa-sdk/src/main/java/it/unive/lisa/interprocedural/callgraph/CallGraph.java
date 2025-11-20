@@ -22,7 +22,9 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, CallGraphEdge> {
+public abstract class CallGraph
+		extends
+		BaseGraph<CallGraph, CallGraphNode, CallGraphEdge> {
 
 	/**
 	 * Initializes the call graph of the given program. A call to this method
@@ -239,14 +241,10 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 * @return the recursions
 	 */
 	public Collection<Collection<CodeMember>> getRecursions() {
-		Collection<Collection<CallGraphNode>> sccs = new SCCs<
-				CallGraph,
-				CallGraphNode,
-				CallGraphEdge>().buildNonTrivial(this);
+		Collection<Collection<CallGraphNode>> sccs = new SCCs<CallGraph, CallGraphNode, CallGraphEdge>()
+				.buildNonTrivial(this);
 		return sccs.stream()
-				.map(nodes -> nodes.stream()
-						.map(node -> node.getCodeMember())
-						.collect(Collectors.toSet()))
+				.map(nodes -> nodes.stream().map(node -> node.getCodeMember()).collect(Collectors.toSet()))
 				.collect(Collectors.toSet());
 	}
 
@@ -261,15 +259,12 @@ public abstract class CallGraph extends BaseGraph<CallGraph, CallGraphNode, Call
 	 */
 	public Collection<Collection<CodeMember>> getRecursionsContaining(
 			CodeMember cm) {
-		Collection<Collection<CallGraphNode>> sccs = new SCCs<
-				CallGraph,
-				CallGraphNode,
-				CallGraphEdge>().buildNonTrivial(this);
+		Collection<Collection<CallGraphNode>> sccs = new SCCs<CallGraph, CallGraphNode, CallGraphEdge>()
+				.buildNonTrivial(this);
 		return sccs.stream()
-				.map(nodes -> nodes.stream()
-						.map(node -> node.getCodeMember())
-						.collect(Collectors.toSet()))
+				.map(nodes -> nodes.stream().map(node -> node.getCodeMember()).collect(Collectors.toSet()))
 				.filter(members -> members.contains(cm))
 				.collect(Collectors.toSet());
 	}
+
 }

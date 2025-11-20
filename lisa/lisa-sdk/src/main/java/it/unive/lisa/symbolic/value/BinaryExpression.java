@@ -3,9 +3,12 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.operator.TypeOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.Type;
 
 /**
@@ -14,7 +17,9 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BinaryExpression extends ValueExpression {
+public class BinaryExpression
+		extends
+		ValueExpression {
 
 	/**
 	 * The left-hand side operand of this expression
@@ -83,19 +88,29 @@ public class BinaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		BinaryExpression expr = new BinaryExpression(getStaticType(), left.pushScope(token), right.pushScope(token),
-				operator, getCodeLocation());
+		BinaryExpression expr = new BinaryExpression(
+				getStaticType(),
+				left.pushScope(token, pp),
+				right.pushScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 
 	@Override
 	public SymbolicExpression popScope(
-			ScopeToken token)
+			ScopeToken token,
+			ProgramPoint pp)
 			throws SemanticException {
-		BinaryExpression expr = new BinaryExpression(getStaticType(), left.popScope(token), right.popScope(token),
-				operator, getCodeLocation());
+		BinaryExpression expr = new BinaryExpression(
+				getStaticType(),
+				left.popScope(token, pp),
+				right.popScope(token, pp),
+				operator,
+				getCodeLocation());
 		return expr;
 	}
 
@@ -165,4 +180,31 @@ public class BinaryExpression extends ValueExpression {
 			BinaryOperator operator) {
 		return new BinaryExpression(getStaticType(), left, right, operator, getCodeLocation());
 	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		if (operator instanceof TypeOperator && !(operator instanceof TypeCheck))
+			return left.removeTypingExpressions();
+
+		SymbolicExpression l = left.removeTypingExpressions();
+		SymbolicExpression r = right.removeTypingExpressions();
+		if (l == left && r == right)
+			return this;
+		return new BinaryExpression(getStaticType(), l, r, operator, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression l = left.replace(source, target);
+		SymbolicExpression r = right.replace(source, target);
+		if (l == left && r == right)
+			return this;
+		return new BinaryExpression(getStaticType(), l, r, operator, getCodeLocation());
+	}
+
 }

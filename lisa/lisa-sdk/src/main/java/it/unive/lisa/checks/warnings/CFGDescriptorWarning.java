@@ -9,7 +9,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGDescriptorWarning extends WarningWithLocation {
+public class CFGDescriptorWarning
+		extends
+		WarningWithLocation {
 
 	/**
 	 * The descriptor where this warning was reported on
@@ -88,7 +90,11 @@ public class CFGDescriptorWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + descriptor.getFullSignatureWithParNames() + "': "
+		return getLocationWithBrackets()
+				+ " on '"
+				+ descriptor.getFullSignatureWithParNames()
+				+ "': "
 				+ getTaggedMessage();
 	}
+
 }

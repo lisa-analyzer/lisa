@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,7 +24,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DefaultParamInitialization extends Expression {
+public class DefaultParamInitialization
+		extends
+		Expression {
 
 	/**
 	 * Builds the initializing expression.
@@ -60,11 +63,13 @@ public class DefaultParamInitialization extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return entryState.smallStepSemantics(new PushAny(getStaticType(), getLocation()), this);
+		return interprocedural.getAnalysis()
+				.smallStepSemantics(entryState, new PushAny(getStaticType(), getLocation()), this);
 	}
+
 }

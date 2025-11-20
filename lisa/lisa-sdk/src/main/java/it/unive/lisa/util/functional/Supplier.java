@@ -20,5 +20,7 @@ public interface Supplier<T, E extends Exception> {
 	 * 
 	 * @throws E if the execution of this supplier raises an error
 	 */
-	T get() throws E;
+	T get()
+			throws E;
+
 }

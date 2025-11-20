@@ -108,4 +108,5 @@ public class Dominators<G extends Graph<G, N, E>, N extends Node<G, N, E>, E ext
 
 		return res == null ? new HashSet<>() : res;
 	}
+
 }

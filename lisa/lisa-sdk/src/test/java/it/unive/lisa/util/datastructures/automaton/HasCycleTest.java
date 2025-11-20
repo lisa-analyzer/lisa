@@ -54,4 +54,5 @@ public class HasCycleTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		assertTrue(a.hasCycle());
 	}
+
 }

@@ -29,4 +29,5 @@ public interface BiFunction<T, U, R, E extends Exception> {
 			T t,
 			U u)
 			throws E;
+
 }

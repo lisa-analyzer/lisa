@@ -12,7 +12,9 @@ import java.util.SortedMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ValueSerializer extends StdSerializer<SerializableValue> {
+public class ValueSerializer
+		extends
+		StdSerializer<SerializableValue> {
 
 	private static final long serialVersionUID = 2323974954619016107L;
 
@@ -90,4 +92,5 @@ public class ValueSerializer extends StdSerializer<SerializableValue> {
 		if (hasProps)
 			gen.writeEndObject();
 	}
+
 }

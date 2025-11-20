@@ -49,20 +49,27 @@ public class BitLogicTest {
 			int test = random.nextInt(length * 64);
 
 			assertEquals("Testing " + test + ": the bitvector is not set to 0 before the computation", 0L, smash(bits));
-			assertFalse("Testing " + test + ": the corresponding bit is set at the beginning",
+			assertFalse(
+					"Testing " + test + ": the corresponding bit is set at the beginning",
 					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 
 			bits[test >> 6] |= 1L << (test % 64);
-			assertNotEquals("Testing " + test + ": set() did not modify the bitvector (still equal to 0)", 0L,
+			assertNotEquals(
+					"Testing " + test + ": set() did not modify the bitvector (still equal to 0)",
+					0L,
 					smash(bits));
-			assertArrayEquals("Testing " + test + ": set() did not modfiy the bits appropriately",
-					new int[] { test }, actives(bits));
-			assertTrue("Testing " + test + ": isset() does not detect the modification made by set()",
+			assertArrayEquals(
+					"Testing " + test + ": set() did not modfiy the bits appropriately",
+					new int[] { test },
+					actives(bits));
+			assertTrue(
+					"Testing " + test + ": isset() does not detect the modification made by set()",
 					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 
 			bits[test >> 6] &= ~(1L << (test % 64));
 			assertEquals("Testing " + test + ": unset() did not bring the bitvector to 0", 0L, smash(bits));
-			assertFalse("Testing " + test + ": isset() does not detect the modification made by unset()",
+			assertFalse(
+					"Testing " + test + ": isset() does not detect the modification made by unset()",
 					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 		}
 	}
@@ -90,4 +97,5 @@ public class BitLogicTest {
 
 		return res.stream().mapToInt(i -> i).toArray();
 	}
+
 }

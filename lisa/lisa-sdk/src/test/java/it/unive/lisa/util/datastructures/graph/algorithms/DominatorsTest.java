@@ -36,13 +36,21 @@ public class DominatorsTest {
 		graph.addEdge(new TestEdge(two, six));
 
 		Map<TestNode, Set<TestNode>> res = new Dominators<TestGraph, TestNode, TestEdge>().build(graph);
-		assertEquals("Fixpoint returned wrong result",
-				Map.of(one, Set.of(one),
-						two, Set.of(one, two),
-						three, Set.of(one, two, three),
-						four, Set.of(one, two, four),
-						five, Set.of(one, two, five),
-						six, Set.of(one, two, six)),
+		assertEquals(
+				"Fixpoint returned wrong result",
+				Map.of(
+						one,
+						Set.of(one),
+						two,
+						Set.of(one, two),
+						three,
+						Set.of(one, two, three),
+						four,
+						Set.of(one, two, four),
+						five,
+						Set.of(one, two, five),
+						six,
+						Set.of(one, two, six)),
 				res);
 	}
 

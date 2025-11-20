@@ -3,17 +3,15 @@ package it.unive.lisa.analysis;
 import static it.unive.lisa.util.collections.CollectionUtilities.collect;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.TestAbstractState;
-import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
+import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
@@ -29,7 +27,9 @@ import org.junit.Test;
 
 public class SubstitutionTest {
 
-	private static class Collector implements ValueDomain<Collector> {
+	private static class Collector
+			implements
+			ValueLattice<Collector> {
 
 		private final ExpressionSet assigned, removed;
 
@@ -45,39 +45,9 @@ public class SubstitutionTest {
 		}
 
 		@Override
-		public Collector assign(
-				Identifier id,
-				ValueExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			Collector add = new Collector(this);
-			add.assigned.elements().add(id);
-			return add;
-		}
-
-		@Override
-		public Collector smallStepSemantics(
-				ValueExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null; // not used
-		}
-
-		@Override
-		public Collector assume(
-				ValueExpression expression,
-				ProgramPoint src,
-				ProgramPoint dest,
-				SemanticOracle oracle)
-				throws SemanticException {
-			return null; // not used
-		}
-
-		@Override
 		public Collector forgetIdentifier(
-				Identifier id)
+				Identifier id,
+				ProgramPoint pp)
 				throws SemanticException {
 			Collector rem = new Collector(this);
 			rem.removed.elements().add(id);
@@ -85,22 +55,35 @@ public class SubstitutionTest {
 		}
 
 		@Override
+		public Collector forgetIdentifiers(
+				Iterable<Identifier> ids,
+				ProgramPoint pp)
+				throws SemanticException {
+			Collector rem = new Collector(this);
+			ids.forEach(rem.removed.elements()::add);
+			return rem;
+		}
+
+		@Override
 		public Collector forgetIdentifiersIf(
-				Predicate<Identifier> test)
+				Predicate<Identifier> test,
+				ProgramPoint pp)
 				throws SemanticException {
 			return null;
 		}
 
 		@Override
 		public Collector pushScope(
-				ScopeToken token)
+				ScopeToken token,
+				ProgramPoint pp)
 				throws SemanticException {
 			return null; // not used
 		}
 
 		@Override
 		public Collector popScope(
-				ScopeToken token)
+				ScopeToken token,
+				ProgramPoint pp)
 				throws SemanticException {
 			return null; // not used
 		}
@@ -142,6 +125,17 @@ public class SubstitutionTest {
 				Identifier id) {
 			return false; // not used
 		}
+
+		@Override
+		public Collector store(
+				Identifier target,
+				Identifier source)
+				throws SemanticException {
+			Collector add = new Collector(this);
+			add.assigned.elements().add(target);
+			return add;
+		}
+
 	}
 
 	private static final ProgramPoint fake = new ProgramPoint() {
@@ -155,16 +149,20 @@ public class SubstitutionTest {
 		public CFG getCFG() {
 			return null;
 		}
+
 	};
 
 	private final Variable x = new Variable(Untyped.INSTANCE, "x", SyntheticLocation.INSTANCE);
+
 	private final Variable y = new Variable(Untyped.INSTANCE, "y", SyntheticLocation.INSTANCE);
+
 	private final Variable z = new Variable(Untyped.INSTANCE, "z", SyntheticLocation.INSTANCE);
+
 	private final Variable w = new Variable(Untyped.INSTANCE, "w", SyntheticLocation.INSTANCE);
-	private final Comparator<
-			SymbolicExpression> comparer = (
-					l,
-					r) -> ((Identifier) l).getName().compareTo(((Identifier) r).getName());
+
+	private final Comparator<SymbolicExpression> comparer = (
+			l,
+			r) -> ((Identifier) l).getName().compareTo(((Identifier) r).getName());
 
 	private void check(
 			List<HeapReplacement> sub,
@@ -172,39 +170,46 @@ public class SubstitutionTest {
 			Collection<SymbolicExpression> remexpected)
 			throws SemanticException {
 		Collector c = new Collector();
-		TestAbstractState oracle = new TestAbstractState();
 		if (sub != null)
 			for (HeapReplacement repl : sub)
-				c = c.lub(c.applyReplacement(repl, fake, oracle));
+				c = c.lub(c.applyReplacement(repl, fake));
 
-		CollectionsDiffBuilder<
-				SymbolicExpression> add = new CollectionsDiffBuilder<>(SymbolicExpression.class, addexpected,
-						c.assigned.elements());
-		CollectionsDiffBuilder<
-				SymbolicExpression> rem = new CollectionsDiffBuilder<>(SymbolicExpression.class, remexpected,
-						c.removed.elements());
+		CollectionsDiffBuilder<SymbolicExpression> add = new CollectionsDiffBuilder<>(
+				SymbolicExpression.class,
+				addexpected,
+				c.assigned.elements());
+		CollectionsDiffBuilder<SymbolicExpression> rem = new CollectionsDiffBuilder<>(
+				SymbolicExpression.class,
+				remexpected,
+				c.removed.elements());
 		add.compute(comparer);
 		rem.compute(comparer);
 
-		assertTrue("Applying " + sub + " assigned unexpected identifiers: " + add.getOnlySecond(),
+		assertTrue(
+				"Applying " + sub + " assigned unexpected identifiers: " + add.getOnlySecond(),
 				add.getOnlySecond().isEmpty());
-		assertTrue("Applying " + sub + " removed unexpected identifiers: " + rem.getOnlySecond(),
+		assertTrue(
+				"Applying " + sub + " removed unexpected identifiers: " + rem.getOnlySecond(),
 				rem.getOnlySecond().isEmpty());
-		assertTrue("Applying " + sub + " did not assign some identifiers: " + add.getOnlyFirst(),
+		assertTrue(
+				"Applying " + sub + " did not assign some identifiers: " + add.getOnlyFirst(),
 				add.getOnlyFirst().isEmpty());
-		assertTrue("Applying " + sub + " did not remove some identifiers: " + rem.getOnlyFirst(),
+		assertTrue(
+				"Applying " + sub + " did not remove some identifiers: " + rem.getOnlyFirst(),
 				rem.getOnlyFirst().isEmpty());
 	}
 
 	@Test
-	public void testEmptySubstitution() throws SemanticException {
+	public void testEmptySubstitution()
+			throws SemanticException {
 		check(null, collect(), collect());
 		check(new ArrayList<>(), collect(), collect());
 		check(Arrays.asList(new HeapReplacement()), collect(), collect());
 	}
 
 	@Test
-	public void testSingleSubstitution() throws SemanticException {
+	public void testSingleSubstitution()
+			throws SemanticException {
 		HeapReplacement rep = new HeapReplacement();
 		rep.addSource(x);
 		rep.addTarget(y);
@@ -213,7 +218,8 @@ public class SubstitutionTest {
 	}
 
 	@Test
-	public void testSingleWeakSubstitution() throws SemanticException {
+	public void testSingleWeakSubstitution()
+			throws SemanticException {
 		HeapReplacement rep = new HeapReplacement();
 		rep.addSource(x);
 		rep.addTarget(x);
@@ -223,7 +229,8 @@ public class SubstitutionTest {
 	}
 
 	@Test
-	public void testNonInterferingSubstitution() throws SemanticException {
+	public void testNonInterferingSubstitution()
+			throws SemanticException {
 		HeapReplacement rep1 = new HeapReplacement();
 		rep1.addSource(x);
 		rep1.addTarget(y);
@@ -235,7 +242,8 @@ public class SubstitutionTest {
 	}
 
 	@Test
-	public void testInterferingSubstitution() throws SemanticException {
+	public void testInterferingSubstitution()
+			throws SemanticException {
 		HeapReplacement rep1 = new HeapReplacement();
 		rep1.addSource(x);
 		rep1.addTarget(y);
@@ -247,7 +255,8 @@ public class SubstitutionTest {
 	}
 
 	@Test
-	public void testResettingSubstitution() throws SemanticException {
+	public void testResettingSubstitution()
+			throws SemanticException {
 		HeapReplacement rep1 = new HeapReplacement();
 		rep1.addSource(x);
 		rep1.addTarget(y);
@@ -258,4 +267,5 @@ public class SubstitutionTest {
 
 		check(Arrays.asList(rep1, rep2, rep3), collect(y, w), collect(x, z));
 	}
+
 }

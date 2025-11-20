@@ -89,4 +89,5 @@ public class ConcatTest {
 
 		assertEquals(exp, a.concat(a2));
 	}
+
 }

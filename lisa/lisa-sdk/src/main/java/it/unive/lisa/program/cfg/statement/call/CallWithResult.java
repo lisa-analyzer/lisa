@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -21,7 +22,12 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class CallWithResult extends Call implements MetaVariableCreator, ResolvedCall {
+public abstract class CallWithResult
+		extends
+		Call
+		implements
+		MetaVariableCreator,
+		ResolvedCall {
 
 	/**
 	 * Builds the call, happening at the given location in the program.
@@ -63,52 +69,55 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 *                            expressions must be stored
 	 * @param parameters      the expressions representing the actual parameters
 	 *                            of the call
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * 
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the cfg call. The
-	 *             {@link AnalysisState#getComputedExpressions()} will contain
+	 *             {@link AnalysisState#getExecutionExpressions()} will contain
 	 *             an {@link Identifier} pointing to the meta variable
 	 *             containing the abstraction of the returned value, if any
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> compute(
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> compute(
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions,
 			ExpressionSet[] parameters)
 			throws SemanticException;
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		// the stack has to be empty
-		state = new AnalysisState<>(state.getState(), new ExpressionSet(), state.getFixpointInformation());
+		state = state.withExecutionExpressions(new ExpressionSet());
 
 		// this will contain only the information about the returned
 		// metavariable
 		AnalysisState<A> returned = compute(state, interprocedural, expressions, params);
 
-		if (interprocedural.returnsVoid(this, returned))
+		if (this.returnsVoid(returned))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
-			return returned.smallStepSemantics(new Skip(getLocation()), this);
+			return interprocedural.getAnalysis().smallStepSemantics(returned, new Skip(getLocation()), this);
 
 		Identifier meta = getMetaVariable();
-		for (SymbolicExpression expr : returned.getComputedExpressions())
+		for (SymbolicExpression expr : returned.getExecutionExpressions())
 			getMetaVariables().add((Identifier) expr);
 		getMetaVariables().add(meta);
 		return returned;
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
@@ -117,4 +126,5 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 		// beta
 		throw new UnsupportedOperationException();
 	}
+
 }

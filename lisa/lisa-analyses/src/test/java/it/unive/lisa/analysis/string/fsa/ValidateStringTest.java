@@ -3,6 +3,8 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
+import it.unive.lisa.lattices.string.fsa.StringSymbol;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import java.util.Collections;

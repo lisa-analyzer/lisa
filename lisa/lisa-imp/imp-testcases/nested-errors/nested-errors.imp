@@ -1,0 +1,184 @@
+class A { ~A() {} }
+
+class program {
+
+    nestedWithoutFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            try {
+                x = 10;
+                x = 20;
+                x = 30;
+            } catch (A e2) {
+                x = 40;
+                x = 50;
+            } else {
+                x = 60;
+                x = 70;
+            }
+            x = 3;
+        } catch (A e) {
+            x = 4;
+            x = 5;
+        } else {
+            x = 6;
+            x = 7;
+        }
+        return x;
+    }
+
+    nestedWithFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            try {
+                x = 10;
+                x = 20;
+                x = 30;
+            } catch (A e2) {
+                x = 40;
+                x = 50;
+            } else {
+                x = 60;
+                x = 70;
+            } finally {
+                x = 80;
+                x = 90;
+            }
+            x = 3;
+        } catch (A e) {
+            x = 4;
+            x = 5;
+        } else {
+            x = 6;
+            x = 7;
+        } finally {
+            x = 8;
+            x = 9;
+        }
+        return x;
+    }
+
+    nestedWithFinallyAndReturns() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            try {
+                x = 10;
+                x = 20;
+                x = 30;
+                return x;
+            } catch (A e2) {
+                x = 40;
+                x = 50;
+                throw x + x;
+            } finally {
+                x = 80;
+                x = 90;
+            }
+        } catch (A e) {
+            x = 4;
+            x = 5;
+        } finally {
+            x = 8;
+            x = 9;
+        }
+        throw x;
+    }
+
+    nestedWithTerminatingFinally() {
+        def x = 0;
+        try {
+            x = 1;
+            x = 2;
+            try {
+                x = 10;
+                x = 20;
+                x = 30;
+                return x;
+            } catch (A e2) {
+                x = 40;
+                x = 50;
+                throw x + x;
+            } finally {
+                x = 80;
+                x = 90;
+            }
+        } catch (A e) {
+            x = 4;
+            x = 5;
+        } finally {
+            x = 8;
+            x = 9;
+            return x + 1;
+        }
+        throw x;
+    }
+
+    nestedWithBreaks(b) {
+        def x = 0;
+        outer: while (b) {
+            try {
+                x = 1;
+                x = 2;
+                if (x > 0)
+                    break outer;
+                x = x + 1;
+            } catch (A e) {
+                x = 4;
+                x = 5;
+            } else {
+                x = 6;
+                x = 7;
+            } finally {
+                x = 8;
+                x = 9;
+            }
+            x = 0;
+        }
+        throw x;
+    }
+
+    nestedWithComplexBreaks(b) {
+        def x = 0;
+        outer: while (b) {
+            try {
+                x = 1;
+                x = 2;
+                try {
+                    while (b) {
+                        x = 55;
+                        if (x > 0)
+                            break outer;
+                        if (x < -10)
+                            return x;
+                        x = x + 1;
+                    }
+                } catch (A e2) {
+                    x = 40;
+                    x = 50;
+                    continue outer;
+                } finally {
+                    x = 80;
+                    x = 90;
+                }
+                x = 3;
+            } catch (A e) {
+                x = 4;
+                x = 5;
+            } else {
+                x = 6;
+                x = 7;
+            } finally {
+                x = 8;
+                x = 9;
+            }
+            x = 0;
+        }
+        throw x;
+    }
+}

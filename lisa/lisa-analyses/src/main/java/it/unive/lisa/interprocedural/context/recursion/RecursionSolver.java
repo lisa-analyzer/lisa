@@ -1,6 +1,8 @@
 package it.unive.lisa.interprocedural.context.recursion;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
@@ -38,10 +40,14 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAnalysis<A> {
+public class RecursionSolver<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		extends
+		ContextBasedAnalysis<A, D> {
 
 	private static final Logger LOG = LogManager.getLogger(RecursionSolver.class);
 
@@ -51,7 +57,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 
 	private final Map<CFGCall, Pair<AnalysisState<A>, ContextSensitivityToken>> finalEntryStates;
 
-	private final BaseCasesFinder<A> baseCases;
+	private final BaseCasesFinder<A, D> baseCases;
 
 	private GenericMapLattice<CFGCall, AnalysisState<A>> previousApprox;
 
@@ -67,14 +73,14 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 	 * @param recursion the recursion to solve
 	 */
 	public RecursionSolver(
-			ContextBasedAnalysis<A> backing,
+			ContextBasedAnalysis<A, D> backing,
 			Recursion<A> recursion) {
 		super(backing);
 		this.recursion = recursion;
 		finalEntryStates = new HashMap<>();
 		// the return value of each back call must be the same as the one
 		// starting the recursion, as they invoke the same cfg
-		returnsVoid = returnsVoid(recursion.getInvocation(), null);
+		returnsVoid = recursion.getInvocation().returnsVoid(null);
 		baseCases = new BaseCasesFinder<>(backing, recursion, returnsVoid);
 	}
 
@@ -82,7 +88,8 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 	public void init(
 			Application app,
 			CallGraph callgraph,
-			OpenCallPolicy policy)
+			OpenCallPolicy policy,
+			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		// we mark this as unsupported to make sure it never gets used as a root
 		// analysis
@@ -120,13 +127,13 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 			// we bring in the entry state to carry over the correct scope
 			AnalysisState<A> res = approx.lub(entryState);
 			Identifier meta = call.getMetaVariable();
-			if (!res.getState().knowsIdentifier(meta)) {
+			if (!res.getExecutionState().knowsIdentifier(meta)) {
 				// if we have no information for the return value, we want to
 				// force it to bottom as it means that this is either the first
 				// execution (that must start from bottom) or that the recursion
 				// diverges
 				PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-				res = res.assign(meta, inv, call);
+				res = analysis.assign(res, meta, inv, call);
 			}
 			return res;
 		}
@@ -150,7 +157,8 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 	 * 
 	 * @throws SemanticException if an exception happens during the computation
 	 */
-	public void solve() throws SemanticException {
+	public void solve()
+			throws SemanticException {
 		int recursionCount = 0;
 		Call start = recursion.getInvocation();
 		Collection<CFGCall> ends = finalEntryStates.keySet();
@@ -158,32 +166,31 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 
 		LOG.info("Solving recursion at " + start.getLocation() + " for context " + recursion.getInvocationToken());
 
-		recursiveApprox = new GenericMapLattice<>(entryState.postState.bottom());
-		recursiveApprox = recursiveApprox.bottom();
+		recursiveApprox = new GenericMapLattice<CFGCall, AnalysisState<A>>(entryState.postState).bottom();
 		base = baseCases.find();
 
 		Expression[] actuals = start.getParameters();
 		ExpressionSet[] params = new ExpressionSet[actuals.length];
 		for (int i = 0; i < params.length; i++)
-			params[i] = entryState.intermediateStates.getState(actuals[i]).getComputedExpressions();
+			params[i] = entryState.intermediateStates.getState(actuals[i]).getExecutionExpressions();
 
 		do {
-			LOG.debug(StringUtilities.ordinal(recursionCount + 1)
-					+ " evaluation of recursive chain at "
-					+ start.getLocation());
+			LOG.debug(
+					StringUtilities.ordinal(recursionCount + 1)
+							+ " evaluation of recursive chain at "
+							+ start.getLocation());
 
 			previousApprox = recursiveApprox;
 
 			// we reset the analysis at the point where the starting call can be
 			// evaluated
 			token = recursion.getInvocationToken();
-			AnalysisState<A> post = start.forwardSemanticsAux(
-					this,
-					entryState.postState,
-					params,
-					entryState.intermediateStates);
+			AnalysisState<A> post = start
+					.forwardSemanticsAux(this, entryState.postState, params, entryState.intermediateStates);
 
 			for (CFGCall end : ends)
+				// no need to lub: the keys are the calls and
+				// are thus unique
 				recursiveApprox = recursiveApprox.putState(end, transferToCallsite(start, end, post));
 
 			if (conf.recursionWideningThreshold < 0)
@@ -206,8 +213,9 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 				ContextSensitivityToken callingToken = pair.getRight();
 
 				// we get the cfg containing the call
-				OptimizedAnalyzedCFG<A> caller = (OptimizedAnalyzedCFG<A>) results.get(call.getCFG())
-						.get(callingToken);
+				@SuppressWarnings("unchecked")
+				OptimizedAnalyzedCFG<A,
+						D> caller = (OptimizedAnalyzedCFG<A, D>) results.get(call.getCFG()).get(callingToken);
 
 				// we get the actual call that is part of the cfg
 				Call source = call;
@@ -222,7 +230,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 					AnalysisState<A> local = transferToCallsite(start, call, base);
 					AnalysisState<A> returned = callEntry.lub(recursiveApprox.getState(call).lub(local));
 					Identifier meta = call.getMetaVariable();
-					if (!returned.getState().knowsIdentifier(meta)) {
+					if (!returned.getExecutionState().knowsIdentifier(meta)) {
 						// if we have no information for the return value, we
 						// want to
 						// force it to bottom as it means that this is either
@@ -231,7 +239,7 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 						// recursion
 						// diverges
 						PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-						returned = returned.assign(meta, inv, call);
+						returned = analysis.assign(returned, meta, inv, call);
 					}
 
 					// finally, we store it in the result
@@ -252,15 +260,15 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 		else
 			for (Identifier variable : original.getMetaVariables())
 				// we transfer the return value
-				res = res.lub(state.assign(meta, variable, original));
+				res = res.lub(analysis.assign(state, meta, variable, original));
 
-		if (!res.getState().knowsIdentifier(meta)) {
+		if (!res.getExecutionState().knowsIdentifier(meta)) {
 			// if we have no information for the return value, we want to
 			// force it to bottom as it means that this is either the first
 			// execution (that must start from bottom) or that the recursion
 			// diverges
 			PushInv inv = new PushInv(meta.getStaticType(), destination.getLocation());
-			res = res.assign(meta, inv, destination);
+			res = analysis.assign(res, meta, inv, destination);
 		}
 
 		// we only keep variables that can be affected by the recursive
@@ -268,7 +276,8 @@ public class RecursionSolver<A extends AbstractState<A>> extends ContextBasedAna
 		// that are not sensible to scoping. All other variables are
 		// subjected to push and pop operations and cannot be
 		// considered a contribution of the recursive call.
-		res = res.forgetIdentifiersIf(i -> i.canBeScoped() && !i.equals(meta));
+		res = res.forgetIdentifiersIf(i -> i.canBeScoped() && !i.equals(meta), original);
 		return res;
 	}
+
 }

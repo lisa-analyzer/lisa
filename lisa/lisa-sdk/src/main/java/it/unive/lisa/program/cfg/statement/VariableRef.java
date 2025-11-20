@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -9,7 +10,6 @@ import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Variable;
@@ -23,7 +23,9 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class VariableRef extends Expression {
+public class VariableRef
+		extends
+		Expression {
 
 	/**
 	 * The name of this variable
@@ -124,13 +126,13 @@ public class VariableRef extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemantics(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		SymbolicExpression expr = getVariable();
-		return entryState.smallStepSemantics(expr, this);
+		return interprocedural.getAnalysis().smallStepSemantics(entryState, expr, this);
 	}
 
 	@Override
@@ -147,10 +149,7 @@ public class VariableRef extends Expression {
 	 * @return the annotations of this variable.
 	 */
 	public Annotations getAnnotations() {
-		// FIXME the iteration should be performed inside the descriptor
-		for (VariableTableEntry entry : getCFG().getDescriptor().getVariables())
-			if (entry.getName().equals(getName()))
-				return entry.getAnnotations();
-		return new Annotations();
+		return getCFG().getDescriptor().getAnnotationsOf(getName(), this);
 	}
+
 }

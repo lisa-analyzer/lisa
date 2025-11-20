@@ -1,20 +1,24 @@
 package it.unive.lisa.conf;
 
 import it.unive.lisa.LiSA;
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
-import it.unive.lisa.interprocedural.WorstCasePolicy;
+import it.unive.lisa.interprocedural.TopExecutionPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.logging.Log4jConfig;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.workset.OrderBasedWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -34,7 +38,16 @@ import org.apache.commons.io.FilenameUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LiSAConfiguration extends BaseConfiguration {
+public class LiSAConfiguration
+		extends
+		BaseConfiguration {
+
+	static {
+		// ensure that some logging configuration is in place
+		// if not, we set a default configuration
+		if (!Log4jConfig.isLog4jConfigured())
+			Log4jConfig.initializeLogging();
+	}
 
 	/**
 	 * The type of graphs that can be dumped by LiSA.
@@ -117,11 +130,11 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * The collection of {@link SemanticCheck}s to execute. These will be
 	 * executed after the fixpoint iteration has been completed, and will be
 	 * provided with the computed fixpoint results (customizable through
-	 * {@link #abstractState}) and the {@link CallGraph} (that can be customized
+	 * {@link #analysis}) and the {@link CallGraph} (that can be customized
 	 * through {@link #callGraph}) that has been built. Defaults to an empty
 	 * set.
 	 */
-	public final Collection<SemanticCheck<?>> semanticChecks = new HashSet<>();
+	public final Collection<SemanticCheck<?, ?>> semanticChecks = new HashSet<>();
 
 	/**
 	 * The {@link CallGraph} instance to use during the analysis. Defaults to
@@ -133,15 +146,14 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * The {@link InterproceduralAnalysis} instance to use during the analysis.
 	 * Defaults to {@code null}.
 	 */
-	public InterproceduralAnalysis<?> interproceduralAnalysis;
+	public InterproceduralAnalysis<?, ?> interproceduralAnalysis;
 
 	/**
-	 * The {@link AbstractState} instance to run during the analysis. This will
-	 * be used as singleton to retrieve the top instances needed to boot up the
-	 * analysis, and can thus be any lattice element. If no value is set for
-	 * this field, no analysis will be executed. Defaults to {@code null}.
+	 * The {@link AbstractDomain} to be run during the analysis. If no value is
+	 * set for this field, no analysis will be executed. Defaults to
+	 * {@code null}.
 	 */
-	public AbstractState<?> abstractState;
+	public AbstractDomain<?> analysis;
 
 	/**
 	 * Sets the format to use for dumping graph files, named
@@ -236,9 +248,9 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 	/**
 	 * The {@link OpenCallPolicy} to be used for computing the result of
-	 * {@link OpenCall}s. Defaults to {@link WorstCasePolicy}.
+	 * {@link OpenCall}s. Defaults to {@link TopExecutionPolicy}.
 	 */
-	public OpenCallPolicy openCallPolicy = WorstCasePolicy.INSTANCE;
+	public OpenCallPolicy openCallPolicy = TopExecutionPolicy.INSTANCE;
 
 	/**
 	 * If {@code true}, will cause the analysis to optimize fixpoint executions.
@@ -290,6 +302,15 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 */
 	public boolean dumpForcesUnwinding = false;
 
+	/**
+	 * This predicate determines if an error of a given type should have its
+	 * separate entry in the {@link AnalysisState} errors, or if it should be
+	 * "smashed" into the summary error state. All smashed errors share a unique
+	 * {@link ProgramState}, as they are deemed as mostly noise or
+	 * uninteresting.
+	 */
+	public Predicate<Type> shouldSmashError = null;
+
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();
@@ -298,7 +319,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 			for (Field field : LiSAConfiguration.class.getFields())
 				if (!Modifier.isStatic(field.getModifiers())
 						// we skip the semantic configuration
-						&& !AbstractState.class.isAssignableFrom(field.getType())
+						&& !AbstractDomain.class.isAssignableFrom(field.getType())
 						&& !CallGraph.class.isAssignableFrom(field.getType())
 						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
@@ -328,7 +349,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 	/**
 	 * Converts this configuration to a property bag, that is, a map from keys
-	 * (fields of this class) to values (their values). {@link #abstractState},
+	 * (fields of this class) to values (their values). {@link #analysis},
 	 * {@link #callGraph}, and {@link #interproceduralAnalysis} are omitted.
 	 * 
 	 * @return the property bag
@@ -339,7 +360,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 			for (Field field : LiSAConfiguration.class.getFields())
 				if (!Modifier.isStatic(field.getModifiers())
 						// we skip the semantic configuration
-						&& !AbstractState.class.isAssignableFrom(field.getType())
+						&& !AbstractDomain.class.isAssignableFrom(field.getType())
 						&& !CallGraph.class.isAssignableFrom(field.getType())
 						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
@@ -348,8 +369,10 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 					String val;
 					if (Collection.class.isAssignableFrom(field.getType()))
-						val = ((Collection<?>) value).stream().map(e -> e.getClass().getSimpleName())
-								.sorted().collect(new CollectionUtilities.StringCollector<>(", "));
+						val = ((Collection<?>) value).stream()
+								.map(e -> e.getClass().getSimpleName())
+								.sorted()
+								.collect(new CollectionUtilities.StringCollector<>(", "));
 					else if (Class.class.isAssignableFrom(field.getType()))
 						val = ((Class<?>) value).getSimpleName();
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
@@ -371,4 +394,5 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 		return bag;
 	}
+
 }

@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_B.B(B__this)_-2108349118.json", "untyped_B.B(B__this)_-2108349149.json", "untyped_C.C(C__this)_-2108355101.json", "untyped_F.main(F__this).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "531ms",
+    "end" : "2025-09-11T16:58:22.567+02:00",
+    "expressions" : "10",
+    "files" : "4",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2025-09-11T16:58:22.036+02:00",
+    "statements" : "7",
+    "units" : "3",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/issues/324"
+  }
+}

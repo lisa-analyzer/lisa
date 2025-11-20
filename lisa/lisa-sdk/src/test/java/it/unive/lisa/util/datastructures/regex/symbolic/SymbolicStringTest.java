@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class SymbolicStringTest {
+
 	@Test
 	public void testCollapseAtBeginning() {
 		assertEquals(mkTopString(5).concat(mkString("a")).collapseTopChars(), mkTopString(1).concat(mkString("a")));
@@ -19,11 +20,15 @@ public class SymbolicStringTest {
 
 	@Test
 	public void testCollapseInside() {
-		assertEquals(mkString("a").concat(mkTopString(5)).concat(mkString("b")).collapseTopChars(),
+		assertEquals(
+				mkString("a").concat(mkTopString(5)).concat(mkString("b")).collapseTopChars(),
 				mkString("a").concat(mkTopString(1)).concat(mkString("b")));
 
 		assertEquals(
-				mkString("a").concat(mkTopString(5)).concat(mkString("b")).concat(mkTopString(9)).concat(mkString("c"))
+				mkString("a").concat(mkTopString(5))
+						.concat(mkString("b"))
+						.concat(mkTopString(9))
+						.concat(mkString("c"))
 						.collapseTopChars(),
 				mkString("a").concat(mkTopString(1)).concat(mkString("b")).concat(mkTopString(1))
 						.concat(mkString("c")));
@@ -36,9 +41,17 @@ public class SymbolicStringTest {
 				mkTopString(1).concat(mkString("a")).concat(mkTopString(1)).concat(mkString("b")));
 
 		assertEquals(
-				mkString("a").concat(mkTopString(5)).concat(mkString("b")).concat(mkTopString(9)).concat(mkString("c"))
-						.concat(mkTopString(5)).collapseTopChars(),
-				mkString("a").concat(mkTopString(1)).concat(mkString("b")).concat(mkTopString(1)).concat(mkString("c"))
+				mkString("a").concat(mkTopString(5))
+						.concat(mkString("b"))
+						.concat(mkTopString(9))
+						.concat(mkString("c"))
+						.concat(mkTopString(5))
+						.collapseTopChars(),
+				mkString("a").concat(mkTopString(1))
+						.concat(mkString("b"))
+						.concat(mkTopString(1))
+						.concat(mkString("c"))
 						.concat(mkTopString(1)));
 	}
+
 }

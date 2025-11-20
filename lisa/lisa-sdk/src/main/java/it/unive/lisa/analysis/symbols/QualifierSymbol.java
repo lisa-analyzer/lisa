@@ -5,7 +5,9 @@ package it.unive.lisa.analysis.symbols;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class QualifierSymbol implements Symbol {
+public class QualifierSymbol
+		implements
+		Symbol {
 
 	private final String qualifier;
 
@@ -58,4 +60,5 @@ public class QualifierSymbol implements Symbol {
 	public String toString() {
 		return qualifier + "::<name>";
 	}
+
 }

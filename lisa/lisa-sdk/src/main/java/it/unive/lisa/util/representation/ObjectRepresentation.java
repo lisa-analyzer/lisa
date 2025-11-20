@@ -15,7 +15,9 @@ import java.util.function.Function;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ObjectRepresentation extends StructuredRepresentation {
+public class ObjectRepresentation
+		extends
+		StructuredRepresentation {
 
 	/**
 	 * The fields of this object, with their values.
@@ -54,7 +56,7 @@ public class ObjectRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public SerializableValue toSerializableValue() {
+	public SerializableObject toSerializableValue() {
 		SortedMap<String, SerializableValue> fields = new TreeMap<>();
 		for (Entry<String, StructuredRepresentation> e : this.fields.entrySet())
 			fields.put(e.getKey(), e.getValue().toSerializableValue());
@@ -71,10 +73,7 @@ public class ObjectRepresentation extends StructuredRepresentation {
 		for (Entry<String, StructuredRepresentation> e : fields.entrySet()) {
 			String val = e.getValue().toString();
 			if (!val.contains("\n"))
-				sb.append(first ? "\n  " : ",\n  ")
-						.append(e.getKey())
-						.append(": ")
-						.append(e.getValue());
+				sb.append(first ? "\n  " : ",\n  ").append(e.getKey()).append(": ").append(e.getValue());
 			else
 				sb.append(first ? "\n  " : ",\n  ")
 						.append(e.getKey())
@@ -111,4 +110,5 @@ public class ObjectRepresentation extends StructuredRepresentation {
 			return false;
 		return true;
 	}
+
 }

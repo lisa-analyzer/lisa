@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_B.B(B__this)_-1674709231.json", "untyped_B.B(B__this)_-1675098436.json", "untyped_D.D(D__this)_-1679908799.json", "untyped_D.D(D__this)_-1680794841.json", "untyped_D.D(D__this)_1391713126.json", "untyped_exceptions.assignAfterException(exceptions__this)_-1788012349.json", "untyped_exceptions.catchAfterCall(exceptions__this,_untyped_b)_-1788017247.json", "untyped_exceptions.catchAfterCallChain(exceptions__this,_untyped_b)_-1788012380.json", "untyped_exceptions.intermediate1(exceptions__this,_untyped_b)_-1381827760.json", "untyped_exceptions.intermediate2(exceptions__this,_untyped_b)_-1675007575.json", "untyped_exceptions.intermediate3(exceptions__this,_untyped_b)_2121319924.json", "untyped_exceptions.main(exceptions__this,_untyped_b).json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1381985488.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1382014070.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-451616917.json", "untyped_exceptions.tryAfterThrow(exceptions__this,_untyped_b)_-1788018177.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_-1381817685.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_-1381830240.json" ],
+  "info" : {
+    "cfgs" : "15",
+    "duration" : "181ms",
+    "end" : "2025-09-15T16:03:23.283+02:00",
+    "expressions" : "71",
+    "files" : "18",
+    "globals" : "0",
+    "members" : "15",
+    "programs" : "1",
+    "start" : "2025-09-15T16:03:23.102+02:00",
+    "statements" : "37",
+    "units" : "6",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/exceptions/calls"
+  }
+}

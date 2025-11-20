@@ -17,6 +17,7 @@ import org.junit.Test;
 public class RandomToRegexTest {
 
 	private final SortedSet<State> states = new TreeSet<>();
+
 	private final Map<Integer, State> mapping = new HashMap<>();
 
 	@Before
@@ -108,4 +109,5 @@ public class RandomToRegexTest {
 		for (int k = 0; k < numberOfGeneratedAutomata; k++)
 			check(generateAutomaton(states, mapping, numberOfTransitionsForEachState, sizeOfChar));
 	}
+
 }

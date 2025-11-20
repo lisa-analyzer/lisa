@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_~LiSAProgram.foo()_-309356675.json", "untyped_~LiSAProgram.main().json" ],
+  "info" : {
+    "cfgs" : "2",
+    "duration" : "730ms",
+    "end" : "2025-07-21T16:53:38.244+02:00",
+    "expressions" : "6",
+    "files" : "2",
+    "globals" : "1",
+    "members" : "2",
+    "programs" : "1",
+    "start" : "2025-07-21T16:53:37.514+02:00",
+    "statements" : "6",
+    "units" : "0",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/issues/322"
+  }
+}

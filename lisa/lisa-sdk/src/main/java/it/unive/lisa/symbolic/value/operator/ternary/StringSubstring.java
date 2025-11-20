@@ -32,7 +32,10 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringSubstring implements StringOperator, TernaryOperator {
+public class StringSubstring
+		implements
+		StringOperator,
+		TernaryOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -66,4 +69,5 @@ public class StringSubstring implements StringOperator, TernaryOperator {
 			return Collections.emptySet();
 		return Collections.singleton(types.getStringType());
 	}
+
 }

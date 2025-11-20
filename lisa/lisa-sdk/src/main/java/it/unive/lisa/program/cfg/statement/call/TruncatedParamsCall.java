@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -18,7 +19,11 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TruncatedParamsCall extends Call implements ResolvedCall {
+public class TruncatedParamsCall
+		extends
+		Call
+		implements
+		ResolvedCall {
 
 	private final Call call;
 
@@ -29,8 +34,15 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	 */
 	public TruncatedParamsCall(
 			Call call) {
-		super(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(), call.getTargetName(),
-				call.getOrder(), call.getStaticType(), call.getParameters());
+		super(
+				call.getCFG(),
+				call.getLocation(),
+				call.getCallType(),
+				call.getQualifier(),
+				call.getTargetName(),
+				call.getOrder(),
+				call.getStaticType(),
+				call.getParameters());
 		if (!(call instanceof ResolvedCall))
 			throw new IllegalArgumentException("The given call has not been resolved yet");
 		this.call = call;
@@ -76,8 +88,8 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
@@ -110,4 +122,5 @@ public class TruncatedParamsCall extends Call implements ResolvedCall {
 	public Call getInnerCall() {
 		return call;
 	}
+
 }

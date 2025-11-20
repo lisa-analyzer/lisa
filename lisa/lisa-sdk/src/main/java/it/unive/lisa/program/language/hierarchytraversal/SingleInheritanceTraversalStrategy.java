@@ -10,12 +10,14 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * A {@link HierarcyTraversalStrategy} that assumes a single super unit per each
- * unit (Java-like).
+ * A {@link HierarchyTraversalStrategy} that assumes a single super unit per
+ * each unit (Java-like).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStrategy {
+public class SingleInheritanceTraversalStrategy
+		implements
+		HierarchyTraversalStrategy {
 
 	/**
 	 * The singleton instance of this class.
@@ -35,10 +37,13 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 			public Iterator<CompilationUnit> iterator() {
 				return new SingleInheritanceIterator(start);
 			}
+
 		};
 	}
 
-	private class SingleInheritanceIterator implements Iterator<CompilationUnit> {
+	private class SingleInheritanceIterator
+			implements
+			Iterator<CompilationUnit> {
 
 		private CompilationUnit current;
 
@@ -85,5 +90,7 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 
 			return cu;
 		}
+
 	};
+
 }

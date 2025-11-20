@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_program.forBreak(program__this)_cfg.json", "untyped_program.forBreakLabel(program__this)_cfg.json", "untyped_program.forContinue(program__this)_cfg.json", "untyped_program.forContinueLabel(program__this)_cfg.json", "untyped_program.nestedBreak(program__this,_untyped_b)_cfg.json", "untyped_program.nestedContinue(program__this,_untyped_b)_cfg.json", "untyped_program.whileBreak(program__this,_untyped_b)_cfg.json", "untyped_program.whileBreakLabel(program__this,_untyped_b)_cfg.json", "untyped_program.whileContinue(program__this,_untyped_b)_cfg.json", "untyped_program.whileContinueLabel(program__this,_untyped_b)_cfg.json" ],
+  "info" : {
+    "cfgs" : "10",
+    "duration" : "511ms",
+    "end" : "2025-08-14T16:15:43.544+02:00",
+    "expressions" : "166",
+    "files" : "10",
+    "globals" : "0",
+    "members" : "10",
+    "programs" : "1",
+    "start" : "2025-08-14T16:15:43.033+02:00",
+    "statements" : "84",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "true",
+    "serializeResults" : "false",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/break-continue"
+  }
+}

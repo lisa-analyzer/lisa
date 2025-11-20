@@ -17,7 +17,11 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NumericNonOverflowingRem extends NumericOperation implements RemainderOperator {
+public class NumericNonOverflowingRem
+		extends
+		NumericOperation
+		implements
+		RemainderOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -36,4 +40,5 @@ public class NumericNonOverflowingRem extends NumericOperation implements Remain
 	public String toString() {
 		return "%";
 	}
+
 }

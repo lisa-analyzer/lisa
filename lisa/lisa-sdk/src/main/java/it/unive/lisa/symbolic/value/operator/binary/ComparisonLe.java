@@ -16,7 +16,9 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ComparisonLe extends NumericComparison {
+public class ComparisonLe
+		extends
+		NumericComparison {
 
 	/**
 	 * The singleton instance of this class.
@@ -40,4 +42,5 @@ public class ComparisonLe extends NumericComparison {
 	public ComparisonOperator opposite() {
 		return ComparisonGt.INSTANCE;
 	}
+
 }

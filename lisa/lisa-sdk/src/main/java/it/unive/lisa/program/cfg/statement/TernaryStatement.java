@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -17,7 +18,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class TernaryStatement extends NaryStatement {
+public abstract class TernaryStatement
+		extends
+		NaryStatement {
 
 	/**
 	 * Builds the statement, happening at the given location in the program. The
@@ -94,13 +97,13 @@ public abstract class TernaryStatement extends NaryStatement {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> forwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
@@ -114,7 +117,10 @@ public abstract class TernaryStatement extends NaryStatement {
 	 * the sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this statement returns.
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the statement is to be evaluated
@@ -137,8 +143,8 @@ public abstract class TernaryStatement extends NaryStatement {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A>> AnalysisState<A> fwdTernarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdTernarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,
 			SymbolicExpression middle,
@@ -147,13 +153,13 @@ public abstract class TernaryStatement extends NaryStatement {
 			throws SemanticException;
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> backwardSemanticsAux(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> backwardSemanticsAux(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		AnalysisState<A> result = state.bottom();
+		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
@@ -171,7 +177,10 @@ public abstract class TernaryStatement extends NaryStatement {
 	 * as it is fine for most atomic statements. One should redefine this method
 	 * if a statement's semantics is composed of a series of smaller operations.
 	 * 
-	 * @param <A>             the type of {@link AbstractState}
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the statement is to be evaluated
@@ -194,8 +203,8 @@ public abstract class TernaryStatement extends NaryStatement {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public <A extends AbstractState<A>> AnalysisState<A> bwdTernarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> bwdTernarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression left,
 			SymbolicExpression middle,
@@ -204,4 +213,5 @@ public abstract class TernaryStatement extends NaryStatement {
 			throws SemanticException {
 		return fwdTernarySemantics(interprocedural, state, left, middle, right, expressions);
 	}
+
 }

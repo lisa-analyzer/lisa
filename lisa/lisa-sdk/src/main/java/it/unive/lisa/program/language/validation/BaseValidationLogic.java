@@ -35,7 +35,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BaseValidationLogic implements ProgramValidationLogic {
+public class BaseValidationLogic
+		implements
+		ProgramValidationLogic {
 
 	/**
 	 * Error message format for duplicated {@link CodeMember}s in the same
@@ -212,8 +214,12 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 			boolean isInstance)
 			throws ProgramValidationException {
 		if (isInstance != global.isInstance())
-			throw new ProgramValidationException(format(GLOBAL_INSTANCE_MISMATCH, global, global.isInstance(),
-					isInstance ? "instance" : "non-instance"));
+			throw new ProgramValidationException(
+					format(
+							GLOBAL_INSTANCE_MISMATCH,
+							global,
+							global.isInstance(),
+							isInstance ? "instance" : "non-instance"));
 
 		if (isInstance && global instanceof ConstantGlobal)
 			throw new ProgramValidationException(format(CONST_INSTANCE_GLOBAL, global));
@@ -340,10 +346,11 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 		for (CompilationUnit ancestor : unit.getImmediateAncestors()) {
 			// check overriders/implementers
 			for (CodeMember inherited : ancestor.getInstanceCodeMembers(true)) {
-				Collection<CodeMember> localOverrides = unit.getMatchingInstanceCodeMembers(inherited.getDescriptor(),
-						false);
+				Collection<CodeMember> localOverrides = unit
+						.getMatchingInstanceCodeMembers(inherited.getDescriptor(), false);
 				if (localOverrides.isEmpty()) {
-					if (inherited instanceof AbstractCodeMember && !ancestor.canBeInstantiated()
+					if (inherited instanceof AbstractCodeMember
+							&& !ancestor.canBeInstantiated()
 							&& unit.canBeInstantiated())
 						// this is the first non-abstract child of ancestor, and
 						// it must provide an implementation for all abstract
@@ -362,7 +369,10 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 					}
 				} else {
 					throw new ProgramValidationException(
-							format(MULTIPLE_OVERRIDES, inherited.getDescriptor().getSignature(), unit,
+							format(
+									MULTIPLE_OVERRIDES,
+									inherited.getDescriptor().getSignature(),
+									unit,
 									StringUtils.join(", ", localOverrides)));
 				}
 			}
@@ -417,12 +427,12 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 				? ((CompilationUnit) container).getMatchingInstanceCodeMembers(member.getDescriptor(), false)
 				: container.getMatchingCodeMember(member.getDescriptor());
 		if (matching.isEmpty())
-			throw new ProgramValidationException(
-					format(MEMBER_MISMATCH, member.getDescriptor().getSignature()));
+			throw new ProgramValidationException(format(MEMBER_MISMATCH, member.getDescriptor().getSignature()));
 		else if (matching.size() != 1 || matching.iterator().next() != member)
 			throw new ProgramValidationException(
 					format(DUPLICATE_MEMBER, member.getDescriptor().getSignature(), container));
 
 		member.validate();
 	}
+
 }

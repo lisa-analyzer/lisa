@@ -8,15 +8,15 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 public class TimerLoggerTest {
+
 	private static final Logger logger = LogManager.getLogger(TimerLoggerTest.class);
 
 	@Test
 	public void testSupplier() {
-		Integer result = TimerLogger.execSupplier(logger, Level.INFO, "Test supplier logging",
-				this::supplier);
+		Integer result = TimerLogger.execSupplier(logger, Level.INFO, "Test supplier logging", this::supplier);
 		assertEquals(5, result.intValue());
-		result = TimerLogger.execSupplier(logger, Level.INFO, TimeFormat.MILLIS, "Test supplier logging",
-				this::supplier);
+		result = TimerLogger
+				.execSupplier(logger, Level.INFO, TimeFormat.MILLIS, "Test supplier logging", this::supplier);
 		assertEquals(5, result.intValue());
 	}
 
@@ -39,4 +39,5 @@ public class TimerLoggerTest {
 		}
 		System.out.println("Waking up!");
 	}
+
 }

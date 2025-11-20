@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.BackwardAnalyzedCFG;
@@ -22,6 +23,7 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
@@ -30,6 +32,9 @@ import it.unive.lisa.program.cfg.fixpoints.DescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.DescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
+import it.unive.lisa.program.cfg.protection.CatchBlock;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
+import it.unive.lisa.program.cfg.protection.ProtectionBlock;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -51,7 +56,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -66,7 +73,11 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
+public class CFG
+		extends
+		CodeGraph<CFG, Statement, Edge>
+		implements
+		CodeMember {
 
 	private static final Logger LOG = LogManager.getLogger(CFG.class);
 
@@ -74,11 +85,6 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * The descriptor of this control flow graph.
 	 */
 	private final CodeMemberDescriptor descriptor;
-
-	/**
-	 * The control flow structures of this cfg
-	 */
-	private final Collection<ControlFlowStructure> cfStructs;
 
 	/**
 	 * The lazily computed basic blocks of this cfg, available only after
@@ -95,7 +101,6 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			CodeMemberDescriptor descriptor) {
 		super(new SequentialEdge());
 		this.descriptor = descriptor;
-		this.cfStructs = new LinkedList<>();
 	}
 
 	/**
@@ -113,7 +118,6 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			NodeList<CFG, Statement, Edge> list) {
 		super(entrypoints, list);
 		this.descriptor = descriptor;
-		this.cfStructs = new LinkedList<>();
 	}
 
 	/**
@@ -125,7 +129,6 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			CFG other) {
 		super(other.entrypoints, other.list);
 		this.descriptor = other.descriptor;
-		this.cfStructs = other.cfStructs;
 		this.basicBlocks = other.basicBlocks;
 	}
 
@@ -166,7 +169,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @return the normal exitpoints of this cfg.
 	 */
 	public Collection<Statement> getNormalExitpoints() {
-		return list.getNodes().stream().filter(st -> st.stopsExecution() && !st.throwsError())
+		return list.getNodes()
+				.stream()
+				.filter(st -> st.stopsExecution() && !st.throwsError())
 				.collect(Collectors.toList());
 	}
 
@@ -180,41 +185,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @return the exitpoints of this cfg.
 	 */
 	public Collection<Statement> getAllExitpoints() {
-		return list.getNodes().stream().filter(st -> st.stopsExecution() || st.throwsError())
+		return list.getNodes()
+				.stream()
+				.filter(st -> st.stopsExecution() || st.throwsError())
 				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Adds the given {@link ControlFlowStructure} to the ones contained in this
-	 * cfg.
-	 * 
-	 * @param cf the control flow structure to add
-	 * 
-	 * @throws IllegalArgumentException if a control flow structure for the same
-	 *                                      condition already exists
-	 */
-	public void addControlFlowStructure(
-			ControlFlowStructure cf) {
-		if (cfStructs.stream().anyMatch(c -> c.getCondition().equals(cf.getCondition())))
-			throw new IllegalArgumentException(
-					"Cannot have more than one conditional structure happening on the same condition: "
-							+ cf.getCondition());
-		cfStructs.add(cf);
-	}
-
-	/**
-	 * Yields the collection of {@link ControlFlowStructure}s contained in this
-	 * cfg.<br>
-	 * <br>
-	 * Note that if no control flow structures have been provided by frontends,
-	 * and no attempt at extracting them has been made yet, invoking this method
-	 * will cause a {@link ControlFlowExtractor} to try to extract them.
-	 * 
-	 * @return the collection, either provided by frontends or extracted, of the
-	 *             control flow structures of this method
-	 */
-	public Collection<ControlFlowStructure> getControlFlowStructures() {
-		return cfStructs;
 	}
 
 	/**
@@ -227,7 +201,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	public void extractControlFlowStructures(
 			ControlFlowExtractor extractor) {
 		LOG.debug("Extracting control flow structures from " + this);
-		extractor.extract(this).forEach(cfStructs::add);
+		extractor.extract(this).forEach(descriptor::addControlFlowStructure);
 	}
 
 	@Override
@@ -247,8 +221,197 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                                           non-sequential edge.
 	 */
 	public void simplify() {
-		super.simplify(NoOp.class, new LinkedList<>(), new HashMap<>());
-		cfStructs.forEach(ControlFlowStructure::simplify);
+		Set<Statement> targets = getNodes().stream()
+				.filter(k -> k instanceof NoOp)
+				.filter(k -> !isNotSimplifiable(k))
+				.collect(Collectors.toSet());
+		targets.forEach(this::preSimplify);
+		list.simplify(targets, entrypoints, new LinkedList<>(), new HashMap<>());
+		descriptor.getControlFlowStructures().forEach(cfs -> cfs.simplify(targets));
+		descriptor.getProtectionBlocks().forEach(pb -> pb.simplify(targets));
+	}
+
+	private boolean isNotSimplifiable(
+			Statement st) {
+		for (ControlFlowStructure cfs : descriptor.getControlFlowStructures())
+			if (cfs.getCondition() == st)
+				return true;
+
+		// removing the only node in a protected block
+		// would mean removing the whole block from the
+		// cfg, but that would make it different w.r.t.
+		// the source code, so we keep it. It is also
+		// problematic to remove if it is a noop-return
+		List<BiPredicate<ProtectedBlock, Statement>> exclusions = new LinkedList<>();
+		// single node in protected block
+		exclusions.add(
+				(
+						pb,
+						s) -> pb.getBody().size() == 1 && pb.getStart() == s);
+		// pre-exit in protected block
+		exclusions.add(
+				(
+						pb,
+						s) -> pb.getBody().size() == 2 && pb.getStart() == s && pb.getEnd().stopsExecution());
+		// branch target followed by finally execution
+		exclusions.add(
+				(
+						pb,
+						s) -> getIngoingEdges(s).size() == 1
+								&& getIngoingEdges(s).stream().anyMatch(Predicate.not(Edge::isUnconditional))
+								&& getOutgoingEdges(s).stream()
+										.allMatch(Edge::isErrorHandling));
+
+		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
+			if (exclusions.stream().anyMatch(e -> e.test(pb.getTryBlock(), st)))
+				return true;
+			else if (pb.getElseBlock() != null && (exclusions.stream().anyMatch(e -> e.test(pb.getElseBlock(), st))))
+				return true;
+			else if (pb.getFinallyBlock() != null
+					&& (exclusions.stream().anyMatch(e -> e.test(pb.getFinallyBlock(), st))))
+				return true;
+			else
+				for (CatchBlock cb : pb.getCatchBlocks())
+					if (exclusions.stream().anyMatch(e -> e.test(cb.getBody(), st)))
+						return true;
+		return false;
+	}
+
+	private void preSimplify(
+			Statement node) {
+		shiftVariableScopes(node);
+		shiftControlFlowStructuresEnd(node);
+		shiftProtectionBlocks(node);
+	}
+
+	private void shiftControlFlowStructuresEnd(
+			Statement node) {
+		Collection<Statement> followers = followersOf(node);
+
+		Statement candidate;
+		for (ControlFlowStructure cfs : descriptor.getControlFlowStructures())
+			if (node == cfs.getFirstFollower())
+				if (followers.isEmpty())
+					cfs.setFirstFollower(null);
+				else if (followers.size() == 1)
+					if (!((candidate = followers.iterator().next()) instanceof NoOp))
+						cfs.setFirstFollower(candidate);
+					else
+						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
+				else {
+					LOG.warn(
+							"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
+							node);
+					cfs.setFirstFollower(null);
+				}
+	}
+
+	private void shiftProtectionBlocks(
+			Statement node) {
+		Collection<Statement> followers = followersOf(node);
+
+		Statement candidate;
+		for (ProtectionBlock pb : descriptor.getProtectionBlocks())
+			if (node == pb.getClosing())
+				if (followers.isEmpty())
+					pb.setClosing(null);
+				else if (followers.size() == 1)
+					if (!((candidate = followers.iterator().next()) instanceof NoOp))
+						pb.setClosing(candidate);
+					else
+						pb.setClosing(firstNonNoOpDeterministicFollower(candidate));
+				else {
+					LOG.warn(
+							"{} is the closing of a protection block, it is being simplified but has multiple followers: the closing of the protection block will be lost",
+							node);
+					pb.setClosing(null);
+				}
+	}
+
+	private Statement firstNonNoOpDeterministicFollower(
+			Statement st) {
+		Statement current = st;
+		while (current instanceof NoOp) {
+			Collection<Statement> followers = followersOf(current);
+			if (followers.isEmpty() || followers.size() > 1)
+				// we reached the end or we have more than one follower
+				return null;
+			current = followers.iterator().next();
+		}
+
+		return current;
+	}
+
+	private void shiftVariableScopes(
+			Statement node) {
+		Collection<VariableTableEntry> starting = descriptor.getVariables()
+				.stream()
+				.filter(v -> v.getScopeStart() == node)
+				.collect(Collectors.toList());
+		Collection<VariableTableEntry> ending = descriptor.getVariables()
+				.stream()
+				.filter(v -> v.getScopeEnd() == node)
+				.collect(Collectors.toList());
+		if (ending.isEmpty() && starting.isEmpty())
+			return;
+
+		Collection<Statement> predecessors = predecessorsOf(node);
+		Collection<Statement> followers = followersOf(node);
+
+		if (predecessors.isEmpty() && followers.isEmpty()) {
+			LOG.warn(
+					"Simplifying the only statement of '{}': all variables will be made visible for the entire cfg",
+					this);
+			starting.forEach(v -> v.setScopeStart(null));
+			ending.forEach(v -> v.setScopeEnd(null));
+			return;
+		}
+
+		String format = "Simplifying the scope-{} statement of a variable with {} "
+				+ "is not supported: {} will be made visible {} of '"
+				+ this
+				+ "'";
+		if (!starting.isEmpty())
+			if (predecessors.isEmpty()) {
+				// no predecessors: move the starting scope forward
+				Statement follow;
+				if (followers.size() > 1) {
+					LOG.warn(format, "starting", "no predecessors and multiple followers", starting, "from the start");
+					follow = null;
+				} else
+					follow = followers.iterator().next();
+				starting.forEach(v -> v.setScopeStart(follow));
+			} else {
+				// move the starting scope backward
+				Statement pred;
+				if (predecessors.size() > 1) {
+					LOG.warn(format, "starting", "multiple predecessors", starting, "from the start");
+					pred = null;
+				} else
+					pred = predecessors.iterator().next();
+				starting.forEach(v -> v.setScopeStart(pred));
+			}
+
+		if (!ending.isEmpty())
+			if (followers.isEmpty()) {
+				// no followers: move the ending scope backward
+				Statement pred;
+				if (predecessors.size() > 1) {
+					LOG.warn(format, "ending", "no followers and multiple predecessors", ending, "until the end");
+					pred = null;
+				} else
+					pred = predecessors.iterator().next();
+				ending.forEach(v -> v.setScopeEnd(pred));
+			} else {
+				// move the ending scope forward
+				Statement follow;
+				if (followers.size() > 1) {
+					LOG.warn(format, "ending", "multiple followers", ending, "until the end");
+					follow = null;
+				} else
+					follow = followers.iterator().next();
+				ending.forEach(v -> v.setScopeEnd(follow));
+			}
 	}
 
 	/**
@@ -261,8 +424,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * invoked cfgs, while {@code ws} is used as working set for the statements
 	 * to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param entryState      the entry states to apply to each
 	 *                            {@link Statement} returned by
 	 *                            {@link #getEntrypoints()}
@@ -286,9 +451,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A>> AnalyzedCFG<A> fixpoint(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
 			ScopeId id)
@@ -307,8 +472,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param entrypoints     the collection of {@link Statement}s that to use
 	 *                            as a starting point of the computation (that
 	 *                            must be nodes of this cfg)
@@ -334,10 +501,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A>> AnalyzedCFG<A> fixpoint(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
 			Collection<Statement> entrypoints,
 			AnalysisState<A> entryState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
 			ScopeId id)
@@ -356,8 +523,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param singleton       an instance of the {@link AnalysisState}
 	 *                            containing the abstract state of the analysis
 	 *                            to run, used to retrieve top and bottom values
@@ -385,10 +554,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A>> AnalyzedCFG<A> fixpoint(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> fixpoint(
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> startingPoints,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
 			ScopeId id)
@@ -397,16 +566,20 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		// descending one: the latter will need full results to start applying
 		// glbs/narrowings from a post-fixpoint
 		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
-		Fixpoint<CFG, Statement, Edge, CompoundState<A>> fix = isOptimized
-				? new OptimizedFixpoint<>(this, false, conf.hotspots)
-				: new Fixpoint<>(this, false);
-		AscendingFixpoint<A> asc = new AscendingFixpoint<>(this, interprocedural, conf);
+		Fixpoint<CFG,
+				Statement,
+				Edge,
+				CompoundState<A>> fix = isOptimized
+						? new OptimizedFixpoint<>(this, false, conf.hotspots)
+						: new Fixpoint<>(this, false);
+		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, interprocedural, conf);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
-		startingPoints.forEach((
-				st,
-				state) -> starting.put(st, CompoundState.of(state, bot)));
+		startingPoints.forEach(
+				(
+						st,
+						state) -> starting.put(st, CompoundState.of(state, bot)));
 		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
 
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
@@ -416,11 +589,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		Map<Statement, CompoundState<A>> descending;
 		switch (conf.descendingPhaseType) {
 		case GLB:
-			DescendingGLBFixpoint<A> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
+			DescendingGLBFixpoint<A, D> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
 			descending = fix.fixpoint(starting, ws, dg, ascending);
 			break;
 		case NARROWING:
-			DescendingNarrowingFixpoint<A> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
+			DescendingNarrowingFixpoint<A, D> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
 			descending = fix.fixpoint(starting, ws, dn, ascending);
 			break;
 		case NONE:
@@ -433,11 +606,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		return flatten(conf.optimize, singleton, startingPoints, interprocedural, id, descending);
 	}
 
-	private <A extends AbstractState<A>> AnalyzedCFG<A> flatten(
+	private <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> flatten(
 			boolean isOptimized,
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> startingPoints,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			ScopeId id,
 			Map<Statement, CompoundState<A>> fixpointResults) {
 		Map<Statement, AnalysisState<A>> finalResults = new HashMap<>(fixpointResults.size());
@@ -448,19 +621,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		}
 
 		return isOptimized
-				? new OptimizedAnalyzedCFG<A>(
-						this,
-						id,
-						singleton,
-						startingPoints,
-						finalResults,
-						interprocedural)
-				: new AnalyzedCFG<>(
-						this,
-						id,
-						singleton,
-						startingPoints,
-						finalResults);
+				? new OptimizedAnalyzedCFG<>(this, id, singleton, startingPoints, finalResults, interprocedural)
+				: new AnalyzedCFG<>(this, id, singleton, startingPoints, finalResults);
 	}
 
 	/**
@@ -473,8 +635,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param exitState       the exit states to apply to each {@link Statement}
 	 *                            returned by {@link #getAllExitpoints()}
 	 * @param interprocedural the interprocedural analysis that can be queried
@@ -497,9 +661,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A>> AnalyzedCFG<A> backwardFixpoint(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
 			AnalysisState<A> exitState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
 			ScopeId id)
@@ -518,8 +682,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * will be invoked to get the approximation of all invoked cfgs, while
 	 * {@code ws} is used as working set for the statements to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param exitpoints      the collection of {@link Statement}s that to use
 	 *                            as a starting point of the computation (that
 	 *                            must be nodes of this cfg)
@@ -545,10 +711,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A>> AnalyzedCFG<A> backwardFixpoint(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
 			Collection<Statement> exitpoints,
 			AnalysisState<A> exitState,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
 			ScopeId id)
@@ -567,8 +733,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * invoked to get the approximation of all invoked cfgs, while {@code ws} is
 	 * used as working set for the statements to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
 	 * @param singleton       an instance of the {@link AnalysisState}
 	 *                            containing the abstract state of the analysis
 	 *                            to run, used to retrieve top and bottom values
@@ -596,10 +764,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A>> AnalyzedCFG<A> backwardFixpoint(
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> backwardFixpoint(
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> startingPoints,
-			InterproceduralAnalysis<A> interprocedural,
+			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
 			ScopeId id)
@@ -608,16 +776,19 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		// descending one: the latter will need full results to start applying
 		// glbs/narrowings from a post-fixpoint
 		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
-		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = isOptimized
-				? new OptimizedBackwardFixpoint<>(this, false, conf.hotspots)
-				: new BackwardFixpoint<>(this, false);
-		BackwardAscendingFixpoint<A> asc = new BackwardAscendingFixpoint<>(this, interprocedural, conf);
+		BackwardFixpoint<CFG,
+				Statement,
+				Edge,
+				CompoundState<A>> fix = isOptimized ? new OptimizedBackwardFixpoint<>(this, false, conf.hotspots)
+						: new BackwardFixpoint<>(this, false);
+		BackwardAscendingFixpoint<A, D> asc = new BackwardAscendingFixpoint<>(this, interprocedural, conf);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
-		startingPoints.forEach((
-				st,
-				state) -> starting.put(st, CompoundState.of(state, bot)));
+		startingPoints.forEach(
+				(
+						st,
+						state) -> starting.put(st, CompoundState.of(state, bot)));
 		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
 
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
@@ -628,11 +799,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		Map<Statement, CompoundState<A>> descending;
 		switch (conf.descendingPhaseType) {
 		case GLB:
-			DescendingGLBFixpoint<A> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
+			DescendingGLBFixpoint<A, D> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
 			descending = fix.fixpoint(starting, ws, dg, ascending);
 			break;
 		case NARROWING:
-			DescendingNarrowingFixpoint<A> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
+			DescendingNarrowingFixpoint<A, D> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
 			descending = fix.fixpoint(starting, ws, dn, ascending);
 			break;
 		case NONE:
@@ -649,117 +820,6 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	public SerializableGraph toSerializableGraph(
 			BiFunction<CFG, Statement, SerializableValue> descriptionGenerator) {
 		return SerializableCFG.fromCFG(this, descriptionGenerator);
-	}
-
-	@Override
-	public void preSimplify(
-			Statement node) {
-		shiftVariableScopes(node);
-		shiftControlFlowStructuresEnd(node);
-	}
-
-	private void shiftControlFlowStructuresEnd(
-			Statement node) {
-		Collection<Statement> followers = followersOf(node);
-
-		Statement candidate;
-		for (ControlFlowStructure cfs : cfStructs)
-			if (node == cfs.getFirstFollower())
-				if (followers.isEmpty())
-					cfs.setFirstFollower(null);
-				else if (followers.size() == 1)
-					if (!((candidate = followers.iterator().next()) instanceof NoOp))
-						cfs.setFirstFollower(candidate);
-					else
-						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
-				else {
-					LOG.warn(
-							"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
-							node);
-					cfs.setFirstFollower(null);
-				}
-	}
-
-	private Statement firstNonNoOpDeterministicFollower(
-			Statement st) {
-		Statement current = st;
-		while (current instanceof NoOp) {
-			Collection<Statement> followers = followersOf(current);
-			if (followers.isEmpty() || followers.size() > 1)
-				// we reached the end or we have more than one follower
-				return null;
-			current = followers.iterator().next();
-		}
-
-		return current;
-	}
-
-	private void shiftVariableScopes(
-			Statement node) {
-		Collection<
-				VariableTableEntry> starting = descriptor.getVariables().stream().filter(v -> v.getScopeStart() == node)
-						.collect(Collectors.toList());
-		Collection<VariableTableEntry> ending = descriptor.getVariables().stream().filter(v -> v.getScopeEnd() == node)
-				.collect(Collectors.toList());
-		if (ending.isEmpty() && starting.isEmpty())
-			return;
-
-		Collection<Statement> predecessors = predecessorsOf(node);
-		Collection<Statement> followers = followersOf(node);
-
-		if (predecessors.isEmpty() && followers.isEmpty()) {
-			LOG.warn("Simplifying the only statement of '{}': all variables will be made visible for the entire cfg",
-					this);
-			starting.forEach(v -> v.setScopeStart(null));
-			ending.forEach(v -> v.setScopeEnd(null));
-			return;
-		}
-
-		String format = "Simplifying the scope-{} statement of a variable with {} "
-				+ "is not supported: {} will be made visible {} of '" + this + "'";
-		if (!starting.isEmpty())
-			if (predecessors.isEmpty()) {
-				// no predecessors: move the starting scope forward
-				Statement follow;
-				if (followers.size() > 1) {
-					LOG.warn(format, "starting", "no predecessors and multiple followers", starting,
-							"from the start");
-					follow = null;
-				} else
-					follow = followers.iterator().next();
-				starting.forEach(v -> v.setScopeStart(follow));
-			} else {
-				// move the starting scope backward
-				Statement pred;
-				if (predecessors.size() > 1) {
-					LOG.warn(format, "starting", "multiple predecessors", starting, "from the start");
-					pred = null;
-				} else
-					pred = predecessors.iterator().next();
-				starting.forEach(v -> v.setScopeStart(pred));
-			}
-
-		if (!ending.isEmpty())
-			if (followers.isEmpty()) {
-				// no followers: move the ending scope backward
-				Statement pred;
-				if (predecessors.size() > 1) {
-					LOG.warn(format, "ending", "no followers and multiple predecessors", ending,
-							"until the end");
-					pred = null;
-				} else
-					pred = predecessors.iterator().next();
-				ending.forEach(v -> v.setScopeEnd(pred));
-			} else {
-				// move the ending scope forward
-				Statement follow;
-				if (followers.size() > 1) {
-					LOG.warn(format, "ending", "multiple followers", ending, "until the end");
-					follow = null;
-				} else
-					follow = followers.iterator().next();
-				ending.forEach(v -> v.setScopeEnd(follow));
-			}
 	}
 
 	/**
@@ -787,6 +847,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			public CodeLocation getLocation() {
 				return SyntheticLocation.INSTANCE;
 			}
+
 		};
 	}
 
@@ -805,28 +866,34 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * </ul>
 	 */
 	@Override
-	public void validate() throws ProgramValidationException {
+	public void validate()
+			throws ProgramValidationException {
 		try {
 			list.validate(entrypoints);
 		} catch (ProgramValidationException e) {
 			throw new ProgramValidationException("The matrix behind " + this + " is invalid", e);
 		}
 
-		for (ControlFlowStructure struct : cfStructs) {
+		for (ControlFlowStructure struct : descriptor.getControlFlowStructures()) {
 			for (Statement st : struct.allStatements())
 				// we tolerate null values only if its the follower
-				if ((st == null && struct.getFirstFollower() != null)
-						|| (st != null && !list.containsNode(st)))
-					throw new ProgramValidationException(this + " has a conditional structure (" + struct
-							+ ") that contains a node not in the graph: " + st);
+				if ((st == null && struct.getFirstFollower() != null) || (st != null && !list.containsNode(st)))
+					throw new ProgramValidationException(
+							this
+									+ " has a conditional structure ("
+									+ struct
+									+ ") that contains a node not in the graph: "
+									+ st);
 		}
 
 		for (Statement st : list) {
 			// no outgoing edges in execution-terminating statements
+			// unless they are error-handling ones
 			Collection<Edge> outs = list.getOutgoingEdges(st);
 			if (st.stopsExecution() && !outs.isEmpty())
-				throw new ProgramValidationException(
-						this + " contains an execution-stopping node that has followers: " + st);
+				if (!st.throwsError() || outs.stream().anyMatch(Predicate.not(ErrorEdge.class::isInstance)))
+					throw new ProgramValidationException(
+							this + " contains an execution-stopping node that has followers: " + st);
 			if (outs.isEmpty() && !st.stopsExecution() && !st.throwsError())
 				throw new ProgramValidationException(
 						this + " contains a node with no followers that is not execution-stopping: " + st);
@@ -834,8 +901,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 		// all entrypoints should be within the cfg
 		if (!list.getNodes().containsAll(entrypoints))
-			throw new ProgramValidationException(this + " has entrypoints that are not part of the graph: "
-					+ new HashSet<>(entrypoints).retainAll(list.getNodes()));
+			throw new ProgramValidationException(
+					this
+							+ " has entrypoints that are not part of the graph: "
+							+ new HashSet<>(entrypoints).retainAll(list.getNodes()));
 	}
 
 	private Collection<ControlFlowStructure> getControlFlowsContaining(
@@ -856,7 +925,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			st = ((Expression) st).getRootStatement();
 
 		Collection<ControlFlowStructure> res = new LinkedList<>();
-		for (ControlFlowStructure cf : cfStructs)
+		for (ControlFlowStructure cf : descriptor.getControlFlowStructures())
 			if (cf.contains(st))
 				res.add(cf);
 
@@ -931,7 +1000,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 */
 	public Collection<Statement> getGuards(
 			ProgramPoint pp) {
-		return getControlFlowsContaining(pp).stream().map(ControlFlowStructure::getCondition)
+		return getControlFlowsContaining(pp).stream()
+				.map(ControlFlowStructure::getCondition)
 				.collect(Collectors.toList());
 	}
 
@@ -950,8 +1020,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 */
 	public Collection<Statement> getLoopGuards(
 			ProgramPoint pp) {
-		return getControlFlowsContaining(pp).stream().filter(Loop.class::isInstance)
-				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
+		return getControlFlowsContaining(pp).stream()
+				.filter(Loop.class::isInstance)
+				.map(ControlFlowStructure::getCondition)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -970,8 +1042,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 */
 	public Collection<Statement> getIfThenElseGuards(
 			ProgramPoint pp) {
-		return getControlFlowsContaining(pp).stream().filter(IfThenElse.class::isInstance)
-				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
+		return getControlFlowsContaining(pp).stream()
+				.filter(IfThenElse.class::isInstance)
+				.map(ControlFlowStructure::getCondition)
+				.collect(Collectors.toList());
 	}
 
 	private Statement getRecent(
@@ -996,8 +1070,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				}
 
 		if (min == -1)
-			throw new IllegalStateException("Conditional flow structures containing " + pp
-					+ " could not evaluate the distance from the root of the structure to the statement itself");
+			throw new IllegalStateException(
+					"Conditional flow structures containing "
+							+ pp
+							+ " could not evaluate the distance from the root of the structure to the statement itself");
 
 		return recent;
 	}
@@ -1067,7 +1143,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 */
 	public ControlFlowStructure getControlFlowStructureOf(
 			ProgramPoint guard) {
-		for (ControlFlowStructure struct : getControlFlowStructures())
+		for (ControlFlowStructure struct : descriptor.getControlFlowStructures())
 			if (struct.getCondition().equals(guard))
 				return struct;
 		return null;
@@ -1083,7 +1159,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	public Collection<Statement> getCycleEntries() {
 		Collection<Statement> result = new HashSet<>();
 
-		for (ControlFlowStructure cfs : cfStructs)
+		for (ControlFlowStructure cfs : descriptor.getControlFlowStructures())
 			if (cfs instanceof Loop)
 				result.add(cfs.getCondition());
 
@@ -1104,8 +1180,26 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	public void computeBasicBlocks() {
 		Collection<Statement> leaders = new HashSet<>();
 		leaders.addAll(entrypoints);
-		for (ControlFlowStructure struct : cfStructs)
+		for (ControlFlowStructure struct : descriptor.getControlFlowStructures())
 			leaders.addAll(struct.getTargetedStatements());
+		for (ProtectionBlock block : descriptor.getProtectionBlocks()) {
+			leaders.add(block.getTryBlock().getStart());
+			if (block.getElseBlock() != null)
+				leaders.add(block.getElseBlock().getStart());
+			if (block.getFinallyBlock() != null) {
+				leaders.add(block.getFinallyBlock().getStart());
+				Collection<Statement> body = block.getFinallyBlock().getBody();
+				for (Edge e : getEdges())
+					if (body.contains(e.getSource()) && !body.contains(e.getDestination()))
+						leaders.add(e.getDestination());
+			}
+			for (CatchBlock cb : block.getCatchBlocks())
+				leaders.add(cb.getBody().getStart());
+			if (block.getClosing() != null)
+				// TODO not having the appropriate statements here might be a
+				// problem
+				leaders.add(block.getClosing());
+		}
 
 		basicBlocks = new IdentityHashMap<>(leaders.size());
 		for (Statement leader : leaders) {
@@ -1148,4 +1242,44 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			throw new IllegalStateException("Cannot retrieve basic blocks before computing them");
 		return basicBlocks;
 	}
+
+	/**
+	 * Yields the protection blocks that enclose the given program point. The
+	 * blocks are returned in order, from the inner-most to the outer-most.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return the protection blocks
+	 */
+	public List<ProtectionBlock> getProtectionsOf(
+			ProgramPoint pp) {
+		if (!(pp instanceof Statement))
+			// synthetic pp
+			return List.of();
+
+		Statement st = (Statement) pp;
+		List<ProtectionBlock> blocks = new LinkedList<>();
+
+		for (ProtectionBlock pb : getDescriptor().getProtectionBlocks())
+			if (pb.getTryBlock().getBody().contains(st))
+				blocks.add(pb);
+
+		if (blocks.isEmpty())
+			return List.of();
+		if (blocks.size() == 1)
+			return blocks;
+
+		blocks.sort((
+				b1,
+				b2) -> {
+			if (b1 == b2)
+				return 0;
+			if (b2.getTryBlock().getBody().containsAll(b1.getFullBody(true)))
+				return -1;
+			return 1;
+		});
+
+		return blocks;
+	}
+
 }

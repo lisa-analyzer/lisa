@@ -17,7 +17,9 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SetRepresentation extends StructuredRepresentation {
+public class SetRepresentation
+		extends
+		StructuredRepresentation {
 
 	/**
 	 * The elements of contained in this set.
@@ -63,7 +65,7 @@ public class SetRepresentation extends StructuredRepresentation {
 	}
 
 	@Override
-	public SerializableValue toSerializableValue() {
+	public SerializableArray toSerializableValue() {
 		List<SerializableValue> values = new ArrayList<>(elements.size());
 		for (StructuredRepresentation e : elements)
 			values.add(e.toSerializableValue());
@@ -82,8 +84,7 @@ public class SetRepresentation extends StructuredRepresentation {
 		StringBuilder sb = new StringBuilder("(");
 		boolean first = true;
 		for (String e : strs) {
-			sb.append(first ? "\n" : ",\n")
-					.append(StringUtilities.indent(e.toString(), "  ", 1));
+			sb.append(first ? "\n" : ",\n").append(StringUtilities.indent(e.toString(), "  ", 1));
 			first = false;
 		}
 		sb.append("\n)");
@@ -115,4 +116,5 @@ public class SetRepresentation extends StructuredRepresentation {
 			return false;
 		return true;
 	}
+
 }

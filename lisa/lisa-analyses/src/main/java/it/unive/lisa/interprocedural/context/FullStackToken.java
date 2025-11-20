@@ -12,7 +12,9 @@ import java.util.List;
  * will thus never merge results for of different calls due to matching
  * contexts.
  */
-public class FullStackToken implements ContextSensitivityToken {
+public class FullStackToken
+		implements
+		ContextSensitivityToken {
 
 	private static final FullStackToken SINGLETON = new FullStackToken();
 
@@ -43,8 +45,10 @@ public class FullStackToken implements ContextSensitivityToken {
 	public String toString() {
 		if (calls.isEmpty())
 			return "<empty>";
-		return "[" + calls.stream().map(call -> call.getLocation())
-				.collect(new CollectionUtilities.StringCollector<>(", ")) + "]";
+		return "["
+				+ calls.stream().map(call -> call.getLocation())
+						.collect(new CollectionUtilities.StringCollector<>(", "))
+				+ "]";
 	}
 
 	@Override
@@ -96,4 +100,5 @@ public class FullStackToken implements ContextSensitivityToken {
 			CFGCall c) {
 		return new FullStackToken(this, c);
 	}
+
 }

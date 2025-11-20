@@ -1,14 +1,19 @@
 package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.symbolic.CFGThrow;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.type.Type;
 
 /**
  * A statement that raises an error, stopping the execution of the current CFG
@@ -16,7 +21,12 @@ import it.unive.lisa.symbolic.value.Skip;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Throw extends UnaryStatement {
+public class Throw
+		extends
+		UnaryStatement
+		implements
+		MetaVariableCreator,
+		YieldsValue {
 
 	/**
 	 * Builds the throw, raising {@code expression} as error, happening at the
@@ -51,13 +61,39 @@ public class Throw extends UnaryStatement {
 	}
 
 	@Override
-	public <A extends AbstractState<A>> AnalysisState<A> fwdUnarySemantics(
-			InterproceduralAnalysis<A> interprocedural,
+	public final Identifier getMetaVariable() {
+		return new CFGThrow(getCFG(), getSubExpression().getStaticType(), getLocation());
+	}
+
+	@Override
+	public Expression yieldedValue() {
+		return getSubExpression();
+	}
+
+	@Override
+	public Statement withValue(
+			Expression value) {
+		return new Throw(getCFG(), getLocation(), value);
+	}
+
+	@Override
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
+			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		// only temporary
-		return state.smallStepSemantics(new Skip(getLocation()), this);
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		Identifier meta = getMetaVariable();
+		AnalysisState<A> sem = analysis.assign(state, meta, expr, this);
+		// we forget the meta variables before moving as the operation only
+		// affects the normal execution, and won't be effective after we
+		// move the state to the exception
+		sem = sem.forgetIdentifiers(getSubExpression().getMetaVariables(), this);
+		Type thrown = expr.getStaticType().isReferenceType() ? expr.getStaticType().asReferenceType().getInnerType()
+				: expr.getStaticType();
+		AnalysisState<A> moved = analysis.moveExecutionToError(sem, new Error(thrown, this));
+		return moved;
 	}
+
 }

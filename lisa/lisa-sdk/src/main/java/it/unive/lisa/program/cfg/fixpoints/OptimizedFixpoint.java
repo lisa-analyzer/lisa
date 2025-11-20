@@ -2,7 +2,8 @@ package it.unive.lisa.program.cfg.fixpoints;
 
 import static java.lang.String.format;
 
-import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.program.cfg.CFG;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A fixpoint algorithm for a {@link Graph}, parametric to the
@@ -31,10 +33,10 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
+ * @param <A> the type of {@link AbstractDomain} contained into the analysis
  *                state
  */
-public class OptimizedFixpoint<A extends AbstractState<A>>
+public class OptimizedFixpoint<A extends AbstractLattice<A>>
 		extends
 		Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
 
@@ -66,8 +68,7 @@ public class OptimizedFixpoint<A extends AbstractState<A>>
 			FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
 			Map<Statement, CompoundState<A>> initialResult)
 			throws FixpointException {
-		Map<Statement, CompoundState<A>> result = initialResult == null
-				? new HashMap<>(graph.getNodesCount())
+		Map<Statement, CompoundState<A>> result = initialResult == null ? new HashMap<>(graph.getNodesCount())
 				: new HashMap<>(initialResult);
 
 		Map<Statement, Statement[]> bbs = graph.getBasicBlocks();
@@ -90,11 +91,7 @@ public class OptimizedFixpoint<A extends AbstractState<A>>
 			if (bb == null)
 				throw new FixpointException("'" + current + "' is not the leader of a basic block of '" + graph + "'");
 
-			CompoundState<A> entrystate = getEntryState(
-					current,
-					startingPoints.get(current),
-					implementation,
-					result);
+			CompoundState<A> entrystate = getEntryState(current, startingPoints.get(current), implementation, result);
 			if (entrystate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 
@@ -149,11 +146,10 @@ public class OptimizedFixpoint<A extends AbstractState<A>>
 			Statement[] bb)
 			throws FixpointException {
 		StatementStore<A> emptyIntermediate = entrystate.intermediateStates.bottom();
-		CompoundState<A> newApprox = CompoundState.of(
-				entrystate.postState.bottom(),
-				emptyIntermediate);
+		CompoundState<A> newApprox = CompoundState.of(entrystate.postState.bottom(), emptyIntermediate);
 		CompoundState<A> entry = entrystate;
-		for (Statement cursor : bb)
+		for (int i = 0; i < bb.length; i++) {
+			Statement cursor = bb[i];
 			try {
 				newApprox = implementation.semantics(cursor, entry);
 
@@ -164,15 +160,25 @@ public class OptimizedFixpoint<A extends AbstractState<A>>
 					if (intermediate.getKey().stopsExecution()
 							|| (hotspots != null && hotspots.test(intermediate.getKey())))
 						result.put(intermediate.getKey(), CompoundState.of(intermediate.getValue(), emptyIntermediate));
-				if (cursor != bb[bb.length - 1] && (cursor.stopsExecution()
-						|| (hotspots != null && hotspots.test(cursor))))
+				if (cursor != bb[bb.length - 1]
+						&& (cursor.stopsExecution() || (hotspots != null && hotspots.test(cursor))))
 					result.put(cursor, CompoundState.of(newApprox.postState, emptyIntermediate));
 
-				entry = newApprox;
+				if (i < bb.length - 1) {
+					Collection<Edge> edges = graph.getEdgesConnecting(cursor, bb[i + 1]);
+					if (edges.size() != 1)
+						throw new FixpointException("More than one edge connecting " + cursor + " and " + bb[i + 1]
+								+ " in the basic block: " + StringUtils.join(edges, ", "));
+					// we still invoke traverse as there is variable scoping
+					// handling happening there
+					entry = implementation.traverse(edges.iterator().next(), newApprox);
+				}
 			} catch (Exception e) {
 				throw new FixpointException(format(ERROR, "computing semantics", cursor, graph), e);
 			}
+		}
 
 		return CompoundState.of(newApprox.postState, emptyIntermediate);
 	}
+
 }
