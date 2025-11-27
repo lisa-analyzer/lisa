@@ -533,8 +533,7 @@ public class CodeMemberDescriptor
 			return false;
 
 		for (int i = 0; i < formals.length; i++)
-			if (!formals[i].getStaticType().canBeAssignedTo(reference.formals[i].getStaticType()))
-				// not sure if this is generic enough
+			if (!formals[i].getStaticType().equals(reference.formals[i].getStaticType()))
 				return false;
 
 		return true;

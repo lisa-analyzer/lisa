@@ -11,17 +11,18 @@ import java.util.Set;
 /**
  * Given three expressions that all evaluate to string values, a
  * {@link TernaryExpression} using this operator computes a new string
- * corresponding to the first argument's string where all occurrences of the
- * second argument's string have been replaced with the third argument's
+ * corresponding to the first argument's string where the first occurrence of
+ * the second argument's string has been replaced with the third argument's
  * string.<br>
  * Note that:
  * <ul>
  * <li>if the first argument's string is empty, the empty string is
  * returned</li>
  * <li>if the second argument's string is empty, the third argument's string is
- * added in any position of the first argument's string</li>
- * <li>if the third argument's string is empty, occurrences of the second
- * argument's string are simply removed from the first argument's string</li>
+ * added at the beginning of the first argument's string</li>
+ * <li>if the third argument's string is empty, the first occurrence of the
+ * second argument's string is simply removed from the first argument's
+ * string</li>
  * </ul>
  * <br>
  * First argument expression type: {@link StringType}<br>

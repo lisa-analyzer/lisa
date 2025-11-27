@@ -1,6 +1,7 @@
 package it.unive.lisa;
 
 import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.CharacterType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
@@ -94,25 +95,9 @@ public class TestTypeSystem
 			}
 
 			@Override
-			public boolean is8Bits() {
-				return false;
+			public int getNBits() {
+				return 0;
 			}
-
-			@Override
-			public boolean is64Bits() {
-				return false;
-			}
-
-			@Override
-			public boolean is32Bits() {
-				return false;
-			}
-
-			@Override
-			public boolean is16Bits() {
-				return false;
-			}
-
 		};
 	}
 
@@ -120,6 +105,38 @@ public class TestTypeSystem
 	public boolean canBeReferenced(
 			Type type) {
 		return false;
+	}
+
+	@Override
+	public int distanceBetweenTypes(
+			Type first,
+			Type second) {
+		return 0;
+	}
+
+	@Override
+	public CharacterType getCharacterType() {
+		return new CharacterType() {
+
+			@Override
+			public Type commonSupertype(
+					Type other) {
+				return null;
+			}
+
+			@Override
+			public boolean canBeAssignedTo(
+					Type other) {
+				return false;
+			}
+
+			@Override
+			public Set<Type> allInstances(
+					TypeSystem types) {
+				return null;
+			}
+
+		};
 	}
 
 }

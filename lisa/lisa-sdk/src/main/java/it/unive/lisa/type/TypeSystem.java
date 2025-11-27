@@ -186,6 +186,13 @@ public abstract class TypeSystem {
 	public abstract NumericType getIntegerType();
 
 	/**
+	 * Yields the {@link CharacterType} of this type system.
+	 * 
+	 * @return the character type
+	 */
+	public abstract CharacterType getCharacterType();
+
+	/**
 	 * Yields whether or not values of the given type can be referenced, that
 	 * is, if a pointer to memory locations containing them can be created. If
 	 * this method returns {@code true}, LiSA will automatically register a
@@ -217,5 +224,25 @@ public abstract class TypeSystem {
 
 		return new ReferenceType(type);
 	}
+
+	/**
+	 * Computes the "distance" between two types. Distance reflects type
+	 * compatibility: zero means an exact match, higher values mean
+	 * progressively less exact matches, and negative means incomparable. This
+	 * is useful when deciding e.g., which overloaded method to pick, when
+	 * multiple are applicable. The magnitude of the distance is
+	 * implementation-defined, but should reflect the number of "conversion
+	 * steps" needed to convert one type into the other, giving more weight to
+	 * more complex conversions (e.g., boxing/unboxing operations should have
+	 * more weight than basic type conversion).
+	 * 
+	 * @param first  the first type
+	 * @param second the second type
+	 * 
+	 * @return the computed distance, or {@code -1} if incomparable
+	 */
+	public abstract int distanceBetweenTypes(
+			Type first,
+			Type second);
 
 }

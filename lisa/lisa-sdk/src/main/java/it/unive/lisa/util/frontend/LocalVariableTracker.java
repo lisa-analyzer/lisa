@@ -11,6 +11,7 @@ import it.unive.lisa.type.Untyped;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -186,6 +187,18 @@ public class LocalVariableTracker {
 	 */
 	public Map<String, LocalVariable> getLatestScope() {
 		return new HashMap<>(latestScope);
+	}
+
+	public LocalVariable getLocalVariable(
+			String identifier) {
+		ListIterator<Map<String, LocalVariable>> iterator = visibleIds.listIterator(visibleIds.size());
+		while (iterator.hasPrevious()) {
+			Map<String, LocalVariable> scope = iterator.previous();
+			LocalVariable id = scope.get(identifier);
+			if (id != null)
+				return id;
+		}
+		return null;
 	}
 
 }

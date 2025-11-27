@@ -44,6 +44,27 @@ public interface Type {
 
 	/**
 	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link CharacterType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isCharacterType() {
+		return this instanceof CharacterType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link CharacterType}, only if
+	 * {@link #isCharacterType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
+	 * 
+	 * @return this type casted as {@link CharacterType}, or {@code null}
+	 */
+	default CharacterType asCharacterType() {
+		return isCharacterType() ? (CharacterType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
 	 * {@link BooleanType}.
 	 * 
 	 * @return {@code true} if that condition holds

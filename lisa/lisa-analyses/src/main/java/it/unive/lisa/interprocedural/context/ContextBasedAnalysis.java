@@ -482,7 +482,12 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					throw new SemanticException("Exception during the interprocedural analysis", e);
 				}
 
-				exitState = fixpointResult.getExitState();
+				exitState = initialState.bottom();
+				for (Statement exit : fixpointResult.getAllExitpoints())
+					exitState = exitState.lub(
+							analysis.removeCaughtErrors(
+									fixpointResult.getAnalysisStateAfter(exit),
+									exit));
 			}
 
 			// save the resulting state
