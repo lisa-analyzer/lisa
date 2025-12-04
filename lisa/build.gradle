@@ -7,6 +7,62 @@
  * to help others understand the purpose of that task. 
  */
 
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    
+    dependencies {
+        classpath 'org.ajoberstar.grgit:grgit-core:4.1.1'
+        classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
+        
+        classpath 'com.diffplug.spotless:spotless-plugin-gradle:7.0.3'
+    }
+}
+
+// ------------------------------------------------------------------------------
+// The following is to fix Buildship not generating .classpath properly
+// ------------------------------------------------------------------------------
+plugins {
+    id 'java'
+    id 'eclipse'
+}
+
+// Create empty source sets so Buildship generates .classpath properly
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java' // empty folder; harmless
+        }
+        resources {
+            srcDir 'src/main/resources' // empty folder; harmless
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java' // empty folder; harmless
+        }
+    }
+}
+
+// Ensure root project produces no artifacts
+tasks.withType(Jar).configureEach { enabled = false }
+tasks.withType(JavaCompile).configureEach { enabled = false }
+
+// Required for Buildship / JDTLS to generate .project and .classpath
+eclipse {
+    project {
+        name = rootProject.name
+    }
+}
+
+// ------------------------------------------------------------------------------
+// End of Buildship fix
+// ------------------------------------------------------------------------------
+
 allprojects {
     repositories {
         mavenCentral()
@@ -43,22 +99,6 @@ allprojects {
     }
 }
 
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    
-    dependencies {
-        classpath 'org.ajoberstar.grgit:grgit-core:4.1.1'
-        classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
-        
-        classpath 'com.diffplug.spotless:spotless-plugin-gradle:7.0.3'
-    }
-}
-
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'eclipse'
@@ -73,3 +113,4 @@ subprojects {
     apply from: "${project.rootDir}/java.gradle"
     apply from: "${project.rootDir}/publishing.gradle"
 }
+
