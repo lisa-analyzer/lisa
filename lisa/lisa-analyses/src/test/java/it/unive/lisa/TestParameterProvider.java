@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ProgramState;
+import it.unive.lisa.analysis.Reachability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
@@ -54,6 +55,7 @@ import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
@@ -656,6 +658,8 @@ public class TestParameterProvider {
 			return (R) SingleValueLattice.SINGLETON;
 		if (clazz == SimpleAbstractDomain.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
+		if (clazz == ReachLattice.ReachabilityStatus.class)
+			return (R) ReachLattice.ReachabilityStatus.POSSIBLY_REACHABLE;
 		return null;
 	}
 
@@ -713,13 +717,15 @@ public class TestParameterProvider {
 			return (R) new Interval();
 		if (param == SmashedSumStringDomain.class || param == WholeValueStringDomain.class)
 			return (R) new Prefix();
+		if (param == ReachLattice.class)
+			return (R) new ReachLattice();
 
 		// domains
 		if (param == Bricks.class)
 			return (R) new Bricks();
 		if (param == BoundedStringSet.class)
 			return (R) new BoundedStringSet();
-		if (root == TracePartitioning.class || root == Analysis.class)
+		if (root == TracePartitioning.class || root == Analysis.class || root == Reachability.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
 
 		throw new UnsupportedOperationException(

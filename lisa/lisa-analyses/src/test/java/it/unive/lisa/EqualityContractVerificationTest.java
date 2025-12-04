@@ -39,6 +39,7 @@ import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
+import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
 import it.unive.lisa.lattices.numeric.NonRedundantIntervalSet;
@@ -542,6 +543,7 @@ public class EqualityContractVerificationTest {
 			else if (subject == SingleHeapLattice.class
 					|| subject == SingleTypeLattice.class
 					|| subject == SingleValueLattice.class
+					|| subject == ReachLattice.ReachabilityStatus.class
 					|| subject == Monolith.class)
 				verify(subject, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
 			else if (subject != AnalyzedCFG.class

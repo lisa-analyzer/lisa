@@ -107,6 +107,10 @@ public interface NumericType
 	 */
 	default boolean sameNumericTypes(
 			NumericType other) {
+		if (isIntegral() != other.isIntegral())
+			return false;
+		if (isUnsigned() != other.isUnsigned())
+			return false;
 		return getNBits() == other.getNBits();
 	}
 

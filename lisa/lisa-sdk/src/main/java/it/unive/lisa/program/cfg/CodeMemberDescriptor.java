@@ -513,6 +513,7 @@ public class CodeMemberDescriptor
 	 * to match, it is required that:
 	 * <ul>
 	 * <li>both signatures have the same name</li>
+	 * <li>both signatures describe instance cfgs, or none of them does</li>
 	 * <li>both signatures have the same number of formals</li>
 	 * <li>for each formal, the static type of the matching signature (i.e.,
 	 * {@code this}) can be assigned to the static type of the matched signature
@@ -529,11 +530,14 @@ public class CodeMemberDescriptor
 		if (!name.equals(reference.name))
 			return false;
 
+		if (instance != reference.instance)
+			return false;
+
 		if (formals.length != reference.formals.length)
 			return false;
 
 		for (int i = 0; i < formals.length; i++)
-			if (!formals[i].getStaticType().equals(reference.formals[i].getStaticType()))
+			if (!formals[i].getStaticType().canBeAssignedTo(reference.formals[i].getStaticType()))
 				return false;
 
 		return true;

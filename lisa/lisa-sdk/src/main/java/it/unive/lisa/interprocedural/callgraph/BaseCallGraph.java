@@ -344,17 +344,19 @@ public abstract class BaseCallGraph
 		ParameterMatchingStrategy matching = call.getProgram().getFeatures().getMatchingStrategy();
 
 		Collection<Unit> possibleUnits = new HashSet<>();
-		if (call.getQualifier() == null)
-			possibleUnits = call.getProgram().getUnits();
-		else {
+		if (call.getQualifier() == null) {
+			possibleUnits.addAll(call.getProgram().getUnits());
+			possibleUnits.add(call.getProgram());
+		} else {
 			Unit cu = call.getProgram().getUnit(call.getQualifier());
 			if (cu != null)
 				possibleUnits.add(cu);
-			else {
+			else if (call.getQualifier().equals(call.getProgram().getName())) {
+				possibleUnits.add(call.getProgram());
+			} else {
 				Aliases qAlias = aliasing.getState(new QualifierSymbol(call.getQualifier()));
 				if (qAlias.isEmpty())
-					throw new CallResolutionException(
-							call + " has a qualifier that does not correspond to a unit or an aliased unit");
+					return;
 				for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class)) {
 					cu = call.getProgram().getUnit(alias.getQualifier());
 					if (cu != null)
@@ -384,8 +386,11 @@ public abstract class BaseCallGraph
 						bestTargets.clear();
 						bestNatives.clear();
 						addTarget(cm, bestTargets, bestNatives);
-						if (distance == 0)
+						if (distance == 0) {
+							targets.addAll(bestTargets);
+							natives.addAll(bestNatives);
 							continue unitLoop;
+						}
 					} else if (distance == lowestDistance)
 						throw new CallResolutionException(
 								"Multiple call targets for call " + call + " found in " + targetUnit +
@@ -406,17 +411,17 @@ public abstract class BaseCallGraph
 							bestTargets.clear();
 							bestNatives.clear();
 							addTarget(cm, bestTargets, bestNatives);
-							if (distance == 0)
+							if (distance == 0) {
+								targets.addAll(bestTargets);
+								natives.addAll(bestNatives);
 								continue unitLoop;
+							}
 						} else if (distance == lowestDistance)
 							throw new CallResolutionException(
 									"Multiple call targets for call " + call + " found in " + targetUnit +
 											": " + bestTargets + " " + bestNatives);
 					}
 				}
-
-			targets.addAll(bestTargets);
-			natives.addAll(bestNatives);
 		}
 	}
 
