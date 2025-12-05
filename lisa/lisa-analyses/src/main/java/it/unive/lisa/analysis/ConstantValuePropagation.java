@@ -97,6 +97,12 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
 import java.util.Set;
 
+/**
+ * A non-relational value domain tracking {@link ConstantValue}s of variables
+ * for numeric, character, string and boolean values.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ConstantValuePropagation
 		implements
 		BaseNonRelationalValueDomain<ConstantValue> {

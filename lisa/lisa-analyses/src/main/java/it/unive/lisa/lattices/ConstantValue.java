@@ -6,17 +6,31 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
+/**
+ * An abstract constant value, that can either represent a specific constant
+ * (e.g., an integer or a string) or the unknown constant (i.e., the top
+ * element).
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ConstantValue
 		implements
 		BaseLattice<ConstantValue> {
 
+	/** The top constant value. */
 	public static final ConstantValue TOP = new ConstantValue(false);
+
+	/** The bottom constant value. */
 	public static final ConstantValue BOTTOM = new ConstantValue(true);
 
 	private final boolean isBottom;
 
 	private final Object value;
 
+	/**
+	 * Builds the abstract value for the unknown constant (i.e. the top
+	 * element).
+	 */
 	public ConstantValue() {
 		this(null, false);
 	}
@@ -43,15 +57,37 @@ public class ConstantValue
 		this(value, false);
 	}
 
+	/**
+	 * Yields the constant value.
+	 * 
+	 * @return the constant value
+	 */
 	public Object getValue() {
 		return value;
 	}
 
+	/**
+	 * Checks whether the constant value is of the given type.
+	 * 
+	 * @param <T>  the target type
+	 * @param type the class of the target type
+	 * 
+	 * @return {@code true} if the constant value is of the given type,
+	 *             {@code false} otherwise
+	 */
 	public <T> boolean is(
 			Class<T> type) {
 		return type.isInstance(getValue());
 	}
 
+	/**
+	 * Casts the constant value to the given type.
+	 * 
+	 * @param <T>  the target type
+	 * @param type the class of the target type
+	 * 
+	 * @return the constant value casted to the given type
+	 */
 	public <T> T as(
 			Class<T> type) {
 		return type.cast(getValue());
@@ -142,8 +178,18 @@ public class ConstantValue
 		return true;
 	}
 
+	/**
+	 * Checks whether the constant value is numeric.
+	 * 
+	 * @return {@code true} if the constant value is numeric, {@code false}
+	 *             otherwise
+	 */
 	public boolean isNumeric() {
-		return value instanceof Long || value instanceof Integer || value instanceof Double || value instanceof Float
-				|| value instanceof Short;
+		return value instanceof Long
+				|| value instanceof Integer
+				|| value instanceof Short
+				|| value instanceof Byte
+				|| value instanceof Double
+				|| value instanceof Float;
 	}
 }

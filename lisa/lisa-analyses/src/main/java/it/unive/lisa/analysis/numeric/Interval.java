@@ -531,7 +531,7 @@ public class Interval
 		return IntInterval.BOTTOM;
 	}
 
-	public static IntInterval trigonometric(
+	private static IntInterval trigonometric(
 			IntInterval i,
 			Function<Double, Double> function,
 			double period) {

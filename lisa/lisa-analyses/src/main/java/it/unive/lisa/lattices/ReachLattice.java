@@ -12,16 +12,38 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Map;
 import java.util.function.Predicate;
 
+/**
+ * A lattice tracking the reachability of the current program point as a
+ * {@link ReachabilityStatus}. To allow merging of reachability coming from
+ * different branches, this class extends {@link FunctionalLattice} to map
+ * program points to their reachability status. Elements in the mapping are
+ * guards traversed during the analysis and whose body has not been fully
+ * analyzed yet. Each guard is mapped to a {@link ReachabilityStatus}
+ * representing the reachability of the <b>first</b> time the guard was reached.
+ * This allows to properly restore the reachability after loops.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ReachLattice
 		extends
 		FunctionalLattice<ReachLattice, ProgramPoint, ReachLattice.ReachabilityStatus>
 		implements
 		AbstractLattice<ReachLattice> {
 
+	/**
+	 * Builds the top reachability lattice, whose state is
+	 * {@link ReachabilityStatus#POSSIBLY_REACHABLE}.
+	 */
 	public ReachLattice() {
 		super(ReachabilityStatus.POSSIBLY_REACHABLE);
 	}
 
+	/**
+	 * Builds the reachability lattice.
+	 *
+	 * @param lattice  the reachability status
+	 * @param function the mapping from program points to their reachability
+	 */
 	public ReachLattice(
 			ReachabilityStatus lattice,
 			Map<ProgramPoint, ReachabilityStatus> function) {
@@ -102,12 +124,36 @@ public class ReachLattice
 		return new ReachLattice(lattice, function);
 	}
 
+	/**
+	 * A lattice representing the reachability status of an execution state.
+	 * This lattice has three elements, organized vertically:<br>
+	 * <br>
+	 * 
+	 * <pre>
+	 * POSSIBLY_REACHABLE
+	 * 		|
+	 * 		REACHABLE
+	 * 		|
+	 * 		UNREACHABLE
+	 * </pre>
+	 * 
+	 * <br>
+	 * where {@link #REACHABLE} means that the execution state is definitely
+	 * reachable, {@link #UNREACHABLE} means that the execution state is
+	 * definitely unreachable, and {@link #POSSIBLY_REACHABLE} means that the
+	 * execution state may or may not be reachable.
+	 *
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	public static class ReachabilityStatus
 			implements
 			BaseLattice<ReachabilityStatus> {
 
+		/** The reachable execution state. */
 		public static final ReachabilityStatus REACHABLE = new ReachabilityStatus();
+		/** The possibly reachable execution state. */
 		public static final ReachabilityStatus POSSIBLY_REACHABLE = new ReachabilityStatus();
+		/** The unreachable execution state. */
 		public static final ReachabilityStatus UNREACHABLE = new ReachabilityStatus();
 
 		private ReachabilityStatus() {
@@ -170,18 +216,36 @@ public class ReachLattice
 		return this;
 	}
 
+	/**
+	 * Yields a copy of this lattice, modified to have its reachability set to
+	 * reachable.
+	 * 
+	 * @return the modified copy
+	 */
 	public ReachLattice setToReachable() {
 		if (lattice == ReachabilityStatus.REACHABLE)
 			return this;
 		return new ReachLattice(ReachabilityStatus.REACHABLE, function);
 	}
 
+	/**
+	 * Yields a copy of this lattice, modified to have its reachability set to
+	 * unreachable.
+	 * 
+	 * @return the modified copy
+	 */
 	public ReachLattice setToUnreachable() {
 		if (lattice == ReachabilityStatus.UNREACHABLE)
 			return this;
 		return new ReachLattice(ReachabilityStatus.UNREACHABLE, function);
 	}
 
+	/**
+	 * Yields a copy of this lattice, modified to have its reachability set to
+	 * possibly reachable.
+	 * 
+	 * @return the modified copy
+	 */
 	public ReachLattice setToPossiblyReachable() {
 		if (lattice == ReachabilityStatus.POSSIBLY_REACHABLE)
 			return this;

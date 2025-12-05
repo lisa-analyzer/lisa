@@ -15,6 +15,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * An abstract domain that tracks the reachability of program points, exploiting
+ * an underlying abstract domain to (i) compute approximations of the program
+ * state, and (ii) deducing which branches are taken after traversing a guard.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <D> the type of the underlying domain
+ * @param <A> the type of lattice tracked by the underlying domain
+ */
 public class Reachability<D extends AbstractDomain<A>,
 		A extends AbstractLattice<A>>
 		implements
@@ -22,6 +32,11 @@ public class Reachability<D extends AbstractDomain<A>,
 
 	private final D domain;
 
+	/**
+	 * Builds the reachability domain.
+	 *
+	 * @param domain the underlying domain
+	 */
 	public Reachability(
 			D domain) {
 		this.domain = domain;

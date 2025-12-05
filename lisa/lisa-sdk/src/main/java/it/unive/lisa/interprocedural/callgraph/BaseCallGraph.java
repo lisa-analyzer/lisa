@@ -310,7 +310,7 @@ public abstract class BaseCallGraph
 	 * {@link #isATarget(UnresolvedCall, SymbolAliasing, CodeMember, Set[], boolean)}
 	 * decides if it is a suitable target for the call.</li>
 	 * <li>For each suitable target, its "distance" from a perfect match using
-	 * {@link ParameterMatchingStrategy#distanceFromPerfectTarget(UnresolvedCall, CodeMember, boolean)}.</li>
+	 * {@link ParameterMatchingStrategy#distanceFromPerfectTarget(UnresolvedCall, Set[], CodeMember, boolean)}.</li>
 	 * <li>The best candidate (lowest distance) for each possible unit is
 	 * selected as a possible call target. If a distance of 0 (perfect match) is
 	 * found, resolution for that unit stops immediately.</li>
@@ -440,7 +440,7 @@ public abstract class BaseCallGraph
 	 * {@link #isATarget(UnresolvedCall, SymbolAliasing, CodeMember, Set[], boolean)}
 	 * decides if it is a suitable target for the call.</li>
 	 * <li>For each suitable target, its "distance" from a perfect match using
-	 * {@link ParameterMatchingStrategy#distanceFromPerfectTarget(UnresolvedCall, CodeMember, boolean)}.</li>
+	 * {@link ParameterMatchingStrategy#distanceFromPerfectTarget(UnresolvedCall, Set[], CodeMember, boolean)}.</li>
 	 * <li>The best candidate (lowest distance) in the hierarchy is selected as
 	 * a possible call target. If a distance of 0 (perfect match) is found,
 	 * resolution for that receiver type stops immediately.</li>

@@ -189,6 +189,15 @@ public class LocalVariableTracker {
 		return new HashMap<>(latestScope);
 	}
 
+	/**
+	 * Yields the local variable with the given identifier, if any, visible in
+	 * the current scope or in any of the outer scopes.
+	 * 
+	 * @param identifier the identifier of the variable to retrieve
+	 * 
+	 * @return the local variable with the given identifier, or {@code null} if
+	 *             not found
+	 */
 	public LocalVariable getLocalVariable(
 			String identifier) {
 		ListIterator<Map<String, LocalVariable>> iterator = visibleIds.listIterator(visibleIds.size());

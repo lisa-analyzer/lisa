@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value.operator.ternary;
 
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
