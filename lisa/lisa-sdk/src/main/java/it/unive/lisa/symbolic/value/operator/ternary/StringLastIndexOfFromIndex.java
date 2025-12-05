@@ -8,11 +8,11 @@ import it.unive.lisa.type.TypeSystem;
 import java.util.Set;
 
 /**
- * Given two expressions that both evaluate to string values, and a thrid one
+ * Given two expressions that both evaluate to string values, and a third one
  * evaluating to an integer value, a {@link TernaryExpression} using this
  * operator computes the starting index <i>of the last occurrence</i> of the
  * string from the second argument inside the one of the first argument,
- * searching backwards from the poisition defined by the thrid argument and
+ * searching backwards from the position defined by the third argument and
  * producing {@code -1} if no occurrence can be found.<br>
  * <br>
  * First argument expression type: {@link StringType}<br>

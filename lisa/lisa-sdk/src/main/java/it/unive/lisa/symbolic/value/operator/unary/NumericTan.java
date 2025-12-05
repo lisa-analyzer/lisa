@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 /**
  * Given an expression that evaluates to a numeric value, a
- * {@link UnaryExpression} using this operator computes the tanget of that
+ * {@link UnaryExpression} using this operator computes the tangent of that
  * value.<br>
  * <br>
  * Argument expression type: {@link NumericType}<br>

@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * Given an expression that evaluates to a character value, a
  * {@link UnaryExpression} using this operator yields {@code true} if the
- * character can be used to start an identifer, {@code false} otherwise.<br>
+ * character can be used to start an identifier, {@code false} otherwise.<br>
  * <br>
  * Argument expression type: {@link CharacterType}<br>
  * Computed expression type: {@link BooleanType}

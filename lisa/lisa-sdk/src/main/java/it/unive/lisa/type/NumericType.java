@@ -42,7 +42,7 @@ public interface NumericType
 	 *             representation; {@code false} otherwise
 	 */
 	default boolean is16Bits() {
-		return getNBits() == 8;
+		return getNBits() == 16;
 	}
 
 	/**
@@ -53,7 +53,7 @@ public interface NumericType
 	 *             representation; {@code false} otherwise
 	 */
 	default boolean is32Bits() {
-		return getNBits() == 8;
+		return getNBits() == 32;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public interface NumericType
 	 *             representation; {@code false} otherwise
 	 */
 	default boolean is64Bits() {
-		return getNBits() == 8;
+		return getNBits() == 64;
 	}
 
 	/**

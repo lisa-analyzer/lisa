@@ -568,7 +568,7 @@ public class ConstantValuePropagation
 				rVal = (int) ((Character) rVal).charValue();
 
 			if (lVal instanceof Number || rVal instanceof Number)
-				return new ConstantValue(Math.max(((Number) lVal).doubleValue(), ((Number) rVal).doubleValue()));
+				return new ConstantValue(Math.min(((Number) lVal).doubleValue(), ((Number) rVal).doubleValue()));
 		}
 
 		if (operator instanceof NumericAtan2) {
@@ -867,12 +867,6 @@ public class ConstantValuePropagation
 			return lv.startsWith(rv) ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
 		}
 
-		if (operator instanceof StringEqualsIgnoreCase) {
-			String lv = ((String) left.getValue());
-			String rv = ((String) right.getValue());
-			return lv.equalsIgnoreCase(rv) ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
-		}
-
 		if (operator instanceof ComparisonEq) {
 			Object lVal = left.getValue();
 			Object rVal = right.getValue();
@@ -993,24 +987,6 @@ public class ConstantValuePropagation
 			else
 				return ((Number) lVal).intValue() >= ((Number) rVal).intValue() ? Satisfiability.SATISFIED
 						: Satisfiability.NOT_SATISFIED;
-		}
-
-		if (operator instanceof StringStartsWith) {
-			String lv = ((String) left.getValue());
-			String rv = ((String) right.getValue());
-			return lv.startsWith(rv) ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
-		}
-
-		if (operator instanceof StringEndsWith) {
-			String lv = ((String) left.getValue());
-			String rv = ((String) right.getValue());
-			return lv.endsWith(rv) ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
-		}
-
-		if (operator instanceof StringMatches) {
-			String lv = ((String) left.getValue());
-			String rv = ((String) right.getValue());
-			return lv.matches(rv) ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
 		}
 
 		return BaseNonRelationalValueDomain.super.satisfiesBinaryExpression(expression, left, right, pp, oracle);

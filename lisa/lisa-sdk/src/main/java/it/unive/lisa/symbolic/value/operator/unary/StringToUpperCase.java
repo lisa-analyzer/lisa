@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * Given an expression that evaluates to a string value, a
  * {@link UnaryExpression} using this operator converts the string to have all
- * characters in lowercase.<br>
+ * characters in uppercase.<br>
  * <br>
  * Argument expression type: {@link StringType}<br>
  * Computed expression type: {@link StringType} (integral)

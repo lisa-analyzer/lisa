@@ -111,16 +111,18 @@ public class Interval
 		if (operator instanceof NumericTan)
 			return trigonometric(arg, Math::tan, Math.PI);
 
-		Double l, h;
+		double l, h;
 		try {
 			l = arg.getLow().toDouble();
 		} catch (MathNumberConversionException e) {
-			l = null;
+			// any value here is fine: usages are guarded by infinity checks
+			l = Double.NaN;
 		}
 		try {
 			h = arg.getHigh().toDouble();
 		} catch (MathNumberConversionException e) {
-			h = null;
+			// any value here is fine: usages are guarded by infinity checks
+			h = Double.NaN;
 		}
 
 		if (operator instanceof NumericAsin)

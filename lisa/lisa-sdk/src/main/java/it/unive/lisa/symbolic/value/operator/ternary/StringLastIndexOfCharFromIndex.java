@@ -13,7 +13,7 @@ import java.util.Set;
  * character, and one that evaluates to an integer, a {@link TernaryExpression}
  * using this operator computes the index <i>of the last occurrence</i> of the
  * second argument inside the string of the first argument, searching backwards
- * fromt the position of the third argument and producing {@code -1} if no
+ * from the position of the third argument and producing {@code -1} if no
  * occurrence can be found.<br>
  * <br>
  * First argument expression type: {@link StringType}<br>

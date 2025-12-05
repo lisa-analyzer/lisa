@@ -44,7 +44,7 @@ public class CharacterToUpperCase
 			Set<Type> argument) {
 		if (argument.stream().noneMatch(Type::isCharacterType))
 			return Collections.emptySet();
-		return Collections.singleton(types.getBooleanType());
+		return Collections.singleton(types.getCharacterType());
 	}
 
 }
