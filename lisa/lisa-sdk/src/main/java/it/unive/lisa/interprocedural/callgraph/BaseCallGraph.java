@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -295,20 +297,41 @@ public abstract class BaseCallGraph
 	}
 
 	/**
-	 * Resolves the given call as regular (non-instance) call.
-	 * 
-	 * @param call     the call to resolve
-	 * @param types    the runtime types of the parameters of the call
-	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link CFG}s targeted by the
-	 *                     call
-	 * @param natives  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link NativeCFG}s targeted
-	 *                     by the call
-	 * @param aliasing the symbol aliasing information
-	 * 
-	 * @throws CallResolutionException if something goes wrong while resolving
-	 *                                     the call
+	 * Resolves a non-instance call to its possible targets.
+	 * <p>
+	 * The resolution process works as follows:
+	 * <ol>
+	 * <li>Looks up the {@link Unit}s corresponding to the call's qualifier,
+	 * considering also possible aliases.</li>
+	 * <li>If one such unit is a {@link CompilationUnit}, its hierarchy is
+	 * traversed as well using the program's
+	 * {@link HierarchyTraversalStrategy}.</li>
+	 * <li>For each candidate {@link CodeMember},
+	 * {@link #isATarget(UnresolvedCall, SymbolAliasing, CodeMember, Set[], boolean)}
+	 * decides if it is a suitable target for the call.</li>
+	 * <li>For each suitable target, its "distance" from a perfect match using
+	 * {@link ParameterMatchingStrategy#distanceFromPerfectTarget(UnresolvedCall, Set[], CodeMember, boolean)}.</li>
+	 * <li>The best candidate (lowest distance) for each possible unit is
+	 * selected as a possible call target. If a distance of 0 (perfect match) is
+	 * found, resolution for that unit stops immediately.</li>
+	 * <li>If multiple candidates along the same unit have the same best
+	 * distance greater than 0, a {@link CallResolutionException} is thrown due
+	 * to ambiguity.</li>
+	 * <li>The best match of each possible unit is added to the
+	 * {@code targets}/{@code natives} collections.</li>
+	 * </ol>
+	 * </p>
+	 *
+	 * @param call     the unresolved call to resolve
+	 * @param types    the possible runtime types of the call's parameters
+	 * @param targets  the collection where resolved {@link CFG} targets will be
+	 *                     stored
+	 * @param natives  the collection where resolved {@link NativeCFG} targets
+	 *                     will be stored
+	 * @param aliasing aliasing information that may affect resolution
+	 *
+	 * @throws CallResolutionException if multiple equally suitable targets are
+	 *                                     found
 	 */
 	public void resolveNonInstance(
 			UnresolvedCall call,
@@ -317,25 +340,129 @@ public abstract class BaseCallGraph
 			Collection<NativeCFG> natives,
 			SymbolAliasing aliasing)
 			throws CallResolutionException {
-		for (CodeMember cm : app.getAllCodeCodeMembers())
-			checkMember(call, types, targets, natives, aliasing, cm, false);
+		HierarchyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
+		ParameterMatchingStrategy matching = call.getProgram().getFeatures().getMatchingStrategy();
+
+		Collection<Unit> possibleUnits = new HashSet<>();
+		if (call.getQualifier() == null) {
+			possibleUnits.addAll(call.getProgram().getUnits());
+			possibleUnits.add(call.getProgram());
+		} else {
+			Unit cu = call.getProgram().getUnit(call.getQualifier());
+			if (cu != null)
+				possibleUnits.add(cu);
+			else if (call.getQualifier().equals(call.getProgram().getName())) {
+				possibleUnits.add(call.getProgram());
+			} else {
+				Aliases qAlias = aliasing.getState(new QualifierSymbol(call.getQualifier()));
+				if (qAlias.isEmpty())
+					return;
+				for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class)) {
+					cu = call.getProgram().getUnit(alias.getQualifier());
+					if (cu != null)
+						possibleUnits.add(cu);
+				}
+			}
+		}
+
+		Set<Unit> seen = new HashSet<>();
+
+		unitLoop: for (Unit targetUnit : possibleUnits) {
+			int lowestDistance = Integer.MAX_VALUE;
+			Collection<CFG> bestTargets = new LinkedHashSet<>();
+			Collection<NativeCFG> bestNatives = new LinkedHashSet<>();
+
+			if (!(targetUnit instanceof CompilationUnit)) {
+				if (!seen.add(targetUnit))
+					continue;
+				for (CodeMember cm : targetUnit.getCodeMembers()) {
+					if (!isATarget(call, aliasing, cm, types, false))
+						continue;
+					int distance = matching.distanceFromPerfectTarget(call, types, cm, false);
+					if (distance < 0)
+						continue; // incomparable
+					if (distance < lowestDistance) {
+						lowestDistance = distance;
+						bestTargets.clear();
+						bestNatives.clear();
+						addTarget(cm, bestTargets, bestNatives);
+						if (distance == 0) {
+							targets.addAll(bestTargets);
+							natives.addAll(bestNatives);
+							continue unitLoop;
+						}
+					} else if (distance == lowestDistance)
+						throw new CallResolutionException(
+								"Multiple call targets for call " + call + " found in " + targetUnit +
+										": " + bestTargets + " " + bestNatives);
+				}
+			} else
+				for (CompilationUnit cu : strategy.traverse(call, (CompilationUnit) targetUnit)) {
+					if (!seen.add(cu))
+						continue;
+					for (CodeMember cm : cu.getCodeMembers()) {
+						if (!isATarget(call, aliasing, cm, types, false))
+							continue;
+						int distance = matching.distanceFromPerfectTarget(call, types, cm, false);
+						if (distance < 0)
+							continue; // incomparable
+						if (distance < lowestDistance) {
+							lowestDistance = distance;
+							bestTargets.clear();
+							bestNatives.clear();
+							addTarget(cm, bestTargets, bestNatives);
+							if (distance == 0) {
+								targets.addAll(bestTargets);
+								natives.addAll(bestNatives);
+								continue unitLoop;
+							}
+						} else if (distance == lowestDistance)
+							throw new CallResolutionException(
+									"Multiple call targets for call " + call + " found in " + targetUnit +
+											": " + bestTargets + " " + bestNatives);
+					}
+				}
+		}
 	}
 
 	/**
-	 * Resolves the given call as an instance call.
-	 * 
-	 * @param call     the call to resolve
-	 * @param types    the runtime types of the parameters of the call
-	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link CFG}s targeted by the
-	 *                     call
-	 * @param natives  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link NativeCFG}s targeted
-	 *                     by the call
-	 * @param aliasing the symbol aliasing information
-	 * 
-	 * @throws CallResolutionException if something goes wrong while resolving
-	 *                                     the call
+	 * Resolves an instance call to its possible targets. The resolution process
+	 * works as follows:
+	 * <ol>
+	 * <li>If the call does not have at least one parameter (the receiver), a
+	 * {@link CallResolutionException} is thrown.</li>
+	 * <li>The possible runtime {@link Type}s of the receiver expression are
+	 * computed, and only the ones corresponding to {@link CompilationUnit}s
+	 * (using {@link #getReceiverCompilationUnit(Type)}) are considered.</li>
+	 * <li>For each receiver type, the hierarchy of its unit is traversed using
+	 * the program's {@link HierarchyTraversalStrategy}.</li>
+	 * <li>For each candidate {@link CodeMember},
+	 * {@link #isATarget(UnresolvedCall, SymbolAliasing, CodeMember, Set[], boolean)}
+	 * decides if it is a suitable target for the call.</li>
+	 * <li>For each suitable target, its "distance" from a perfect match using
+	 * {@link ParameterMatchingStrategy#distanceFromPerfectTarget(UnresolvedCall, Set[], CodeMember, boolean)}.</li>
+	 * <li>The best candidate (lowest distance) in the hierarchy is selected as
+	 * a possible call target. If a distance of 0 (perfect match) is found,
+	 * resolution for that receiver type stops immediately.</li>
+	 * <li>If multiple candidates along the same hierarchy have the same best
+	 * distance greater than 0, a {@link CallResolutionException} is thrown due
+	 * to ambiguity.</li>
+	 * <li>The best match of each possible receiver type is added to the
+	 * {@code targets}/{@code natives} collections.</li>
+	 * </ol>
+	 *
+	 * @param call     the unresolved instance call to resolve
+	 * @param types    the possible runtime types of the call's parameters,
+	 *                     where {@code types[0]} corresponds to the receiver
+	 * @param targets  the collection where resolved {@link CFG} targets will be
+	 *                     stored
+	 * @param natives  the collection where resolved {@link NativeCFG} targets
+	 *                     will be stored
+	 * @param aliasing aliasing information that may affect resolution
+	 *
+	 * @throws CallResolutionException if the call has no receiver, or if
+	 *                                     multiple equally suitable targets are
+	 *                                     found
 	 */
 	public void resolveInstance(
 			UnresolvedCall call,
@@ -346,61 +473,87 @@ public abstract class BaseCallGraph
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
 			throw new CallResolutionException(
-					"An instance call should have at least one parameter to be used as the receiver of the call");
+					"An instance call should have at least one parameter as receiver");
 		Expression receiver = call.getParameters()[0];
+		HierarchyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
+		ParameterMatchingStrategy matching = call.getProgram().getFeatures().getMatchingStrategy();
+
 		for (Type recType : getPossibleTypesOfReceiver(receiver, types[0])) {
-			CompilationUnit unit;
-			if (recType.isUnitType())
-				unit = recType.asUnitType().getUnit();
-			else if (recType.isPointerType() && recType.asPointerType().getInnerType().isUnitType())
-				unit = recType.asPointerType().getInnerType().asUnitType().getUnit();
-			else
+			CompilationUnit unit = getReceiverCompilationUnit(recType);
+			if (unit == null)
 				continue;
 
 			Set<CompilationUnit> seen = new HashSet<>();
-			HierarchyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
+			Collection<CFG> bestTargets = new LinkedHashSet<>();
+			Collection<NativeCFG> bestNatives = new LinkedHashSet<>();
+			int lowestDistance = Integer.MAX_VALUE;
 
-			hierarchyLoop: for (CompilationUnit cu : strategy.traverse(call, unit))
-				if (seen.add(cu))
-					// we inspect only the ones of the current unit
-					for (CodeMember cm : cu.getInstanceCodeMembers(false))
-						if (checkMember(call, types, targets, natives, aliasing, cm, true))
-							// we found a target, we stop looking in
-							// superclasses
+			hierarchyLoop: for (CompilationUnit cu : strategy.traverse(call, unit)) {
+				if (!seen.add(cu))
+					continue;
+				for (CodeMember cm : cu.getInstanceCodeMembers(false)) {
+					if (!isATarget(call, aliasing, cm, types, true))
+						continue;
+					int distance = matching.distanceFromPerfectTarget(call, types, cm, true);
+					if (distance < 0)
+						continue; // incomparable
+					if (distance < lowestDistance) {
+						lowestDistance = distance;
+						bestTargets.clear();
+						bestNatives.clear();
+						addTarget(cm, bestTargets, bestNatives);
+						if (distance == 0)
 							break hierarchyLoop;
+					} else if (distance == lowestDistance)
+						// we allow only one target in each compilation unit
+						throw new CallResolutionException(
+								"Multiple call targets for call " + call + " found in " + unit +
+										": " + bestTargets + " " + bestNatives);
+				}
+			}
+
+			targets.addAll(bestTargets);
+			natives.addAll(bestNatives);
 		}
 	}
 
 	/**
-	 * Checks if the given code member {@code cm} is a candidate target for the
-	 * given call, and proceeds to add it to the set of targets if it is.
-	 * Aliasing information is used here to match code members that have been
-	 * aliased and that can be targeted by calls that refer to other names. Note
-	 * that {@link AbstractCodeMember}s are always discarded.
-	 * 
-	 * @param call     the call to match
-	 * @param types    the runtime types of the parameters of the call
-	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link CFG}s targeted by the
-	 *                     call
-	 * @param natives  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link NativeCFG}s targeted
-	 *                     by the call
-	 * @param aliasing the symbol aliasing information
-	 * @param cm       the code member to match
-	 * @param instance whether or not the only instance or non-instance members
-	 *                     should be matched
-	 * 
-	 * @return {@code true} if {@code cm} has been added to either
-	 *             {@code targets} or {@code natives}, {@code false} otherwise
+	 * Returns the {@link CompilationUnit} associated with a receiver type.
+	 * <p>
+	 * Supports both unit types and pointer-to-unit types.
+	 * </p>
+	 *
+	 * @param receiverType the type of the receiver
+	 *
+	 * @return the compilation unit of the receiver, or {@code null} if
+	 *             unavailable
 	 */
-	public boolean checkMember(
+	public CompilationUnit getReceiverCompilationUnit(
+			Type receiverType) {
+		if (receiverType.isUnitType())
+			return receiverType.asUnitType().getUnit();
+		if (receiverType.isPointerType() && receiverType.asPointerType().getInnerType().isUnitType())
+			return receiverType.asPointerType().getInnerType().asUnitType().getUnit();
+		return null;
+	}
+
+	/**
+	 * Checks whether a given code member is a valid target for a call.
+	 *
+	 * @param call     the unresolved call
+	 * @param aliasing aliasing information
+	 * @param cm       the candidate code member
+	 * @param types    the possible runtime types of the call's parameters
+	 * @param instance whether the call is an instance call
+	 *
+	 * @return {@code true} if the code member is a valid target, {@code false}
+	 *             otherwise
+	 */
+	public boolean isATarget(
 			UnresolvedCall call,
-			Set<Type>[] types,
-			Collection<CFG> targets,
-			Collection<NativeCFG> natives,
 			SymbolAliasing aliasing,
 			CodeMember cm,
+			Set<Type>[] types,
 			boolean instance) {
 		CodeMemberDescriptor descr = cm.getDescriptor();
 		if (instance != descr.isInstance() || cm instanceof AbstractCodeMember)
@@ -409,53 +562,72 @@ public abstract class BaseCallGraph
 		String qualifier = descr.getUnit().getName();
 		String name = descr.getName();
 
-		boolean add = false;
-		if (aliasing != null) {
-			Aliases nAlias = aliasing.getState(new NameSymbol(name));
-			Aliases qAlias = aliasing.getState(new QualifierSymbol(qualifier));
-			Aliases qnAlias = aliasing.getState(new QualifiedNameSymbol(qualifier, name));
+		boolean target = false;
+		if (aliasing != null)
+			if (matchesAlias(call, aliasing, name, qualifier))
+				target = true;
 
-			// we first check the qualified name, then the qualifier and the
-			// name individually
-			if (!qnAlias.isEmpty()) {
-				for (QualifiedNameSymbol alias : qnAlias.castElements(QualifiedNameSymbol.class))
-					if (matchCodeMemberName(call, alias.getQualifier(), alias.getName())) {
-						add = true;
-						break;
-					}
-			}
-
-			if (!add && !qAlias.isEmpty()) {
-				for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class))
-					if (matchCodeMemberName(call, alias.getQualifier(), name)) {
-						add = true;
-						break;
-					}
-			}
-
-			if (!add && !nAlias.isEmpty()) {
-				for (NameSymbol alias : nAlias.castElements(NameSymbol.class))
-					if (matchCodeMemberName(call, qualifier, alias.getName())) {
-						add = true;
-						break;
-					}
-			}
-		}
-
-		if (!add)
-			add = matchCodeMemberName(call, qualifier, name);
+		if (!target)
+			target = matchCodeMemberName(call, qualifier, name);
 
 		ParameterMatchingStrategy strategy = call.getProgram().getFeatures().getMatchingStrategy();
-		if (add)
-			if (strategy.matches(call, descr.getFormals(), call.getParameters(), types))
-				if (cm instanceof CFG)
-					targets.add((CFG) cm);
-				else
-					natives.add((NativeCFG) cm);
-			else
-				add = false;
+		return target && strategy.matches(call, descr.getFormals(), call.getParameters(), types);
+	}
 
-		return add;
+	/**
+	 * Checks whether the given call matches any known aliases for a member.
+	 *
+	 * @param call      the unresolved call
+	 * @param aliasing  aliasing information
+	 * @param name      the original method name
+	 * @param qualifier the original qualifier (class or namespace)
+	 *
+	 * @return {@code true} if the call matches an alias, {@code false}
+	 *             otherwise
+	 */
+	public boolean matchesAlias(
+			UnresolvedCall call,
+			SymbolAliasing aliasing,
+			String name,
+			String qualifier) {
+		Aliases nAlias = aliasing.getState(new NameSymbol(name));
+		Aliases qAlias = aliasing.getState(new QualifierSymbol(qualifier));
+		Aliases qnAlias = aliasing.getState(new QualifiedNameSymbol(qualifier, name));
+
+		if (!qnAlias.isEmpty())
+			for (QualifiedNameSymbol alias : qnAlias.castElements(QualifiedNameSymbol.class))
+				if (matchCodeMemberName(call, alias.getQualifier(), alias.getName()))
+					return true;
+
+		if (!qAlias.isEmpty())
+			for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class))
+				if (matchCodeMemberName(call, alias.getQualifier(), name))
+					return true;
+
+		if (!nAlias.isEmpty())
+			for (NameSymbol alias : nAlias.castElements(NameSymbol.class))
+				if (matchCodeMemberName(call, qualifier, alias.getName()))
+					return true;
+
+		return false;
+	}
+
+	/**
+	 * Adds a resolved code member to the appropriate collection based on
+	 * whether it is a {@link CFG} or a {@link NativeCFG}.
+	 *
+	 * @param cm            the code member
+	 * @param cfgTargets    the collection for CFG targets
+	 * @param nativeTargets the collection for native CFG targets
+	 */
+	public void addTarget(
+			CodeMember cm,
+			Collection<CFG> cfgTargets,
+			Collection<NativeCFG> nativeTargets) {
+		if (cm instanceof CFG)
+			cfgTargets.add((CFG) cm);
+		else
+			nativeTargets.add((NativeCFG) cm);
 	}
 
 	/**

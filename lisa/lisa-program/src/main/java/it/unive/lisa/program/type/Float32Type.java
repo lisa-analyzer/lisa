@@ -45,23 +45,8 @@ public class Float32Type
 	}
 
 	@Override
-	public boolean is8Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is16Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is32Bits() {
-		return true;
-	}
-
-	@Override
-	public boolean is64Bits() {
-		return false;
+	public int getNBits() {
+		return 32;
 	}
 
 	@Override

@@ -27,11 +27,30 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
+import it.unive.lisa.symbolic.value.operator.binary.NumericMax;
+import it.unive.lisa.symbolic.value.operator.binary.NumericMin;
+import it.unive.lisa.symbolic.value.operator.binary.ValueComparison;
+import it.unive.lisa.symbolic.value.operator.unary.NumericAbs;
+import it.unive.lisa.symbolic.value.operator.unary.NumericAcos;
+import it.unive.lisa.symbolic.value.operator.unary.NumericAsin;
+import it.unive.lisa.symbolic.value.operator.unary.NumericAtan;
+import it.unive.lisa.symbolic.value.operator.unary.NumericCos;
+import it.unive.lisa.symbolic.value.operator.unary.NumericExp;
+import it.unive.lisa.symbolic.value.operator.unary.NumericFloor;
+import it.unive.lisa.symbolic.value.operator.unary.NumericLog;
+import it.unive.lisa.symbolic.value.operator.unary.NumericLog10;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.symbolic.value.operator.unary.NumericRound;
+import it.unive.lisa.symbolic.value.operator.unary.NumericSin;
+import it.unive.lisa.symbolic.value.operator.unary.NumericSqrt;
+import it.unive.lisa.symbolic.value.operator.unary.NumericTan;
+import it.unive.lisa.symbolic.value.operator.unary.NumericToRadians;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
+import java.util.function.Function;
 
 /**
  * The overflow-insensitive interval abstract domain, approximating integer
@@ -81,10 +100,142 @@ public class Interval
 				return IntInterval.TOP;
 			else
 				return arg.mul(IntInterval.MINUS_ONE);
-		else if (operator == StringLength.INSTANCE)
+
+		if (operator == StringLength.INSTANCE)
 			return new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
-		else
-			return IntInterval.TOP;
+
+		if (operator instanceof NumericSin)
+			return trigonometric(arg, Math::sin, 4 * Math.PI);
+		if (operator instanceof NumericCos)
+			return trigonometric(arg, Math::cos, 4 * Math.PI);
+		if (operator instanceof NumericTan)
+			return trigonometric(arg, Math::tan, Math.PI);
+
+		double l, h;
+		try {
+			l = arg.getLow().toDouble();
+		} catch (MathNumberConversionException e) {
+			// any value here is fine: usages are guarded by infinity checks
+			l = Double.NaN;
+		}
+		try {
+			h = arg.getHigh().toDouble();
+		} catch (MathNumberConversionException e) {
+			// any value here is fine: usages are guarded by infinity checks
+			h = Double.NaN;
+		}
+
+		if (operator instanceof NumericAsin)
+			if (arg.lowIsMinusInfinity() || arg.getLow().compareTo(MathNumber.MINUS_ONE) <= 0)
+				if (arg.highIsPlusInfinity() || arg.getHigh().compareTo(MathNumber.ONE) >= 1)
+					return new IntInterval(new MathNumber(Math.asin(-1)), new MathNumber(Math.asin(1)));
+				else
+					return new IntInterval(new MathNumber(Math.asin(-1)), new MathNumber(Math.asin(h)));
+			else if (arg.highIsPlusInfinity() || arg.getHigh().compareTo(MathNumber.ONE) >= 1)
+				return new IntInterval(new MathNumber(Math.asin(l)), new MathNumber(Math.asin(1)));
+			else
+				return new IntInterval(new MathNumber(Math.asin(l)), new MathNumber(Math.asin(h)));
+
+		if (operator instanceof NumericAcos)
+			if (arg.lowIsMinusInfinity() || arg.getLow().compareTo(MathNumber.MINUS_ONE) <= 0)
+				if (arg.highIsPlusInfinity() || arg.getHigh().compareTo(MathNumber.ONE) >= 1)
+					return new IntInterval(new MathNumber(Math.acos(1)), new MathNumber(Math.acos(-1)));
+				else
+					return new IntInterval(new MathNumber(Math.acos(h)), new MathNumber(Math.acos(-1)));
+			else if (arg.highIsPlusInfinity() || arg.getHigh().compareTo(MathNumber.ONE) >= 1)
+				return new IntInterval(new MathNumber(Math.acos(1)), new MathNumber(Math.acos(l)));
+			else
+				return new IntInterval(new MathNumber(Math.acos(h)), new MathNumber(Math.acos(l)));
+
+		if (operator instanceof NumericAtan)
+			if (arg.lowIsMinusInfinity())
+				if (arg.highIsPlusInfinity())
+					return IntInterval.TOP;
+				else
+					return new IntInterval(MathNumber.MINUS_INFINITY, new MathNumber(Math.atan(h)));
+			else if (arg.highIsPlusInfinity())
+				return new IntInterval(new MathNumber(Math.atan(l)), MathNumber.PLUS_INFINITY);
+			else
+				return new IntInterval(new MathNumber(Math.atan(l)), new MathNumber(Math.atan(h)));
+
+		if (operator instanceof NumericToRadians)
+			if (arg.lowIsMinusInfinity())
+				if (arg.highIsPlusInfinity())
+					return IntInterval.TOP;
+				else
+					return new IntInterval(MathNumber.MINUS_INFINITY, new MathNumber(Math.toRadians(h)));
+			else if (arg.highIsPlusInfinity())
+				return new IntInterval(new MathNumber(Math.toRadians(l)), MathNumber.PLUS_INFINITY);
+			else
+				return new IntInterval(new MathNumber(Math.toRadians(l)), new MathNumber(Math.toRadians(h)));
+
+		if (operator instanceof NumericSqrt)
+			if (arg.lowIsMinusInfinity() || arg.getLow().compareTo(MathNumber.ZERO) <= 0)
+				if (arg.getHigh().compareTo(MathNumber.ZERO) <= 0)
+					return IntInterval.BOTTOM;
+				else if (arg.highIsPlusInfinity())
+					return new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+				else
+					return new IntInterval(MathNumber.ZERO, new MathNumber(Math.sqrt(h)));
+			else if (arg.highIsPlusInfinity())
+				return new IntInterval(new MathNumber(Math.sqrt(l)), MathNumber.PLUS_INFINITY);
+			else
+				return new IntInterval(new MathNumber(Math.sqrt(l)), new MathNumber(Math.sqrt(h)));
+
+		if (operator instanceof NumericLog)
+			if (arg.lowIsMinusInfinity() || arg.getLow().compareTo(MathNumber.ZERO) <= 0)
+				if (arg.getHigh().compareTo(MathNumber.ZERO) <= 0)
+					return IntInterval.BOTTOM;
+				else if (arg.highIsPlusInfinity())
+					return IntInterval.TOP;
+				else
+					return new IntInterval(MathNumber.MINUS_INFINITY, new MathNumber(Math.log(h)));
+			else if (arg.highIsPlusInfinity())
+				return new IntInterval(new MathNumber(Math.log(l)), MathNumber.PLUS_INFINITY);
+			else
+				return new IntInterval(new MathNumber(Math.log(l)), new MathNumber(Math.log(h)));
+
+		if (operator instanceof NumericLog10)
+			if (arg.lowIsMinusInfinity() || arg.getLow().compareTo(MathNumber.ZERO) <= 0)
+				if (arg.getHigh().compareTo(MathNumber.ZERO) <= 0)
+					return IntInterval.BOTTOM;
+				else if (arg.highIsPlusInfinity())
+					return IntInterval.TOP;
+				else
+					return new IntInterval(MathNumber.MINUS_INFINITY, new MathNumber(Math.log10(h)));
+			else if (arg.highIsPlusInfinity())
+				return new IntInterval(new MathNumber(Math.log10(l)), MathNumber.PLUS_INFINITY);
+			else
+				return new IntInterval(new MathNumber(Math.log10(l)), new MathNumber(Math.log10(h)));
+
+		if (operator instanceof NumericExp)
+			if (arg.lowIsMinusInfinity())
+				if (arg.highIsPlusInfinity())
+					return IntInterval.TOP;
+				else
+					return new IntInterval(MathNumber.MINUS_INFINITY, new MathNumber(Math.exp(h)));
+			else if (arg.highIsPlusInfinity())
+				return new IntInterval(new MathNumber(Math.exp(l)), MathNumber.PLUS_INFINITY);
+			else
+				return new IntInterval(new MathNumber(Math.exp(l)), new MathNumber(Math.exp(h)));
+
+		if (operator instanceof NumericFloor)
+			return arg;
+		if (operator instanceof NumericRound)
+			return arg;
+
+		if (operator instanceof NumericAbs)
+			if (arg.getLow().compareTo(MathNumber.ZERO) >= 0)
+				return arg;
+			else if (arg.getHigh().compareTo(MathNumber.ZERO) <= 0)
+				return new IntInterval(arg.getHigh().multiply(MathNumber.MINUS_ONE),
+						arg.getLow().multiply(MathNumber.MINUS_ONE));
+			else if (arg.getHigh().compareTo(arg.getLow().multiply(MathNumber.MINUS_ONE)) >= 0)
+				return new IntInterval(MathNumber.ZERO, arg.getHigh());
+			else
+				return new IntInterval(MathNumber.ZERO, arg.getLow().multiply(MathNumber.MINUS_ONE));
+
+		return IntInterval.TOP;
 	}
 
 	@Override
@@ -172,6 +323,16 @@ public class Interval
 							M.multiply(MathNumber.MINUS_ONE).add(MathNumber.ONE),
 							M.subtract(MathNumber.ONE));
 			}
+
+		if (operator instanceof NumericMax)
+			return new IntInterval(left.getLow().max(right.getLow()), left.getHigh().max(right.getHigh()));
+
+		if (operator instanceof NumericMin)
+			return new IntInterval(left.getLow().min(right.getLow()), left.getHigh().min(right.getHigh()));
+
+		if (operator instanceof ValueComparison)
+			return new IntInterval(-1, 1);
+
 		return IntInterval.TOP;
 	}
 
@@ -370,6 +531,72 @@ public class Interval
 	@Override
 	public IntInterval bottom() {
 		return IntInterval.BOTTOM;
+	}
+
+	private static IntInterval trigonometric(
+			IntInterval i,
+			Function<Double, Double> function,
+			double period) {
+		if (i.isBottom())
+			return i;
+
+		if (i.lowIsMinusInfinity() || i.highIsPlusInfinity())
+			// unbounded -> all values
+			return new IntInterval(-1, 1);
+
+		double a, b;
+		try {
+			a = i.getLow().toDouble();
+			b = i.getHigh().toDouble();
+		} catch (MathNumberConversionException e) {
+			// this should never happen as both bounds are finite
+			return IntInterval.BOTTOM;
+		}
+
+		if (b - a >= period)
+			// an interval wider than the period will include all values
+			return new IntInterval(-1, 1);
+
+		// these are the coefficients of the smaller and greater multiples of pi
+		// that are included in the interval
+		double pi = Math.PI;
+		int kStart = (int) Math.ceil(a / pi);
+		int kEnd = (int) Math.floor(b / pi);
+
+		double trig_a = function.apply(a);
+		double trig_b = function.apply(b);
+
+		// the min/max are the ones of the bounds, unless a local
+		// max/min exists inside the interval: this always correspond
+		// to a multiple of pi
+		double min = Math.min(trig_a, trig_b);
+		double max = Math.max(trig_a, trig_b);
+
+		// we iterate over the multiples of pi inside the interval
+		// to scan for local min/max
+		for (int k = kStart; k <= kEnd; ++k) {
+			double x = function.apply(k * pi);
+			min = Math.min(min, x);
+			max = Math.max(max, x);
+		}
+
+		return new IntInterval((int) Math.floor(min), (int) Math.ceil(max));
+	}
+
+	@Override
+	public ValueEnvironment<IntInterval> assume(
+			ValueEnvironment<IntInterval> environment,
+			ValueExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability sat = satisfies(environment, expression, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+		return SmashedSumIntDomain.super.assume(environment, expression, src, dest, oracle);
 	}
 
 }

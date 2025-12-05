@@ -16,13 +16,23 @@ public interface NumericType
 		Type {
 
 	/**
+	 * Returns the number of bits this numeric type is represented with in
+	 * memory.
+	 *
+	 * @return the number of bits
+	 */
+	int getNBits();
+
+	/**
 	 * Returns {@code true} if this numeric type follows a 8-bits format
 	 * representation.
 	 * 
 	 * @return {@code true} if this numeric type follows a 8-bits format
 	 *             representation; {@code false} otherwise
 	 */
-	boolean is8Bits();
+	default boolean is8Bits() {
+		return getNBits() == 8;
+	}
 
 	/**
 	 * Returns {@code true} if this numeric type follows a 16-bits format
@@ -31,7 +41,9 @@ public interface NumericType
 	 * @return {@code true} if this numeric type follows a 16-bits format
 	 *             representation; {@code false} otherwise
 	 */
-	boolean is16Bits();
+	default boolean is16Bits() {
+		return getNBits() == 16;
+	}
 
 	/**
 	 * Returns {@code true} if this numeric type follows a 32-bits format
@@ -40,7 +52,9 @@ public interface NumericType
 	 * @return {@code true} if this numeric type follows a 32-bits format
 	 *             representation; {@code false} otherwise
 	 */
-	boolean is32Bits();
+	default boolean is32Bits() {
+		return getNBits() == 32;
+	}
 
 	/**
 	 * Returns {@code true} if this numeric type follows a 64-bits format
@@ -49,7 +63,9 @@ public interface NumericType
 	 * @return {@code true} if this numeric type follows a 64-bits format
 	 *             representation; {@code false} otherwise
 	 */
-	boolean is64Bits();
+	default boolean is64Bits() {
+		return getNBits() == 64;
+	}
 
 	/**
 	 * Returns {@code true} if this numeric type is unsigned.
@@ -91,19 +107,11 @@ public interface NumericType
 	 */
 	default boolean sameNumericTypes(
 			NumericType other) {
-		if (is8Bits() != other.is8Bits())
-			return false;
-		if (is16Bits() != other.is16Bits())
-			return false;
-		if (is32Bits() != other.is32Bits())
-			return false;
-		if (is64Bits() != other.is64Bits())
-			return false;
 		if (isIntegral() != other.isIntegral())
 			return false;
 		if (isUnsigned() != other.isUnsigned())
 			return false;
-		return true;
+		return getNBits() == other.getNBits();
 	}
 
 	/**
@@ -118,22 +126,10 @@ public interface NumericType
 	 */
 	default NumericType supertype(
 			NumericType other) {
-		if (is8Bits() && (other.is16Bits() || other.is32Bits() || other.is64Bits()))
+		if (getNBits() < other.getNBits())
 			return other;
-		if (other.is8Bits() && (is16Bits() || is32Bits() || is64Bits()))
+		if (getNBits() > other.getNBits())
 			return this;
-
-		if (is16Bits() && (other.is32Bits() || other.is64Bits()))
-			return other;
-		if (other.is16Bits() && (is32Bits() || is64Bits()))
-			return this;
-
-		if (is32Bits() && other.is64Bits())
-			return other;
-		if (other.is32Bits() && is64Bits())
-			return this;
-
-		// both have same number of bits
 
 		if (isIntegral() && !other.isIntegral())
 			return other;
@@ -145,7 +141,7 @@ public interface NumericType
 		if (isSigned() && other.isUnsigned())
 			return this;
 
-		return this; // they are both same-bit signed non-integral types
+		return this; // they are both same-bit same-signed non-integral types
 	}
 
 	/**

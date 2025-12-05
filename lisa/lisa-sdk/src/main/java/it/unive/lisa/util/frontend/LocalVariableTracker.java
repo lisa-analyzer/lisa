@@ -11,6 +11,7 @@ import it.unive.lisa.type.Untyped;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -186,6 +187,27 @@ public class LocalVariableTracker {
 	 */
 	public Map<String, LocalVariable> getLatestScope() {
 		return new HashMap<>(latestScope);
+	}
+
+	/**
+	 * Yields the local variable with the given identifier, if any, visible in
+	 * the current scope or in any of the outer scopes.
+	 * 
+	 * @param identifier the identifier of the variable to retrieve
+	 * 
+	 * @return the local variable with the given identifier, or {@code null} if
+	 *             not found
+	 */
+	public LocalVariable getLocalVariable(
+			String identifier) {
+		ListIterator<Map<String, LocalVariable>> iterator = visibleIds.listIterator(visibleIds.size());
+		while (iterator.hasPrevious()) {
+			Map<String, LocalVariable> scope = iterator.previous();
+			LocalVariable id = scope.get(identifier);
+			if (id != null)
+				return id;
+		}
+		return null;
 	}
 
 }

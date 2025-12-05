@@ -45,23 +45,8 @@ public class UInt64Type
 	}
 
 	@Override
-	public boolean is8Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is16Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is32Bits() {
-		return false;
-	}
-
-	@Override
-	public boolean is64Bits() {
-		return true;
+	public int getNBits() {
+		return 64;
 	}
 
 	@Override
