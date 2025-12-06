@@ -15,15 +15,7 @@ import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.heap.NullConstant;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.PushInv;
-import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.*;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
@@ -376,6 +368,31 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			SemanticOracle oracle)
 			throws SemanticException {
 		return left.top();
+	}
+
+	@Override
+	default L visit(VariadicExpression expression, L[] values, Map<String, L[]> variadicValues, Object... params) throws SemanticException {
+		for (L val : values) {
+			if (val.isBottom()) {
+				return val;
+			}
+		}
+
+		for (Map.Entry<String, L[]> entry : variadicValues.entrySet()) {
+			for (L val : entry.getValue()) {
+				if (val.isBottom()) {
+					return val;
+				}
+			}
+		}
+
+		ProgramPoint pp = (ProgramPoint) params[1];
+		SemanticOracle oracle = (SemanticOracle) params[2];
+		return evalVariadicExpression(expression, values, variadicValues, pp, oracle);
+	}
+
+	default L evalVariadicExpression(VariadicExpression expression, L[] values, Map<String,L[]> variadicValues, ProgramPoint pp, SemanticOracle oracle) {
+		return top();
 	}
 
 	@Override

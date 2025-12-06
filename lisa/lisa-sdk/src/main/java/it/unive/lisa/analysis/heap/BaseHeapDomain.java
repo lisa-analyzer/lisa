@@ -7,18 +7,10 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.PushInv;
-import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import it.unive.lisa.symbolic.value.*;
+
+import java.util.*;
+
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -177,6 +169,26 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 					}
 			return new ExpressionSet(result);
 		}
+
+		@Override
+		public ExpressionSet visit(
+				VariadicExpression expression,
+				ExpressionSet[] values,
+				Map<String, ExpressionSet[]> variadicValues,
+				Object... params) throws SemanticException {
+
+				Set<SymbolicExpression> result = new HashSet<>();
+				for (SymbolicExpression[] e : new VariadicExpression.CartesianProduct(values)) {
+					VariadicExpression ve = new VariadicExpression(
+							expression.getStaticType(),
+							e,
+							expression.getVarargsIndex(),
+							expression.getOperator(),
+							expression.getCodeLocation());
+					result.add(ve);
+				}
+				return new ExpressionSet(result);
+			}
 
 		@Override
 		public ExpressionSet visit(

@@ -11,21 +11,11 @@ import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.heap.NullConstant;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.PushInv;
-import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.*;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+
+import java.util.*;
 
 /**
  * An implementation of the available expressions dataflow analysis, that
@@ -199,6 +189,11 @@ public class AvailableExpressions
 				Collection<Identifier> right,
 				Object... params)
 				throws SemanticException {
+			return result;
+		}
+
+		@Override
+		public Collection<Identifier> visit(VariadicExpression expression, Collection<Identifier>[] values, Map<String, Collection<Identifier>[]> variadicValues, Object... params) throws SemanticException {
 			return result;
 		}
 
