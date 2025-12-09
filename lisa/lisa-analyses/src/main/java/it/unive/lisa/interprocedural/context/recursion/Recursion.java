@@ -1,7 +1,7 @@
 package it.unive.lisa.interprocedural.context.recursion;
 
 import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
+import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
@@ -24,7 +24,7 @@ public class Recursion<A extends AbstractLattice<A>> {
 
 	private final Collection<CodeMember> members;
 
-	private final ContextSensitivityToken invocationToken;
+	private final KDepthToken<A> invocationToken;
 
 	private final CompoundState<A> entryState;
 
@@ -43,7 +43,7 @@ public class Recursion<A extends AbstractLattice<A>> {
 	 */
 	public Recursion(
 			Call invocation,
-			ContextSensitivityToken invocationToken,
+			KDepthToken<A> invocationToken,
 			CompoundState<A> entryState,
 			CFG recursionHead,
 			Collection<CodeMember> members) {
@@ -125,12 +125,12 @@ public class Recursion<A extends AbstractLattice<A>> {
 	}
 
 	/**
-	 * Yields the {@link ContextSensitivityToken} that was active when
+	 * Yields the {@link KDepthToken} that was active when
 	 * {@link #getInvocation()} was executed to start the recursion.
 	 * 
 	 * @return the token
 	 */
-	public ContextSensitivityToken getInvocationToken() {
+	public KDepthToken<A> getInvocationToken() {
 		return invocationToken;
 	}
 

@@ -1,9 +1,9 @@
 package it.unive.lisa.cron;
 
+import org.junit.Test;
+
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
-import org.junit.Test;
 
 public class ExceptionsTest
 		extends
@@ -14,7 +14,7 @@ public class ExceptionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.allMethods = true;
 		conf.testDir = "exceptions";
 		conf.testSubDir = "basic";
@@ -35,7 +35,7 @@ public class ExceptionsTest
 		// there
 		conf.wideningThreshold = 10;
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.allMethods = true;
 		conf.testDir = "exceptions";
 		conf.testSubDir = "advanced";
@@ -48,7 +48,7 @@ public class ExceptionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "exceptions";
 		conf.testSubDir = "calls";
 		conf.programFile = "calls.imp";
@@ -60,7 +60,7 @@ public class ExceptionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.shouldSmashError = t -> t.toString().equals("D") || t.toString().equals("E");
 		conf.testDir = "exceptions";
 		conf.testSubDir = "smashed";

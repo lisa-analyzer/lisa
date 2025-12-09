@@ -1,5 +1,9 @@
 package it.unive.lisa.cron;
 
+import java.util.Arrays;
+
+import org.junit.Test;
+
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.dataflow.AvailableExpressions;
 import it.unive.lisa.analysis.dataflow.ConstantPropagation;
@@ -9,7 +13,6 @@ import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.BackwardModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -25,8 +28,6 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.global.AccessGlobal;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
-import java.util.Arrays;
-import org.junit.Test;
 
 public class DataflowAnalysesTest
 		extends
@@ -95,7 +96,7 @@ public class DataflowAnalysesTest
 				DefaultConfiguration.defaultHeapDomain(),
 				new ReachingDefinitions(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.optimize = false;
 		conf.serializeResults = true;
 		conf.testDir = "issues";

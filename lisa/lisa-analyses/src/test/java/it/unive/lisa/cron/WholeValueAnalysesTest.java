@@ -40,7 +40,6 @@ import it.unive.lisa.imp.expressions.IMPAssert;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -199,7 +198,7 @@ public class WholeValueAnalysesTest
 		conf.semanticChecks.add(new AssertionCheck<>());
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.compareWithOptimization = false;
 		conf.optimize = true;
 		conf.serializeResults = true;

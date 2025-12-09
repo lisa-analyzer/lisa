@@ -1,19 +1,23 @@
 package it.unive.lisa.interprocedural.context;
 
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.util.collections.CollectionUtilities;
+
 /**
- * A context sensitive token representing an entire call chain up to a fixed
- * length {@code k}, specified in the singleton creation
- * ({@link #getSingleton(int)}).
+ * A context sensitive token representing an the last {@code k} elements of the
+ * call chain, with {@code k} being specified in the singleton creation
+ * ({@link #create(int)}).
  */
-public class KDepthToken
+public class KDepthToken<A extends AbstractLattice<A>>
 		implements
-		ContextSensitivityToken {
+		ScopeId<A> {
 
 	private final List<CFGCall> calls;
 
@@ -27,11 +31,19 @@ public class KDepthToken
 
 	private KDepthToken(
 			int k,
-			KDepthToken source,
+			KDepthToken<A> source,
 			CFGCall newToken) {
 		this.k = k;
+
+		if (k == 0) {
+			// k = 0 -> insensitive
+			this.calls = source.calls;
+			return;
+		}
+
 		int oldlen = source.calls.size();
-		if (oldlen < k) {
+		if (k <= 0 || oldlen < k) {
+			// k <= 0 -> full stack
 			this.calls = new ArrayList<>(oldlen + 1);
 			source.calls.forEach(this.calls::add);
 			this.calls.add(newToken);
@@ -44,15 +56,15 @@ public class KDepthToken
 	}
 
 	/**
-	 * Return an empty token.
+	 * Creates an empty token that can track at most {@code k} calls.
 	 * 
 	 * @param k the maximum depth
 	 * 
 	 * @return an empty token
 	 */
-	public static KDepthToken getSingleton(
+	public static <A extends AbstractLattice<A>> KDepthToken<A> create(
 			int k) {
-		return new KDepthToken(k);
+		return new KDepthToken<>(k);
 	}
 
 	@Override
@@ -74,7 +86,7 @@ public class KDepthToken
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		KDepthToken other = (KDepthToken) obj;
+		KDepthToken<?> other = (KDepthToken<?>) obj;
 		// we ignore k as it does not matter for equality
 		if (calls == null) {
 			if (other.calls != null)
@@ -103,8 +115,8 @@ public class KDepthToken
 	}
 
 	@Override
-	public ContextSensitivityToken startingId() {
-		return getSingleton(k);
+	public KDepthToken<A> startingId() {
+		return create(k);
 	}
 
 	@Override
@@ -113,9 +125,10 @@ public class KDepthToken
 	}
 
 	@Override
-	public ContextSensitivityToken push(
-			CFGCall c) {
-		return new KDepthToken(k, this, c);
+	public KDepthToken<A> push(
+			CFGCall c,
+			AnalysisState<A> state) {
+		return new KDepthToken<>(k, this, c);
 	}
 
 }
