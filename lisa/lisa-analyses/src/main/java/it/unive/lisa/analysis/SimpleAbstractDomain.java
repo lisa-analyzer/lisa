@@ -566,8 +566,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		return new SimpleAbstractState<>(
 				heapDomain.makeLattice(),
 				valueDomain.makeLattice(),
-				typeDomain.makeLattice())
-						.top();
+				typeDomain.makeLattice());
 	}
 
 	@Override
