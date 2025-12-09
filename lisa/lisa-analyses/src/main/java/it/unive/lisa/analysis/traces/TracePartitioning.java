@@ -409,4 +409,15 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 
 	}
 
+	@Override
+	public TraceLattice<A> onCallReturn(
+			TraceLattice<A> entryState,
+			TraceLattice<A> callres,
+			ProgramPoint call)
+			throws SemanticException {
+		// TODO the traces might differ between entryState and callres,
+		// how do we match them with each other?
+		return callres;
+	}
+
 }

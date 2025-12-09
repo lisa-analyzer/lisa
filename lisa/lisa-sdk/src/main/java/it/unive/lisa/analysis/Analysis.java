@@ -661,4 +661,20 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		return state.bottomExecution().withHalt(halt);
 	}
 
+	@Override
+	public AnalysisState<A> onCallReturn(
+			AnalysisState<A> entryState,
+			AnalysisState<A> callres,
+			ProgramPoint call)
+			throws SemanticException {
+		return callres.withExecution(
+				new ProgramState<>(
+						domain.onCallReturn(
+								entryState.getExecutionState(),
+								callres.getExecutionState(),
+								call),
+						callres.getExecutionExpressions(),
+						callres.getExecutionInformation()));
+	}
+
 }
