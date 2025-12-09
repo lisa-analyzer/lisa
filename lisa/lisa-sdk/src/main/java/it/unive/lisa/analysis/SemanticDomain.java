@@ -123,7 +123,9 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	/**
 	 * Builds an instance of the lattice that this domain works with. The
 	 * returned value can be <i>any</i> instance of the lattice, including the
-	 * top or bottom element.
+	 * top or bottom element, and it should be what this analysis uses as a
+	 * start state at the beginning of the analysis (e.g., as an entry state to
+	 * the main function).
 	 * 
 	 * @return an instance of the lattice that this domain works with
 	 */

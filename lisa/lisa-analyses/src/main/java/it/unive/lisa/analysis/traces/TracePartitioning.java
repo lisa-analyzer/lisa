@@ -244,7 +244,7 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 
 	@Override
 	public TraceLattice<A> makeLattice() {
-		return new TraceLattice<>(domain.makeLattice());
+		return new TraceLattice<>(domain.makeLattice()).top();
 	}
 
 	private class TraceOracle

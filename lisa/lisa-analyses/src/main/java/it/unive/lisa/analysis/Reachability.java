@@ -208,7 +208,7 @@ public class Reachability<D extends AbstractDomain<A>,
 
 	@Override
 	public ReachabilityProduct<A> makeLattice() {
-		return new ReachabilityProduct<>(new ReachLattice(), domain.makeLattice());
+		return new ReachabilityProduct<>(new ReachLattice().setToReachable(), domain.makeLattice());
 	}
 
 	@Override

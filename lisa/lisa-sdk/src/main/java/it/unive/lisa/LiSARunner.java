@@ -25,10 +25,8 @@ import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -211,12 +209,7 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 
 	private void analyze(
 			FixpointConfiguration fixconf) {
-		AnalysisState<A> state = this.analysis.makeLattice()
-				// we set all continuations to bottom, except for
-				// the normal execution that starts at top
-				.bottom()
-				.topExecution()
-				.withExecutionExpression(new Skip(SyntheticLocation.INSTANCE));
+		AnalysisState<A> state = this.analysis.makeLattice();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {
 				interproc.fixpoint(state, fixconf);
