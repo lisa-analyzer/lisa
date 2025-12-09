@@ -24,7 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public class CFGResults<
 		A extends AbstractLattice<A>>
 		extends
-		FunctionalLattice<CFGResults<A>, ScopeId, AnalyzedCFG<A>> {
+		FunctionalLattice<CFGResults<A>, ScopeId<A>, AnalyzedCFG<A>> {
 
 	/**
 	 * Builds a new result.
@@ -39,7 +39,7 @@ public class CFGResults<
 
 	private CFGResults(
 			AnalyzedCFG<A> lattice,
-			Map<ScopeId, AnalyzedCFG<A>> function) {
+			Map<ScopeId<A>, AnalyzedCFG<A>> function) {
 		super(lattice, function);
 	}
 
@@ -70,7 +70,7 @@ public class CFGResults<
 	 * @throws SemanticException if something goes wrong during the update
 	 */
 	public Pair<Boolean, AnalyzedCFG<A>> putResult(
-			ScopeId token,
+			ScopeId<A> token,
 			AnalyzedCFG<A> result)
 			throws SemanticException {
 		if (function == null) {
@@ -114,7 +114,7 @@ public class CFGResults<
 	 * @return {@code true} if that condition holds
 	 */
 	public boolean contains(
-			ScopeId token) {
+			ScopeId<A> token) {
 		return function != null && function.containsKey(token);
 	}
 
@@ -129,7 +129,7 @@ public class CFGResults<
 	 * @return the result, or {@code null}
 	 */
 	public AnalyzedCFG<A> get(
-			ScopeId token) {
+			ScopeId<A> token) {
 		return function == null ? null : function.get(token);
 	}
 
@@ -156,13 +156,13 @@ public class CFGResults<
 	@Override
 	public CFGResults<A> mk(
 			AnalyzedCFG<A> lattice,
-			Map<ScopeId, AnalyzedCFG<A>> function) {
+			Map<ScopeId<A>, AnalyzedCFG<A>> function) {
 		return new CFGResults<>(lattice, function);
 	}
 
 	@Override
 	public AnalyzedCFG<A> stateOfUnknown(
-			ScopeId key) {
+			ScopeId<A> key) {
 		return lattice.bottom();
 	}
 

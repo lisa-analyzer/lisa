@@ -88,7 +88,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope());
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope<>());
 		} catch (FixpointException e) {
 			System.err.println(e);
 			fail("The fixpoint computation has thrown an exception");
@@ -103,7 +103,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope());
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -118,7 +118,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope());
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -139,7 +139,7 @@ public class CFGFixpointTest {
 				ValueEnvironment<IntInterval>,
 				TypeEnvironment<TypeSet>>> domain = mkState();
 		AnalyzedCFG<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = cfg
-				.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
+				.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope<>());
 
 		assertTrue(result.getAnalysisStateAfter(call).getExecutionState().valueState.getKeys().isEmpty());
 	}

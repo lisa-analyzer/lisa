@@ -671,13 +671,13 @@ public class TestParameterProvider {
 		if (param == CFG.class)
 			return (R) cfg;
 		if (param == AnalyzedCFG.class)
-			return (R) new AnalyzedCFG<>(cfg, new UniqueScope(), as);
+			return (R) new AnalyzedCFG<>(cfg, new UniqueScope<>(), as);
 		if (param == CFGResults.class)
-			return (R) new CFGResults<>(new AnalyzedCFG<>(cfg, new UniqueScope(), as));
+			return (R) new CFGResults<>(new AnalyzedCFG<>(cfg, new UniqueScope<>(), as));
 		if (param == InterproceduralAnalysis.class)
 			return (R) interprocedural;
 		if (param == ScopeId.class)
-			return (R) new UniqueScope();
+			return (R) new UniqueScope<>();
 
 		// expressions
 		if (param == ExpressionSet.class)

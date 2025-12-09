@@ -82,7 +82,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 */
 	public BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			InterproceduralAnalysis<A, D> interprocedural) {
 		super(cfg, id, singleton);
@@ -108,7 +108,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 */
 	public BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> exitStates,
 			Map<Statement, AnalysisState<A>> results,
@@ -132,7 +132,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 */
 	public BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> exitStates,
 			StatementStore<A> results,
 			InterproceduralAnalysis<A, D> interprocedural) {
@@ -142,7 +142,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 
 	private BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> exitStates,
 			StatementStore<A> results,
 			StatementStore<A> expanded,
@@ -285,7 +285,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@Override
 		public AnalysisState<A> getAbstractResultOf(
 				CFGCall call,
-				AnalysisState<A> exitState,
+				AnalysisState<A> entryState,
 				ExpressionSet[] parameters,
 				StatementStore<A> expressions)
 				throws SemanticException {
@@ -295,8 +295,8 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 
 			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
-			ScopeId id = getId().push(call);
-			AnalysisState<A> state = exitState.bottom();
+			ScopeId<A> id = getId().push(call, entryState);
+			AnalysisState<A> state = entryState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();
 				state = state.lub(

@@ -67,7 +67,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	 * An id meant to identify this specific result, based on how it has been
 	 * produced.
 	 */
-	protected final ScopeId id;
+	protected final ScopeId<A> id;
 
 	/**
 	 * Builds the control flow graph, storing the given mapping between nodes
@@ -82,7 +82,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	 */
 	public AnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton) {
 		this(cfg, id, singleton, Collections.emptyMap(), Collections.emptyMap());
 	}
@@ -102,7 +102,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	 */
 	public AnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> entryStates,
 			Map<Statement, AnalysisState<A>> results) {
@@ -126,7 +126,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	 */
 	public AnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results) {
 		super(cfg);
@@ -141,7 +141,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	 * 
 	 * @return the identifier of this result
 	 */
-	public ScopeId getId() {
+	public ScopeId<A> getId() {
 		return id;
 	}
 

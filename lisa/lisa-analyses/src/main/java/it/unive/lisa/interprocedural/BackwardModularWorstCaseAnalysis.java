@@ -46,7 +46,7 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 
 	private static final Logger LOG = LogManager.getLogger(BackwardModularWorstCaseAnalysis.class);
 
-	private static final ScopeId ID = new UniqueScope();
+	private final ScopeId<A> id = new UniqueScope<>();
 
 	/**
 	 * The application.
@@ -91,8 +91,8 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
 		AnalyzedCFG<A> graph = conf.optimize
-				? new OptimizedAnalyzedCFG<>(singleton, ID, entryState.bottom(), this)
-				: new AnalyzedCFG<>(singleton, ID, entryState);
+				? new OptimizedAnalyzedCFG<>(singleton, id, entryState.bottom(), this)
+				: new AnalyzedCFG<>(singleton, id, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);
 		this.results = new FixpointResults<>(value.top());
 
@@ -103,8 +103,8 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			try {
 				results.putResult(
 						cfg,
-						ID,
-						cfg.backwardFixpoint(entryState, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
+						id,
+						cfg.backwardFixpoint(entryState, this, WorkingSet.of(conf.fixpointWorkingSet), conf, id));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
