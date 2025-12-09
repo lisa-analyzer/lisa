@@ -563,9 +563,33 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 
 	@Override
 	public SimpleAbstractState<H, V, T> makeLattice() {
-		return new SimpleAbstractState<H,
-				V,
-				T>(heapDomain.makeLattice(), valueDomain.makeLattice(), typeDomain.makeLattice());
+		return new SimpleAbstractState<>(
+				heapDomain.makeLattice(),
+				valueDomain.makeLattice(),
+				typeDomain.makeLattice());
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> onCallReturn(
+			SimpleAbstractState<H, V, T> entryState,
+			SimpleAbstractState<H, V, T> callres,
+			ProgramPoint call)
+			throws SemanticException {
+		H h = heapDomain.onCallReturn(
+				entryState.heapState,
+				callres.heapState,
+				call);
+		V v = valueDomain.onCallReturn(
+				entryState.valueState,
+				callres.valueState,
+				call);
+		T t = typeDomain.onCallReturn(
+				entryState.typeState,
+				callres.typeState,
+				call);
+		if (h == callres.heapState && v == callres.valueState && t == callres.typeState)
+			return callres;
+		return new SimpleAbstractState<>(h, v, t);
 	}
 
 }

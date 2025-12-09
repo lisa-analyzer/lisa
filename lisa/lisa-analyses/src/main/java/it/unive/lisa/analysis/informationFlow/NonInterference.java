@@ -214,4 +214,29 @@ public class NonInterference
 		return NonInterferenceValue.BOTTOM;
 	}
 
+	@Override
+	public NonInterferenceEnvironment onCallReturn(
+			NonInterferenceEnvironment entryState,
+			NonInterferenceEnvironment callres,
+			ProgramPoint call)
+			throws SemanticException {
+		// the non-interference level goes back to the one
+		// of the caller after it returns
+		if (entryState.guards == null)
+			if (callres.guards == null)
+				return callres;
+			else
+				return new NonInterferenceEnvironment(
+						callres.lattice,
+						callres.function,
+						entryState.guards);
+		else if (entryState.guards.equals(callres.guards))
+			return callres;
+		else
+			return new NonInterferenceEnvironment(
+					callres.lattice,
+					callres.function,
+					entryState.guards);
+	}
+
 }

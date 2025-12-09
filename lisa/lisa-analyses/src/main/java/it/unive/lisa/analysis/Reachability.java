@@ -123,10 +123,6 @@ public class Reachability<D extends AbstractDomain<A>,
 				status = status == null ? reach : status.lub(reach);
 			}
 
-		// TODO the reachability after a call that does not throw exceptions/
-		// halt the execution should be restored to the reachability before
-		// the call, but there is no way of doing it right now
-
 		if (!toRemove.isEmpty()) {
 			Map<ProgramPoint, ReachabilityStatus> map = r.mkNewFunction(r.function, true);
 			if (map != null)
@@ -208,13 +204,33 @@ public class Reachability<D extends AbstractDomain<A>,
 
 	@Override
 	public ReachabilityProduct<A> makeLattice() {
-		return new ReachabilityProduct<>(new ReachLattice(), domain.makeLattice());
+		return new ReachabilityProduct<>(new ReachLattice().setToReachable(), domain.makeLattice());
 	}
 
 	@Override
 	public SemanticOracle makeOracle(
 			ReachabilityProduct<A> state) {
 		return domain.makeOracle(state.second);
+	}
+
+	@Override
+	public ReachabilityProduct<A> onCallReturn(
+			ReachabilityProduct<A> entryState,
+			ReachabilityProduct<A> callres,
+			ProgramPoint call)
+			throws SemanticException {
+		// TODO the reachability after a call that does not throw exceptions/
+		// halt the execution should be restored to the reachability before
+		// the call, but there is no way of doing it right now
+		ReachLattice reach = callres.first;
+		if (entryState.first.lattice == ReachabilityStatus.REACHABLE
+				&& callres.first.lattice != ReachabilityStatus.REACHABLE)
+			reach = reach.setToReachable();
+
+		A returned = domain.onCallReturn(entryState.second, callres.second, call);
+		if (returned == callres.second && reach == callres.first)
+			return callres;
+		return new ReachabilityProduct<>(reach, returned);
 	}
 
 }

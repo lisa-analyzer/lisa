@@ -494,6 +494,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			ScopingStrategy strategy = call.getProgram().getFeatures().getScopingStrategy();
 			AnalysisState<A> callres = strategy.unscope(call, scope, exitState, analysis);
 			callres = analysis.transferThrowers(callres, call, cfg);
+			callres = analysis.onCallReturn(entryState, callres, call);
 			result = result.lub(callres);
 		}
 

@@ -244,7 +244,7 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 
 	@Override
 	public TraceLattice<A> makeLattice() {
-		return new TraceLattice<>(domain.makeLattice());
+		return new TraceLattice<>(domain.makeLattice()).top();
 	}
 
 	private class TraceOracle
@@ -407,6 +407,17 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 			return result;
 		}
 
+	}
+
+	@Override
+	public TraceLattice<A> onCallReturn(
+			TraceLattice<A> entryState,
+			TraceLattice<A> callres,
+			ProgramPoint call)
+			throws SemanticException {
+		// TODO the traces might differ between entryState and callres,
+		// how do we match them with each other?
+		return callres;
 	}
 
 }

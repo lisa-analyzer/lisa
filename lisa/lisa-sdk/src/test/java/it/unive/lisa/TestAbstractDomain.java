@@ -130,4 +130,13 @@ public class TestAbstractDomain
 
 	}
 
+	@Override
+	public TestAbstractState onCallReturn(
+			TestAbstractState entryState,
+			TestAbstractState callres,
+			ProgramPoint call)
+			throws SemanticException {
+		return callres;
+	}
+
 }

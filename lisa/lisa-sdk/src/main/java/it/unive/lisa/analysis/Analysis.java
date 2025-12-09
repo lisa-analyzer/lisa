@@ -373,7 +373,13 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 
 	@Override
 	public AnalysisState<A> makeLattice() {
-		return new AnalysisState<>(new ProgramState<>(domain.makeLattice(), new ExpressionSet(), new FixpointInfo()));
+		ProgramState<A> state = new ProgramState<>(domain.makeLattice(), new ExpressionSet(), new FixpointInfo());
+		return new AnalysisState<>(state)
+				// we set all continuations to bottom, except for
+				// the normal execution that starts at top
+				.bottom()
+				.withExecution(state)
+				.withExecutionExpression(new Skip(SyntheticLocation.INSTANCE));
 	}
 
 	/**
@@ -653,6 +659,22 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			return state;
 		ProgramState<A> halt = state.getHalt().lub(state.getExecution());
 		return state.bottomExecution().withHalt(halt);
+	}
+
+	@Override
+	public AnalysisState<A> onCallReturn(
+			AnalysisState<A> entryState,
+			AnalysisState<A> callres,
+			ProgramPoint call)
+			throws SemanticException {
+		return callres.withExecution(
+				new ProgramState<>(
+						domain.onCallReturn(
+								entryState.getExecutionState(),
+								callres.getExecutionState(),
+								call),
+						callres.getExecutionExpressions(),
+						callres.getExecutionInformation()));
 	}
 
 }
