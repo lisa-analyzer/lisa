@@ -1,0 +1,159 @@
+class octagon_tests {
+
+	assign_relations()
+	{
+		def x = 5;
+		def y = 10;
+		y = -y;
+		y = 8;
+		return 0;
+	}
+
+	assign_relations2()
+	{
+		def x = 10;
+		def y = x + 50;
+		def z = y + 100;
+		return z;
+	}
+
+	assign_relations3()
+	{
+		def x = 10;
+		x = -x - 30;
+
+		def y = 100;
+		
+		return x;
+	}
+
+	assign_relations4()
+	{
+		def x = 10;
+		def y = -x + 20;
+		
+		return x;
+	}
+
+	loopInfinite() {
+		def x=0;
+
+		while(x<10) {
+			x = x - 1;
+		}
+
+		def z = 10;
+		return x;
+	}
+
+	backward() {
+		def x = 100;
+
+		while(x >= 1) {
+			x = x - 1;
+		}
+		return x; // expected 0
+	}
+
+	
+	// Forward increasing loop, terminates when x >= 10
+	forward() {
+		def x = 0;
+		while (x < 10) {
+			x = x + 1;
+		}
+		return x; // expected 10
+	}
+
+	// Backward decreasing loop that terminates (guard x > -5)
+	backward_terminating() {
+		def x = 3;
+		while (x > -5) {
+			x = x - 2;
+		}
+		return x;
+	} 
+
+	// Zero-iteration loop: guard false at entry
+	zero_iterations() {
+		def x = 5;
+		while (x < 0) {
+			x = x + 1;
+		}
+		return x; // expected 5 
+	}
+
+	// Loop with step of 2 (even progression)
+	step2() {
+		def x = 1;
+		while (x - 100 < 0) {
+			x = x + 2;
+		}
+		return x; // expected 100 
+	}
+
+	branches() {
+    	def x = 0;
+    	if (x > 0) {
+			x = 10;
+		} 
+		return x; 
+ 	}
+
+	// Loop with condition depending on two variables
+	mixed_guard() {
+		def x = 0;
+		def y = 3;
+		while (x < y) {
+			x = x + 1; 
+			y = y + 1; 
+		}
+		return x;  
+	}
+
+	//Increasing loop counter
+	example1() {
+		def x = 0;
+
+		while(x < 5) {
+			x=x+1;
+		}
+
+		def z = 100;
+		return x;
+	}
+
+	//Decreasing loop counter
+	example2() {
+		def i=16;
+		def x=1;
+
+		while(i > 0) {
+			x=x+1;
+			i=i-1;
+		}
+
+		def z = 10;
+		return x;
+	}
+
+	//Absolute value
+	example3() {
+		def x=50;
+		def y=x;
+
+		y=-y;
+		
+		if(y<=0) {
+			y=-y;
+		} else {
+			y=y+0;
+		}
+
+		if(y<=69) {
+			y=y+0;
+		}
+
+		return y;
+	}
+}

@@ -4,12 +4,15 @@ import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.nonRedundantSet.NonRedundantPowersetOfInterval;
+import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.numeric.Octagon;
 import it.unive.lisa.analysis.numeric.Parity;
 import it.unive.lisa.analysis.numeric.Pentagon;
 import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import org.junit.Test;
 
@@ -103,6 +106,23 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 		conf.testDir = "numeric";
 		conf.testSubDir = "pentagons";
 		conf.programFile = "pentagons.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testOctagon() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = DefaultConfiguration.simpleState(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Octagon(),
+				new TypeEnvironment<>(new InferredTypes()));
+		conf.testDir = "numeric";
+		conf.optimize = false;
+		conf.compareWithOptimization = false;
+		conf.testSubDir = "octagon";
+		conf.programFile = "octagon.imp";
+		// conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		perform(conf);
 	}
 }

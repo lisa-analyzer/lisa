@@ -1,0 +1,38 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_octagon_tests.assign_relations(octagon_tests__this).json", "untyped_octagon_tests.assign_relations2(octagon_tests__this).json", "untyped_octagon_tests.assign_relations3(octagon_tests__this).json", "untyped_octagon_tests.assign_relations4(octagon_tests__this).json", "untyped_octagon_tests.backward(octagon_tests__this).json", "untyped_octagon_tests.backward_terminating(octagon_tests__this).json", "untyped_octagon_tests.branches(octagon_tests__this).json", "untyped_octagon_tests.example1(octagon_tests__this).json", "untyped_octagon_tests.example2(octagon_tests__this).json", "untyped_octagon_tests.example3(octagon_tests__this).json", "untyped_octagon_tests.forward(octagon_tests__this).json", "untyped_octagon_tests.loopInfinite(octagon_tests__this).json", "untyped_octagon_tests.mixed_guard(octagon_tests__this).json", "untyped_octagon_tests.step2(octagon_tests__this).json", "untyped_octagon_tests.zero_iterations(octagon_tests__this).json" ],
+  "info" : {
+    "cfgs" : "15",
+    "duration" : "418ms",
+    "end" : "2025-10-31T20:52:53.683+01:00",
+    "expressions" : "170",
+    "files" : "15",
+    "globals" : "0",
+    "members" : "15",
+    "programs" : "1",
+    "start" : "2025-10-31T20:52:53.265+01:00",
+    "statements" : "72",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/numeric/octagon"
+  }
+}
