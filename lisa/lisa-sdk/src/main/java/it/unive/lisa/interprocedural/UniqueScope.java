@@ -9,6 +9,8 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * calling contexts.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the type of {@link AbstractLattice} handled by the analysis
  */
 public class UniqueScope<A extends AbstractLattice<A>>
 		implements

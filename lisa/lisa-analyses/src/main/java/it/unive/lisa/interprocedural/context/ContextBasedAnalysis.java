@@ -55,10 +55,10 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
- * tuned by the kind of number of calls that tail the call stack to keep track
- * of. This happens concretely in {@link KDepthToken}. Recursions are
- * approximated applying the iterates of the recursion starting from bottom and
- * using the same widening threshold of cfg fixpoints.
+ * tuned by the number of calls that tail the call stack to keep track of. This
+ * happens concretely in {@link KDepthToken}. Recursions are approximated
+ * applying the iterates of the recursion starting from bottom and using the
+ * same widening threshold of cfg fixpoints.
  * 
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}

@@ -10,6 +10,7 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * results for the same {@link CFG} based on their calling contexts.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <A> the type of {@link AbstractLattice} computed by the analysis
  */
 public interface ScopeId<A extends AbstractLattice<A>> {
@@ -33,12 +34,13 @@ public interface ScopeId<A extends AbstractLattice<A>> {
 	/**
 	 * Transforms the current scope id by appending the given call.
 	 * 
-	 * @param c the call to append
+	 * @param c     the call to append
 	 * @param state the analysis state at the call site
 	 *
 	 * @return the (optionally) updated id
 	 */
 	ScopeId<A> push(
-			CFGCall c, AnalysisState<A> state);
+			CFGCall c,
+			AnalysisState<A> state);
 
 }

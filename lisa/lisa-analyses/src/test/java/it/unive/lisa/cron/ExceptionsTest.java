@@ -1,9 +1,8 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import org.junit.Test;
 
 public class ExceptionsTest
 		extends
