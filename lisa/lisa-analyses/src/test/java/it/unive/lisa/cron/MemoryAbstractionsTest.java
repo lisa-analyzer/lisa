@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.heap.TypeBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
 import org.junit.Test;
 
 public class MemoryAbstractionsTest
@@ -20,7 +19,7 @@ public class MemoryAbstractionsTest
 				new TypeBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "heap";
 		conf.testSubDir = "types";
 		conf.programFile = "heap-type.imp";
@@ -36,7 +35,7 @@ public class MemoryAbstractionsTest
 				new PointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "heap";
 		conf.testSubDir = "pp";
 		conf.programFile = "heap-pp.imp";
@@ -52,7 +51,7 @@ public class MemoryAbstractionsTest
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "heap";
 		conf.testSubDir = "pp-field";
 		conf.programFile = "heap-pp-field.imp";
@@ -68,7 +67,7 @@ public class MemoryAbstractionsTest
 				new PointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "heap";
 		conf.testSubDir = "pp-gc";
 		conf.programFile = "gc.imp";
@@ -83,7 +82,7 @@ public class MemoryAbstractionsTest
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "heap";
 		conf.testSubDir = "pp-field-gc";
 		conf.programFile = "gc.imp";

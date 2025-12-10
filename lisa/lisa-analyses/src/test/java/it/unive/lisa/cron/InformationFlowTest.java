@@ -19,7 +19,6 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceEnvironment;
@@ -175,7 +174,7 @@ public class InformationFlowTest
 		conf.serializeResults = true;
 		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
 		conf.callGraph = new RTACallGraph();
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/interproc";
 		conf.programFile = "program.imp";

@@ -271,7 +271,7 @@ public class CheckToolWithAnalysisResultsTest {
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
 		AnalyzedCFG<TestAbstractState> res1 = new AnalyzedCFG<>(
 				cfg,
-				new UniqueScope(),
+				new UniqueScope<>(),
 				singleton,
 				Map.of(noop, singleton.bottom()),
 				Map.of(noop, singleton.bottom()));
@@ -279,7 +279,7 @@ public class CheckToolWithAnalysisResultsTest {
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
 		AnalyzedCFG<TestAbstractState> res2 = new AnalyzedCFG<>(
 				cfg2,
-				new UniqueScope(),
+				new UniqueScope<>(),
 				singleton,
 				Map.of(noop, singleton.bottom()),
 				Map.of(noop, singleton.bottom()));

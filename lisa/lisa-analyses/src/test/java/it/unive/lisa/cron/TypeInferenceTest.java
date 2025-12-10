@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
 import org.junit.Test;
 
 public class TypeInferenceTest
@@ -34,7 +33,7 @@ public class TypeInferenceTest
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "type-inference";
 		conf.testSubDir = "inferred-casts";
 		conf.programFile = "casts.imp";
@@ -49,7 +48,7 @@ public class TypeInferenceTest
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "type-inference";
 		conf.testSubDir = "inferred-objects";
 		conf.programFile = "objects.imp";
@@ -78,7 +77,7 @@ public class TypeInferenceTest
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "type-inference";
 		conf.testSubDir = "static-casts";
 		conf.programFile = "casts.imp";
@@ -93,7 +92,7 @@ public class TypeInferenceTest
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "type-inference";
 		conf.testSubDir = "static-objects";
 		conf.programFile = "objects.imp";

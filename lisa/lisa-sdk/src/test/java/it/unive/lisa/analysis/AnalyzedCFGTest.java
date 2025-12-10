@@ -43,7 +43,7 @@ public class AnalyzedCFGTest {
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
-		AnalyzedCFG<TestAbstractState> res = new AnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
+		AnalyzedCFG<TestAbstractState> res = new AnalyzedCFG<>(cfg, new UniqueScope<>(), state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -69,7 +69,7 @@ public class AnalyzedCFGTest {
 		OptimizedAnalyzedCFG<TestAbstractState,
 				TestAbstractDomain> res = new OptimizedAnalyzedCFG<>(
 						cfg,
-						new UniqueScope(),
+						new UniqueScope<>(),
 						state,
 						entries,
 						results,
@@ -97,7 +97,7 @@ public class AnalyzedCFGTest {
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
 		BackwardAnalyzedCFG<
-				TestAbstractState> res = new BackwardAnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
+				TestAbstractState> res = new BackwardAnalyzedCFG<>(cfg, new UniqueScope<>(), state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -123,7 +123,7 @@ public class AnalyzedCFGTest {
 		BackwardOptimizedAnalyzedCFG<TestAbstractState,
 				TestAbstractDomain> res = new BackwardOptimizedAnalyzedCFG<>(
 						cfg,
-						new UniqueScope(),
+						new UniqueScope<>(),
 						state,
 						entries,
 						results,

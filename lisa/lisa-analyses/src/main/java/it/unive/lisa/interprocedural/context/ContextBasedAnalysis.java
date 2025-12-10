@@ -55,9 +55,10 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
- * tuned by the kind of {@link ContextSensitivityToken} used. Recursions are
- * approximated applying the iterates of the recursion starting from bottom and
- * using the same widening threshold of cfg fixpoints.
+ * tuned by the number of calls that tail the call stack to keep track of. This
+ * happens concretely in {@link KDepthToken}. Recursions are approximated
+ * applying the iterates of the recursion starting from bottom and using the
+ * same widening threshold of cfg fixpoints.
  * 
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
@@ -94,31 +95,36 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	private Class<? extends WorkingSet<Statement>> workingSet;
 
 	/**
-	 * The current sensitivity token.
-	 */
-	protected ContextSensitivityToken token;
-
-	/**
 	 * The fixpoint configuration.
 	 */
 	protected FixpointConfiguration conf;
 
 	/**
-	 * Builds the analysis, using {@link LastCallToken}s.
+	 * The current sensitivity token.
+	 */
+	protected KDepthToken<A> token;
+
+	/**
+	 * Builds the analysis, keeping track of the last call only as calling
+	 * context. For more information, see {@link #ContextBasedAnalysis(int)}.
 	 */
 	public ContextBasedAnalysis() {
-		this(LastCallToken.getSingleton());
+		this(1);
 	}
 
 	/**
-	 * Builds the analysis.
+	 * Builds the analysis. The context sensitivity is determined by the number
+	 * of calls that tail the call stack to keep track of. For instance, if
+	 * {@code k} is 0, the analysis is context insensitive, while if {@code k}
+	 * is 1, the analysis is sensitive to the last call only. If {@code k} is
+	 * negative, the analysis is fully context sensitive.
 	 *
-	 * @param token an instance of the tokens to be used to partition w.r.t.
-	 *                  context sensitivity
+	 * @param k the number of calls that tail the call stack to keep as context
+	 *              for calls through {@link KDepthToken}
 	 */
 	public ContextBasedAnalysis(
-			ContextSensitivityToken token) {
-		this.token = token;
+			int k) {
+		this.token = KDepthToken.create(k);
 		triggers = new HashSet<>();
 	}
 
@@ -165,7 +171,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		// new fixpoint execution: reset
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
-		ContextSensitivityToken empty = (ContextSensitivityToken) token.startingId();
+		KDepthToken<A> empty = token.startingId();
 		AnalyzedCFG<A> graph = conf.optimize
 				? new OptimizedAnalyzedCFG<>(singleton, empty, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, empty, entryState);
@@ -262,8 +268,8 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					.filter(CFG.class::isInstance)
 					.map(CFG.class::cast)
 					.collect(Collectors.toSet());
-			Set<Pair<ContextSensitivityToken, CompoundState<A>>> entries = new HashSet<>();
-			for (Entry<ScopeId, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
+			Set<Pair<KDepthToken<A>, CompoundState<A>>> entries = new HashSet<>();
+			for (Entry<ScopeId<A>, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
 				StatementStore<A> params = new StatementStore<>(entryState.bottom());
 				Expression[] parameters = starter.getParameters();
 				if (conf.optimize)
@@ -277,17 +283,17 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 						params.put(actual, res.getValue().getAnalysisStateAfter(actual));
 
 				if (parameters.length == 0)
-					entries.add(Pair.of((ContextSensitivityToken) res.getKey(),
+					entries.add(Pair.of((KDepthToken<A>) res.getKey(),
 							CompoundState.of(res.getValue().getAnalysisStateBefore(starter), params)));
 				else
 					entries.add(
 							Pair.of(
-									(ContextSensitivityToken) res.getKey(),
+									(KDepthToken<A>) res.getKey(),
 									CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
 			}
 
 			for (CFG head : heads)
-				for (Pair<ContextSensitivityToken, CompoundState<A>> entry : entries) {
+				for (Pair<KDepthToken<A>, CompoundState<A>> entry : entries) {
 					Recursion<A> recursion = new Recursion<>(starter, entry.getLeft(), entry.getRight(), head, rec);
 					recursions.add(recursion);
 				}
@@ -296,7 +302,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 
 	private void processEntrypoints(
 			AnalysisState<A> entryState,
-			ContextSensitivityToken empty,
+			KDepthToken<A> empty,
 			Collection<CFG> entryPoints) {
 		for (CFG cfg : IterationLogger.iterate(LOG, entryPoints, "Processing entrypoints", "entries"))
 			try {
@@ -337,7 +343,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	 */
 	private AnalyzedCFG<A> computeFixpoint(
 			CFG cfg,
-			ContextSensitivityToken token,
+			KDepthToken<A> token,
 			AnalysisState<A> entryState)
 			throws FixpointException,
 			SemanticException {
@@ -442,8 +448,8 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 				return entryState.bottomExecution().withExecutionExpression(call.getMetaVariable());
 		}
 
-		ContextSensitivityToken callerToken = token;
-		token = token.push(call);
+		KDepthToken<A> callerToken = token;
+		token = token.push(call, entryState);
 		ScopeToken scope = new ScopeToken(call);
 
 		// we exclude erroneous/halting executions from the

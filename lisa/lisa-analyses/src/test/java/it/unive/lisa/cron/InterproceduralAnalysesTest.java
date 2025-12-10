@@ -13,7 +13,7 @@ import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CHACallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
+import it.unive.lisa.interprocedural.inlining.InliningAnalysis;
 import org.junit.Test;
 
 public class InterproceduralAnalysesTest
@@ -92,7 +92,7 @@ public class InterproceduralAnalysesTest
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "context-helper-full";
@@ -145,4 +145,63 @@ public class InterproceduralAnalysesTest
 		perform(conf);
 	}
 
+	@Test
+	public void testInliningRTA() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "inlining";
+		conf.programFile = "context.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testInliningRTAHelper() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "inlining-helper";
+		conf.programFile = "context-helper.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testInliningRTAArrayOpPP() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.analysis = DefaultConfiguration
+				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "inlining-pp-arrayop";
+		conf.programFile = "array-op.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testInliningRTATwoArraysPP() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.serializeResults = true;
+		conf.analysis = DefaultConfiguration
+				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "inlining-pp-twoarrays";
+		conf.programFile = "two-arrays.imp";
+		perform(conf);
+	}
 }

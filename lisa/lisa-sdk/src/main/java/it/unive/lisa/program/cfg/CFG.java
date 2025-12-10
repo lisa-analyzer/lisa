@@ -456,7 +456,7 @@ public class CFG
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id)
+			ScopeId<A> id)
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
@@ -507,7 +507,7 @@ public class CFG
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id)
+			ScopeId<A> id)
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
@@ -560,7 +560,7 @@ public class CFG
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id)
+			ScopeId<A> id)
 			throws FixpointException {
 		// we disable optimizations for ascending phases if there is a
 		// descending one: the latter will need full results to start applying
@@ -611,7 +611,7 @@ public class CFG
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> startingPoints,
 			InterproceduralAnalysis<A, D> interprocedural,
-			ScopeId id,
+			ScopeId<A> id,
 			Map<Statement, CompoundState<A>> fixpointResults) {
 		Map<Statement, AnalysisState<A>> finalResults = new HashMap<>(fixpointResults.size());
 		for (Entry<Statement, CompoundState<A>> e : fixpointResults.entrySet()) {
@@ -666,7 +666,7 @@ public class CFG
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id)
+			ScopeId<A> id)
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		getAllExitpoints().forEach(e -> start.put(e, exitState));
@@ -717,7 +717,7 @@ public class CFG
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id)
+			ScopeId<A> id)
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
 		exitpoints.forEach(e -> start.put(e, exitState));
@@ -770,7 +770,7 @@ public class CFG
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
 			FixpointConfiguration conf,
-			ScopeId id)
+			ScopeId<A> id)
 			throws FixpointException {
 		// we disable optimizations for ascending phases if there is a
 		// descending one: the latter will need full results to start applying

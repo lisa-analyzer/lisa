@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import guru.nidi.graphviz.model.Factory;
 import guru.nidi.graphviz.model.MutableGraph;
 import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.BackwardAnalyzedCFG;
@@ -33,12 +34,13 @@ import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.FixpointResults;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
-import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
-import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
+import it.unive.lisa.interprocedural.inlining.CallStackId;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
@@ -91,6 +93,7 @@ import it.unive.lisa.program.cfg.statement.NaryStatement;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
@@ -156,10 +159,12 @@ import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
-//This test must live here since this project has all the others in its classpath, and reflections can detect all classes
+// This test must live here since this project has all the others in its
+// classpath, and reflections can detect all classes
 public class EqualityContractVerificationTest {
 
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
+	private static final SourceCodeLocation loc2 = new SourceCodeLocation("fake2", 0, 0);
 
 	private static final ClassUnit unit1 = new ClassUnit(
 			loc,
@@ -193,6 +198,14 @@ public class EqualityContractVerificationTest {
 
 	private static final CFG cfg2 = new CFG(descr2);
 
+	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, null, "fake1");
+
+	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc2, CallType.STATIC, null, "fake2");
+
+	private static final CFGCall cc1 = new CFGCall(uc1, Set.of(cfg1));
+
+	private static final CFGCall cc2 = new CFGCall(uc2, Set.of(cfg2));
+
 	private static final CodeMemberDescriptor signDescr1 = new CodeMemberDescriptor(loc, interface1, true, "fake1");
 
 	private static final CodeMemberDescriptor signDescr2 = new CodeMemberDescriptor(loc, interface1, true, "fake2");
@@ -216,10 +229,6 @@ public class EqualityContractVerificationTest {
 	private static final MutableGraph g1 = Factory.mutGraph("a");
 
 	private static final MutableGraph g2 = Factory.mutGraph("b");
-
-	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
-
-	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, CallType.STATIC, "bar", "bar");
 
 	private static final Set<Type> s1 = Collections.singleton(Untyped.INSTANCE);
 
@@ -254,10 +263,6 @@ public class EqualityContractVerificationTest {
 					&& !Modifier.isInterface(clazz.getModifiers())
 					&& !tested.contains(clazz)
 					&& definesEqualsHashcode(clazz)
-					// ContextInsensitiveToken is designed for reference
-					// equality, but we fix the hashcode as it is still used in
-					// some filenames
-					&& clazz != ContextInsensitiveToken.class
 					// some testing classes that we do not care about end up
 					// here
 					&& !clazz.getName().contains("Test")
@@ -326,7 +331,6 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(NodeList.class, adj1, adj2)
 				.withPrefabValues(StructuredRepresentation.class, dr1, dr2)
 				.withPrefabValues(RegularExpression.class, re1, re2)
-				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterferenceValue.class, new NonInterference().top(),
 						new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
@@ -427,7 +431,11 @@ public class EqualityContractVerificationTest {
 		for (Class<? extends Type> type : scanner.getSubTypesOf(Type.class))
 			if (!type.getName().contains("BaseCallGraphTest"))
 				// type token is the only one with an eclipse-like equals
-				verify(type, type == TypeTokenType.class, Warning.STRICT_INHERITANCE);
+				verify(
+						type,
+						type == TypeTokenType.class,
+						verifier -> verifier.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4)),
+						Warning.STRICT_INHERITANCE);
 	}
 
 	@Test
@@ -607,12 +615,23 @@ public class EqualityContractVerificationTest {
 		verify(FixpointResults.class, Warning.NONFINAL_FIELDS);
 		verify(Recursion.class);
 		Reflections scanner = mkReflections();
-		for (Class<? extends ContextSensitivityToken> token : scanner.getSubTypesOf(ContextSensitivityToken.class))
+		for (@SuppressWarnings("rawtypes")
+		Class<? extends ScopeId> token : scanner.getSubTypesOf(ScopeId.class))
 			if (token == KDepthToken.class)
 				// k is just a bound on the maximum length, it does not matter
 				verify(token, verifier -> verifier.withIgnoredFields("k"));
-			else if (token != ContextInsensitiveToken.class)
-				// there always is a unique instance of ContextInsensitiveToken
+			else if (token == UniqueScope.class)
+				verify(token, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
+			else if (token == CallStackId.class) {
+				verify(
+						token,
+						verifier -> verifier.withPrefabValues(
+								Pair.class,
+								Pair.of(cc1,
+										new Analysis<>(DefaultConfiguration.defaultAbstractDomain()).makeLattice()),
+								Pair.of(cc2,
+										new Analysis<>(DefaultConfiguration.defaultAbstractDomain()).makeLattice())));
+			} else
 				verify(token);
 	}
 

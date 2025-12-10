@@ -6,7 +6,6 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
 import it.unive.lisa.util.testing.TestConfiguration;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,7 +19,7 @@ public class VisualizationTest
 	private static TestConfiguration config() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		return conf;
 	}

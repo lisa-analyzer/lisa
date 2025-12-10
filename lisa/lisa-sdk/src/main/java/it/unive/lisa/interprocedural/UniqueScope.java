@@ -1,5 +1,7 @@
 package it.unive.lisa.interprocedural;
 
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
@@ -7,19 +9,22 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
  * calling contexts.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the type of {@link AbstractLattice} handled by the analysis
  */
-public class UniqueScope
+public class UniqueScope<A extends AbstractLattice<A>>
 		implements
-		ScopeId {
+		ScopeId<A> {
 
 	@Override
-	public ScopeId startingId() {
+	public ScopeId<A> startingId() {
 		return this;
 	}
 
 	@Override
-	public ScopeId push(
-			CFGCall scopeToken) {
+	public ScopeId<A> push(
+			CFGCall scopeToken,
+			AnalysisState<A> state) {
 		return this;
 	}
 

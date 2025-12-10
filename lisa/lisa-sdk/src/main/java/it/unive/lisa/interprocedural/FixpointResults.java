@@ -58,7 +58,7 @@ public class FixpointResults<
 	 */
 	public Pair<Boolean, AnalyzedCFG<A>> putResult(
 			CFG cfg,
-			ScopeId token,
+			ScopeId<A> token,
 			AnalyzedCFG<A> result)
 			throws SemanticException {
 		if (function == null)

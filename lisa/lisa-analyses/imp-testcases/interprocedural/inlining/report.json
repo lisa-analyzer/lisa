@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this)_179929679.json", "untyped_A.getOne(A__this)_179937398.json", "untyped_A.getPositive(A__this,_untyped_i)_179949953.json", "untyped_A.getPositive(A__this,_untyped_i)_179950883.json", "untyped_tests.main(tests__this).json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "401ms",
+    "end" : "2025-12-09T11:46:16.120+01:00",
+    "expressions" : "26",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "5",
+    "programs" : "1",
+    "start" : "2025-12-09T11:46:15.719+01:00",
+    "statements" : "14",
+    "units" : "2",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/inlining"
+  }
+}

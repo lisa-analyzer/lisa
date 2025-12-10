@@ -1,0 +1,39 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this)_-685653989.json", "untyped_A.identity(A__this,_untyped_i)_-465358669.json", "untyped_A.identity(A__this,_untyped_i)_-465509546.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_-685630801.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_-685635668.json", "untyped_tests.main(tests__this).json" ],
+  "info" : {
+    "cfgs" : "6",
+    "duration" : "396ms",
+    "end" : "2025-12-09T11:48:46.636+01:00",
+    "expressions" : "32",
+    "files" : "6",
+    "globals" : "0",
+    "members" : "6",
+    "programs" : "1",
+    "start" : "2025-12-09T11:48:46.240+01:00",
+    "statements" : "16",
+    "units" : "2",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/inlining-helper"
+  }
+}

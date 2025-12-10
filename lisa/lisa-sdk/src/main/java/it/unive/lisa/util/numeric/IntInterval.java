@@ -77,7 +77,7 @@ public class IntInterval
 
 	/**
 	 * Builds a new interval. Order of the bounds is adjusted (i.e., if
-	 * {@code low} is greater then {@code high}, then the interval
+	 * {@code low} is greater than {@code high}, then the interval
 	 * {@code [high, low]} is created).
 	 * 
 	 * @param low  the lower bound
@@ -91,7 +91,7 @@ public class IntInterval
 
 	/**
 	 * Builds a new interval. Order of the bounds is adjusted (i.e., if
-	 * {@code low} is greater then {@code high}, then the interval
+	 * {@code low} is greater than {@code high}, then the interval
 	 * {@code [high, low]} is created). Note that if both bounds are
 	 * {@code null}, the bottom element is created.
 	 * 
@@ -118,7 +118,7 @@ public class IntInterval
 
 	/**
 	 * Builds a new interval. Order of the bounds is adjusted (i.e., if
-	 * {@code low} is greater then {@code high}, then the interval
+	 * {@code low} is greater than {@code high}, then the interval
 	 * {@code [high, low]} is created). Note that if both bounds are
 	 * {@code null}, the bottom element is created.
 	 * 

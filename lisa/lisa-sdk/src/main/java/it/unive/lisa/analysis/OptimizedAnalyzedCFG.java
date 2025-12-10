@@ -80,7 +80,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 */
 	public OptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			InterproceduralAnalysis<A, D> interprocedural) {
 		super(cfg, id, singleton);
@@ -106,7 +106,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 */
 	public OptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> entryStates,
 			Map<Statement, AnalysisState<A>> results,
@@ -130,7 +130,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 */
 	public OptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results,
 			InterproceduralAnalysis<A, D> interprocedural) {
@@ -140,7 +140,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 
 	private OptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results,
 			StatementStore<A> expanded,
@@ -293,7 +293,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 
 			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
-			ScopeId id = getId().push(call);
+			ScopeId<A> id = getId().push(call, entryState);
 			AnalysisState<A> result = entryState.bottomExecution();
 			Analysis<A, D> analysis = interprocedural.getAnalysis();
 
