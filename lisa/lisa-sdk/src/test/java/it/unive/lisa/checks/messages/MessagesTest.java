@@ -1,4 +1,4 @@
-package it.unive.lisa.checks.warnings;
+package it.unive.lisa.checks.messages;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -26,7 +26,7 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.util.List;
 import org.junit.Test;
 
-public class WarningsTest {
+public class MessagesTest {
 
 	private static final ClassUnit unit1 = new ClassUnit(
 			new SourceCodeLocation("fake", 1, 0),
@@ -154,7 +154,7 @@ public class WarningsTest {
 
 	@Test
 	public void testDifferentType() {
-		List<Message> warns = List.of(
+		List<Message> msgs = List.of(
 				new Message("bar"),
 				new UnitMessage(unit1, "foo"),
 				new GlobalMessage(unit1, global1, "foo"),
@@ -163,10 +163,10 @@ public class WarningsTest {
 				new ExpressionMessage(e1, "foo"),
 				new StatementMessage(st1, "foo"));
 
-		for (int i = 0; i < warns.size(); i++)
-			for (int j = 0; j < warns.size(); j++)
+		for (int i = 0; i < msgs.size(); i++)
+			for (int j = 0; j < msgs.size(); j++)
 				if (i != j) {
-					Message w1 = warns.get(i), w2 = warns.get(j);
+					Message w1 = msgs.get(i), w2 = msgs.get(j);
 					assertNotEquals(
 							w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(),
 							0,
