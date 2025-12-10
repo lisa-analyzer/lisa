@@ -1,4 +1,4 @@
-package it.unive.lisa.outputs.warnings;
+package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.SyntheticLocation;
@@ -6,26 +6,26 @@ import it.unive.lisa.program.Unit;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A warning reported by LiSA on one of the Units under analysis.
+ * A message reported by LiSA on one of the Units under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UnitWarning
+public class UnitMessage
 		extends
-		WarningWithLocation {
+		MessageWithLocation {
 
 	/**
-	 * The unit where this warning was reported on
+	 * The unit where this message was reported on
 	 */
 	private final Unit unit;
 
 	/**
-	 * Builds the warning.
+	 * Builds the message.
 	 * 
-	 * @param unit    the unit where this warning was reported on
-	 * @param message the message of this warning
+	 * @param unit    the unit where this message was reported on
+	 * @param message the message of this message
 	 */
-	public UnitWarning(
+	public UnitMessage(
 			Unit unit,
 			String message) {
 		super(unit instanceof ClassUnit ? ((ClassUnit) unit).getLocation() : SyntheticLocation.INSTANCE, message);
@@ -33,7 +33,7 @@ public class UnitWarning
 	}
 
 	/**
-	 * Yields the unit where this warning was reported on.
+	 * Yields the unit where this message was reported on.
 	 * 
 	 * @return the unit
 	 */
@@ -43,15 +43,15 @@ public class UnitWarning
 
 	@Override
 	public int compareTo(
-			Warning o) {
+			Message o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
 
-		if (!(o instanceof UnitWarning))
+		if (!(o instanceof UnitMessage))
 			return getClass().getName().compareTo(o.getClass().getName());
 
-		UnitWarning other = (UnitWarning) o;
+		UnitMessage other = (UnitMessage) o;
 		if ((cmp = StringUtils.compare(unit.getName(), other.unit.getName())) != 0)
 			return cmp;
 
@@ -75,7 +75,7 @@ public class UnitWarning
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UnitWarning other = (UnitWarning) obj;
+		UnitMessage other = (UnitMessage) obj;
 		if (unit == null) {
 			if (other.unit != null)
 				return false;

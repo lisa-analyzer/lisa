@@ -1,30 +1,30 @@
-package it.unive.lisa.outputs.warnings;
+package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A warning reported by LiSA on the descriptor of one of the CFGs under
+ * A message reported by LiSA on the descriptor of one of the CFGs under
  * analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGDescriptorWarning
+public class CFGDescriptorMessage
 		extends
-		WarningWithLocation {
+		MessageWithLocation {
 
 	/**
-	 * The descriptor where this warning was reported on
+	 * The descriptor where this message was reported on
 	 */
 	private final CodeMemberDescriptor descriptor;
 
 	/**
-	 * Builds the warning.
+	 * Builds the message.
 	 * 
-	 * @param descriptor the descriptor where this warning was reported on
-	 * @param message    the message of this warning
+	 * @param descriptor the descriptor where this message was reported on
+	 * @param message    the message of this message
 	 */
-	public CFGDescriptorWarning(
+	public CFGDescriptorMessage(
 			CodeMemberDescriptor descriptor,
 			String message) {
 		super(descriptor.getLocation(), message);
@@ -32,7 +32,7 @@ public class CFGDescriptorWarning
 	}
 
 	/**
-	 * Yields the cfg where this warning was reported on.
+	 * Yields the cfg where this message was reported on.
 	 * 
 	 * @return the column, or {@code -1}
 	 */
@@ -42,15 +42,15 @@ public class CFGDescriptorWarning
 
 	@Override
 	public int compareTo(
-			Warning o) {
+			Message o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
 
-		if (!(o instanceof CFGDescriptorWarning))
+		if (!(o instanceof CFGDescriptorMessage))
 			return getClass().getName().compareTo(o.getClass().getName());
 
-		CFGDescriptorWarning other = (CFGDescriptorWarning) o;
+		CFGDescriptorMessage other = (CFGDescriptorMessage) o;
 		if ((cmp = StringUtils.compare(descriptor.toString(), other.descriptor.toString())) != 0)
 			return cmp;
 
@@ -74,7 +74,7 @@ public class CFGDescriptorWarning
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CFGDescriptorWarning other = (CFGDescriptorWarning) obj;
+		CFGDescriptorMessage other = (CFGDescriptorMessage) obj;
 		if (descriptor == null) {
 			if (other.descriptor != null)
 				return false;

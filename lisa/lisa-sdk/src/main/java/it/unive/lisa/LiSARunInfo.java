@@ -1,20 +1,8 @@
 package it.unive.lisa;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-
-import org.joda.time.DateTime;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
-
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
-import it.unive.lisa.outputs.warnings.Warning;
+import it.unive.lisa.outputs.messages.Message;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -26,6 +14,16 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.file.FileManager;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 /**
  * A collector of the information about a competed analysis.
@@ -163,7 +161,7 @@ public class LiSARunInfo {
 	 * @param end      the end time
 	 */
 	public LiSARunInfo(
-			Collection<Warning> warnings,
+			Collection<Message> warnings,
 			Collection<String> files,
 			Application app,
 			DateTime start,

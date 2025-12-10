@@ -1,28 +1,28 @@
-package it.unive.lisa.outputs.warnings;
+package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
- * A warning reported by LiSA on a statement.
+ * A message reported by LiSA on a statement.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StatementWarning
+public class StatementMessage
 		extends
-		WarningWithLocation {
+		MessageWithLocation {
 
 	/**
-	 * The statement where this warning was reported on
+	 * The statement where this message was reported on
 	 */
 	private final Statement statement;
 
 	/**
-	 * Builds the warning.
+	 * Builds the message.
 	 * 
-	 * @param statement the statement where this warning was reported on
-	 * @param message   the message of this warning
+	 * @param statement the statement where this message was reported on
+	 * @param message   the message of this message
 	 */
-	public StatementWarning(
+	public StatementMessage(
 			Statement statement,
 			String message) {
 		super(statement.getLocation(), message);
@@ -30,7 +30,7 @@ public class StatementWarning
 	}
 
 	/**
-	 * Yields the statement where this warning was reported on.
+	 * Yields the statement where this message was reported on.
 	 * 
 	 * @return the statement
 	 */
@@ -40,15 +40,15 @@ public class StatementWarning
 
 	@Override
 	public int compareTo(
-			Warning o) {
+			Message o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
 
-		if (!(o instanceof StatementWarning))
+		if (!(o instanceof StatementMessage))
 			return getClass().getName().compareTo(o.getClass().getName());
 
-		StatementWarning other = (StatementWarning) o;
+		StatementMessage other = (StatementMessage) o;
 		if ((cmp = statement.compareTo(other.statement)) != 0)
 			return cmp;
 
@@ -72,7 +72,7 @@ public class StatementWarning
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		StatementWarning other = (StatementWarning) obj;
+		StatementMessage other = (StatementMessage) obj;
 		if (statement == null) {
 			if (other.statement != null)
 				return false;

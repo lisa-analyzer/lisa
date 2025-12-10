@@ -2,23 +2,6 @@ package it.unive.lisa;
 
 import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
-
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-
 import guru.nidi.graphviz.model.Factory;
 import guru.nidi.graphviz.model.MutableGraph;
 import it.unive.lisa.analysis.AbstractDomain;
@@ -70,6 +53,7 @@ import it.unive.lisa.lattices.traces.TraceToken;
 import it.unive.lisa.lattices.types.Supertype;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.messages.Message;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
@@ -157,9 +141,24 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.testing.TestConfiguration;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 // This test must live here since this project has all the others in its
 // classpath, and reflections can detect all classes
@@ -599,14 +598,13 @@ public class EqualityContractVerificationTest {
 	}
 
 	@Test
-	public void testWarnings() {
+	public void testMessages() {
 		// serialization requires non final fields
 		verify(JsonWarning.class, Warning.NONFINAL_FIELDS);
-		verify(it.unive.lisa.outputs.warnings.Warning.class);
+		verify(Message.class);
 		Reflections scanner = mkReflections();
-		for (Class<? extends it.unive.lisa.outputs.warnings.Warning> warning : scanner
-				.getSubTypesOf(it.unive.lisa.outputs.warnings.Warning.class))
-			verify(warning);
+		for (Class<? extends Message> message : scanner.getSubTypesOf(Message.class))
+			verify(message);
 	}
 
 	@Test

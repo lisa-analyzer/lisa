@@ -1,17 +1,13 @@
 package it.unive.lisa.checks.syntactic;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-
 import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.outputs.warnings.CFGDescriptorWarning;
-import it.unive.lisa.outputs.warnings.CFGWarning;
-import it.unive.lisa.outputs.warnings.ExpressionWarning;
-import it.unive.lisa.outputs.warnings.GlobalWarning;
-import it.unive.lisa.outputs.warnings.StatementWarning;
-import it.unive.lisa.outputs.warnings.UnitWarning;
-import it.unive.lisa.outputs.warnings.Warning;
+import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
+import it.unive.lisa.outputs.messages.CFGMessage;
+import it.unive.lisa.outputs.messages.ExpressionMessage;
+import it.unive.lisa.outputs.messages.GlobalMessage;
+import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
+import it.unive.lisa.outputs.messages.UnitMessage;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
@@ -19,6 +15,9 @@ import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.file.FileManager;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An auxiliary tool that can be used by checks during their execution. It
@@ -32,7 +31,7 @@ public class CheckTool {
 	/**
 	 * The collection of generated warnings
 	 */
-	private final Collection<Warning> warnings;
+	private final Collection<Message> warnings;
 
 	/**
 	 * The configuration of the analysis
@@ -97,7 +96,7 @@ public class CheckTool {
 	 */
 	public void warn(
 			String message) {
-		warnings.add(new Warning(message));
+		warnings.add(new Message(message));
 	}
 
 	/**
@@ -110,7 +109,7 @@ public class CheckTool {
 	public void warnOn(
 			Unit unit,
 			String message) {
-		warnings.add(new UnitWarning(unit, message));
+		warnings.add(new UnitMessage(unit, message));
 	}
 
 	/**
@@ -125,7 +124,7 @@ public class CheckTool {
 			Unit unit,
 			Global global,
 			String message) {
-		warnings.add(new GlobalWarning(unit, global, message));
+		warnings.add(new GlobalMessage(unit, global, message));
 	}
 
 	/**
@@ -138,7 +137,7 @@ public class CheckTool {
 	public void warnOn(
 			CFG cfg,
 			String message) {
-		warnings.add(new CFGWarning(cfg, message));
+		warnings.add(new CFGMessage(cfg, message));
 	}
 
 	/**
@@ -151,7 +150,7 @@ public class CheckTool {
 	public void warnOn(
 			CodeMemberDescriptor descriptor,
 			String message) {
-		warnings.add(new CFGDescriptorWarning(descriptor, message));
+		warnings.add(new CFGDescriptorMessage(descriptor, message));
 	}
 
 	/**
@@ -168,7 +167,7 @@ public class CheckTool {
 		if (statement instanceof Expression)
 			warnOn((Expression) statement, message);
 		else
-			warnings.add(new StatementWarning(statement, message));
+			warnings.add(new StatementMessage(statement, message));
 	}
 
 	/**
@@ -180,7 +179,7 @@ public class CheckTool {
 	public void warnOn(
 			Expression expression,
 			String message) {
-		warnings.add(new ExpressionWarning(expression, message));
+		warnings.add(new ExpressionMessage(expression, message));
 	}
 
 	/**
@@ -189,7 +188,7 @@ public class CheckTool {
 	 * 
 	 * @return a view of the warnings
 	 */
-	public Collection<Warning> getWarnings() {
+	public Collection<Message> getWarnings() {
 		return Collections.unmodifiableCollection(warnings);
 	}
 

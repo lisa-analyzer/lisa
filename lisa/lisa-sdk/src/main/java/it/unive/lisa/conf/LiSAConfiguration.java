@@ -1,16 +1,5 @@
 package it.unive.lisa.conf;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Predicate;
-
-import org.apache.commons.io.FilenameUtils;
-
 import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AnalysisState;
@@ -23,7 +12,6 @@ import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.TopExecutionPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.Log4jConfig;
-import it.unive.lisa.outputs.warnings.Warning;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -34,6 +22,15 @@ import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.workset.OrderBasedWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.file.FileManager;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Predicate;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.

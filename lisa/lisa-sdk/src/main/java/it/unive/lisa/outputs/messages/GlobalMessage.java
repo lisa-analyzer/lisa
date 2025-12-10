@@ -1,37 +1,37 @@
-package it.unive.lisa.outputs.warnings;
+package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A warning reported by LiSA on one of the Globals under analysis.
+ * A message reported by LiSA on one of the Globals under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class GlobalWarning
+public class GlobalMessage
 		extends
-		WarningWithLocation {
+		MessageWithLocation {
 
 	/**
-	 * The nit containing the global where this warning was reported on
+	 * The nit containing the global where this message was reported on
 	 */
 	private final Unit unit;
 
 	/**
-	 * The global where this warning was reported on
+	 * The global where this message was reported on
 	 */
 	private final Global global;
 
 	/**
-	 * Builds the warning.
+	 * Builds the message.
 	 * 
-	 * @param unit    the unit containing the global where this warning was
+	 * @param unit    the unit containing the global where this message was
 	 *                    reported on
-	 * @param global  the global where this warning was reported on
-	 * @param message the message of this warning
+	 * @param global  the global where this message was reported on
+	 * @param message the message of this message
 	 */
-	public GlobalWarning(
+	public GlobalMessage(
 			Unit unit,
 			Global global,
 			String message) {
@@ -41,7 +41,7 @@ public class GlobalWarning
 	}
 
 	/**
-	 * Yields the unit containing the global where this warning was reported on.
+	 * Yields the unit containing the global where this message was reported on.
 	 * 
 	 * @return the global
 	 */
@@ -50,7 +50,7 @@ public class GlobalWarning
 	}
 
 	/**
-	 * Yields the global where this warning was reported on.
+	 * Yields the global where this message was reported on.
 	 * 
 	 * @return the global
 	 */
@@ -60,15 +60,15 @@ public class GlobalWarning
 
 	@Override
 	public int compareTo(
-			Warning o) {
+			Message o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
 
-		if (!(o instanceof GlobalWarning))
+		if (!(o instanceof GlobalMessage))
 			return getClass().getName().compareTo(o.getClass().getName());
 
-		GlobalWarning other = (GlobalWarning) o;
+		GlobalMessage other = (GlobalMessage) o;
 		if ((cmp = StringUtils.compare(unit.getName(), other.unit.getName())) != 0)
 			return cmp;
 		if ((cmp = StringUtils.compare(global.getName(), other.global.getName())) != 0)
@@ -95,7 +95,7 @@ public class GlobalWarning
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		GlobalWarning other = (GlobalWarning) obj;
+		GlobalMessage other = (GlobalMessage) obj;
 		if (unit == null) {
 			if (other.unit != null)
 				return false;
