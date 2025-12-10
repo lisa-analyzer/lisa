@@ -34,6 +34,11 @@ public class CheckTool {
 	private final Collection<Message> warnings;
 
 	/**
+	 * The collection of generated notices
+	 */
+	private final Collection<Message> notices;
+
+	/**
 	 * The configuration of the analysis
 	 */
 	private final LiSAConfiguration configuration;
@@ -53,6 +58,7 @@ public class CheckTool {
 			LiSAConfiguration configuration,
 			FileManager fileManager) {
 		warnings = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		notices = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.configuration = configuration;
 		this.fileManager = fileManager;
 	}
@@ -76,7 +82,7 @@ public class CheckTool {
 	}
 
 	/**
-	 * Build the tool, shallow-copying the set of warnings from the given one.
+	 * Build the tool, shallow-copying the sets of warnings and notices from the given one.
 	 * 
 	 * @param other the original tool to copy
 	 */
@@ -84,6 +90,7 @@ public class CheckTool {
 			CheckTool other) {
 		this(other.configuration, other.fileManager);
 		warnings.addAll(other.warnings);
+		notices.addAll(other.notices);
 	}
 
 	/**
@@ -190,6 +197,112 @@ public class CheckTool {
 	 */
 	public Collection<Message> getWarnings() {
 		return Collections.unmodifiableCollection(warnings);
+	}
+
+	/**
+	 * Reports a new notice that is meant to be a generic notice on the
+	 * program. For notices related to one of the components of the program
+	 * (e.g., a CFG, a statement, ...) rely on the other methods provided by
+	 * this class.
+	 * 
+	 * @param message the message of the notice
+	 */
+	public void notice(
+			String message) {
+		notices.add(new Message(message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the declaration of the
+	 * given unit.
+	 * 
+	 * @param unit    the unit to notice on
+	 * @param message the message of the notice
+	 */
+	public void noticeOn(
+			Unit unit,
+			String message) {
+		notices.add(new UnitMessage(unit, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the declaration of the
+	 * given global.
+	 * 
+	 * @param unit    the unit containing the global to notice on
+	 * @param global  the global to notice on
+	 * @param message the message of the notice
+	 */
+	public void noticeOn(
+			Unit unit,
+			Global global,
+			String message) {
+		notices.add(new GlobalMessage(unit, global, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the declaration of the
+	 * given cfg.
+	 * 
+	 * @param cfg     the cfg to notice on
+	 * @param message the message of the notice
+	 */
+	public void noticeOn(
+			CFG cfg,
+			String message) {
+		notices.add(new CFGMessage(cfg, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the declaration of the
+	 * cfg represented by the given descriptor.
+	 * 
+	 * @param descriptor the descriptor cfg to notice on
+	 * @param message    the message of the notice
+	 */
+	public void noticeOn(
+			CodeMemberDescriptor descriptor,
+			String message) {
+		notices.add(new CFGDescriptorMessage(descriptor, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given statement. If
+	 * {@code statement} is an instance of {@link Expression}, then
+	 * {@link #noticeOn(Expression, String)} is invoked.
+	 * 
+	 * @param statement the statement to notice on
+	 * @param message   the message of the notice
+	 */
+	public void noticeOn(
+			Statement statement,
+			String message) {
+		if (statement instanceof Expression)
+			noticeOn((Expression) statement, message);
+		else
+			notices.add(new StatementMessage(statement, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given expression.
+	 * 
+	 * @param expression the expression to notice on
+	 * @param message    the message of the notice
+	 */
+	public void noticeOn(
+			Expression expression,
+			String message) {
+		notices.add(new ExpressionMessage(expression, message));
+	}
+
+	/**
+	 * Returns an <b>unmodifiable</b> view of the notices that have been
+	 * generated up to now using this tool.
+	 * 
+	 * @return a view of the notices
+	 */
+	public Collection<Message> getNotices() {
+		return Collections.unmodifiableCollection(notices);
 	}
 
 }

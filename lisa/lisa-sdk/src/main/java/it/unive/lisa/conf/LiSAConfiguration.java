@@ -12,6 +12,7 @@ import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.TopExecutionPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.Log4jConfig;
+import it.unive.lisa.outputs.messages.Message;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -189,7 +190,7 @@ public class LiSAConfiguration
 	/**
 	 * Sets whether or not a json report file, named {@value LiSA#REPORT_NAME},
 	 * should be created and dumped in the working directory at the end of the
-	 * analysis. This file will contain all the {@link Warning}s that have been
+	 * analysis. This file will contain all the {@link Message}s that have been
 	 * generated, as well as a list of produced files. To customize where the
 	 * report should be generated, use {@link #workdir}. Defaults to
 	 * {@code false}.
