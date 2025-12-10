@@ -4,8 +4,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
+import org.junit.Test;
+
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
+import it.unive.lisa.outputs.warnings.CFGDescriptorWarning;
+import it.unive.lisa.outputs.warnings.CFGWarning;
+import it.unive.lisa.outputs.warnings.ExpressionWarning;
+import it.unive.lisa.outputs.warnings.GlobalWarning;
+import it.unive.lisa.outputs.warnings.StatementWarning;
+import it.unive.lisa.outputs.warnings.UnitWarning;
+import it.unive.lisa.outputs.warnings.Warning;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -16,8 +27,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import java.util.List;
-import org.junit.Test;
 
 public class WarningsTest {
 

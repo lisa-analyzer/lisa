@@ -1,12 +1,13 @@
 package it.unive.lisa;
 
-import it.unive.lisa.checks.warnings.Warning;
-import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.util.file.FileManager;
-import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+
+import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.outputs.warnings.Warning;
+import it.unive.lisa.util.file.FileManager;
+import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
  * A structured report containing the information about an analysis that has

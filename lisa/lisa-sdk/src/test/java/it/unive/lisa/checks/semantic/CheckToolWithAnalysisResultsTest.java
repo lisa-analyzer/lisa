@@ -3,6 +3,15 @@ package it.unive.lisa.checks.semantic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
+
 import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestLanguageFeatures;
@@ -14,18 +23,18 @@ import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.checks.syntactic.CheckTool;
-import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
-import it.unive.lisa.checks.warnings.CFGWarning;
-import it.unive.lisa.checks.warnings.ExpressionWarning;
-import it.unive.lisa.checks.warnings.GlobalWarning;
-import it.unive.lisa.checks.warnings.StatementWarning;
-import it.unive.lisa.checks.warnings.UnitWarning;
-import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.outputs.warnings.CFGDescriptorWarning;
+import it.unive.lisa.outputs.warnings.CFGWarning;
+import it.unive.lisa.outputs.warnings.ExpressionWarning;
+import it.unive.lisa.outputs.warnings.GlobalWarning;
+import it.unive.lisa.outputs.warnings.StatementWarning;
+import it.unive.lisa.outputs.warnings.UnitWarning;
+import it.unive.lisa.outputs.warnings.Warning;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
@@ -44,13 +53,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.file.FileManager;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
 
 public class CheckToolWithAnalysisResultsTest {
 

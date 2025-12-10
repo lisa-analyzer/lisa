@@ -1,4 +1,4 @@
-package it.unive.lisa.checks.warnings;
+package it.unive.lisa.outputs.warnings;
 
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import org.apache.commons.lang3.StringUtils;

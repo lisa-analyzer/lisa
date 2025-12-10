@@ -1,4 +1,4 @@
-package it.unive.lisa.checks.warnings;
+package it.unive.lisa.outputs.warnings;
 
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;

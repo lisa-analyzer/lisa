@@ -1,4 +1,4 @@
-package it.unive.lisa.checks.warnings;
+package it.unive.lisa.outputs.warnings;
 
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.SyntheticLocation;
