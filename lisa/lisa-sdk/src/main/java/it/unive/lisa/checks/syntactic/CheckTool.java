@@ -82,7 +82,8 @@ public class CheckTool {
 	}
 
 	/**
-	 * Build the tool, shallow-copying the sets of warnings and notices from the given one.
+	 * Build the tool, shallow-copying the sets of warnings and notices from the
+	 * given one.
 	 * 
 	 * @param other the original tool to copy
 	 */
@@ -200,10 +201,9 @@ public class CheckTool {
 	}
 
 	/**
-	 * Reports a new notice that is meant to be a generic notice on the
-	 * program. For notices related to one of the components of the program
-	 * (e.g., a CFG, a statement, ...) rely on the other methods provided by
-	 * this class.
+	 * Reports a new notice that is meant to be a generic notice on the program.
+	 * For notices related to one of the components of the program (e.g., a CFG,
+	 * a statement, ...) rely on the other methods provided by this class.
 	 * 
 	 * @param message the message of the notice
 	 */
@@ -254,8 +254,8 @@ public class CheckTool {
 	}
 
 	/**
-	 * Reports a new notice with the given message on the declaration of the
-	 * cfg represented by the given descriptor.
+	 * Reports a new notice with the given message on the declaration of the cfg
+	 * represented by the given descriptor.
 	 * 
 	 * @param descriptor the descriptor cfg to notice on
 	 * @param message    the message of the notice

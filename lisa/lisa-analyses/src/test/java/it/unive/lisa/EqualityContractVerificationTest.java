@@ -52,7 +52,7 @@ import it.unive.lisa.lattices.traces.ExecutionTrace;
 import it.unive.lisa.lattices.traces.TraceToken;
 import it.unive.lisa.lattices.types.Supertype;
 import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
 import it.unive.lisa.outputs.messages.Message;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -600,7 +600,7 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testMessages() {
 		// serialization requires non final fields
-		verify(JsonWarning.class, Warning.NONFINAL_FIELDS);
+		verify(JsonMessage.class, Warning.NONFINAL_FIELDS);
 		verify(Message.class);
 		Reflections scanner = mkReflections();
 		for (Class<? extends Message> message : scanner.getSubTypesOf(Message.class))

@@ -1,14 +1,5 @@
 package it.unive.lisa;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.BiFunction;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
@@ -39,6 +30,13 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An auxiliary analysis runner for executing LiSA analysis.
@@ -90,7 +88,8 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	 * 
 	 * @param app the application to analyze
 	 * 
-	 * @return the tool used to run the checks, that contains all warnings and notices
+	 * @return the tool used to run the checks, that contains all warnings and
+	 *             notices
 	 */
 	CheckTool run(
 			Application app) {

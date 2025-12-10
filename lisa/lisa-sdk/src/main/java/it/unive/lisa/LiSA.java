@@ -1,12 +1,5 @@
 package it.unive.lisa;
 
-import java.io.IOException;
-import java.util.function.Consumer;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.joda.time.DateTime;
-
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -16,6 +9,11 @@ import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.util.function.Consumer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities

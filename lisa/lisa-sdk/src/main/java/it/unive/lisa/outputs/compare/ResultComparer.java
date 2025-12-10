@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import it.unive.lisa.LiSA;
 import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
 import it.unive.lisa.outputs.serializableGraph.SerializableArray;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -53,7 +53,9 @@ import org.apache.logging.log4j.util.TriConsumer;
  * treating each field as a string but ignoring timestamps (duration, start,
  * end) and LiSA's version;</li>
  * <li>warnings ({@link JsonReport#getWarnings()}) are then compared, using
- * {@link JsonWarning#compareTo(JsonWarning)} method;</li>
+ * {@link JsonMessage#compareTo(JsonMessage)} method;</li>
+ * <li>notices ({@link JsonReport#getNotices()}) are then compared, using
+ * {@link JsonMessage#compareTo(JsonMessage)} method;</li>
  * <li>the set of files produced during the analysis
  * ({@link JsonReport#getFiles()}) is then compared, matching their paths;</li>
  * <li>finally, the contents of every file produced by both analyses are
@@ -122,6 +124,8 @@ public class ResultComparer {
 
 	private static final String WARNINGS_ONLY = "Warnings only in the {} report:";
 
+	private static final String NOTICES_ONLY = "Notices only in the {} report:";
+
 	private static final String INFOS_ONLY = "Run info keys only in the {} report:";
 
 	private static final String CONFS_ONLY = "Configuration keys only in the {} report:";
@@ -187,6 +191,12 @@ public class ResultComparer {
 
 		/**
 		 * Indicates that the difference was found in the collection of
+		 * generated notices.
+		 */
+		NOTICES,
+
+		/**
+		 * Indicates that the difference was found in the collection of
 		 * generated files.
 		 */
 		FILES,
@@ -236,6 +246,10 @@ public class ResultComparer {
 		if (shouldFailFast() && !sameWarnings)
 			return false;
 
+		boolean sameNotices = !shouldCompareNotices() || compareNotices(first, second);
+		if (shouldFailFast() && !sameNotices)
+			return false;
+
 		boolean sameFiles = !shouldCompareFiles() || compareFiles(first, second);
 		if (shouldFailFast() && !sameFiles)
 			return false;
@@ -258,7 +272,7 @@ public class ResultComparer {
 		if (shouldFailFast() && !sameAddInfo)
 			return false;
 
-		return sameConfs && sameInfos && sameWarnings && sameFiles && sameFileContents && sameAddInfo;
+		return sameConfs && sameInfos && sameWarnings && sameNotices && sameFiles && sameFileContents && sameAddInfo;
 	}
 
 	/**
@@ -356,11 +370,11 @@ public class ResultComparer {
 	public boolean compareWarnings(
 			JsonReport first,
 			JsonReport second) {
-		CollectionsDiffBuilder<JsonWarning> warnings = new CollectionsDiffBuilder<>(
-				JsonWarning.class,
+		CollectionsDiffBuilder<JsonMessage> warnings = new CollectionsDiffBuilder<>(
+				JsonMessage.class,
 				first.getWarnings(),
 				second.getWarnings());
-		warnings.compute(JsonWarning::compareTo);
+		warnings.compute(JsonMessage::compareTo);
 
 		if (!warnings.getCommons().isEmpty())
 			report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.COMMON, warnings.getCommons());
@@ -369,6 +383,33 @@ public class ResultComparer {
 		if (!warnings.getOnlySecond().isEmpty())
 			report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_SECOND, warnings.getOnlySecond());
 		return warnings.sameContent();
+	}
+
+	/**
+	 * Compares the notices ({@link JsonReport#getNotices()}) of both reports,
+	 * relying on the {@link Comparable#compareTo(Object)} method.
+	 * 
+	 * @param first  the first report
+	 * @param second the second report
+	 * 
+	 * @return {@code true} if the notices are equal, {@code false} otherwise
+	 */
+	public boolean compareNotices(
+			JsonReport first,
+			JsonReport second) {
+		CollectionsDiffBuilder<JsonMessage> notices = new CollectionsDiffBuilder<>(
+				JsonMessage.class,
+				first.getNotices(),
+				second.getNotices());
+		notices.compute(JsonMessage::compareTo);
+
+		if (!notices.getCommons().isEmpty())
+			report(REPORTED_COMPONENT.NOTICES, REPORT_TYPE.COMMON, notices.getCommons());
+		if (!notices.getOnlyFirst().isEmpty())
+			report(REPORTED_COMPONENT.NOTICES, REPORT_TYPE.ONLY_FIRST, notices.getOnlyFirst());
+		if (!notices.getOnlySecond().isEmpty())
+			report(REPORTED_COMPONENT.NOTICES, REPORT_TYPE.ONLY_SECOND, notices.getOnlySecond());
+		return notices.sameContent();
 	}
 
 	/**
@@ -1030,6 +1071,12 @@ public class ResultComparer {
 			else
 				LOG.warn(WARNINGS_ONLY, "second");
 			break;
+		case NOTICES:
+			if (isFirst)
+				LOG.warn(NOTICES_ONLY, "first");
+			else
+				LOG.warn(NOTICES_ONLY, "second");
+			break;
 		case INFO:
 			if (isFirst)
 				LOG.warn(INFOS_ONLY, "first");
@@ -1142,6 +1189,16 @@ public class ResultComparer {
 	 * @return whether or not warnings should be compared
 	 */
 	public boolean shouldCompareWarnings() {
+		return true;
+	}
+
+	/**
+	 * If {@code true}, notices ({@link JsonReport#getNotices()}) will be
+	 * compared.
+	 * 
+	 * @return whether or not notices should be compared
+	 */
+	public boolean shouldCompareNotices() {
 		return true;
 	}
 
