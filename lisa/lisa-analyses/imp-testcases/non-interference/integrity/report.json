@@ -20,20 +20,22 @@
   }, {
     "message" : "['imp-testcases/non-interference/integrity/program.imp':9:38] on 'untyped Integrity::integrity_lec5ex2(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
   } ],
+  "notices" : [ ],
   "files" : [ "report.json", "untyped_Integrity.integrity_lec16(Integrity__this).json", "untyped_Integrity.integrity_lec17(Integrity__this).json", "untyped_Integrity.integrity_lec18ex1(Integrity__this).json", "untyped_Integrity.integrity_lec18ex2(Integrity__this).json", "untyped_Integrity.integrity_lec19ex1(Integrity__this).json", "untyped_Integrity.integrity_lec19ex2(Integrity__this).json", "untyped_Integrity.integrity_lec19ex3(Integrity__this).json", "untyped_Integrity.integrity_lec19ex4(Integrity__this).json", "untyped_Integrity.integrity_lec19ex5(Integrity__this).json", "untyped_Integrity.integrity_lec5ex1(Integrity__this).json", "untyped_Integrity.integrity_lec5ex2(Integrity__this).json", "untyped_Integrity.integrity_lec6(Integrity__this).json", "untyped_Integrity.integrity_lec7(Integrity__this).json", "untyped_Integrity.integrity_lec8(Integrity__this).json" ],
   "info" : {
     "cfgs" : "14",
-    "duration" : "555ms",
-    "end" : "2025-01-31T12:39:02.180+01:00",
+    "duration" : "55ms",
+    "end" : "2025-12-10T13:06:16.716+01:00",
     "expressions" : "130",
     "files" : "14",
     "globals" : "0",
     "members" : "14",
+    "notices" : "0",
     "programs" : "1",
-    "start" : "2025-01-31T12:39:01.625+01:00",
+    "start" : "2025-12-10T13:06:16.661+01:00",
     "statements" : "70",
     "units" : "1",
-    "version" : "0.1b8",
+    "version" : "0.1",
     "warnings" : "10"
   },
   "configuration" : {

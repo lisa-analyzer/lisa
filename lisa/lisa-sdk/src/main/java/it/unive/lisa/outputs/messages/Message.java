@@ -1,54 +1,54 @@
-package it.unive.lisa.checks.warnings;
+package it.unive.lisa.outputs.messages;
 
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A warning reported by LiSA on the program under analysis.
+ * A message reported by LiSA on the program under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Warning
+public class Message
 		implements
-		Comparable<Warning> {
+		Comparable<Message> {
 
 	/**
-	 * The message of this warning
+	 * The message of this message
 	 */
 	private final String message;
 
 	/**
-	 * Builds the warning.
+	 * Builds the message.
 	 * 
-	 * @param message the message of this warning
+	 * @param message the message of this message
 	 */
-	public Warning(
+	public Message(
 			String message) {
 		this.message = message;
 	}
 
 	/**
-	 * Yields the message of this warning.
+	 * Yields the message of this message.
 	 * 
-	 * @return the message of this warning
+	 * @return the message of this message
 	 */
 	public final String getMessage() {
 		return message;
 	}
 
 	/**
-	 * Yields the tag of this warning.
+	 * Yields the tag of this message.
 	 * 
-	 * @return the tag of this warning
+	 * @return the tag of this message
 	 */
 	public String getTag() {
 		return "GENERIC";
 	}
 
 	/**
-	 * Yields the message of this warning, preceeded by the tag under square
+	 * Yields the message of this message, preceeded by the tag under square
 	 * brackets.
 	 * 
-	 * @return the tag and message of this warning
+	 * @return the tag and message of this message
 	 */
 	public final String getTaggedMessage() {
 		return "[" + getTag() + "] " + getMessage();
@@ -56,7 +56,7 @@ public class Warning
 
 	@Override
 	public int compareTo(
-			Warning o) {
+			Message o) {
 		return StringUtils.compare(message, o.message);
 	}
 
@@ -77,7 +77,7 @@ public class Warning
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Warning other = (Warning) obj;
+		Message other = (Message) obj;
 		if (message == null) {
 			if (other.message != null)
 				return false;

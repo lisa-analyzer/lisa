@@ -1,29 +1,29 @@
-package it.unive.lisa.checks.warnings;
+package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.program.cfg.CFG;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A warning reported by LiSA on one of the CFGs under analysis.
+ * A message reported by LiSA on one of the CFGs under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGWarning
+public class CFGMessage
 		extends
-		WarningWithLocation {
+		MessageWithLocation {
 
 	/**
-	 * The cfg where this warning was reported on
+	 * The cfg where this message was reported on
 	 */
 	private final CFG cfg;
 
 	/**
-	 * Builds the warning.
+	 * Builds the message.
 	 * 
-	 * @param cfg     the cfg where this warning was reported on
-	 * @param message the message of this warning
+	 * @param cfg     the cfg where this message was reported on
+	 * @param message the message of this message
 	 */
-	public CFGWarning(
+	public CFGMessage(
 			CFG cfg,
 			String message) {
 		super(cfg.getDescriptor().getLocation(), message);
@@ -31,7 +31,7 @@ public class CFGWarning
 	}
 
 	/**
-	 * Yields the cfg where this warning was reported on.
+	 * Yields the cfg where this message was reported on.
 	 * 
 	 * @return the cfg
 	 */
@@ -41,15 +41,15 @@ public class CFGWarning
 
 	@Override
 	public int compareTo(
-			Warning o) {
+			Message o) {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
 
-		if (!(o instanceof CFGWarning))
+		if (!(o instanceof CFGMessage))
 			return getClass().getName().compareTo(o.getClass().getName());
 
-		CFGWarning other = (CFGWarning) o;
+		CFGMessage other = (CFGMessage) o;
 		if ((cmp = StringUtils.compare(cfg.getDescriptor().toString(), other.cfg.getDescriptor().toString())) != 0)
 			return cmp;
 
@@ -73,7 +73,7 @@ public class CFGWarning
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CFGWarning other = (CFGWarning) obj;
+		CFGMessage other = (CFGMessage) obj;
 		if (cfg == null) {
 			if (other.cfg != null)
 				return false;

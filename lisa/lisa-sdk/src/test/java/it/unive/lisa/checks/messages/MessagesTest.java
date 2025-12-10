@@ -1,4 +1,4 @@
-package it.unive.lisa.checks.warnings;
+package it.unive.lisa.checks.messages;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -6,6 +6,13 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
+import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
+import it.unive.lisa.outputs.messages.CFGMessage;
+import it.unive.lisa.outputs.messages.ExpressionMessage;
+import it.unive.lisa.outputs.messages.GlobalMessage;
+import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
+import it.unive.lisa.outputs.messages.UnitMessage;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -19,7 +26,7 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.util.List;
 import org.junit.Test;
 
-public class WarningsTest {
+public class MessagesTest {
 
 	private static final ClassUnit unit1 = new ClassUnit(
 			new SourceCodeLocation("fake", 1, 0),
@@ -63,44 +70,44 @@ public class WarningsTest {
 
 	@Test
 	public void testSameTypeDifferentMessage() {
-		Warning w1 = new Warning("foo");
-		Warning w2 = new Warning("bar");
+		Message w1 = new Message("foo");
+		Message w2 = new Message("bar");
 		assertEquals(0, w1.compareTo(w1));
 		assertTrue(w1.compareTo(w2) > 0);
 		assertTrue(w2.compareTo(w1) < 0);
 
-		UnitWarning uw1 = new UnitWarning(unit1, "foo");
-		UnitWarning uw2 = new UnitWarning(unit1, "bar");
+		UnitMessage uw1 = new UnitMessage(unit1, "foo");
+		UnitMessage uw2 = new UnitMessage(unit1, "bar");
 		assertEquals(0, uw1.compareTo(uw1));
 		assertTrue(uw1.compareTo(uw2) > 0);
 		assertTrue(uw2.compareTo(uw1) < 0);
 
-		GlobalWarning gw1 = new GlobalWarning(unit1, global1, "foo");
-		GlobalWarning gw2 = new GlobalWarning(unit1, global1, "bar");
+		GlobalMessage gw1 = new GlobalMessage(unit1, global1, "foo");
+		GlobalMessage gw2 = new GlobalMessage(unit1, global1, "bar");
 		assertEquals(0, gw1.compareTo(gw1));
 		assertTrue(gw1.compareTo(gw2) > 0);
 		assertTrue(gw2.compareTo(gw1) < 0);
 
-		CFGWarning cfgw1 = new CFGWarning(cfg1, "foo");
-		CFGWarning cfgw2 = new CFGWarning(cfg1, "bar");
+		CFGMessage cfgw1 = new CFGMessage(cfg1, "foo");
+		CFGMessage cfgw2 = new CFGMessage(cfg1, "bar");
 		assertEquals(0, cfgw1.compareTo(cfgw1));
 		assertTrue(cfgw1.compareTo(cfgw2) > 0);
 		assertTrue(cfgw2.compareTo(cfgw1) < 0);
 
-		CFGDescriptorWarning cfgdw1 = new CFGDescriptorWarning(descriptor1, "foo");
-		CFGDescriptorWarning cfgdw2 = new CFGDescriptorWarning(descriptor1, "bar");
+		CFGDescriptorMessage cfgdw1 = new CFGDescriptorMessage(descriptor1, "foo");
+		CFGDescriptorMessage cfgdw2 = new CFGDescriptorMessage(descriptor1, "bar");
 		assertEquals(0, cfgdw1.compareTo(cfgdw1));
 		assertTrue(cfgdw1.compareTo(cfgdw2) > 0);
 		assertTrue(cfgdw2.compareTo(cfgdw1) < 0);
 
-		ExpressionWarning ew1 = new ExpressionWarning(e1, "foo");
-		ExpressionWarning ew2 = new ExpressionWarning(e1, "bar");
+		ExpressionMessage ew1 = new ExpressionMessage(e1, "foo");
+		ExpressionMessage ew2 = new ExpressionMessage(e1, "bar");
 		assertEquals(0, ew1.compareTo(ew1));
 		assertTrue(ew1.compareTo(ew2) > 0);
 		assertTrue(ew2.compareTo(ew1) < 0);
 
-		StatementWarning sw1 = new StatementWarning(st1, "foo");
-		StatementWarning sw2 = new StatementWarning(st1, "bar");
+		StatementMessage sw1 = new StatementMessage(st1, "foo");
+		StatementMessage sw2 = new StatementMessage(st1, "bar");
 		assertEquals(0, sw1.compareTo(sw1));
 		assertTrue(sw1.compareTo(sw2) > 0);
 		assertTrue(sw2.compareTo(sw1) < 0);
@@ -108,38 +115,38 @@ public class WarningsTest {
 
 	@Test
 	public void testSameTypeDifferentElement() {
-		UnitWarning uw1 = new UnitWarning(unit1, "foo");
-		UnitWarning uw2 = new UnitWarning(unit2, "bar");
+		UnitMessage uw1 = new UnitMessage(unit1, "foo");
+		UnitMessage uw2 = new UnitMessage(unit2, "bar");
 		assertEquals(0, uw1.compareTo(uw1));
 		assertTrue(uw1.compareTo(uw2) < 0);
 		assertTrue(uw2.compareTo(uw1) > 0);
 
-		GlobalWarning gw1 = new GlobalWarning(unit1, global1, "foo");
-		GlobalWarning gw2 = new GlobalWarning(unit2, global2, "bar");
+		GlobalMessage gw1 = new GlobalMessage(unit1, global1, "foo");
+		GlobalMessage gw2 = new GlobalMessage(unit2, global2, "bar");
 		assertEquals(0, gw1.compareTo(gw1));
 		assertTrue(gw1.compareTo(gw2) < 0);
 		assertTrue(gw2.compareTo(gw1) > 0);
 
-		CFGWarning cfgw1 = new CFGWarning(cfg1, "foo");
-		CFGWarning cfgw2 = new CFGWarning(cfg2, "bar");
+		CFGMessage cfgw1 = new CFGMessage(cfg1, "foo");
+		CFGMessage cfgw2 = new CFGMessage(cfg2, "bar");
 		assertEquals(0, cfgw1.compareTo(cfgw1));
 		assertTrue(cfgw1.compareTo(cfgw2) < 0);
 		assertTrue(cfgw2.compareTo(cfgw1) > 0);
 
-		CFGDescriptorWarning cfgdw1 = new CFGDescriptorWarning(descriptor1, "foo");
-		CFGDescriptorWarning cfgdw2 = new CFGDescriptorWarning(descriptor2, "bar");
+		CFGDescriptorMessage cfgdw1 = new CFGDescriptorMessage(descriptor1, "foo");
+		CFGDescriptorMessage cfgdw2 = new CFGDescriptorMessage(descriptor2, "bar");
 		assertEquals(0, cfgdw1.compareTo(cfgdw1));
 		assertTrue(cfgdw1.compareTo(cfgdw2) < 0);
 		assertTrue(cfgdw2.compareTo(cfgdw1) > 0);
 
-		ExpressionWarning ew1 = new ExpressionWarning(e1, "foo");
-		ExpressionWarning ew2 = new ExpressionWarning(e2, "bar");
+		ExpressionMessage ew1 = new ExpressionMessage(e1, "foo");
+		ExpressionMessage ew2 = new ExpressionMessage(e2, "bar");
 		assertEquals(0, ew1.compareTo(ew1));
 		assertTrue(ew1.compareTo(ew2) < 0);
 		assertTrue(ew2.compareTo(ew1) > 0);
 
-		StatementWarning sw1 = new StatementWarning(st1, "foo");
-		StatementWarning sw2 = new StatementWarning(st2, "bar");
+		StatementMessage sw1 = new StatementMessage(st1, "foo");
+		StatementMessage sw2 = new StatementMessage(st2, "bar");
 		assertEquals(0, sw1.compareTo(sw1));
 		assertTrue(sw1.compareTo(sw2) < 0);
 		assertTrue(sw2.compareTo(sw1) > 0);
@@ -147,19 +154,19 @@ public class WarningsTest {
 
 	@Test
 	public void testDifferentType() {
-		List<Warning> warns = List.of(
-				new Warning("bar"),
-				new UnitWarning(unit1, "foo"),
-				new GlobalWarning(unit1, global1, "foo"),
-				new CFGWarning(cfg1, "foo"),
-				new CFGDescriptorWarning(descriptor1, "foo"),
-				new ExpressionWarning(e1, "foo"),
-				new StatementWarning(st1, "foo"));
+		List<Message> msgs = List.of(
+				new Message("bar"),
+				new UnitMessage(unit1, "foo"),
+				new GlobalMessage(unit1, global1, "foo"),
+				new CFGMessage(cfg1, "foo"),
+				new CFGDescriptorMessage(descriptor1, "foo"),
+				new ExpressionMessage(e1, "foo"),
+				new StatementMessage(st1, "foo"));
 
-		for (int i = 0; i < warns.size(); i++)
-			for (int j = 0; j < warns.size(); j++)
+		for (int i = 0; i < msgs.size(); i++)
+			for (int j = 0; j < msgs.size(); j++)
 				if (i != j) {
-					Warning w1 = warns.get(i), w2 = warns.get(j);
+					Message w1 = msgs.get(i), w2 = msgs.get(j);
 					assertNotEquals(
 							w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(),
 							0,

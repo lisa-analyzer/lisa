@@ -1,30 +1,30 @@
-package it.unive.lisa.checks.warnings;
+package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.program.cfg.statement.Expression;
 
 /**
- * A warning reported by LiSA on an expression.
+ * A message reported by LiSA on an expression.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ExpressionWarning
+public class ExpressionMessage
 		extends
-		StatementWarning {
+		StatementMessage {
 
 	/**
-	 * Builds the warning.
+	 * Builds the message.
 	 * 
-	 * @param expression the expression where this warning was reported on
-	 * @param message    the message of this warning
+	 * @param expression the expression where this message was reported on
+	 * @param message    the message of this message
 	 */
-	public ExpressionWarning(
+	public ExpressionMessage(
 			Expression expression,
 			String message) {
 		super(expression, message);
 	}
 
 	/**
-	 * Yields the expression where this warning was reported on.
+	 * Yields the expression where this message was reported on.
 	 * 
 	 * @return the expression
 	 */

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Graph: untyped tests::helper(tests* this, untyped i, untyped dispatcher)</title>
+		
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
+		
+		<script src="assets/d3.v7.min.js"></script>
+		<script src="assets/d3-graphviz.min.js"></script>
+		
+		<style>	
+		html,
+		body {
+			height: 100%;
+			margin: 0;
+		}
+
+		body {
+			font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+			font-size: 14px;
+			background-color: white;
+		}
+		
+		.box {
+			display: flex;
+			flex-flow: column;
+			height: 100%;
+		}
+
+		.box .row.header {
+			flex: 0 1 auto;
+		}
+
+		.box .row.content {
+			flex: 1 1 auto;
+		}
+		
+		header {
+			padding: 10px;
+			border-bottom: 2px black solid;
+		}
+		
+		header img {
+			float: right;
+			height: 120px;
+			margin-top: 10px;
+		}
+		
+		.splitter {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+		}
+
+		#separator {
+			cursor: col-resize;
+			background-color: #aaa;
+			background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='30'><path d='M2 0 v30 M5 0 v30 M8 0 v30' fill='none' stroke='black'/></svg>");
+			background-repeat: no-repeat;
+			background-position: center;
+			width: 10px;
+
+			/* Prevent the browser's built-in drag from interfering */
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 12;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+			background-color: rgb(0,0,0);
+			background-color: rgba(0,0,0,0.4);
+		}
+
+		.modal-content {
+			background-color: #fefefe;
+			margin: 15% auto;
+			padding: 20px;
+			border: 1px solid #888;
+			width: 40%;
+			min-width: 350px;
+		}
+		
+		.modal-content b {
+			padding: 6px 0;
+			color: #333333;
+			display: block;
+			cursor: pointer;
+		}
+
+		.close {
+			color: #aaa;
+			float: right;
+			font-size: 28px;
+			font-weight: bold;
+		}
+
+		.close:hover, .close:focus {
+			color: black;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		
+		.button {
+			background-color: #16A15B;
+			color: white;
+			padding: 5px 20px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			border: 1px #16A15B solid;
+			border-radius: 25px;
+			cursor: pointer;
+		}
+		
+		.button:disabled, .button[disabled] {
+			background-color: #CCCCCC;
+			border: 1px #CCCCCC solid;
+			color: #666666;
+		}
+		
+		.searchbar {
+			padding: 5px 20px;
+			border-radius: 25px;
+			border: 1px #16A15B solid;
+		}
+		
+		.no-results {
+			border: solid 2px #FF0000;  
+			background-color: #FF000040;
+		}
+		
+		#graph {
+			display: flex;
+			flex-grow: 1;
+			justify-content: center;
+			align-items: center;
+			z-index: 10;
+			width: 75%;
+			min-width: 500px;
+		}
+		
+		.node { cursor: pointer; }
+		
+		.node polygon { fill: white; }
+		
+		.node-selected { filter: drop-shadow(0 0 5px #16A15B); }
+		
+		#descriptions {
+			flex-grow: 0.5;
+			z-index: 11;
+			overflow: auto;
+			font-size: 18px;
+			border-left: 2px solid #e2e2e2;
+			padding-left: 5px;
+			width: 25%;
+			min-width: 200px;
+		}
+		
+		.description-header { font-weight: bold; }
+		
+		#descriptions ul {
+			padding-left: inherit;
+			margin: 5px 0;
+		}
+		
+		.description-nest { padding-left: 15px;	}
+		
+		.header-hidden { display: none; }
+		
+		.description-title-wrapper {
+			margin-top: 0.83em;
+			margin-bottom: 0.83em;
+		}
+		
+		.description-title {
+			font-size: 1.5em;
+			font-weight: bold;
+		}
+		
+		.description-title-text {
+			font-size: 1.5em;
+			font-family: monospace;
+		}
+		
+		#header-none {
+			margin-top: 0.83em;
+			margin-bottom: 0.83em;
+		}
+
+		g.edge > text {
+			font-size: 0.9em;
+		}
+		</style>
+	</head>
+
+	<body>
+		<div class="box">
+			<header class="row header">
+				<img src="https://raw.githubusercontent.com/lisa-analyzer/lisa/master/logo.png" alt="LiSA logo"/>
+				<h1>Graph: untyped tests::helper(tests* this, untyped i, untyped dispatcher)</h1>
+				<h3></h3>
+				<input id="search" type="text" class="searchbar" placeholder="Search node..."/>
+				<input id="next" type="button" value="Next" class="button" disabled/>
+				<input id="prev" type="button" value="Previous" class="button" disabled/>
+				<button id="centerButton" class="button">Center graph</button>
+				<button id="legendButton" class="button">Legend</button>
+			</header>
+			<div id="legend" class="modal">
+				<div class="modal-content">
+					<span class="close">&times;</span>
+					<b>Node border: <font color="darkgray">gray</font>, single</b>
+					<b>Entrypoint border: black, dashed</b>
+					<b>Exitpoint border: black, solid</b>
+					<b>Sequential edge: black, solid</b>
+					<b>False edge: <font color="red">red</font>, dashed</b>
+					<b>True edge: <font color="blue">blue</font>, dashed</b>
+					<b>Error edge: <font color="orange">orange</font>, dashed</b>
+					<b>Begin finally edge: <font color="green">green</font>, dashed</b>
+					<b>End finally edge: <font color="purple">purple</font>, dashed</b>
+				</div>
+			</div>
+			<div id="full" class="row content splitter">
+				<div id="graph"></div>
+				<div id="separator"></div>
+				<div id="descriptions">
+					<div class="header-info" id="header-none">
+					No node selected. Select a node to show its <span>results</span>.
+					</div>
+					<div></div>
+				</div>
+			</div>
+		</div>
+		<script>
+			d3.select('#descriptions').style('height', d3.select('#graph').node().offsetHeight + "px");
+			
+			/* Graph visualization setup */
+			const scale = 0.8;
+			function attributer(datum, index, nodes) {
+				// taken from https://stackoverflow.com/questions/67626414/scale-and-center-d3-graphviz-graph
+				var selection = d3.select(this);
+				if (datum.tag == "svg") {
+					datum.attributes = {
+						...datum.attributes,
+						width: '100%',
+						height: d3.select('#graph').node().offsetHeight + 'px',
+					};
+					const px2pt = 3 / 4;
+					const graphWidth = datum.attributes.viewBox.split(' ')[2] / px2pt;
+					const graphHeight = datum.attributes.viewBox.split(' ')[3] / px2pt;
+					const w = graphWidth / scale;
+					const h = graphHeight / scale;
+					const x = -(w - graphWidth) / 2;
+					const y = -(h - graphHeight) / 2;
+					const viewBox = `${x * px2pt} ${y * px2pt} ${w * px2pt} ${h * px2pt}`;
+					selection.attr('viewBox', viewBox);
+					datum.attributes.viewBox = viewBox;
+				}
+			}
+			const graphviz = d3.select("#graph").graphviz()
+								.attributer(attributer)
+								.zoom(true);
+			/*<![CDATA[*/
+			const graph = "digraph \"untyped tests::helper(tests* this, untyped i, untyped dispatcher)\" {\n\"node0\" [\"label\"=<return identity(dispatcher, i)>,\"shape\"=\"rect\",\"id\"=\"node0\",\"style\"=\"dashed\"]\n}";
+			/*]]>*/
+			
+			/* Zooming setup */
+			var zoom = d3.zoom().on("zoom", zoomed);
+			function zoomed(e) {
+				g.attr("transform", e.transform);
+			}
+			
+			// initial transformation of the graph
+			var svg = null;
+			var g = null;
+			var itTX = 0;
+			var itTY = 0;
+			function getTransformation(transform) {
+				// taken from: https://stackoverflow.com/questions/38224875/how-can-d3-transform-be-used-in-d3-v4
+				var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+				g.setAttributeNS(null, "transform", transform);
+				var matrix = g.transform.baseVal.consolidate().matrix;
+				var a=matrix.a, b=matrix.b, c=matrix.c, d=matrix.d, e=matrix.e, f=matrix.f;
+				var scaleX, scaleY, skewX;
+				if (scaleX = Math.sqrt(a * a + b * b)) a /= scaleX, b /= scaleX;
+				if (skewX = a * c + b * d) c -= a * skewX, d -= b * skewX;
+				if (scaleY = Math.sqrt(c * c + d * d)) c /= scaleY, d /= scaleY, skewX /= scaleY;
+				if (a * d < b * c) a = -a, b = -b, skewX = -skewX, scaleX = -scaleX;
+				return {
+					translateX: e,
+					translateY: f,
+					rotate: Math.atan2(b, a) * 180 / Math.PI,
+					skewX: Math.atan(skewX) * 180 / Math.PI,
+					scaleX: scaleX,
+					scaleY: scaleY
+				};
+			}
+			function selectNode(target) {
+				d3.select('.node-selected').classed('node-selected', false);
+				d3.select(target).classed('node-selected', true);
+				// Show corresponding header
+				var id = d3.select(target).attr('id');
+				d3.selectAll('.header-info').classed('header-hidden', true);
+				d3.select('#header-' + id).classed('header-hidden', false);
+			}
+			function renderGraph(dotString) {
+				graphviz.renderDot(dotString, function () {
+					d3.selectAll('.node').on('click', function () {
+						selectNode(this);
+					});
+					svg = d3.select('#graph').select('svg');
+					svg.call(zoom);
+					g = svg.select('g');
+					var it = getTransformation(g.attr("transform"));
+					itTX = it.translateX;
+					itTY = it.translateY;
+				});
+			}
+			renderGraph(graph);
+			
+			/* Center button */
+			var btn = d3.select("#centerButton").on('click', function() {
+				var zoomTransition = d3.transition("zooming")
+										.duration(150)
+										.ease(d3.easeLinear);
+				graphviz.resetZoom(zoomTransition);
+			});
+			
+			/* Search */
+			// Reset searchbar contents on load
+			d3.select('#search').node().value = "";
+			var hits = [];
+			var hit = -1;
+			function centerToSearch() {
+				hits.filter(function (d, i) { 
+						return i === hit; 
+					}).each(function (d, i) { 
+						selectNode(this);
+						var gbbox = g.node().getBBox();
+						var gX = gbbox.x + (gbbox.width/2);
+						var gY = gbbox.y + (gbbox.height/2);
+						var bbox = this.getBBox();
+						var tX = bbox.x + (bbox.width/2);
+						var tY = bbox.y + (bbox.height/2);
+						var offsetX = gX - tX;
+						var offsetY = gY - tY;
+						var curr = getTransformation(g.attr("transform"));
+						var transform = d3.zoomIdentity
+							// reset to initial position
+							.translate(itTX, itTY)
+							// keep current scale
+							.scale(curr.scaleX)
+							// move to node center
+							.translate(offsetX, offsetY);
+						svg.transition("zooming")
+							.duration(150)
+							.ease(d3.easeLinear)
+							.call(zoom.transform, transform);
+					});
+			}
+			d3.select('#search').on('input', function (e) {
+				var query = e.target.value;
+				if (query !== "")
+					hits = d3.selectAll('.node').filter(function (d, i) {
+						return d3.select(this).select('text').text().includes(query);
+					});
+				
+				if (query === "" || hits.size() == 0) {
+					hit = -1;
+					d3.select('#next').attr('disabled', true);
+					d3.select('#prev').attr('disabled', true);
+					d3.select('.node-selected').classed('node-selected', false);
+					d3.select(this).classed('no-results', true);
+				} else {
+					hit = 0;
+					d3.select('#next').attr('disabled', null);
+					d3.select('#prev').attr('disabled', null);
+					d3.select(this).classed('no-results', false);
+					centerToSearch();
+				}
+			});
+			d3.select('#next').on('click', function (e) {
+				if (hit != -1) {
+					hit = (hit + 1) % hits.size();
+					centerToSearch();
+				}
+			});
+			d3.select('#prev').on('click', function (e) {
+				if (hit != -1) {
+					hit = ((hit - 1) + hits.size()) % hits.size();
+					centerToSearch();
+				}
+			});
+			
+			/* Split pane */
+			// taken from https://stackoverflow.com/questions/12194469/best-way-to-do-a-split-pane-in-html
+			const separator = document.getElementById("separator");
+			const first  = document.getElementById("graph");
+			const second = document.getElementById("descriptions");
+			var md;
+			separator.onmousedown = onMouseDown;
+			function onMouseDown(e) {
+				md = {e,
+					offsetLeft:  separator.offsetLeft,
+					offsetTop:   separator.offsetTop,
+					firstWidth:  first.offsetWidth,
+					secondWidth: second.offsetWidth
+				};
+				document.onmousemove = onMouseMove;
+				document.onmouseup = () => { document.onmousemove = document.onmouseup = null; }
+			}
+			function onMouseMove(e)
+			{
+				var delta = {x: e.clientX - md.e.clientX, y: e.clientY - md.e.clientY};
+				delta.x = Math.min(Math.max(delta.x, -md.firstWidth), md.secondWidth);
+				separator.style.left = md.offsetLeft + delta.x + "px";
+				first.style.width = (md.firstWidth + delta.x) + "px";
+				second.style.width = (md.secondWidth - delta.x) + "px";
+			}
+			
+			/* Legend modal */
+			var modal = d3.select("#legend").on('click', function() {
+				d3.select(this).style('display', 'none');
+			});
+			var btn = d3.select("#legendButton").on('click', function() {
+				modal.style('display', 'block');
+			});
+			var span = d3.select(".close").on('click', function() {
+				modal.style('display', 'none');
+			});
+			</script>
+	</body>
+</html>

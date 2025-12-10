@@ -14,18 +14,18 @@ import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.checks.syntactic.CheckTool;
-import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
-import it.unive.lisa.checks.warnings.CFGWarning;
-import it.unive.lisa.checks.warnings.ExpressionWarning;
-import it.unive.lisa.checks.warnings.GlobalWarning;
-import it.unive.lisa.checks.warnings.StatementWarning;
-import it.unive.lisa.checks.warnings.UnitWarning;
-import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
+import it.unive.lisa.outputs.messages.CFGMessage;
+import it.unive.lisa.outputs.messages.ExpressionMessage;
+import it.unive.lisa.outputs.messages.GlobalMessage;
+import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
+import it.unive.lisa.outputs.messages.UnitMessage;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
@@ -132,31 +132,31 @@ public class CheckToolWithAnalysisResultsTest {
 
 	};
 
-	private static Warning build(
+	private static Message build(
 			CheckTool tool,
 			Object target,
 			String message) {
 		if (target == null) {
 			tool.warn(message);
-			return new Warning(message);
+			return new Message(message);
 		} else if (target instanceof Unit) {
 			tool.warnOn((Unit) target, message);
-			return new UnitWarning((Unit) target, message);
+			return new UnitMessage((Unit) target, message);
 		} else if (target instanceof Global) {
 			tool.warnOn(unit, (Global) target, message);
-			return new GlobalWarning(unit, (Global) target, message);
+			return new GlobalMessage(unit, (Global) target, message);
 		} else if (target instanceof CFG) {
 			tool.warnOn((CFG) target, message);
-			return new CFGWarning((CFG) target, message);
+			return new CFGMessage((CFG) target, message);
 		} else if (target instanceof CodeMemberDescriptor) {
 			tool.warnOn((CodeMemberDescriptor) target, message);
-			return new CFGDescriptorWarning((CodeMemberDescriptor) target, message);
+			return new CFGDescriptorMessage((CodeMemberDescriptor) target, message);
 		} else if (target instanceof Expression) {
 			tool.warnOn((Expression) target, message);
-			return new ExpressionWarning((Expression) target, message);
+			return new ExpressionMessage((Expression) target, message);
 		} else if (target instanceof Statement) {
 			tool.warnOn((Statement) target, message);
-			return new StatementWarning((Statement) target, message);
+			return new StatementMessage((Statement) target, message);
 		}
 		return null;
 	}
@@ -170,7 +170,7 @@ public class CheckToolWithAnalysisResultsTest {
 						Map.of(),
 						fakeCallGraph,
 						new Analysis<>(new TestAbstractDomain()));
-		Collection<Warning> exp = new HashSet<>();
+		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
 		exp.add(build(tool, cfg, "foo"));
@@ -211,7 +211,7 @@ public class CheckToolWithAnalysisResultsTest {
 						Map.of(),
 						fakeCallGraph,
 						new Analysis<>(new TestAbstractDomain()));
-		Collection<Warning> exp = new HashSet<>();
+		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
 		exp.add(build(tool, cfg, "foo"));
@@ -232,7 +232,7 @@ public class CheckToolWithAnalysisResultsTest {
 						Map.of(),
 						fakeCallGraph,
 						new Analysis<>(new TestAbstractDomain()));
-		Collection<Warning> exp = new HashSet<>();
+		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 4, 0)), "foo"));
@@ -251,7 +251,7 @@ public class CheckToolWithAnalysisResultsTest {
 						Map.of(),
 						fakeCallGraph,
 						new Analysis<>(new TestAbstractDomain()));
-		Collection<Warning> exp = new HashSet<>();
+		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));

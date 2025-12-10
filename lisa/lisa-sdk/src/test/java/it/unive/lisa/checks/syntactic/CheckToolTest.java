@@ -4,14 +4,14 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
-import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
-import it.unive.lisa.checks.warnings.CFGWarning;
-import it.unive.lisa.checks.warnings.ExpressionWarning;
-import it.unive.lisa.checks.warnings.GlobalWarning;
-import it.unive.lisa.checks.warnings.StatementWarning;
-import it.unive.lisa.checks.warnings.UnitWarning;
-import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
+import it.unive.lisa.outputs.messages.CFGMessage;
+import it.unive.lisa.outputs.messages.ExpressionMessage;
+import it.unive.lisa.outputs.messages.GlobalMessage;
+import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
+import it.unive.lisa.outputs.messages.UnitMessage;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -47,31 +47,31 @@ public class CheckToolTest {
 
 	private static final CFG cfg = new CFG(descriptor);
 
-	private static Warning build(
+	private static Message build(
 			CheckTool tool,
 			Object target,
 			String message) {
 		if (target == null) {
 			tool.warn(message);
-			return new Warning(message);
+			return new Message(message);
 		} else if (target instanceof Unit) {
 			tool.warnOn((Unit) target, message);
-			return new UnitWarning((Unit) target, message);
+			return new UnitMessage((Unit) target, message);
 		} else if (target instanceof Global) {
 			tool.warnOn(unit, (Global) target, message);
-			return new GlobalWarning(unit, (Global) target, message);
+			return new GlobalMessage(unit, (Global) target, message);
 		} else if (target instanceof CFG) {
 			tool.warnOn((CFG) target, message);
-			return new CFGWarning((CFG) target, message);
+			return new CFGMessage((CFG) target, message);
 		} else if (target instanceof CodeMemberDescriptor) {
 			tool.warnOn((CodeMemberDescriptor) target, message);
-			return new CFGDescriptorWarning((CodeMemberDescriptor) target, message);
+			return new CFGDescriptorMessage((CodeMemberDescriptor) target, message);
 		} else if (target instanceof Expression) {
 			tool.warnOn((Expression) target, message);
-			return new ExpressionWarning((Expression) target, message);
+			return new ExpressionMessage((Expression) target, message);
 		} else if (target instanceof Statement) {
 			tool.warnOn((Statement) target, message);
-			return new StatementWarning((Statement) target, message);
+			return new StatementMessage((Statement) target, message);
 		}
 		return null;
 	}
@@ -79,7 +79,7 @@ public class CheckToolTest {
 	@Test
 	public void testCopy() {
 		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
-		Collection<Warning> exp = new HashSet<>();
+		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
 		exp.add(build(tool, cfg, "foo"));
@@ -107,7 +107,7 @@ public class CheckToolTest {
 	@Test
 	public void testSimpleFill() {
 		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
-		Collection<Warning> exp = new HashSet<>();
+		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
 		exp.add(build(tool, cfg, "foo"));
@@ -120,9 +120,9 @@ public class CheckToolTest {
 	}
 
 	@Test
-	public void testDisjointWarnings() {
+	public void testDisjointMessages() {
 		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
-		Collection<Warning> exp = new HashSet<>();
+		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 4, 0)), "foo"));
@@ -133,9 +133,9 @@ public class CheckToolTest {
 	}
 
 	@Test
-	public void testDuplicateWarnings() {
+	public void testDuplicateMessages() {
 		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
-		Collection<Warning> exp = new HashSet<>();
+		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));

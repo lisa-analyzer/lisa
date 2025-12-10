@@ -4,17 +4,19 @@
   }, {
     "message" : "['imp-testcases/whole-value/count.imp':24:21] on 'untyped count::main(count* this, untyped nondet)': [STATEMENT] This assertion might fail"
   } ],
+  "notices" : [ ],
   "files" : [ "report.json", "untyped_count.countMatches(count__this,_untyped_str,_untyped_sub)_-417308280.json", "untyped_count.main(count__this,_untyped_nondet).json" ],
   "info" : {
     "cfgs" : "2",
-    "duration" : "36ms",
-    "end" : "2025-07-22T10:23:39.758+02:00",
+    "duration" : "18ms",
+    "end" : "2025-12-10T13:06:29.538+01:00",
     "expressions" : "48",
     "files" : "2",
     "globals" : "0",
     "members" : "2",
+    "notices" : "0",
     "programs" : "1",
-    "start" : "2025-07-22T10:23:39.722+02:00",
+    "start" : "2025-12-10T13:06:29.520+01:00",
     "statements" : "18",
     "units" : "1",
     "version" : "0.1",

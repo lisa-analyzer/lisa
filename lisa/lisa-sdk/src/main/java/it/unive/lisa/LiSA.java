@@ -1,7 +1,7 @@
 package it.unive.lisa;
 
 import it.unive.lisa.analysis.Analysis;
-import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.logging.Log4jConfig;
 import it.unive.lisa.logging.TimerLogger;
@@ -10,7 +10,6 @@ import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,18 +107,29 @@ public class LiSA {
 				conf.callGraph,
 				conf.analysis == null ? null : new Analysis(conf.analysis, conf.shouldSmashError));
 		Application app = new Application(programs);
-		Collection<Warning> warnings;
+		CheckTool tool;
 
 		try {
-			warnings = TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app));
+			tool = TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app));
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}
 
-		LiSARunInfo stats = new LiSARunInfo(warnings, fileManager.createdFiles(), app, start, new DateTime());
+		LiSARunInfo stats = new LiSARunInfo(
+				tool.getWarnings(),
+				tool.getNotices(),
+				fileManager.createdFiles(),
+				app,
+				start,
+				new DateTime());
 		LOG.info("LiSA statistics:\n" + stats);
 
-		LiSAReport report = new LiSAReport(conf, stats, warnings, fileManager.createdFiles());
+		LiSAReport report = new LiSAReport(
+				conf,
+				stats,
+				tool.getWarnings(),
+				tool.getNotices(),
+				fileManager.createdFiles());
 		if (infoProvider != null)
 			infoProvider.accept(report);
 		if (conf.jsonOutput) {

@@ -1,0 +1,41 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "assets/d3-graphviz.min.js", "assets/d3.v7.min.js", "report.json", "untyped_A.A(A__this)_cfg.html", "untyped_A.A(A__this)_cfg.json", "untyped_A.getOne(A__this)_cfg.html", "untyped_A.getOne(A__this)_cfg.json", "untyped_A.getPositive(A__this,_untyped_i)_cfg.html", "untyped_A.getPositive(A__this,_untyped_i)_cfg.json", "untyped_A.identity(A__this,_untyped_i)_cfg.html", "untyped_A.identity(A__this,_untyped_i)_cfg.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_cfg.html", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_cfg.json", "untyped_tests.main(tests__this)_cfg.html", "untyped_tests.main(tests__this)_cfg.json" ],
+  "info" : {
+    "cfgs" : "6",
+    "duration" : "94ms",
+    "end" : "2025-12-10T13:06:26.648+01:00",
+    "expressions" : "49",
+    "files" : "14",
+    "globals" : "0",
+    "members" : "6",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2025-12-10T13:06:26.554+01:00",
+    "statements" : "21",
+    "units" : "2",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "HTML",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "true",
+    "serializeResults" : "false",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/visualization/html-inputs"
+  }
+}

@@ -20,20 +20,22 @@
   }, {
     "message" : "['imp-testcases/non-interference/confidentiality/program.imp':9:43] on 'untyped Confidentiality::confidentiality_lec5ex2(Confidentiality* this)': [EXPRESSION] This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference"
   } ],
+  "notices" : [ ],
   "files" : [ "report.json", "untyped_Confidentiality.confidentiality_lec16(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec17(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec18ex1(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec18ex2(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec19ex1(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec19ex2(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec19ex3(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec19ex4(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec19ex5(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec5ex1(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec5ex2(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec6(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec7(Confidentiality__this).json", "untyped_Confidentiality.confidentiality_lec8(Confidentiality__this).json" ],
   "info" : {
     "cfgs" : "14",
-    "duration" : "486ms",
-    "end" : "2025-01-31T12:39:50.549+01:00",
+    "duration" : "41ms",
+    "end" : "2025-12-10T13:06:16.956+01:00",
     "expressions" : "130",
     "files" : "14",
     "globals" : "0",
     "members" : "14",
+    "notices" : "0",
     "programs" : "1",
-    "start" : "2025-01-31T12:39:50.063+01:00",
+    "start" : "2025-12-10T13:06:16.915+01:00",
     "statements" : "70",
     "units" : "1",
-    "version" : "0.1b8",
+    "version" : "0.1",
     "warnings" : "10"
   },
   "configuration" : {
