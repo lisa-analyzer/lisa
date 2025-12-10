@@ -456,4 +456,7 @@ public interface Type {
 		return false;
 	}
 
+	default boolean isFunctionType() {
+		return this instanceof FunctionType;
+	}
 }

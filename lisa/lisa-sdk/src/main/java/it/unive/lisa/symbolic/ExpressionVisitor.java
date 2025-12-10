@@ -7,15 +7,9 @@ import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.heap.NullConstant;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.PushInv;
-import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.*;
+
+import java.util.Map;
 
 /**
  * A visitor for {@link SymbolicExpression}s, to be used as parameter to
@@ -239,6 +233,13 @@ public interface ExpressionVisitor<T> {
 			T left,
 			T middle,
 			T right,
+			Object... params)
+			throws SemanticException;
+
+	T visit(
+			VariadicExpression expression,
+			T[] values,
+			Map<String, T[]> variadicValues,
 			Object... params)
 			throws SemanticException;
 
