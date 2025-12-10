@@ -107,7 +107,7 @@ public class OptimizedFixpointTest {
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
+					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -147,7 +147,7 @@ public class OptimizedFixpointTest {
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
+					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -187,7 +187,7 @@ public class OptimizedFixpointTest {
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
 			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-					.fixpoint(Map.of(source, comp), FIFOWorkingSet.mk(), new FixpointTester2());
+					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>(), new FixpointTester2());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");

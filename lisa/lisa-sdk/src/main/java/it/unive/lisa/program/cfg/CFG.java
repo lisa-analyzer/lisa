@@ -1203,7 +1203,7 @@ public class CFG
 
 		basicBlocks = new IdentityHashMap<>(leaders.size());
 		for (Statement leader : leaders) {
-			VisitOnceWorkingSet<Statement> ws = VisitOnceFIFOWorkingSet.mk();
+			VisitOnceWorkingSet<Statement> ws = new VisitOnceFIFOWorkingSet<>();
 			ws.push(leader);
 			List<Statement> bb = new LinkedList<>();
 			while (!ws.isEmpty()) {

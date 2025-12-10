@@ -17,7 +17,7 @@ public class FixpointConfiguration
 	/**
 	 * Holder of {@link LiSAConfiguration#fixpointWorkingSet}.
 	 */
-	public final Class<? extends WorkingSet<Statement>> fixpointWorkingSet;
+	public final WorkingSet<Statement> fixpointWorkingSet;
 
 	/**
 	 * Holder of {@link LiSAConfiguration#wideningThreshold}.
@@ -59,10 +59,9 @@ public class FixpointConfiguration
 	 * 
 	 * @param parent the root configuration to draw data from.
 	 */
-	@SuppressWarnings("unchecked")
 	public FixpointConfiguration(
 			LiSAConfiguration parent) {
-		this.fixpointWorkingSet = (Class<? extends WorkingSet<Statement>>) parent.fixpointWorkingSet;
+		this.fixpointWorkingSet = parent.fixpointWorkingSet;
 		this.wideningThreshold = parent.wideningThreshold;
 		this.recursionWideningThreshold = parent.recursionWideningThreshold;
 		this.glbThreshold = parent.glbThreshold;

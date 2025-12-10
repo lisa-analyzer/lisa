@@ -1,5 +1,12 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
@@ -24,13 +31,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
@@ -104,7 +105,7 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 				results.putResult(
 						cfg,
 						id,
-						cfg.backwardFixpoint(entryState, this, WorkingSet.of(conf.fixpointWorkingSet), conf, id));
+						cfg.backwardFixpoint(entryState, this, conf.fixpointWorkingSet.mk(), conf, id));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}

@@ -92,7 +92,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	/**
 	 * The kind of {@link WorkingSet} to use during this analysis.
 	 */
-	private Class<? extends WorkingSet<Statement>> workingSet;
+	private WorkingSet<Statement> workingSet;
 
 	/**
 	 * The fixpoint configuration.
@@ -311,7 +311,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 				results.putResult(
 						cfg,
 						empty,
-						cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
+						cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty));
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
@@ -347,7 +347,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			AnalysisState<A> entryState)
 			throws FixpointException,
 			SemanticException {
-		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, WorkingSet.of(workingSet), conf, token);
+		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, workingSet.mk(), conf, token);
 		if (shouldStoreFixpointResults()) {
 			Pair<Boolean, AnalyzedCFG<A>> res = results.putResult(cfg, token, fixpointResult);
 			if (shouldStoreFixpointResults() && Boolean.TRUE.equals(res.getLeft()))

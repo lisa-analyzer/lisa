@@ -92,7 +92,7 @@ public class ControlFlowExtractor {
 
 			// with empty loops, we can skip the whole reasoning
 			if (tail != conditional) {
-				WorkingSet<Edge> ws = VisitOnceFIFOWorkingSet.mk();
+				WorkingSet<Edge> ws = new VisitOnceFIFOWorkingSet<>();
 				target.getIngoingEdges(tail).forEach(ws::push);
 				body.addNode(tail);
 				while (!ws.isEmpty()) {

@@ -244,7 +244,7 @@ public class LiSAConfiguration
 	 * The concrete class of {@link WorkingSet} to be used in fixpoints.
 	 * Defaults to {@link OrderBasedWorkingSet}.
 	 */
-	public Class<?> fixpointWorkingSet = OrderBasedWorkingSet.class;
+	public WorkingSet<Statement> fixpointWorkingSet = new OrderBasedWorkingSet();
 
 	/**
 	 * The {@link OpenCallPolicy} to be used for computing the result of

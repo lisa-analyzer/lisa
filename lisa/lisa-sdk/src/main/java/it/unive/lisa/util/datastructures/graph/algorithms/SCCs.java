@@ -97,7 +97,7 @@ public class SCCs<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends E
 		int index = 0;
 		Map<N, Integer> indexes = new HashMap<>();
 		Map<N, Integer> lowlinks = new HashMap<>();
-		WorkingSet<N> ws = LIFOWorkingSet.mk();
+		WorkingSet<N> ws = new LIFOWorkingSet<>();
 		for (N n : graph.getNodes())
 			if (!indexes.containsKey(n))
 				index = strongconnect(graph, indexes, lowlinks, index, ws, n);

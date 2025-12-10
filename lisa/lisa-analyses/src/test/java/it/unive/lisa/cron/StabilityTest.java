@@ -105,7 +105,7 @@ public class StabilityTest
 					Map<Statement,
 							ValueEnvironment<Trend>> fixpoint = fix.fixpoint(
 									entrypoints,
-									FIFOWorkingSet.mk(),
+									new FIFOWorkingSet<>(),
 									new FixpointImplementation<Statement, Edge, ValueEnvironment<Trend>>() {
 
 										@Override

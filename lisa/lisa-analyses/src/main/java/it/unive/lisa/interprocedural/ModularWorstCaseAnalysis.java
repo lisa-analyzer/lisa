@@ -117,7 +117,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 				results.putResult(
 						cfg,
 						id,
-						cfg.fixpoint(prepared, this, WorkingSet.of(conf.fixpointWorkingSet), conf, id));
+						cfg.fixpoint(prepared, this, conf.fixpointWorkingSet.mk(), conf, id));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}

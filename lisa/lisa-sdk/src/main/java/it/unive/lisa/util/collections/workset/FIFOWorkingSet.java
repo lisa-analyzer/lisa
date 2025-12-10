@@ -18,19 +18,15 @@ public final class FIFOWorkingSet<E>
 
 	private final Deque<E> ws;
 
-	private FIFOWorkingSet() {
+	/**
+	 * Builds an empty working set.
+	 */
+	public FIFOWorkingSet() {
 		ws = new LinkedList<>();
 	}
 
-	/**
-	 * Yields a new, empty working set.
-	 * 
-	 * @param <E> the type of the elements that the returned working set
-	 *                contains
-	 * 
-	 * @return the new working set
-	 */
-	public static <E> FIFOWorkingSet<E> mk() {
+	@Override
+	public FIFOWorkingSet<E> mk() {
 		return new FIFOWorkingSet<>();
 	}
 

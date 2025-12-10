@@ -99,26 +99,26 @@ public class WorksetTest {
 
 	@Test
 	public void LIFOsWsTest() {
-		linear(LIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		linear(LIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", null);
-		random(LIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		random(LIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", null);
+		linear(new LIFOWorkingSet<>(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		linear(new LIFOWorkingSet<>(), true, true, "a", "b", "c", "d", null);
+		random(new LIFOWorkingSet<>(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		random(new LIFOWorkingSet<>(), true, true, "a", "b", "c", "d", null);
 
 		// Concurrent version does not support null elements
-		linear(ConcurrentLIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		random(ConcurrentLIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		linear(new ConcurrentLIFOWorkingSet<>(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		random(new ConcurrentLIFOWorkingSet<>(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
 	}
 
 	@Test
 	public void FIFOsWsTest() {
-		linear(FIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		linear(FIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", null);
-		random(FIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		random(FIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", null);
+		linear(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		linear(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", null);
+		random(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		random(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", null);
 
 		// Concurrent version does not support null elements
-		linear(ConcurrentFIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		random(ConcurrentFIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		linear(new ConcurrentFIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		random(new ConcurrentFIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
 	}
 
 	interface Tester<T> {
@@ -156,7 +156,7 @@ public class WorksetTest {
 	@Test
 	public void VisitOnceWsTest() {
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
+				new VisitOnceFIFOWorkingSet<>(),
 				false,
 				(
 						ws,
@@ -172,7 +172,7 @@ public class WorksetTest {
 				"b",
 				"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
+				new VisitOnceFIFOWorkingSet<>(),
 				false,
 				(
 						ws,
@@ -189,7 +189,7 @@ public class WorksetTest {
 				null,
 				"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
+				new VisitOnceFIFOWorkingSet<>(),
 				false,
 				(
 						ws,
@@ -205,7 +205,7 @@ public class WorksetTest {
 				"b",
 				"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
+				new VisitOnceFIFOWorkingSet<>(),
 				false,
 				(
 						ws,
@@ -223,7 +223,7 @@ public class WorksetTest {
 				"i");
 
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
+				new VisitOnceLIFOWorkingSet<>(),
 				true,
 				(
 						ws,
@@ -239,7 +239,7 @@ public class WorksetTest {
 				"b",
 				"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
+				new VisitOnceLIFOWorkingSet<>(),
 				true,
 				(
 						ws,
@@ -256,7 +256,7 @@ public class WorksetTest {
 				null,
 				"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
+				new VisitOnceLIFOWorkingSet<>(),
 				true,
 				(
 						ws,
@@ -272,7 +272,7 @@ public class WorksetTest {
 				"b",
 				"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
+				new VisitOnceLIFOWorkingSet<>(),
 				true,
 				(
 						ws,

@@ -215,7 +215,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new BackwardFixpoint<>(this, true);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
-				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, FIFOWorkingSet.mk(), asc, existing);
+				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, new FIFOWorkingSet<>(), asc, existing);
 				expanded = new StatementStore<>(bottom);
 				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
 					expanded.put(e.getKey(), e.getValue().postState);
