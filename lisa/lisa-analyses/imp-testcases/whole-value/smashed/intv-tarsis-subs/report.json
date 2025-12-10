@@ -6,17 +6,19 @@
   }, {
     "message" : "['imp-testcases/whole-value/subs.imp':12:31] on 'untyped subs::main(subs* this, untyped nondet)': [STATEMENT] This assertion always fails"
   } ],
+  "notices" : [ ],
   "files" : [ "report.json", "untyped_subs.main(subs__this,_untyped_nondet).json" ],
   "info" : {
     "cfgs" : "1",
-    "duration" : "31ms",
-    "end" : "2025-07-22T10:23:37.790+02:00",
+    "duration" : "5ms",
+    "end" : "2025-12-10T13:06:28.154+01:00",
     "expressions" : "27",
     "files" : "1",
     "globals" : "0",
     "members" : "1",
+    "notices" : "0",
     "programs" : "1",
-    "start" : "2025-07-22T10:23:37.759+02:00",
+    "start" : "2025-12-10T13:06:28.149+01:00",
     "statements" : "10",
     "units" : "1",
     "version" : "0.1",

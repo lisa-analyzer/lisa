@@ -1,0 +1,41 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_strings.assume(strings__this).json", "untyped_strings.branching(strings__this,_untyped_x).json", "untyped_strings.closure(strings__this).json", "untyped_strings.closure2(strings__this).json", "untyped_strings.closure3(strings__this).json", "untyped_strings.constants(strings__this).json", "untyped_strings.iftest1(strings__this).json", "untyped_strings.iftest2(strings__this).json", "untyped_strings.iftestand(strings__this).json", "untyped_strings.iftestor(strings__this).json", "untyped_strings.integers(strings__this).json", "untyped_strings.interassign(strings__this).json", "untyped_strings.loops(strings__this,_untyped_x).json", "untyped_strings.paper1(strings__this).json", "untyped_strings.paper2(strings__this).json", "untyped_strings.paper3(strings__this,_untyped_x).json", "untyped_strings.replace(strings__this).json", "untyped_strings.replace2(strings__this).json", "untyped_strings.scopetest(strings__this,_untyped_x).json", "untyped_strings.stringconcat(strings__this).json", "untyped_strings.substring(strings__this).json", "untyped_strings.substring2(strings__this).json", "untyped_strings.type(strings__this,_untyped_x).json" ],
+  "info" : {
+    "cfgs" : "23",
+    "duration" : "143ms",
+    "end" : "2025-12-10T13:06:23.503+01:00",
+    "expressions" : "258",
+    "files" : "23",
+    "globals" : "0",
+    "members" : "23",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2025-12-10T13:06:23.360+01:00",
+    "statements" : "114",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "optimize" : "false",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/string/subs-domain/subs-domain"
+  }
+}
