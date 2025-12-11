@@ -14,6 +14,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * A {@link ScopeId} that keeps track of the whole call stack and of the entry
  * state of each stack frame.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <A> the type of {@link AbstractLattice} handled by the analysis
  */
 public class CallStackId<A extends AbstractLattice<A>>

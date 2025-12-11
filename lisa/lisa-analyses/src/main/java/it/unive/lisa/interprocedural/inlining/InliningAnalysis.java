@@ -48,6 +48,8 @@ import org.apache.logging.log4j.Logger;
  * set through the constructor, or (ii) terminates with an exception when the
  * maximum call stack depth has been reached.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis

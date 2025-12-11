@@ -62,5 +62,5 @@ public interface WorkingSet<E> {
 	 * 
 	 * @return the new working set
 	 */
-	WorkingSet<E> mk(); 
+	WorkingSet<E> mk();
 }

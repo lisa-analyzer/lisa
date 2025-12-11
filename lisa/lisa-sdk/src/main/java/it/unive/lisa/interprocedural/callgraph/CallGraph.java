@@ -125,7 +125,7 @@ public abstract class CallGraph
 	 */
 	public Collection<CodeMember> getCallersTransitively(
 			CodeMember cm) {
-		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
+		VisitOnceWorkingSet<CodeMember> ws = new VisitOnceFIFOWorkingSet<>();
 		getCallers(cm).stream().forEach(ws::push);
 		while (!ws.isEmpty())
 			getCallers(ws.pop()).stream().forEach(ws::push);
@@ -143,7 +143,7 @@ public abstract class CallGraph
 	 */
 	public Collection<CodeMember> getCallersTransitively(
 			Collection<? extends CodeMember> cms) {
-		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
+		VisitOnceWorkingSet<CodeMember> ws = new VisitOnceFIFOWorkingSet<>();
 		cms.forEach(cm -> getCallers(cm).stream().forEach(ws::push));
 		while (!ws.isEmpty())
 			getCallers(ws.pop()).stream().forEach(ws::push);
@@ -177,7 +177,7 @@ public abstract class CallGraph
 	 */
 	public Collection<CodeMember> getCalleesTransitively(
 			CodeMember cm) {
-		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
+		VisitOnceWorkingSet<CodeMember> ws = new VisitOnceFIFOWorkingSet<>();
 		getCallees(cm).stream().forEach(ws::push);
 		while (!ws.isEmpty())
 			getCallees(ws.pop()).stream().forEach(ws::push);
@@ -195,7 +195,7 @@ public abstract class CallGraph
 	 */
 	public Collection<CodeMember> getCalleesTransitively(
 			Collection<? extends CodeMember> cms) {
-		VisitOnceWorkingSet<CodeMember> ws = VisitOnceFIFOWorkingSet.mk();
+		VisitOnceWorkingSet<CodeMember> ws = new VisitOnceFIFOWorkingSet<>();
 		cms.forEach(cm -> getCallees(cm).stream().forEach(ws::push));
 		while (!ws.isEmpty())
 			getCallees(ws.pop()).stream().forEach(ws::push);

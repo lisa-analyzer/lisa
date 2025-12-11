@@ -214,7 +214,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix
-						.fixpoint(starting, WorkingSet.of(conf.fixpointWorkingSet), asc, existing);
+						.fixpoint(starting, conf.fixpointWorkingSet.mk(), asc, existing);
 				expanded = new StatementStore<>(bottom);
 				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
 					expanded.put(e.getKey(), e.getValue().postState);

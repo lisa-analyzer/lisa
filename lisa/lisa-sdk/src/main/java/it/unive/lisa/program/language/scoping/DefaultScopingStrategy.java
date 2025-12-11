@@ -19,6 +19,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * scope on the whole state using
  * {@link AnalysisState#pushScope(ScopeToken, ProgramPoint)} and
  * {@link AnalysisState#popScope(ScopeToken, ProgramPoint)}.
+ *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class DefaultScopingStrategy
 		implements

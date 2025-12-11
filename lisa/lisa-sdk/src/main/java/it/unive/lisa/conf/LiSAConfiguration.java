@@ -13,7 +13,6 @@ import it.unive.lisa.interprocedural.TopExecutionPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.Log4jConfig;
 import it.unive.lisa.outputs.messages.Message;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.statement.Statement;

@@ -14,6 +14,8 @@ import java.util.List;
  * call chain, with {@code k} being specified in the singleton creation
  * ({@link #create(int)}).
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <A> the type of {@link AbstractLattice} handled by the analysis
  */
 public class KDepthToken<A extends AbstractLattice<A>>
