@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import java.util.Collection;
 

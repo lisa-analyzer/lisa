@@ -27,7 +27,7 @@ import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.DescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.DescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
