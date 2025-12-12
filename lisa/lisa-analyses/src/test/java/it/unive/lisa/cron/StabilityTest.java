@@ -126,7 +126,7 @@ public class StabilityTest
 										}
 
 										@Override
-										public boolean equality(
+										public boolean leq(
 												Statement node,
 												ValueEnvironment<Trend> approx,
 												ValueEnvironment<Trend> old)
@@ -160,7 +160,7 @@ public class StabilityTest
 										}
 
 										@Override
-										public ValueEnvironment<Trend> operation(
+										public ValueEnvironment<Trend> join(
 												Statement node,
 												ValueEnvironment<Trend> approx,
 												ValueEnvironment<Trend> old)

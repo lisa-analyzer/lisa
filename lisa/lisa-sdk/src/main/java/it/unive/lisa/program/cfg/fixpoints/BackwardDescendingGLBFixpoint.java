@@ -48,7 +48,7 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 	}
 
 	@Override
-	public CompoundState<A> operation(
+	public CompoundState<A> join(
 			Statement node,
 			CompoundState<A> approx,
 			CompoundState<A> old)
@@ -65,7 +65,7 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 	}
 
 	@Override
-	public boolean equality(
+	public boolean leq(
 			Statement node,
 			CompoundState<A> approx,
 			CompoundState<A> old)

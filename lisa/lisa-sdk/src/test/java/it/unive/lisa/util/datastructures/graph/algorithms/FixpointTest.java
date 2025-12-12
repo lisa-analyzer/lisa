@@ -52,7 +52,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> operation(
+		public Set<TestNode> join(
 				TestNode node,
 				Set<TestNode> approx,
 				Set<TestNode> old)
@@ -61,7 +61,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public boolean equality(
+		public boolean leq(
 				TestNode node,
 				Set<TestNode> approx,
 				Set<TestNode> old)
@@ -247,7 +247,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> operation(
+		public Set<TestNode> join(
 				TestNode node,
 				Set<TestNode> approx,
 				Set<TestNode> old)
@@ -258,7 +258,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public boolean equality(
+		public boolean leq(
 				TestNode node,
 				Set<TestNode> approx,
 				Set<TestNode> old)

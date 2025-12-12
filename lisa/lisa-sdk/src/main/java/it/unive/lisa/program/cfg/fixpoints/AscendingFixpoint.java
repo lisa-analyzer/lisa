@@ -52,7 +52,7 @@ public class AscendingFixpoint<A extends AbstractLattice<A>, D extends AbstractD
 	}
 
 	@Override
-	public CompoundState<A> operation(
+	public CompoundState<A> join(
 			Statement node,
 			CompoundState<A> approx,
 			CompoundState<A> old)
@@ -85,7 +85,7 @@ public class AscendingFixpoint<A extends AbstractLattice<A>, D extends AbstractD
 	}
 
 	@Override
-	public boolean equality(
+	public boolean leq(
 			Statement node,
 			CompoundState<A> approx,
 			CompoundState<A> old)

@@ -240,8 +240,8 @@ public class LiSAConfiguration
 	public DescendingPhaseType descendingPhaseType = DescendingPhaseType.NONE;
 
 	/**
-	 * The concrete class of {@link WorkingSet} to be used in fixpoints.
-	 * Defaults to {@link OrderBasedWorkingSet}.
+	 * The {@link WorkingSet} to be used in fixpoints. Defaults to
+	 * {@link OrderBasedWorkingSet}.
 	 */
 	public WorkingSet<Statement> fixpointWorkingSet = new OrderBasedWorkingSet();
 
@@ -330,10 +330,9 @@ public class LiSAConfiguration
 						res.append(" (").append(coll.size()).append(")").append((coll.isEmpty() ? "" : ":"));
 						for (Object element : coll)
 							res.append("\n    ").append(element.getClass().getSimpleName());
-					} else if (Class.class.isAssignableFrom(field.getType()))
-						res.append(": ").append(((Class<?>) value).getSimpleName());
-					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
-						res.append(": ").append(((OpenCallPolicy) value).getClass().getSimpleName());
+					} else if (WorkingSet.class.isAssignableFrom(field.getType())
+							|| OpenCallPolicy.class.isAssignableFrom(field.getType()))
+						res.append(": ").append(value.getClass().getSimpleName());
 					else if (Predicate.class.isAssignableFrom(field.getType()))
 						// not sure how we can get more details reliably
 						res.append(": ").append(value == null ? "unset" : "set");
@@ -372,10 +371,9 @@ public class LiSAConfiguration
 								.map(e -> e.getClass().getSimpleName())
 								.sorted()
 								.collect(new CollectionUtilities.StringCollector<>(", "));
-					else if (Class.class.isAssignableFrom(field.getType()))
-						val = ((Class<?>) value).getSimpleName();
-					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
-						val = ((OpenCallPolicy) value).getClass().getSimpleName();
+					else if (WorkingSet.class.isAssignableFrom(field.getType())
+							|| OpenCallPolicy.class.isAssignableFrom(field.getType()))
+						val = value.getClass().getSimpleName();
 					else if (Predicate.class.isAssignableFrom(field.getType()))
 						// not sure how we can get more details reliably
 						val = value == null ? "unset" : "set";

@@ -66,7 +66,7 @@ public class OptimizedFixpointTest {
 		}
 
 		@Override
-		public CompoundState<TestAbstractState> operation(
+		public CompoundState<TestAbstractState> join(
 				Statement node,
 				CompoundState<TestAbstractState> approx,
 				CompoundState<TestAbstractState> old)
@@ -75,7 +75,7 @@ public class OptimizedFixpointTest {
 		}
 
 		@Override
-		public boolean equality(
+		public boolean leq(
 				Statement node,
 				CompoundState<TestAbstractState> approx,
 				CompoundState<TestAbstractState> old)

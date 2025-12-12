@@ -101,7 +101,7 @@ public class OptimizedFixpoint<A extends AbstractLattice<A>>
 			CompoundState<A> oldApprox = result.get(closing);
 			if (oldApprox != null)
 				try {
-					newApprox = implementation.operation(closing, newApprox, oldApprox);
+					newApprox = implementation.join(closing, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", closing, graph), e);
 				}
@@ -113,7 +113,7 @@ public class OptimizedFixpoint<A extends AbstractLattice<A>>
 						|| oldApprox == null
 						// or if we got a result that should not be considered
 						// equal
-						|| !implementation.equality(closing, newApprox, oldApprox)) {
+						|| !implementation.leq(closing, newApprox, oldApprox)) {
 					result.put(closing, newApprox);
 					for (Statement instr : graph.followersOf(closing))
 						ws.push(instr);

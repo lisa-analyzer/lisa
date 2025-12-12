@@ -148,7 +148,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T operation(
+		T join(
 				N node,
 				T approx,
 				T old)
@@ -156,15 +156,15 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 		/**
 		 * Given a node and two states, yields whether or not the most recent
-		 * one has to be considered <i>equal</i> to the older one in terms of
-		 * fixpoint iterations. This means that if this method returns
-		 * {@code true}, than the result for the given node won't be updated and
-		 * the successors of such node won't be added back to the list of nodes
-		 * to process.<br>
+		 * one has to be considered <i>less than or equal</i> to the older one
+		 * in terms of fixpoint iterations. This means that if this method
+		 * returns {@code true}, the result for the given node won't be updated
+		 * and the successors of such node won't be added back to the list of
+		 * nodes to process.<br>
 		 * <br>
 		 * This callback is invoked after the exit state of a node has been
 		 * computed through {@link #semantics(Object, Object)} and joined with
-		 * the older one through {@link #operation(Object, Object, Object)}.
+		 * the older one through {@link #join(Object, Object, Object)}.
 		 * 
 		 * @param node   the node where the computation takes place
 		 * @param approx the most recent state
@@ -175,7 +175,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		boolean equality(
+		boolean leq(
 				N node,
 				T approx,
 				T old)
@@ -264,7 +264,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			T postApprox = newApprox;
 			if (oldApprox != null)
 				try {
-					postApprox = implementation.operation(current, newApprox, oldApprox);
+					postApprox = implementation.join(current, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
@@ -275,7 +275,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 						|| oldApprox == null
 						// or if we got a result that should not be considered
 						// equal
-						|| !implementation.equality(current, postApprox, oldApprox)) {
+						|| !implementation.leq(current, postApprox, oldApprox)) {
 					result.put(current, postApprox);
 					for (N instr : graph.followersOf(current))
 						ws.push(instr);

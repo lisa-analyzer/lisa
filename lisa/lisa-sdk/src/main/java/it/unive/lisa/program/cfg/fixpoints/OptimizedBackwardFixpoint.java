@@ -107,7 +107,7 @@ public class OptimizedBackwardFixpoint<
 			CompoundState<A> oldApprox = result.get(leader);
 			if (oldApprox != null)
 				try {
-					newApprox = implementation.operation(leader, newApprox, oldApprox);
+					newApprox = implementation.join(leader, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", leader, graph), e);
 				}
@@ -119,7 +119,7 @@ public class OptimizedBackwardFixpoint<
 						|| oldApprox == null
 						// or if we got a result that should not be considered
 						// equal
-						|| !implementation.equality(leader, newApprox, oldApprox)) {
+						|| !implementation.leq(leader, newApprox, oldApprox)) {
 					result.put(leader, newApprox);
 					for (Statement instr : graph.predecessorsOf(leader))
 						ws.push(instr);
