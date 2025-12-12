@@ -13,8 +13,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,7 +97,8 @@ public class OptimizedBackwardFixpoint<
 			if (bb == null)
 				throw new FixpointException("'" + current + "' is not the leader of a basic block of '" + graph + "'");
 
-			CompoundState<A> exitstate = getExitState(current, startingPoints.get(current), implementation, result);
+			CompoundState<
+					A> exitstate = getExitState(graph, current, startingPoints.get(current), implementation, result);
 			if (exitstate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 

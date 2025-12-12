@@ -10,7 +10,7 @@ import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.TestGraph;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
-import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint.FixpointImplementation;
+import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;

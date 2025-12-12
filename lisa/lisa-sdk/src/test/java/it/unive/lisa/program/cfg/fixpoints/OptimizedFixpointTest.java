@@ -29,7 +29,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint.FixpointImplementation;
+import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Map;
 import org.junit.Test;

@@ -12,8 +12,9 @@ import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,6 +63,13 @@ public class OptimizedFixpoint<A extends AbstractLattice<A>>
 	}
 
 	@Override
+	public Fixpoint<CFG, Statement, Edge, CompoundState<A>> mk(
+			CFG graph,
+			boolean forceFullEvaluation) {
+		return new OptimizedFixpoint<>(graph, forceFullEvaluation, hotspots);
+	}
+
+	@Override
 	public Map<Statement, CompoundState<A>> fixpoint(
 			Map<Statement, CompoundState<A>> startingPoints,
 			WorkingSet<Statement> ws,
@@ -91,7 +99,8 @@ public class OptimizedFixpoint<A extends AbstractLattice<A>>
 			if (bb == null)
 				throw new FixpointException("'" + current + "' is not the leader of a basic block of '" + graph + "'");
 
-			CompoundState<A> entrystate = getEntryState(current, startingPoints.get(current), implementation, result);
+			CompoundState<
+					A> entrystate = getEntryState(graph, current, startingPoints.get(current), implementation, result);
 			if (entrystate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 
