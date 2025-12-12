@@ -12,7 +12,7 @@ import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * A fixpoint algorithm for a {@link Graph}, parametric to the
- * {@link it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation}
+ * {@link it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint.FixpointImplementation}
  * that one wants to use to compute the results. This fixpoint algorithms is
  * optimized: it works exploiting the basic blocks of the target graph, and only
  * yields approximations of widening points, stopping statements and
@@ -38,7 +38,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class OptimizedFixpoint<A extends AbstractLattice<A>>
 		extends
-		Fixpoint<CFG, Statement, Edge, CompoundState<A>> {
+		ForwardFixpoint<CFG, Statement, Edge, CompoundState<A>> {
 
 	private final Predicate<Statement> hotspots;
 

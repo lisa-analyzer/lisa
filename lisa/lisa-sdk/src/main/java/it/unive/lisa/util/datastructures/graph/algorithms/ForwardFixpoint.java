@@ -25,7 +25,7 @@ import java.util.Set;
  * @param <E> the type of the {@link Edge}s in the source graph
  * @param <T> the type of data computed by the fixpoint
  */
-public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>, T> {
+public class ForwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>, T> {
 
 	/**
 	 * Common format for error messages.
@@ -50,7 +50,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	 *                                all nodes independently of the fixpoint
 	 *                                implementation
 	 */
-	public Fixpoint(
+	public ForwardFixpoint(
 			G graph,
 			boolean forceFullEvaluation) {
 		this.graph = graph;

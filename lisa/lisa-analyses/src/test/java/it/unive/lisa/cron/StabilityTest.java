@@ -25,8 +25,8 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.representation.MapRepresentation;
@@ -89,7 +89,7 @@ public class StabilityTest
 								ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
 								TypeEnvironment<TypeSet>>> tool,
 				CFG graph) {
-			Fixpoint<CFG, Statement, Edge, ValueEnvironment<Trend>> fix = new Fixpoint<>(graph, false);
+			ForwardFixpoint<CFG, Statement, Edge, ValueEnvironment<Trend>> fix = new ForwardFixpoint<>(graph, false);
 			// we start at bottom to have the empty state at the beginning
 			ValueEnvironment<Trend> beginning = new ValueEnvironment<>(Trend.BOTTOM).bottom();
 			Stability<ValueEnvironment<IntInterval>> analysis = new Stability<>(aux);

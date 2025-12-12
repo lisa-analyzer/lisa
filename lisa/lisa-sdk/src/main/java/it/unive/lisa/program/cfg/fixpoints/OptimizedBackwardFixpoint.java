@@ -13,7 +13,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 
 /**
  * A fixpoint algorithm for a {@link Graph}, parametric to the
- * {@link it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation}
+ * {@link it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint.FixpointImplementation}
  * that one wants to use to compute the results. This fixpoint algorithms is
  * optimized: it works exploiting the basic blocks of the target graph, and only
  * yields approximations of widening points, stopping statements and
@@ -66,7 +66,7 @@ public class OptimizedBackwardFixpoint<
 	public Map<Statement, CompoundState<A>> fixpoint(
 			Map<Statement, CompoundState<A>> startingPoints,
 			WorkingSet<Statement> ws,
-			Fixpoint.FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
+			ForwardFixpoint.FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
 			Map<Statement, CompoundState<A>> initialResult)
 			throws FixpointException {
 		Map<Statement, CompoundState<A>> result = initialResult == null ? new HashMap<>(graph.getNodesCount())
@@ -147,7 +147,7 @@ public class OptimizedBackwardFixpoint<
 
 	private CompoundState<A> analyze(
 			Map<Statement, CompoundState<A>> result,
-			Fixpoint.FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
+			ForwardFixpoint.FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
 			CompoundState<A> exitstate,
 			Statement[] bb)
 			throws FixpointException {

@@ -24,7 +24,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -209,7 +209,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 		}
 
 		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
-		Fixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new Fixpoint<>(this, true);
+		ForwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new ForwardFixpoint<>(this, true);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix

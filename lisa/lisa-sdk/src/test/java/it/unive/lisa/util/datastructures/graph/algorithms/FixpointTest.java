@@ -10,7 +10,7 @@ import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.TestGraph;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint.FixpointImplementation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -75,7 +75,7 @@ public class FixpointTest {
 	public void testEmptyGraph() {
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(new TestGraph(), false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(new TestGraph(), false)
 					.fixpoint(Map.of(), new FIFOWorkingSet<>(), new FixpointTester());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
@@ -100,7 +100,7 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>(), new FixpointTester());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
@@ -135,7 +135,7 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>(), new FixpointTester());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
@@ -180,7 +180,7 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>(), new FixpointTester());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
@@ -292,7 +292,7 @@ public class FixpointTest {
 		Map<TestNode, Set<TestNode>> res = null;
 		boolean fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>(), new ExceptionalTester(0));
 		} catch (FixpointException e) {
 			fail = true;
@@ -305,7 +305,7 @@ public class FixpointTest {
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>(), new ExceptionalTester(1));
 		} catch (FixpointException e) {
 			fail = true;
@@ -318,7 +318,7 @@ public class FixpointTest {
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>(), new ExceptionalTester(2));
 		} catch (FixpointException e) {
 			fail = true;
@@ -332,7 +332,7 @@ public class FixpointTest {
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>(), new ExceptionalTester(3));
 		} catch (FixpointException e) {
 			fail = true;
@@ -345,7 +345,7 @@ public class FixpointTest {
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
+			res = new ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>(), new ExceptionalTester(4));
 		} catch (FixpointException e) {
 			fail = true;

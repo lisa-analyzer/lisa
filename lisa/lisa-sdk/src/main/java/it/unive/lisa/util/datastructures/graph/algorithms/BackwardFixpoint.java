@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * A backward fixpoint algorithm for a {@link Graph}, parametric to the
- * {@link Fixpoint.FixpointImplementation} that one wants to use to compute the
+ * {@link ForwardFixpoint.FixpointImplementation} that one wants to use to compute the
  * results.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -67,7 +67,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *                           fixpoint at, each mapped to its entry state.
 	 * @param ws             the instance of {@link WorkingSet} to use for the
 	 *                           fixpoint
-	 * @param implementation the {@link Fixpoint.FixpointImplementation} to use
+	 * @param implementation the {@link ForwardFixpoint.FixpointImplementation} to use
 	 *                           for running the fixpoint
 	 * 
 	 * @return a mapping from each (reachable) node of the source graph to the
@@ -79,7 +79,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	public Map<N, T> fixpoint(
 			Map<N, T> startingPoints,
 			WorkingSet<N> ws,
-			Fixpoint.FixpointImplementation<N, E, T> implementation)
+			ForwardFixpoint.FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
 		return fixpoint(startingPoints, ws, implementation, null);
 	}
@@ -92,7 +92,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *                           fixpoint at, each mapped to its entry state.
 	 * @param ws             the instance of {@link WorkingSet} to use for the
 	 *                           fixpoint
-	 * @param implementation the {@link Fixpoint.FixpointImplementation} to use
+	 * @param implementation the {@link ForwardFixpoint.FixpointImplementation} to use
 	 *                           for running the fixpoint
 	 * @param initialResult  the map of initial result to use for running the
 	 *                           fixpoint
@@ -106,7 +106,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	public Map<N, T> fixpoint(
 			Map<N, T> startingPoints,
 			WorkingSet<N> ws,
-			Fixpoint.FixpointImplementation<N, E, T> implementation,
+			ForwardFixpoint.FixpointImplementation<N, E, T> implementation,
 			Map<N, T> initialResult)
 			throws FixpointException {
 		Map<N, T> result = initialResult == null ? new HashMap<>(graph.getNodesCount()) : new HashMap<>(initialResult);
@@ -180,7 +180,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	protected T getExitState(
 			N node,
 			T startstate,
-			Fixpoint.FixpointImplementation<N, E, T> implementation,
+			ForwardFixpoint.FixpointImplementation<N, E, T> implementation,
 			Map<N, T> result)
 			throws FixpointException {
 		Collection<N> follows = graph.followersOf(node);

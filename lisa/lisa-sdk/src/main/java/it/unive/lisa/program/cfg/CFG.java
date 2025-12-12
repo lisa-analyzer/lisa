@@ -43,7 +43,7 @@ import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
@@ -566,12 +566,12 @@ public class CFG
 		// descending one: the latter will need full results to start applying
 		// glbs/narrowings from a post-fixpoint
 		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
-		Fixpoint<CFG,
+		ForwardFixpoint<CFG,
 				Statement,
 				Edge,
 				CompoundState<A>> fix = isOptimized
 						? new OptimizedFixpoint<>(this, false, conf.hotspots)
-						: new Fixpoint<>(this, false);
+						: new ForwardFixpoint<>(this, false);
 		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, interprocedural, conf);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
@@ -585,7 +585,7 @@ public class CFG
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
 			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
 
-		fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new Fixpoint<>(this, true);
+		fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new ForwardFixpoint<>(this, true);
 		Map<Statement, CompoundState<A>> descending;
 		switch (conf.descendingPhaseType) {
 		case GLB:

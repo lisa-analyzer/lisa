@@ -14,7 +14,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint.FixpointImplementation;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
