@@ -13,10 +13,9 @@ import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
-import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -25,7 +24,6 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,8 +34,8 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * An {@link AnalyzedCFG} that has been built using an
- * {@link OptimizedFixpoint}. This means that this graph will only contain
- * results for widening points (that is, {@link Statement}s that part of
+ * {@link OptimizedForwardFixpoint}. This means that this graph will only
+ * contain results for widening points (that is, {@link Statement}s that part of
  * {@link #getCycleEntries()}), exit statements (that is, {@link Statement}s
  * such that {@link Statement#stopsExecution()} holds), and hotspots (that is,
  * {@link Statement}s such that {@link LiSAConfiguration#hotspots} holds).
@@ -208,12 +206,12 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 			}
 		}
 
-		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
-		ForwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new ForwardFixpoint<>(this, true);
+		ForwardAscendingFixpoint<A,
+				D> fix = new ForwardAscendingFixpoint<>(this, true, new PrecomputedAnalysis(), conf);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix
-						.fixpoint(starting, conf.fixpointWorkingSet.mk(), asc, existing);
+						.fixpoint(starting, conf.fixpointWorkingSet.mk(), existing);
 				expanded = new StatementStore<>(bottom);
 				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
 					expanded.put(e.getKey(), e.getValue().postState);

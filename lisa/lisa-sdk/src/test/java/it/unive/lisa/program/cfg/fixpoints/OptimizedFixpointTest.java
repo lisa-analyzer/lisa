@@ -4,13 +4,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
+import it.unive.lisa.TestInterproceduralAnalysis;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ProgramState;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CodeUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
@@ -21,6 +26,8 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardFixpoint;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
@@ -28,22 +35,30 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.junit.Test;
 
 public class OptimizedFixpointTest {
 
 	private static class FixpointTester2
-			implements
-			FixpointImplementation<Statement, Edge, CompoundState<TestAbstractState>> {
+			extends
+			OptimizedForwardFixpoint<TestAbstractState, TestAbstractDomain> {
+
+		public FixpointTester2(
+				CFG graph,
+				boolean forceFullEvaluation,
+				InterproceduralAnalysis<TestAbstractState, TestAbstractDomain> interprocedural,
+				Predicate<Statement> hotspots) {
+			super(graph, forceFullEvaluation, interprocedural, hotspots);
+		}
 
 		@Override
 		public CompoundState<TestAbstractState> semantics(
 				Statement node,
 				CompoundState<TestAbstractState> entrystate)
-				throws Exception {
+				throws SemanticException {
 			return entrystate;
 		}
 
@@ -51,7 +66,7 @@ public class OptimizedFixpointTest {
 		public CompoundState<TestAbstractState> traverse(
 				Edge edge,
 				CompoundState<TestAbstractState> entrystate)
-				throws Exception {
+				throws SemanticException {
 			return entrystate;
 		}
 
@@ -60,7 +75,7 @@ public class OptimizedFixpointTest {
 				Statement node,
 				CompoundState<TestAbstractState> left,
 				CompoundState<TestAbstractState> right)
-				throws Exception {
+				throws SemanticException {
 			return left.lub(right);
 		}
 
@@ -69,7 +84,7 @@ public class OptimizedFixpointTest {
 				Statement node,
 				CompoundState<TestAbstractState> approx,
 				CompoundState<TestAbstractState> old)
-				throws Exception {
+				throws SemanticException {
 			return old.lub(approx);
 		}
 
@@ -78,8 +93,17 @@ public class OptimizedFixpointTest {
 				Statement node,
 				CompoundState<TestAbstractState> approx,
 				CompoundState<TestAbstractState> old)
-				throws Exception {
+				throws SemanticException {
 			return approx.lessOrEqual(old);
+		}
+
+		@Override
+		public ForwardCFGFixpoint<TestAbstractState, TestAbstractDomain> mk(
+				CFG graph,
+				boolean forceFullEvaluation,
+				InterproceduralAnalysis<TestAbstractState, TestAbstractDomain> interprocedural,
+				FixpointConfiguration config) {
+			return new FixpointTester2(graph, forceFullEvaluation, interprocedural, st -> st instanceof Call);
 		}
 
 	}
@@ -105,8 +129,8 @@ public class OptimizedFixpointTest {
 				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>(), new FixpointTester2());
+			res = new FixpointTester2(graph, false, new TestInterproceduralAnalysis<>(), st -> st instanceof Call)
+					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -145,8 +169,8 @@ public class OptimizedFixpointTest {
 				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>(), new FixpointTester2());
+			res = new FixpointTester2(graph, false, new TestInterproceduralAnalysis<>(), st -> st instanceof Call)
+					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -185,8 +209,8 @@ public class OptimizedFixpointTest {
 				new ProgramState<>(new TestAbstractState(), new ExpressionSet()));
 		CompoundState<TestAbstractState> comp = CompoundState.of(state.bottom(), new StatementStore<>(state.bottom()));
 		try {
-			res = new OptimizedFixpoint<TestAbstractState>(graph, false, st -> st instanceof Call)
-					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>(), new FixpointTester2());
+			res = new FixpointTester2(graph, false, new TestInterproceduralAnalysis<>(), st -> st instanceof Call)
+					.fixpoint(Map.of(source, comp), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");

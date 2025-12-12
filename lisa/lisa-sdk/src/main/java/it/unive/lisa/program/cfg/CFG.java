@@ -25,13 +25,19 @@ import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
-import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
-import it.unive.lisa.program.cfg.fixpoints.DescendingGLBFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.DescendingNarrowingFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
@@ -570,9 +576,8 @@ public class CFG
 				Statement,
 				Edge,
 				CompoundState<A>> fix = isOptimized
-						? new OptimizedFixpoint<>(this, false, conf.hotspots)
-						: new ForwardFixpoint<>(this, false);
-		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, interprocedural, conf);
+						? new OptimizedForwardAscendingFixpoint<>(this, false, interprocedural, conf, conf.hotspots)
+						: new ForwardAscendingFixpoint<>(this, false, interprocedural, conf);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
@@ -580,21 +585,25 @@ public class CFG
 				(
 						st,
 						state) -> starting.put(st, CompoundState.of(state, bot)));
-		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
+		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws);
 
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
 			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
 
-		fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new ForwardFixpoint<>(this, true);
 		Map<Statement, CompoundState<A>> descending;
 		switch (conf.descendingPhaseType) {
 		case GLB:
-			DescendingGLBFixpoint<A, D> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
-			descending = fix.fixpoint(starting, ws, dg, ascending);
+			fix = conf.optimize
+					? new OptimizedForwardDescendingGLBFixpoint<>(this, true, interprocedural, conf, conf.hotspots)
+					: new ForwardDescendingGLBFixpoint<>(this, true, interprocedural, conf);
+			descending = fix.fixpoint(starting, ws, ascending);
 			break;
 		case NARROWING:
-			DescendingNarrowingFixpoint<A, D> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
-			descending = fix.fixpoint(starting, ws, dn, ascending);
+			fix = conf.optimize
+					? new OptimizedForwardDescendingNarrowingFixpoint<>(this, true, interprocedural, conf,
+							conf.hotspots)
+					: new ForwardDescendingNarrowingFixpoint<>(this, true, interprocedural, conf);
+			descending = fix.fixpoint(starting, ws, ascending);
 			break;
 		case NONE:
 		default:
@@ -779,9 +788,9 @@ public class CFG
 		BackwardFixpoint<CFG,
 				Statement,
 				Edge,
-				CompoundState<A>> fix = isOptimized ? new OptimizedBackwardFixpoint<>(this, false, conf.hotspots)
-						: new BackwardFixpoint<>(this, false);
-		BackwardAscendingFixpoint<A, D> asc = new BackwardAscendingFixpoint<>(this, interprocedural, conf);
+				CompoundState<A>> fix = isOptimized
+						? new OptimizedBackwardAscendingFixpoint<>(this, false, interprocedural, conf, conf.hotspots)
+						: new BackwardAscendingFixpoint<>(this, false, interprocedural, conf);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
@@ -789,22 +798,25 @@ public class CFG
 				(
 						st,
 						state) -> starting.put(st, CompoundState.of(state, bot)));
-		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
+		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws);
 
 		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
 			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
 
-		fix = conf.optimize ? new OptimizedBackwardFixpoint<>(this, true, conf.hotspots)
-				: new BackwardFixpoint<>(this, true);
 		Map<Statement, CompoundState<A>> descending;
 		switch (conf.descendingPhaseType) {
 		case GLB:
-			DescendingGLBFixpoint<A, D> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
-			descending = fix.fixpoint(starting, ws, dg, ascending);
+			fix = conf.optimize
+					? new OptimizedBackwardDescendingGLBFixpoint<>(this, true, interprocedural, conf, conf.hotspots)
+					: new BackwardDescendingGLBFixpoint<>(this, true, interprocedural, conf);
+			descending = fix.fixpoint(starting, ws, ascending);
 			break;
 		case NARROWING:
-			DescendingNarrowingFixpoint<A, D> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
-			descending = fix.fixpoint(starting, ws, dn, ascending);
+			fix = conf.optimize
+					? new OptimizedBackwardDescendingNarrowingFixpoint<>(this, true, interprocedural, conf,
+							conf.hotspots)
+					: new BackwardDescendingNarrowingFixpoint<>(this, true, interprocedural, conf);
+			descending = fix.fixpoint(starting, ws, ascending);
 			break;
 		case NONE:
 		default:

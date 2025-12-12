@@ -14,10 +14,9 @@ import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
-import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -26,7 +25,6 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -211,11 +209,11 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			}
 		}
 
-		BackwardAscendingFixpoint<A, D> asc = new BackwardAscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
-		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new BackwardFixpoint<>(this, true);
+		BackwardAscendingFixpoint<A,
+				D> fix = new BackwardAscendingFixpoint<>(this, true, new PrecomputedAnalysis(), conf);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
-				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, new FIFOWorkingSet<>(), asc, existing);
+				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, new FIFOWorkingSet<>(), existing);
 				expanded = new StatementStore<>(bottom);
 				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
 					expanded.put(e.getKey(), e.getValue().postState);

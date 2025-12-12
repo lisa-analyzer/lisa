@@ -1,4 +1,4 @@
-package it.unive.lisa.program.cfg.fixpoints;
+package it.unive.lisa.program.cfg.fixpoints.optforward;
 
 import static java.lang.String.format;
 
@@ -6,12 +6,14 @@ import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import java.util.Collection;
@@ -21,26 +23,31 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * A fixpoint algorithm for a {@link Graph}, parametric to the
- * {@link it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint.FixpointImplementation}
- * that one wants to use to compute the results. This fixpoint algorithms is
- * optimized: it works exploiting the basic blocks of the target graph, and only
- * yields approximations of widening points, stopping statements and
- * user-defined hotspots.
+ * An optimized {@link ForwardFixpoint} for {@link CFGs}. This fixpoint
+ * algorithm is optimized: it works exploiting the basic blocks of the target
+ * graph, and only yields approximations of widening points, stopping statements
+ * and user-defined hotspots.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the type of {@link AbstractDomain} contained into the analysis
  *                state
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class OptimizedBackwardFixpoint<
-		A extends AbstractLattice<A>>
+public abstract class OptimizedForwardFixpoint<
+		A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
 		extends
-		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> {
+		ForwardCFGFixpoint<A, D> {
 
-	private final Predicate<Statement> hotspots;
+	/**
+	 * The predicate to identify additional statements whose approximation must
+	 * be preserved in the results.
+	 */
+	protected final Predicate<Statement> hotspots;
 
 	/**
 	 * Builds an optimized fixpoint for the given {@link Graph}.
@@ -49,15 +56,18 @@ public class OptimizedBackwardFixpoint<
 	 * @param forceFullEvaluation whether or not the fixpoint should evaluate
 	 *                                all nodes independently of the fixpoint
 	 *                                implementation
+	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
+	 *                                semantics invocation
 	 * @param hotspots            the predicate to identify additional
 	 *                                statements whose approximation must be
 	 *                                preserved in the results
 	 */
-	public OptimizedBackwardFixpoint(
+	public OptimizedForwardFixpoint(
 			CFG graph,
 			boolean forceFullEvaluation,
+			InterproceduralAnalysis<A, D> interprocedural,
 			Predicate<Statement> hotspots) {
-		super(graph, forceFullEvaluation);
+		super(graph, forceFullEvaluation, interprocedural);
 		this.hotspots = hotspots;
 	}
 
@@ -65,18 +75,12 @@ public class OptimizedBackwardFixpoint<
 	public Map<Statement, CompoundState<A>> fixpoint(
 			Map<Statement, CompoundState<A>> startingPoints,
 			WorkingSet<Statement> ws,
-			ForwardFixpoint.FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
 			Map<Statement, CompoundState<A>> initialResult)
 			throws FixpointException {
 		Map<Statement, CompoundState<A>> result = initialResult == null ? new HashMap<>(graph.getNodesCount())
 				: new HashMap<>(initialResult);
 
-		Map<Statement, Statement[]> bbs = new HashMap<>();
-		for (Entry<Statement, Statement[]> bb : graph.getBasicBlocks().entrySet()) {
-			// we store the basic blocks as <closing statement, block>
-			Statement[] block = bb.getValue();
-			bbs.put(block[block.length - 1], block);
-		}
+		Map<Statement, Statement[]> bbs = graph.getBasicBlocks();
 		startingPoints.keySet().forEach(ws::push);
 
 		Set<Statement> toProcess = null;
@@ -97,19 +101,19 @@ public class OptimizedBackwardFixpoint<
 				throw new FixpointException("'" + current + "' is not the leader of a basic block of '" + graph + "'");
 
 			CompoundState<
-					A> exitstate = getExitState(graph, current, startingPoints.get(current), implementation, result);
-			if (exitstate == null)
+					A> entrystate = getEntryState(graph, current, startingPoints.get(current), result);
+			if (entrystate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 
-			newApprox = analyze(result, implementation, exitstate, bb);
+			newApprox = analyze(result, entrystate, bb);
 
-			Statement leader = bb[0];
-			CompoundState<A> oldApprox = result.get(leader);
+			Statement closing = bb[bb.length - 1];
+			CompoundState<A> oldApprox = result.get(closing);
 			if (oldApprox != null)
 				try {
-					newApprox = implementation.join(leader, newApprox, oldApprox);
+					newApprox = join(closing, newApprox, oldApprox);
 				} catch (Exception e) {
-					throw new FixpointException(format(ERROR, "joining states", leader, graph), e);
+					throw new FixpointException(format(ERROR, "joining states", closing, graph), e);
 				}
 
 			try {
@@ -119,13 +123,13 @@ public class OptimizedBackwardFixpoint<
 						|| oldApprox == null
 						// or if we got a result that should not be considered
 						// equal
-						|| !implementation.leq(leader, newApprox, oldApprox)) {
-					result.put(leader, newApprox);
-					for (Statement instr : graph.predecessorsOf(leader))
+						|| !leq(closing, newApprox, oldApprox)) {
+					result.put(closing, newApprox);
+					for (Statement instr : graph.followersOf(closing))
 						ws.push(instr);
 				}
 			} catch (Exception e) {
-				throw new FixpointException(format(ERROR, "updating result", leader, graph), e);
+				throw new FixpointException(format(ERROR, "updating result", closing, graph), e);
 			}
 		}
 
@@ -147,17 +151,16 @@ public class OptimizedBackwardFixpoint<
 
 	private CompoundState<A> analyze(
 			Map<Statement, CompoundState<A>> result,
-			ForwardFixpoint.FixpointImplementation<Statement, Edge, CompoundState<A>> implementation,
-			CompoundState<A> exitstate,
+			CompoundState<A> entrystate,
 			Statement[] bb)
 			throws FixpointException {
-		StatementStore<A> emptyIntermediate = exitstate.intermediateStates.bottom();
-		CompoundState<A> newApprox = CompoundState.of(exitstate.postState.bottom(), emptyIntermediate);
-		CompoundState<A> exit = exitstate;
-		for (int i = bb.length - 1; i >= 0; i--)
+		StatementStore<A> emptyIntermediate = entrystate.intermediateStates.bottom();
+		CompoundState<A> newApprox = CompoundState.of(entrystate.postState.bottom(), emptyIntermediate);
+		CompoundState<A> entry = entrystate;
+		for (int i = 0; i < bb.length; i++) {
+			Statement cursor = bb[i];
 			try {
-				Statement cursor = bb[i];
-				newApprox = implementation.semantics(cursor, exit);
+				newApprox = semantics(cursor, entry);
 
 				// storing approximations into result is a trick: it won't ever
 				// be used in fixpoint comparisons, but it will still make
@@ -166,13 +169,23 @@ public class OptimizedBackwardFixpoint<
 					if (intermediate.getKey().stopsExecution()
 							|| (hotspots != null && hotspots.test(intermediate.getKey())))
 						result.put(intermediate.getKey(), CompoundState.of(intermediate.getValue(), emptyIntermediate));
-				if (cursor != bb[0] && (cursor.stopsExecution() || (hotspots != null && hotspots.test(cursor))))
+				if (cursor != bb[bb.length - 1]
+						&& (cursor.stopsExecution() || (hotspots != null && hotspots.test(cursor))))
 					result.put(cursor, CompoundState.of(newApprox.postState, emptyIntermediate));
 
-				exit = newApprox;
+				if (i < bb.length - 1) {
+					Collection<Edge> edges = graph.getEdgesConnecting(cursor, bb[i + 1]);
+					if (edges.size() != 1)
+						throw new FixpointException("More than one edge connecting " + cursor + " and " + bb[i + 1]
+								+ " in the basic block: " + StringUtils.join(edges, ", "));
+					// we still invoke traverse as there is variable scoping
+					// handling happening there
+					entry = traverse(edges.iterator().next(), newApprox);
+				}
 			} catch (Exception e) {
-				throw new FixpointException(format(ERROR, "computing semantics", bb[i], graph), e);
+				throw new FixpointException(format(ERROR, "computing semantics", cursor, graph), e);
 			}
+		}
 
 		return CompoundState.of(newApprox.postState, emptyIntermediate);
 	}

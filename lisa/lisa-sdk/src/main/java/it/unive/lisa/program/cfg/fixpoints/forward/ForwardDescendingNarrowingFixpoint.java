@@ -1,4 +1,4 @@
-package it.unive.lisa.program.cfg.fixpoints;
+package it.unive.lisa.program.cfg.fixpoints.forward;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
@@ -8,11 +8,13 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collection;
 
 /**
- * A {@link CFGFixpoint} that traverses descending chains using narrowings.
+ * A {@link ForwardCFGFixpoint} that traverses descending chains using
+ * narrowings.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -20,10 +22,10 @@ import java.util.Collection;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
+public class ForwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 		D extends AbstractDomain<A>>
 		extends
-		BackwardCFGFixpoint<A, D> {
+		ForwardCFGFixpoint<A, D> {
 
 	private final FixpointConfiguration config;
 
@@ -32,16 +34,20 @@ public class BackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 	/**
 	 * Builds the fixpoint implementation.
 	 * 
-	 * @param target          the target of the implementation
-	 * @param interprocedural the {@link InterproceduralAnalysis} to use for
-	 *                            semantics computations
-	 * @param config          the {@link FixpointConfiguration} to use
+	 * @param target              the target of the implementation
+	 * @param forceFullEvaluation whether or not the fixpoint should evaluate
+	 *                                all nodes independently of the fixpoint
+	 *                                implementation
+	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
+	 *                                semantics computations
+	 * @param config              the {@link FixpointConfiguration} to use
 	 */
-	public BackwardDescendingNarrowingFixpoint(
+	public ForwardDescendingNarrowingFixpoint(
 			CFG target,
+			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration config) {
-		super(target, interprocedural);
+		super(target, forceFullEvaluation, interprocedural);
 		this.config = config;
 		this.wideningPoints = config.useWideningPoints ? target.getCycleEntries() : null;
 	}
@@ -76,6 +82,15 @@ public class BackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 			CompoundState<A> old)
 			throws SemanticException {
 		return old.lessOrEqual(approx);
+	}
+
+	@Override
+	public ForwardCFGFixpoint<A, D> mk(
+			CFG graph,
+			boolean forceFullEvaluation,
+			InterproceduralAnalysis<A, D> interprocedural,
+			FixpointConfiguration config) {
+		return new ForwardDescendingNarrowingFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
 	}
 
 }
