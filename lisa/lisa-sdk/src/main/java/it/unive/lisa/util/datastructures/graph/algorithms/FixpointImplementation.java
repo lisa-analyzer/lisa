@@ -28,7 +28,7 @@ public interface FixpointImplementation<
 	 * semantics.<br>
 	 * <br>
 	 * This callback is invoked after the overall entry state for a node has
-	 * been computed through {@link #union(Object, Object, Object)} of the exit
+	 * been computed through {@link #union(Node, Object, Object)} of the exit
 	 * states of its predecessors.
 	 * 
 	 * @param node       the node where the computation takes place
@@ -69,7 +69,7 @@ public interface FixpointImplementation<
 	 * <br>
 	 * This callback is invoked for the computation of the overall entry state
 	 * for a node to merge the exit states of its predecessors, after traversing
-	 * the edges connecting them through {@link #traverse(Object, Object)}.
+	 * the edges connecting them through {@link #traverse(Edge, Object)}.
 	 * 
 	 * @param node  the node where the computation takes place
 	 * @param left  the first state
@@ -90,7 +90,7 @@ public interface FixpointImplementation<
 	 * <i>or</i> widening) together.<br>
 	 * <br>
 	 * This callback is invoked after the exit state of a node has been computed
-	 * through {@link #semantics(Object, Object)}, to join it with results from
+	 * through {@link #semantics(Node, Object)}, to join it with results from
 	 * older fixpoint iterations.
 	 * 
 	 * @param node   the node where the computation takes place
@@ -116,8 +116,8 @@ public interface FixpointImplementation<
 	 * process.<br>
 	 * <br>
 	 * This callback is invoked after the exit state of a node has been computed
-	 * through {@link #semantics(Object, Object)} and joined with the older one
-	 * through {@link #join(Object, Object, Object)}.
+	 * through {@link #semantics(Node, Object)} and joined with the older one
+	 * through {@link #join(Node, Object, Object)}.
 	 * 
 	 * @param node   the node where the computation takes place
 	 * @param approx the most recent state

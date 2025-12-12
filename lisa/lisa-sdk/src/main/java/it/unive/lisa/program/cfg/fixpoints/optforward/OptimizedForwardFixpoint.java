@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * An optimized {@link ForwardFixpoint} for {@link CFGs}. This fixpoint
+ * An optimized {@link ForwardFixpoint} for {@link CFG}s. This fixpoint
  * algorithm is optimized: it works exploiting the basic blocks of the target
  * graph, and only yields approximations of widening points, stopping statements
  * and user-defined hotspots.
