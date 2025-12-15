@@ -121,4 +121,19 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>,
 		return left.lub(right);
 	}
 
+	@Override
+	public boolean isOptimized() {
+		return false;
+	}
+
+	@Override
+	public ForwardCFGFixpoint<A, D> asForward() {
+		return this;
+	}
+
+	@Override
+	public AnalysisFixpoint<?, A, D> asUnoptimized() {
+		return this;
+	}
+
 }

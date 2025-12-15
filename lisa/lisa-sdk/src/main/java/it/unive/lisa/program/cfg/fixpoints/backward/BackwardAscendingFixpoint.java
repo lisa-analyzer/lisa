@@ -1,5 +1,9 @@
 package it.unive.lisa.program.cfg.fixpoints.backward;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -8,11 +12,12 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A {@link BackwardCFGFixpoint} that traverses ascending chains using lubs and
@@ -120,6 +125,16 @@ public class BackwardAscendingFixpoint<A extends AbstractLattice<A>,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration config) {
 		return new BackwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
+	}
+
+	@Override
+	public AnalysisFixpoint<?, A, D> asOptimized() {
+		return new OptimizedBackwardAscendingFixpoint<>();
+	}
+
+	@Override
+	public ForwardCFGFixpoint<A, D> asForward() {
+		return new ForwardAscendingFixpoint<>();
 	}
 
 }

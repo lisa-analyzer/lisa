@@ -6,7 +6,11 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,6 +101,14 @@ public class ForwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration config) {
 		return new ForwardDescendingGLBFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
+	}
+	@Override
+	public AnalysisFixpoint<?, A, D> asOptimized() {
+		return new OptimizedForwardDescendingGLBFixpoint<>();
+	}
+	@Override
+	public BackwardCFGFixpoint<A, D> asBackward() {
+		return new BackwardDescendingGLBFixpoint<>();
 	}
 
 }

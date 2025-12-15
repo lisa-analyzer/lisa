@@ -2,19 +2,6 @@ package it.unive.lisa.program.cfg.fixpoints.optbackward;
 
 import static java.lang.String.format;
 
-import it.unive.lisa.analysis.AbstractDomain;
-import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.fixpoints.CompoundState;
-import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,11 +10,32 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.checks.semantic.SemanticCheck;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.collections.workset.WorkingSet;
+import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+
 /**
  * An optimized {@link BackwardFixpoint} for {@link CFG}s. This fixpoint
  * algorithm is optimized: it works exploiting the basic blocks of the target
  * graph, and only yields approximations of widening points, stopping statements
- * and user-defined hotspots.
+ * and user-defined hotspots. These are identified through a predicate over
+ * statements (also considering intermediate ones) for which the fixpoint
+ * results must be kept. This is useful for avoiding result unwinding due to
+ * {@link SemanticCheck}s querying for the post-state of statements. Note that
+ * statements for which {@link Statement#stopsExecution()} is {@code true} are
+ * always considered hotspots.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -42,8 +50,12 @@ public abstract class OptimizedBackwardFixpoint<
 		BackwardCFGFixpoint<A, D> {
 
 	/**
-	 * The predicate to identify additional statements whose approximation must
-	 * be preserved in the results.
+	 * The predicate to identify additional statements (also considering
+	 * intermediate ones) for which the fixpoint results must be kept. This is
+	 * useful for avoiding result unwinding due to {@link SemanticCheck}s
+	 * querying for the post-state of statements. Note that statements for which
+	 * {@link Statement#stopsExecution()} is {@code true} are always considered
+	 * hotspots.
 	 */
 	protected final Predicate<Statement> hotspots;
 
@@ -57,8 +69,16 @@ public abstract class OptimizedBackwardFixpoint<
 	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
 	 *                                semantics invocation
 	 * @param hotspots            the predicate to identify additional
-	 *                                statements whose approximation must be
-	 *                                preserved in the results
+	 *                                statements (also considering intermediate
+	 *                                ones) for which the fixpoint results must
+	 *                                be kept. This is useful for avoiding
+	 *                                result unwinding due to
+	 *                                {@link SemanticCheck}s querying for the
+	 *                                post-state of statements. Note that
+	 *                                statements for which
+	 *                                {@link Statement#stopsExecution()} is
+	 *                                {@code true} are always considered
+	 *                                hotspots
 	 */
 	public OptimizedBackwardFixpoint(
 			CFG graph,
@@ -183,4 +203,18 @@ public abstract class OptimizedBackwardFixpoint<
 		return CompoundState.of(newApprox.postState, emptyIntermediate);
 	}
 
+	@Override
+	public boolean isOptimized() {
+		return true;
+	}
+
+	@Override
+	public AnalysisFixpoint<?, A, D> asOptimized() {
+		return this;
+	}
+
+	@Override
+	public BackwardCFGFixpoint<A, D> asBackward() {
+		return this;
+	}
 }

@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.fixpoints.forward;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -8,9 +10,12 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
 
 /**
  * A {@link ForwardCFGFixpoint} that traverses descending chains using
@@ -105,6 +110,16 @@ public class ForwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration config) {
 		return new ForwardDescendingNarrowingFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
+	}
+
+	@Override
+	public AnalysisFixpoint<?, A, D> asOptimized() {
+		return new OptimizedForwardDescendingNarrowingFixpoint<>();
+	}
+
+	@Override
+	public BackwardCFGFixpoint<A, D> asBackward() {
+		return new BackwardDescendingNarrowingFixpoint<>();
 	}
 
 }

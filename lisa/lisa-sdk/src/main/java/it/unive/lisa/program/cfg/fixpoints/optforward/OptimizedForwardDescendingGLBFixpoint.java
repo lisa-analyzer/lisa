@@ -6,8 +6,12 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,9 +46,29 @@ public class OptimizedForwardDescendingGLBFixpoint<
 	 * constructor or the
 	 * {@link #mk(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
 	 * method. Invocations of the latter will preserve the hotspots predicate.
+	 */
+	public OptimizedForwardDescendingGLBFixpoint() {
+		this(null, false, null, null, null);
+	}
+
+	/**
+	 * Builds the fixpoint implementation. Note that the implementation built
+	 * with this constructor is inherently invalid, as it does not target any
+	 * cfg and has no information on the analysis to run. Valid instances should
+	 * be built throug the
+	 * {@link #OptimizedForwardDescendingGLBFixpoint(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * constructor or the
+	 * {@link #mk(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * method. Invocations of the latter will preserve the hotspots predicate.
 	 * 
-	 * @param hotspots the predicate to identify additional statements whose
-	 *                     approximation must be preserved in the results
+	 * @param hotspots the predicate to identify additional statements (also
+	 *                     considering intermediate ones) for which the fixpoint
+	 *                     results must be kept. This is useful for avoiding
+	 *                     result unwinding due to {@link SemanticCheck}s
+	 *                     querying for the post-state of statements. Note that
+	 *                     statements for which
+	 *                     {@link Statement#stopsExecution()} is {@code true}
+	 *                     are always considered hotspots
 	 */
 	public OptimizedForwardDescendingGLBFixpoint(
 			Predicate<Statement> hotspots) {
@@ -110,6 +134,16 @@ public class OptimizedForwardDescendingGLBFixpoint<
 			FixpointConfiguration config) {
 		return new OptimizedForwardDescendingGLBFixpoint<>(graph, forceFullEvaluation, interprocedural, config,
 				hotspots);
+	}
+
+	@Override
+	public AnalysisFixpoint<?, A, D> asUnoptimized() {
+		return new ForwardDescendingGLBFixpoint<>();
+	}
+
+	@Override
+	public BackwardCFGFixpoint<A, D> asBackward() {
+		return new OptimizedBackwardDescendingGLBFixpoint<>(hotspots);
 	}
 
 }

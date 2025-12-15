@@ -110,4 +110,19 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 		return left.lub(right);
 	}
 
+	@Override
+	public boolean isOptimized() {
+		return false;
+	}
+
+	@Override
+	public BackwardCFGFixpoint<A, D> asBackward() {
+		return this;
+	}
+
+	@Override
+	public AnalysisFixpoint<?, A, D> asUnoptimized() {
+		return this;
+	}
+
 }

@@ -1,15 +1,20 @@
 package it.unive.lisa.program.cfg.fixpoints.backward;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A {@link BackwardCFGFixpoint} that traverses descending chains using glbs up
@@ -98,6 +103,16 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration config) {
 		return new BackwardDescendingGLBFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
+	}
+
+	@Override
+	public AnalysisFixpoint<?, A, D> asOptimized() {
+		return new OptimizedBackwardDescendingGLBFixpoint<>();
+	}
+
+	@Override
+	public ForwardCFGFixpoint<A, D> asForward() {
+		return new ForwardDescendingGLBFixpoint<>();
 	}
 
 }
