@@ -241,8 +241,10 @@ public class LiSAConfiguration
 	public DescendingPhaseType descendingPhaseType = DescendingPhaseType.NONE;
 
 	/**
-	 * The {@link WorkingSet} to be used in fixpoints. Defaults to
-	 * {@link OrderBasedWorkingSet}.
+	 * The {@link WorkingSet} to be used in fixpoints. Note that the instance
+	 * passed to this field is used as a factory to create new working sets
+	 * through {@link WorkingSet#mk()}, and its contents are thus ignored.
+	 * Defaults to {@link OrderBasedWorkingSet}.
 	 */
 	public WorkingSet<Statement> fixpointWorkingSet = new OrderBasedWorkingSet();
 

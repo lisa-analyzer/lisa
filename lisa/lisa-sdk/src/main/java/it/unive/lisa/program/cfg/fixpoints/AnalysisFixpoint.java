@@ -7,7 +7,9 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 
 /**
- * A generic interface for analysis fixpoints that enables cloning.
+ * A generic interface for analysis fixpoints that enables the creation of new
+ * instances with the same configuration through
+ * {@link #mk(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
