@@ -33,6 +33,24 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 	private final Map<Statement, Integer> glbs;
 
 	/**
+	 * Builds the fixpoint implementation. Note that the implementation built
+	 * with this constructor is inherently invalid, as it does not target any
+	 * cfg and has no information on the analysis to run. Valid instances should
+	 * be built throug the
+	 * {@link #OptimizedBackwardDescendingGLBFixpoint(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * constructor or the
+	 * {@link #mk(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * method. Invocations of the latter will preserve the hotspots predicate.
+	 * 
+	 * @param hotspots the predicate to identify additional statements whose
+	 *                     approximation must be preserved in the results
+	 */
+	public OptimizedBackwardDescendingGLBFixpoint(
+			Predicate<Statement> hotspots) {
+		this(null, false, null, null, hotspots);
+	}
+
+	/**
 	 * Builds the fixpoint implementation.
 	 * 
 	 * @param target              the target of the implementation

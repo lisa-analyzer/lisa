@@ -32,6 +32,20 @@ public class BackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 	private final Collection<Statement> wideningPoints;
 
 	/**
+	 * Builds the fixpoint implementation. Note that the implementation built
+	 * with this constructor is inherently invalid, as it does not target any
+	 * cfg and has no information on the analysis to run. Valid instances should
+	 * be built throug the
+	 * {@link #BackwardDescendingNarrowingFixpoint(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * constructor or the
+	 * {@link #mk(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * method.
+	 */
+	public BackwardDescendingNarrowingFixpoint() {
+		this(null, false, null, null);
+	}
+
+	/**
 	 * Builds the fixpoint implementation.
 	 * 
 	 * @param target              the target of the implementation
