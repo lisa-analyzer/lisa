@@ -19,6 +19,7 @@ import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * A {@link BackwardFixpoint} for {@link CFG}s.
@@ -121,8 +122,17 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 	}
 
 	@Override
-	public AnalysisFixpoint<?, A, D> asUnoptimized() {
+	public BackwardCFGFixpoint<A, D> asUnoptimized() {
 		return this;
 	}
 
+	// we redefine the following to narrow the return type
+	@Override
+	public abstract BackwardCFGFixpoint<A, D> asOptimized();
+
+	@Override
+	public BackwardCFGFixpoint<A, D> withHotspots(
+			Predicate<Statement> hotspots) {
+		return this;
+	}
 }

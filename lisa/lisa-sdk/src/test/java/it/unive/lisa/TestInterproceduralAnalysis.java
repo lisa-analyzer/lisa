@@ -54,7 +54,7 @@ public class TestInterproceduralAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
 	}
 

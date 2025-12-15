@@ -14,7 +14,6 @@ import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
@@ -41,16 +40,22 @@ import org.junit.Test;
 
 public class CFGFixpointTest {
 
-	private static FixpointConfiguration conf;
+	private static FixpointConfiguration<
+			SimpleAbstractState<
+					Monolith,
+					ValueEnvironment<IntInterval>,
+					TypeEnvironment<TypeSet>>,
+			SimpleAbstractDomain<
+					Monolith,
+					ValueEnvironment<IntInterval>,
+					TypeEnvironment<TypeSet>>> conf;
 
 	@BeforeClass
 	public static void init() {
 		LiSAConfiguration base = new LiSAConfiguration();
-		base.descendingPhaseType = DescendingPhaseType.NONE;
 		base.glbThreshold = 5;
 		base.wideningThreshold = 5;
-		base.optimize = false;
-		conf = new FixpointConfiguration(base);
+		conf = new FixpointConfiguration<>(base);
 	}
 
 	private ModularWorstCaseAnalysis<

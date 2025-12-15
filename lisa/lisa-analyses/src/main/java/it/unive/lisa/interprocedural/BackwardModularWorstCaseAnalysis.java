@@ -83,15 +83,15 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
-		if (conf.optimize)
+		if (conf.usesOptimizedBackwardFixpoint())
 			LOG.warn("Optimizations are turned on: this feature is experimental with backward analyses");
 
 		// new fixpoint iteration: restart
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
-		AnalyzedCFG<A> graph = conf.optimize
+		AnalyzedCFG<A> graph = conf.usesOptimizedBackwardFixpoint()
 				? new OptimizedAnalyzedCFG<>(singleton, id, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, id, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);

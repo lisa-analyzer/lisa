@@ -96,10 +96,10 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 		finalize(app);
 
 		Collection<CFG> allCFGs = app.getAllCFGs();
-		FixpointConfiguration fixconf = new FixpointConfiguration(conf);
+		FixpointConfiguration<A, D> fixconf = new FixpointConfiguration<>(conf);
 		CheckTool tool = new CheckTool(conf, fileManager);
 
-		if (conf.optimize)
+		if (fixconf.usesOptimizedForwardFixpoint() || fixconf.usesOptimizedBackwardFixpoint())
 			allCFGs.forEach(CFG::computeBasicBlocks);
 
 		if (conf.serializeInputs)
@@ -208,7 +208,7 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	}
 
 	private void analyze(
-			FixpointConfiguration fixconf) {
+			FixpointConfiguration<A, D> fixconf) {
 		AnalysisState<A> state = this.analysis.makeLattice();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {
@@ -223,15 +223,19 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	@SuppressWarnings("unchecked")
 	private void dumpResults(
 			Collection<CFG> allCFGs,
-			FixpointConfiguration fixconf) {
-		BiFunction<CFG, Statement, SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding ? (
-				cfg,
-				st) -> ((OptimizedAnalyzedCFG<A, D>) cfg).getUnwindedAnalysisStateAfter(st, fixconf)
-						.representation()
-						.toSerializableValue()
-				: (
-						cfg,
-						st) -> ((AnalyzedCFG<A>) cfg).getAnalysisStateAfter(st).representation().toSerializableValue();
+			FixpointConfiguration<A, D> fixconf) {
+		BiFunction<CFG,
+				Statement,
+				SerializableValue> labeler = (fixconf.usesOptimizedForwardFixpoint()
+						|| fixconf.usesOptimizedBackwardFixpoint()) && conf.dumpForcesUnwinding ? (
+								cfg,
+								st) -> ((OptimizedAnalyzedCFG<A, D>) cfg).getUnwindedAnalysisStateAfter(st, fixconf)
+										.representation()
+										.toSerializableValue()
+								: (
+										cfg,
+										st) -> ((AnalyzedCFG<A>) cfg).getAnalysisStateAfter(st).representation()
+												.toSerializableValue();
 
 		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 			for (AnalyzedCFG<A> result : interproc.getAnalysisResultsOf(cfg)) {

@@ -81,7 +81,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	/**
 	 * The fixpoint configuration.
 	 */
-	private FixpointConfiguration conf;
+	private FixpointConfiguration<A, D> conf;
 
 	/**
 	 * Builds the analysis, using an infinite call stack depth.
@@ -118,7 +118,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
 		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
@@ -127,7 +127,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
 		CallStackId<A> empty = token.startingId();
-		AnalyzedCFG<A> graph = conf.optimize
+		AnalyzedCFG<A> graph = conf.usesOptimizedForwardFixpoint()
 				? new OptimizedAnalyzedCFG<>(singleton, empty, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, empty, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);

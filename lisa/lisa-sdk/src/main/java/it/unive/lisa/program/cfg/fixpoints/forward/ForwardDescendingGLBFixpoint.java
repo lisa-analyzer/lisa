@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingGLBFixpoint;
@@ -45,8 +44,11 @@ public class ForwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 	 * method.
 	 */
 	public ForwardDescendingGLBFixpoint() {
-		this(null, false, null, null);
+		super(null, false, null);
+		this.maxGLBs = -1;
+		this.glbs = null;
 	}
+
 	/**
 	 * Builds the fixpoint implementation.
 	 * 
@@ -62,7 +64,7 @@ public class ForwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 			CFG target,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config) {
+			FixpointConfiguration<A, D> config) {
 		super(target, forceFullEvaluation, interprocedural);
 		this.maxGLBs = config.glbThreshold;
 		this.glbs = new HashMap<>(target.getNodesCount());
@@ -99,13 +101,15 @@ public class ForwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 			CFG graph,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config) {
+			FixpointConfiguration<A, D> config) {
 		return new ForwardDescendingGLBFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
 	}
+
 	@Override
-	public AnalysisFixpoint<?, A, D> asOptimized() {
+	public ForwardCFGFixpoint<A, D> asOptimized() {
 		return new OptimizedForwardDescendingGLBFixpoint<>();
 	}
+
 	@Override
 	public BackwardCFGFixpoint<A, D> asBackward() {
 		return new BackwardDescendingGLBFixpoint<>();

@@ -1,9 +1,5 @@
 package it.unive.lisa.program.cfg.fixpoints.forward;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -12,12 +8,14 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A {@link ForwardCFGFixpoint} that traverses ascending chains using lubs and
@@ -33,7 +31,7 @@ public class ForwardAscendingFixpoint<A extends AbstractLattice<A>, D extends Ab
 		extends
 		ForwardCFGFixpoint<A, D> {
 
-	private final FixpointConfiguration config;
+	private final FixpointConfiguration<A, D> config;
 
 	private final Map<Statement, Integer> lubs;
 
@@ -50,7 +48,10 @@ public class ForwardAscendingFixpoint<A extends AbstractLattice<A>, D extends Ab
 	 * method.
 	 */
 	public ForwardAscendingFixpoint() {
-		this(null, false, null, null);
+		super(null, false, null);
+		this.config = null;
+		this.wideningPoints = null;
+		this.lubs = null;
 	}
 
 	/**
@@ -68,7 +69,7 @@ public class ForwardAscendingFixpoint<A extends AbstractLattice<A>, D extends Ab
 			CFG target,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config) {
+			FixpointConfiguration<A, D> config) {
 		super(target, forceFullEvaluation, interprocedural);
 		this.config = config;
 		this.wideningPoints = config.useWideningPoints ? target.getCycleEntries() : null;
@@ -122,12 +123,12 @@ public class ForwardAscendingFixpoint<A extends AbstractLattice<A>, D extends Ab
 			CFG graph,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config) {
+			FixpointConfiguration<A, D> config) {
 		return new ForwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
 	}
 
 	@Override
-	public AnalysisFixpoint<?, A, D> asOptimized() {
+	public ForwardCFGFixpoint<A, D> asOptimized() {
 		return new OptimizedForwardAscendingFixpoint<>();
 	}
 

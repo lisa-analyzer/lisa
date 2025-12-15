@@ -1,20 +1,18 @@
 package it.unive.lisa.program.cfg.fixpoints.backward;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A {@link BackwardCFGFixpoint} that traverses descending chains using glbs up
@@ -46,7 +44,9 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 	 * method.
 	 */
 	public BackwardDescendingGLBFixpoint() {
-		this(null, false, null, null);
+		super(null, false, null);
+		this.maxGLBs = -1;
+		this.glbs = null;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 			CFG target,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config) {
+			FixpointConfiguration<A, D> config) {
 		super(target, forceFullEvaluation, interprocedural);
 		this.maxGLBs = config.glbThreshold;
 		this.glbs = new HashMap<>(target.getNodesCount());
@@ -101,12 +101,12 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 			CFG graph,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config) {
+			FixpointConfiguration<A, D> config) {
 		return new BackwardDescendingGLBFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
 	}
 
 	@Override
-	public AnalysisFixpoint<?, A, D> asOptimized() {
+	public BackwardCFGFixpoint<A, D> asOptimized() {
 		return new OptimizedBackwardDescendingGLBFixpoint<>();
 	}
 

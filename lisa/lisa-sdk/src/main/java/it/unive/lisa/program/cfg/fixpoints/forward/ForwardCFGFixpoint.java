@@ -19,6 +19,7 @@ import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * A {@link ForwardFixpoint} for {@link CFG}s.
@@ -132,8 +133,17 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>,
 	}
 
 	@Override
-	public AnalysisFixpoint<?, A, D> asUnoptimized() {
+	public ForwardCFGFixpoint<A, D> asUnoptimized() {
 		return this;
 	}
 
+	// we redefine the following to narrow the return type
+	@Override
+	public abstract ForwardCFGFixpoint<A, D> asOptimized();
+
+	@Override
+	public ForwardCFGFixpoint<A, D> withHotspots(
+			Predicate<Statement> hotspots) {
+		return this;
+	}
 }

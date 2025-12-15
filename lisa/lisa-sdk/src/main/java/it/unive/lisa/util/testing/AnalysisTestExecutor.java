@@ -175,15 +175,26 @@ public abstract class AnalysisTestExecutor {
 		compare(conf, expectedPath, actualPath, expFile, actFile, false);
 		System.out.println("Test successful!");
 
-		if (conf.compareWithOptimization && !conf.optimize) {
+		if (conf.compareWithOptimization
+				&& !conf.forwardFixpoint.isOptimized()
+				&& !conf.backwardFixpoint.isOptimized()
+				&& (conf.forwardDescendingFixpoint == null || !conf.forwardDescendingFixpoint.isOptimized())
+				&& (conf.backwardDescendingFixpoint == null || !conf.backwardDescendingFixpoint.isOptimized())) {
 			System.out.println("### Testing " + testMethod + " with optimization enabled");
+
+			// set optimizations
+			conf.forwardFixpoint = conf.forwardFixpoint.asOptimized();
+			conf.forwardDescendingFixpoint = conf.forwardDescendingFixpoint == null ? null
+					: conf.forwardDescendingFixpoint.asOptimized();
+			conf.backwardFixpoint = conf.backwardFixpoint.asOptimized();
+			conf.backwardDescendingFixpoint = conf.backwardDescendingFixpoint == null ? null
+					: conf.backwardDescendingFixpoint.asOptimized();
 
 			// we parse the program again since the analysis might have
 			// finalized it or modified it, and we want to start from scratch
 			// TODO: might need to enable this again
 			// program = readProgram(target, allMethods);
 
-			conf.optimize = true;
 			actualPath = Paths.get(actualPath.toString(), "optimized");
 			conf.workdir = actualPath.toFile().toString();
 			conf.dumpForcesUnwinding = true;

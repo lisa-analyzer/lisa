@@ -161,7 +161,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 */
 	public AnalysisState<A> getUnwindedAnalysisStateAfter(
 			Statement st,
-			FixpointConfiguration conf) {
+			FixpointConfiguration<A, D> conf) {
 		if (results.getKeys().contains(st))
 			return results.getState(st);
 
@@ -182,7 +182,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 *                 fixpoint computation
 	 */
 	public void unwind(
-			FixpointConfiguration conf) {
+			FixpointConfiguration<A, D> conf) {
 		AnalysisState<A> bottom = results.lattice.bottom();
 		StatementStore<A> bot = new StatementStore<>(bottom);
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
@@ -266,7 +266,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 		@Override
 		public void fixpoint(
 				AnalysisState<A> entryState,
-				FixpointConfiguration conf)
+				FixpointConfiguration<A, D> conf)
 				throws FixpointException {
 			throw new UnsupportedOperationException();
 		}

@@ -99,7 +99,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
 		// we mark this as unsupported to make sure it never gets used as a root
 		// analysis
@@ -203,7 +203,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 			}
 		} while (!recursiveApprox.lessOrEqual(previousApprox));
 
-		if (conf.optimize)
+		if (conf.usesOptimizedForwardFixpoint())
 			// as the fixpoint results do not contain an explicit entry for the
 			// recursive call, we need to store the approximation for the
 			// recursive call manually or the unwinding won't manage to solve it

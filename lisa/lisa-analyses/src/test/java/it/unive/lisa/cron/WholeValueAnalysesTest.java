@@ -44,6 +44,7 @@ import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -200,8 +201,8 @@ public class WholeValueAnalysesTest
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.compareWithOptimization = false;
-		conf.optimize = true;
 		conf.serializeResults = true;
+		conf.forwardFixpoint = new OptimizedForwardAscendingFixpoint<>();
 		conf.hotspots = st -> st instanceof IMPAssert
 				|| (st instanceof Expression && ((Expression) st).getRootStatement() instanceof IMPAssert);
 		return conf;

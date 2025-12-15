@@ -7,7 +7,7 @@ import it.unive.lisa.analysis.numeric.NonRedundantIntervals;
 import it.unive.lisa.analysis.numeric.Parity;
 import it.unive.lisa.analysis.numeric.Pentagon;
 import it.unive.lisa.analysis.numeric.Sign;
-import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
 import org.junit.Test;
 
 public class NumericAnalysesTest
@@ -81,7 +81,7 @@ public class NumericAnalysesTest
 		conf.testDir = "numeric";
 		conf.testSubDir = "interval-set";
 		conf.programFile = "numeric.imp";
-		conf.descendingPhaseType = DescendingPhaseType.GLB;
+		conf.forwardDescendingFixpoint = new ForwardDescendingGLBFixpoint<>();
 		conf.glbThreshold = 5;
 		// there seem to be one less round of redundancy removal
 		// that avoids compacting two elements into a single one when running an

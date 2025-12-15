@@ -1,7 +1,8 @@
 package it.unive.lisa.cron;
 
 import it.unive.lisa.DefaultConfiguration;
-import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingNarrowingFixpoint;
 import org.junit.Test;
 
 public class DescendingTest
@@ -16,7 +17,7 @@ public class DescendingTest
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.descendingPhaseType = DescendingPhaseType.NARROWING;
+		conf.forwardDescendingFixpoint = new ForwardDescendingNarrowingFixpoint<>();
 		conf.testDir = "descending";
 		conf.testSubDir = "widening";
 		conf.programFile = "descending.imp";
@@ -31,7 +32,7 @@ public class DescendingTest
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.descendingPhaseType = DescendingPhaseType.GLB;
+		conf.forwardDescendingFixpoint = new ForwardDescendingGLBFixpoint<>();
 		conf.glbThreshold = 5;
 		conf.testDir = "descending";
 		conf.testSubDir = "maxglb";

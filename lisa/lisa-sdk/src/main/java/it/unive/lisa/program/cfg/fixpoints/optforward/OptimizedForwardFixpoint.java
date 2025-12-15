@@ -2,16 +2,6 @@ package it.unive.lisa.program.cfg.fixpoints.optforward;
 
 import static java.lang.String.format;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -20,7 +10,6 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -28,6 +17,14 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Predicate;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * An optimized {@link ForwardFixpoint} for {@link CFG}s. This fixpoint
@@ -217,7 +214,7 @@ public abstract class OptimizedForwardFixpoint<
 	}
 
 	@Override
-	public AnalysisFixpoint<?, A, D> asOptimized() {
+	public ForwardCFGFixpoint<A, D> asOptimized() {
 		return this;
 	}
 

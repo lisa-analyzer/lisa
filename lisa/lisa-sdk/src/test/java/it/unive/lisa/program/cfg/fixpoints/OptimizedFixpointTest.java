@@ -26,6 +26,7 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardFixpoint;
 import it.unive.lisa.program.cfg.statement.Ret;
@@ -102,8 +103,13 @@ public class OptimizedFixpointTest {
 				CFG graph,
 				boolean forceFullEvaluation,
 				InterproceduralAnalysis<TestAbstractState, TestAbstractDomain> interprocedural,
-				FixpointConfiguration config) {
+				FixpointConfiguration<TestAbstractState, TestAbstractDomain> config) {
 			return new FixpointTester2(graph, forceFullEvaluation, interprocedural, st -> st instanceof Call);
+		}
+
+		@Override
+		public BackwardCFGFixpoint<TestAbstractState, TestAbstractDomain> asBackward() {
+			throw new UnsupportedOperationException();
 		}
 
 	}

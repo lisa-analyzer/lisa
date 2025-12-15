@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.fixpoints;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
@@ -10,6 +11,7 @@ import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
+import java.util.function.Predicate;
 
 /**
  * A generic interface for analysis fixpoints that enables the creation of new
@@ -47,7 +49,7 @@ public interface AnalysisFixpoint<
 			CFG graph,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config);
+			FixpointConfiguration<A, D> config);
 
 	/**
 	 * Yields whether or not this fixpoint is optimized.
@@ -88,4 +90,21 @@ public interface AnalysisFixpoint<
 	 * @return the backward fixpoint
 	 */
 	BackwardCFGFixpoint<A, D> asBackward();
+
+	/**
+	 * Yields a new version if this fixpoint with the given hotspots predicate.
+	 * 
+	 * @param hotspots the predicate to identify additional statements (also
+	 *                     considering intermediate ones) for which the fixpoint
+	 *                     results must be kept. This is useful for avoiding
+	 *                     result unwinding due to {@link SemanticCheck}s
+	 *                     querying for the post-state of statements. Note that
+	 *                     statements for which
+	 *                     {@link Statement#stopsExecution()} is {@code true}
+	 *                     are always considered hotspots
+	 * 
+	 * @return the fixpoint with the given hotspots
+	 */
+	AnalysisFixpoint<?, A, D> withHotspots(
+			Predicate<Statement> hotspots);
 }

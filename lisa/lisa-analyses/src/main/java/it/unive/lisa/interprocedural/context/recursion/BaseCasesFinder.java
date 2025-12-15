@@ -74,7 +74,7 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
 		// we mark this as unsupported to make sure it never gets used as a root
 		// analysis

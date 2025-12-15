@@ -95,7 +95,6 @@ public class DataflowAnalysesTest
 				new ReachingDefinitions(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
-		conf.optimize = false;
 		conf.serializeResults = true;
 		conf.testDir = "issues";
 		conf.testSubDir = "322";

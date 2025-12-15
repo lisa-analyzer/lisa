@@ -164,7 +164,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 */
 	public AnalysisState<A> getUnwindedAnalysisStateBefore(
 			Statement st,
-			FixpointConfiguration conf) {
+			FixpointConfiguration<A, D> conf) {
 		if (results.getKeys().contains(st))
 			return results.getState(st);
 
@@ -185,7 +185,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 *                 fixpoint computation
 	 */
 	public void unwind(
-			FixpointConfiguration conf) {
+			FixpointConfiguration<A, D> conf) {
 		AnalysisState<A> bottom = results.lattice.bottom();
 		StatementStore<A> bot = new StatementStore<>(bottom);
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
@@ -269,7 +269,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@Override
 		public void fixpoint(
 				AnalysisState<A> exitState,
-				FixpointConfiguration conf)
+				FixpointConfiguration<A, D> conf)
 				throws FixpointException {
 			throw new UnsupportedOperationException();
 		}

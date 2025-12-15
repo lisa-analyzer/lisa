@@ -69,13 +69,21 @@ public class StabilityTest
 
 		private final Interval aux;
 
-		private final FixpointConfiguration conf;
+		private final FixpointConfiguration<
+				SimpleAbstractState<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>,
+								ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>,
+				SimpleAbstractDomain<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>,
+								ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>> conf;
 
 		private CoContraVarianceCheck(
 				Interval aux,
 				LiSAConfiguration conf) {
 			this.aux = aux;
-			this.conf = new FixpointConfiguration(conf);
+			this.conf = new FixpointConfiguration<>(conf);
 		}
 
 		@Override
@@ -128,7 +136,15 @@ public class StabilityTest
 
 		private final Stability<ValueEnvironment<IntInterval>> analysis;
 
-		private final FixpointConfiguration conf;
+		private final FixpointConfiguration<
+				SimpleAbstractState<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>,
+								ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>,
+				SimpleAbstractDomain<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>,
+								ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>> conf;
 
 		private final AnalyzedCFG<
 				SimpleAbstractState<
@@ -140,7 +156,15 @@ public class StabilityTest
 				CFG graph,
 				boolean forceFullEvaluation,
 				Stability<ValueEnvironment<IntInterval>> analysis,
-				FixpointConfiguration conf,
+				FixpointConfiguration<
+						SimpleAbstractState<Monolith,
+								ValueLatticeProduct<ValueEnvironment<Trend>,
+										ValueEnvironment<IntInterval>>,
+								TypeEnvironment<TypeSet>>,
+						SimpleAbstractDomain<Monolith,
+								ValueLatticeProduct<ValueEnvironment<Trend>,
+										ValueEnvironment<IntInterval>>,
+								TypeEnvironment<TypeSet>>> conf,
 				AnalyzedCFG<SimpleAbstractState<Monolith,
 						ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
 						TypeEnvironment<TypeSet>>> result) {
@@ -183,7 +207,7 @@ public class StabilityTest
 				ValueEnvironment<Trend> entrystate)
 				throws Exception {
 			ValueEnvironment<Trend> post;
-			if (result instanceof OptimizedAnalyzedCFG)
+			if (result instanceof OptimizedAnalyzedCFG) {
 				post = ((OptimizedAnalyzedCFG<
 						SimpleAbstractState<Monolith,
 								ValueLatticeProduct<ValueEnvironment<Trend>,
@@ -195,7 +219,7 @@ public class StabilityTest
 								TypeEnvironment<TypeSet>>>) result)
 										.getUnwindedAnalysisStateAfter(node, conf)
 										.getExecutionState().valueState.first;
-			else
+			} else
 				post = result.getAnalysisStateAfter(node)
 						.getExecutionState().valueState.first;
 			return analysis.combine(entrystate, post);

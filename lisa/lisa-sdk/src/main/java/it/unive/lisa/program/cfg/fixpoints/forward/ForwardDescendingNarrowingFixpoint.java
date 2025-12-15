@@ -1,7 +1,5 @@
 package it.unive.lisa.program.cfg.fixpoints.forward;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
@@ -10,12 +8,12 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
 
 /**
  * A {@link ForwardCFGFixpoint} that traverses descending chains using
@@ -32,7 +30,7 @@ public class ForwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 		extends
 		ForwardCFGFixpoint<A, D> {
 
-	private final FixpointConfiguration config;
+	private final FixpointConfiguration<A, D> config;
 
 	private final Collection<Statement> wideningPoints;
 
@@ -47,7 +45,9 @@ public class ForwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 	 * method.
 	 */
 	public ForwardDescendingNarrowingFixpoint() {
-		this(null, false, null, null);
+		super(null, false, null);
+		this.config = null;
+		this.wideningPoints = null;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class ForwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 			CFG target,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config) {
+			FixpointConfiguration<A, D> config) {
 		super(target, forceFullEvaluation, interprocedural);
 		this.config = config;
 		this.wideningPoints = config.useWideningPoints ? target.getCycleEntries() : null;
@@ -108,12 +108,12 @@ public class ForwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 			CFG graph,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration config) {
+			FixpointConfiguration<A, D> config) {
 		return new ForwardDescendingNarrowingFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
 	}
 
 	@Override
-	public AnalysisFixpoint<?, A, D> asOptimized() {
+	public ForwardCFGFixpoint<A, D> asOptimized() {
 		return new OptimizedForwardDescendingNarrowingFixpoint<>();
 	}
 

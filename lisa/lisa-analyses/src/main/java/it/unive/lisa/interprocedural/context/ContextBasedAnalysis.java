@@ -99,7 +99,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	/**
 	 * The fixpoint configuration.
 	 */
-	protected FixpointConfiguration conf;
+	protected FixpointConfiguration<A, D> conf;
 
 	/**
 	 * The current sensitivity token.
@@ -165,7 +165,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
 		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
@@ -174,7 +174,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
 		KDepthToken<A> empty = token.startingId();
-		AnalyzedCFG<A> graph = conf.optimize
+		AnalyzedCFG<A> graph = conf.usesOptimizedForwardFixpoint()
 				? new OptimizedAnalyzedCFG<>(singleton, empty, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, empty, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);
@@ -274,7 +274,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			for (Entry<ScopeId<A>, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
 				StatementStore<A> params = new StatementStore<>(entryState.bottom());
 				Expression[] parameters = starter.getParameters();
-				if (conf.optimize)
+				if (conf.usesOptimizedForwardFixpoint())
 					for (Expression actual : parameters)
 						params.put(
 								actual,
