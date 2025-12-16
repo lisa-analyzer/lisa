@@ -46,7 +46,7 @@ public abstract class OutputCFGDumper<A extends AbstractLattice<A>, D extends Ab
 			FileManager fileManager)
 			throws IOException {
 		if (!(tool instanceof CheckToolWithAnalysisResults)) {
-			LOG.warn("The provided check tool does not support analysis results, skipping JSONResultsOutput");
+			LOG.warn("No analysis results available, skipping execution of output " + this.getClass().getSimpleName());
 			return;
 		}
 

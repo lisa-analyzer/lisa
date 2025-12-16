@@ -14,6 +14,7 @@ import it.unive.lisa.interprocedural.callgraph.CHACallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.inlining.InliningAnalysis;
+import it.unive.lisa.outputs.JSONCallGraph;
 import it.unive.lisa.outputs.JSONResults;
 import org.junit.Test;
 
@@ -57,6 +58,7 @@ public class InterproceduralAnalysesTest
 	public void testContextSensitiveRTA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -73,6 +75,7 @@ public class InterproceduralAnalysesTest
 	public void testContextSensitiveRTAHelper() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -89,6 +92,7 @@ public class InterproceduralAnalysesTest
 	public void testContextSensitiveRTAHelperFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -105,6 +109,7 @@ public class InterproceduralAnalysesTest
 	public void testContextSensitiveRTAArrayOpPP() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -119,6 +124,7 @@ public class InterproceduralAnalysesTest
 	public void testContextSensitiveRTATwoArraysPP() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -135,6 +141,7 @@ public class InterproceduralAnalysesTest
 			AnalysisException {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(),
 						new InferredTypes());
@@ -150,6 +157,7 @@ public class InterproceduralAnalysesTest
 	public void testInliningRTA() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -166,6 +174,7 @@ public class InterproceduralAnalysesTest
 	public void testInliningRTAHelper() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -182,6 +191,7 @@ public class InterproceduralAnalysesTest
 	public void testInliningRTAArrayOpPP() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new InliningAnalysis<>();
@@ -196,6 +206,7 @@ public class InterproceduralAnalysesTest
 	public void testInliningRTATwoArraysPP() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new InliningAnalysis<>();

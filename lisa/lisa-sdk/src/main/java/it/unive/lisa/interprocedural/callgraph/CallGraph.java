@@ -1,6 +1,11 @@
 package it.unive.lisa.interprocedural.callgraph;
 
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -11,9 +16,18 @@ import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.datastructures.graph.BaseGraph;
 import it.unive.lisa.util.datastructures.graph.algorithms.SCCs;
+import it.unive.lisa.util.representation.ObjectRepresentation;
+import it.unive.lisa.util.representation.SetRepresentation;
+import it.unive.lisa.util.representation.StringRepresentation;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -265,6 +279,62 @@ public abstract class CallGraph
 				.map(nodes -> nodes.stream().map(node -> node.getCodeMember()).collect(Collectors.toSet()))
 				.filter(members -> members.contains(cm))
 				.collect(Collectors.toSet());
+	}
+
+	@Override
+	public SerializableGraph toSerializableGraph(
+			BiFunction<CallGraph, CallGraphNode, SerializableValue> descriptionGenerator) {
+		String name = "CallGraph";
+		String desc = null;
+
+		SortedSet<SerializableNode> nodes = new TreeSet<>();
+		SortedSet<SerializableNodeDescription> descrs = new TreeSet<>();
+		SortedSet<SerializableEdge> edges = new TreeSet<>();
+
+		Map<CallGraphNode, Integer> mapping = new HashMap<>();
+		int offset = 0;
+		Set<CallGraphNode> sortedNodes = new TreeSet<>(
+				(
+						a,
+						b) -> a.getCodeMember().getDescriptor().getFullSignatureWithParNames()
+								.compareTo(b.getCodeMember().getDescriptor().getFullSignatureWithParNames()));
+		sortedNodes.addAll(getNodes());
+		for (CallGraphNode node : sortedNodes)
+			mapping.put(node, offset++);
+
+		for (CallGraphNode node : getNodes())
+			addNode(nodes, descrs, node, mapping.get(node));
+
+		for (CallGraphEdge edge : getEdges())
+			edges.add(
+					new SerializableEdge(
+							mapping.get(edge.getSource()),
+							mapping.get(edge.getDestination()),
+							edge.getClass().getSimpleName(),
+							null));
+
+		return new SerializableGraph(name, desc, nodes, edges, descrs);
+	}
+
+	private void addNode(
+			SortedSet<SerializableNode> nodes,
+			SortedSet<SerializableNodeDescription> descrs,
+			CallGraphNode node,
+			Integer offset) {
+		SerializableNode n = new SerializableNode(offset, Collections.emptyList(), node.toString());
+		nodes.add(n);
+		Set<CodeMember> callers = new HashSet<>(getCallers(node.getCodeMember()));
+		Set<CodeMember> callees = new HashSet<>(getCallees(node.getCodeMember()));
+		Set<Call> callsites = new HashSet<>(getCallSites(node.getCodeMember()));
+		SerializableValue value = new ObjectRepresentation(Map.of(
+				"callers",
+				new SetRepresentation(callers, cm -> new StringRepresentation(cm.toString())),
+				"callees",
+				new SetRepresentation(callees, cm -> new StringRepresentation(cm.toString())),
+				"call sites",
+				new SetRepresentation(callsites, cm -> new StringRepresentation(cm.toString()))))
+						.toSerializableValue();
+		descrs.add(new SerializableNodeDescription(offset, value));
 	}
 
 }

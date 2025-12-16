@@ -39,7 +39,7 @@ public abstract class InputCFGDumper
 			try {
 				dump(fileManager, graph, filename);
 			} catch (IOException e) {
-				LOG.error("Exception while dumping the analysis results on {}", cfg.getDescriptor().getFullSignature());
+				LOG.error("Exception while dumping the analysis inputs on {}", cfg.getDescriptor().getFullSignature());
 				LOG.error(e);
 			}
 		}
