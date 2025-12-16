@@ -17,19 +17,15 @@ public final class ConcurrentFIFOWorkingSet<E>
 
 	private final Deque<E> ws;
 
-	private ConcurrentFIFOWorkingSet() {
+	/**
+	 * Builds an empty working set.
+	 */
+	public ConcurrentFIFOWorkingSet() {
 		ws = new ConcurrentLinkedDeque<>();
 	}
 
-	/**
-	 * Yields a new, empty working set.
-	 * 
-	 * @param <E> the type of the elements that the returned working set
-	 *                contains
-	 * 
-	 * @return the new working set
-	 */
-	public static <E> ConcurrentFIFOWorkingSet<E> mk() {
+	@Override
+	public ConcurrentFIFOWorkingSet<E> mk() {
 		return new ConcurrentFIFOWorkingSet<>();
 	}
 

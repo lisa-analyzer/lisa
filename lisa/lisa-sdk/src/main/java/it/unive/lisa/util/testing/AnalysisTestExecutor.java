@@ -7,6 +7,7 @@ import static java.nio.file.Files.delete;
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.outputs.JSONReportDumper;
 import it.unive.lisa.outputs.compare.ResultComparer;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Program;
@@ -151,23 +152,25 @@ public abstract class AnalysisTestExecutor {
 
 		setupWorkdir(conf, actualPath);
 
-		conf.jsonOutput = true;
+		conf.outputs.add(new JSONReportDumper());
 
 		// save disk space!
 		System.clearProperty("lisa.json.indent");
 
 		run(conf, program);
 
-		File expFile = Paths.get(expectedPath.toString(), LiSA.REPORT_NAME).toFile();
-		File actFile = Paths.get(actualPath.toString(), LiSA.REPORT_NAME).toFile();
+		File expFile = Paths.get(expectedPath.toString(), JSONReportDumper.REPORT_NAME).toFile();
+		File actFile = Paths.get(actualPath.toString(), JSONReportDumper.REPORT_NAME).toFile();
 
 		if (!expFile.exists()) {
 			boolean update = "true".equals(System.getProperty("lisa.cron.update")) || conf.forceUpdate;
 			if (!update) {
-				System.out.println("No '" + LiSA.REPORT_NAME + "' found in the expected folder, exiting...");
+				System.out
+						.println("No '" + JSONReportDumper.REPORT_NAME + "' found in the expected folder, exiting...");
 				return;
 			} else {
-				System.out.println("No '" + LiSA.REPORT_NAME + "' found in the expected folder, copying results...");
+				System.out.println(
+						"No '" + JSONReportDumper.REPORT_NAME + "' found in the expected folder, copying results...");
 				copyFiles(expectedPath, actualPath, expFile, actFile);
 			}
 		}
@@ -175,22 +178,33 @@ public abstract class AnalysisTestExecutor {
 		compare(conf, expectedPath, actualPath, expFile, actFile, false);
 		System.out.println("Test successful!");
 
-		if (conf.compareWithOptimization && !conf.optimize) {
+		if (conf.compareWithOptimization
+				&& !conf.forwardFixpoint.isOptimized()
+				&& !conf.backwardFixpoint.isOptimized()
+				&& (conf.forwardDescendingFixpoint == null || !conf.forwardDescendingFixpoint.isOptimized())
+				&& (conf.backwardDescendingFixpoint == null || !conf.backwardDescendingFixpoint.isOptimized())) {
 			System.out.println("### Testing " + testMethod + " with optimization enabled");
+
+			// set optimizations
+			conf.forwardFixpoint = conf.forwardFixpoint.asOptimized();
+			conf.forwardDescendingFixpoint = conf.forwardDescendingFixpoint == null ? null
+					: conf.forwardDescendingFixpoint.asOptimized();
+			conf.backwardFixpoint = conf.backwardFixpoint.asOptimized();
+			conf.backwardDescendingFixpoint = conf.backwardDescendingFixpoint == null ? null
+					: conf.backwardDescendingFixpoint.asOptimized();
 
 			// we parse the program again since the analysis might have
 			// finalized it or modified it, and we want to start from scratch
 			// TODO: might need to enable this again
 			// program = readProgram(target, allMethods);
 
-			conf.optimize = true;
 			actualPath = Paths.get(actualPath.toString(), "optimized");
 			conf.workdir = actualPath.toFile().toString();
 			conf.dumpForcesUnwinding = true;
 
 			run(conf, program);
 
-			actFile = Paths.get(actualPath.toString(), LiSA.REPORT_NAME).toFile();
+			actFile = Paths.get(actualPath.toString(), JSONReportDumper.REPORT_NAME).toFile();
 			compare(conf, expectedPath, actualPath, expFile, actFile, true);
 			System.out.println("Test successful!");
 		}
@@ -249,11 +263,11 @@ public abstract class AnalysisTestExecutor {
 			createDirectories(expectedPath);
 
 			copy(actFile.toPath(), expFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			System.err.println("- Copied " + LiSA.REPORT_NAME);
+			System.err.println("- Copied " + JSONReportDumper.REPORT_NAME);
 
 			for (String file : actual.getFiles()) {
 				Path f = Paths.get(file);
-				if (!f.getFileName().toString().equals(LiSA.REPORT_NAME)) {
+				if (!f.getFileName().toString().equals(JSONReportDumper.REPORT_NAME)) {
 					Path path = Paths.get(expectedPath.toString(), f.toString());
 					createDirectories(path.getParent());
 					copy(Paths.get(actualPath.toString(), f.toString()), path);
@@ -285,14 +299,14 @@ public abstract class AnalysisTestExecutor {
 				|| !acc.changedFileName.isEmpty();
 		if (updateReport) {
 			copy(actFile.toPath(), expFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			System.err.println("- Updated " + LiSA.REPORT_NAME);
+			System.err.println("- Updated " + JSONReportDumper.REPORT_NAME);
 		}
 		for (Path f : acc.removedFilePaths) {
 			delete(Paths.get(expectedPath.toString(), f.toString()));
 			System.err.println("- Deleted " + f);
 		}
 		for (Path f : acc.addedFilePaths)
-			if (!f.getFileName().toString().equals(LiSA.REPORT_NAME)) {
+			if (!f.getFileName().toString().equals(JSONReportDumper.REPORT_NAME)) {
 				Path path = Paths.get(expectedPath.toString(), f.toString());
 				createDirectories(path.getParent());
 				copy(Paths.get(actualPath.toString(), f.toString()), path);

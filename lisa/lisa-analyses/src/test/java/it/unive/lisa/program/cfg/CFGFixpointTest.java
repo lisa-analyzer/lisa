@@ -14,7 +14,6 @@ import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
@@ -41,16 +40,22 @@ import org.junit.Test;
 
 public class CFGFixpointTest {
 
-	private static FixpointConfiguration conf;
+	private static FixpointConfiguration<
+			SimpleAbstractState<
+					Monolith,
+					ValueEnvironment<IntInterval>,
+					TypeEnvironment<TypeSet>>,
+			SimpleAbstractDomain<
+					Monolith,
+					ValueEnvironment<IntInterval>,
+					TypeEnvironment<TypeSet>>> conf;
 
 	@BeforeClass
 	public static void init() {
 		LiSAConfiguration base = new LiSAConfiguration();
-		base.descendingPhaseType = DescendingPhaseType.NONE;
 		base.glbThreshold = 5;
 		base.wideningThreshold = 5;
-		base.optimize = false;
-		conf = new FixpointConfiguration(base);
+		conf = new FixpointConfiguration<>(base);
 	}
 
 	private ModularWorstCaseAnalysis<
@@ -88,7 +93,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope<>());
+			cfg.fixpoint(mkState(), mkAnalysis(p), new FIFOWorkingSet<>(), conf, new UniqueScope<>());
 		} catch (FixpointException e) {
 			System.err.println(e);
 			fail("The fixpoint computation has thrown an exception");
@@ -103,7 +108,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope<>());
+			cfg.fixpoint(mkState(), mkAnalysis(p), new FIFOWorkingSet<>(), conf, new UniqueScope<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -118,7 +123,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope<>());
+			cfg.fixpoint(mkState(), mkAnalysis(p), new FIFOWorkingSet<>(), conf, new UniqueScope<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -139,7 +144,7 @@ public class CFGFixpointTest {
 				ValueEnvironment<IntInterval>,
 				TypeEnvironment<TypeSet>>> domain = mkState();
 		AnalyzedCFG<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = cfg
-				.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope<>());
+				.fixpoint(domain, mkAnalysis(program), new FIFOWorkingSet<>(), conf, new UniqueScope<>());
 
 		assertTrue(result.getAnalysisStateAfter(call).getExecutionState().valueState.getKeys().isEmpty());
 	}

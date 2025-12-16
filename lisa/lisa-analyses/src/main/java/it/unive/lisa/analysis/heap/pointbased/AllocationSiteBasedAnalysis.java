@@ -692,7 +692,7 @@ public abstract class AllocationSiteBasedAnalysis<
 		if (state.isBottom())
 			return Satisfiability.BOTTOM;
 
-		WorkingSet<SymbolicExpression> ws = VisitOnceFIFOWorkingSet.mk();
+		WorkingSet<SymbolicExpression> ws = new VisitOnceFIFOWorkingSet<>();
 		rewrite(state, x, pp, oracle).elements().forEach(ws::push);
 		ExpressionSet targets = rewrite(state, y, pp, oracle);
 

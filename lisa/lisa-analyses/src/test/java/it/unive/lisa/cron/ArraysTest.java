@@ -4,6 +4,7 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
+import it.unive.lisa.outputs.JSONResults;
 import org.junit.Test;
 
 public class ArraysTest
@@ -13,7 +14,7 @@ public class ArraysTest
 	@Test
 	public void monolithTest() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new MonolithicHeap(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -27,7 +28,7 @@ public class ArraysTest
 	@Test
 	public void fieldInsensitiveTest() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new PointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -41,7 +42,7 @@ public class ArraysTest
 	@Test
 	public void fieldSensitiveTest() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),

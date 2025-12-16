@@ -15,9 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A backward fixpoint algorithm for a {@link Graph}, parametric to the
- * {@link Fixpoint.FixpointImplementation} that one wants to use to compute the
- * results.
+ * A backward fixpoint algorithm for a {@link Graph}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -26,12 +24,14 @@ import java.util.Set;
  * @param <E> the type of the {@link Edge}s in the source graph
  * @param <T> the type of data computed by the fixpoint
  */
-public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>, T> {
-
-	/**
-	 * Common format for error messages.
-	 */
-	protected static final String ERROR = "Exception while %s of '%s' in '%s'";
+public abstract class BackwardFixpoint<
+		G extends Graph<G, N, E>,
+		N extends Node<G, N, E>,
+		E extends Edge<G, N, E>,
+		T>
+		implements
+		Fixpoint<G, N, E, T>,
+		FixpointImplementation<G, N, E, T> {
 
 	/**
 	 * The graph to target.
@@ -51,62 +51,25 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *                                all nodes independently of the fixpoint
 	 *                                implementation
 	 */
-	public BackwardFixpoint(
+	protected BackwardFixpoint(
 			G graph,
 			boolean forceFullEvaluation) {
 		this.graph = graph;
 		this.forceFullEvaluation = forceFullEvaluation;
 	}
 
-	/**
-	 * Runs the fixpoint. Invoking this method effectively recomputes the
-	 * result: no caching on previous runs is executed. It starts with empty
-	 * result.
-	 * 
-	 * @param startingPoints a map containing all the nodes to start the
-	 *                           fixpoint at, each mapped to its entry state.
-	 * @param ws             the instance of {@link WorkingSet} to use for the
-	 *                           fixpoint
-	 * @param implementation the {@link Fixpoint.FixpointImplementation} to use
-	 *                           for running the fixpoint
-	 * 
-	 * @return a mapping from each (reachable) node of the source graph to the
-	 *             fixpoint result computed at that node
-	 * 
-	 * @throws FixpointException if something goes wrong during the fixpoint
-	 *                               execution
-	 */
+	@Override
 	public Map<N, T> fixpoint(
 			Map<N, T> startingPoints,
-			WorkingSet<N> ws,
-			Fixpoint.FixpointImplementation<N, E, T> implementation)
+			WorkingSet<N> ws)
 			throws FixpointException {
-		return fixpoint(startingPoints, ws, implementation, null);
+		return fixpoint(startingPoints, ws, null);
 	}
 
-	/**
-	 * Runs the fixpoint. Invoking this method effectively recomputes the
-	 * result: no caching on previous runs is executed.
-	 * 
-	 * @param startingPoints a map containing all the nodes to start the
-	 *                           fixpoint at, each mapped to its entry state.
-	 * @param ws             the instance of {@link WorkingSet} to use for the
-	 *                           fixpoint
-	 * @param implementation the {@link Fixpoint.FixpointImplementation} to use
-	 *                           for running the fixpoint
-	 * @param initialResult  the map of initial result to use for running the
-	 *                           fixpoint
-	 * 
-	 * @return a mapping from each (reachable) node of the source graph to the
-	 *             fixpoint result computed at that node
-	 * 
-	 * @throws FixpointException if something goes wrong during the fixpoint
-	 *                               execution
-	 */
+	@Override
 	public Map<N, T> fixpoint(
 			Map<N, T> startingPoints,
 			WorkingSet<N> ws,
-			Fixpoint.FixpointImplementation<N, E, T> implementation,
 			Map<N, T> initialResult)
 			throws FixpointException {
 		Map<N, T> result = initialResult == null ? new HashMap<>(graph.getNodesCount()) : new HashMap<>(initialResult);
@@ -125,12 +88,12 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 			if (!graph.containsNode(current))
 				throw new FixpointException("'" + current + "' is not part of '" + graph + "'");
 
-			T exitstate = getExitState(current, startingPoints.get(current), implementation, result);
+			T exitstate = getExitState(graph, current, startingPoints.get(current), result);
 			if (exitstate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 
 			try {
-				newApprox = implementation.semantics(current, exitstate);
+				newApprox = semantics(current, exitstate);
 			} catch (Exception e) {
 				throw new FixpointException(format(ERROR, "computing semantics", current, graph), e);
 			}
@@ -139,7 +102,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 			T postApprox = newApprox;
 			if (oldApprox != null)
 				try {
-					postApprox = implementation.operation(current, newApprox, oldApprox);
+					postApprox = join(current, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
@@ -150,7 +113,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 						|| oldApprox == null
 						// or if we got a result that should not be considered
 						// equal
-						|| !implementation.equality(current, postApprox, oldApprox)) {
+						|| !leq(current, postApprox, oldApprox)) {
 					result.put(current, postApprox);
 					for (N instr : graph.predecessorsOf(current))
 						ws.push(instr);
@@ -166,21 +129,20 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	/**
 	 * Yields the exit state for the given node.
 	 * 
-	 * @param node           the node under evaluation
-	 * @param startstate     a predefined ending state that must be taken into
-	 *                           account for the computation
-	 * @param implementation the fixpoint implementation that knows how to
-	 *                           combine different states
-	 * @param result         the current approximations for each node
+	 * @param graph      the graph containing the node
+	 * @param node       the node under evaluation
+	 * @param startstate a predefined ending state that must be taken into
+	 *                       account for the computation
+	 * @param result     the current approximations for each node
 	 * 
 	 * @return the computed state
 	 * 
 	 * @throws FixpointException if something goes wrong during the computation
 	 */
 	protected T getExitState(
+			G graph,
 			N node,
 			T startstate,
-			Fixpoint.FixpointImplementation<N, E, T> implementation,
 			Map<N, T> result)
 			throws FixpointException {
 		Collection<N> follows = graph.followersOf(node);
@@ -191,7 +153,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 				// this might not have been computed yet
 				E edge = graph.getEdgeConnecting(node, follow);
 				try {
-					states.add(implementation.traverse(edge, result.get(follow)));
+					states.add(traverse(edge, result.get(follow)));
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "computing edge semantics", edge, graph), e);
 				}
@@ -203,7 +165,7 @@ public class BackwardFixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 				if (exitstate == null)
 					exitstate = s;
 				else
-					exitstate = implementation.union(node, exitstate, s);
+					exitstate = union(node, exitstate, s);
 		} catch (Exception e) {
 			throw new FixpointException(format(ERROR, "creating entry state", node, graph), e);
 		}

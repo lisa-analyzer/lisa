@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.BackwardAnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
-import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
@@ -25,13 +24,9 @@ import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
-import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
-import it.unive.lisa.program.cfg.fixpoints.DescendingGLBFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.DescendingNarrowingFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
@@ -42,8 +37,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
@@ -455,7 +448,7 @@ public class CFG
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
-			FixpointConfiguration conf,
+			FixpointConfiguration<A, D> conf,
 			ScopeId<A> id)
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
@@ -506,7 +499,7 @@ public class CFG
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
-			FixpointConfiguration conf,
+			FixpointConfiguration<A, D> conf,
 			ScopeId<A> id)
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
@@ -559,20 +552,17 @@ public class CFG
 			Map<Statement, AnalysisState<A>> startingPoints,
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
-			FixpointConfiguration conf,
+			FixpointConfiguration<A, D> conf,
 			ScopeId<A> id)
 			throws FixpointException {
-		// we disable optimizations for ascending phases if there is a
-		// descending one: the latter will need full results to start applying
-		// glbs/narrowings from a post-fixpoint
-		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
-		Fixpoint<CFG,
-				Statement,
-				Edge,
-				CompoundState<A>> fix = isOptimized
-						? new OptimizedFixpoint<>(this, false, conf.hotspots)
-						: new Fixpoint<>(this, false);
-		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, interprocedural, conf);
+		ForwardCFGFixpoint<A, D> fix = conf.forwardFixpoint;
+		if (fix.isOptimized() && conf.forwardDescendingFixpoint != null)
+			// we disable optimizations for ascending phases if there is a
+			// descending one: the latter will need full results to start
+			// applying glbs/narrowings from a post-fixpoint
+			fix = fix.asUnoptimized();
+		fix = fix.mk(this, false, interprocedural, conf);
+		fix = fix.withHotspots(conf.hotspots);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
@@ -580,30 +570,16 @@ public class CFG
 				(
 						st,
 						state) -> starting.put(st, CompoundState.of(state, bot)));
-		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
+		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws);
 
-		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
-			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
+		if (conf.forwardDescendingFixpoint == null)
+			return flatten(fix.isOptimized(), singleton, startingPoints, interprocedural, id, ascending);
 
-		fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new Fixpoint<>(this, true);
 		Map<Statement, CompoundState<A>> descending;
-		switch (conf.descendingPhaseType) {
-		case GLB:
-			DescendingGLBFixpoint<A, D> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
-			descending = fix.fixpoint(starting, ws, dg, ascending);
-			break;
-		case NARROWING:
-			DescendingNarrowingFixpoint<A, D> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
-			descending = fix.fixpoint(starting, ws, dn, ascending);
-			break;
-		case NONE:
-		default:
-			// should never happen
-			descending = ascending;
-			break;
-		}
-
-		return flatten(conf.optimize, singleton, startingPoints, interprocedural, id, descending);
+		fix = conf.forwardDescendingFixpoint.mk(this, true, interprocedural, conf);
+		fix = fix.withHotspots(conf.hotspots);
+		descending = fix.fixpoint(starting, ws, ascending);
+		return flatten(fix.isOptimized(), singleton, startingPoints, interprocedural, id, descending);
 	}
 
 	private <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> flatten(
@@ -665,7 +641,7 @@ public class CFG
 			AnalysisState<A> exitState,
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
-			FixpointConfiguration conf,
+			FixpointConfiguration<A, D> conf,
 			ScopeId<A> id)
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
@@ -716,7 +692,7 @@ public class CFG
 			AnalysisState<A> exitState,
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
-			FixpointConfiguration conf,
+			FixpointConfiguration<A, D> conf,
 			ScopeId<A> id)
 			throws FixpointException {
 		Map<Statement, AnalysisState<A>> start = new HashMap<>();
@@ -769,19 +745,17 @@ public class CFG
 			Map<Statement, AnalysisState<A>> startingPoints,
 			InterproceduralAnalysis<A, D> interprocedural,
 			WorkingSet<Statement> ws,
-			FixpointConfiguration conf,
+			FixpointConfiguration<A, D> conf,
 			ScopeId<A> id)
 			throws FixpointException {
-		// we disable optimizations for ascending phases if there is a
-		// descending one: the latter will need full results to start applying
-		// glbs/narrowings from a post-fixpoint
-		boolean isOptimized = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE;
-		BackwardFixpoint<CFG,
-				Statement,
-				Edge,
-				CompoundState<A>> fix = isOptimized ? new OptimizedBackwardFixpoint<>(this, false, conf.hotspots)
-						: new BackwardFixpoint<>(this, false);
-		BackwardAscendingFixpoint<A, D> asc = new BackwardAscendingFixpoint<>(this, interprocedural, conf);
+		BackwardCFGFixpoint<A, D> fix = conf.backwardFixpoint;
+		if (fix.isOptimized() && conf.backwardDescendingFixpoint != null)
+			// we disable optimizations for ascending phases if there is a
+			// descending one: the latter will need full results to start
+			// applying glbs/narrowings from a post-fixpoint
+			fix = fix.asUnoptimized();
+		fix = fix.mk(this, false, interprocedural, conf);
+		fix = fix.withHotspots(conf.hotspots);
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
@@ -789,31 +763,16 @@ public class CFG
 				(
 						st,
 						state) -> starting.put(st, CompoundState.of(state, bot)));
-		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws, asc);
+		Map<Statement, CompoundState<A>> ascending = fix.fixpoint(starting, ws);
 
-		if (conf.descendingPhaseType == DescendingPhaseType.NONE)
-			return flatten(isOptimized, singleton, startingPoints, interprocedural, id, ascending);
+		if (conf.backwardDescendingFixpoint == null)
+			return flatten(fix.isOptimized(), singleton, startingPoints, interprocedural, id, ascending);
 
-		fix = conf.optimize ? new OptimizedBackwardFixpoint<>(this, true, conf.hotspots)
-				: new BackwardFixpoint<>(this, true);
 		Map<Statement, CompoundState<A>> descending;
-		switch (conf.descendingPhaseType) {
-		case GLB:
-			DescendingGLBFixpoint<A, D> dg = new DescendingGLBFixpoint<>(this, interprocedural, conf);
-			descending = fix.fixpoint(starting, ws, dg, ascending);
-			break;
-		case NARROWING:
-			DescendingNarrowingFixpoint<A, D> dn = new DescendingNarrowingFixpoint<>(this, interprocedural, conf);
-			descending = fix.fixpoint(starting, ws, dn, ascending);
-			break;
-		case NONE:
-		default:
-			// should never happen
-			descending = ascending;
-			break;
-		}
-
-		return flatten(conf.optimize, singleton, startingPoints, interprocedural, id, descending);
+		fix = conf.backwardDescendingFixpoint.mk(this, true, interprocedural, conf);
+		fix = fix.withHotspots(conf.hotspots);
+		descending = fix.fixpoint(starting, ws, ascending);
+		return flatten(fix.isOptimized(), singleton, startingPoints, interprocedural, id, descending);
 	}
 
 	@Override
@@ -1203,7 +1162,7 @@ public class CFG
 
 		basicBlocks = new IdentityHashMap<>(leaders.size());
 		for (Statement leader : leaders) {
-			VisitOnceWorkingSet<Statement> ws = VisitOnceFIFOWorkingSet.mk();
+			VisitOnceWorkingSet<Statement> ws = new VisitOnceFIFOWorkingSet<>();
 			ws.push(leader);
 			List<Statement> bb = new LinkedList<>();
 			while (!ws.isEmpty()) {

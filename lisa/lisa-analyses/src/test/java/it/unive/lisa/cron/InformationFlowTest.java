@@ -25,6 +25,7 @@ import it.unive.lisa.lattices.informationFlow.NonInterferenceEnvironment;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
 import it.unive.lisa.lattices.informationFlow.TaintLattice;
 import it.unive.lisa.lattices.types.TypeSet;
+import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
@@ -49,7 +50,7 @@ public class InformationFlowTest
 				DefaultConfiguration.defaultHeapDomain(),
 				new TwoLevelsTaint(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -68,7 +69,7 @@ public class InformationFlowTest
 				DefaultConfiguration.defaultHeapDomain(),
 				new ThreeLevelsTaint(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -145,7 +146,7 @@ public class InformationFlowTest
 	@Test
 	public void testConfidentialityNI() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/confidentiality";
@@ -158,7 +159,7 @@ public class InformationFlowTest
 	@Test
 	public void testIntegrityNI() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/integrity";
@@ -171,7 +172,7 @@ public class InformationFlowTest
 	@Test
 	public void testDeclassification() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);

@@ -316,7 +316,7 @@ public class FSA
 			return sat;
 		}
 
-		WorkingSet<State> ws = FIFOWorkingSet.mk();
+		WorkingSet<State> ws = new FIFOWorkingSet<>();
 		Set<State> visited = new TreeSet<>();
 
 		for (State q : current.getInitialStates())

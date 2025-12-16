@@ -2,6 +2,7 @@ package it.unive.lisa.cron;
 
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.outputs.JSONResults;
 import org.junit.Test;
 
 public class ExceptionsTest
@@ -11,7 +12,7 @@ public class ExceptionsTest
 	@Test
 	public void testBasic() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.allMethods = true;
@@ -24,7 +25,7 @@ public class ExceptionsTest
 	@Test
 	public void testAdvanced() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		// we need higher widening since the finally in
 		// tryCatchElseFinallyWithComplexControlFlow
 		// has lots of predecessors and end up widening
@@ -45,7 +46,7 @@ public class ExceptionsTest
 	@Test
 	public void testCalls() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "exceptions";
@@ -57,7 +58,7 @@ public class ExceptionsTest
 	@Test
 	public void testSmashed() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.shouldSmashError = t -> t.toString().equals("D") || t.toString().equals("E");

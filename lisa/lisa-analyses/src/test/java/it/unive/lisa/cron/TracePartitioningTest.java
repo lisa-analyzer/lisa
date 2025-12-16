@@ -2,6 +2,7 @@ package it.unive.lisa.cron;
 
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.traces.TracePartitioning;
+import it.unive.lisa.outputs.JSONResults;
 import org.junit.Test;
 
 public class TracePartitioningTest
@@ -12,7 +13,7 @@ public class TracePartitioningTest
 	public void testTracePartitioning() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.analysis = new TracePartitioning<>(3, 5, DefaultConfiguration.defaultAbstractDomain());
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.testDir = "traces";
 		conf.programFile = "traces.imp";
 		perform(conf);

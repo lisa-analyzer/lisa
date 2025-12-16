@@ -5,36 +5,28 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.checks.ChecksExecutor;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
-import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -96,14 +88,11 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 		finalize(app);
 
 		Collection<CFG> allCFGs = app.getAllCFGs();
-		FixpointConfiguration fixconf = new FixpointConfiguration(conf);
+		FixpointConfiguration<A, D> fixconf = new FixpointConfiguration<>(conf);
 		CheckTool tool = new CheckTool(conf, fileManager);
 
-		if (conf.optimize)
+		if (fixconf.usesOptimizedForwardFixpoint() || fixconf.usesOptimizedBackwardFixpoint())
 			allCFGs.forEach(CFG::computeBasicBlocks);
-
-		if (conf.serializeInputs)
-			dumpInputs(allCFGs);
 
 		if (!conf.syntacticChecks.isEmpty())
 			ChecksExecutor.executeAll(tool, app, conf.syntacticChecks);
@@ -115,18 +104,25 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 
 			analyze(fixconf);
 
-			if (conf.serializeResults || conf.analysisGraphs != GraphType.NONE)
-				dumpResults(allCFGs, fixconf);
+			Map<CFG, Collection<AnalyzedCFG<A>>> results = new IdentityHashMap<>(allCFGs.size());
+			for (CFG cfg : allCFGs)
+				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
+
+			CheckToolWithAnalysisResults<A, D> tool2 = new CheckToolWithAnalysisResults<>(
+					tool,
+					results,
+					callGraph,
+					analysis);
 
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			Collection<SemanticCheck<A, D>> semanticChecks = (Collection) conf.semanticChecks;
 			if (!semanticChecks.isEmpty())
-				tool = runSemanticChecks(app, allCFGs, tool, semanticChecks);
+				ChecksExecutor.executeAll(tool2, app, semanticChecks);
 			else
 				LOG.warn("Skipping semantic checks execution since none have been provided");
-		}
 
-		dumpSupportFiles();
+			tool = tool2;
+		}
 
 		return tool;
 	}
@@ -150,23 +146,6 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 					throw new AnalysisExecutionException("Unable to finalize target program", e);
 				}
 			});
-		}
-	}
-
-	private void dumpInputs(
-			Collection<CFG> allCFGs) {
-		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input cfgs", "cfgs")) {
-			SerializableGraph graph = cfg.toSerializableGraph();
-			String filename = cfg.getDescriptor().getFullSignatureWithParNames() + "_cfg";
-
-			try {
-				fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
-
-				dumpSingleGraph(filename, graph);
-			} catch (IOException e) {
-				LOG.error("Exception while dumping the analysis results on {}", cfg.getDescriptor().getFullSignature());
-				LOG.error(e);
-			}
 		}
 	}
 
@@ -208,7 +187,7 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	}
 
 	private void analyze(
-			FixpointConfiguration fixconf) {
+			FixpointConfiguration<A, D> fixconf) {
 		AnalysisState<A> state = this.analysis.makeLattice();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {
@@ -218,87 +197,6 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 				throw new AnalysisExecutionException("Exception during fixpoint computation", e);
 			}
 		});
-	}
-
-	@SuppressWarnings("unchecked")
-	private void dumpResults(
-			Collection<CFG> allCFGs,
-			FixpointConfiguration fixconf) {
-		BiFunction<CFG, Statement, SerializableValue> labeler = conf.optimize && conf.dumpForcesUnwinding ? (
-				cfg,
-				st) -> ((OptimizedAnalyzedCFG<A, D>) cfg).getUnwindedAnalysisStateAfter(st, fixconf)
-						.representation()
-						.toSerializableValue()
-				: (
-						cfg,
-						st) -> ((AnalyzedCFG<A>) cfg).getAnalysisStateAfter(st).representation().toSerializableValue();
-
-		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
-			for (AnalyzedCFG<A> result : interproc.getAnalysisResultsOf(cfg)) {
-				SerializableGraph graph = result.toSerializableGraph(labeler);
-				String filename = cfg.getDescriptor().getFullSignatureWithParNames();
-				if (!result.getId().isStartingId())
-					filename += "_" + result.getId().hashCode();
-
-				try {
-					if (conf.serializeResults)
-						fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
-					dumpSingleGraph(filename, graph);
-				} catch (IOException e) {
-					LOG.error(
-							"Exception while dumping the analysis results on {}",
-							cfg.getDescriptor().getFullSignature());
-					LOG.error(e);
-				}
-			}
-	}
-
-	private void dumpSingleGraph(
-			String filename,
-			SerializableGraph graph)
-			throws IOException {
-		switch (conf.analysisGraphs) {
-		case DOT:
-			fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
-			break;
-		case HTML:
-			fileManager.mkHtmlFile(filename, writer -> graph.toHtml(false, "results").dump(writer));
-			fileManager.usedHtmlViewer();
-			break;
-		case HTML_WITH_SUBNODES:
-			fileManager.mkHtmlFile(filename, writer -> graph.toHtml(true, "results").dump(writer));
-			fileManager.usedHtmlViewer();
-			break;
-		case NONE:
-			break;
-		default:
-			throw new AnalysisExecutionException("Unknown graph type: " + conf.analysisGraphs);
-		}
-	}
-
-	private CheckTool runSemanticChecks(
-			Application app,
-			Collection<CFG> allCFGs,
-			CheckTool tool,
-			Collection<SemanticCheck<A, D>> semanticChecks) {
-		Map<CFG, Collection<AnalyzedCFG<A>>> results = new IdentityHashMap<>(allCFGs.size());
-		for (CFG cfg : allCFGs)
-			results.put(cfg, interproc.getAnalysisResultsOf(cfg));
-		CheckToolWithAnalysisResults<A,
-				D> tool2 = new CheckToolWithAnalysisResults<>(tool, results, callGraph, analysis);
-		ChecksExecutor.executeAll(tool2, app, semanticChecks);
-		return tool2;
-	}
-
-	private void dumpSupportFiles() {
-		try {
-			// we dumped at least one file: need to copy the
-			// support files
-			fileManager.generateSupportFiles();
-		} catch (IOException e) {
-			LOG.error("Exception while generating supporting files for visualization");
-			LOG.error(e);
-		}
 	}
 
 }

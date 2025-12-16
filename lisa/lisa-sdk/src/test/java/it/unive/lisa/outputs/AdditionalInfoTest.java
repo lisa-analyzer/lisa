@@ -44,12 +44,12 @@ public class AdditionalInfoTest {
 
 		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.workdir = "tmp";
-		conf.jsonOutput = true;
+		conf.outputs.add(new JSONReportDumper());
 		LiSA lisa = new LiSA(conf);
 		LiSAReport report = lisa.run(program);
 
 		assertEquals(0, report.getAdditionalInfo().size());
-		try (FileReader reader = new FileReader("tmp/" + LiSA.REPORT_NAME)) {
+		try (FileReader reader = new FileReader("tmp/" + JSONReportDumper.REPORT_NAME)) {
 			JsonReport jsonReport = JsonReport.read(reader);
 			assertEquals(0, jsonReport.getAdditionalInfo().getFields().size());
 		}
@@ -67,13 +67,13 @@ public class AdditionalInfoTest {
 
 		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.workdir = "tmp";
-		conf.jsonOutput = true;
+		conf.outputs.add(new JSONReportDumper());
 		LiSA lisa = new LiSA(conf);
 		Consumer<LiSAReport> filler = r -> r.getAdditionalInfo().put("key", new StringRepresentation("value"));
 		LiSAReport report = lisa.run(filler, program);
 
 		assertEquals(1, report.getAdditionalInfo().size());
-		try (FileReader reader = new FileReader("tmp/" + LiSA.REPORT_NAME)) {
+		try (FileReader reader = new FileReader("tmp/" + JSONReportDumper.REPORT_NAME)) {
 			JsonReport jsonReport = JsonReport.read(reader);
 			assertEquals(1, jsonReport.getAdditionalInfo().getFields().size());
 		}

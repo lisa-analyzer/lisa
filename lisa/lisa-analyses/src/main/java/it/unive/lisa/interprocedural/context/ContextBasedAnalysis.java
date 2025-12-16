@@ -30,7 +30,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -59,6 +59,8 @@ import org.apache.logging.log4j.Logger;
  * happens concretely in {@link KDepthToken}. Recursions are approximated
  * applying the iterates of the recursion starting from bottom and using the
  * same widening threshold of cfg fixpoints.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
@@ -92,12 +94,12 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	/**
 	 * The kind of {@link WorkingSet} to use during this analysis.
 	 */
-	private Class<? extends WorkingSet<Statement>> workingSet;
+	private WorkingSet<Statement> workingSet;
 
 	/**
 	 * The fixpoint configuration.
 	 */
-	protected FixpointConfiguration conf;
+	protected FixpointConfiguration<A, D> conf;
 
 	/**
 	 * The current sensitivity token.
@@ -163,7 +165,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
 		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
@@ -172,7 +174,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
 		KDepthToken<A> empty = token.startingId();
-		AnalyzedCFG<A> graph = conf.optimize
+		AnalyzedCFG<A> graph = conf.usesOptimizedForwardFixpoint()
 				? new OptimizedAnalyzedCFG<>(singleton, empty, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, empty, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);
@@ -272,7 +274,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			for (Entry<ScopeId<A>, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
 				StatementStore<A> params = new StatementStore<>(entryState.bottom());
 				Expression[] parameters = starter.getParameters();
-				if (conf.optimize)
+				if (conf.usesOptimizedForwardFixpoint())
 					for (Expression actual : parameters)
 						params.put(
 								actual,
@@ -311,7 +313,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 				results.putResult(
 						cfg,
 						empty,
-						cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
+						cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty));
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
@@ -347,7 +349,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			AnalysisState<A> entryState)
 			throws FixpointException,
 			SemanticException {
-		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, WorkingSet.of(workingSet), conf, token);
+		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, workingSet.mk(), conf, token);
 		if (shouldStoreFixpointResults()) {
 			Pair<Boolean, AnalyzedCFG<A>> res = results.putResult(cfg, token, fixpointResult);
 			if (shouldStoreFixpointResults() && Boolean.TRUE.equals(res.getLeft()))

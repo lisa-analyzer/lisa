@@ -20,14 +20,14 @@ import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.numeric.Trend;
 import it.unive.lisa.lattices.types.TypeSet;
+import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.SetRepresentation;
@@ -44,7 +44,7 @@ public class StabilityTest
 	public void testStability()
 			throws ParsingException {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		Interval aux = new Interval();
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
@@ -70,13 +70,21 @@ public class StabilityTest
 
 		private final Interval aux;
 
-		private final FixpointConfiguration conf;
+		private final FixpointConfiguration<
+				SimpleAbstractState<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>,
+								ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>,
+				SimpleAbstractDomain<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>,
+								ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>> conf;
 
 		private CoContraVarianceCheck(
 				Interval aux,
 				LiSAConfiguration conf) {
 			this.aux = aux;
-			this.conf = new FixpointConfiguration(conf);
+			this.conf = new FixpointConfiguration<>(conf);
 		}
 
 		@Override
@@ -89,10 +97,9 @@ public class StabilityTest
 								ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
 								TypeEnvironment<TypeSet>>> tool,
 				CFG graph) {
-			Fixpoint<CFG, Statement, Edge, ValueEnvironment<Trend>> fix = new Fixpoint<>(graph, false);
+			Stability<ValueEnvironment<IntInterval>> analysis = new Stability<>(aux);
 			// we start at bottom to have the empty state at the beginning
 			ValueEnvironment<Trend> beginning = new ValueEnvironment<>(Trend.BOTTOM).bottom();
-			Stability<ValueEnvironment<IntInterval>> analysis = new Stability<>(aux);
 
 			Map<Statement, ValueEnvironment<Trend>> entrypoints = new HashMap<>();
 			for (Statement entry : graph.getEntrypoints())
@@ -102,73 +109,10 @@ public class StabilityTest
 					ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
 					TypeEnvironment<TypeSet>>> result : tool.getResultOf(graph))
 				try {
-					Map<Statement,
-							ValueEnvironment<Trend>> fixpoint = fix.fixpoint(
-									entrypoints,
-									FIFOWorkingSet.mk(),
-									new FixpointImplementation<Statement, Edge, ValueEnvironment<Trend>>() {
-
-										@Override
-										public ValueEnvironment<Trend> union(
-												Statement node,
-												ValueEnvironment<Trend> left,
-												ValueEnvironment<Trend> right)
-												throws Exception {
-											return left.lub(right);
-										}
-
-										@Override
-										public ValueEnvironment<Trend> traverse(
-												Edge edge,
-												ValueEnvironment<Trend> entrystate)
-												throws Exception {
-											return entrystate;
-										}
-
-										@Override
-										public boolean equality(
-												Statement node,
-												ValueEnvironment<Trend> approx,
-												ValueEnvironment<Trend> old)
-												throws Exception {
-											return approx.lessOrEqual(old);
-										}
-
-										@Override
-										@SuppressWarnings("unchecked")
-										public ValueEnvironment<Trend> semantics(
-												Statement node,
-												ValueEnvironment<Trend> entrystate)
-												throws Exception {
-											ValueEnvironment<Trend> post;
-											if (result instanceof OptimizedAnalyzedCFG)
-												post = ((OptimizedAnalyzedCFG<
-														SimpleAbstractState<Monolith,
-																ValueLatticeProduct<ValueEnvironment<Trend>,
-																		ValueEnvironment<IntInterval>>,
-																TypeEnvironment<TypeSet>>,
-														SimpleAbstractDomain<Monolith,
-																ValueLatticeProduct<ValueEnvironment<Trend>,
-																		ValueEnvironment<IntInterval>>,
-																TypeEnvironment<TypeSet>>>) result)
-																		.getUnwindedAnalysisStateAfter(node, conf)
-																		.getExecutionState().valueState.first;
-											else
-												post = result.getAnalysisStateAfter(node)
-														.getExecutionState().valueState.first;
-											return analysis.combine(entrystate, post);
-										}
-
-										@Override
-										public ValueEnvironment<Trend> operation(
-												Statement node,
-												ValueEnvironment<Trend> approx,
-												ValueEnvironment<Trend> old)
-												throws Exception {
-											return approx.lub(old);
-										}
-
-									});
+					StabilityFixpoint fix = new StabilityFixpoint(graph, false, analysis, this.conf, result);
+					Map<Statement, ValueEnvironment<Trend>> fixpoint = fix.fixpoint(
+							entrypoints,
+							new FIFOWorkingSet<>());
 
 					for (Statement exit : graph.getAllExitpoints()) {
 						ValueEnvironment<Trend> state = fixpoint.get(exit);
@@ -187,4 +131,108 @@ public class StabilityTest
 
 	}
 
+	private static class StabilityFixpoint
+			extends
+			ForwardFixpoint<CFG, Statement, Edge, ValueEnvironment<Trend>> {
+
+		private final Stability<ValueEnvironment<IntInterval>> analysis;
+
+		private final FixpointConfiguration<
+				SimpleAbstractState<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>,
+								ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>,
+				SimpleAbstractDomain<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>,
+								ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>> conf;
+
+		private final AnalyzedCFG<
+				SimpleAbstractState<
+						Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>> result;
+
+		public StabilityFixpoint(
+				CFG graph,
+				boolean forceFullEvaluation,
+				Stability<ValueEnvironment<IntInterval>> analysis,
+				FixpointConfiguration<
+						SimpleAbstractState<Monolith,
+								ValueLatticeProduct<ValueEnvironment<Trend>,
+										ValueEnvironment<IntInterval>>,
+								TypeEnvironment<TypeSet>>,
+						SimpleAbstractDomain<Monolith,
+								ValueLatticeProduct<ValueEnvironment<Trend>,
+										ValueEnvironment<IntInterval>>,
+								TypeEnvironment<TypeSet>>> conf,
+				AnalyzedCFG<SimpleAbstractState<Monolith,
+						ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
+						TypeEnvironment<TypeSet>>> result) {
+			super(graph, forceFullEvaluation);
+			this.analysis = analysis;
+			this.conf = conf;
+			this.result = result;
+		}
+
+		@Override
+		public ValueEnvironment<Trend> union(
+				Statement node,
+				ValueEnvironment<Trend> left,
+				ValueEnvironment<Trend> right)
+				throws Exception {
+			return left.lub(right);
+		}
+
+		@Override
+		public ValueEnvironment<Trend> traverse(
+				Edge edge,
+				ValueEnvironment<Trend> entrystate)
+				throws Exception {
+			return entrystate;
+		}
+
+		@Override
+		public boolean leq(
+				Statement node,
+				ValueEnvironment<Trend> approx,
+				ValueEnvironment<Trend> old)
+				throws Exception {
+			return approx.lessOrEqual(old);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public ValueEnvironment<Trend> semantics(
+				Statement node,
+				ValueEnvironment<Trend> entrystate)
+				throws Exception {
+			ValueEnvironment<Trend> post;
+			if (result instanceof OptimizedAnalyzedCFG) {
+				post = ((OptimizedAnalyzedCFG<
+						SimpleAbstractState<Monolith,
+								ValueLatticeProduct<ValueEnvironment<Trend>,
+										ValueEnvironment<IntInterval>>,
+								TypeEnvironment<TypeSet>>,
+						SimpleAbstractDomain<Monolith,
+								ValueLatticeProduct<ValueEnvironment<Trend>,
+										ValueEnvironment<IntInterval>>,
+								TypeEnvironment<TypeSet>>>) result)
+										.getUnwindedAnalysisStateAfter(node, conf)
+										.getExecutionState().valueState.first;
+			} else
+				post = result.getAnalysisStateAfter(node)
+						.getExecutionState().valueState.first;
+			return analysis.combine(entrystate, post);
+		}
+
+		@Override
+		public ValueEnvironment<Trend> join(
+				Statement node,
+				ValueEnvironment<Trend> approx,
+				ValueEnvironment<Trend> old)
+				throws Exception {
+			return approx.lub(old);
+		}
+	}
 }

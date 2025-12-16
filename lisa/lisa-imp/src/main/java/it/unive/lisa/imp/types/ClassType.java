@@ -142,7 +142,7 @@ public final class ClassType
 
 	private Type scanForSupertypeOf(
 			UnitType other) {
-		WorkingSet<ClassType> ws = FIFOWorkingSet.mk();
+		WorkingSet<ClassType> ws = new FIFOWorkingSet<>();
 		Set<ClassType> seen = new HashSet<>();
 		ws.push(this);
 		ClassType current;

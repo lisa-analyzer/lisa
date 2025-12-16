@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.heap.TypeBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.outputs.JSONResults;
 import org.junit.Test;
 
 public class MemoryAbstractionsTest
@@ -14,7 +15,7 @@ public class MemoryAbstractionsTest
 	@Test
 	public void testTypeBasedHeap() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new TypeBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -30,7 +31,7 @@ public class MemoryAbstractionsTest
 	@Test
 	public void fieldInsensitivePointBasedHeapTest() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new PointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -46,7 +47,7 @@ public class MemoryAbstractionsTest
 	@Test
 	public void fieldSensitivePointBasedHeapTest() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -62,7 +63,7 @@ public class MemoryAbstractionsTest
 	@Test
 	public void fieldInsensitiveGCTest() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new PointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -77,7 +78,7 @@ public class MemoryAbstractionsTest
 	@Test
 	public void fieldSensitiveGCTest() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),

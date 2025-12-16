@@ -1,4 +1,4 @@
-package it.unive.lisa.program.cfg.fixpoints;
+package it.unive.lisa.program.cfg.fixpoints.backward;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
@@ -9,18 +9,20 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
- * A {@link FixpointImplementation} for {@link CFG}s.
+ * A {@link BackwardFixpoint} for {@link CFG}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -30,13 +32,10 @@ import java.util.List;
  */
 public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 		D extends AbstractDomain<A>>
+		extends
+		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>>
 		implements
-		FixpointImplementation<Statement, Edge, CompoundState<A>> {
-
-	/**
-	 * The graph targeted by this implementation.
-	 */
-	protected final CFG graph;
+		AnalysisFixpoint<BackwardCFGFixpoint<A, D>, A, D> {
 
 	/**
 	 * The {@link InterproceduralAnalysis} to use for semantics invocations.
@@ -46,14 +45,18 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 	/**
 	 * Builds the fixpoint implementation.
 	 * 
-	 * @param graph           the graph targeted by this implementation
-	 * @param interprocedural the {@link InterproceduralAnalysis} to use for
-	 *                            semantics invocation
+	 * @param graph               the graph targeted by this implementation
+	 * @param forceFullEvaluation whether or not the fixpoint should evaluate
+	 *                                all nodes independently of the fixpoint
+	 *                                implementation
+	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
+	 *                                semantics invocation
 	 */
 	public BackwardCFGFixpoint(
 			CFG graph,
+			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural) {
-		this.graph = graph;
+		super(graph, forceFullEvaluation);
 		this.interprocedural = interprocedural;
 	}
 
@@ -108,4 +111,28 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 		return left.lub(right);
 	}
 
+	@Override
+	public boolean isOptimized() {
+		return false;
+	}
+
+	@Override
+	public BackwardCFGFixpoint<A, D> asBackward() {
+		return this;
+	}
+
+	@Override
+	public BackwardCFGFixpoint<A, D> asUnoptimized() {
+		return this;
+	}
+
+	// we redefine the following to narrow the return type
+	@Override
+	public abstract BackwardCFGFixpoint<A, D> asOptimized();
+
+	@Override
+	public BackwardCFGFixpoint<A, D> withHotspots(
+			Predicate<Statement> hotspots) {
+		return this;
+	}
 }

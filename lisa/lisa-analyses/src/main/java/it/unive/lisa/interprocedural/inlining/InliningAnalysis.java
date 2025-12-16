@@ -48,6 +48,8 @@ import org.apache.logging.log4j.Logger;
  * set through the constructor, or (ii) terminates with an exception when the
  * maximum call stack depth has been reached.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
@@ -74,12 +76,12 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	/**
 	 * The kind of {@link WorkingSet} to use during this analysis.
 	 */
-	private Class<? extends WorkingSet<Statement>> workingSet;
+	private WorkingSet<Statement> workingSet;
 
 	/**
 	 * The fixpoint configuration.
 	 */
-	private FixpointConfiguration conf;
+	private FixpointConfiguration<A, D> conf;
 
 	/**
 	 * Builds the analysis, using an infinite call stack depth.
@@ -116,7 +118,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
 		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
@@ -125,7 +127,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
 		CallStackId<A> empty = token.startingId();
-		AnalyzedCFG<A> graph = conf.optimize
+		AnalyzedCFG<A> graph = conf.usesOptimizedForwardFixpoint()
 				? new OptimizedAnalyzedCFG<>(singleton, empty, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, empty, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);
@@ -147,7 +149,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 				results.putResult(
 						cfg,
 						empty,
-						cfg.fixpoint(entryStateCFG, this, WorkingSet.of(workingSet), conf, empty));
+						cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty));
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
@@ -183,7 +185,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			AnalysisState<A> entryState)
 			throws FixpointException,
 			SemanticException {
-		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, WorkingSet.of(workingSet), conf, token);
+		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, workingSet.mk(), conf, token);
 		Pair<Boolean, AnalyzedCFG<A>> res = results.putResult(cfg, token, fixpointResult);
 		if (res.getLeft())
 			throw new FixpointException("Inconsistent fixpoint result for " + cfg + " under token " + token);

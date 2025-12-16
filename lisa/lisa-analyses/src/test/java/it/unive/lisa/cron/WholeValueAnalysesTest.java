@@ -41,9 +41,11 @@ import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.lattices.SimpleAbstractState;
+import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -194,14 +196,13 @@ public class WholeValueAnalysesTest
 	private static TestConfiguration mkConf()
 			throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
-		conf.jsonOutput = true;
 		conf.semanticChecks.add(new AssertionCheck<>());
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.compareWithOptimization = false;
-		conf.optimize = true;
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
+		conf.forwardFixpoint = new OptimizedForwardAscendingFixpoint<>();
 		conf.hotspots = st -> st instanceof IMPAssert
 				|| (st instanceof Expression && ((Expression) st).getRootStatement() instanceof IMPAssert);
 		return conf;

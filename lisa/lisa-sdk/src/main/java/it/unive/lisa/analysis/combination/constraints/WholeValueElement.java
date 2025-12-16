@@ -14,6 +14,8 @@ import java.util.Set;
  * through <i>constraints</i> (i.e., {@link BinaryExpression}s having a constant
  * on the left-hand side and an expression on the right-hand side).
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <L> the concrete type of this lattice
  */
 public interface WholeValueElement<L extends WholeValueElement<L>>

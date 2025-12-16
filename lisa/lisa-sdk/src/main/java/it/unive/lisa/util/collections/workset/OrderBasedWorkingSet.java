@@ -28,16 +28,15 @@ public class OrderBasedWorkingSet
 
 	private final SortedSet<Statement> ws;
 
-	private OrderBasedWorkingSet() {
+	/**
+	 * Builds an empty working set.
+	 */
+	public OrderBasedWorkingSet() {
 		ws = new TreeSet<>();
 	}
 
-	/**
-	 * Yields a new, empty working set.
-	 * 
-	 * @return the new working set
-	 */
-	public static OrderBasedWorkingSet mk() {
+	@Override
+	public OrderBasedWorkingSet mk() {
 		return new OrderBasedWorkingSet();
 	}
 

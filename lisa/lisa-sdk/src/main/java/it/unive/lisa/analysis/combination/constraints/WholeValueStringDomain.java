@@ -15,6 +15,8 @@ import java.util.Set;
  * arguments are of a different data type, and are thus expressed as
  * constraints.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <L> the type of lattice produced by this domain
  */
 public interface WholeValueStringDomain<L extends Lattice<L>>

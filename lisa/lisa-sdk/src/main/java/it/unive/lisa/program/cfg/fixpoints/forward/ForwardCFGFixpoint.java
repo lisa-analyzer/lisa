@@ -1,0 +1,149 @@
+package it.unive.lisa.program.cfg.fixpoints.forward;
+
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.VariableTableEntry;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Predicate;
+
+/**
+ * A {@link ForwardFixpoint} for {@link CFG}s.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
+ */
+public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
+		extends
+		ForwardFixpoint<CFG, Statement, Edge, CompoundState<A>>
+		implements
+		AnalysisFixpoint<ForwardCFGFixpoint<A, D>, A, D> {
+
+	/**
+	 * The {@link InterproceduralAnalysis} to use for semantics invocations.
+	 */
+	protected final InterproceduralAnalysis<A, D> interprocedural;
+
+	/**
+	 * Builds the fixpoint implementation.
+	 * 
+	 * @param graph               the graph targeted by this implementation
+	 * @param forceFullEvaluation whether or not the fixpoint should evaluate
+	 *                                all nodes independently of the fixpoint
+	 *                                implementation
+	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
+	 *                                semantics invocation
+	 */
+	public ForwardCFGFixpoint(
+			CFG graph,
+			boolean forceFullEvaluation,
+			InterproceduralAnalysis<A, D> interprocedural) {
+		super(graph, forceFullEvaluation);
+		this.interprocedural = interprocedural;
+	}
+
+	@Override
+	public CompoundState<A> semantics(
+			Statement node,
+			CompoundState<A> entrystate)
+			throws SemanticException {
+		StatementStore<A> expressions = new StatementStore<>(entrystate.postState).bottom();
+		AnalysisState<A> approx = node.forwardSemantics(entrystate.postState, interprocedural, expressions);
+		// we do not remove the meta variables here, since they might be
+		// used for deciding whether or not to traverse an edge
+		return CompoundState.of(approx, expressions);
+	}
+
+	@Override
+	public CompoundState<A> traverse(
+			Edge edge,
+			CompoundState<A> entrystate)
+			throws SemanticException {
+		AnalysisState<A> state = entrystate.postState;
+
+		// we remove the exceptions that are caught by error edges
+		// going out from the same source
+		if (!edge.isErrorHandling())
+			state = interprocedural.getAnalysis().removeCaughtErrors(state, edge.getSource());
+
+		AnalysisState<A> approx = edge.traverseForward(state, interprocedural.getAnalysis());
+
+		// we remove out of scope variables here
+		List<VariableTableEntry> toRemove = new LinkedList<>();
+		for (VariableTableEntry entry : graph.getDescriptor().getVariables())
+			if (entry.getScopeEnd() == edge.getSource())
+				toRemove.add(entry);
+
+		Collection<Identifier> ids = new LinkedList<>();
+		for (VariableTableEntry entry : toRemove) {
+			SymbolicExpression v = entry.createReference(graph).getVariable();
+			for (SymbolicExpression expr : interprocedural.getAnalysis()
+					.smallStepSemantics(approx, v, edge.getSource())
+					.getExecutionExpressions())
+				ids.add((Identifier) expr);
+		}
+
+		if (edge.getSource() instanceof Expression)
+			// we forget the meta variables now as the values are popped from
+			// the stack after the execution of the source expression,
+			// and at this point we used them for evaluation of guards
+			ids.addAll(((Expression) edge.getSource()).getMetaVariables());
+
+		if (!ids.isEmpty())
+			approx = approx.forgetIdentifiers(ids, edge.getSource());
+
+		return CompoundState.of(approx, new StatementStore<>(approx).bottom());
+	}
+
+	@Override
+	public CompoundState<A> union(
+			Statement node,
+			CompoundState<A> left,
+			CompoundState<A> right)
+			throws SemanticException {
+		return left.lub(right);
+	}
+
+	@Override
+	public boolean isOptimized() {
+		return false;
+	}
+
+	@Override
+	public ForwardCFGFixpoint<A, D> asForward() {
+		return this;
+	}
+
+	@Override
+	public ForwardCFGFixpoint<A, D> asUnoptimized() {
+		return this;
+	}
+
+	// we redefine the following to narrow the return type
+	@Override
+	public abstract ForwardCFGFixpoint<A, D> asOptimized();
+
+	@Override
+	public ForwardCFGFixpoint<A, D> withHotspots(
+			Predicate<Statement> hotspots) {
+		return this;
+	}
+}

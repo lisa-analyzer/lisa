@@ -24,7 +24,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Set;
@@ -34,6 +33,8 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
@@ -82,15 +83,15 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
-		if (conf.optimize)
+		if (conf.usesOptimizedBackwardFixpoint())
 			LOG.warn("Optimizations are turned on: this feature is experimental with backward analyses");
 
 		// new fixpoint iteration: restart
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
-		AnalyzedCFG<A> graph = conf.optimize
+		AnalyzedCFG<A> graph = conf.usesOptimizedBackwardFixpoint()
 				? new OptimizedAnalyzedCFG<>(singleton, id, entryState.bottom(), this)
 				: new AnalyzedCFG<>(singleton, id, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);
@@ -104,7 +105,7 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 				results.putResult(
 						cfg,
 						id,
-						cfg.backwardFixpoint(entryState, this, WorkingSet.of(conf.fixpointWorkingSet), conf, id));
+						cfg.backwardFixpoint(entryState, this, conf.fixpointWorkingSet.mk(), conf, id));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}

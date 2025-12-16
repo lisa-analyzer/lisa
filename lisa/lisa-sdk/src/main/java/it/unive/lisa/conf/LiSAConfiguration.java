@@ -12,16 +12,22 @@ import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.TopExecutionPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.Log4jConfig;
-import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.LiSAOutput;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.workset.OrderBasedWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
+import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.file.FileManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -47,63 +53,6 @@ public class LiSAConfiguration
 		// if not, we set a default configuration
 		if (!Log4jConfig.isLog4jConfigured())
 			Log4jConfig.initializeLogging();
-	}
-
-	/**
-	 * The type of graphs that can be dumped by LiSA.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static enum GraphType {
-
-		/**
-		 * No graphs are dumped.
-		 */
-		NONE,
-
-		/**
-		 * Graphs are dumped as an html page using javascript to visualize the
-		 * graphs. Only root-level nodes are included in the graph: to get a
-		 * complete graph with subn-odes, use {@link #HTML_WITH_SUBNODES}.
-		 */
-		HTML,
-
-		/**
-		 * Graphs are dumped as an html page using javascript to visualize the
-		 * graphs. All nodes, including sub-nodes, are part of the visualized,
-		 * creating a compound graph. Note: graphs generated with this option
-		 * are big: files will have larger dimension and the viewer will be
-		 * slower. For a lighter alternative, use {@link #HTML}.
-		 */
-		HTML_WITH_SUBNODES,
-
-		/**
-		 * Graphs are dumped in Dot format.
-		 */
-		DOT;
-	}
-
-	/**
-	 * The type of descending fixpoint phase algorithms that can be used.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static enum DescendingPhaseType {
-
-		/**
-		 * The descending phase is not computed.
-		 */
-		NONE,
-
-		/**
-		 * The descending phase is performed by applying the glb k-times.
-		 */
-		GLB,
-
-		/**
-		 * The descending phase always uses the narrowing operator.
-		 */
-		NARROWING;
 	}
 
 	/**
@@ -156,46 +105,10 @@ public class LiSAConfiguration
 	public AbstractDomain<?> analysis;
 
 	/**
-	 * Sets the format to use for dumping graph files, named
-	 * {@code <cfg signature>[optional numeric hash].<format>}, in the working
-	 * directory at the end of the analysis. These files will contain a graph
-	 * representing each input {@link CFG}s' structure, and whose nodes will
-	 * contain a representation of the results of the semantic analysis on each
-	 * {@link Statement}. To customize where the graphs should be generated, use
-	 * {@link #workdir}. Defaults to {@link GraphType#NONE} (that is, no graphs
-	 * will be dumped).
+	 * The collection of {@link LiSAOutput}s to produce at the end of the
+	 * analysis. Defaults to an empty set.
 	 */
-	public GraphType analysisGraphs = GraphType.NONE;
-
-	/**
-	 * Whether or not the inputs {@link CFG}s to the analysis should be dumped
-	 * in json format before the analysis starts. Graph files are named
-	 * {@code <cfg signature>_cfg.json}, and are dumped in the path pointed to
-	 * by {@link #workdir}. If {@link #analysisGraphs} is not set to
-	 * {@link GraphType#NONE}, inputs will also be dumped using the format
-	 * specified by that field. Defaults to {@code false}.
-	 */
-	public boolean serializeInputs;
-
-	/**
-	 * Whether or not the results of the analysis (if executed) should be dumped
-	 * in json format. Graph files are named
-	 * {@code <cfg signature>[optional numeric hash]json}, and are dumped in the
-	 * path pointed to by {@link #workdir}. If {@link #analysisGraphs} is not
-	 * set to {@link GraphType#NONE}, results will also be dumped using the
-	 * format specified by that field. Defaults to {@code false}.
-	 */
-	public boolean serializeResults;
-
-	/**
-	 * Sets whether or not a json report file, named {@value LiSA#REPORT_NAME},
-	 * should be created and dumped in the working directory at the end of the
-	 * analysis. This file will contain all the {@link Message}s that have been
-	 * generated, as well as a list of produced files. To customize where the
-	 * report should be generated, use {@link #workdir}. Defaults to
-	 * {@code false}.
-	 */
-	public boolean jsonOutput;
+	public Collection<LiSAOutput> outputs = new HashSet<>();
 
 	/**
 	 * The working directory for this instance of LiSA, that is, the directory
@@ -235,36 +148,46 @@ public class LiSAConfiguration
 	public int glbThreshold = DEFAULT_GLB_THRESHOLD;
 
 	/**
-	 * the type of descending phase that will be applied by the fixpoint
-	 * algorithm.
+	 * The {@link ForwardCFGFixpoint} to use for forward fixpoint iterations
+	 * over individual {@link CFG}s. Defaults to
+	 * {@link ForwardAscendingFixpoint}.
 	 */
-	public DescendingPhaseType descendingPhaseType = DescendingPhaseType.NONE;
+	public ForwardCFGFixpoint<?, ?> forwardFixpoint = new ForwardAscendingFixpoint<>();
 
 	/**
-	 * The concrete class of {@link WorkingSet} to be used in fixpoints.
+	 * The {@link ForwardCFGFixpoint} to use for the descending phase of forward
+	 * fixpoint iterations over individual {@link CFG}s. Defaults to
+	 * {@code null}, meaning that no forward descending phase should be run.
+	 */
+	public ForwardCFGFixpoint<?, ?> forwardDescendingFixpoint = null;
+
+	/**
+	 * The {@link BackwardCFGFixpoint} to use for backward fixpoint iterations
+	 * over individual {@link CFG}s. Defaults to
+	 * {@link ForwardAscendingFixpoint}.
+	 */
+	public BackwardCFGFixpoint<?, ?> backwardFixpoint = new BackwardAscendingFixpoint<>();
+
+	/**
+	 * The {@link BackwardCFGFixpoint} to use for the descending phase of
+	 * backward fixpoint iterations over individual {@link CFG}s. Defaults to
+	 * {@code null}, meaning that no backward descending phase should be run.
+	 */
+	public BackwardCFGFixpoint<?, ?> backwardDescendingFixpoint = null;
+
+	/**
+	 * The {@link WorkingSet} to be used in fixpoints. Note that the instance
+	 * passed to this field is used as a factory to create new working sets
+	 * through {@link WorkingSet#mk()}, and its contents are thus ignored.
 	 * Defaults to {@link OrderBasedWorkingSet}.
 	 */
-	public Class<?> fixpointWorkingSet = OrderBasedWorkingSet.class;
+	public WorkingSet<Statement> fixpointWorkingSet = new OrderBasedWorkingSet();
 
 	/**
 	 * The {@link OpenCallPolicy} to be used for computing the result of
 	 * {@link OpenCall}s. Defaults to {@link TopExecutionPolicy}.
 	 */
 	public OpenCallPolicy openCallPolicy = TopExecutionPolicy.INSTANCE;
-
-	/**
-	 * If {@code true}, will cause the analysis to optimize fixpoint executions.
-	 * This means that (i) basic blocks will be computed for each cfg, (ii)
-	 * fixpoint computations will discard post-states of statements that are not
-	 * ending a basic block, (iii) after the fixpoint terminates, only the
-	 * pre-state of the cfg entrypoints and the post-states of widening points
-	 * will be stored, discarding everything else. When the pre- or post-state
-	 * of a non-widening point is queried, a fast fixpoint iteration will be ran
-	 * to unwind (that is, re-propagate) the results and compute the missing
-	 * states. Note that results are <b>not</b> unwinded for dumping results.
-	 * Defaults to {@code false}.
-	 */
-	public boolean optimize = false;
 
 	/**
 	 * If {@code true}, will cause fixpoint iterations to use widening (and
@@ -293,12 +216,16 @@ public class LiSAConfiguration
 	public Predicate<Statement> hotspots = null;
 
 	/**
-	 * When {@link #optimize} is {@code true}, this field controls whether or
-	 * not optimized results are automatically unwinded before dumping them to
-	 * output files. Note that, if this field is {@code false} and
-	 * {@link #optimize} is {@code true}, the post-state of every node that is
-	 * not a widening point or that is not matched by {@link #hotspots} will
-	 * appear as bottom states. Defaults to {@code true}.
+	 * When an optimized fixpoint is used (i.e., when invocations of
+	 * {@link AnalysisFixpoint#isOptimized()} on {@link #forwardFixpoint},
+	 * {@link #forwardDescendingFixpoint}, {@link #backwardFixpoint}, or
+	 * {@link #backwardDescendingFixpoint} yields {@code true}), this field
+	 * controls whether or not optimized results are automatically unwinded
+	 * before dumping them to output files. Note that, if this field is
+	 * {@code false} and an optimized fixpoint is used, the post-state of every
+	 * node that is not a widening point or that is not matched by the
+	 * fixpoint's custom hotspots predicate will appear as bottom states.
+	 * Defaults to {@code false}.
 	 */
 	public boolean dumpForcesUnwinding = false;
 
@@ -307,7 +234,8 @@ public class LiSAConfiguration
 	 * separate entry in the {@link AnalysisState} errors, or if it should be
 	 * "smashed" into the summary error state. All smashed errors share a unique
 	 * {@link ProgramState}, as they are deemed as mostly noise or
-	 * uninteresting.
+	 * uninteresting. Defaults to {@code null}, meaning that no error is
+	 * smashed.
 	 */
 	public Predicate<Type> shouldSmashError = null;
 
@@ -331,10 +259,10 @@ public class LiSAConfiguration
 						res.append(" (").append(coll.size()).append(")").append((coll.isEmpty() ? "" : ":"));
 						for (Object element : coll)
 							res.append("\n    ").append(element.getClass().getSimpleName());
-					} else if (Class.class.isAssignableFrom(field.getType()))
-						res.append(": ").append(((Class<?>) value).getSimpleName());
-					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
-						res.append(": ").append(((OpenCallPolicy) value).getClass().getSimpleName());
+					} else if (WorkingSet.class.isAssignableFrom(field.getType())
+							|| OpenCallPolicy.class.isAssignableFrom(field.getType())
+							|| Fixpoint.class.isAssignableFrom(field.getType()))
+						res.append(": ").append(value == null ? "unset" : value.getClass().getSimpleName());
 					else if (Predicate.class.isAssignableFrom(field.getType()))
 						// not sure how we can get more details reliably
 						res.append(": ").append(value == null ? "unset" : "set");
@@ -373,10 +301,10 @@ public class LiSAConfiguration
 								.map(e -> e.getClass().getSimpleName())
 								.sorted()
 								.collect(new CollectionUtilities.StringCollector<>(", "));
-					else if (Class.class.isAssignableFrom(field.getType()))
-						val = ((Class<?>) value).getSimpleName();
-					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
-						val = ((OpenCallPolicy) value).getClass().getSimpleName();
+					else if (WorkingSet.class.isAssignableFrom(field.getType())
+							|| OpenCallPolicy.class.isAssignableFrom(field.getType())
+							|| Fixpoint.class.isAssignableFrom(field.getType()))
+						val = value == null ? "unset" : value.getClass().getSimpleName();
 					else if (Predicate.class.isAssignableFrom(field.getType()))
 						// not sure how we can get more details reliably
 						val = value == null ? "unset" : "set";

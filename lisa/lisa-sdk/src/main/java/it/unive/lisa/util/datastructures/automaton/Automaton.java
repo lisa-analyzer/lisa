@@ -532,7 +532,7 @@ public abstract class Automaton<A extends Automaton<A, T>,
 
 		Map<Set<State>, Boolean> marked = new HashMap<>();
 		Map<Set<State>, State> statesName = new HashMap<>();
-		WorkingSet<Set<State>> unmarked = FIFOWorkingSet.mk();
+		WorkingSet<Set<State>> unmarked = new FIFOWorkingSet<>();
 
 		int num = 0;
 		Set<State> temp = epsilonClosure(getInitialStates());
@@ -696,7 +696,7 @@ public abstract class Automaton<A extends Automaton<A, T>,
 			return lang;
 		}
 
-		WorkingSet<Pair<String, Transition<T>>> ws = FIFOWorkingSet.mk();
+		WorkingSet<Pair<String, Transition<T>>> ws = new FIFOWorkingSet<>();
 		for (State q : getInitialStates())
 			for (Transition<T> t : getOutgoingTransitionsFrom(q))
 				ws.push(Pair.of("", t));
@@ -995,7 +995,7 @@ public abstract class Automaton<A extends Automaton<A, T>,
 			return result;
 
 		SortedSet<T> lang = new TreeSet<>();
-		WorkingSet<Triple<T, State, Integer>> stack = FIFOWorkingSet.mk();
+		WorkingSet<Triple<T, State, Integer>> stack = new FIFOWorkingSet<>();
 		stack.push(Triple.of(epsilon(), s, n));
 
 		while (!stack.isEmpty()) {

@@ -130,7 +130,7 @@ public final class InterfaceType
 
 	private Type scanForSupertypeOf(
 			UnitType other) {
-		WorkingSet<InterfaceType> ws = FIFOWorkingSet.mk();
+		WorkingSet<InterfaceType> ws = new FIFOWorkingSet<>();
 		Set<InterfaceType> seen = new HashSet<>();
 		ws.push(this);
 		InterfaceType current;

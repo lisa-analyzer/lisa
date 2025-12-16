@@ -95,7 +95,7 @@ public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends
 	 */
 	void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException;
 
 	/**
