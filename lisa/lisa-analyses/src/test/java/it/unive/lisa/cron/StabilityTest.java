@@ -20,6 +20,7 @@ import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.numeric.Trend;
 import it.unive.lisa.lattices.types.TypeSet;
+import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -43,7 +44,7 @@ public class StabilityTest
 	public void testStability()
 			throws ParsingException {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		Interval aux = new Interval();
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),

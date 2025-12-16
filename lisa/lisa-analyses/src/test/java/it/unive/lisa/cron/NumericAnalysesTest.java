@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.numeric.NonRedundantIntervals;
 import it.unive.lisa.analysis.numeric.Parity;
 import it.unive.lisa.analysis.numeric.Pentagon;
 import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
 import org.junit.Test;
 
@@ -17,7 +18,7 @@ public class NumericAnalysesTest
 	@Test
 	public void testSign() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -31,7 +32,7 @@ public class NumericAnalysesTest
 	@Test
 	public void testParity() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Parity(),
@@ -45,7 +46,7 @@ public class NumericAnalysesTest
 	@Test
 	public void testInterval() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
@@ -59,7 +60,7 @@ public class NumericAnalysesTest
 	@Test
 	public void testIntegerConstantPropagation() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new IntegerConstantPropagation(),
@@ -73,7 +74,7 @@ public class NumericAnalysesTest
 	@Test
 	public void testNonRedundantSetOfInterval() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new NonRedundantIntervals(),
@@ -94,7 +95,7 @@ public class NumericAnalysesTest
 	@Test
 	public void testPentagons() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Pentagon(),

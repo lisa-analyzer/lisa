@@ -9,6 +9,7 @@ import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.BackwardModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -34,7 +35,7 @@ public class DataflowAnalysesTest
 	@Test
 	public void testAvailableExpressions() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new AvailableExpressions(),
@@ -47,7 +48,7 @@ public class DataflowAnalysesTest
 	@Test
 	public void testConstantPropagation() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new ConstantPropagation(),
@@ -60,7 +61,7 @@ public class DataflowAnalysesTest
 	@Test
 	public void testReachingDefinitions() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new ReachingDefinitions(),
@@ -73,7 +74,7 @@ public class DataflowAnalysesTest
 	@Test
 	public void testLiveness() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.interproceduralAnalysis = new BackwardModularWorstCaseAnalysis<>();
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
@@ -95,7 +96,7 @@ public class DataflowAnalysesTest
 				new ReachingDefinitions(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.testDir = "issues";
 		conf.testSubDir = "322";
 

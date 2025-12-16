@@ -1,6 +1,7 @@
 package it.unive.lisa.cron;
 
 import it.unive.lisa.DefaultConfiguration;
+import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingNarrowingFixpoint;
 import org.junit.Test;
@@ -12,7 +13,7 @@ public class DescendingTest
 	@Test
 	public void testIntervalDescendingWidening() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -27,7 +28,7 @@ public class DescendingTest
 	@Test
 	public void testIntervalDescendingMaxGlb() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),

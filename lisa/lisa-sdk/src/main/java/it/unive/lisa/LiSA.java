@@ -5,11 +5,13 @@ import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.logging.Log4jConfig;
 import it.unive.lisa.logging.TimerLogger;
-import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.outputs.LiSAOutput;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,11 +35,6 @@ public class LiSA {
 	}
 
 	private static final Logger LOG = LogManager.getLogger(LiSA.class);
-
-	/**
-	 * The name of the json report that LiSA can optionally dump.
-	 */
-	public static final String REPORT_NAME = "report.json";
 
 	/**
 	 * The {@link FileManager} instance that will be used during analyses
@@ -132,18 +129,49 @@ public class LiSA {
 				fileManager.createdFiles());
 		if (infoProvider != null)
 			infoProvider.accept(report);
-		if (conf.jsonOutput) {
-			LOG.info("Dumping analysis report to '" + REPORT_NAME + "'");
-			try {
-				fileManager.mkOutputFile(REPORT_NAME, writer -> {
-					JsonReport json = new JsonReport(report);
-					json.dump(writer);
-					LOG.info("Report file dumped to '" + REPORT_NAME + "'");
-				});
-			} catch (IOException e) {
-				LOG.error("Unable to dump report file", e);
-			}
+
+		Collection<LiSAOutput> reportOutputs = new HashSet<>();
+		for (LiSAOutput output : conf.outputs)
+			if (output.isReportOutput())
+				reportOutputs.add(output);
+			else
+				try {
+					output.dump(app, report, tool, fileManager);
+				} catch (IOException e) {
+					LOG.error("Unable to dump output using " + output.getClass().getSimpleName(), e);
+				}
+
+		try {
+			fileManager.generateSupportFiles();
+		} catch (IOException e) {
+			LOG.error("Exception while generating supporting files for visualization");
+			LOG.error(e);
 		}
+
+		// we regenerate stats and report to have up-to-date information
+		stats = new LiSARunInfo(
+				tool.getWarnings(),
+				tool.getNotices(),
+				fileManager.createdFiles(),
+				app,
+				start,
+				new DateTime());
+		report = new LiSAReport(
+				conf,
+				stats,
+				tool.getWarnings(),
+				tool.getNotices(),
+				fileManager.createdFiles());
+		if (infoProvider != null)
+			infoProvider.accept(report);
+
+		// we dump these last to have up-to-date information in the report
+		for (LiSAOutput output : reportOutputs)
+			try {
+				output.dump(app, report, tool, fileManager);
+			} catch (IOException e) {
+				LOG.error("Unable to dump output using " + output.getClass().getSimpleName(), e);
+			}
 
 		return report;
 	}

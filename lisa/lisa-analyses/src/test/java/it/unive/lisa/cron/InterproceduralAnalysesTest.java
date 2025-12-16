@@ -14,6 +14,7 @@ import it.unive.lisa.interprocedural.callgraph.CHACallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.inlining.InliningAnalysis;
+import it.unive.lisa.outputs.JSONResults;
 import org.junit.Test;
 
 public class InterproceduralAnalysesTest
@@ -23,7 +24,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testWorstCaseCHA() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -39,7 +40,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testWorstCaseRTA() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -55,7 +56,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTA() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -71,7 +72,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTAHelper() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -87,7 +88,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTAHelperFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -103,7 +104,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTAArrayOpPP() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -117,7 +118,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTATwoArraysPP() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -133,7 +134,7 @@ public class InterproceduralAnalysesTest
 			throws ParsingException,
 			AnalysisException {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(),
 						new InferredTypes());
@@ -148,7 +149,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testInliningRTA() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -164,7 +165,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testInliningRTAHelper() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -180,7 +181,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testInliningRTAArrayOpPP() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new InliningAnalysis<>();
@@ -194,7 +195,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testInliningRTATwoArraysPP() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new InliningAnalysis<>();

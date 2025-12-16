@@ -2,7 +2,7 @@ package it.unive.lisa.outputs.compare;
 
 import static java.lang.String.format;
 
-import it.unive.lisa.LiSA;
+import it.unive.lisa.outputs.JSONReportDumper;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
 import it.unive.lisa.outputs.serializableGraph.SerializableArray;
@@ -59,8 +59,8 @@ import org.apache.logging.log4j.util.TriConsumer;
  * <li>the set of files produced during the analysis
  * ({@link JsonReport#getFiles()}) is then compared, matching their paths;</li>
  * <li>finally, the contents of every file produced by both analyses are
- * compared, excluding the report itself ({@link LiSA#REPORT_NAME}) and
- * visualization-only files.</li>
+ * compared, excluding the report itself ({@link JSONReportDumper.REPORT_NAME})
+ * and visualization-only files.</li>
  * </ol>
  * All differences are reported by showing them in the log of the analysis.
  * Comparison and reporting can be customized by overriding the following
@@ -493,7 +493,7 @@ public class ResultComparer {
 				throw new FileNotFoundException(format(MISSING_FILE, pair.getRight(), "second"));
 
 			String path = left.getName();
-			if (FilenameUtils.getName(path).equals(LiSA.REPORT_NAME))
+			if (FilenameUtils.getName(path).equals(JSONReportDumper.REPORT_NAME))
 				continue;
 
 			if (isJsonGraph(path))
@@ -1251,9 +1251,7 @@ public class ResultComparer {
 	 */
 	public boolean isJsonGraph(
 			String path) {
-		// TODO this is fragile, we should open the file and look for its
-		// contents
-		return FilenameUtils.getExtension(path).equals("json");
+		return path.endsWith(".graph.json");
 	}
 
 	/**

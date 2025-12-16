@@ -12,7 +12,7 @@ import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.TopExecutionPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.Log4jConfig;
-import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.LiSAOutput;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -53,40 +53,6 @@ public class LiSAConfiguration
 		// if not, we set a default configuration
 		if (!Log4jConfig.isLog4jConfigured())
 			Log4jConfig.initializeLogging();
-	}
-
-	/**
-	 * The type of graphs that can be dumped by LiSA.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static enum GraphType {
-
-		/**
-		 * No graphs are dumped.
-		 */
-		NONE,
-
-		/**
-		 * Graphs are dumped as an html page using javascript to visualize the
-		 * graphs. Only root-level nodes are included in the graph: to get a
-		 * complete graph with subn-odes, use {@link #HTML_WITH_SUBNODES}.
-		 */
-		HTML,
-
-		/**
-		 * Graphs are dumped as an html page using javascript to visualize the
-		 * graphs. All nodes, including sub-nodes, are part of the visualized,
-		 * creating a compound graph. Note: graphs generated with this option
-		 * are big: files will have larger dimension and the viewer will be
-		 * slower. For a lighter alternative, use {@link #HTML}.
-		 */
-		HTML_WITH_SUBNODES,
-
-		/**
-		 * Graphs are dumped in Dot format.
-		 */
-		DOT;
 	}
 
 	/**
@@ -139,46 +105,10 @@ public class LiSAConfiguration
 	public AbstractDomain<?> analysis;
 
 	/**
-	 * Sets the format to use for dumping graph files, named
-	 * {@code <cfg signature>[optional numeric hash].<format>}, in the working
-	 * directory at the end of the analysis. These files will contain a graph
-	 * representing each input {@link CFG}s' structure, and whose nodes will
-	 * contain a representation of the results of the semantic analysis on each
-	 * {@link Statement}. To customize where the graphs should be generated, use
-	 * {@link #workdir}. Defaults to {@link GraphType#NONE} (that is, no graphs
-	 * will be dumped).
+	 * The collection of {@link LiSAOutput}s to produce at the end of the
+	 * analysis. Defaults to an empty set.
 	 */
-	public GraphType analysisGraphs = GraphType.NONE;
-
-	/**
-	 * Whether or not the inputs {@link CFG}s to the analysis should be dumped
-	 * in json format before the analysis starts. Graph files are named
-	 * {@code <cfg signature>_cfg.json}, and are dumped in the path pointed to
-	 * by {@link #workdir}. If {@link #analysisGraphs} is not set to
-	 * {@link GraphType#NONE}, inputs will also be dumped using the format
-	 * specified by that field. Defaults to {@code false}.
-	 */
-	public boolean serializeInputs;
-
-	/**
-	 * Whether or not the results of the analysis (if executed) should be dumped
-	 * in json format. Graph files are named
-	 * {@code <cfg signature>[optional numeric hash]json}, and are dumped in the
-	 * path pointed to by {@link #workdir}. If {@link #analysisGraphs} is not
-	 * set to {@link GraphType#NONE}, results will also be dumped using the
-	 * format specified by that field. Defaults to {@code false}.
-	 */
-	public boolean serializeResults;
-
-	/**
-	 * Sets whether or not a json report file, named {@value LiSA#REPORT_NAME},
-	 * should be created and dumped in the working directory at the end of the
-	 * analysis. This file will contain all the {@link Message}s that have been
-	 * generated, as well as a list of produced files. To customize where the
-	 * report should be generated, use {@link #workdir}. Defaults to
-	 * {@code false}.
-	 */
-	public boolean jsonOutput;
+	public Collection<LiSAOutput> outputs = new HashSet<>();
 
 	/**
 	 * The working directory for this instance of LiSA, that is, the directory
