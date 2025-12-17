@@ -205,11 +205,14 @@ public class LiSAConfiguration
 	public boolean useWideningPoints = true;
 
 	/**
-	 * When {@link #optimize} is {@code true}, this predicate will be used to
-	 * determine additional statements (also considering intermediate ones) for
-	 * which the fixpoint results must be kept. This is useful for avoiding
-	 * result unwinding due to {@link SemanticCheck}s querying for the
-	 * post-state of statements. Note that statements for which
+	 * When an optimized fixpoint is used (i.e., when invocations of
+	 * {@link AnalysisFixpoint#isOptimized()} on {@link #forwardFixpoint},
+	 * {@link #forwardDescendingFixpoint}, {@link #backwardFixpoint}, or
+	 * {@link #backwardDescendingFixpoint} yields {@code true}), this predicate
+	 * will be used to determine additional statements (also considering
+	 * intermediate ones) for which the fixpoint results must be kept. This is
+	 * useful for avoiding result unwinding due to {@link SemanticCheck}s
+	 * querying for the post-state of statements. Note that statements for which
 	 * {@link Statement#stopsExecution()} is {@code true} are always considered
 	 * hotspots.
 	 */

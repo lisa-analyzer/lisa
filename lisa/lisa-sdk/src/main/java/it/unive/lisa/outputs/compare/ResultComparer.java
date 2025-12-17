@@ -59,7 +59,7 @@ import org.apache.logging.log4j.util.TriConsumer;
  * <li>the set of files produced during the analysis
  * ({@link JsonReport#getFiles()}) is then compared, matching their paths;</li>
  * <li>finally, the contents of every file produced by both analyses are
- * compared, excluding the report itself ({@link JSONReportDumper.REPORT_NAME})
+ * compared, excluding the report itself ({@link JSONReportDumper#REPORT_NAME})
  * and visualization-only files.</li>
  * </ol>
  * All differences are reported by showing them in the log of the analysis.

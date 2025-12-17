@@ -40,7 +40,7 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 	 * with this constructor is inherently invalid, as it does not target any
 	 * cfg and has no information on the analysis to run. Valid instances should
 	 * be built throug the
-	 * {@link #OptimizedBackwardDescendingGLBFixpoint(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * {@link #OptimizedBackwardDescendingGLBFixpoint(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration, Predicate)}
 	 * constructor or the
 	 * {@link #mk(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
 	 * method. Invocations of the latter will preserve the hotspots predicate.

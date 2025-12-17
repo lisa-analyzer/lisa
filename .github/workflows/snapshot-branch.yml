@@ -37,7 +37,7 @@ jobs:
           # this keeps <version>-SNAPSHOT (master branch snapshots)
           # and <version>-<anything but not safe_branch>-SNAPSHOT
           ignore-versions: >-
-            ^[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT)$
+            ^[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT$
       - name: "Delete pre-releases of lisa-program from packages"
         uses: actions/delete-package-versions@v2
         with:
@@ -46,7 +46,7 @@ jobs:
           # this keeps <version>-SNAPSHOT (master branch snapshots)
           # and <version>-<anything but not safe_branch>-SNAPSHOT
           ignore-versions: >-
-            ^[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT)$
+            ^[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT$
       - name: "Delete pre-releases of lisa-analyses from packages"
         uses: actions/delete-package-versions@v2
         with:
@@ -55,7 +55,7 @@ jobs:
           # this keeps <version>-SNAPSHOT (master branch snapshots)
           # and <version>-<anything but not safe_branch>-SNAPSHOT
           ignore-versions: >-
-            ^[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT)$
+            ^[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT$
       - name: "Delete pre-releases of lisa-imp from packages"
         uses: actions/delete-package-versions@v2
         with:
@@ -64,7 +64,7 @@ jobs:
           # this keeps <version>-SNAPSHOT (master branch snapshots)
           # and <version>-<anything but not safe_branch>-SNAPSHOT
           ignore-versions: >-
-            ^[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT)$
+            ^[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT$
       - name: "Retrieve version number list"
         id: gitinfo
         run: |
