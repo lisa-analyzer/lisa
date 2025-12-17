@@ -1,81 +1,101 @@
-name: 'Snapshot custom branch'
+name: "Snapshot custom branch"
 
 on:
   workflow_dispatch:
+
+env:
+  RAW_BRANCH: ${{ github.ref_name }}
 
 jobs:
   build-and-cron:
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout'
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 # needed to have the tags below
-    - name: 'Ensure git is installed'
-      run: sudo apt-get install -y git
-    - name: 'Set up JDK 11'
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11
-    - name: 'Grant execute permission for gradlew'
-      run: chmod +x lisa/gradlew
-    - name: 'Gradle: normal build'
-      run: cd lisa && ./gradlew build
-    - name: 'Delete pre-releases of lisa-sdk from packages'
-      uses: actions/delete-package-versions@v2
-      with: 
-        package-name: 'io.github.lisa-analyzer.lisa-sdk'
-        min-versions-to-keep: 0 
-        # this ignores everything that is not version-branch-SNAPSHOT
-        ignore-versions: ^[0-9.b]+(-(?!${{ github.ref_name }}-SNAPSHOT)[a-zA-Z0-9_-]*)?$
-    - name: 'Delete pre-releases of lisa-program from packages'
-      uses: actions/delete-package-versions@v2
-      with: 
-        package-name: 'io.github.lisa-analyzer.lisa-program'
-        min-versions-to-keep: 0
-        # this ignores everything that is not version-branch-SNAPSHOT
-        ignore-versions: ^[0-9.b]+(-(?!${{ github.ref_name }}-SNAPSHOT)[a-zA-Z0-9_-]*)?$
-    - name: 'Delete pre-releases of lisa-analyses from packages'
-      uses: actions/delete-package-versions@v2
-      with: 
-        package-name: 'io.github.lisa-analyzer.lisa-analyses'
-        min-versions-to-keep: 0
-        # this ignores everything that is not version-branch-SNAPSHOT
-        ignore-versions: ^[0-9.b]+(-(?!${{ github.ref_name }}-SNAPSHOT)[a-zA-Z0-9_-]*)?$
-    - name: 'Delete pre-releases of lisa-imp from packages'
-      uses: actions/delete-package-versions@v2
-      with: 
-        package-name: 'io.github.lisa-analyzer.lisa-imp'
-        min-versions-to-keep: 0
-        # this ignores everything that is not version-branch-SNAPSHOT
-        ignore-versions: ^[0-9.b]+(-(?!${{ github.ref_name }}-SNAPSHOT)[a-zA-Z0-9_-]*)?$
-    - name: 'Retrieve version number list'
-      id: gitinfo
-      run: |
-        # get last tag excluding 'latest' and considering only version tags
-        echo "most recent tags:"
-        git tag --sort=-creatordate | head -n5
-        currenttag=$(git tag --sort=-creatordate | grep -v latest | grep "^v[0-9].*" | head -n1)
-        echo "current tag: $currenttag"
-        function join_by {
-          local d=${1-} f=${2-}
-          if shift 2; then
-          printf %s "$f" "${@/#/$d}"
-          fi
-        }
-        # tokenize whenever we transition from numbers to whatever else
-        # 5.2b4 -> (5 . 2 b 4)
-        currentver=${currenttag#?} # remove the v
-        echo "current version: $currentver"
-        nexttag=( $(grep -oE '[0-9]+|[^0-9]+' <<< $currentver) ) 
-        let nexttag[-1]=${nexttag[-1]}+1
-        nextver=$(join_by "" "${nexttag[@]}")
-        echo "nextver=$nextver" >> $GITHUB_OUTPUT
-    - name: 'Gradle: publish to GitHub Packages'
-      env:
-        SIGN_PW: ${{ secrets.SIGN_PASSPHRASE }}
-        SIGN_KEY: ${{ secrets.SIGN_PRIVATE_KEY }}
-        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cd lisa && ./gradlew -Pversion=${{ steps.gitinfo.outputs.nextver }}-${{ github.ref_name }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository        
+      - name: Sanitize branch name
+        id: sanitize
+        run: |
+          SAFE_BRANCH="${RAW_BRANCH//\//-}"
+          echo "safe_branch=$SAFE_BRANCH" >> "$GITHUB_OUTPUT"
+      - name: "Checkout"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # needed to have the tags below
+      - name: "Ensure git is installed"
+        run: sudo apt-get install -y git
+      - name: "Set up JDK 11"
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: "Grant execute permission for gradlew"
+        run: chmod +x lisa/gradlew
+      - name: "Gradle: normal build"
+        run: cd lisa && ./gradlew build
+      - name: "Delete pre-releases of lisa-sdk from packages"
+        uses: actions/delete-package-versions@v2
+        with:
+          package-name: "io.github.lisa-analyzer.lisa-sdk"
+          min-versions-to-keep: 0
+          # this keeps <version>-SNAPSHOT (master branch snapshots)
+          # and <version>-<anything but not safe_branch>-SNAPSHOT
+          ignore-versions: >-
+            ^(?:[0-9.]+-SNAPSHOT
+            |[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT)$
+      - name: "Delete pre-releases of lisa-program from packages"
+        uses: actions/delete-package-versions@v2
+        with:
+          package-name: "io.github.lisa-analyzer.lisa-program"
+          min-versions-to-keep: 0
+          # this keeps <version>-SNAPSHOT (master branch snapshots)
+          # and <version>-<anything but not safe_branch>-SNAPSHOT
+          ignore-versions: >-
+            ^(?:[0-9.]+-SNAPSHOT
+            |[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT)$
+      - name: "Delete pre-releases of lisa-analyses from packages"
+        uses: actions/delete-package-versions@v2
+        with:
+          package-name: "io.github.lisa-analyzer.lisa-analyses"
+          min-versions-to-keep: 0
+          # this keeps <version>-SNAPSHOT (master branch snapshots)
+          # and <version>-<anything but not safe_branch>-SNAPSHOT
+          ignore-versions: >-
+            ^(?:[0-9.]+-SNAPSHOT
+            |[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT)$
+      - name: "Delete pre-releases of lisa-imp from packages"
+        uses: actions/delete-package-versions@v2
+        with:
+          package-name: "io.github.lisa-analyzer.lisa-imp"
+          min-versions-to-keep: 0
+          # this keeps <version>-SNAPSHOT (master branch snapshots)
+          # and <version>-<anything but not safe_branch>-SNAPSHOT
+          ignore-versions: >-
+            ^(?:[0-9.]+-SNAPSHOT
+            |[0-9.]+-(?!${{ steps.sanitize.outputs.safe_branch }}-SNAPSHOT).+-SNAPSHOT)$
+      - name: "Retrieve version number list"
+        id: gitinfo
+        run: |
+          # get last tag excluding 'latest' and considering only version tags
+          echo "most recent tags:"
+          git tag --sort=-creatordate | head -n5
+          currenttag=$(git tag --sort=-creatordate | grep -v latest | grep "^v[0-9].*" | head -n1)
+          echo "current tag: $currenttag"
+          function join_by {
+            local d=${1-} f=${2-}
+            if shift 2; then
+            printf %s "$f" "${@/#/$d}"
+            fi
+          }
+          # tokenize whenever we transition from numbers to whatever else
+          # 5.2b4 -> (5 . 2 b 4)
+          currentver=${currenttag#?} # remove the v
+          echo "current version: $currentver"
+          nexttag=( $(grep -oE '[0-9]+|[^0-9]+' <<< $currentver) ) 
+          let nexttag[-1]=${nexttag[-1]}+1
+          nextver=$(join_by "" "${nexttag[@]}")
+          echo "nextver=$nextver" >> $GITHUB_OUTPUT
+      - name: "Gradle: publish to GitHub Packages"
+        env:
+          SIGN_PW: ${{ secrets.SIGN_PASSPHRASE }}
+          SIGN_KEY: ${{ secrets.SIGN_PRIVATE_KEY }}
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cd lisa && ./gradlew -Pversion=${{ steps.gitinfo.outputs.nextver }}-${{ github.ref_name }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository
