@@ -83,7 +83,7 @@ jobs:
           nextver=$(join_by "" "${nexttag[@]}")
           changelog=$(cat changelog.txt)
           echo "next version: $nextver"
-          echo "changelog: $changelog.txt"
+          echo "changelog: $changelog"
           echo "nextver=$nextver" >> $GITHUB_OUTPUT
           echo "currentver=$currentver" >> $GITHUB_OUTPUT
           echo "CHANGELOG<<EOF" >> $GITHUB_ENV
