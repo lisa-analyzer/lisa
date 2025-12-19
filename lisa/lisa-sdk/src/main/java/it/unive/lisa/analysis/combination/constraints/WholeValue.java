@@ -87,6 +87,16 @@ public class WholeValue<N extends WholeValueElement<N>, S extends WholeValueElem
 	}
 
 	@Override
+	public WholeValue<N, S, B> mergeAux(
+			WholeValue<N, S, B> other)
+			throws SemanticException {
+		return new WholeValue<>(
+				this.intValue.merge(other.intValue),
+				this.stringValue.merge(other.stringValue),
+				this.boolValue.merge(other.boolValue));
+	}
+
+	@Override
 	public boolean lessOrEqualAux(
 			WholeValue<N, S, B> other)
 			throws SemanticException {

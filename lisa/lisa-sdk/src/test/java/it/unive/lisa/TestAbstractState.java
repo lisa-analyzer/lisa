@@ -78,6 +78,13 @@ public class TestAbstractState
 	}
 
 	@Override
+	public TestAbstractState merge(
+			TestAbstractState other)
+			throws SemanticException {
+		return this;
+	}
+
+	@Override
 	public TestAbstractState top() {
 		return this;
 	}

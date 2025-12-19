@@ -131,6 +131,13 @@ public abstract class CartesianCombination<C extends CartesianCombination<C, T1,
 	}
 
 	@Override
+	public C mergeAux(
+			C other)
+			throws SemanticException {
+		return mk(first.merge(other.first), second.merge(other.second));
+	}
+
+	@Override
 	public C wideningAux(
 			C other)
 			throws SemanticException {

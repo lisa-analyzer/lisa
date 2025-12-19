@@ -46,6 +46,20 @@ public interface BaseLattice<L extends BaseLattice<L>>
 
 	@Override
 	@SuppressWarnings("unchecked")
+	default L merge(
+			L other)
+			throws SemanticException {
+		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
+			return (L) this;
+
+		if (this.isBottom() || other.isTop())
+			return other;
+
+		return mergeAux(other);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	default L glb(
 			L other)
 			throws SemanticException {
@@ -104,9 +118,35 @@ public interface BaseLattice<L extends BaseLattice<L>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract L lubAux(
+	L lubAux(
 			L other)
 			throws SemanticException;
+
+	/**
+	 * Performs the merge operation between this lattice element and the given
+	 * one, assuming that base cases have already been handled. In particular,
+	 * it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * </ul>
+	 * The default implementation of this method delegates to
+	 * {@link #lubAux(BaseLattice)}.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the merge between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L mergeAux(
+			L other)
+			throws SemanticException {
+		return lubAux(other);
+	}
 
 	/**
 	 * Performs the greatest lower bound operation between this lattice element
@@ -204,18 +244,18 @@ public interface BaseLattice<L extends BaseLattice<L>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract boolean lessOrEqualAux(
+	boolean lessOrEqualAux(
 			L other)
 			throws SemanticException;
 
 	@Override
-	public abstract boolean equals(
+	boolean equals(
 			Object obj);
 
 	@Override
-	public abstract int hashCode();
+	int hashCode();
 
 	@Override
-	public abstract String toString();
+	String toString();
 
 }

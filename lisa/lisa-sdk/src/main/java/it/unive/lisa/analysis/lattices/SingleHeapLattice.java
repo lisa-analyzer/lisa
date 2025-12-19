@@ -56,6 +56,13 @@ public class SingleHeapLattice
 	}
 
 	@Override
+	public SingleHeapLattice merge(
+			SingleHeapLattice other)
+			throws SemanticException {
+		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
+	}
+
+	@Override
 	public SingleHeapLattice glb(
 			SingleHeapLattice other)
 			throws SemanticException {

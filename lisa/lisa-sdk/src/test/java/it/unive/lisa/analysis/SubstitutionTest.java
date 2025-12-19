@@ -104,6 +104,13 @@ public class SubstitutionTest {
 		}
 
 		@Override
+		public Collector merge(
+				Collector other)
+				throws SemanticException {
+			return lub(other);
+		}
+
+		@Override
 		public boolean lessOrEqual(
 				Collector other)
 				throws SemanticException {

@@ -58,6 +58,13 @@ public class Monolith
 	}
 
 	@Override
+	public Monolith merge(
+			Monolith other)
+			throws SemanticException {
+		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
+	}
+
+	@Override
 	public Monolith glb(
 			Monolith other)
 			throws SemanticException {

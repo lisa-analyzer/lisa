@@ -201,6 +201,19 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	}
 
 	@Override
+	public F mergeAux(
+			F other)
+			throws SemanticException {
+		return functionalLift(
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.merge(o2));
+	}
+
+	@Override
 	public F glbAux(
 			F other)
 			throws SemanticException {

@@ -49,6 +49,13 @@ public class SingleValueLattice
 	}
 
 	@Override
+	public SingleValueLattice merge(
+			SingleValueLattice other)
+			throws SemanticException {
+		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
+	}
+
+	@Override
 	public SingleValueLattice glb(
 			SingleValueLattice other)
 			throws SemanticException {

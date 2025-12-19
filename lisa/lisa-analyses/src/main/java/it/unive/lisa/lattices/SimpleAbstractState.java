@@ -277,6 +277,16 @@ public class SimpleAbstractState<H extends HeapLattice<H>, V extends ValueLattic
 	}
 
 	@Override
+	public SimpleAbstractState<H, V, T> mergeAux(
+			SimpleAbstractState<H, V, T> other)
+			throws SemanticException {
+		return new SimpleAbstractState<>(
+				heapState.merge(other.heapState),
+				valueState.merge(other.valueState),
+				typeState.merge(other.typeState));
+	}
+
+	@Override
 	public SimpleAbstractState<H, V, T> glbAux(
 			SimpleAbstractState<H, V, T> other)
 			throws SemanticException {

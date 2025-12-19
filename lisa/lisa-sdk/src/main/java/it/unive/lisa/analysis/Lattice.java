@@ -69,7 +69,14 @@ public interface Lattice<L extends Lattice<L>>
 
 	/**
 	 * Performs the least upper bound operation between this lattice element and
-	 * the given one. This operation is commutative.
+	 * the given one. This operation is commutative. Note that
+	 * {@link #merge(Lattice)} shares most of the logic with this method: while
+	 * the latter is used to explicitly merge lattices at control flow merge
+	 * points, this one is used to join arbitrary elements of the lattice at any
+	 * point during the analysis. The distinction is present to allow
+	 * implementers to provide different behaviors for the two operations, if
+	 * needed (e.g., when a closure operation should be applied only in one of
+	 * the situations).
 	 * 
 	 * @param other the other lattice element
 	 * 
@@ -125,6 +132,72 @@ public interface Lattice<L extends Lattice<L>>
 				(
 						l1,
 						l2) -> l1.lub(l2));
+	}
+
+	/**
+	 * Merges this lattice element and the given one. This operation is
+	 * commutative. Merging two instances corresponds to computing their least
+	 * upper bound, and it is used to explicitly merge lattices at control flow
+	 * merge points. Instead, {@link #lub(Lattice)} is used to join arbitrary
+	 * elements of the lattice at any point during the analysis. The distinction
+	 * is present to allow implementers to provide different behaviors for the
+	 * two operations, if needed (e.g., when a closure operation should be
+	 * applied only in one of the situations).
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the merge between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	L merge(
+			L other)
+			throws SemanticException;
+
+	/**
+	 * Performs the merge operation between this lattice element and the given
+	 * ones, by repeatedly invoking {@link #merge(Lattice)} following the
+	 * iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the merge between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L merge(
+			L... others)
+			throws SemanticException {
+		return compress(
+				(L) this,
+				new IterableArray<>(others),
+				(
+						l1,
+						l2) -> l1.merge(l2));
+	}
+
+	/**
+	 * Performs the merge operation between this lattice element and the given
+	 * ones, by repeatedly invoking {@link #merge(Lattice)} following the
+	 * iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the merge between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L merge(
+			Iterable<L> others)
+			throws SemanticException {
+		return compress(
+				(L) this,
+				others,
+				(
+						l1,
+						l2) -> l1.merge(l2));
 	}
 
 	/**

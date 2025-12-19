@@ -185,6 +185,31 @@ public class FixpointInfo
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public FixpointInfo mergeAux(
+			FixpointInfo other)
+			throws SemanticException {
+		Map<String, Lattice<?>> function = mkNewFunction(null, false);
+		Set<String> keys = SetUtils.union(this.getKeys(), other.getKeys());
+		for (String key : keys)
+			try {
+				// need to leave this raw to not have the compiler complaining
+				// about the merge invocation
+				Lattice v = this.get(key);
+				Lattice<?> o = other.get(key);
+				if (v != null && o != null)
+					function.put(key, v.merge(o));
+				else if (v != null)
+					function.put(key, v);
+				else
+					function.put(key, o);
+			} catch (SemanticException e) {
+				throw new SemanticException("Exception while operating on '" + key + "'", e);
+			}
+		return new FixpointInfo(function);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public FixpointInfo glbAux(
 			FixpointInfo other)
 			throws SemanticException {
