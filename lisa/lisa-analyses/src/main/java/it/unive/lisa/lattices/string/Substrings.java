@@ -73,6 +73,13 @@ public class Substrings
 	}
 
 	@Override
+	public Substrings mergeAux(
+			Substrings other)
+			throws SemanticException {
+		return lubAux(other);
+	}
+
+	@Override
 	public Substrings glbAux(
 			Substrings other)
 			throws SemanticException {

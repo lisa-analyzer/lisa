@@ -282,6 +282,14 @@ public class HeapEnvWithFields
 	}
 
 	@Override
+	public HeapEnvWithFields mergeAux(
+			HeapEnvWithFields other)
+			throws SemanticException {
+		HeapEnvWithFields merge = super.mergeAux(other);
+		return new HeapEnvWithFields(merge.lattice, merge.function, fields.merge(other.fields));
+	}
+
+	@Override
 	public HeapEnvWithFields glbAux(
 			HeapEnvWithFields other)
 			throws SemanticException {
