@@ -46,7 +46,7 @@ public interface BaseLattice<L extends BaseLattice<L>>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	default L merge(
+	default L chain(
 			L other)
 			throws SemanticException {
 		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
@@ -55,7 +55,7 @@ public interface BaseLattice<L extends BaseLattice<L>>
 		if (this.isBottom() || other.isTop())
 			return other;
 
-		return mergeAux(other);
+		return chainAux(other);
 	}
 
 	@Override
@@ -123,9 +123,10 @@ public interface BaseLattice<L extends BaseLattice<L>>
 			throws SemanticException;
 
 	/**
-	 * Performs the merge operation between this lattice element and the given
-	 * one, assuming that base cases have already been handled. In particular,
-	 * it is guaranteed that:
+	 * Performs the chain operation (see {@link Lattice#chain(Lattice)} for more
+	 * information} between this lattice element and the given one, assuming
+	 * that base cases have already been handled. In particular, it is
+	 * guaranteed that:
 	 * <ul>
 	 * <li>{@code other} is not {@code null}</li>
 	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
@@ -138,11 +139,11 @@ public interface BaseLattice<L extends BaseLattice<L>>
 	 * 
 	 * @param other the other lattice element
 	 * 
-	 * @return the merge between this and other
+	 * @return the chain between this and other
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default L mergeAux(
+	default L chainAux(
 			L other)
 			throws SemanticException {
 		return lubAux(other);

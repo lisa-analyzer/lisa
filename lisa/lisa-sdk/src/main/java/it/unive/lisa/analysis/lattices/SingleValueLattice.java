@@ -49,7 +49,7 @@ public class SingleValueLattice
 	}
 
 	@Override
-	public SingleValueLattice merge(
+	public SingleValueLattice chain(
 			SingleValueLattice other)
 			throws SemanticException {
 		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;

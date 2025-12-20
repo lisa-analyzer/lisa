@@ -282,11 +282,11 @@ public class HeapEnvWithFields
 	}
 
 	@Override
-	public HeapEnvWithFields mergeAux(
+	public HeapEnvWithFields chainAux(
 			HeapEnvWithFields other)
 			throws SemanticException {
-		HeapEnvWithFields merge = super.mergeAux(other);
-		return new HeapEnvWithFields(merge.lattice, merge.function, fields.merge(other.fields));
+		HeapEnvWithFields chain = super.chainAux(other);
+		return new HeapEnvWithFields(chain.lattice, chain.function, fields.chain(other.fields));
 	}
 
 	@Override

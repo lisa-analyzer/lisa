@@ -55,7 +55,7 @@ public class SingleTypeLattice
 	}
 
 	@Override
-	public SingleTypeLattice merge(
+	public SingleTypeLattice chain(
 			SingleTypeLattice other)
 			throws SemanticException {
 		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;

@@ -292,13 +292,13 @@ public class ProgramState<A extends AbstractLattice<A>>
 	}
 
 	@Override
-	public ProgramState<A> mergeAux(
+	public ProgramState<A> chainAux(
 			ProgramState<A> other)
 			throws SemanticException {
 		return new ProgramState<>(
-				state.merge(other.state),
-				computedExpressions.merge(other.computedExpressions),
-				info.merge(other.info));
+				state.chain(other.state),
+				computedExpressions.chain(other.computedExpressions),
+				info.chain(other.info));
 	}
 
 	@Override

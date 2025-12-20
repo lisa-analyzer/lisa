@@ -181,7 +181,7 @@ public class StabilityTest
 				ValueEnvironment<Trend> left,
 				ValueEnvironment<Trend> right)
 				throws Exception {
-			return left.merge(right);
+			return left.chain(right);
 		}
 
 		@Override

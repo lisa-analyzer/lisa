@@ -43,7 +43,10 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <V> the type of {@link ValueLattice} embedded in this state
  * @param <T> the type of {@link TypeLattice} embedded in this state
  */
-public class SimpleAbstractState<H extends HeapLattice<H>, V extends ValueLattice<V>, T extends TypeLattice<T>>
+public class SimpleAbstractState<
+		H extends HeapLattice<H>,
+		V extends ValueLattice<V>,
+		T extends TypeLattice<T>>
 		implements
 		BaseLattice<SimpleAbstractState<H, V, T>>,
 		AbstractLattice<SimpleAbstractState<H, V, T>> {
@@ -277,13 +280,13 @@ public class SimpleAbstractState<H extends HeapLattice<H>, V extends ValueLattic
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> mergeAux(
+	public SimpleAbstractState<H, V, T> chainAux(
 			SimpleAbstractState<H, V, T> other)
 			throws SemanticException {
 		return new SimpleAbstractState<>(
-				heapState.merge(other.heapState),
-				valueState.merge(other.valueState),
-				typeState.merge(other.typeState));
+				heapState.chain(other.heapState),
+				valueState.chain(other.valueState),
+				typeState.chain(other.typeState));
 	}
 
 	@Override

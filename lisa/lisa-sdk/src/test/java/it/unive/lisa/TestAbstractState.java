@@ -78,7 +78,7 @@ public class TestAbstractState
 	}
 
 	@Override
-	public TestAbstractState merge(
+	public TestAbstractState chain(
 			TestAbstractState other)
 			throws SemanticException {
 		return this;

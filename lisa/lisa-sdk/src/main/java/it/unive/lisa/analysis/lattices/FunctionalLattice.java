@@ -201,7 +201,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	}
 
 	@Override
-	public F mergeAux(
+	public F chainAux(
 			F other)
 			throws SemanticException {
 		return functionalLift(
@@ -210,7 +210,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 				this::lubKeys,
 				(
 						o1,
-						o2) -> o1 == null ? o2 : o1.merge(o2));
+						o2) -> o1 == null ? o2 : o1.chain(o2));
 	}
 
 	@Override

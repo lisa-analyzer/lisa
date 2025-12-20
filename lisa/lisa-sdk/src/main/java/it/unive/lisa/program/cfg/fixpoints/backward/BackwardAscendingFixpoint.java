@@ -85,12 +85,12 @@ public class BackwardAscendingFixpoint<A extends AbstractLattice<A>,
 			throws SemanticException {
 		if (config.wideningThreshold < 0)
 			// invalid threshold means always lub
-			return old.lub(approx);
+			return old.chain(approx);
 
 		if (config.useWideningPoints && !wideningPoints.contains(node))
 			// optimization: never apply widening on normal instructions,
 			// save time and precision and only apply to widening points
-			return old.lub(approx);
+			return old.chain(approx);
 
 		int lub = lubs.computeIfAbsent(node, st -> config.wideningThreshold);
 		if (lub == 0) {
@@ -100,14 +100,14 @@ public class BackwardAscendingFixpoint<A extends AbstractLattice<A>,
 				// no need to widen the intermediate expressions as
 				// well: we force convergence on the final post state
 				// only, to recover as much precision as possible
-				intermediate = old.intermediateStates.lub(approx.intermediateStates);
+				intermediate = old.intermediateStates.chain(approx.intermediateStates);
 			else
 				intermediate = old.intermediateStates.widening(approx.intermediateStates);
 			return CompoundState.of(post, intermediate);
 		}
 
 		lubs.put(node, --lub);
-		return old.lub(approx);
+		return old.chain(approx);
 	}
 
 	@Override

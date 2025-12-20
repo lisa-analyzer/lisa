@@ -185,7 +185,7 @@ public class FixpointInfo
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FixpointInfo mergeAux(
+	public FixpointInfo chainAux(
 			FixpointInfo other)
 			throws SemanticException {
 		Map<String, Lattice<?>> function = mkNewFunction(null, false);
@@ -193,11 +193,11 @@ public class FixpointInfo
 		for (String key : keys)
 			try {
 				// need to leave this raw to not have the compiler complaining
-				// about the merge invocation
+				// about the chain invocation
 				Lattice v = this.get(key);
 				Lattice<?> o = other.get(key);
 				if (v != null && o != null)
-					function.put(key, v.merge(o));
+					function.put(key, v.chain(o));
 				else if (v != null)
 					function.put(key, v);
 				else

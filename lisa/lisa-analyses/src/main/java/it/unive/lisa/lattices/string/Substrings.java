@@ -73,7 +73,7 @@ public class Substrings
 	}
 
 	@Override
-	public Substrings mergeAux(
+	public Substrings chainAux(
 			Substrings other)
 			throws SemanticException {
 		return lubAux(other);

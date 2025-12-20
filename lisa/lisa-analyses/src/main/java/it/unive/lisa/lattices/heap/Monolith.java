@@ -58,7 +58,7 @@ public class Monolith
 	}
 
 	@Override
-	public Monolith merge(
+	public Monolith chain(
 			Monolith other)
 			throws SemanticException {
 		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;

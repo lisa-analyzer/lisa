@@ -87,13 +87,13 @@ public class WholeValue<N extends WholeValueElement<N>, S extends WholeValueElem
 	}
 
 	@Override
-	public WholeValue<N, S, B> mergeAux(
+	public WholeValue<N, S, B> chainAux(
 			WholeValue<N, S, B> other)
 			throws SemanticException {
 		return new WholeValue<>(
-				this.intValue.merge(other.intValue),
-				this.stringValue.merge(other.stringValue),
-				this.boolValue.merge(other.boolValue));
+				this.intValue.chain(other.intValue),
+				this.stringValue.chain(other.stringValue),
+				this.boolValue.chain(other.boolValue));
 	}
 
 	@Override

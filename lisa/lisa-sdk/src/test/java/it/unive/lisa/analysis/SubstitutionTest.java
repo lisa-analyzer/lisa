@@ -104,7 +104,7 @@ public class SubstitutionTest {
 		}
 
 		@Override
-		public Collector merge(
+		public Collector chain(
 				Collector other)
 				throws SemanticException {
 			return lub(other);

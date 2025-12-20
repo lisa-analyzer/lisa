@@ -577,15 +577,15 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	}
 
 	@Override
-	public AnalysisState<A> mergeAux(
+	public AnalysisState<A> chainAux(
 			AnalysisState<A> other)
 			throws SemanticException {
 		return new AnalysisState<>(
-				execution.merge(other.execution),
-				halt.merge(other.halt),
-				smashedErrors.merge(other.smashedErrors),
-				smashedErrorsState.merge(other.smashedErrorsState),
-				errors.merge(other.errors));
+				execution.chain(other.execution),
+				halt.chain(other.halt),
+				smashedErrors.chain(other.smashedErrors),
+				smashedErrorsState.chain(other.smashedErrorsState),
+				errors.chain(other.errors));
 	}
 
 	@Override

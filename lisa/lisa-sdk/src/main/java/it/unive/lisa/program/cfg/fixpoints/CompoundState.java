@@ -109,10 +109,10 @@ public final class CompoundState<A extends AbstractLattice<A>>
 	}
 
 	@Override
-	public CompoundState<A> merge(
+	public CompoundState<A> chain(
 			CompoundState<A> other)
 			throws SemanticException {
-		return CompoundState.of(postState.merge(other.postState), intermediateStates.merge(other.intermediateStates));
+		return CompoundState.of(postState.chain(other.postState), intermediateStates.chain(other.intermediateStates));
 	}
 
 	@Override

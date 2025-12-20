@@ -108,7 +108,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 			CompoundState<A> left,
 			CompoundState<A> right)
 			throws SemanticException {
-		return left.merge(right);
+		return left.lub(right);
 	}
 
 	@Override

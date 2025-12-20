@@ -87,13 +87,13 @@ public class SmashedValue<N extends Lattice<N>, S extends Lattice<S>>
 	}
 
 	@Override
-	public SmashedValue<N, S> mergeAux(
+	public SmashedValue<N, S> chainAux(
 			SmashedValue<N, S> other)
 			throws SemanticException {
 		return new SmashedValue<N, S>(
-				intValue.merge(other.intValue),
-				stringValue.merge(other.stringValue),
-				boolValue.merge(other.boolValue));
+				intValue.chain(other.intValue),
+				stringValue.chain(other.stringValue),
+				boolValue.chain(other.boolValue));
 	}
 
 	@Override
