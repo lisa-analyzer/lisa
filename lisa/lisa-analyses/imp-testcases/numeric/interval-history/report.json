@@ -1,0 +1,40 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_tutorial.constants(tutorial__this).graph.json", "untyped_tutorial.div(tutorial__this,_untyped_i,_untyped_j).graph.json", "untyped_tutorial.doublewhile(tutorial__this,_untyped_t).graph.json", "untyped_tutorial.gcd(tutorial__this,_untyped_a,_untyped_b).graph.json", "untyped_tutorial.glb(tutorial__this,_untyped_x,_untyped_y).graph.json", "untyped_tutorial.intv_dec(tutorial__this).graph.json", "untyped_tutorial.sat(tutorial__this).graph.json", "untyped_tutorial.sat(tutorial__this,_untyped_x,_untyped_y).graph.json", "untyped_tutorial.sat2(tutorial__this).graph.json", "untyped_tutorial.sign_parity_example(tutorial__this).graph.json", "untyped_tutorial.ub_example(tutorial__this,_untyped_y,_untyped_z).graph.json" ],
+  "info" : {
+    "cfgs" : "11",
+    "duration" : "646ms",
+    "end" : "2025-12-22T08:57:36.514+01:00",
+    "expressions" : "153",
+    "files" : "11",
+    "globals" : "0",
+    "members" : "11",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2025-12-22T08:57:35.868+01:00",
+    "statements" : "62",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/numeric/interval-history"
+  }
+}

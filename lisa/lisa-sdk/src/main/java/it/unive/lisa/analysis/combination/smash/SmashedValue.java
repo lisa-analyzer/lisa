@@ -80,8 +80,40 @@ public class SmashedValue<N extends Lattice<N>, S extends Lattice<S>>
 	public SmashedValue<N, S> lubAux(
 			SmashedValue<N, S> other)
 			throws SemanticException {
-		return new SmashedValue<N,
-				S>(intValue.lub(other.intValue), stringValue.lub(other.stringValue), boolValue.lub(other.boolValue));
+		return new SmashedValue<N, S>(
+				intValue.lub(other.intValue),
+				stringValue.lub(other.stringValue),
+				boolValue.lub(other.boolValue));
+	}
+
+	@Override
+	public SmashedValue<N, S> upchainAux(
+			SmashedValue<N, S> other)
+			throws SemanticException {
+		return new SmashedValue<N, S>(
+				intValue.upchain(other.intValue),
+				stringValue.upchain(other.stringValue),
+				boolValue.upchain(other.boolValue));
+	}
+
+	@Override
+	public SmashedValue<N, S> glbAux(
+			SmashedValue<N, S> other)
+			throws SemanticException {
+		return new SmashedValue<N, S>(
+				intValue.glb(other.intValue),
+				stringValue.glb(other.stringValue),
+				boolValue.glb(other.boolValue));
+	}
+
+	@Override
+	public SmashedValue<N, S> downchainAux(
+			SmashedValue<N, S> other)
+			throws SemanticException {
+		return new SmashedValue<N, S>(
+				intValue.downchain(other.intValue),
+				stringValue.downchain(other.stringValue),
+				boolValue.downchain(other.boolValue));
 	}
 
 	@Override
@@ -92,6 +124,17 @@ public class SmashedValue<N extends Lattice<N>, S extends Lattice<S>>
 				intValue.widening(other.intValue),
 				stringValue.widening(other.stringValue),
 				boolValue.widening(other.boolValue));
+
+	}
+
+	@Override
+	public SmashedValue<N, S> narrowingAux(
+			SmashedValue<N, S> other)
+			throws SemanticException {
+		return new SmashedValue<N, S>(
+				intValue.narrowing(other.intValue),
+				stringValue.narrowing(other.stringValue),
+				boolValue.narrowing(other.boolValue));
 
 	}
 

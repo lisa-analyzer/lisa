@@ -104,6 +104,20 @@ public class SubstitutionTest {
 		}
 
 		@Override
+		public Collector upchain(
+				Collector other)
+				throws SemanticException {
+			return lub(other);
+		}
+
+		@Override
+		public Collector downchain(
+				Collector other)
+				throws SemanticException {
+			return glb(other);
+		}
+
+		@Override
 		public boolean lessOrEqual(
 				Collector other)
 				throws SemanticException {

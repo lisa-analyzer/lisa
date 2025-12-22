@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.HistoryDomain;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.Reachability;
@@ -725,7 +726,8 @@ public class TestParameterProvider {
 			return (R) new Bricks();
 		if (param == BoundedStringSet.class)
 			return (R) new BoundedStringSet();
-		if (root == TracePartitioning.class || root == Analysis.class || root == Reachability.class)
+		if (root == TracePartitioning.class || root == Analysis.class || root == Reachability.class
+				|| root == HistoryDomain.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
 
 		throw new UnsupportedOperationException(

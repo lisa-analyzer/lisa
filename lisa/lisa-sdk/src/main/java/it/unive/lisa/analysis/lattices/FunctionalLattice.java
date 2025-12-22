@@ -201,6 +201,19 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	}
 
 	@Override
+	public F upchainAux(
+			F other)
+			throws SemanticException {
+		return functionalLift(
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.upchain(o2));
+	}
+
+	@Override
 	public F glbAux(
 			F other)
 			throws SemanticException {
@@ -211,6 +224,19 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 				(
 						o1,
 						o2) -> o1 == null ? o2 : o1.glb(o2));
+	}
+
+	@Override
+	public F downchainAux(
+			F other)
+			throws SemanticException {
+		return functionalLift(
+				other,
+				lattice.top(),
+				this::glbKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.downchain(o2));
 	}
 
 	@Override

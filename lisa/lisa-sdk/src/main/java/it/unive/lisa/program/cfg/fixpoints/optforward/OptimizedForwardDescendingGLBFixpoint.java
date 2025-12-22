@@ -91,7 +91,7 @@ public class OptimizedForwardDescendingGLBFixpoint<
 			return old;
 
 		glbs.put(node, --glb);
-		return old.glb(approx);
+		return old.downchain(approx);
 	}
 
 	@Override

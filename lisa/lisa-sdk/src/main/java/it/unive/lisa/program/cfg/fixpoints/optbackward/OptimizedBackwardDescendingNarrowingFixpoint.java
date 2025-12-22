@@ -86,7 +86,7 @@ public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLatt
 		if (wideningPoints == null || !wideningPoints.contains(node))
 			// optimization: never apply narrowing on normal instructions,
 			// save time and precision and only apply to widening points
-			return old.glb(approx);
+			return old.downchain(approx);
 
 		AnalysisState<A> post = old.postState.narrowing(approx.postState);
 		StatementStore<A> intermediate;
@@ -94,7 +94,7 @@ public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLatt
 			// no need to narrow the intermediate expressions as
 			// well: we force convergence on the final post state
 			// only, to recover as much precision as possible
-			intermediate = old.intermediateStates.glb(approx.intermediateStates);
+			intermediate = old.intermediateStates.downchain(approx.intermediateStates);
 		else
 			intermediate = old.intermediateStates.narrowing(approx.intermediateStates);
 		return CompoundState.of(post, intermediate);

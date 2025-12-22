@@ -46,6 +46,20 @@ public interface BaseLattice<L extends BaseLattice<L>>
 
 	@Override
 	@SuppressWarnings("unchecked")
+	default L upchain(
+			L other)
+			throws SemanticException {
+		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
+			return (L) this;
+
+		if (this.isBottom() || other.isTop())
+			return other;
+
+		return upchainAux(other);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	default L glb(
 			L other)
 			throws SemanticException {
@@ -56,6 +70,20 @@ public interface BaseLattice<L extends BaseLattice<L>>
 			return other;
 
 		return glbAux(other);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	default L downchain(
+			L other)
+			throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other))
+			return (L) this;
+
+		if (other.isBottom() || this.isTop())
+			return other;
+
+		return downchainAux(other);
 	}
 
 	@Override
@@ -104,9 +132,36 @@ public interface BaseLattice<L extends BaseLattice<L>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract L lubAux(
+	L lubAux(
 			L other)
 			throws SemanticException;
+
+	/**
+	 * Performs the upwards chain operation (see
+	 * {@link Lattice#upchain(Lattice)} for more information) between this
+	 * lattice element and the given one, assuming that base cases have already
+	 * been handled. In particular, it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * </ul>
+	 * The default implementation of this method delegates to
+	 * {@link #lubAux(BaseLattice)}.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the upchain between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L upchainAux(
+			L other)
+			throws SemanticException {
+		return lubAux(other);
+	}
 
 	/**
 	 * Performs the greatest lower bound operation between this lattice element
@@ -130,6 +185,33 @@ public interface BaseLattice<L extends BaseLattice<L>>
 			L other)
 			throws SemanticException {
 		return bottom();
+	}
+
+	/**
+	 * Performs the downwards chain operation (see
+	 * {@link Lattice#downchain(Lattice)} for more information) between this
+	 * lattice element and the given one, assuming that base cases have already
+	 * been handled. In particular, it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * </ul>
+	 * The default implementation of this method delegates to
+	 * {@link #glbAux(BaseLattice)}.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the downchain between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L downchainAux(
+			L other)
+			throws SemanticException {
+		return glbAux(other);
 	}
 
 	/**
@@ -204,18 +286,18 @@ public interface BaseLattice<L extends BaseLattice<L>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract boolean lessOrEqualAux(
+	boolean lessOrEqualAux(
 			L other)
 			throws SemanticException;
 
 	@Override
-	public abstract boolean equals(
+	boolean equals(
 			Object obj);
 
 	@Override
-	public abstract int hashCode();
+	int hashCode();
 
 	@Override
-	public abstract String toString();
+	String toString();
 
 }

@@ -56,6 +56,20 @@ public class SingleHeapLattice
 	}
 
 	@Override
+	public SingleHeapLattice upchain(
+			SingleHeapLattice other)
+			throws SemanticException {
+		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
+	}
+
+	@Override
+	public SingleHeapLattice downchain(
+			SingleHeapLattice other)
+			throws SemanticException {
+		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
+	}
+
+	@Override
 	public SingleHeapLattice glb(
 			SingleHeapLattice other)
 			throws SemanticException {
