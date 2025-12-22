@@ -204,8 +204,8 @@ public interface Lattice<L extends Lattice<L>>
 	}
 
 	/**
-	 * Performs the greatest lower bound operation between this lattice
-	 * element and the given one. This operation is commutative. Note that
+	 * Performs the greatest lower bound operation between this lattice element
+	 * and the given one. This operation is commutative. Note that
 	 * {@link #downchain(Lattice)} shares most of the logic with this method:
 	 * while the latter is used to explicitly traverse descending chains in
 	 * fixpoint computations (i.e., glb-ing together a previous approximation
