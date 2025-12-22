@@ -282,11 +282,11 @@ public class HeapEnvWithFields
 	}
 
 	@Override
-	public HeapEnvWithFields chainAux(
+	public HeapEnvWithFields upchainAux(
 			HeapEnvWithFields other)
 			throws SemanticException {
-		HeapEnvWithFields chain = super.chainAux(other);
-		return new HeapEnvWithFields(chain.lattice, chain.function, fields.chain(other.fields));
+		HeapEnvWithFields chain = super.upchainAux(other);
+		return new HeapEnvWithFields(chain.lattice, chain.function, fields.upchain(other.fields));
 	}
 
 	@Override
@@ -295,6 +295,14 @@ public class HeapEnvWithFields
 			throws SemanticException {
 		HeapEnvWithFields glb = super.glbAux(other);
 		return new HeapEnvWithFields(glb.lattice, glb.function, fields.glb(other.fields));
+	}
+
+	@Override
+	public HeapEnvWithFields downchainAux(
+			HeapEnvWithFields other)
+			throws SemanticException {
+		HeapEnvWithFields chain = super.downchainAux(other);
+		return new HeapEnvWithFields(chain.lattice, chain.function, fields.downchain(other.fields));
 	}
 
 	@Override

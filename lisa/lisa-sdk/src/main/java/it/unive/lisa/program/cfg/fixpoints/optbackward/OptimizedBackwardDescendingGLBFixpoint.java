@@ -90,7 +90,7 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 			return old;
 
 		glbs.put(node, --glb);
-		return old.glb(approx);
+		return old.downchain(approx);
 	}
 
 	@Override

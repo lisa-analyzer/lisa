@@ -92,12 +92,12 @@ public class OptimizedForwardAscendingFixpoint<
 			throws SemanticException {
 		if (config.wideningThreshold < 0)
 			// invalid threshold means always lub
-			return old.chain(approx);
+			return old.upchain(approx);
 
 		if (config.useWideningPoints && !wideningPoints.contains(node))
 			// optimization: never apply widening on normal instructions,
 			// save time and precision and only apply to widening points
-			return old.chain(approx);
+			return old.upchain(approx);
 
 		int lub = lubs.computeIfAbsent(node, st -> config.wideningThreshold);
 		if (lub == 0) {
@@ -107,14 +107,14 @@ public class OptimizedForwardAscendingFixpoint<
 				// no need to widen the intermediate expressions as
 				// well: we force convergence on the final post state
 				// only, to recover as much precision as possible
-				intermediate = old.intermediateStates.chain(approx.intermediateStates);
+				intermediate = old.intermediateStates.upchain(approx.intermediateStates);
 			else
 				intermediate = old.intermediateStates.widening(approx.intermediateStates);
 			return CompoundState.of(post, intermediate);
 		}
 
 		lubs.put(node, --lub);
-		return old.chain(approx);
+		return old.upchain(approx);
 	}
 
 	@Override

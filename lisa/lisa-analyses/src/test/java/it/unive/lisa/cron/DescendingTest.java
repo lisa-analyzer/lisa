@@ -11,7 +11,7 @@ public class DescendingTest
 		IMPCronExecutor {
 
 	@Test
-	public void testIntervalDescendingWidening() {
+	public void testIntervalDescendingNarrowing() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(

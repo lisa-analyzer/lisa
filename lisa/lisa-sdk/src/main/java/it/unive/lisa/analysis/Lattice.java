@@ -70,14 +70,14 @@ public interface Lattice<L extends Lattice<L>>
 	/**
 	 * Performs the least upper bound operation between this lattice element and
 	 * the given one. This operation is commutative. Note that
-	 * {@link #chain(Lattice)} shares most of the logic with this method: while
-	 * the latter is used to explicitly traverse ascending chain in fixpoint
-	 * computations (i.e., lubbing together a previous approximation for an
-	 * instruction with a new one), this one is used to join arbitrary elements
-	 * of the lattice at any point during the analysis. The distinction is
-	 * present to allow implementers to provide different behaviors for the two
-	 * operations, if needed (e.g., when a closure operation should be applied
-	 * only in one of the situations).
+	 * {@link #upchain(Lattice)} shares most of the logic with this method:
+	 * while the latter is used to explicitly traverse ascending chains in
+	 * fixpoint computations (i.e., lubbing together a previous approximation
+	 * for an instruction with a new one), this one is used to join arbitrary
+	 * elements of the lattice at any point during the analysis. The distinction
+	 * is present to allow implementers to provide different behaviors for the
+	 * two operations, if needed (e.g., when a closure operation should be
+	 * applied only in one of the situations).
 	 * 
 	 * @param other the other lattice element
 	 * 
@@ -136,40 +136,40 @@ public interface Lattice<L extends Lattice<L>>
 	}
 
 	/**
-	 * Chains this lattice element and the given one. This operation is
-	 * commutative. Chaining two instances usually corresponds to computing
-	 * their least upper bound, and it is used to explicitly traverse ascending
-	 * chain in fixpoint computations (i.e., lubbing together a previous
-	 * approximation for an instruction with a new one). Instead,
-	 * {@link #lub(Lattice)} is used to join arbitrary elements of the lattice
-	 * at any point during the analysis. The distinction is present to allow
-	 * implementers to provide different behaviors for the two operations, if
-	 * needed (e.g., when a closure operation should be applied only in one of
-	 * the situations).
+	 * Chains this lattice element and the given one upwards. This operation is
+	 * <b>not</b> commutative. Chaining two instances upwards usually
+	 * corresponds to computing their least upper bound, and it is used to
+	 * explicitly traverse ascending chains in fixpoint computations (i.e.,
+	 * lubbing together a previous approximation for an instruction with a new
+	 * one). Instead, {@link #lub(Lattice)} is used to join arbitrary elements
+	 * of the lattice at any point during the analysis. The distinction is
+	 * present to allow implementers to provide different behaviors for the two
+	 * operations, if needed (e.g., when a closure operation should be applied
+	 * only in one of the situations).
 	 * 
 	 * @param other the other lattice element
 	 * 
-	 * @return the chain between this and other
+	 * @return the upchain between this and other
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L chain(
+	L upchain(
 			L other)
 			throws SemanticException;
 
 	/**
-	 * Performs the chain operation between this lattice element and the given
-	 * ones, by repeatedly invoking {@link #chain(Lattice)} following the
-	 * iteration order.
+	 * Performs the upwards chain operation between this lattice element and the
+	 * given ones, by repeatedly invoking {@link #upchain(Lattice)} following
+	 * the iteration order.
 	 * 
 	 * @param others the other lattice elements
 	 * 
-	 * @return the chain between this and all other lattice elements
+	 * @return the upchain between this and all other lattice elements
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	default L chain(
+	default L upchain(
 			L... others)
 			throws SemanticException {
 		return compress(
@@ -177,22 +177,22 @@ public interface Lattice<L extends Lattice<L>>
 				new IterableArray<>(others),
 				(
 						l1,
-						l2) -> l1.chain(l2));
+						l2) -> l1.upchain(l2));
 	}
 
 	/**
-	 * Performs the chain operation between this lattice element and the given
-	 * ones, by repeatedly invoking {@link #chain(Lattice)} following the
-	 * iteration order.
+	 * Performs the upwards chain operation between this lattice element and the
+	 * given ones, by repeatedly invoking {@link #upchain(Lattice)} following
+	 * the iteration order.
 	 * 
 	 * @param others the other lattice elements
 	 * 
-	 * @return the chain between this and all other lattice elements
+	 * @return the upchain between this and all other lattice elements
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	default L chain(
+	default L upchain(
 			Iterable<L> others)
 			throws SemanticException {
 		return compress(
@@ -200,12 +200,20 @@ public interface Lattice<L extends Lattice<L>>
 				others,
 				(
 						l1,
-						l2) -> l1.chain(l2));
+						l2) -> l1.upchain(l2));
 	}
 
 	/**
 	 * Performs the greatest lower upper bound operation between this lattice
-	 * element and the given one. This operation is commutative.
+	 * element and the given one. This operation is commutative. Note that
+	 * {@link #downchain(Lattice)} shares most of the logic with this method:
+	 * while the latter is used to explicitly traverse descending chains in
+	 * fixpoint computations (i.e., glb-ing together a previous approximation
+	 * for an instruction with a new one), this one is used to meet arbitrary
+	 * elements of the lattice at any point during the analysis. The distinction
+	 * is present to allow implementers to provide different behaviors for the
+	 * two operations, if needed (e.g., when a closure operation should be
+	 * applied only in one of the situations).
 	 * 
 	 * @param other the other lattice element
 	 * 
@@ -263,6 +271,74 @@ public interface Lattice<L extends Lattice<L>>
 				(
 						l1,
 						l2) -> l1.glb(l2));
+	}
+
+	/**
+	 * Chains this lattice element and the given one downwards. This operation
+	 * is <b>not</b> commutative. Chaining two instances downwards usually
+	 * corresponds to computing their greatest lower bound, and it is used to
+	 * explicitly traverse descending chains in fixpoint computations (i.e.,
+	 * glb-ing together a previous approximation for an instruction with a new
+	 * one). Instead, {@link #glb(Lattice)} is used to meet arbitrary elements
+	 * of the lattice at any point during the analysis. The distinction is
+	 * present to allow implementers to provide different behaviors for the two
+	 * operations, if needed (e.g., when a closure operation should be applied
+	 * only in one of the situations).
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the downchain between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	L downchain(
+			L other)
+			throws SemanticException;
+
+	/**
+	 * Performs the downwards chain operation between this lattice element and
+	 * the given ones, by repeatedly invoking {@link #downchain(Lattice)}
+	 * following the iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the downchain between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L downchain(
+			L... others)
+			throws SemanticException {
+		return compress(
+				(L) this,
+				new IterableArray<>(others),
+				(
+						l1,
+						l2) -> l1.downchain(l2));
+	}
+
+	/**
+	 * Performs the downwards chain operation between this lattice element and
+	 * the given ones, by repeatedly invoking {@link #downchain(Lattice)}
+	 * following the iteration order.
+	 * 
+	 * @param others the other lattice elements
+	 * 
+	 * @return the downchain between this and all other lattice elements
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	default L downchain(
+			Iterable<L> others)
+			throws SemanticException {
+		return compress(
+				(L) this,
+				others,
+				(
+						l1,
+						l2) -> l1.downchain(l2));
 	}
 
 	/**

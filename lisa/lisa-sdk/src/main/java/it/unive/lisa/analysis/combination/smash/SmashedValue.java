@@ -87,13 +87,13 @@ public class SmashedValue<N extends Lattice<N>, S extends Lattice<S>>
 	}
 
 	@Override
-	public SmashedValue<N, S> chainAux(
+	public SmashedValue<N, S> upchainAux(
 			SmashedValue<N, S> other)
 			throws SemanticException {
 		return new SmashedValue<N, S>(
-				intValue.chain(other.intValue),
-				stringValue.chain(other.stringValue),
-				boolValue.chain(other.boolValue));
+				intValue.upchain(other.intValue),
+				stringValue.upchain(other.stringValue),
+				boolValue.upchain(other.boolValue));
 	}
 
 	@Override
@@ -104,6 +104,16 @@ public class SmashedValue<N extends Lattice<N>, S extends Lattice<S>>
 				intValue.glb(other.intValue),
 				stringValue.glb(other.stringValue),
 				boolValue.glb(other.boolValue));
+	}
+
+	@Override
+	public SmashedValue<N, S> downchainAux(
+			SmashedValue<N, S> other)
+			throws SemanticException {
+		return new SmashedValue<N, S>(
+				intValue.downchain(other.intValue),
+				stringValue.downchain(other.stringValue),
+				boolValue.downchain(other.boolValue));
 	}
 
 	@Override

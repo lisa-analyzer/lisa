@@ -77,7 +77,7 @@ public class OptimizedFixpointTest {
 				CompoundState<TestAbstractState> left,
 				CompoundState<TestAbstractState> right)
 				throws SemanticException {
-			return left.chain(right);
+			return left.upchain(right);
 		}
 
 		@Override

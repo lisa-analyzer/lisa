@@ -280,13 +280,13 @@ public class SimpleAbstractState<
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> chainAux(
+	public SimpleAbstractState<H, V, T> upchainAux(
 			SimpleAbstractState<H, V, T> other)
 			throws SemanticException {
 		return new SimpleAbstractState<>(
-				heapState.chain(other.heapState),
-				valueState.chain(other.valueState),
-				typeState.chain(other.typeState));
+				heapState.upchain(other.heapState),
+				valueState.upchain(other.valueState),
+				typeState.upchain(other.typeState));
 	}
 
 	@Override
@@ -297,6 +297,16 @@ public class SimpleAbstractState<
 				heapState.glb(other.heapState),
 				valueState.glb(other.valueState),
 				typeState.glb(other.typeState));
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> downchainAux(
+			SimpleAbstractState<H, V, T> other)
+			throws SemanticException {
+		return new SimpleAbstractState<>(
+				heapState.downchain(other.heapState),
+				valueState.downchain(other.valueState),
+				typeState.downchain(other.typeState));
 	}
 
 	@Override

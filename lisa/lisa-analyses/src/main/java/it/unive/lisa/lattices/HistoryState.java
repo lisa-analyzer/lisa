@@ -1,10 +1,5 @@
 package it.unive.lisa.lattices;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
@@ -14,6 +9,10 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.ListRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * An abstract state that stores the history of the previous fixpoint
@@ -187,7 +186,7 @@ public class HistoryState<A extends AbstractLattice<A>>
 	}
 
 	@Override
-	public HistoryState<A> chainAux(
+	public HistoryState<A> upchainAux(
 			HistoryState<A> other)
 			throws SemanticException {
 		// this represents the history of states for a given
@@ -206,6 +205,18 @@ public class HistoryState<A extends AbstractLattice<A>>
 	}
 
 	@Override
+	public HistoryState<A> downchainAux(
+			HistoryState<A> other)
+			throws SemanticException {
+		// this represents the history of states for a given
+		// instruction, while other represents the new state computed
+		// for that instruction. The latter's history comes from another
+		// instruction, so we discard it and just add its current state
+		// to this
+		return new HistoryState<>(this.current.glb(other.current), this);
+	}
+
+	@Override
 	public HistoryState<A> wideningAux(
 			HistoryState<A> other)
 			throws SemanticException {
@@ -219,9 +230,14 @@ public class HistoryState<A extends AbstractLattice<A>>
 
 	@Override
 	public HistoryState<A> narrowingAux(
-		HistoryState<A> other)
-	throws SemanticException {
-		return new HistoryState<>(current.narrowing(other.current));
+			HistoryState<A> other)
+			throws SemanticException {
+		// this represents the history of states for a given
+		// instruction, while other represents the new state computed
+		// for that instruction. The latter's history comes from another
+		// instruction, so we discard it and just add its current state
+		// to this
+		return new HistoryState<>(this.current.narrowing(other.current), this);
 	}
 
 	@Override

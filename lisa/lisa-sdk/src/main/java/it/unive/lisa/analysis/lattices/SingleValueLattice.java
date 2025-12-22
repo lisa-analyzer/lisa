@@ -49,7 +49,14 @@ public class SingleValueLattice
 	}
 
 	@Override
-	public SingleValueLattice chain(
+	public SingleValueLattice upchain(
+			SingleValueLattice other)
+			throws SemanticException {
+		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
+	}
+
+	@Override
+	public SingleValueLattice downchain(
 			SingleValueLattice other)
 			throws SemanticException {
 		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;

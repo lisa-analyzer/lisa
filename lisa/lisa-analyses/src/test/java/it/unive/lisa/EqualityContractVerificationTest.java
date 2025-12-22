@@ -41,6 +41,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.inlining.CallStackId;
+import it.unive.lisa.lattices.HistoryState;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
@@ -346,6 +347,16 @@ public class EqualityContractVerificationTest {
 								DefaultConfiguration.defaultHeapDomain(),
 								new Sign(),
 								DefaultConfiguration.defaultTypeDomain()))
+				.withPrefabValues(
+						HistoryState.class,
+						new HistoryState<>(DefaultConfiguration.simpleDomain(
+								DefaultConfiguration.defaultHeapDomain(),
+								new Interval(),
+								DefaultConfiguration.defaultTypeDomain()).makeLattice()),
+						new HistoryState<>(DefaultConfiguration.simpleDomain(
+								DefaultConfiguration.defaultHeapDomain(),
+								new Sign(),
+								DefaultConfiguration.defaultTypeDomain()).makeLattice()))
 				.withPrefabValues(MutableGraph.class, g1, g2);
 
 		if (getClass)

@@ -73,7 +73,7 @@ public class Substrings
 	}
 
 	@Override
-	public Substrings chainAux(
+	public Substrings upchainAux(
 			Substrings other)
 			throws SemanticException {
 		return lubAux(other);
@@ -90,6 +90,13 @@ public class Substrings
 				(
 						o1,
 						o2) -> o1.glb(o2)).closure();
+	}
+
+	@Override
+	public Substrings downchainAux(
+			Substrings other)
+			throws SemanticException {
+		return glbAux(other);
 	}
 
 	@Override

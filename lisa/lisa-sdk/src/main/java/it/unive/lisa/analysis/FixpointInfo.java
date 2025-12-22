@@ -185,7 +185,7 @@ public class FixpointInfo
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FixpointInfo chainAux(
+	public FixpointInfo upchainAux(
 			FixpointInfo other)
 			throws SemanticException {
 		Map<String, Lattice<?>> function = mkNewFunction(null, false);
@@ -197,7 +197,7 @@ public class FixpointInfo
 				Lattice v = this.get(key);
 				Lattice<?> o = other.get(key);
 				if (v != null && o != null)
-					function.put(key, v.chain(o));
+					function.put(key, v.upchain(o));
 				else if (v != null)
 					function.put(key, v);
 				else
@@ -223,6 +223,27 @@ public class FixpointInfo
 				Lattice<?> o = other.get(key);
 				if (v != null && o != null)
 					function.put(key, v.glb(o));
+			} catch (SemanticException e) {
+				throw new SemanticException("Exception while operating on '" + key + "'", e);
+			}
+		return new FixpointInfo(function);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public FixpointInfo downchainAux(
+			FixpointInfo other)
+			throws SemanticException {
+		Map<String, Lattice<?>> function = mkNewFunction(null, false);
+		Set<String> keys = SetUtils.intersection(this.getKeys(), other.getKeys());
+		for (String key : keys)
+			try {
+				// need to leave this raw to not have the compiler complaining
+				// about the chain invocation
+				Lattice v = this.get(key);
+				Lattice<?> o = other.get(key);
+				if (v != null && o != null)
+					function.put(key, v.downchain(o));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception while operating on '" + key + "'", e);
 			}

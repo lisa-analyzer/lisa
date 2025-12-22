@@ -78,7 +78,14 @@ public class TestAbstractState
 	}
 
 	@Override
-	public TestAbstractState chain(
+	public TestAbstractState upchain(
+			TestAbstractState other)
+			throws SemanticException {
+		return this;
+	}
+
+	@Override
+	public TestAbstractState downchain(
 			TestAbstractState other)
 			throws SemanticException {
 		return this;

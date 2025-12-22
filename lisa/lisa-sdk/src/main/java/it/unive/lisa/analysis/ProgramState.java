@@ -292,13 +292,13 @@ public class ProgramState<A extends AbstractLattice<A>>
 	}
 
 	@Override
-	public ProgramState<A> chainAux(
+	public ProgramState<A> upchainAux(
 			ProgramState<A> other)
 			throws SemanticException {
 		return new ProgramState<>(
-				state.chain(other.state),
-				computedExpressions.chain(other.computedExpressions),
-				info.chain(other.info));
+				state.upchain(other.state),
+				computedExpressions.upchain(other.computedExpressions),
+				info.upchain(other.info));
 	}
 
 	@Override
@@ -309,6 +309,16 @@ public class ProgramState<A extends AbstractLattice<A>>
 				state.glb(other.state),
 				computedExpressions.glb(other.computedExpressions),
 				info.glb(other.info));
+	}
+
+	@Override
+	public ProgramState<A> downchainAux(
+			ProgramState<A> other)
+			throws SemanticException {
+		return new ProgramState<>(
+				state.downchain(other.state),
+				computedExpressions.downchain(other.computedExpressions),
+				info.downchain(other.info));
 	}
 
 	@Override

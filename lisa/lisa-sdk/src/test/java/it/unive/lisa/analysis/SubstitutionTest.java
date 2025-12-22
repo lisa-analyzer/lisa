@@ -104,10 +104,17 @@ public class SubstitutionTest {
 		}
 
 		@Override
-		public Collector chain(
+		public Collector upchain(
 				Collector other)
 				throws SemanticException {
 			return lub(other);
+		}
+
+		@Override
+		public Collector downchain(
+				Collector other)
+				throws SemanticException {
+			return glb(other);
 		}
 
 		@Override

@@ -577,15 +577,15 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	}
 
 	@Override
-	public AnalysisState<A> chainAux(
+	public AnalysisState<A> upchainAux(
 			AnalysisState<A> other)
 			throws SemanticException {
 		return new AnalysisState<>(
-				execution.chain(other.execution),
-				halt.chain(other.halt),
-				smashedErrors.chain(other.smashedErrors),
-				smashedErrorsState.chain(other.smashedErrorsState),
-				errors.chain(other.errors));
+				execution.upchain(other.execution),
+				halt.upchain(other.halt),
+				smashedErrors.upchain(other.smashedErrors),
+				smashedErrorsState.upchain(other.smashedErrorsState),
+				errors.upchain(other.errors));
 	}
 
 	@Override
@@ -598,6 +598,18 @@ public class AnalysisState<A extends AbstractLattice<A>>
 				smashedErrors.glb(other.smashedErrors),
 				smashedErrorsState.glb(other.smashedErrorsState),
 				errors.glb(other.errors));
+	}
+
+	@Override
+	public AnalysisState<A> downchainAux(
+			AnalysisState<A> other)
+			throws SemanticException {
+		return new AnalysisState<>(
+				execution.downchain(other.execution),
+				halt.downchain(other.halt),
+				smashedErrors.downchain(other.smashedErrors),
+				smashedErrorsState.downchain(other.smashedErrorsState),
+				errors.downchain(other.errors));
 	}
 
 	@Override

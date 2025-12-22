@@ -58,7 +58,7 @@ public class Monolith
 	}
 
 	@Override
-	public Monolith chain(
+	public Monolith upchain(
 			Monolith other)
 			throws SemanticException {
 		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
@@ -66,6 +66,13 @@ public class Monolith
 
 	@Override
 	public Monolith glb(
+			Monolith other)
+			throws SemanticException {
+		return this == SINGLETON && other == SINGLETON ? SINGLETON : BOTTOM;
+	}
+
+	@Override
+	public Monolith downchain(
 			Monolith other)
 			throws SemanticException {
 		return this == SINGLETON && other == SINGLETON ? SINGLETON : BOTTOM;
