@@ -39,6 +39,7 @@ import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Map;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 public class OptimizedFixpointTest {
@@ -56,11 +57,12 @@ public class OptimizedFixpointTest {
 		}
 
 		@Override
-		public CompoundState<TestAbstractState> semantics(
+		public Pair<CompoundState<TestAbstractState>, Statement> semantics(
 				Statement node,
-				CompoundState<TestAbstractState> entrystate)
+				CompoundState<TestAbstractState> entrystate,
+				Map<Statement, CompoundState<TestAbstractState>> result)
 				throws SemanticException {
-			return entrystate;
+			return Pair.of(entrystate, node);
 		}
 
 		@Override

@@ -34,6 +34,7 @@ import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 public class StabilityTest
@@ -203,9 +204,10 @@ public class StabilityTest
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public ValueEnvironment<Trend> semantics(
+		public Pair<ValueEnvironment<Trend>, Statement> semantics(
 				Statement node,
-				ValueEnvironment<Trend> entrystate)
+				ValueEnvironment<Trend> entrystate,
+				Map<Statement, ValueEnvironment<Trend>> results)
 				throws Exception {
 			ValueEnvironment<Trend> post;
 			if (result instanceof OptimizedAnalyzedCFG) {
@@ -223,7 +225,7 @@ public class StabilityTest
 			} else
 				post = result.getAnalysisStateAfter(node)
 						.getExecutionState().valueState.first;
-			return analysis.combine(entrystate, post);
+			return Pair.of(analysis.combine(entrystate, post), node);
 		}
 
 		@Override

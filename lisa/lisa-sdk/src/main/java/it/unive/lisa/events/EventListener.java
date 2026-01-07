@@ -44,8 +44,8 @@ public interface EventListener {
 			CheckTool tool);
 
 	/**
-	 * Callback invoked by {@link EventQueue} when {@link #onEvent(Event)}
-	 * throws an exception.
+	 * Callback invoked by {@link EventQueue} when
+	 * {@link #onEvent(Event, CheckTool)} throws an exception.
 	 * 
 	 * @param event the event whose processing caused the error
 	 * @param error the error thrown during processing

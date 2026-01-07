@@ -1,11 +1,10 @@
 package it.unive.lisa.events;
 
+import it.unive.lisa.checks.syntactic.CheckTool;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import it.unive.lisa.checks.syntactic.CheckTool;
 
 /**
  * An event queue that allows posting {@link Event}s to registered synchronous

@@ -19,7 +19,9 @@ import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link BackwardFixpoint} for {@link CFG}s.
@@ -61,9 +63,10 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 	}
 
 	@Override
-	public CompoundState<A> semantics(
+	public Pair<CompoundState<A>, Statement> semantics(
 			Statement node,
-			CompoundState<A> entrystate)
+			CompoundState<A> entrystate,
+			Map<Statement, CompoundState<A>> result)
 			throws SemanticException {
 		StatementStore<A> expressions = new StatementStore<>(entrystate.postState).bottom();
 		AnalysisState<A> approx = node.backwardSemantics(entrystate.postState, interprocedural, expressions);
@@ -71,7 +74,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>,
 			// we forget the meta variables now as the values are popped from
 			// the stack here
 			approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables(), node);
-		return CompoundState.of(approx, expressions);
+		return Pair.of(CompoundState.of(approx, expressions), node);
 	}
 
 	@Override

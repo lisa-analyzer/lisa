@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A backward fixpoint algorithm for a {@link Graph}.
@@ -79,7 +80,6 @@ public abstract class BackwardFixpoint<
 		if (forceFullEvaluation)
 			toProcess = new HashSet<>(graph.getNodes());
 
-		T newApprox;
 		while (!ws.isEmpty()) {
 			N current = ws.pop();
 
@@ -92,19 +92,23 @@ public abstract class BackwardFixpoint<
 			if (exitstate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 
+			T newApprox;
+			N last;
 			try {
-				newApprox = semantics(current, exitstate);
+				Pair<T, N> r = semantics(current, exitstate, result);
+				newApprox = r.getLeft();
+				last = r.getRight();
 			} catch (Exception e) {
 				throw new FixpointException(format(ERROR, "computing semantics", current, graph), e);
 			}
 
-			T oldApprox = result.get(current);
+			T oldApprox = result.get(last);
 			T postApprox = newApprox;
 			if (oldApprox != null)
 				try {
-					postApprox = join(current, newApprox, oldApprox);
+					postApprox = join(last, newApprox, oldApprox);
 				} catch (Exception e) {
-					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
+					throw new FixpointException(format(ERROR, "joining states", last, graph), e);
 				}
 			try {
 				// we go on if we were asked to analyze all nodes at least once
@@ -113,15 +117,17 @@ public abstract class BackwardFixpoint<
 						|| oldApprox == null
 						// or if we got a result that should not be considered
 						// equal
-						|| !leq(current, postApprox, oldApprox)) {
-					result.put(current, postApprox);
-					for (N instr : graph.predecessorsOf(current))
+						|| !leq(last, postApprox, oldApprox)) {
+					result.put(last, postApprox);
+					for (N instr : graph.predecessorsOf(last))
 						ws.push(instr);
 				}
 			} catch (Exception e) {
-				throw new FixpointException(format(ERROR, "updating result", current, graph), e);
+				throw new FixpointException(format(ERROR, "updating result", last, graph), e);
 			}
 		}
+
+		cleanup(result);
 
 		return result;
 	}
@@ -173,4 +179,13 @@ public abstract class BackwardFixpoint<
 		return exitstate;
 	}
 
+	/**
+	 * Cleans up the result of the fixpoint computation before returning it.
+	 * 
+	 * @param result the computed result
+	 */
+	protected void cleanup(
+			Map<N, T> result) {
+		// by default, do nothing
+	}
 }

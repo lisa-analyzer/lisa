@@ -19,7 +19,9 @@ import it.unive.lisa.util.datastructures.graph.algorithms.ForwardFixpoint;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link ForwardFixpoint} for {@link CFG}s.
@@ -61,15 +63,16 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>,
 	}
 
 	@Override
-	public CompoundState<A> semantics(
+	public Pair<CompoundState<A>, Statement> semantics(
 			Statement node,
-			CompoundState<A> entrystate)
+			CompoundState<A> entrystate,
+			Map<Statement, CompoundState<A>> result)
 			throws SemanticException {
 		StatementStore<A> expressions = new StatementStore<>(entrystate.postState).bottom();
 		AnalysisState<A> approx = node.forwardSemantics(entrystate.postState, interprocedural, expressions);
 		// we do not remove the meta variables here, since they might be
 		// used for deciding whether or not to traverse an edge
-		return CompoundState.of(approx, expressions);
+		return Pair.of(CompoundState.of(approx, expressions), node);
 	}
 
 	@Override
