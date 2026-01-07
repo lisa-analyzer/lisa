@@ -161,7 +161,9 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * events, and it is thus not required to store the given queue. However, as
 	 * this method will only be invoked once, implementations of this method
 	 * should forward the call to any sub-domain that might need the event
-	 * queue.
+	 * queue. Also note that, to avoid unnecessary overhead, this method will
+	 * only be invoked if at least one event listener has been registered in the
+	 * event queue. Dereferences of the queue should thus be null-checked.
 	 * 
 	 * @param queue the event queue to use
 	 */

@@ -11,6 +11,7 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventListener;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
@@ -101,11 +102,17 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			LOG.warn("Skipping syntactic checks execution since none have been provided");
 
 		if (canAnalyze()) {
-			EventQueue events = new EventQueue(conf.synchronousListeners, conf.asynchronousListeners);
+			EventQueue events;
+			if (conf.synchronousListeners.isEmpty() && conf.asynchronousListeners.isEmpty())
+				// to avoid unnecessary overhead in calling posting events, we
+				// set this to null and require null checks during the analysis
+				events = null;
+			else
+				events = new EventQueue(conf.synchronousListeners, conf.asynchronousListeners, tool);
 
 			init(app, events);
 
-			analyze(fixconf);
+			analyze(fixconf, tool);
 
 			Map<CFG, Collection<AnalyzedCFG<A>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
@@ -193,7 +200,15 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	}
 
 	private void analyze(
-			FixpointConfiguration<A, D> fixconf) {
+			FixpointConfiguration<A, D> fixconf,
+			CheckTool tool) {
+		TimerLogger.execAction(LOG, "Initializing event listeners", () -> {
+			for (EventListener listener : conf.synchronousListeners)
+				listener.beforeExecution(tool);
+			for (EventListener listener : conf.asynchronousListeners)
+				listener.beforeExecution(tool);
+		});
+
 		AnalysisState<A> state = this.analysis.makeLattice();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {
@@ -202,6 +217,13 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 				LOG.fatal("Exception during fixpoint computation", e);
 				throw new AnalysisExecutionException("Exception during fixpoint computation", e);
 			}
+		});
+
+		TimerLogger.execAction(LOG, "Shutting down event listeners", () -> {
+			for (EventListener listener : conf.synchronousListeners)
+				listener.afterExecution(tool);
+			for (EventListener listener : conf.asynchronousListeners)
+				listener.afterExecution(tool);
 		});
 	}
 

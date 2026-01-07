@@ -4,11 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
+import org.junit.Test;
+
 import it.unive.lisa.TestCallGraph;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
@@ -29,10 +34,6 @@ import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-import org.junit.Test;
 
 public class BaseCallGraphTest {
 
@@ -116,7 +117,7 @@ public class BaseCallGraphTest {
 		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
 		Application app = new Application(p);
-		cg.init(app, new EventQueue(Collections.emptyList(), Collections.emptyList()));
+		cg.init(app, null);
 		@SuppressWarnings("unchecked")
 		CFGCall resolved = (CFGCall) cg.resolve(call, new Set[0], new SymbolAliasing());
 		cg.registerCall(resolved);
@@ -186,7 +187,7 @@ public class BaseCallGraphTest {
 		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
 		Application app = new Application(p);
-		cg.init(app, new EventQueue(Collections.emptyList(), Collections.emptyList()));
+		cg.init(app, null);
 
 		CFGCall resolved = (CFGCall) cg
 				.resolve(call, new Set[] { Collections.singleton(new StrType()) }, new SymbolAliasing());

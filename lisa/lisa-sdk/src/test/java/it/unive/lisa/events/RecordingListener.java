@@ -3,6 +3,8 @@ package it.unive.lisa.events;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import it.unive.lisa.checks.syntactic.CheckTool;
+
 public class RecordingListener
 		implements
 		EventListener {
@@ -10,7 +12,8 @@ public class RecordingListener
 
 	@Override
 	public void onEvent(
-			Event event) {
+			Event event,
+			CheckTool tool) {
 		events.add(event.toString());
 	}
 }

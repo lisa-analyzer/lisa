@@ -2,6 +2,17 @@ package it.unive.lisa;
 
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Executable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
@@ -44,7 +55,6 @@ import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.analysis.value.ValueLattice;
-import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -111,15 +121,6 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.numeric.IntInterval;
-import java.lang.reflect.Executable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.collections4.SetUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 public class TestParameterProvider {
 
@@ -443,13 +444,12 @@ public class TestParameterProvider {
 		cg = new RTACallGraph();
 		interprocedural = new ModularWorstCaseAnalysis<>();
 		try {
-			EventQueue events = new EventQueue(Collections.emptyList(), Collections.emptyList());
-			cg.init(app, events);
+			cg.init(app, null);
 			interprocedural.init(
 					app,
 					cg,
 					WorstCasePolicy.INSTANCE,
-					events,
+					null,
 					new Analysis<>(new SimpleAbstractDomain<>(new MonolithicHeap(), new Sign(), new InferredTypes())));
 		} catch (CallGraphConstructionException | InterproceduralAnalysisException e) {
 			fail("Unable to instantiate test parameters: " + e.getMessage());

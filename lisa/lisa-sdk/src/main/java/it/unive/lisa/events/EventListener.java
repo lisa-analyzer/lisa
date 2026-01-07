@@ -1,5 +1,7 @@
 package it.unive.lisa.events;
 
+import it.unive.lisa.checks.syntactic.CheckTool;
+
 /**
  * Common interface for listeners that can be registered to an
  * {@link EventQueue} to receive events.
@@ -9,13 +11,37 @@ package it.unive.lisa.events;
 public interface EventListener {
 
 	/**
+	 * Callback invoked only once before the beginning of the analysis. Can be
+	 * used to setup common data structures. The default implementation does
+	 * nothing.
+	 * 
+	 * @param tool the tool that this listener can use during the execution
+	 */
+	default void beforeExecution(
+			CheckTool tool) {
+	}
+
+	/**
+	 * Callback invoked only once after the end of the analysis. Can be used to
+	 * perform cleanups or to report summary warnings. The default
+	 * implementation does nothing.
+	 * 
+	 * @param tool the tool that this listener can use during the execution
+	 */
+	default void afterExecution(
+			CheckTool tool) {
+	}
+
+	/**
 	 * Accepts and processes the given event. If this listener does not
 	 * suppoport the given event, it can simply return.
 	 * 
 	 * @param event the event to process
+	 * @param tool  the tool that this listener can use during the execution
 	 */
 	void onEvent(
-			Event event);
+			Event event,
+			CheckTool tool);
 
 	/**
 	 * Callback invoked by {@link EventQueue} when {@link #onEvent(Event)}
@@ -23,9 +49,11 @@ public interface EventListener {
 	 * 
 	 * @param event the event whose processing caused the error
 	 * @param error the error thrown during processing
+	 * @param tool  the tool that this listener can use during the execution
 	 */
 	default void onError(
 			Event event,
-			Exception error) {
+			Exception error,
+			CheckTool tool) {
 	}
 }

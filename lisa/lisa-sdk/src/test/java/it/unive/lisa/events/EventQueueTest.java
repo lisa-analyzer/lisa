@@ -30,7 +30,8 @@ public class EventQueueTest {
 
 		EventQueue queue = new EventQueue(
 				List.of(listener),
-				List.of());
+				List.of(),
+				null);
 
 		queue.post(new StringEvent("main"));
 		queue.post(new StringEvent("x = 1"));
@@ -48,7 +49,8 @@ public class EventQueueTest {
 
 		EventQueue queue = new EventQueue(
 				List.of(),
-				List.of(listener));
+				List.of(listener),
+				null);
 
 		queue.post(new StringEvent("main"));
 		queue.post(new StringEvent("x = 1"));
@@ -69,7 +71,8 @@ public class EventQueueTest {
 
 		EventQueue queue = new EventQueue(
 				List.of(sync),
-				List.of(async));
+				List.of(async),
+				null);
 
 		queue.post(new StringEvent("test"));
 		queue.join();
@@ -87,7 +90,8 @@ public class EventQueueTest {
 
 		EventQueue queue = new EventQueue(
 				List.of(failing, good),
-				List.of());
+				List.of(),
+				null);
 
 		queue.post(new StringEvent("safe"));
 
@@ -103,7 +107,8 @@ public class EventQueueTest {
 
 		EventQueue queue = new EventQueue(
 				List.of(),
-				List.of(listener));
+				List.of(listener),
+				null);
 
 		for (int i = 0; i < 10000; i++)
 			queue.post(new StringEvent("event" + i));
