@@ -11,6 +11,7 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -100,7 +101,9 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			LOG.warn("Skipping syntactic checks execution since none have been provided");
 
 		if (canAnalyze()) {
-			init(app);
+			EventQueue events = new EventQueue(conf.synchronousListeners, conf.asynchronousListeners);
+
+			init(app, events);
 
 			analyze(fixconf);
 
@@ -150,16 +153,19 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	}
 
 	private void init(
-			Application app) {
+			Application app,
+			EventQueue events) {
+		analysis.setEventQueue(events);
+
 		try {
-			callGraph.init(app);
+			callGraph.init(app, events);
 		} catch (CallGraphConstructionException e) {
 			LOG.fatal("Exception while building the call graph for the input program", e);
 			throw new AnalysisSetupException("Exception while building the call graph for the input program", e);
 		}
 
 		try {
-			interproc.init(app, callGraph, conf.openCallPolicy, analysis);
+			interproc.init(app, callGraph, conf.openCallPolicy, events, analysis);
 		} catch (InterproceduralAnalysisException e) {
 			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisSetupException(

@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.HistoryState;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -32,6 +33,12 @@ public class HistoryDomain<
 	public HistoryDomain(
 			D domain) {
 		this.domain = domain;
+	}
+
+	@Override
+	public void setEventQueue(
+			EventQueue queue) {
+		domain.setEventQueue(queue);
 	}
 
 	@Override

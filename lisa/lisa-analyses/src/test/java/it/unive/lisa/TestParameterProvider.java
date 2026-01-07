@@ -44,6 +44,7 @@ import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -442,11 +443,13 @@ public class TestParameterProvider {
 		cg = new RTACallGraph();
 		interprocedural = new ModularWorstCaseAnalysis<>();
 		try {
-			cg.init(app);
+			EventQueue events = new EventQueue(Collections.emptyList(), Collections.emptyList());
+			cg.init(app, events);
 			interprocedural.init(
 					app,
 					cg,
 					WorstCasePolicy.INSTANCE,
+					events,
 					new Analysis<>(new SimpleAbstractDomain<>(new MonolithicHeap(), new Sign(), new InferredTypes())));
 		} catch (CallGraphConstructionException | InterproceduralAnalysisException e) {
 			fail("Unable to instantiate test parameters: " + e.getMessage());

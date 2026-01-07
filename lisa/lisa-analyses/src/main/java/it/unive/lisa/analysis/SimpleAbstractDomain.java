@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -56,6 +57,8 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	 * The type domain used by this abstract domain.
 	 */
 	public final TypeDomain<T> typeDomain;
+
+	private EventQueue events;
 
 	/**
 	 * Builds a new abstract domain. The missing domains are set to the default
@@ -180,6 +183,15 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		this.heapDomain = heapDomain;
 		this.valueDomain = valueDomain;
 		this.typeDomain = typeDomain;
+	}
+
+	@Override
+	public void setEventQueue(
+			EventQueue queue) {
+		this.events = queue;
+		heapDomain.setEventQueue(queue);
+		valueDomain.setEventQueue(queue);
+		typeDomain.setEventQueue(queue);
 	}
 
 	private void applySubstitution(

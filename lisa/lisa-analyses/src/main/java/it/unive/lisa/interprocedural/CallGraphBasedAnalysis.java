@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Application;
@@ -57,6 +58,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 	protected Analysis<A, D> analysis;
 
 	/**
+	 * The event queue for the analysis.
+	 */
+	protected EventQueue events;
+
+	/**
 	 * Builds the analysis.
 	 */
 	protected CallGraphBasedAnalysis() {
@@ -73,6 +79,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 		this.app = other.app;
 		this.policy = other.policy;
 		this.analysis = other.analysis;
+		this.events = other.events;
 	}
 
 	@Override
@@ -90,12 +97,14 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.app = app;
 		this.policy = policy;
 		this.analysis = analysis;
+		this.events = events;
 	}
 
 	@Override

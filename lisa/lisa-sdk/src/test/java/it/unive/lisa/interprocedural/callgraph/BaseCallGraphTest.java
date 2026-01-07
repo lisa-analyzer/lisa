@@ -8,6 +8,7 @@ import it.unive.lisa.TestCallGraph;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
@@ -115,7 +116,7 @@ public class BaseCallGraphTest {
 		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
 		Application app = new Application(p);
-		cg.init(app);
+		cg.init(app, new EventQueue(Collections.emptyList(), Collections.emptyList()));
 		@SuppressWarnings("unchecked")
 		CFGCall resolved = (CFGCall) cg.resolve(call, new Set[0], new SymbolAliasing());
 		cg.registerCall(resolved);
@@ -185,7 +186,7 @@ public class BaseCallGraphTest {
 		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
 		Application app = new Application(p);
-		cg.init(app);
+		cg.init(app, new EventQueue(Collections.emptyList(), Collections.emptyList()));
 
 		CFGCall resolved = (CFGCall) cg
 				.resolve(call, new Set[] { Collections.singleton(new StrType()) }, new SymbolAliasing());

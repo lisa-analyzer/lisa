@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
@@ -259,6 +260,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 				Application app,
 				CallGraph callgraph,
 				OpenCallPolicy policy,
+				EventQueue events,
 				Analysis<A, D> analysis) {
 			throw new UnsupportedOperationException();
 		}

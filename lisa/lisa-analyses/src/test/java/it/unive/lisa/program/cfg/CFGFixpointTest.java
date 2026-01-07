@@ -14,6 +14,7 @@ import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
@@ -35,6 +36,7 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.numeric.IntInterval;
+import java.util.Collections;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -70,11 +72,13 @@ public class CFGFixpointTest {
 						TypeEnvironment<TypeSet>>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
 		Application app = new Application(p);
-		callgraph.init(app);
+		EventQueue events = new EventQueue(Collections.emptyList(), Collections.emptyList());
+		callgraph.init(app, events);
 		analysis.init(
 				app,
 				callgraph,
 				WorstCasePolicy.INSTANCE,
+				events,
 				new Analysis<>(DefaultConfiguration.defaultAbstractDomain()));
 		return analysis;
 	}

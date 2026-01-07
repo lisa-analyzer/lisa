@@ -15,6 +15,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
@@ -87,9 +88,10 @@ public class CheckToolWithAnalysisResultsTest {
 
 		@Override
 		public void init(
-				Application app)
+				Application app,
+				EventQueue events)
 				throws CallGraphConstructionException {
-			super.init(app);
+			super.init(app, events);
 		}
 
 		@Override

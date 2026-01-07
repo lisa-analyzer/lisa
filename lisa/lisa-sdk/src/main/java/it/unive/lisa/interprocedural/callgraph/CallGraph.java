@@ -1,6 +1,7 @@
 package it.unive.lisa.interprocedural.callgraph;
 
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
@@ -45,13 +46,15 @@ public abstract class CallGraph
 	 * should effectively re-initialize the call graph as if it is yet to be
 	 * used. This is useful when the same instance is used in multiple analyses.
 	 *
-	 * @param app the application to analyze
+	 * @param app    the application to analyze
+	 * @param events the event queue to use for this analysis
 	 *
 	 * @throws CallGraphConstructionException if an exception happens while
 	 *                                            building the call graph
 	 */
 	public void init(
-			Application app)
+			Application app,
+			EventQueue events)
 			throws CallGraphConstructionException {
 		entrypoints.clear();
 		adjacencyMatrix.clear();

@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.traces.Branching;
 import it.unive.lisa.lattices.traces.ExecutionTrace;
 import it.unive.lisa.lattices.traces.LoopIteration;
@@ -106,6 +107,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		this.max_loop_iterations = maxLoopIterations;
 		this.max_conditions = maxConditions;
 		this.domain = domain;
+	}
+
+	@Override
+	public void setEventQueue(
+			EventQueue queue) {
+		domain.setEventQueue(queue);
 	}
 
 	@Override

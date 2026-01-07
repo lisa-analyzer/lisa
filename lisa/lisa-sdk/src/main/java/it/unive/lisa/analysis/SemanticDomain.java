@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -154,4 +155,16 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 			ProgramPoint call)
 			throws SemanticException;
 
+	/**
+	 * Sets the {@link EventQueue} that this domain can use to post analysis
+	 * events. This operation is optional: a domain is not required to issue
+	 * events, and it is thus not required to store the given queue. However, as
+	 * this method will only be invoked once, implementations of this method
+	 * should forward the call to any sub-domain that might need the event
+	 * queue.
+	 * 
+	 * @param queue the event queue to use
+	 */
+	void setEventQueue(
+			EventQueue queue);
 }

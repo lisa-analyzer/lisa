@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
@@ -57,6 +58,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 	 * The application.
 	 */
 	private Application app;
+
+	/**
+	 * The event queue to use for this analysis.
+	 */
+	private EventQueue events;
 
 	/**
 	 * The policy used for computing the result of cfg calls.
@@ -189,12 +195,14 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		this.app = app;
 		this.policy = policy;
 		this.results = null;
 		this.analysis = analysis;
+		this.events = events;
 	}
 
 	@Override

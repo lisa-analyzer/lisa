@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -64,6 +65,7 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		// we mark this as unsupported to make sure it never gets used as a root

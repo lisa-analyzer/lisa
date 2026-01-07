@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.ReachLattice.ReachabilityStatus;
 import it.unive.lisa.lattices.ReachabilityProduct;
@@ -40,6 +41,12 @@ public class Reachability<D extends AbstractDomain<A>,
 	public Reachability(
 			D domain) {
 		this.domain = domain;
+	}
+
+	@Override
+	public void setEventQueue(
+			EventQueue queue) {
+		domain.setEventQueue(queue);
 	}
 
 	@Override

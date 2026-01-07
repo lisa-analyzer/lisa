@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-
 import org.junit.Test;
 
 public class EventQueueTest {
@@ -113,7 +112,7 @@ public class EventQueueTest {
 		// if close did not wait, some events would be missing
 		assertEquals(10000, listener.events.size());
 		List<String> expected = new java.util.ArrayList<>(100);
-				for (int i = 0; i < 10000; i++)
+		for (int i = 0; i < 10000; i++)
 			expected.add("event" + i);
 		assertEquals(expected, listener.events);
 	}

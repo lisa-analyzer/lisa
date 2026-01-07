@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.GenericSetLattice;
 import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -48,9 +49,15 @@ import org.apache.commons.lang3.tuple.Pair;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+public class Analysis<
+		A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
 		implements
-		SemanticDomain<AnalysisState<A>, AnalysisState<A>, SymbolicExpression, Identifier> {
+		SemanticDomain<
+				AnalysisState<A>,
+				AnalysisState<A>,
+				SymbolicExpression,
+				Identifier> {
 
 	/**
 	 * The domain to be executed.
@@ -62,6 +69,8 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 * errors. See {@link LiSAConfiguration#shouldSmashError} for more details.
 	 */
 	public final Predicate<Type> shouldSmashError;
+
+	private EventQueue events;
 
 	/**
 	 * Builds the analysis, wrapping the given domain.
@@ -87,6 +96,13 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			Predicate<Type> shouldSmashException) {
 		this.domain = domain;
 		this.shouldSmashError = shouldSmashException;
+	}
+
+	@Override
+	public void setEventQueue(
+			EventQueue queue) {
+		this.events = queue;
+		domain.setEventQueue(queue);
 	}
 
 	@Override
