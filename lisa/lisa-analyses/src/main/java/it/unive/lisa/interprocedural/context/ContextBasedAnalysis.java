@@ -21,8 +21,20 @@ import it.unive.lisa.interprocedural.NoEntryPointException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.context.events.RecursionEnd;
+import it.unive.lisa.interprocedural.context.events.RecursionStart;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.context.recursion.RecursionSolver;
+import it.unive.lisa.interprocedural.events.CFGFixpointEnd;
+import it.unive.lisa.interprocedural.events.CFGFixpointStart;
+import it.unive.lisa.interprocedural.events.CFGFixpointStored;
+import it.unive.lisa.interprocedural.events.ComputedCallResult;
+import it.unive.lisa.interprocedural.events.ComputedCallState;
+import it.unive.lisa.interprocedural.events.FixpointEnd;
+import it.unive.lisa.interprocedural.events.FixpointIterationEnd;
+import it.unive.lisa.interprocedural.events.FixpointIterationStart;
+import it.unive.lisa.interprocedural.events.FixpointStart;
+import it.unive.lisa.interprocedural.events.PrecomputedCallResult;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CodeUnit;
@@ -191,15 +203,24 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 						c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
 		entryPoints.addAll(app.getEntryPoints());
 
-		int iter = 0;
+		if (events != null)
+			events.post(new FixpointStart());
+
+		int iter = 1;
 		do {
-			LOG.info("Performing {} fixpoint iteration", StringUtilities.ordinal(iter + 1));
+			LOG.info("Performing {} fixpoint iteration", StringUtilities.ordinal(iter));
+			if (events != null)
+				events.post(new FixpointIterationStart(iter));
+
 			triggers.clear();
 			pendingRecursions = false;
 
 			processEntrypoints(entryState, empty, entryPoints);
 
 			if (pendingRecursions) {
+				if (events != null)
+					events.post(new RecursionStart());
+
 				Set<Recursion<A>> recursions = new HashSet<>();
 
 				for (Collection<CodeMember> rec : callgraph.getRecursions())
@@ -210,6 +231,9 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					}
 
 				solveRecursions(recursions);
+
+				if (events != null)
+					events.post(new RecursionEnd());
 			}
 
 			// starting from the callers of the cfgs that needed a lub,
@@ -219,8 +243,13 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			toRemove.removeAll(triggers);
 			toRemove.stream().filter(CFG.class::isInstance).map(CFG.class::cast).forEach(results::forget);
 
+			if (events != null)
+				events.post(new FixpointIterationEnd(iter));
 			iter++;
 		} while (!triggers.isEmpty());
+
+		if (events != null)
+			events.post(new FixpointEnd());
 	}
 
 	private void solveRecursions(
@@ -312,10 +341,18 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			try {
 				token = empty;
 				AnalysisState<A> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
-				results.putResult(
-						cfg,
-						empty,
-						cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty));
+
+				if (events != null)
+					events.post(new CFGFixpointStart<>(cfg, token, entryState));
+
+				AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty);
+
+				if (events != null) {
+					events.post(new CFGFixpointEnd<>(cfg, token, entryState, fixpointResult));
+					events.post(new CFGFixpointStored<>(cfg, token, entryState, fixpointResult, fixpointResult));
+				}
+
+				results.putResult(cfg, empty, fixpointResult);
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
@@ -351,13 +388,25 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			AnalysisState<A> entryState)
 			throws FixpointException,
 			SemanticException {
+		if (events != null)
+			events.post(new CFGFixpointStart<>(cfg, token, entryState));
+
 		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, workingSet.mk(), conf, token);
+
+		if (events != null)
+			events.post(new CFGFixpointEnd<>(cfg, token, entryState, fixpointResult));
+
 		if (shouldStoreFixpointResults()) {
 			Pair<Boolean, AnalyzedCFG<A>> res = results.putResult(cfg, token, fixpointResult);
 			if (shouldStoreFixpointResults() && Boolean.TRUE.equals(res.getLeft()))
 				triggers.add(cfg);
+
+			if (events != null)
+				events.post(new CFGFixpointStored<>(cfg, token, entryState, fixpointResult, res.getRight()));
+
 			fixpointResult = res.getRight();
 		}
+
 		return fixpointResult;
 	}
 
@@ -477,13 +526,23 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 							scope,
 							cfg);
 
+			if (events != null)
+				events.post(new ComputedCallState<>(call, prepared.getLeft(), prepared.getRight()));
+
 			AnalysisState<A> exitState;
-			if (canShortcut(cfg) && states != null && prepared.getLeft().lessOrEqual(states.getEntryState()))
+			if (canShortcut(cfg) && states != null && prepared.getLeft().lessOrEqual(states.getEntryState())) {
 				// no need to compute the fixpoint: we already have an
 				// (over-)approximation of the result computed starting from
 				// an over-approximation of the entry state
 				exitState = states.getExitState();
-			else {
+				if (events != null)
+					events.post(new PrecomputedCallResult<>(
+							call,
+							token,
+							prepared.getLeft(),
+							prepared.getRight(),
+							exitState));
+			} else {
 				// compute the result with a fixpoint iteration
 				AnalyzedCFG<A> fixpointResult = null;
 				try {
@@ -498,6 +557,14 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 							analysis.removeCaughtErrors(
 									fixpointResult.getAnalysisStateAfter(exit),
 									exit));
+
+				if (events != null)
+					events.post(new ComputedCallResult<>(
+							call,
+							token,
+							prepared.getLeft(),
+							prepared.getRight(),
+							exitState));
 			}
 
 			// save the resulting state

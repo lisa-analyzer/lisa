@@ -6,6 +6,23 @@ package it.unive.lisa.events;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface Event {
+public abstract class Event {
 
+	private long timestamp;
+
+	/**
+	 * Builds the event, assigning it the current timestamp in nanoseconds.
+	 */
+	protected Event() {
+		this.timestamp = System.nanoTime();
+	}
+
+	/**
+	 * Yields the timestamp of this event, in nanoseconds.
+	 * 
+	 * @return the timestamp
+	 */
+	public long getTimestamp() {
+		return timestamp;
+	}
 }

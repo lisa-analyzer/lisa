@@ -9,12 +9,13 @@ import org.junit.Test;
 public class EventQueueTest {
 
 	private static class StringEvent
-			implements
+			extends
 			Event {
 		private final String description;
 
 		private StringEvent(
 				String description) {
+			super();
 			this.description = description;
 		}
 

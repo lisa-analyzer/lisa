@@ -45,7 +45,9 @@ public interface EventListener {
 
 	/**
 	 * Callback invoked by {@link EventQueue} when
-	 * {@link #onEvent(Event, ReportingTool)} throws an exception.
+	 * {@link #onEvent(Event, ReportingTool)} throws an exception. The default
+	 * implementation simply reports the error using the provided
+	 * {@link ReportingTool} through a notice.
 	 * 
 	 * @param event the event whose processing caused the error
 	 * @param error the error thrown during processing
@@ -55,5 +57,9 @@ public interface EventListener {
 			Event event,
 			Exception error,
 			ReportingTool tool) {
+		tool.notice(getClass().getSimpleName()
+				+ " failed to process event of type "
+				+ event.getClass().getSimpleName()
+				+ ": " + error.getMessage());
 	}
 }

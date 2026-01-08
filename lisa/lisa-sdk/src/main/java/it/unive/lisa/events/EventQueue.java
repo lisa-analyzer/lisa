@@ -131,7 +131,7 @@ public final class EventQueue
 	}
 
 	private static class DrainEvent
-			implements
+			extends
 			Event {
 		final CountDownLatch latch = new CountDownLatch(1);
 	}

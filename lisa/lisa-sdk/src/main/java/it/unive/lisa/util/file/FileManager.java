@@ -1,13 +1,17 @@
 package it.unive.lisa.util.file;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,47 +64,6 @@ public class FileManager {
 	 */
 	public void usedHtmlViewer() {
 		usedHtmlViewer = true;
-	}
-
-	/**
-	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
-	 * missing directories will be created as well. The given name will be
-	 * joined with the workdir used to initialize this file manager, thus
-	 * raising an exception if {@code name} is absolute. {@code filler} will
-	 * then be used to write to the writer.
-	 * 
-	 * @param name   the name of the file to create
-	 * @param filler the callback to write to the file
-	 * 
-	 * @throws IOException if something goes wrong while creating the file
-	 */
-	public void mkOutputFile(
-			String name,
-			WriteAction filler)
-			throws IOException {
-		mkOutputFile(name, false, filler);
-	}
-
-	/**
-	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
-	 * missing directories will be created as well. The given name will be
-	 * joined with the workdir used to initialize this file manager, thus
-	 * raising an exception if {@code name} is absolute. {@code filler} will
-	 * then be used to write to the writer.
-	 * 
-	 * @param path   the sub-path, relative to the workdir, where the file
-	 *                   should be created
-	 * @param name   the name of the file to create
-	 * @param filler the callback to write to the file
-	 * 
-	 * @throws IOException if something goes wrong while creating the file
-	 */
-	public void mkOutputFile(
-			String path,
-			String name,
-			WriteAction filler)
-			throws IOException {
-		mkOutputFile(path, name, false, filler);
 	}
 
 	/**
@@ -207,68 +170,6 @@ public class FileManager {
 
 	}
 
-	/**
-	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
-	 * missing directories will be created as well. The given name will be
-	 * joined with the workdir used to initialize this file manager, thus
-	 * raising an exception if {@code name} is absolute. {@code filler} will
-	 * then be used to write to the writer.
-	 * 
-	 * @param name   the name of the file to create
-	 * @param bom    if {@code true}, the bom marker {@code \ufeff} will be
-	 *                   written to the file
-	 * @param filler the callback to write to the file
-	 * 
-	 * @throws IOException if something goes wrong while creating or writing to
-	 *                         the file
-	 */
-	public void mkOutputFile(
-			String name,
-			boolean bom,
-			WriteAction filler)
-			throws IOException {
-		mkOutputFile(null, name, bom, filler);
-	}
-
-	/**
-	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
-	 * missing directories will be created as well. The given name will be
-	 * joined with the workdir used to initialize this file manager, thus
-	 * raising an exception if {@code name} is absolute. {@code filler} will
-	 * then be used to write to the writer.
-	 * 
-	 * @param path   the sub-path, relative to the workdir, where the file
-	 *                   should be created
-	 * @param name   the name of the file to create
-	 * @param bom    if {@code true}, the bom marker {@code \ufeff} will be
-	 *                   written to the file
-	 * @param filler the callback to write to the file
-	 * 
-	 * @throws IOException if something goes wrong while creating or writing to
-	 *                         the file
-	 */
-	public void mkOutputFile(
-			String path,
-			String name,
-			boolean bom,
-			WriteAction filler)
-			throws IOException {
-		File parent = workdir;
-		if (path != null)
-			parent = new File(workdir, cleanFileName(path, true));
-		File file = new File(parent, cleanFileName(name, false));
-
-		if (!parent.exists() && !parent.mkdirs())
-			throw new IOException("Unable to create directory structure for " + file);
-
-		createdFiles.add(FilenameUtils.separatorsToUnix(workdir.toPath().relativize(file.toPath()).toString()));
-		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8.newEncoder())) {
-			if (bom)
-				writer.write('\ufeff');
-			filler.perform(writer);
-		}
-	}
-
 	private final static int[] illegalChars = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
 			20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 34, 42, 47, 58, 60, 62, 63, 92, 124 };
 
@@ -343,4 +244,205 @@ public class FileManager {
 			}
 	}
 
+	/**
+	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
+	 * missing directories will be created as well. The given name will be
+	 * joined with the workdir used to initialize this file manager, thus
+	 * raising an exception if {@code name} is absolute. {@code filler} will
+	 * then be used to write to the writer.
+	 * 
+	 * @param name   the name of the file to create
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
+	public void mkOutputFile(
+			String name,
+			WriteAction filler)
+			throws IOException {
+		mkOutputFile(name, false, filler);
+	}
+
+	/**
+	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
+	 * missing directories will be created as well. The given name will be
+	 * joined with the workdir used to initialize this file manager, thus
+	 * raising an exception if {@code name} is absolute. {@code filler} will
+	 * then be used to write to the writer.
+	 * 
+	 * @param path   the sub-path, relative to the workdir, where the file
+	 *                   should be created
+	 * @param name   the name of the file to create
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
+	public void mkOutputFile(
+			String path,
+			String name,
+			WriteAction filler)
+			throws IOException {
+		mkOutputFile(path, name, false, filler);
+	}
+
+	/**
+	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
+	 * missing directories will be created as well. The given name will be
+	 * joined with the workdir used to initialize this file manager, thus
+	 * raising an exception if {@code name} is absolute. {@code filler} will
+	 * then be used to write to the writer.
+	 * 
+	 * @param name   the name of the file to create
+	 * @param bom    if {@code true}, the bom marker {@code \ufeff} will be
+	 *                   written to the file
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating or writing to
+	 *                         the file
+	 */
+	public void mkOutputFile(
+			String name,
+			boolean bom,
+			WriteAction filler)
+			throws IOException {
+		mkOutputFile(null, name, bom, filler);
+	}
+
+	/**
+	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
+	 * missing directories will be created as well. The given name will be
+	 * joined with the workdir used to initialize this file manager, thus
+	 * raising an exception if {@code name} is absolute. {@code filler} will
+	 * then be used to write to the writer.
+	 * 
+	 * @param path   the sub-path, relative to the workdir, where the file
+	 *                   should be created
+	 * @param name   the name of the file to create
+	 * @param bom    if {@code true}, the bom marker {@code \ufeff} will be
+	 *                   written to the file
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating or writing to
+	 *                         the file
+	 */
+	public void mkOutputFile(
+			String path,
+			String name,
+			boolean bom,
+			WriteAction filler)
+			throws IOException {
+		File file = setupFile(path, name);
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8.newEncoder())) {
+			if (bom)
+				writer.write('\ufeff');
+			filler.perform(writer);
+		}
+	}
+
+	/**
+	 * Creates a {@link BufferedWriter} pointing to an UTF-8 encoded file with
+	 * the given name. If name is a path, all missing directories will be
+	 * created as well. The given name will be joined with the workdir used to
+	 * initialize this file manager, thus raising an exception if {@code name}
+	 * is absolute. If the file already exists, it will be truncated.
+	 * 
+	 * @param name the name of the file to create
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
+	public BufferedWriter mkOutputWriter(
+			String name)
+			throws IOException {
+		return mkOutputWriter(name, false);
+	}
+
+	/**
+	 * Creates a {@link BufferedWriter} pointing to an UTF-8 encoded file with
+	 * the given name. If name is a path, all missing directories will be
+	 * created as well. The given name will be joined with the workdir used to
+	 * initialize this file manager, thus raising an exception if {@code name}
+	 * is absolute. If the file already exists, it will be truncated.
+	 * 
+	 * @param path the sub-path, relative to the workdir, where the file should
+	 *                 be created
+	 * @param name the name of the file to create
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
+	public BufferedWriter mkOutputFile(
+			String path,
+			String name)
+			throws IOException {
+		return mkOutputWriter(path, name, false);
+	}
+
+	/**
+	 * Creates a {@link BufferedWriter} pointing to an UTF-8 encoded file with
+	 * the given name. If name is a path, all missing directories will be
+	 * created as well. The given name will be joined with the workdir used to
+	 * initialize this file manager, thus raising an exception if {@code name}
+	 * is absolute. If the file already exists, it will be truncated.
+	 * 
+	 * @param name the name of the file to create
+	 * @param bom  if {@code true}, the bom marker {@code \ufeff} will be
+	 *                 written to the file before returning the writer
+	 * 
+	 * @throws IOException if something goes wrong while creating or writing to
+	 *                         the file
+	 */
+	public BufferedWriter mkOutputWriter(
+			String name,
+			boolean bom)
+			throws IOException {
+		return mkOutputWriter(null, name, bom);
+	}
+
+	/**
+	 * Creates a {@link BufferedWriter} pointing to an UTF-8 encoded file with
+	 * the given name. If name is a path, all missing directories will be
+	 * created as well. The given name will be joined with the workdir used to
+	 * initialize this file manager, thus raising an exception if {@code name}
+	 * is absolute. If the file already exists, it will be truncated.
+	 * 
+	 * @param path the sub-path, relative to the workdir, where the file should
+	 *                 be created
+	 * @param name the name of the file to create
+	 * @param bom  if {@code true}, the bom marker {@code \ufeff} will be
+	 *                 written to the file before returning the writer
+	 * 
+	 * @throws IOException if something goes wrong while creating or writing to
+	 *                         the file
+	 */
+	public BufferedWriter mkOutputWriter(
+			String path,
+			String name,
+			boolean bom)
+			throws IOException {
+		File file = setupFile(path, name);
+		BufferedWriter writer = Files.newBufferedWriter(
+				file.toPath(),
+				StandardCharsets.UTF_8,
+				StandardOpenOption.CREATE,
+				StandardOpenOption.TRUNCATE_EXISTING,
+				StandardOpenOption.WRITE);
+		if (bom)
+			writer.write('\ufeff');
+		return writer;
+	}
+
+	private File setupFile(
+			String path,
+			String name)
+			throws IOException {
+		File parent = workdir;
+		if (path != null)
+			parent = new File(workdir, cleanFileName(path, true));
+		File file = new File(parent, cleanFileName(name, false));
+
+		if (!parent.exists() && !parent.mkdirs())
+			throw new IOException("Unable to create directory structure for " + file);
+
+		createdFiles.add(FilenameUtils.separatorsToUnix(workdir.toPath().relativize(file.toPath()).toString()));
+		return file;
+	}
 }
