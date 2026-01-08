@@ -2,12 +2,6 @@ package it.unive.lisa;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
-
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
 import it.unive.lisa.outputs.messages.CFGMessage;
@@ -28,6 +22,10 @@ import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.util.file.FileManager;
+import java.util.Collection;
+import java.util.HashSet;
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
 
 public class ReportingToolTest {
 
@@ -101,7 +99,8 @@ public class ReportingToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "faa"));
 
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, new ReportingTool(tool).getWarnings()));
+		assertTrue("Wrong set of warnings",
+				CollectionUtils.isEqualCollection(exp, new ReportingTool(tool).getWarnings()));
 	}
 
 	@Test

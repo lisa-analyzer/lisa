@@ -1,19 +1,17 @@
 package it.unive.lisa.outputs;
 
-import java.io.IOException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import it.unive.lisa.ReportingTool;
 import it.unive.lisa.LiSAReport;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An output that dumps the {@link CallGraph} produced by the analysis, if any,
@@ -39,12 +37,12 @@ public class HtmlCallGraph<A extends AbstractLattice<A>, D extends AbstractDomai
 			ReportingTool tool,
 			FileManager fileManager)
 			throws IOException {
-		if (!(tool instanceof CheckToolWithAnalysisResults)) {
+		if (!(tool instanceof SemanticTool)) {
 			LOG.warn("No analysis results available, skipping execution of output " + this.getClass().getSimpleName());
 			return;
 		}
 
-		CheckToolWithAnalysisResults<A, D> ctool = (CheckToolWithAnalysisResults<A, D>) tool;
+		SemanticTool<A, D> ctool = (SemanticTool<A, D>) tool;
 		CallGraph callGraph = ctool.getCallGraph();
 		if (callGraph == null) {
 			LOG.warn("No call graph produced by the analysis, skipping execution of output "

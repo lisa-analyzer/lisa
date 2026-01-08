@@ -3,15 +3,6 @@ package it.unive.lisa.checks.semantic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
-
 import it.unive.lisa.ReportingTool;
 import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
@@ -54,8 +45,15 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.file.FileManager;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
 
-public class CheckToolWithAnalysisResultsTest {
+public class SemanticToolTest {
 
 	private static final ClassUnit unit = new ClassUnit(
 			new SourceCodeLocation("fake", 1, 0),
@@ -167,8 +165,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testCopy() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
+		SemanticTool<TestAbstractState,
+				TestAbstractDomain> tool = new SemanticTool<>(
 						new LiSAConfiguration(),
 						new FileManager("foo"),
 						Map.of(),
@@ -199,7 +197,7 @@ public class CheckToolWithAnalysisResultsTest {
 				"Wrong set of warnings",
 				CollectionUtils.isEqualCollection(
 						exp,
-						new CheckToolWithAnalysisResults<>(
+						new SemanticTool<>(
 								tool,
 								Map.of(),
 								fakeCallGraph,
@@ -208,8 +206,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testSimpleFill() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
+		SemanticTool<TestAbstractState,
+				TestAbstractDomain> tool = new SemanticTool<>(
 						new LiSAConfiguration(),
 						new FileManager("foo"),
 						Map.of(),
@@ -229,8 +227,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDisjointWarnings() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
+		SemanticTool<TestAbstractState,
+				TestAbstractDomain> tool = new SemanticTool<>(
 						new LiSAConfiguration(),
 						new FileManager("foo"),
 						Map.of(),
@@ -248,8 +246,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDuplicateWarnings() {
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
+		SemanticTool<TestAbstractState,
+				TestAbstractDomain> tool = new SemanticTool<>(
 						new LiSAConfiguration(),
 						new FileManager("foo"),
 						Map.of(),
@@ -288,8 +286,8 @@ public class CheckToolWithAnalysisResultsTest {
 				Map.of(noop, singleton.bottom()),
 				Map.of(noop, singleton.bottom()));
 
-		CheckToolWithAnalysisResults<TestAbstractState,
-				TestAbstractDomain> tool = new CheckToolWithAnalysisResults<>(
+		SemanticTool<TestAbstractState,
+				TestAbstractDomain> tool = new SemanticTool<>(
 						new LiSAConfiguration(),
 						new FileManager("foo"),
 						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)),

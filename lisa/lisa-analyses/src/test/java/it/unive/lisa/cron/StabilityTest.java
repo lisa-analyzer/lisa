@@ -10,8 +10,8 @@ import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Stability;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.ParsingException;
@@ -90,7 +90,7 @@ public class StabilityTest
 
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<
+				SemanticTool<
 						SimpleAbstractState<Monolith,
 								ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
 								TypeEnvironment<TypeSet>>,

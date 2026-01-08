@@ -33,8 +33,8 @@ import it.unive.lisa.analysis.string.tarsis.Tarsis;
 import it.unive.lisa.analysis.traces.TracePartitioning;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.imp.constructs.StringContains.IMPStringContains;
 import it.unive.lisa.imp.expressions.IMPAssert;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
@@ -78,7 +78,7 @@ public class WholeValueAnalysesTest
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<A, D> tool,
+				SemanticTool<A, D> tool,
 				CFG graph,
 				Statement node) {
 
@@ -132,7 +132,7 @@ public class WholeValueAnalysesTest
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void containsCharAssertion(
-				CheckToolWithAnalysisResults<A, D> tool,
+				SemanticTool<A, D> tool,
 				Statement node,
 				AnalyzedCFG<A> res,
 				Expression variable,
@@ -163,7 +163,7 @@ public class WholeValueAnalysesTest
 		}
 
 		private void assertion(
-				CheckToolWithAnalysisResults<A, D> tool,
+				SemanticTool<A, D> tool,
 				Statement node,
 				AnalysisState<A> post,
 				D domain,
@@ -181,7 +181,7 @@ public class WholeValueAnalysesTest
 		}
 
 		private void warnOn(
-				CheckToolWithAnalysisResults<A, D> tool,
+				SemanticTool<A, D> tool,
 				Statement node,
 				String message) {
 			if (message != null) {

@@ -1,12 +1,11 @@
 package it.unive.lisa.outputs;
 
-import java.io.IOException;
-
-import it.unive.lisa.ReportingTool;
 import it.unive.lisa.LiSAReport;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
+import it.unive.lisa.ReportingTool;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
 
 /**
  * An output that can dump analysis results produced by LiSA.
@@ -27,7 +26,7 @@ public interface LiSAOutput {
 	 *                        files)
 	 * @param tool        the check tool used during the analysis (if a semantic
 	 *                        analysis has been performed, it will be an
-	 *                        instance of {@link CheckToolWithAnalysisResults})
+	 *                        instance of {@link SemanticTool})
 	 * @param fileManager the file manager to use for creating and writing the
 	 *                        output file
 	 * 

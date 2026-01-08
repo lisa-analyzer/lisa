@@ -1,9 +1,8 @@
 package it.unive.lisa.events;
 
+import it.unive.lisa.ReportingTool;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import it.unive.lisa.ReportingTool;
 
 public class RecordingListener
 		implements

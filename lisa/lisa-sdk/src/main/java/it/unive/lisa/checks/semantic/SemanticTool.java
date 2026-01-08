@@ -1,8 +1,5 @@
 package it.unive.lisa.checks.semantic;
 
-import java.util.Collection;
-import java.util.Map;
-
 import it.unive.lisa.ReportingTool;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
@@ -19,6 +16,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * An extension of {@link ReportingTool} that also contains the results of the
@@ -30,7 +29,7 @@ import it.unive.lisa.util.file.FileManager;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} ran during the analysis
  */
-public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		ReportingTool {
 
@@ -51,7 +50,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>, D extend
 	 * @param analysis      the analysis that has been executed to produce the
 	 *                          results
 	 */
-	public CheckToolWithAnalysisResults(
+	public SemanticTool(
 			LiSAConfiguration configuration,
 			FileManager fileManager,
 			Map<CFG, Collection<AnalyzedCFG<A>>> results,
@@ -72,7 +71,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>, D extend
 	 * @param analysis  the analysis that has been executed to produce the
 	 *                      results
 	 */
-	public CheckToolWithAnalysisResults(
+	public SemanticTool(
 			ReportingTool other,
 			Map<CFG, Collection<AnalyzedCFG<A>>> results,
 			CallGraph callgraph,

@@ -1,9 +1,5 @@
 package it.unive.lisa.checks;
 
-import java.io.IOException;
-
-import org.junit.Test;
-
 import it.unive.lisa.ReportingTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.cron.CronConfiguration;
@@ -12,6 +8,8 @@ import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
+import java.io.IOException;
+import org.junit.Test;
 
 public class ChecksExecutorTest
 		extends

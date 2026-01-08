@@ -1,19 +1,12 @@
 package it.unive.lisa.outputs;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.function.BiFunction;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import it.unive.lisa.ReportingTool;
 import it.unive.lisa.LiSAReport;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -22,6 +15,11 @@ import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.function.BiFunction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An output that dumps each input cfg, including the results produced by the
@@ -47,12 +45,12 @@ public abstract class OutputCFGDumper<A extends AbstractLattice<A>, D extends Ab
 			ReportingTool tool,
 			FileManager fileManager)
 			throws IOException {
-		if (!(tool instanceof CheckToolWithAnalysisResults)) {
+		if (!(tool instanceof SemanticTool)) {
 			LOG.warn("No analysis results available, skipping execution of output " + this.getClass().getSimpleName());
 			return;
 		}
 
-		CheckToolWithAnalysisResults<A, D> ctool = (CheckToolWithAnalysisResults<A, D>) tool;
+		SemanticTool<A, D> ctool = (SemanticTool<A, D>) tool;
 		Collection<CFG> allCFGs = app.getAllCFGs();
 		FixpointConfiguration<A, D> fixconf = new FixpointConfiguration<>(report.getConfiguration());
 		boolean isOptimized = fixconf.usesOptimizedForwardFixpoint() || fixconf.usesOptimizedBackwardFixpoint();
