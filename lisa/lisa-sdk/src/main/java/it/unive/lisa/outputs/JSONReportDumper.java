@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Application;
@@ -32,7 +32,7 @@ public class JSONReportDumper
 	public void dump(
 			Application app,
 			LiSAReport report,
-			CheckTool tool,
+			ReportingTool tool,
 			FileManager fileManager)
 			throws IOException {
 		LOG.info("Dumping analysis report to '" + REPORT_NAME + "'");

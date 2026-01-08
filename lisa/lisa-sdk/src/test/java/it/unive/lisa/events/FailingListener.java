@@ -1,6 +1,6 @@
 package it.unive.lisa.events;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 
 public class FailingListener
 		implements
@@ -11,7 +11,7 @@ public class FailingListener
 	@Override
 	public void onEvent(
 			Event e,
-			CheckTool tool) {
+			ReportingTool tool) {
 		throw new RuntimeException("boom");
 	}
 
@@ -19,7 +19,7 @@ public class FailingListener
 	public void onError(
 			Event event,
 			Exception error,
-			CheckTool tool) {
+			ReportingTool tool) {
 		errorHandled = true;
 	}
 }

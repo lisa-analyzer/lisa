@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -30,7 +30,7 @@ public abstract class InputCFGDumper
 	public void dump(
 			Application app,
 			LiSAReport report,
-			CheckTool tool,
+			ReportingTool tool,
 			FileManager fileManager)
 			throws IOException {
 		Collection<CFG> allCFGs = app.getAllCFGs();

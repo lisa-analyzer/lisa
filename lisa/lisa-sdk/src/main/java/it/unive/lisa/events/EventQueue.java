@@ -5,7 +5,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 
 /**
  * An event queue that allows posting {@link Event}s to registered synchronous
@@ -23,7 +23,7 @@ public final class EventQueue
 	private final BlockingQueue<Event> asyncQueue;
 	private final Thread asyncThread;
 	private final boolean hasListeners;
-	private final CheckTool tool;
+	private final ReportingTool tool;
 
 	private volatile boolean running = true;
 
@@ -33,7 +33,7 @@ public final class EventQueue
 	 * @param tool the tool that listeners can use during the execution
 	 */
 	public EventQueue(
-			CheckTool tool) {
+			ReportingTool tool) {
 		this(List.of(), List.of(), tool);
 	}
 
@@ -48,7 +48,7 @@ public final class EventQueue
 	public EventQueue(
 			List<EventListener> syncListeners,
 			List<EventListener> asyncListeners,
-			CheckTool tool) {
+			ReportingTool tool) {
 		this.syncListeners = syncListeners.toArray(new EventListener[0]);
 		this.asyncListeners = asyncListeners.toArray(new EventListener[0]);
 		this.hasListeners = !syncListeners.isEmpty() || !asyncListeners.isEmpty();

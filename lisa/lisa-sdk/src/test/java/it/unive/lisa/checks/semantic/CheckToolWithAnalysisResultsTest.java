@@ -12,7 +12,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestLanguageFeatures;
@@ -137,7 +137,7 @@ public class CheckToolWithAnalysisResultsTest {
 	};
 
 	private static Message build(
-			CheckTool tool,
+			ReportingTool tool,
 			Object target,
 			String message) {
 		if (target == null) {

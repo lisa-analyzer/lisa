@@ -1,6 +1,6 @@
 package it.unive.lisa.events;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 
 /**
  * Common interface for listeners that can be registered to an
@@ -18,7 +18,7 @@ public interface EventListener {
 	 * @param tool the tool that this listener can use during the execution
 	 */
 	default void beforeExecution(
-			CheckTool tool) {
+			ReportingTool tool) {
 	}
 
 	/**
@@ -29,7 +29,7 @@ public interface EventListener {
 	 * @param tool the tool that this listener can use during the execution
 	 */
 	default void afterExecution(
-			CheckTool tool) {
+			ReportingTool tool) {
 	}
 
 	/**
@@ -41,11 +41,11 @@ public interface EventListener {
 	 */
 	void onEvent(
 			Event event,
-			CheckTool tool);
+			ReportingTool tool);
 
 	/**
 	 * Callback invoked by {@link EventQueue} when
-	 * {@link #onEvent(Event, CheckTool)} throws an exception.
+	 * {@link #onEvent(Event, ReportingTool)} throws an exception.
 	 * 
 	 * @param event the event whose processing caused the error
 	 * @param error the error thrown during processing
@@ -54,6 +54,6 @@ public interface EventListener {
 	default void onError(
 			Event event,
 			Exception error,
-			CheckTool tool) {
+			ReportingTool tool) {
 	}
 }

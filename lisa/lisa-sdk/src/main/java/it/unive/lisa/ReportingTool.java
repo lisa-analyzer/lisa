@@ -20,13 +20,13 @@ import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An auxiliary tool that can be used by checks during their execution. It
- * provides reporting capabilities, as well as access to analysis singletons,
- * such as executed semantic analyses.
+ * An auxiliary tool that can be used by analysis components during their
+ * execution. It provides reporting capabilities, file management capabilities,
+ * as well as access to the configuration.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CheckTool {
+public class ReportingTool {
 
 	/**
 	 * The collection of generated warnings
@@ -54,7 +54,7 @@ public class CheckTool {
 	 * @param configuration the configuration of the analysis
 	 * @param fileManager   the file manager of the analysis
 	 */
-	public CheckTool(
+	public ReportingTool(
 			LiSAConfiguration configuration,
 			FileManager fileManager) {
 		warnings = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -87,8 +87,8 @@ public class CheckTool {
 	 * 
 	 * @param other the original tool to copy
 	 */
-	public CheckTool(
-			CheckTool other) {
+	public ReportingTool(
+			ReportingTool other) {
 		this(other.configuration, other.fileManager);
 		warnings.addAll(other.warnings);
 		notices.addAll(other.notices);

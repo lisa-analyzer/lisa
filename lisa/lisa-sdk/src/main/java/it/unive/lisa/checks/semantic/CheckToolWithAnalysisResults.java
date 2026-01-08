@@ -3,7 +3,7 @@ package it.unive.lisa.checks.semantic;
 import java.util.Collection;
 import java.util.Map;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
@@ -21,7 +21,7 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
 
 /**
- * An extension of {@link CheckTool} that also contains the results of the
+ * An extension of {@link ReportingTool} that also contains the results of the
  * fixpoint computation.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -32,7 +32,7 @@ import it.unive.lisa.util.file.FileManager;
  */
 public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
-		CheckTool {
+		ReportingTool {
 
 	private final Map<CFG, Collection<AnalyzedCFG<A>>> results;
 
@@ -73,7 +73,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractLattice<A>, D extend
 	 *                      results
 	 */
 	public CheckToolWithAnalysisResults(
-			CheckTool other,
+			ReportingTool other,
 			Map<CFG, Collection<AnalyzedCFG<A>>> results,
 			CallGraph callgraph,
 			Analysis<A, D> analysis) {

@@ -7,7 +7,7 @@ import java.util.function.BiFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
@@ -44,7 +44,7 @@ public abstract class OutputCFGDumper<A extends AbstractLattice<A>, D extends Ab
 	public void dump(
 			Application app,
 			LiSAReport report,
-			CheckTool tool,
+			ReportingTool tool,
 			FileManager fileManager)
 			throws IOException {
 		if (!(tool instanceof CheckToolWithAnalysisResults)) {

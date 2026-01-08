@@ -86,13 +86,13 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	 * @return the tool used to run the checks, that contains all warnings and
 	 *             notices
 	 */
-	CheckTool run(
+	ReportingTool run(
 			Application app) {
 		finalize(app);
 
 		Collection<CFG> allCFGs = app.getAllCFGs();
 		FixpointConfiguration<A, D> fixconf = new FixpointConfiguration<>(conf);
-		CheckTool tool = new CheckTool(conf, fileManager);
+		ReportingTool tool = new ReportingTool(conf, fileManager);
 
 		if (fixconf.usesOptimizedForwardFixpoint() || fixconf.usesOptimizedBackwardFixpoint())
 			allCFGs.forEach(CFG::computeBasicBlocks);
@@ -202,7 +202,7 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 
 	private void analyze(
 			FixpointConfiguration<A, D> fixconf,
-			CheckTool tool) {
+			ReportingTool tool) {
 		TimerLogger.execAction(LOG, "Initializing event listeners", () -> {
 			for (EventListener listener : conf.synchronousListeners)
 				listener.beforeExecution(tool);

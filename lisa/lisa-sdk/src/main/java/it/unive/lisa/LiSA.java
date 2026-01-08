@@ -105,7 +105,7 @@ public class LiSA {
 				conf.callGraph,
 				conf.analysis == null ? null : new Analysis(conf.analysis, conf.shouldSmashError));
 		Application app = new Application(programs);
-		CheckTool tool;
+		ReportingTool tool;
 
 		try {
 			tool = TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app));

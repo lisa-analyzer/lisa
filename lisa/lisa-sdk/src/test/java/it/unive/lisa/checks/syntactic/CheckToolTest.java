@@ -8,7 +8,7 @@ import java.util.HashSet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -51,7 +51,7 @@ public class CheckToolTest {
 	private static final CFG cfg = new CFG(descriptor);
 
 	private static Message build(
-			CheckTool tool,
+			ReportingTool tool,
 			Object target,
 			String message) {
 		if (target == null) {
@@ -81,7 +81,7 @@ public class CheckToolTest {
 
 	@Test
 	public void testCopy() {
-		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
+		ReportingTool tool = new ReportingTool(new LiSAConfiguration(), new FileManager("foo"));
 		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -104,12 +104,12 @@ public class CheckToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "faa"));
 
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, new CheckTool(tool).getWarnings()));
+		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, new ReportingTool(tool).getWarnings()));
 	}
 
 	@Test
 	public void testSimpleFill() {
-		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
+		ReportingTool tool = new ReportingTool(new LiSAConfiguration(), new FileManager("foo"));
 		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -124,7 +124,7 @@ public class CheckToolTest {
 
 	@Test
 	public void testDisjointMessages() {
-		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
+		ReportingTool tool = new ReportingTool(new LiSAConfiguration(), new FileManager("foo"));
 		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -137,7 +137,7 @@ public class CheckToolTest {
 
 	@Test
 	public void testDuplicateMessages() {
-		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
+		ReportingTool tool = new ReportingTool(new LiSAConfiguration(), new FileManager("foo"));
 		Collection<Message> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));

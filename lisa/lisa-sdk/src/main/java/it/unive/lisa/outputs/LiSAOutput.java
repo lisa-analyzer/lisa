@@ -2,7 +2,7 @@ package it.unive.lisa.outputs;
 
 import java.io.IOException;
 
-import it.unive.lisa.CheckTool;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.program.Application;
@@ -36,7 +36,7 @@ public interface LiSAOutput {
 	void dump(
 			Application app,
 			LiSAReport report,
-			CheckTool tool,
+			ReportingTool tool,
 			FileManager fileManager)
 			throws IOException;
 
