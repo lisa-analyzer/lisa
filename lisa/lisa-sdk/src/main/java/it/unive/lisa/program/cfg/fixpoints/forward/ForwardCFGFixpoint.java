@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
@@ -32,8 +33,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		ForwardFixpoint<CFG, Statement, Edge, CompoundState<A>>
 		implements
@@ -45,6 +45,11 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>,
 	protected final InterproceduralAnalysis<A, D> interprocedural;
 
 	/**
+	 * The event queue to notify analysis events.
+	 */
+	protected final EventQueue events;
+
+	/**
 	 * Builds the fixpoint implementation.
 	 * 
 	 * @param graph               the graph targeted by this implementation
@@ -53,13 +58,16 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>,
 	 *                                implementation
 	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
 	 *                                semantics invocation
+	 * @param events              the event queue to use to emit analysis events
 	 */
 	public ForwardCFGFixpoint(
 			CFG graph,
 			boolean forceFullEvaluation,
-			InterproceduralAnalysis<A, D> interprocedural) {
+			InterproceduralAnalysis<A, D> interprocedural,
+			EventQueue events) {
 		super(graph, forceFullEvaluation);
 		this.interprocedural = interprocedural;
+		this.events = events;
 	}
 
 	@Override

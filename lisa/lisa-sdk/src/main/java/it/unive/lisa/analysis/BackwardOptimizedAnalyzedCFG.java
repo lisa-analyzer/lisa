@@ -53,8 +53,7 @@ import org.apache.logging.log4j.Logger;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		BackwardAnalyzedCFG<A> {
 
@@ -210,8 +209,13 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			}
 		}
 
-		BackwardAscendingFixpoint<A,
-				D> fix = new BackwardAscendingFixpoint<>(this, true, new PrecomputedAnalysis(), conf);
+		BackwardAscendingFixpoint<A, D> fix = new BackwardAscendingFixpoint<>(
+				this,
+				true,
+				new PrecomputedAnalysis(),
+				conf,
+				// we do not issue events for unwinding
+				null);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, new FIFOWorkingSet<>(), existing);

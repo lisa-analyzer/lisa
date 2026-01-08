@@ -207,8 +207,14 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 			}
 		}
 
-		ForwardAscendingFixpoint<A,
-				D> fix = new ForwardAscendingFixpoint<>(this, true, new PrecomputedAnalysis(), conf);
+		ForwardAscendingFixpoint<A, D> fix = new ForwardAscendingFixpoint<>(
+				this,
+				true,
+				new PrecomputedAnalysis(),
+				conf,
+				// we do not issue events during unwinding
+				null);
+
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix

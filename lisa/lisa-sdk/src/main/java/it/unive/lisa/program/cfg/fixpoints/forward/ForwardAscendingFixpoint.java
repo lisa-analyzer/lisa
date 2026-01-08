@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
@@ -48,7 +49,7 @@ public class ForwardAscendingFixpoint<A extends AbstractLattice<A>, D extends Ab
 	 * method.
 	 */
 	public ForwardAscendingFixpoint() {
-		super(null, false, null);
+		super(null, false, null, null);
 		this.config = null;
 		this.wideningPoints = null;
 		this.lubs = null;
@@ -64,13 +65,15 @@ public class ForwardAscendingFixpoint<A extends AbstractLattice<A>, D extends Ab
 	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
 	 *                                semantics computations
 	 * @param config              the {@link FixpointConfiguration} to use
+	 * @param events              the event queue to use to emit analysis events
 	 */
 	public ForwardAscendingFixpoint(
 			CFG target,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			FixpointConfiguration<A, D> config) {
-		super(target, forceFullEvaluation, interprocedural);
+			FixpointConfiguration<A, D> config,
+			EventQueue events) {
+		super(target, forceFullEvaluation, interprocedural, events);
 		this.config = config;
 		this.wideningPoints = config.useWideningPoints ? target.getCycleEntries() : null;
 		this.lubs = new HashMap<>(config.useWideningPoints ? wideningPoints.size() : target.getNodesCount());
@@ -124,7 +127,7 @@ public class ForwardAscendingFixpoint<A extends AbstractLattice<A>, D extends Ab
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration<A, D> config) {
-		return new ForwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
+		return new ForwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config, events);
 	}
 
 	@Override

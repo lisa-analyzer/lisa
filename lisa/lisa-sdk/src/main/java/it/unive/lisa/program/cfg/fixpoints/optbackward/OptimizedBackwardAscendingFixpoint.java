@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
@@ -29,8 +30,7 @@ import java.util.function.Predicate;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		OptimizedBackwardFixpoint<A, D> {
 
@@ -51,7 +51,7 @@ public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
 	 * method. Invocations of the latter will preserve the hotspots predicate.
 	 */
 	public OptimizedBackwardAscendingFixpoint() {
-		super(null, false, null, null);
+		super(null, false, null, null, null);
 		this.config = null;
 		this.wideningPoints = null;
 		this.lubs = null;
@@ -67,6 +67,7 @@ public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
 	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
 	 *                                semantics computations
 	 * @param config              the {@link FixpointConfiguration} to use
+	 * @param events              the event queue to use to emit analysis events
 	 * @param hotspots            the predicate to identify additional
 	 *                                statements whose approximation must be
 	 *                                preserved in the results
@@ -76,8 +77,9 @@ public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration<A, D> config,
+			EventQueue events,
 			Predicate<Statement> hotspots) {
-		super(target, forceFullEvaluation, interprocedural, hotspots);
+		super(target, forceFullEvaluation, interprocedural, events, hotspots);
 		this.config = config;
 		this.wideningPoints = config.useWideningPoints ? target.getCycleEntries() : null;
 		this.lubs = new HashMap<>(config.useWideningPoints ? wideningPoints.size() : target.getNodesCount());
@@ -131,7 +133,8 @@ public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration<A, D> config) {
-		return new OptimizedBackwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config, hotspots);
+		return new OptimizedBackwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config, events,
+				hotspots);
 	}
 
 	@Override
@@ -141,13 +144,14 @@ public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
 
 	@Override
 	public ForwardCFGFixpoint<A, D> asForward() {
-		return new OptimizedForwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config, hotspots);
+		return new OptimizedForwardAscendingFixpoint<>();
 	}
 
 	@Override
 	public BackwardCFGFixpoint<A, D> withHotspots(
 			Predicate<Statement> hotspots) {
-		return new OptimizedBackwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config, hotspots);
+		return new OptimizedBackwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config, events,
+				hotspots);
 	}
 
 }

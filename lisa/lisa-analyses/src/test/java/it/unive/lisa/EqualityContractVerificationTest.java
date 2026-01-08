@@ -30,6 +30,7 @@ import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.cron.CronConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -336,6 +337,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(NonInterferenceValue.class, new NonInterference().top(),
 						new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
+				.withPrefabValues(EventQueue.class, new EventQueue(null), new EventQueue(null))
 				.withPrefabValues(Set.class, s1, s2)
 				.withPrefabValues(
 						AbstractDomain.class,
