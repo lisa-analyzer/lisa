@@ -1,6 +1,6 @@
 package it.unive.lisa.events;
 
-import it.unive.lisa.checks.syntactic.CheckTool;
+import it.unive.lisa.CheckTool;
 
 public class FailingListener
 		implements

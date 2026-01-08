@@ -1,4 +1,4 @@
-package it.unive.lisa.checks.syntactic;
+package it.unive.lisa;
 
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
@@ -87,7 +87,7 @@ public class CheckTool {
 	 * 
 	 * @param other the original tool to copy
 	 */
-	protected CheckTool(
+	public CheckTool(
 			CheckTool other) {
 		this(other.configuration, other.fileManager);
 		warnings.addAll(other.warnings);

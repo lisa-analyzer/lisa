@@ -1,8 +1,9 @@
 package it.unive.lisa.events;
 
-import it.unive.lisa.checks.syntactic.CheckTool;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import it.unive.lisa.CheckTool;
 
 public class RecordingListener
 		implements

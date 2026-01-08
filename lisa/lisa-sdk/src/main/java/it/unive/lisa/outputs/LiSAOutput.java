@@ -1,11 +1,12 @@
 package it.unive.lisa.outputs;
 
+import java.io.IOException;
+
+import it.unive.lisa.CheckTool;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
-import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
 
 /**
  * An output that can dump analysis results produced by LiSA.

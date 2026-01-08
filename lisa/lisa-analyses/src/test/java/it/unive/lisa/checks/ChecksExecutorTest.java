@@ -1,6 +1,10 @@
 package it.unive.lisa.checks;
 
-import it.unive.lisa.checks.syntactic.CheckTool;
+import java.io.IOException;
+
+import org.junit.Test;
+
+import it.unive.lisa.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.cron.CronConfiguration;
 import it.unive.lisa.cron.IMPCronExecutor;
@@ -8,8 +12,6 @@ import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import java.io.IOException;
-import org.junit.Test;
 
 public class ChecksExecutorTest
 		extends

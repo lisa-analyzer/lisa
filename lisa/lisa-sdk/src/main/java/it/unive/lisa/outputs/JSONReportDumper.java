@@ -1,13 +1,15 @@
 package it.unive.lisa.outputs;
 
+import java.io.IOException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.CheckTool;
 import it.unive.lisa.LiSAReport;
-import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An output that dumps the analysis report in JSON format to

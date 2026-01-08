@@ -1,8 +1,9 @@
 package it.unive.lisa.outputs;
 
+import java.io.IOException;
+
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
 
 /**
  * An output that dumps each input cfg as a json file, with no information on

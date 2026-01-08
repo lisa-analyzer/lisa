@@ -1,5 +1,6 @@
 package it.unive.lisa.checks.syntactic;
 
+import it.unive.lisa.CheckTool;
 import it.unive.lisa.checks.Check;
 
 /**

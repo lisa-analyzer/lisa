@@ -1,16 +1,18 @@
 package it.unive.lisa.outputs;
 
+import java.io.IOException;
+import java.util.Collection;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.CheckTool;
 import it.unive.lisa.LiSAReport;
-import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
-import java.util.Collection;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An output that dumps each input cfg, with no information on the analysis

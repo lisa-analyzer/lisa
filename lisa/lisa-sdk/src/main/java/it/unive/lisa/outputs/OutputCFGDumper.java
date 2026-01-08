@@ -1,12 +1,19 @@
 package it.unive.lisa.outputs;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.function.BiFunction;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.CheckTool;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
-import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -15,11 +22,6 @@ import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.function.BiFunction;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An output that dumps each input cfg, including the results produced by the

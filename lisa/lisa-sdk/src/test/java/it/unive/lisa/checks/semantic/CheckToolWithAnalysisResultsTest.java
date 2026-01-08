@@ -3,6 +3,16 @@ package it.unive.lisa.checks.semantic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
+
+import it.unive.lisa.CheckTool;
 import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestLanguageFeatures;
@@ -13,7 +23,6 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.UniqueScope;
@@ -45,13 +54,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.file.FileManager;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
 
 public class CheckToolWithAnalysisResultsTest {
 
