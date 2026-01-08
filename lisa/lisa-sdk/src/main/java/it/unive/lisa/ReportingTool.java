@@ -87,7 +87,7 @@ public class ReportingTool {
 	 * 
 	 * @param other the original tool to copy
 	 */
-	public ReportingTool(
+	protected ReportingTool(
 			ReportingTool other) {
 		this(other.configuration, other.fileManager);
 		warnings.addAll(other.warnings);

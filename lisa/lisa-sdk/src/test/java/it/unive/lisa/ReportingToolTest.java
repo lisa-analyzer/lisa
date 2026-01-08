@@ -1,4 +1,4 @@
-package it.unive.lisa.checks.syntactic;
+package it.unive.lisa;
 
 import static org.junit.Assert.assertTrue;
 
@@ -8,9 +8,6 @@ import java.util.HashSet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
-import it.unive.lisa.ReportingTool;
-import it.unive.lisa.TestLanguageFeatures;
-import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
 import it.unive.lisa.outputs.messages.CFGMessage;
@@ -32,7 +29,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.util.file.FileManager;
 
-public class CheckToolTest {
+public class ReportingToolTest {
 
 	private static final ClassUnit unit = new ClassUnit(
 			new SourceCodeLocation("fake", 1, 0),
