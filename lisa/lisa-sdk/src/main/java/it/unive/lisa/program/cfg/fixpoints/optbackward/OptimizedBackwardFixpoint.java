@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.checks.semantic.SemanticCheck;
-import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
@@ -68,7 +67,6 @@ public abstract class OptimizedBackwardFixpoint<
 	 *                                implementation
 	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
 	 *                                semantics invocation
-	 * @param events              the event queue to use to emit analysis events
 	 * @param hotspots            the predicate to identify additional
 	 *                                statements (also considering intermediate
 	 *                                ones) for which the fixpoint results must
@@ -85,9 +83,8 @@ public abstract class OptimizedBackwardFixpoint<
 			CFG graph,
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
-			EventQueue events,
 			Predicate<Statement> hotspots) {
-		super(graph, forceFullEvaluation, interprocedural, events);
+		super(graph, forceFullEvaluation, interprocedural);
 		this.hotspots = hotspots;
 		// graph might be null if this is just used as a factory
 		if (graph == null)

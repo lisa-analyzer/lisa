@@ -1,8 +1,5 @@
 package it.unive.lisa.listeners;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.ReportingTool;
 import it.unive.lisa.events.EndEvent;
@@ -11,9 +8,18 @@ import it.unive.lisa.events.EventListener;
 import it.unive.lisa.events.StartEvent;
 import it.unive.lisa.interprocedural.events.InterproceduralEvent;
 import it.unive.lisa.logging.TimeFormat;
+import it.unive.lisa.program.cfg.fixpoints.events.FixpointEvent;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
+import java.io.BufferedWriter;
+import java.io.IOException;
 
+/**
+ * An event listener that traces the start and end of events to a trace file,
+ * constructing a timeline of how the analysis performed.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class TracingListener
 		implements
 		EventListener {
@@ -56,7 +62,7 @@ public class TracingListener
 	public void onEvent(
 			Event event,
 			ReportingTool tool) {
-		if (!(event instanceof InterproceduralEvent))
+		if (!(event instanceof InterproceduralEvent || event instanceof FixpointEvent))
 			return;
 
 		try {
@@ -86,4 +92,3 @@ public class TracingListener
 	}
 
 }
-

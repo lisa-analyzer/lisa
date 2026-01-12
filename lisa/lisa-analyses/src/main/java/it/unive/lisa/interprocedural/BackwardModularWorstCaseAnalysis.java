@@ -210,4 +210,8 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 		return analysis;
 	}
 
+	@Override
+	public EventQueue getEventQueue() {
+		return events;
+	}
 }

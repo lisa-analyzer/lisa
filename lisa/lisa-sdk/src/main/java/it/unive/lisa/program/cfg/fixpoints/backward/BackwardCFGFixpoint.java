@@ -12,11 +12,17 @@ import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.fixpoints.AnalysisFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.events.EdgeTraverseEnd;
+import it.unive.lisa.program.cfg.fixpoints.events.EdgeTraverseStart;
+import it.unive.lisa.program.cfg.fixpoints.events.PreStateComputed;
+import it.unive.lisa.program.cfg.fixpoints.events.StatementSemanticsEnd;
+import it.unive.lisa.program.cfg.fixpoints.events.StatementSemanticsStart;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,7 +53,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>, D extend
 	/**
 	 * The event queue to notify analysis events.
 	 */
-	protected final EventQueue events;
+	protected EventQueue events;
 
 	/**
 	 * Builds the fixpoint implementation.
@@ -58,16 +64,26 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>, D extend
 	 *                                implementation
 	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
 	 *                                semantics invocation
-	 * @param events              the event queue to use to emit analysis events
 	 */
 	public BackwardCFGFixpoint(
 			CFG graph,
 			boolean forceFullEvaluation,
-			InterproceduralAnalysis<A, D> interprocedural,
-			EventQueue events) {
+			InterproceduralAnalysis<A, D> interprocedural) {
 		super(graph, forceFullEvaluation);
 		this.interprocedural = interprocedural;
-		this.events = events;
+	}
+
+	/**
+	 * Sets the {@link EventQueue} that this fixpoint can use to post events.
+	 * Note that, to avoid unnecessary overhead, this method will only be
+	 * invoked if at least one event listener has been registered in the event
+	 * queue. Dereferences of the queue should thus be null-checked.
+	 * 
+	 * @param queue the event queue to use
+	 */
+	public void setEventQueue(
+			EventQueue queue) {
+		this.events = queue;
 	}
 
 	@Override
@@ -77,11 +93,18 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>, D extend
 			Map<Statement, CompoundState<A>> result)
 			throws SemanticException {
 		StatementStore<A> expressions = new StatementStore<>(entrystate.postState).bottom();
+		if (events != null)
+			events.post(new StatementSemanticsStart<>(node, entrystate.postState));
+
 		AnalysisState<A> approx = node.backwardSemantics(entrystate.postState, interprocedural, expressions);
 		if (node instanceof Expression)
 			// we forget the meta variables now as the values are popped from
 			// the stack here
 			approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables(), node);
+
+		if (events != null)
+			events.post(new StatementSemanticsEnd<>(node, entrystate.postState, approx));
+
 		return Pair.of(CompoundState.of(approx, expressions), node);
 	}
 
@@ -90,7 +113,12 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>, D extend
 			Edge edge,
 			CompoundState<A> entrystate)
 			throws SemanticException {
-		AnalysisState<A> approx = edge.traverseBackwards(entrystate.postState, interprocedural.getAnalysis());
+		AnalysisState<A> state = entrystate.postState;
+
+		if (events != null)
+			events.post(new EdgeTraverseStart<>(edge, state));
+
+		AnalysisState<A> approx = edge.traverseBackwards(state, interprocedural.getAnalysis());
 
 		// we remove out of scope variables here
 		List<VariableTableEntry> toRemove = new LinkedList<>();
@@ -110,7 +138,23 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>, D extend
 		if (!ids.isEmpty())
 			approx = approx.forgetIdentifiers(ids, edge.getSource());
 
+		if (events != null)
+			events.post(new EdgeTraverseEnd<>(edge, state, approx));
+
 		return CompoundState.of(approx, new StatementStore<>(approx).bottom());
+	}
+
+	@Override
+	protected CompoundState<A> getExitState(
+			CFG graph,
+			Statement node,
+			CompoundState<A> startstate,
+			Map<Statement, CompoundState<A>> result)
+			throws FixpointException {
+		CompoundState<A> exitState = super.getExitState(graph, node, startstate, result);
+		if (events != null)
+			events.post(new PreStateComputed<>(node, exitState.postState));
+		return exitState;
 	}
 
 	@Override

@@ -81,6 +81,15 @@ public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends
 	Analysis<A, D> getAnalysis();
 
 	/**
+	 * Yields the event queue used by this interprocedural analysis to emit
+	 * events. Note that in case no listeners are registered for the analysis,
+	 * the return value of this method is {@code null}.
+	 * 
+	 * @return the event queue
+	 */
+	EventQueue getEventQueue();
+
+	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
 	 * {@link AnalyzedCFG} for each {@link CFG} contained in this analysis. Each
 	 * result is computed with

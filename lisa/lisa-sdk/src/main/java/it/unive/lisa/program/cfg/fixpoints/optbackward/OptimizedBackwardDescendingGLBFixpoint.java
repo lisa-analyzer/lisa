@@ -4,12 +4,13 @@ import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.conf.FixpointConfiguration;
-import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.events.JoinPerformed;
+import it.unive.lisa.program.cfg.fixpoints.events.LeqPerformed;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -46,7 +47,7 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 	 * method. Invocations of the latter will preserve the hotspots predicate.
 	 */
 	public OptimizedBackwardDescendingGLBFixpoint() {
-		super(null, false, null, null, null);
+		super(null, false, null, null);
 		this.config = null;
 		this.glbs = null;
 	}
@@ -61,7 +62,6 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
 	 *                                semantics computations
 	 * @param config              the {@link FixpointConfiguration} to use
-	 * @param events              the event queue to use to emit analysis events
 	 * @param hotspots            the predicate to identify additional
 	 *                                statements whose approximation must be
 	 *                                preserved in the results
@@ -71,9 +71,8 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration<A, D> config,
-			EventQueue events,
 			Predicate<Statement> hotspots) {
-		super(target, forceFullEvaluation, interprocedural, events, hotspots);
+		super(target, forceFullEvaluation, interprocedural, hotspots);
 		this.config = config;
 		this.glbs = new HashMap<>(target.getNodesCount());
 	}
@@ -84,15 +83,23 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
+		CompoundState<A> result;
 		if (config.glbThreshold < 0)
-			return old;
+			result = old;
+		else {
+			int glb = glbs.computeIfAbsent(node, st -> config.glbThreshold);
+			if (glb == 0)
+				result = old;
+			else {
+				glbs.put(node, --glb);
+				result = old.downchain(approx);
+			}
+		}
 
-		int glb = glbs.computeIfAbsent(node, st -> config.glbThreshold);
-		if (glb == 0)
-			return old;
+		if (events != null)
+			events.post(new JoinPerformed<>(node, old, approx, result));
 
-		glbs.put(node, --glb);
-		return old.downchain(approx);
+		return result;
 	}
 
 	@Override
@@ -101,7 +108,10 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
-		return old.lessOrEqual(approx);
+		boolean result = old.lessOrEqual(approx);
+		if (events != null)
+			events.post(new LeqPerformed<A>(node, old, approx, result));
+		return result;
 	}
 
 	@Override
@@ -115,7 +125,6 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 				forceFullEvaluation,
 				interprocedural,
 				config,
-				events,
 				hotspots);
 	}
 
@@ -137,7 +146,6 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 				forceFullEvaluation,
 				interprocedural,
 				config,
-				events,
 				hotspots);
 	}
 

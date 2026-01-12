@@ -44,6 +44,11 @@ public class TestInterproceduralAnalysis<A extends AbstractLattice<A>,
 	}
 
 	@Override
+	public EventQueue getEventQueue() {
+		return null;
+	}
+
+	@Override
 	public void init(
 			Application app,
 			CallGraph callgraph,

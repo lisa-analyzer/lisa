@@ -53,7 +53,7 @@ public class OptimizedFixpointTest {
 				boolean forceFullEvaluation,
 				InterproceduralAnalysis<TestAbstractState, TestAbstractDomain> interprocedural,
 				Predicate<Statement> hotspots) {
-			super(graph, forceFullEvaluation, interprocedural, null, hotspots);
+			super(graph, forceFullEvaluation, interprocedural, hotspots);
 		}
 
 		@Override

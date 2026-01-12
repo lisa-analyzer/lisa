@@ -213,9 +213,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extend
 				this,
 				true,
 				new PrecomputedAnalysis(),
-				conf,
-				// we do not issue events for unwinding
-				null);
+				conf);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, new FIFOWorkingSet<>(), existing);
@@ -347,6 +345,11 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extend
 			return interprocedural.getAnalysis();
 		}
 
+		@Override
+		public EventQueue getEventQueue() {
+			// we do not want events during unwinding
+			return null;
+		}
 	}
 
 	@Override

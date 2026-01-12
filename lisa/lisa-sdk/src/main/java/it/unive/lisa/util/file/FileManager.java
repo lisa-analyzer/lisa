@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -348,6 +347,8 @@ public class FileManager {
 	 * 
 	 * @param name the name of the file to create
 	 * 
+	 * @return the buffered writer
+	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public BufferedWriter mkOutputWriter(
@@ -366,6 +367,8 @@ public class FileManager {
 	 * @param path the sub-path, relative to the workdir, where the file should
 	 *                 be created
 	 * @param name the name of the file to create
+	 * 
+	 * @return the buffered writer
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
@@ -386,6 +389,8 @@ public class FileManager {
 	 * @param name the name of the file to create
 	 * @param bom  if {@code true}, the bom marker {@code \ufeff} will be
 	 *                 written to the file before returning the writer
+	 * 
+	 * @return the buffered writer
 	 * 
 	 * @throws IOException if something goes wrong while creating or writing to
 	 *                         the file
@@ -409,6 +414,8 @@ public class FileManager {
 	 * @param name the name of the file to create
 	 * @param bom  if {@code true}, the bom marker {@code \ufeff} will be
 	 *                 written to the file before returning the writer
+	 * 
+	 * @return the buffered writer
 	 * 
 	 * @throws IOException if something goes wrong while creating or writing to
 	 *                         the file

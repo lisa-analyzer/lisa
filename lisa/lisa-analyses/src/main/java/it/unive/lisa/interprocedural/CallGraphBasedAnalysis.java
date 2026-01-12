@@ -32,7 +32,8 @@ import java.util.Set;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
+public abstract class CallGraphBasedAnalysis<
+		A extends AbstractLattice<A>,
 		D extends AbstractDomain<A>>
 		implements
 		InterproceduralAnalysis<A, D> {
@@ -90,6 +91,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public Analysis<A, D> getAnalysis() {
 		return analysis;
+	}
+
+	@Override
+	public EventQueue getEventQueue() {
+		return events;
 	}
 
 	@Override

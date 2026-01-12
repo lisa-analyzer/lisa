@@ -563,6 +563,7 @@ public class CFG
 			fix = fix.asUnoptimized();
 		fix = fix.mk(this, false, interprocedural, conf);
 		fix = fix.withHotspots(conf.hotspots);
+		fix.setEventQueue(interprocedural.getEventQueue());
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
@@ -578,6 +579,7 @@ public class CFG
 		Map<Statement, CompoundState<A>> descending;
 		fix = conf.forwardDescendingFixpoint.mk(this, true, interprocedural, conf);
 		fix = fix.withHotspots(conf.hotspots);
+		fix.setEventQueue(interprocedural.getEventQueue());
 		descending = fix.fixpoint(starting, ws, ascending);
 		return flatten(fix.isOptimized(), singleton, startingPoints, interprocedural, id, descending);
 	}
@@ -756,6 +758,7 @@ public class CFG
 			fix = fix.asUnoptimized();
 		fix = fix.mk(this, false, interprocedural, conf);
 		fix = fix.withHotspots(conf.hotspots);
+		fix.setEventQueue(interprocedural.getEventQueue());
 
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
 		StatementStore<A> bot = new StatementStore<>(singleton.bottom());
@@ -771,6 +774,7 @@ public class CFG
 		Map<Statement, CompoundState<A>> descending;
 		fix = conf.backwardDescendingFixpoint.mk(this, true, interprocedural, conf);
 		fix = fix.withHotspots(conf.hotspots);
+		fix.setEventQueue(interprocedural.getEventQueue());
 		descending = fix.fixpoint(starting, ws, ascending);
 		return flatten(fix.isOptimized(), singleton, startingPoints, interprocedural, id, descending);
 	}

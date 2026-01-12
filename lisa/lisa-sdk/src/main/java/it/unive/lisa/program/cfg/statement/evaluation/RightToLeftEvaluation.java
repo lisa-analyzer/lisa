@@ -7,6 +7,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.cfg.fixpoints.events.StatementSemanticsEnd;
+import it.unive.lisa.program.cfg.fixpoints.events.StatementSemanticsStart;
 import it.unive.lisa.program.cfg.statement.Expression;
 
 /**
@@ -40,8 +42,17 @@ public class RightToLeftEvaluation
 
 		AnalysisState<A> postState = entryState;
 		for (int i = computed.length - 1; i >= 0; i--) {
-			AnalysisState<A> tmp = subExpressions[i].forwardSemantics(postState, interprocedural, expressions);
-			expressions.put(subExpressions[i], tmp);
+			Expression node = subExpressions[i];
+
+			if (interprocedural.getEventQueue() != null)
+				interprocedural.getEventQueue().post(new StatementSemanticsStart<>(node, postState));
+
+			AnalysisState<A> tmp = node.forwardSemantics(postState, interprocedural, expressions);
+
+			if (interprocedural.getEventQueue() != null)
+				interprocedural.getEventQueue().post(new StatementSemanticsEnd<>(node, postState, tmp));
+
+			expressions.put(node, tmp);
 			computed[i] = tmp.getExecutionExpressions();
 			postState = tmp;
 		}
@@ -62,8 +73,17 @@ public class RightToLeftEvaluation
 
 		AnalysisState<A> postState = entryState;
 		for (int i = 0; i < computed.length; i++) {
-			AnalysisState<A> tmp = subExpressions[i].backwardSemantics(postState, interprocedural, expressions);
-			expressions.put(subExpressions[i], tmp);
+			Expression node = subExpressions[i];
+
+			if (interprocedural.getEventQueue() != null)
+				interprocedural.getEventQueue().post(new StatementSemanticsStart<>(node, postState));
+
+			AnalysisState<A> tmp = node.backwardSemantics(postState, interprocedural, expressions);
+
+			if (interprocedural.getEventQueue() != null)
+				interprocedural.getEventQueue().post(new StatementSemanticsEnd<>(node, postState, tmp));
+
+			expressions.put(node, tmp);
 			computed[i] = tmp.getExecutionExpressions();
 			postState = tmp;
 		}

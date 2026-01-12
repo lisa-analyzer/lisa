@@ -211,9 +211,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 				this,
 				true,
 				new PrecomputedAnalysis(),
-				conf,
-				// we do not issue events during unwinding
-				null);
+				conf);
 
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
@@ -350,6 +348,11 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 			return interprocedural.getAnalysis();
 		}
 
+		@Override
+		public EventQueue getEventQueue() {
+			// we do not want events during unwinding
+			return null;
+		}
 	}
 
 	@Override

@@ -111,7 +111,7 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 
 			init(app, events);
 
-			analyze(fixconf, tool);
+			analyze(fixconf, events, tool);
 
 			Map<CFG, Collection<AnalyzedCFG<A>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
@@ -200,13 +200,15 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 
 	private void analyze(
 			FixpointConfiguration<A, D> fixconf,
+			EventQueue events,
 			ReportingTool tool) {
-		TimerLogger.execAction(LOG, "Initializing event listeners", () -> {
-			for (EventListener listener : conf.synchronousListeners)
-				listener.beforeExecution(tool);
-			for (EventListener listener : conf.asynchronousListeners)
-				listener.beforeExecution(tool);
-		});
+		if (events != null)
+			TimerLogger.execAction(LOG, "Initializing event listeners", () -> {
+				for (EventListener listener : conf.synchronousListeners)
+					listener.beforeExecution(tool);
+				for (EventListener listener : conf.asynchronousListeners)
+					listener.beforeExecution(tool);
+			});
 
 		AnalysisState<A> state = this.analysis.makeLattice();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
@@ -218,12 +220,23 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			}
 		});
 
-		TimerLogger.execAction(LOG, "Shutting down event listeners", () -> {
-			for (EventListener listener : conf.synchronousListeners)
-				listener.afterExecution(tool);
-			for (EventListener listener : conf.asynchronousListeners)
-				listener.afterExecution(tool);
-		});
+		if (events != null) {
+			TimerLogger.execAction(LOG, "Waiting for event listeners to complete", () -> {
+				try {
+					events.close();
+				} catch (InterruptedException e) {
+					LOG.fatal("Exception while waiting for event listeners to complete", e);
+					throw new AnalysisExecutionException("Exception while waiting for event listeners to complete", e);
+				}
+			});
+
+			TimerLogger.execAction(LOG, "Shutting down event listeners", () -> {
+				for (EventListener listener : conf.synchronousListeners)
+					listener.afterExecution(tool);
+				for (EventListener listener : conf.asynchronousListeners)
+					listener.afterExecution(tool);
+			});
+		}
 	}
 
 }

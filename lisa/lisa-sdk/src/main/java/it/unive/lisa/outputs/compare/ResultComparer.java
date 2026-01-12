@@ -2,6 +2,19 @@ package it.unive.lisa.outputs.compare;
 
 import static java.lang.String.format;
 
+import it.unive.lisa.listeners.TracingListener;
+import it.unive.lisa.outputs.JSONReportDumper;
+import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,27 +38,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.TriConsumer;
-
-import it.unive.lisa.listeners.TracingListener;
-import it.unive.lisa.outputs.JSONReportDumper;
-import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableNode;
-import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 /**
  * A class providing capabilities for finding differences between two
@@ -337,8 +335,8 @@ public class ResultComparer {
 			Map<String, String> second,
 			TriConsumer<String, String, String> reporter,
 			Predicate<String> ignore) {
-		CollectionsDiffBuilder<
-				String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(), second.keySet());
+		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(),
+				second.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.getOnlyFirst().isEmpty())
@@ -432,8 +430,8 @@ public class ResultComparer {
 	public boolean compareFiles(
 			JsonReport first,
 			JsonReport second) {
-		CollectionsDiffBuilder<
-				String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(), second.getFiles());
+		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
+				second.getFiles());
 		files.compute(String::compareTo);
 
 		if (!files.getCommons().isEmpty())
@@ -485,8 +483,8 @@ public class ResultComparer {
 			File secondFileRoot)
 			throws FileNotFoundException,
 			IOException {
-		CollectionsDiffBuilder<
-				String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(), second.getFiles());
+		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
+				second.getFiles());
 		files.compute(String::compareTo);
 		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
@@ -936,8 +934,8 @@ public class ResultComparer {
 		SortedMap<String, SerializableValue> felements = first.getFields();
 		SortedMap<String, SerializableValue> selements = second.getFields();
 
-		CollectionsDiffBuilder<
-				String> diff = new CollectionsDiffBuilder<>(String.class, felements.keySet(), selements.keySet());
+		CollectionsDiffBuilder<String> diff = new CollectionsDiffBuilder<>(String.class, felements.keySet(),
+				selements.keySet());
 		diff.compute(String::compareTo);
 
 		boolean atLeastOne = false;
@@ -1008,6 +1006,18 @@ public class ResultComparer {
 				.append(second);
 	}
 
+	/**
+	 * Compares two trace files line by line, ignoring the time taken to
+	 * complete each traced action.
+	 * 
+	 * @param left  the first trace file
+	 * @param right the second trace file
+	 * 
+	 * @return {@code true} if the trace files are equal, {@code false}
+	 *             otherwise
+	 * 
+	 * @throws IOException if an I/O error occurs
+	 */
 	public boolean matchTraceFiles(
 			File left,
 			File right)

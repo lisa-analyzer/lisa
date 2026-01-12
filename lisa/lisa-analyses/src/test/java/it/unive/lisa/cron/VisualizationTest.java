@@ -1,7 +1,5 @@
 package it.unive.lisa.cron;
 
-import org.junit.Test;
-
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
@@ -11,6 +9,7 @@ import it.unive.lisa.outputs.HtmlInputs;
 import it.unive.lisa.outputs.HtmlResults;
 import it.unive.lisa.outputs.JSONInputs;
 import it.unive.lisa.util.testing.TestConfiguration;
+import org.junit.Test;
 
 public class VisualizationTest
 		extends
