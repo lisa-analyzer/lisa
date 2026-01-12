@@ -1,8 +1,7 @@
-package it.unive.lisa.interprocedural.context.events;
+package it.unive.lisa.interprocedural.events;
 
 import it.unive.lisa.events.EndEvent;
 import it.unive.lisa.events.Event;
-import it.unive.lisa.interprocedural.events.InterproceduralEvent;
 
 /**
  * An event signaling the end of the recursion solving during an interprocedural

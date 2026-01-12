@@ -1,14 +1,16 @@
 package it.unive.lisa.cron;
 
+import org.junit.Test;
+
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.listeners.TracingListener;
 import it.unive.lisa.outputs.DotResults;
 import it.unive.lisa.outputs.HtmlInputs;
 import it.unive.lisa.outputs.HtmlResults;
 import it.unive.lisa.outputs.JSONInputs;
 import it.unive.lisa.util.testing.TestConfiguration;
-import org.junit.Test;
 
 public class VisualizationTest
 		extends
@@ -73,4 +75,13 @@ public class VisualizationTest
 		perform(conf);
 	}
 
+	@Test
+	public void testFixpointTrace() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new TracingListener());
+		conf.testDir = "visualization";
+		conf.testSubDir = "trace";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
 }

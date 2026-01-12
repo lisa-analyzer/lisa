@@ -1,5 +1,19 @@
 package it.unive.lisa.interprocedural.context;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
@@ -21,8 +35,6 @@ import it.unive.lisa.interprocedural.NoEntryPointException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.interprocedural.context.events.RecursionEnd;
-import it.unive.lisa.interprocedural.context.events.RecursionStart;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.context.recursion.RecursionSolver;
 import it.unive.lisa.interprocedural.events.CFGFixpointEnd;
@@ -35,6 +47,8 @@ import it.unive.lisa.interprocedural.events.FixpointIterationEnd;
 import it.unive.lisa.interprocedural.events.FixpointIterationStart;
 import it.unive.lisa.interprocedural.events.FixpointStart;
 import it.unive.lisa.interprocedural.events.PrecomputedCallResult;
+import it.unive.lisa.interprocedural.events.RecursionEnd;
+import it.unive.lisa.interprocedural.events.RecursionStart;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CodeUnit;
@@ -53,18 +67,6 @@ import it.unive.lisa.program.language.scoping.ScopingStrategy;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is

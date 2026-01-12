@@ -1,0 +1,20 @@
+> Program-wide fixpoint
+| > Program-wide fixpoint iteration 1
+| | > Fixpoint of untyped tests::main(tests*)
+| | | > Fixpoint of untyped A::A(A*)
+| | | L [completed in 4ms 137241ns]
+| | | > Fixpoint of untyped A::getOne(A*)
+| | | L [completed in 26ms 368338ns]
+| | | > Fixpoint of untyped A::getPositive(A*, untyped)
+| | | L [completed in 4ms 719577ns]
+| | | > Fixpoint of untyped A::identity(A*, untyped)
+| | | L [completed in 3ms 878195ns]
+| | | > Fixpoint of untyped A::identity(A*, untyped)
+| | | L [completed in 1ms 115228ns]
+| | | > Fixpoint of untyped tests::helper(tests*, untyped, untyped)
+| | | | > Fixpoint of untyped A::identity(A*, untyped)
+| | | | L [completed in 1ms 586055ns]
+| | | L [completed in 6ms 767999ns]
+| | L [completed in 143ms 627367ns]
+| L [completed in 159ms 568674ns]
+L [completed in 160ms 937198ns]

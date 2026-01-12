@@ -2,18 +2,7 @@ package it.unive.lisa.outputs.compare;
 
 import static java.lang.String.format;
 
-import it.unive.lisa.outputs.JSONReportDumper;
-import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableNode;
-import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,12 +25,27 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.TriConsumer;
+
+import it.unive.lisa.listeners.TracingListener;
+import it.unive.lisa.outputs.JSONReportDumper;
+import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 /**
  * A class providing capabilities for finding differences between two
@@ -119,6 +123,8 @@ public class ResultComparer {
 	private static final String DESC_DIFF = "Different description for node %d (%s)";
 
 	private static final String DESC_DIFF_VERBOSE = "Different description for node %d (%s):\n%s";
+
+	private static final String TRACE_DIFF = "Line %d of trace file differs:\n\t'%s'\n\t<--->\n\t'%s'";
 
 	private static final String FILES_ONLY = "Files only in the {} report:";
 
@@ -498,6 +504,8 @@ public class ResultComparer {
 
 			if (isJsonGraph(path))
 				diffFound |= matchJsonGraphs(left, right);
+			else if (FilenameUtils.getName(path).equals(TracingListener.TRACE_FNAME))
+				diffFound |= matchTraceFiles(left, right);
 			else if (isVisualizationFile(path))
 				LOG.info(VIS_ONLY, left.toString(), right.toString());
 			else
@@ -1000,6 +1008,56 @@ public class ResultComparer {
 				.append(second);
 	}
 
+	public boolean matchTraceFiles(
+			File left,
+			File right)
+			throws IOException {
+		boolean diffFound = false;
+
+		try (BufferedReader l = new BufferedReader(
+				new InputStreamReader(
+						new FileInputStream(left),
+						StandardCharsets.UTF_8));
+				BufferedReader r = new BufferedReader(
+						new InputStreamReader(
+								new FileInputStream(right),
+								StandardCharsets.UTF_8))) {
+			String lineL;
+			String lineR;
+			int lineNum = 1;
+			while ((lineL = l.readLine()) != null & (lineR = r.readLine()) != null) {
+				lineL = lineL.replaceFirst("L \\[completed in [^]]+\\]", "");
+				lineR = lineR.replaceFirst("L \\[completed in [^]]+\\]", "");
+				if (!lineL.equals(lineR)) {
+					diffFound = true;
+					fileDiff(
+							left.toString(),
+							right.toString(),
+							format(TRACE_DIFF, lineNum, lineL, lineR));
+				}
+				lineNum++;
+			}
+			while ((lineL = l.readLine()) != null) {
+				diffFound = true;
+				fileDiff(
+						left.toString(),
+						right.toString(),
+						format(TRACE_DIFF, lineNum, lineL, "<no line>"));
+				lineNum++;
+			}
+			while ((lineR = r.readLine()) != null) {
+				diffFound = true;
+				fileDiff(
+						left.toString(),
+						right.toString(),
+						format(TRACE_DIFF, lineNum, "<no line>", lineR));
+				lineNum++;
+			}
+		}
+
+		return diffFound;
+	}
+
 	/**
 	 * Compares the additional info ({@link JsonReport#getAdditionalInfo()}) of
 	 * both reports.
@@ -1266,8 +1324,11 @@ public class ResultComparer {
 	public boolean isVisualizationFile(
 			String path) {
 		String ext = FilenameUtils.getExtension(path);
-		return ext.equals(
-				"dot") || ext.equals("graphml") || ext.equals("png") || ext.equals("html") || ext.equals("js");
+		return ext.equals("dot")
+				|| ext.equals("graphml")
+				|| ext.equals("png")
+				|| ext.equals("html")
+				|| ext.equals("js");
 	}
 
 	/**
