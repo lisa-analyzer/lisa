@@ -32,15 +32,15 @@ spotless {
     java {
         // tabs, no spaces
         leadingSpacesToTabs()
-    
+
         // keep imports clean 
         importOrder() 
         removeUnusedImports()
-    
+
         // use the eclipse formatting with the one provided with the project
         eclipse().configFile(new File(rootProject.projectDir, 'spotless-formatting.xml'))
 
-		target 'src/**/*.java'    
+        target 'src/**/*.java'	
         // ignore generated code
         targetExclude '**/build/generated/**/*.java'
         targetExclude '**/build/generated-src/**/*.java'
@@ -50,8 +50,8 @@ spotless {
 }
 
 spotlessJava {
-	// declaring explicit dependencies
-	dependsOn 'compileJava', 'compileTestJava', 'processTestResources'
+    // declaring explicit dependencies
+    dependsOn 'compileJava', 'compileTestJava', 'processTestResources'
 }
 
 spotlessJavaCheck { 
@@ -71,6 +71,12 @@ task spotlessErrorMessage {
 
 tasks.register('checkCodeStyle') {
     group = 'verification'
-    description = 'Execute spotless and checkstyle to ensure code and javadoc formatting'
+    description = 'Execute spotless check and checkstyle to ensure code and javadoc formatting'
     dependsOn 'spotlessCheck', 'checkstyleMain', 'checkstyleTest'
+}
+
+tasks.register('applyCodeStyle') {
+    group = 'verification'
+    description = 'Execute spotless apply and checkstyle to apply code and javadoc formatting'
+    dependsOn 'spotlessApply', 'checkstyleMain', 'checkstyleTest'
 }
