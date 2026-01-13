@@ -1,230 +1,230 @@
 > Program-wide fixpoint
 | > Program-wide fixpoint iteration 1
 | | > Semantics of #TOP#
-| | L [completed in 2ms 804211ns]
+| | L [completed in 6ms 287232ns]
 | | > Semantics of this
-| | L [completed in 660846ns]
+| | L [completed in 599280ns]
 | | > Fixpoint of untyped tests::main(tests*)
 | | | > Semantics of a = new A()
 | | | | > Semantics of new A()
 | | | | | > Fixpoint of untyped A::A(A*)
 | | | | | | > Semantics of i1 = 0
 | | | | | | | > Semantics of 0
-| | | | | | | L [completed in 200090ns]
+| | | | | | | L [completed in 95663ns]
 | | | | | | | > Semantics of i1
-| | | | | | | L [completed in 125516ns]
-| | | | | | L [completed in 1ms 42408ns]
+| | | | | | | L [completed in 74297ns]
+| | | | | | L [completed in 387392ns]
 | | | | | | > Traversal of [ i1 = 0 ] ---> [ ret ]
-| | | | | | L [completed in 1ms 498144ns]
+| | | | | | L [completed in 1ms 383728ns]
 | | | | | | > Semantics of ret
-| | | | | | L [completed in 41365ns]
-| | | | | L [completed in 3ms 380199ns]
-| | | | L [completed in 57ms 123135ns]
+| | | | | | L [completed in 375145ns]
+| | | | | L [completed in 3ms 724059ns]
+| | | | L [completed in 51ms 336635ns]
 | | | | > Semantics of a
-| | | | L [completed in 80517ns]
-| | | L [completed in 57ms 492548ns]
+| | | | L [completed in 59735ns]
+| | | L [completed in 51ms 563528ns]
 | | | > Traversal of [ a = new A() ] ---> [ one = getPositive(a, getOne(a)) ]
-| | | L [completed in 193716ns]
+| | | L [completed in 136249ns]
 | | | > Semantics of one = getPositive(a, getOne(a))
 | | | | > Semantics of getPositive(a, getOne(a))
 | | | | | > Semantics of a
-| | | | | L [completed in 48217ns]
+| | | | | L [completed in 1ms 17082ns]
 | | | | | > Semantics of getOne(a)
 | | | | | | > Semantics of a
-| | | | | | L [completed in 21107ns]
+| | | | | | L [completed in 148945ns]
 | | | | | | > Fixpoint of untyped A::getOne(A*)
 | | | | | | | > Semantics of rec = new tests()
 | | | | | | | | > Semantics of new tests()
-| | | | | | | | L [completed in 1ms 220834ns]
+| | | | | | | | L [completed in 2ms 979686ns]
 | | | | | | | | > Semantics of rec
-| | | | | | | | L [completed in 33959ns]
-| | | | | | | L [completed in 1ms 454681ns]
+| | | | | | | | L [completed in 135201ns]
+| | | | | | | L [completed in 3ms 744786ns]
 | | | | | | | > Traversal of [ rec = new tests() ] ---> [ x = open(rec) ]
-| | | | | | | L [completed in 160316ns]
+| | | | | | | L [completed in 491198ns]
 | | | | | | | > Semantics of x = open(rec)
 | | | | | | | | > Semantics of open(rec)
 | | | | | | | | | > Semantics of rec
-| | | | | | | | | L [completed in 28717ns]
-| | | | | | | | L [completed in 364741ns]
+| | | | | | | | | L [completed in 43580ns]
+| | | | | | | | L [completed in 625787ns]
 | | | | | | | | > Semantics of x
-| | | | | | | | L [completed in 24679ns]
-| | | | | | | L [completed in 632792ns]
+| | | | | | | | L [completed in 26589ns]
+| | | | | | | L [completed in 2ms 767522ns]
 | | | | | | | > Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
-| | | | | | | L [completed in 113393ns]
+| | | | | | | L [completed in 305409ns]
 | | | | | | | > Semantics of <(x, 10)
 | | | | | | | | > Semantics of x
-| | | | | | | | L [completed in 39307ns]
+| | | | | | | | L [completed in 145429ns]
 | | | | | | | | > Semantics of 10
-| | | | | | | | L [completed in 10181ns]
-| | | | | | | L [completed in 5ms 282170ns]
+| | | | | | | | L [completed in 13119ns]
+| | | | | | | L [completed in 3ms 796048ns]
 | | | | | | | > Traversal of [ <(x, 10) ] -T-> [ x = +(x, 1) ]
-| | | | | | | L [completed in 6ms 998888ns]
+| | | | | | | L [completed in 5ms 390103ns]
 | | | | | | | > Semantics of x = +(x, 1)
 | | | | | | | | > Semantics of +(x, 1)
 | | | | | | | | | > Semantics of x
-| | | | | | | | | L [completed in 57560ns]
+| | | | | | | | | L [completed in 118970ns]
 | | | | | | | | | > Semantics of 1
-| | | | | | | | | L [completed in 11095ns]
-| | | | | | | | L [completed in 2ms 706945ns]
+| | | | | | | | | L [completed in 20876ns]
+| | | | | | | | L [completed in 5ms 356783ns]
 | | | | | | | | > Semantics of x
-| | | | | | | | L [completed in 44903ns]
-| | | | | | | L [completed in 4ms 302944ns]
-| | | | | | | > Traversal of [ x = +(x, 1) ] ---> [ <(x, 10) ]
-| | | | | | | L [completed in 59082ns]
+| | | | | | | | L [completed in 112857ns]
+| | | | | | | L [completed in 8ms 933656ns]
 | | | | | | | > Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
-| | | | | | | L [completed in 58492ns]
+| | | | | | | L [completed in 127443ns]
+| | | | | | | > Traversal of [ x = +(x, 1) ] ---> [ <(x, 10) ]
+| | | | | | | L [completed in 78305ns]
 | | | | | | | > Semantics of <(x, 10)
 | | | | | | | | > Semantics of x
-| | | | | | | | L [completed in 82521ns]
+| | | | | | | | L [completed in 313276ns]
 | | | | | | | | > Semantics of 10
-| | | | | | | | L [completed in 13739ns]
-| | | | | | | L [completed in 375163ns]
+| | | | | | | | L [completed in 54113ns]
+| | | | | | | L [completed in 1ms 103249ns]
 | | | | | | | > Traversal of [ <(x, 10) ] -F-> [ return 1 ]
-| | | | | | | L [completed in 947394ns]
+| | | | | | | L [completed in 2ms 905133ns]
 | | | | | | | > Semantics of return 1
 | | | | | | | | > Semantics of 1
-| | | | | | | | L [completed in 14635ns]
-| | | | | | | L [completed in 322020ns]
-| | | | | | L [completed in 25ms 575665ns]
-| | | | | L [completed in 28ms 879706ns]
+| | | | | | | | L [completed in 45637ns]
+| | | | | | | L [completed in 851132ns]
+| | | | | | L [completed in 39ms 26179ns]
+| | | | | L [completed in 42ms 428606ns]
 | | | | | > Fixpoint of untyped A::getPositive(A*, untyped)
 | | | | | | > Semantics of <=(i, 0)
 | | | | | | | > Semantics of i
-| | | | | | | L [completed in 49158ns]
+| | | | | | | L [completed in 34159ns]
 | | | | | | | > Semantics of 0
-| | | | | | | L [completed in 10192ns]
-| | | | | | L [completed in 1ms 949629ns]
+| | | | | | | L [completed in 9738ns]
+| | | | | | L [completed in 1ms 760991ns]
 | | | | | | > Traversal of [ <=(i, 0) ] -T-> [ i = 1 ]
-| | | | | | L [completed in 3ms 259163ns]
+| | | | | | L [completed in 325238ns]
 | | | | | | > Semantics of i = 1
 | | | | | | | > Semantics of 1
-| | | | | | | L [completed in 41267ns]
+| | | | | | | L [completed in 15235ns]
 | | | | | | | > Semantics of i
-| | | | | | | L [completed in 35690ns]
-| | | | | | L [completed in 163849ns]
+| | | | | | | L [completed in 26722ns]
+| | | | | | L [completed in 94896ns]
 | | | | | | > Traversal of [ <=(i, 0) ] -F-> [ i = 10 ]
-| | | | | | L [completed in 259115ns]
+| | | | | | L [completed in 201036ns]
 | | | | | | > Semantics of i = 10
 | | | | | | | > Semantics of 10
-| | | | | | | L [completed in 12924ns]
+| | | | | | | L [completed in 11050ns]
 | | | | | | | > Semantics of i
-| | | | | | | L [completed in 24434ns]
-| | | | | | L [completed in 189974ns]
-| | | | | | > Traversal of [ i = 10 ] ---> [ return i ]
-| | | | | | L [completed in 58274ns]
+| | | | | | | L [completed in 21587ns]
+| | | | | | L [completed in 195959ns]
 | | | | | | > Traversal of [ i = 1 ] ---> [ return i ]
-| | | | | | L [completed in 36924ns]
+| | | | | | L [completed in 51982ns]
+| | | | | | > Traversal of [ i = 10 ] ---> [ return i ]
+| | | | | | L [completed in 46272ns]
 | | | | | | > Semantics of return i
 | | | | | | | > Semantics of i
-| | | | | | | L [completed in 29900ns]
-| | | | | | L [completed in 131156ns]
-| | | | | L [completed in 8ms 170079ns]
-| | | | L [completed in 40ms 162362ns]
+| | | | | | | L [completed in 36148ns]
+| | | | | | L [completed in 138675ns]
+| | | | | L [completed in 3ms 709063ns]
+| | | | L [completed in 52ms 60049ns]
 | | | | > Semantics of one
-| | | | L [completed in 122549ns]
-| | | L [completed in 40ms 785635ns]
+| | | | L [completed in 76965ns]
+| | | L [completed in 52ms 621489ns]
 | | | > Traversal of [ one = getPositive(a, getOne(a)) ] ---> [ positive = identity(a, one) ]
-| | | L [completed in 516535ns]
+| | | L [completed in 559742ns]
 | | | > Semantics of positive = identity(a, one)
 | | | | > Semantics of identity(a, one)
 | | | | | > Semantics of a
-| | | | | L [completed in 148354ns]
+| | | | | L [completed in 149333ns]
 | | | | | > Semantics of one
-| | | | | L [completed in 46999ns]
+| | | | | L [completed in 63659ns]
 | | | | | > Fixpoint of untyped A::identity(A*, untyped)
 | | | | | | > Semantics of i3 = 1
 | | | | | | | > Semantics of 1
-| | | | | | | L [completed in 12924ns]
+| | | | | | | L [completed in 30081ns]
 | | | | | | | > Semantics of i3
-| | | | | | | L [completed in 26534ns]
-| | | | | | L [completed in 132825ns]
+| | | | | | | L [completed in 39020ns]
+| | | | | | L [completed in 386532ns]
 | | | | | | > Traversal of [ i3 = 1 ] ---> [ return i ]
-| | | | | | L [completed in 106558ns]
+| | | | | | L [completed in 81314ns]
 | | | | | | > Semantics of return i
 | | | | | | | > Semantics of i
-| | | | | | | L [completed in 23383ns]
-| | | | | | L [completed in 100896ns]
-| | | | | L [completed in 571283ns]
-| | | | L [completed in 5ms 934848ns]
+| | | | | | | L [completed in 43829ns]
+| | | | | | L [completed in 159153ns]
+| | | | | L [completed in 1ms 4257ns]
+| | | | L [completed in 5ms 287223ns]
 | | | | > Semantics of positive
-| | | | L [completed in 23453ns]
-| | | L [completed in 6ms 61971ns]
+| | | | L [completed in 26233ns]
+| | | L [completed in 5ms 458327ns]
 | | | > Traversal of [ positive = identity(a, one) ] ---> [ minusone = -1 ]
-| | | L [completed in 62310ns]
+| | | L [completed in 97991ns]
 | | | > Semantics of minusone = -1
 | | | | > Semantics of -1
-| | | | L [completed in 8691ns]
+| | | | L [completed in 11519ns]
 | | | | > Semantics of minusone
-| | | | L [completed in 18781ns]
-| | | L [completed in 121733ns]
+| | | | L [completed in 22313ns]
+| | | L [completed in 165190ns]
 | | | > Traversal of [ minusone = -1 ] ---> [ negative = identity(a, minusone) ]
-| | | L [completed in 36136ns]
+| | | L [completed in 79379ns]
 | | | > Semantics of negative = identity(a, minusone)
 | | | | > Semantics of identity(a, minusone)
 | | | | | > Semantics of a
-| | | | | L [completed in 18492ns]
+| | | | | L [completed in 23380ns]
 | | | | | > Semantics of minusone
-| | | | | L [completed in 14844ns]
+| | | | | L [completed in 19773ns]
 | | | | | > Fixpoint of untyped A::identity(A*, untyped)
 | | | | | | > Semantics of i3 = 1
 | | | | | | | > Semantics of 1
-| | | | | | | L [completed in 10942ns]
+| | | | | | | L [completed in 39457ns]
 | | | | | | | > Semantics of i3
-| | | | | | | L [completed in 24903ns]
-| | | | | | L [completed in 344120ns]
+| | | | | | | L [completed in 75106ns]
+| | | | | | L [completed in 474936ns]
 | | | | | | > Traversal of [ i3 = 1 ] ---> [ return i ]
-| | | | | | L [completed in 97755ns]
+| | | | | | L [completed in 83068ns]
 | | | | | | > Semantics of return i
 | | | | | | | > Semantics of i
-| | | | | | | L [completed in 53966ns]
-| | | | | | L [completed in 228322ns]
-| | | | | L [completed in 954323ns]
-| | | | L [completed in 3ms 705196ns]
+| | | | | | | L [completed in 32479ns]
+| | | | | | L [completed in 170806ns]
+| | | | | L [completed in 1ms 206339ns]
+| | | | L [completed in 3ms 584481ns]
 | | | | > Semantics of negative
-| | | | L [completed in 343651ns]
-| | | L [completed in 4ms 616138ns]
+| | | | L [completed in 31309ns]
+| | | L [completed in 3ms 714330ns]
 | | | > Traversal of [ negative = identity(a, minusone) ] ---> [ top = helper(this, one, a) ]
-| | | L [completed in 297388ns]
+| | | L [completed in 90781ns]
 | | | > Semantics of top = helper(this, one, a)
 | | | | > Semantics of helper(this, one, a)
 | | | | | > Semantics of this
-| | | | | L [completed in 174131ns]
+| | | | | L [completed in 20408ns]
 | | | | | > Semantics of one
-| | | | | L [completed in 88755ns]
+| | | | | L [completed in 17226ns]
 | | | | | > Semantics of a
-| | | | | L [completed in 209901ns]
+| | | | | L [completed in 20891ns]
 | | | | | > Fixpoint of untyped tests::helper(tests*, untyped, untyped)
 | | | | | | > Semantics of return identity(dispatcher, i)
 | | | | | | | > Semantics of identity(dispatcher, i)
 | | | | | | | | > Semantics of dispatcher
-| | | | | | | | L [completed in 29146ns]
+| | | | | | | | L [completed in 28091ns]
 | | | | | | | | > Semantics of i
-| | | | | | | | L [completed in 17999ns]
+| | | | | | | | L [completed in 19976ns]
 | | | | | | | | > Fixpoint of untyped A::identity(A*, untyped)
 | | | | | | | | | > Semantics of i3 = 1
 | | | | | | | | | | > Semantics of 1
-| | | | | | | | | | L [completed in 16074ns]
+| | | | | | | | | | L [completed in 14100ns]
 | | | | | | | | | | > Semantics of i3
-| | | | | | | | | | L [completed in 37229ns]
-| | | | | | | | | L [completed in 174439ns]
+| | | | | | | | | | L [completed in 25297ns]
+| | | | | | | | | L [completed in 136085ns]
 | | | | | | | | | > Traversal of [ i3 = 1 ] ---> [ return i ]
-| | | | | | | | | L [completed in 54511ns]
+| | | | | | | | | L [completed in 120351ns]
 | | | | | | | | | > Semantics of return i
 | | | | | | | | | | > Semantics of i
-| | | | | | | | | | L [completed in 22741ns]
-| | | | | | | | | L [completed in 108109ns]
-| | | | | | | | L [completed in 588470ns]
-| | | | | | | L [completed in 4ms 363712ns]
-| | | | | | L [completed in 4ms 739994ns]
-| | | | | L [completed in 5ms 131797ns]
-| | | | L [completed in 8ms 679902ns]
+| | | | | | | | | | L [completed in 21671ns]
+| | | | | | | | | L [completed in 100564ns]
+| | | | | | | | L [completed in 557193ns]
+| | | | | | | L [completed in 2ms 362079ns]
+| | | | | | L [completed in 2ms 485210ns]
+| | | | | L [completed in 2ms 619635ns]
+| | | | L [completed in 4ms 466567ns]
 | | | | > Semantics of top
-| | | | L [completed in 55112ns]
-| | | L [completed in 8ms 918373ns]
+| | | | L [completed in 25693ns]
+| | | L [completed in 4ms 567240ns]
 | | | > Traversal of [ top = helper(this, one, a) ] ---> [ ret ]
-| | | L [completed in 126742ns]
+| | | L [completed in 72293ns]
 | | | > Semantics of ret
-| | | L [completed in 16212ns]
-| | L [completed in 124ms 625267ns]
-| L [completed in 143ms 434409ns]
-L [completed in 144ms 556489ns]
+| | | L [completed in 9182ns]
+| | L [completed in 124ms 621682ns]
+| L [completed in 151ms 357018ns]
+L [completed in 152ms 401726ns]
