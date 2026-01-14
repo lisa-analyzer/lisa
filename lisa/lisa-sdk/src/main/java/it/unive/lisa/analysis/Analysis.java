@@ -1,6 +1,26 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.AnalysisState.Error;
+import it.unive.lisa.analysis.events.AnalysisAssignEnd;
+import it.unive.lisa.analysis.events.AnalysisAssignStart;
+import it.unive.lisa.analysis.events.AnalysisAssumeEnd;
+import it.unive.lisa.analysis.events.AnalysisAssumeStart;
+import it.unive.lisa.analysis.events.AnalysisErrorsToExecEnd;
+import it.unive.lisa.analysis.events.AnalysisErrorsToExecStart;
+import it.unive.lisa.analysis.events.AnalysisExecToErrorEnd;
+import it.unive.lisa.analysis.events.AnalysisExecToErrorStart;
+import it.unive.lisa.analysis.events.AnalysisExecToHaltEnd;
+import it.unive.lisa.analysis.events.AnalysisExecToHaltStart;
+import it.unive.lisa.analysis.events.AnalysisOnCallReturnEnd;
+import it.unive.lisa.analysis.events.AnalysisOnCallReturnStart;
+import it.unive.lisa.analysis.events.AnalysisRemoveCaughtEnd;
+import it.unive.lisa.analysis.events.AnalysisRemoveCaughtStart;
+import it.unive.lisa.analysis.events.AnalysisSatisfiesEnd;
+import it.unive.lisa.analysis.events.AnalysisSatisfiesStart;
+import it.unive.lisa.analysis.events.AnalysisSmallStepEnd;
+import it.unive.lisa.analysis.events.AnalysisSmallStepStart;
+import it.unive.lisa.analysis.events.AnalysisTransferThrowersEnd;
+import it.unive.lisa.analysis.events.AnalysisTransferThrowersStart;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.GenericSetLattice;
 import it.unive.lisa.analysis.lattices.Satisfiability;
@@ -112,8 +132,19 @@ public class Analysis<
 			SymbolicExpression value,
 			ProgramPoint pp)
 			throws SemanticException {
+		if (events != null)
+			events.post(new AnalysisAssignStart<>(state, id, value));
+
 		A s = domain.assign(state.getExecutionState(), id, value, pp);
-		return state.withExecution(new ProgramState<>(s, new ExpressionSet(id), state.getExecutionInformation()));
+		AnalysisState<A> res = state.withExecution(new ProgramState<>(
+				s,
+				new ExpressionSet(id),
+				state.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisAssignEnd<>(state, res, id, value));
+
+		return res;
 	}
 
 	/**
@@ -141,6 +172,9 @@ public class Analysis<
 		if (id instanceof Identifier)
 			return assign(state, (Identifier) id, expression, pp);
 
+		if (events != null)
+			events.post(new AnalysisAssignStart<>(state, id, expression));
+
 		A s = state.getExecutionState().bottom();
 		AnalysisState<A> sem = smallStepSemantics(state, id, pp);
 		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
@@ -150,7 +184,16 @@ public class Analysis<
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
 				s = s.lub(domain.assign(sem.getExecutionState(), (Identifier) i, expression, pp));
-		return state.withExecution(new ProgramState<>(s, rewritten, state.getExecutionInformation()));
+
+		AnalysisState<A> res = state.withExecution(new ProgramState<>(
+				s,
+				rewritten,
+				state.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisAssignEnd<>(state, res, id, expression));
+
+		return res;
 	}
 
 	@Override
@@ -159,11 +202,19 @@ public class Analysis<
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
+		if (events != null)
+			events.post(new AnalysisSmallStepStart<>(state, expression));
+
 		A s = domain.smallStepSemantics(state.getExecutionState(), expression, pp);
-		return state.withExecution(new ProgramState<>(
+		AnalysisState<A> res = state.withExecution(new ProgramState<>(
 				s,
 				new ExpressionSet(expression),
 				state.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisSmallStepEnd<>(state, res, expression));
+
+		return res;
 	}
 
 	@Override
@@ -173,14 +224,23 @@ public class Analysis<
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException {
+		if (events != null)
+			events.post(new AnalysisAssumeStart<>(state, expression));
+
 		A assume = domain.assume(state.getExecutionState(), expression, src, dest);
+		AnalysisState<A> res;
 		if (assume.isBottom())
-			return state.bottomExecution();
-		return state.withExecution(
-				new ProgramState<>(
-						assume,
-						state.getExecutionExpressions(),
-						state.getExecutionInformation()));
+			res = state.bottomExecution();
+		else
+			res = state.withExecution(new ProgramState<>(
+					assume,
+					state.getExecutionExpressions(),
+					state.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisAssumeEnd<>(state, res, expression));
+
+		return res;
 	}
 
 	@Override
@@ -189,7 +249,15 @@ public class Analysis<
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
-		return domain.satisfies(state.getExecutionState(), expression, pp);
+		if (events != null)
+			events.post(new AnalysisSatisfiesStart<>(state, expression));
+
+		Satisfiability sat = domain.satisfies(state.getExecutionState(), expression, pp);
+
+		if (events != null)
+			events.post(new AnalysisSatisfiesEnd<>(state, sat, expression));
+
+		return sat;
 	}
 
 	/**
@@ -419,12 +487,21 @@ public class Analysis<
 			throws SemanticException {
 		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
 			return state;
+
+		if (events != null)
+			events.post(new AnalysisExecToErrorStart<>(state, exception));
+
 		AnalysisState<A> result = state.bottomExecution();
 
 		if (shouldSmashError == null || !shouldSmashError.test(exception.getType()))
-			return result.addError(exception, state.getExecution());
+			result = result.addError(exception, state.getExecution());
+		else
+			result = result.addSmashedError(exception, state.getExecution());
 
-		return result.addSmashedError(exception, state.getExecution());
+		if (events != null)
+			events.post(new AnalysisExecToErrorEnd<>(state, result, exception));
+
+		return result;
 	}
 
 	/**
@@ -460,6 +537,9 @@ public class Analysis<
 			throws SemanticException {
 		if (state.isBottom() || state.isTop())
 			return state;
+
+		if (events != null)
+			events.post(new AnalysisErrorsToExecStart<>(state, protectedBlock, targets, excluded, variable));
 
 		Type varType = variable == null ? null : variable.getStaticType();
 		ProgramState<A> result = state.getExecution().bottom();
@@ -502,11 +582,17 @@ public class Analysis<
 				excs.add(e);
 		}
 
-		if (result.isBottom())
+		if (result.isBottom()) {
 			// nothing to catch, result should be bottom
 			// we put the whole state to bottom here
 			// since the catch is unreachable
-			return state.bottom();
+			AnalysisState<A> bottom = state.bottom();
+
+			if (events != null)
+				events.post(new AnalysisErrorsToExecEnd<>(state, bottom, protectedBlock, targets, excluded, variable));
+
+			return bottom;
+		}
 
 		A start = result.getState();
 		A moved = start;
@@ -522,10 +608,9 @@ public class Analysis<
 			moved = assigned.forgetIdentifiers(
 					toForget,
 					variable);
-			if (moved.isBottom()) {
+			if (moved.isBottom())
 				// no exceptions have been assigned to the variable
 				moved = domain.assign(start, target, new PushAny(varType, variable.getLocation()), variable);
-			}
 		} else
 			moved = moved.forgetIdentifiers(toForget, protectedBlock.getStart());
 
@@ -535,7 +620,12 @@ public class Analysis<
 		// no uncaught exceptions should remain
 		// in the resulting state
 		// since they are not caught by this block
-		return state.removeAllErrors(false).withExecution(result);
+		AnalysisState<A> res = state.removeAllErrors(false).withExecution(result);
+
+		if (events != null)
+			events.post(new AnalysisErrorsToExecEnd<>(state, res, protectedBlock, targets, excluded, variable));
+
+		return res;
 	}
 
 	/**
@@ -560,6 +650,9 @@ public class Analysis<
 			throws SemanticException {
 		if (state.isBottom() || state.isTop())
 			return state;
+
+		if (events != null)
+			events.post(new AnalysisTransferThrowersStart<>(state, target, origin));
 
 		if (target instanceof Call)
 			target = ((Call) target).getSource();
@@ -598,10 +691,15 @@ public class Analysis<
 				}
 			}
 
-		return state.removeErrors(oldErrors)
+		AnalysisState<A> res = state.removeErrors(oldErrors)
 				.addErrors(newErrors)
 				.removeSmashedErrors(toRemove)
 				.addSmashedErrors(toAdd, state.getSmashedErrorsState());
+
+		if (events != null)
+			events.post(new AnalysisTransferThrowersEnd<>(state, res, target, origin));
+
+		return res;
 	}
 
 	/**
@@ -629,6 +727,9 @@ public class Analysis<
 		if (caught.isEmpty())
 			return state;
 
+		if (events != null)
+			events.post(new AnalysisRemoveCaughtStart<>(state, source));
+
 		Predicate<Type> isCaught = t -> caught.stream().anyMatch(target -> t.canBeAssignedTo(target.getLeft()));
 		BiPredicate<Statement, ProtectedBlock> aux = (
 				st,
@@ -654,7 +755,12 @@ public class Analysis<
 					caughtSmashedTypes.put(ex.getKey(), caughtThrowers);
 			}
 
-		return cleaned.removeSmashedErrors(caughtSmashedTypes);
+		AnalysisState<A> res = cleaned.removeSmashedErrors(caughtSmashedTypes);
+
+		if (events != null)
+			events.post(new AnalysisRemoveCaughtEnd<>(state, res, source));
+
+		return res;
 	}
 
 	/**
@@ -673,8 +779,17 @@ public class Analysis<
 			throws SemanticException {
 		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
 			return state;
+
+		if (events != null)
+			events.post(new AnalysisExecToHaltStart<>(state));
+
 		ProgramState<A> halt = state.getHalt().lub(state.getExecution());
-		return state.bottomExecution().withHalt(halt);
+		AnalysisState<A> res = state.bottomExecution().withHalt(halt);
+
+		if (events != null)
+			events.post(new AnalysisExecToHaltEnd<>(state, res));
+
+		return res;
 	}
 
 	@Override
@@ -683,7 +798,10 @@ public class Analysis<
 			AnalysisState<A> callres,
 			ProgramPoint call)
 			throws SemanticException {
-		return callres.withExecution(
+		if (events != null)
+			events.post(new AnalysisOnCallReturnStart<>(entryState, callres, call));
+
+		AnalysisState<A> res = callres.withExecution(
 				new ProgramState<>(
 						domain.onCallReturn(
 								entryState.getExecutionState(),
@@ -691,6 +809,11 @@ public class Analysis<
 								call),
 						callres.getExecutionExpressions(),
 						callres.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisOnCallReturnEnd<>(entryState, callres, res, call));
+
+		return res;
 	}
 
 }

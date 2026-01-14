@@ -1036,8 +1036,6 @@ public class ResultComparer {
 			String lineR;
 			int lineNum = 1;
 			while ((lineL = l.readLine()) != null & (lineR = r.readLine()) != null) {
-				lineL = lineL.replaceFirst("L \\[completed in [^]]+\\]", "");
-				lineR = lineR.replaceFirst("L \\[completed in [^]]+\\]", "");
 				if (!lineL.equals(lineR)) {
 					diffFound = true;
 					fileDiff(

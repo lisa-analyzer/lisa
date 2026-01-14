@@ -1,230 +1,239 @@
-> Program-wide fixpoint
-| > Program-wide fixpoint iteration 1
-| | > Semantics of #TOP#
-| | L [completed in 6ms 287232ns]
-| | > Semantics of this
-| | L [completed in 599280ns]
-| | > Fixpoint of untyped tests::main(tests*)
-| | | > Semantics of a = new A()
-| | | | > Semantics of new A()
-| | | | | > Fixpoint of untyped A::A(A*)
-| | | | | | > Semantics of i1 = 0
-| | | | | | | > Semantics of 0
-| | | | | | | L [completed in 95663ns]
-| | | | | | | > Semantics of i1
-| | | | | | | L [completed in 74297ns]
-| | | | | | L [completed in 387392ns]
-| | | | | | > Traversal of [ i1 = 0 ] ---> [ ret ]
-| | | | | | L [completed in 1ms 383728ns]
-| | | | | | > Semantics of ret
-| | | | | | L [completed in 375145ns]
-| | | | | L [completed in 3ms 724059ns]
-| | | | L [completed in 51ms 336635ns]
-| | | | > Semantics of a
-| | | | L [completed in 59735ns]
-| | | L [completed in 51ms 563528ns]
-| | | > Traversal of [ a = new A() ] ---> [ one = getPositive(a, getOne(a)) ]
-| | | L [completed in 136249ns]
-| | | > Semantics of one = getPositive(a, getOne(a))
-| | | | > Semantics of getPositive(a, getOne(a))
-| | | | | > Semantics of a
-| | | | | L [completed in 1ms 17082ns]
-| | | | | > Semantics of getOne(a)
-| | | | | | > Semantics of a
-| | | | | | L [completed in 148945ns]
-| | | | | | > Fixpoint of untyped A::getOne(A*)
-| | | | | | | > Semantics of rec = new tests()
-| | | | | | | | > Semantics of new tests()
-| | | | | | | | L [completed in 2ms 979686ns]
-| | | | | | | | > Semantics of rec
-| | | | | | | | L [completed in 135201ns]
-| | | | | | | L [completed in 3ms 744786ns]
-| | | | | | | > Traversal of [ rec = new tests() ] ---> [ x = open(rec) ]
-| | | | | | | L [completed in 491198ns]
-| | | | | | | > Semantics of x = open(rec)
-| | | | | | | | > Semantics of open(rec)
-| | | | | | | | | > Semantics of rec
-| | | | | | | | | L [completed in 43580ns]
-| | | | | | | | L [completed in 625787ns]
-| | | | | | | | > Semantics of x
-| | | | | | | | L [completed in 26589ns]
-| | | | | | | L [completed in 2ms 767522ns]
-| | | | | | | > Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
-| | | | | | | L [completed in 305409ns]
-| | | | | | | > Semantics of <(x, 10)
-| | | | | | | | > Semantics of x
-| | | | | | | | L [completed in 145429ns]
-| | | | | | | | > Semantics of 10
-| | | | | | | | L [completed in 13119ns]
-| | | | | | | L [completed in 3ms 796048ns]
-| | | | | | | > Traversal of [ <(x, 10) ] -T-> [ x = +(x, 1) ]
-| | | | | | | L [completed in 5ms 390103ns]
-| | | | | | | > Semantics of x = +(x, 1)
-| | | | | | | | > Semantics of +(x, 1)
-| | | | | | | | | > Semantics of x
-| | | | | | | | | L [completed in 118970ns]
-| | | | | | | | | > Semantics of 1
-| | | | | | | | | L [completed in 20876ns]
-| | | | | | | | L [completed in 5ms 356783ns]
-| | | | | | | | > Semantics of x
-| | | | | | | | L [completed in 112857ns]
-| | | | | | | L [completed in 8ms 933656ns]
-| | | | | | | > Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
-| | | | | | | L [completed in 127443ns]
-| | | | | | | > Traversal of [ x = +(x, 1) ] ---> [ <(x, 10) ]
-| | | | | | | L [completed in 78305ns]
-| | | | | | | > Semantics of <(x, 10)
-| | | | | | | | > Semantics of x
-| | | | | | | | L [completed in 313276ns]
-| | | | | | | | > Semantics of 10
-| | | | | | | | L [completed in 54113ns]
-| | | | | | | L [completed in 1ms 103249ns]
-| | | | | | | > Traversal of [ <(x, 10) ] -F-> [ return 1 ]
-| | | | | | | L [completed in 2ms 905133ns]
-| | | | | | | > Semantics of return 1
-| | | | | | | | > Semantics of 1
-| | | | | | | | L [completed in 45637ns]
-| | | | | | | L [completed in 851132ns]
-| | | | | | L [completed in 39ms 26179ns]
-| | | | | L [completed in 42ms 428606ns]
-| | | | | > Fixpoint of untyped A::getPositive(A*, untyped)
-| | | | | | > Semantics of <=(i, 0)
-| | | | | | | > Semantics of i
-| | | | | | | L [completed in 34159ns]
-| | | | | | | > Semantics of 0
-| | | | | | | L [completed in 9738ns]
-| | | | | | L [completed in 1ms 760991ns]
-| | | | | | > Traversal of [ <=(i, 0) ] -T-> [ i = 1 ]
-| | | | | | L [completed in 325238ns]
-| | | | | | > Semantics of i = 1
-| | | | | | | > Semantics of 1
-| | | | | | | L [completed in 15235ns]
-| | | | | | | > Semantics of i
-| | | | | | | L [completed in 26722ns]
-| | | | | | L [completed in 94896ns]
-| | | | | | > Traversal of [ <=(i, 0) ] -F-> [ i = 10 ]
-| | | | | | L [completed in 201036ns]
-| | | | | | > Semantics of i = 10
-| | | | | | | > Semantics of 10
-| | | | | | | L [completed in 11050ns]
-| | | | | | | > Semantics of i
-| | | | | | | L [completed in 21587ns]
-| | | | | | L [completed in 195959ns]
-| | | | | | > Traversal of [ i = 1 ] ---> [ return i ]
-| | | | | | L [completed in 51982ns]
-| | | | | | > Traversal of [ i = 10 ] ---> [ return i ]
-| | | | | | L [completed in 46272ns]
-| | | | | | > Semantics of return i
-| | | | | | | > Semantics of i
-| | | | | | | L [completed in 36148ns]
-| | | | | | L [completed in 138675ns]
-| | | | | L [completed in 3ms 709063ns]
-| | | | L [completed in 52ms 60049ns]
-| | | | > Semantics of one
-| | | | L [completed in 76965ns]
-| | | L [completed in 52ms 621489ns]
-| | | > Traversal of [ one = getPositive(a, getOne(a)) ] ---> [ positive = identity(a, one) ]
-| | | L [completed in 559742ns]
-| | | > Semantics of positive = identity(a, one)
-| | | | > Semantics of identity(a, one)
-| | | | | > Semantics of a
-| | | | | L [completed in 149333ns]
-| | | | | > Semantics of one
-| | | | | L [completed in 63659ns]
-| | | | | > Fixpoint of untyped A::identity(A*, untyped)
-| | | | | | > Semantics of i3 = 1
-| | | | | | | > Semantics of 1
-| | | | | | | L [completed in 30081ns]
-| | | | | | | > Semantics of i3
-| | | | | | | L [completed in 39020ns]
-| | | | | | L [completed in 386532ns]
-| | | | | | > Traversal of [ i3 = 1 ] ---> [ return i ]
-| | | | | | L [completed in 81314ns]
-| | | | | | > Semantics of return i
-| | | | | | | > Semantics of i
-| | | | | | | L [completed in 43829ns]
-| | | | | | L [completed in 159153ns]
-| | | | | L [completed in 1ms 4257ns]
-| | | | L [completed in 5ms 287223ns]
-| | | | > Semantics of positive
-| | | | L [completed in 26233ns]
-| | | L [completed in 5ms 458327ns]
-| | | > Traversal of [ positive = identity(a, one) ] ---> [ minusone = -1 ]
-| | | L [completed in 97991ns]
-| | | > Semantics of minusone = -1
-| | | | > Semantics of -1
-| | | | L [completed in 11519ns]
-| | | | > Semantics of minusone
-| | | | L [completed in 22313ns]
-| | | L [completed in 165190ns]
-| | | > Traversal of [ minusone = -1 ] ---> [ negative = identity(a, minusone) ]
-| | | L [completed in 79379ns]
-| | | > Semantics of negative = identity(a, minusone)
-| | | | > Semantics of identity(a, minusone)
-| | | | | > Semantics of a
-| | | | | L [completed in 23380ns]
-| | | | | > Semantics of minusone
-| | | | | L [completed in 19773ns]
-| | | | | > Fixpoint of untyped A::identity(A*, untyped)
-| | | | | | > Semantics of i3 = 1
-| | | | | | | > Semantics of 1
-| | | | | | | L [completed in 39457ns]
-| | | | | | | > Semantics of i3
-| | | | | | | L [completed in 75106ns]
-| | | | | | L [completed in 474936ns]
-| | | | | | > Traversal of [ i3 = 1 ] ---> [ return i ]
-| | | | | | L [completed in 83068ns]
-| | | | | | > Semantics of return i
-| | | | | | | > Semantics of i
-| | | | | | | L [completed in 32479ns]
-| | | | | | L [completed in 170806ns]
-| | | | | L [completed in 1ms 206339ns]
-| | | | L [completed in 3ms 584481ns]
-| | | | > Semantics of negative
-| | | | L [completed in 31309ns]
-| | | L [completed in 3ms 714330ns]
-| | | > Traversal of [ negative = identity(a, minusone) ] ---> [ top = helper(this, one, a) ]
-| | | L [completed in 90781ns]
-| | | > Semantics of top = helper(this, one, a)
-| | | | > Semantics of helper(this, one, a)
-| | | | | > Semantics of this
-| | | | | L [completed in 20408ns]
-| | | | | > Semantics of one
-| | | | | L [completed in 17226ns]
-| | | | | > Semantics of a
-| | | | | L [completed in 20891ns]
-| | | | | > Fixpoint of untyped tests::helper(tests*, untyped, untyped)
-| | | | | | > Semantics of return identity(dispatcher, i)
-| | | | | | | > Semantics of identity(dispatcher, i)
-| | | | | | | | > Semantics of dispatcher
-| | | | | | | | L [completed in 28091ns]
-| | | | | | | | > Semantics of i
-| | | | | | | | L [completed in 19976ns]
-| | | | | | | | > Fixpoint of untyped A::identity(A*, untyped)
-| | | | | | | | | > Semantics of i3 = 1
-| | | | | | | | | | > Semantics of 1
-| | | | | | | | | | L [completed in 14100ns]
-| | | | | | | | | | > Semantics of i3
-| | | | | | | | | | L [completed in 25297ns]
-| | | | | | | | | L [completed in 136085ns]
-| | | | | | | | | > Traversal of [ i3 = 1 ] ---> [ return i ]
-| | | | | | | | | L [completed in 120351ns]
-| | | | | | | | | > Semantics of return i
-| | | | | | | | | | > Semantics of i
-| | | | | | | | | | L [completed in 21671ns]
-| | | | | | | | | L [completed in 100564ns]
-| | | | | | | | L [completed in 557193ns]
-| | | | | | | L [completed in 2ms 362079ns]
-| | | | | | L [completed in 2ms 485210ns]
-| | | | | L [completed in 2ms 619635ns]
-| | | | L [completed in 4ms 466567ns]
-| | | | > Semantics of top
-| | | | L [completed in 25693ns]
-| | | L [completed in 4ms 567240ns]
-| | | > Traversal of [ top = helper(this, one, a) ] ---> [ ret ]
-| | | L [completed in 72293ns]
-| | | > Semantics of ret
-| | | L [completed in 9182ns]
-| | L [completed in 124ms 621682ns]
-| L [completed in 151ms 357018ns]
-L [completed in 152ms 401726ns]
+Program-wide fixpoint
+  Program-wide fixpoint iteration 1
+    Semantics of #TOP#
+      Analysis: Small step semantics of PUSHANY
+    Semantics of this
+      Analysis: Small step semantics of this
+    Analysis: Assignment of this to PUSHANY
+    Fixpoint of untyped tests::main(tests*)
+      Semantics of a = new A()
+        Semantics of new A()
+          Analysis: Small step semantics of new A
+          Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
+          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
+          Fixpoint of untyped A::A(A*)
+            Semantics of i1 = 0
+              Semantics of 0
+                Analysis: Small step semantics of 0
+              Semantics of i1
+                Analysis: Small step semantics of i1
+              Analysis: Assignment of i1 to 0
+            Traversal of [ i1 = 0 ] ---> [ ret ]
+            Semantics of ret
+              Analysis: Small step semantics of skip
+          Analysis: Transferring throwers from untyped A::A(A*) [at 'imp-testcases/visualization/visualization.imp':2:4] to [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
+          Analysis: Returning from call [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
+          Analysis: Small step semantics of skip
+        Semantics of a
+          Analysis: Small step semantics of a
+        Analysis: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
+      Traversal of [ a = new A() ] ---> [ one = getPositive(a, getOne(a)) ]
+      Semantics of one = getPositive(a, getOne(a))
+        Semantics of getPositive(a, getOne(a))
+          Semantics of a
+            Analysis: Small step semantics of a
+          Semantics of getOne(a)
+            Semantics of a
+              Analysis: Small step semantics of a
+            Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
+            Fixpoint of untyped A::getOne(A*)
+              Semantics of rec = new tests()
+                Semantics of new tests()
+                  Analysis: Small step semantics of new tests
+                  Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
+                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
+                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
+                Semantics of rec
+                  Analysis: Small step semantics of rec
+                Analysis: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
+              Traversal of [ rec = new tests() ] ---> [ x = open(rec) ]
+              Semantics of x = open(rec)
+                Semantics of open(rec)
+                  Semantics of rec
+                    Analysis: Small step semantics of rec
+                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                Semantics of x
+                  Analysis: Small step semantics of x
+                Analysis: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+              Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
+              Semantics of <(x, 10)
+                Semantics of x
+                  Analysis: Small step semantics of x
+                Semantics of 10
+                  Analysis: Small step semantics of 10
+                Analysis: Small step semantics of x < 10
+              Traversal of [ <(x, 10) ] -T-> [ x = +(x, 1) ]
+                Analysis: Assume of x < 10
+              Semantics of x = +(x, 1)
+                Semantics of +(x, 1)
+                  Semantics of x
+                    Analysis: Small step semantics of x
+                  Semantics of 1
+                    Analysis: Small step semantics of 1
+                  Analysis: Small step semantics of x + 1
+                  Analysis: Small step semantics of x + 1
+                Semantics of x
+                  Analysis: Small step semantics of x
+                Analysis: Assignment of x to x + 1
+              Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
+              Traversal of [ x = +(x, 1) ] ---> [ <(x, 10) ]
+              Semantics of <(x, 10)
+                Semantics of x
+                  Analysis: Small step semantics of x
+                Semantics of 10
+                  Analysis: Small step semantics of 10
+                Analysis: Small step semantics of x < 10
+              Traversal of [ <(x, 10) ] -F-> [ return 1 ]
+                Analysis: Assume of ! x < 10
+              Semantics of return 1
+                Semantics of 1
+                  Analysis: Small step semantics of 1
+                Analysis: Assignment of ret_value@getOne to 1
+            Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
+            Analysis: Transferring throwers from untyped A::getOne(A*) [at 'imp-testcases/visualization/visualization.imp':5:4] to [1 targets] getOne(a)
+            Analysis: Returning from call [1 targets] getOne(a)
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
+          Fixpoint of untyped A::getPositive(A*, untyped)
+            Semantics of <=(i, 0)
+              Semantics of i
+                Analysis: Small step semantics of i
+              Semantics of 0
+                Analysis: Small step semantics of 0
+              Analysis: Small step semantics of i <= 0
+            Traversal of [ <=(i, 0) ] -T-> [ i = 1 ]
+              Analysis: Assume of i <= 0
+            Semantics of i = 1
+              Semantics of 1
+                Analysis: Small step semantics of 1
+              Semantics of i
+                Analysis: Small step semantics of i
+              Analysis: Assignment of i to 1
+            Traversal of [ <=(i, 0) ] -F-> [ i = 10 ]
+              Analysis: Assume of ! i <= 0
+            Semantics of i = 10
+              Semantics of 10
+                Analysis: Small step semantics of 10
+              Semantics of i
+                Analysis: Small step semantics of i
+              Analysis: Assignment of i to 10
+            Traversal of [ i = 1 ] ---> [ return i ]
+            Traversal of [ i = 10 ] ---> [ return i ]
+            Semantics of return i
+              Semantics of i
+                Analysis: Small step semantics of i
+              Analysis: Assignment of ret_value@getPositive to i
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
+          Analysis: Transferring throwers from untyped A::getPositive(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':12:4] to [1 targets] getPositive(a, getOne(a))
+          Analysis: Returning from call [1 targets] getPositive(a, getOne(a))
+        Semantics of one
+          Analysis: Small step semantics of one
+        Analysis: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
+      Traversal of [ one = getPositive(a, getOne(a)) ] ---> [ positive = identity(a, one) ]
+      Semantics of positive = identity(a, one)
+        Semantics of identity(a, one)
+          Semantics of a
+            Analysis: Small step semantics of a
+          Semantics of one
+            Analysis: Small step semantics of one
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
+          Fixpoint of untyped A::identity(A*, untyped)
+            Semantics of i3 = 1
+              Semantics of 1
+                Analysis: Small step semantics of 1
+              Semantics of i3
+                Analysis: Small step semantics of i3
+              Analysis: Assignment of i3 to 1
+            Traversal of [ i3 = 1 ] ---> [ return i ]
+            Semantics of return i
+              Semantics of i
+                Analysis: Small step semantics of i
+              Analysis: Assignment of ret_value@identity to i
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
+          Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to [1 targets] identity(a, one)
+          Analysis: Returning from call [1 targets] identity(a, one)
+        Semantics of positive
+          Analysis: Small step semantics of positive
+        Analysis: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
+      Traversal of [ positive = identity(a, one) ] ---> [ minusone = -1 ]
+      Semantics of minusone = -1
+        Semantics of -1
+          Analysis: Small step semantics of -1
+        Semantics of minusone
+          Analysis: Small step semantics of minusone
+        Analysis: Assignment of minusone to -1
+      Traversal of [ minusone = -1 ] ---> [ negative = identity(a, minusone) ]
+      Semantics of negative = identity(a, minusone)
+        Semantics of identity(a, minusone)
+          Semantics of a
+            Analysis: Small step semantics of a
+          Semantics of minusone
+            Analysis: Small step semantics of minusone
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
+          Fixpoint of untyped A::identity(A*, untyped)
+            Semantics of i3 = 1
+              Semantics of 1
+                Analysis: Small step semantics of 1
+              Semantics of i3
+                Analysis: Small step semantics of i3
+              Analysis: Assignment of i3 to 1
+            Traversal of [ i3 = 1 ] ---> [ return i ]
+            Semantics of return i
+              Semantics of i
+                Analysis: Small step semantics of i
+              Analysis: Assignment of ret_value@identity to i
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
+          Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to [1 targets] identity(a, minusone)
+          Analysis: Returning from call [1 targets] identity(a, minusone)
+        Semantics of negative
+          Analysis: Small step semantics of negative
+        Analysis: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
+      Traversal of [ negative = identity(a, minusone) ] ---> [ top = helper(this, one, a) ]
+      Semantics of top = helper(this, one, a)
+        Semantics of helper(this, one, a)
+          Semantics of this
+            Analysis: Small step semantics of this
+          Semantics of one
+            Analysis: Small step semantics of one
+          Semantics of a
+            Analysis: Small step semantics of a
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
+          Analysis: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
+          Fixpoint of untyped tests::helper(tests*, untyped, untyped)
+            Semantics of return identity(dispatcher, i)
+              Semantics of identity(dispatcher, i)
+                Semantics of dispatcher
+                  Analysis: Small step semantics of dispatcher
+                Semantics of i
+                  Analysis: Small step semantics of i
+                Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
+                Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
+                Fixpoint of untyped A::identity(A*, untyped)
+                  Semantics of i3 = 1
+                    Semantics of 1
+                      Analysis: Small step semantics of 1
+                    Semantics of i3
+                      Analysis: Small step semantics of i3
+                    Analysis: Assignment of i3 to 1
+                  Traversal of [ i3 = 1 ] ---> [ return i ]
+                  Semantics of return i
+                    Semantics of i
+                      Analysis: Small step semantics of i
+                    Analysis: Assignment of ret_value@identity to i
+                Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
+                Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to [1 targets] identity(dispatcher, i)
+                Analysis: Returning from call [1 targets] identity(dispatcher, i)
+              Analysis: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
+          Analysis: Transferring throwers from untyped tests::helper(tests*, untyped, untyped) [at 'imp-testcases/visualization/visualization.imp':37:4] to [1 targets] helper(this, one, a)
+          Analysis: Returning from call [1 targets] helper(this, one, a)
+        Semantics of top
+          Analysis: Small step semantics of top
+        Analysis: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
+      Traversal of [ top = helper(this, one, a) ] ---> [ ret ]
+      Semantics of ret
+        Analysis: Small step semantics of skip

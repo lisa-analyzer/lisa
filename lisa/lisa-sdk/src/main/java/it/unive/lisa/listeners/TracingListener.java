@@ -1,18 +1,19 @@
 package it.unive.lisa.listeners;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.ReportingTool;
+import it.unive.lisa.analysis.events.AnalysisEvent;
 import it.unive.lisa.events.EndEvent;
 import it.unive.lisa.events.Event;
 import it.unive.lisa.events.EventListener;
 import it.unive.lisa.events.StartEvent;
 import it.unive.lisa.interprocedural.events.InterproceduralEvent;
-import it.unive.lisa.logging.TimeFormat;
 import it.unive.lisa.program.cfg.fixpoints.events.FixpointEvent;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-import java.io.BufferedWriter;
-import java.io.IOException;
 
 /**
  * An event listener that traces the start and end of events to a trace file,
@@ -62,14 +63,13 @@ public class TracingListener
 	public void onEvent(
 			Event event,
 			ReportingTool tool) {
-		if (!(event instanceof InterproceduralEvent || event instanceof FixpointEvent))
+		if (!(event instanceof InterproceduralEvent || event instanceof FixpointEvent || event instanceof AnalysisEvent))
 			return;
 
 		try {
 			if (event instanceof StartEvent) {
 				running.push(event);
-				writer.write("| ".repeat(indent));
-				writer.write("> ");
+				writer.write("  ".repeat(indent));
 				writer.write(((StartEvent) event).getTarget());
 				writer.newLine();
 				indent++;
@@ -77,14 +77,7 @@ public class TracingListener
 					writer.flush();
 			} else if (event instanceof EndEvent) {
 				indent--;
-				Event started = running.pop();
-				writer.write("| ".repeat(indent));
-				writer.write("L [completed in "
-						+ TimeFormat.UP_TO_HOURS.format(event.getTimestamp() - started.getTimestamp())
-						+ "]");
-				writer.newLine();
-				if (++writes % 100 == 0)
-					writer.flush();
+				running.pop();
 			}
 		} catch (IOException e) {
 			onError(event, e, tool);
