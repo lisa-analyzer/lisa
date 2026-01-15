@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.lattices;
+package it.unive.lisa.lattices;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.ScopedObject;
@@ -16,20 +16,20 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * An inverse set lattice containing a set of symbolic expressions.
+ * A set lattice containing a set of symbolic expressions.
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class ExpressionInverseSet
+public class ExpressionSet
 		extends
-		InverseSetLattice<ExpressionInverseSet, SymbolicExpression>
+		SetLattice<ExpressionSet, SymbolicExpression>
 		implements
-		ScopedObject<ExpressionInverseSet> {
+		ScopedObject<ExpressionSet> {
 
 	/**
 	 * Builds the empty set lattice element.
 	 */
-	public ExpressionInverseSet() {
+	public ExpressionSet() {
 		this(Collections.emptySet(), false);
 	}
 
@@ -38,7 +38,7 @@ public class ExpressionInverseSet
 	 * 
 	 * @param exp the expression
 	 */
-	public ExpressionInverseSet(
+	public ExpressionSet(
 			SymbolicExpression exp) {
 		this(Collections.singleton(exp), false);
 	}
@@ -48,36 +48,36 @@ public class ExpressionInverseSet
 	 * 
 	 * @param set the set of expression
 	 */
-	public ExpressionInverseSet(
+	public ExpressionSet(
 			Set<SymbolicExpression> set) {
-		this(Collections.unmodifiableSet(set), false);
+		this(set, false);
 	}
 
-	private ExpressionInverseSet(
+	private ExpressionSet(
 			boolean isTop) {
 		this(Collections.emptySet(), isTop);
 	}
 
-	private ExpressionInverseSet(
+	private ExpressionSet(
 			Set<SymbolicExpression> set,
 			boolean isTop) {
 		super(set, isTop);
 	}
 
 	@Override
-	public ExpressionInverseSet top() {
-		return new ExpressionInverseSet(true);
+	public ExpressionSet top() {
+		return new ExpressionSet(true);
 	}
 
 	@Override
-	public ExpressionInverseSet bottom() {
-		return new ExpressionInverseSet();
+	public ExpressionSet bottom() {
+		return new ExpressionSet();
 	}
 
 	@Override
-	public ExpressionInverseSet mk(
+	public ExpressionSet mk(
 			Set<SymbolicExpression> set) {
-		return new ExpressionInverseSet(set);
+		return new ExpressionSet(set);
 	}
 
 	@Override
@@ -97,42 +97,42 @@ public class ExpressionInverseSet
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ExpressionInverseSet other = (ExpressionInverseSet) obj;
+		ExpressionSet other = (ExpressionSet) obj;
 		if (isTop != other.isTop)
 			return false;
 		return true;
 	}
 
 	@Override
-	public ExpressionInverseSet lubAux(
-			ExpressionInverseSet other)
+	public ExpressionSet lubAux(
+			ExpressionSet other)
 			throws SemanticException {
-		Set<SymbolicExpression> lub = new HashSet<>(exceptIds());
-		lub.retainAll(other.exceptIds());
+		Set<SymbolicExpression> lub = new HashSet<>();
 
+		// all non-identifiers expressions are part of the lub
+		elements.stream().filter(Predicate.not(Identifier.class::isInstance)).forEach(lub::add);
+		// common ones will be overwritten
+		other.elements.stream().filter(Predicate.not(Identifier.class::isInstance)).forEach(lub::add);
+
+		// identifiers are added after lubbing the ones with the same name
 		Set<Identifier> idlub = new HashSet<>();
-		CollectionUtilities.meet(
+		CollectionUtilities.join(
 				onlyIds(),
 				other.onlyIds(),
 				idlub,
 				(
 						id1,
 						id2) -> id1.getName().equals(id2.getName()),
-				ExpressionInverseSet::wrapper);
+				ExpressionSet::wrapper);
 		idlub.forEach(lub::add);
 
-		if (lub.isEmpty())
-			return top();
-
-		return new ExpressionInverseSet(lub);
+		return new ExpressionSet(lub);
 	}
 
 	private static Identifier wrapper(
 			Identifier id1,
 			Identifier id2) {
 		try {
-			// we keep using the lub here as it is basically an equality
-			// operator, distinguishing only between weak and strong identifiers
 			return id1.lub(id2);
 		} catch (SemanticException e) {
 			throw new SemanticExceptionWrapper(e);
@@ -146,30 +146,26 @@ public class ExpressionInverseSet
 				.collect(Collectors.toSet());
 	}
 
-	private Collection<SymbolicExpression> exceptIds() {
-		return elements.stream().filter(Predicate.not(Identifier.class::isInstance)).collect(Collectors.toSet());
-	}
-
 	@Override
-	public ExpressionInverseSet pushScope(
+	public ExpressionSet pushScope(
 			ScopeToken token,
 			ProgramPoint pp)
 			throws SemanticException {
 		Set<SymbolicExpression> mapped = new HashSet<>();
 		for (SymbolicExpression exp : elements)
 			mapped.add(exp.pushScope(token, pp));
-		return new ExpressionInverseSet(mapped);
+		return new ExpressionSet(mapped);
 	}
 
 	@Override
-	public ExpressionInverseSet popScope(
+	public ExpressionSet popScope(
 			ScopeToken token,
 			ProgramPoint pp)
 			throws SemanticException {
 		Set<SymbolicExpression> mapped = new HashSet<>();
 		for (SymbolicExpression exp : elements)
 			mapped.add(exp.popScope(token, pp));
-		return new ExpressionInverseSet(mapped);
+		return new ExpressionSet(mapped);
 	}
 
 }

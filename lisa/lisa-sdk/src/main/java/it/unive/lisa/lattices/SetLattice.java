@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.lattices;
+package it.unive.lisa.lattices;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
@@ -11,23 +11,24 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * A generic inverse set lattice containing a set of elements. Lattice
- * operations are the opposite of the {@link SetLattice} ones, namely:
+ * A generic set lattice containing a set of elements. Lattice operations
+ * correspond to standard set operations:
  * <ul>
- * <li>the lub is the set intersection</li>
- * <li>the &le; is the inverse set inclusion</li>
+ * <li>the lub is the set union</li>
+ * <li>the &le; is the set inclusion</li>
+ * <li>...</li>
  * </ul>
  * Widening on instances of this lattice depends on the cardinality of the
  * domain of the underlying elements. The provided implementation behave as the
- * domain is <b>finite</b>, thus invoking the lub. Inverse set lattices defined
- * on infinite domains must implement a coherent widening logic.
+ * domain is <b>finite</b>, thus invoking the lub. Set lattices defined on
+ * infinite domains must implement a coherent widening logic.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <S> the concrete instance of {@link InverseSetLattice}
+ * @param <S> the concrete instance of {@link SetLattice}
  * @param <E> the type of elements of the domain of this lattice
  */
-public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E>
+public abstract class SetLattice<S extends SetLattice<S, E>, E>
 		implements
 		BaseLattice<S>,
 		Iterable<E> {
@@ -35,7 +36,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E>
 	/**
 	 * The set of elements contained in the lattice.
 	 */
-	public Set<E> elements;
+	public final Set<E> elements;
 
 	/**
 	 * Whether or not this is the top or bottom element of the lattice, valid
@@ -50,7 +51,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E>
 	 * @param isTop    whether or not this is the top or bottom element of the
 	 *                     lattice, valid only if the set of elements is empty
 	 */
-	public InverseSetLattice(
+	public SetLattice(
 			Set<E> elements,
 			boolean isTop) {
 		this.elements = elements;
@@ -58,16 +59,16 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E>
 	}
 
 	/**
-	 * Utility for creating a concrete instance of {@link InverseSetLattice}
-	 * given a set. This decouples the instance of set used during computation
-	 * of the elements to put in the lattice from the actual type of set
-	 * underlying the lattice.
+	 * Utility for creating a concrete instance of {@link SetLattice} given a
+	 * set. This decouples the instance of set used during computation of the
+	 * elements to put in the lattice from the actual type of set underlying the
+	 * lattice.
 	 * 
 	 * @param set the set containing the elements that must be included in the
 	 *                lattice instance
 	 * 
-	 * @return a new concrete instance of {@link InverseSetLattice} containing
-	 *             the elements of the given set
+	 * @return a new concrete instance of {@link SetLattice} containing the
+	 *             elements of the given set
 	 */
 	public abstract S mk(
 			Set<E> set);
@@ -77,7 +78,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E>
 			S other)
 			throws SemanticException {
 		Set<E> lub = new HashSet<>(elements);
-		lub.retainAll(other.elements);
+		lub.addAll(other.elements);
 		return mk(lub);
 	}
 
@@ -86,20 +87,25 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E>
 			S other)
 			throws SemanticException {
 		Set<E> glb = new HashSet<>(elements);
-		glb.addAll(other.elements);
+		glb.retainAll(other.elements);
 		return mk(glb);
-	}
-
-	@Override
-	public Iterator<E> iterator() {
-		return elements.iterator();
 	}
 
 	@Override
 	public boolean lessOrEqualAux(
 			S other)
 			throws SemanticException {
-		return elements.containsAll(other.elements);
+		return other.elements.containsAll(elements);
+	}
+
+	@Override
+	public boolean isTop() {
+		return isTop && elements.isEmpty();
+	}
+
+	@Override
+	public boolean isBottom() {
+		return !isTop && elements.isEmpty();
 	}
 
 	/**
@@ -125,13 +131,8 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E>
 	}
 
 	@Override
-	public boolean isTop() {
-		return isTop && elements.isEmpty();
-	}
-
-	@Override
-	public boolean isBottom() {
-		return !isTop && elements.isEmpty();
+	public Iterator<E> iterator() {
+		return this.elements.iterator();
 	}
 
 	@Override
@@ -152,7 +153,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InverseSetLattice<?, ?> other = (InverseSetLattice<?, ?>) obj;
+		SetLattice<?, ?> other = (SetLattice<?, ?>) obj;
 		if (elements == null) {
 			if (other.elements != null)
 				return false;

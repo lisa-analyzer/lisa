@@ -1,9 +1,9 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.GenericMapLattice;
-import it.unive.lisa.analysis.lattices.GenericSetLattice;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.GenericMapLattice;
+import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;

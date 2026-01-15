@@ -2,10 +2,10 @@ package it.unive.lisa.analysis.types;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.type.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.type.NonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.types.Supertype;
 import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.cfg.ProgramPoint;

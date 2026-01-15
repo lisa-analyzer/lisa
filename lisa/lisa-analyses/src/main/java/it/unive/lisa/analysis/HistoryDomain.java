@@ -1,8 +1,8 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.HistoryState;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;

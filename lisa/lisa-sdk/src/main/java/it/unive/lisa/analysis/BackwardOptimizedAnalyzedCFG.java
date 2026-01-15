@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -12,6 +11,7 @@ import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;

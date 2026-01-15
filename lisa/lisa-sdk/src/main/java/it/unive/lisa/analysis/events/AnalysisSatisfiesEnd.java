@@ -2,9 +2,9 @@ package it.unive.lisa.analysis.events;
 
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.events.EndEvent;
 import it.unive.lisa.events.Event;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**

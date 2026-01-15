@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.symbols;
 
 import it.unive.lisa.analysis.FixpointInfo;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.FunctionalLattice;
 import java.util.Map;
 
 /**

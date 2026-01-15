@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.SingleValueLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.lattices.SingleValueLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;

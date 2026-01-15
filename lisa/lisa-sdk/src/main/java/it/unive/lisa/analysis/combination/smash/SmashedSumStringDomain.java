@@ -2,8 +2,8 @@ package it.unive.lisa.analysis.combination.smash;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.util.numeric.IntInterval;
 
 /**

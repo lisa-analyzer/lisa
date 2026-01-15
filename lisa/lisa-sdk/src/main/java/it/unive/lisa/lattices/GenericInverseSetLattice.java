@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.lattices;
+package it.unive.lisa.lattices;
 
 import java.util.Collections;
 import java.util.Set;

@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.nonrelational.heap;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
 import java.util.List;

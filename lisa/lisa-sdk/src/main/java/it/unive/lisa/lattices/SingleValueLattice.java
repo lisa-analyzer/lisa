@@ -1,87 +1,81 @@
-package it.unive.lisa.analysis.lattices;
+package it.unive.lisa.lattices;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.nonrelational.type.TypeValue;
-import it.unive.lisa.analysis.type.TypeLattice;
+import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * A {@link TypeLattice} and {@link TypeValue} with just one non-bottom value.
- * This is useful in analyses where type information is not relevant or when a
- * placeholder is needed. Note that this lattice always models {@link Untyped}
- * as the only possible runtime type.
+ * A {@link ValueLattice} with just one non-bottom value. This is useful in
+ * analyses where value information is not relevant or when a placeholder is
+ * needed.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SingleTypeLattice
+public class SingleValueLattice
 		implements
-		TypeLattice<SingleTypeLattice>,
-		TypeValue<SingleTypeLattice> {
+		ValueLattice<SingleValueLattice> {
 
 	/**
 	 * The singleton instance of this lattice, which is the only non-bottom
 	 * value.
 	 */
-	public static final SingleTypeLattice SINGLETON = new SingleTypeLattice();
+	public static final SingleValueLattice SINGLETON = new SingleValueLattice();
 
 	/**
 	 * The bottom instance of this lattice, which is the only non-top value.
 	 */
-	public static final SingleTypeLattice BOTTOM = new SingleTypeLattice();
+	public static final SingleValueLattice BOTTOM = new SingleValueLattice();
 
-	private SingleTypeLattice() {
+	private SingleValueLattice() {
 	}
 
 	@Override
 	public boolean lessOrEqual(
-			SingleTypeLattice other)
+			SingleValueLattice other)
 			throws SemanticException {
 		return this == BOTTOM || other == SINGLETON;
 	}
 
 	@Override
-	public SingleTypeLattice lub(
-			SingleTypeLattice other)
+	public SingleValueLattice lub(
+			SingleValueLattice other)
 			throws SemanticException {
 		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
 	}
 
 	@Override
-	public SingleTypeLattice upchain(
-			SingleTypeLattice other)
+	public SingleValueLattice upchain(
+			SingleValueLattice other)
 			throws SemanticException {
 		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
 	}
 
 	@Override
-	public SingleTypeLattice downchain(
-			SingleTypeLattice other)
+	public SingleValueLattice downchain(
+			SingleValueLattice other)
 			throws SemanticException {
 		return this == BOTTOM && other == BOTTOM ? BOTTOM : SINGLETON;
 	}
 
 	@Override
-	public SingleTypeLattice glb(
-			SingleTypeLattice other)
+	public SingleValueLattice glb(
+			SingleValueLattice other)
 			throws SemanticException {
 		return this == SINGLETON && other == SINGLETON ? SINGLETON : BOTTOM;
 	}
 
 	@Override
-	public SingleTypeLattice top() {
+	public SingleValueLattice top() {
 		return SINGLETON;
 	}
 
 	@Override
-	public SingleTypeLattice bottom() {
+	public SingleValueLattice bottom() {
 		return BOTTOM;
 	}
 
@@ -93,7 +87,7 @@ public class SingleTypeLattice
 	}
 
 	@Override
-	public SingleTypeLattice pushScope(
+	public SingleValueLattice pushScope(
 			ScopeToken token,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -101,7 +95,7 @@ public class SingleTypeLattice
 	}
 
 	@Override
-	public SingleTypeLattice popScope(
+	public SingleValueLattice popScope(
 			ScopeToken token,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -115,7 +109,7 @@ public class SingleTypeLattice
 	}
 
 	@Override
-	public SingleTypeLattice forgetIdentifier(
+	public SingleValueLattice forgetIdentifier(
 			Identifier id,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -123,7 +117,7 @@ public class SingleTypeLattice
 	}
 
 	@Override
-	public SingleTypeLattice forgetIdentifiers(
+	public SingleValueLattice forgetIdentifiers(
 			Iterable<Identifier> ids,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -131,7 +125,7 @@ public class SingleTypeLattice
 	}
 
 	@Override
-	public SingleTypeLattice forgetIdentifiersIf(
+	public SingleValueLattice forgetIdentifiersIf(
 			Predicate<Identifier> test,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -139,16 +133,11 @@ public class SingleTypeLattice
 	}
 
 	@Override
-	public SingleTypeLattice store(
+	public SingleValueLattice store(
 			Identifier target,
 			Identifier source)
 			throws SemanticException {
 		return this;
-	}
-
-	@Override
-	public Set<Type> getRuntimeTypes() {
-		return Set.of(Untyped.INSTANCE);
 	}
 
 }

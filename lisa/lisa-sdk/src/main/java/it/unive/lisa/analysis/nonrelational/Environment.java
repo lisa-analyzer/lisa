@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticComponent;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;

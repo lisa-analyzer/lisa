@@ -2,9 +2,9 @@ package it.unive.lisa.lattices.string;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.lattices.ExpressionInverseSet;
+import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;

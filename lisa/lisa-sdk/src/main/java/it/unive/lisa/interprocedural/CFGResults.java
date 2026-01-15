@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.FunctionalLattice;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;

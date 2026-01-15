@@ -1,9 +1,9 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.lattices.SingleHeapLattice;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.Satisfiability;
+import it.unive.lisa.lattices.SingleHeapLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;

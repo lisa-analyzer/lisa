@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.Satisfiability;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

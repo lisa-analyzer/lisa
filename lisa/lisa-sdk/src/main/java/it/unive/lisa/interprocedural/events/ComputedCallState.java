@@ -2,8 +2,8 @@ package it.unive.lisa.interprocedural.events;
 
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.events.Event;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
