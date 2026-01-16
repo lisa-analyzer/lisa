@@ -3,7 +3,9 @@ package it.unive.lisa.analysis.events;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.events.EndEvent;
+import it.unive.lisa.events.EvaluationEvent;
 import it.unive.lisa.events.Event;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
@@ -19,7 +21,8 @@ public class AnalysisRemoveCaughtEnd<A extends AbstractLattice<A>>
 		Event
 		implements
 		AnalysisEvent,
-		EndEvent {
+		EndEvent,
+		EvaluationEvent<AnalysisState<A>, AnalysisState<A>> {
 
 	private final AnalysisState<A> state;
 	private final AnalysisState<A> result;
@@ -41,31 +44,19 @@ public class AnalysisRemoveCaughtEnd<A extends AbstractLattice<A>>
 		this.where = where;
 	}
 
-	/**
-	 * Yields the analysis state before the removal.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getState() {
+	@Override
+	public ProgramPoint getProgramPoint() {
+		return where;
+	}
+
+	@Override
+	public AnalysisState<A> getPreState() {
 		return state;
 	}
 
-	/**
-	 * Yields the analysis state after the removal.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getResult() {
+	@Override
+	public AnalysisState<A> getPostState() {
 		return result;
-	}
-
-	/**
-	 * Yields the statement where caught errors are being removed.
-	 * 
-	 * @return the statement
-	 */
-	public Statement getWhere() {
-		return where;
 	}
 
 	@Override

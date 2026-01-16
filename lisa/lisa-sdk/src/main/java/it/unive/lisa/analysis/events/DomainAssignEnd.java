@@ -2,7 +2,9 @@ package it.unive.lisa.analysis.events;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.events.EndEvent;
+import it.unive.lisa.events.EvaluationEvent;
 import it.unive.lisa.events.Event;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
@@ -19,8 +21,10 @@ public class DomainAssignEnd<L extends Lattice<L>>
 		Event
 		implements
 		DomainEvent,
-		EndEvent {
+		EndEvent,
+		EvaluationEvent<L, L> {
 
+	private final ProgramPoint pp;
 	private final Class<?> domain;
 	private final L state;
 	private final L result;
@@ -30,6 +34,7 @@ public class DomainAssignEnd<L extends Lattice<L>>
 	/**
 	 * Builds the event.
 	 * 
+	 * @param pp       the program point where the computation happens
 	 * @param domain   the domain class where the assignment happened
 	 * @param state    the state before the assignment
 	 * @param result   the state after the assignment
@@ -38,11 +43,13 @@ public class DomainAssignEnd<L extends Lattice<L>>
 	 */
 	public DomainAssignEnd(
 			Class<?> domain,
+			ProgramPoint pp,
 			L state,
 			L result,
 			Identifier assigned,
 			SymbolicExpression value) {
 		this.domain = domain;
+		this.pp = pp;
 		this.state = state;
 		this.result = result;
 		this.assigned = assigned;
@@ -58,21 +65,18 @@ public class DomainAssignEnd<L extends Lattice<L>>
 		return domain;
 	}
 
-	/**
-	 * Yields the state before the assignment.
-	 * 
-	 * @return the state
-	 */
-	public L getState() {
+	@Override
+	public ProgramPoint getProgramPoint() {
+		return pp;
+	}
+
+	@Override
+	public L getPreState() {
 		return state;
 	}
 
-	/**
-	 * Yields the state after the assignment.
-	 * 
-	 * @return the state
-	 */
-	public L getResult() {
+	@Override
+	public L getPostState() {
 		return result;
 	}
 

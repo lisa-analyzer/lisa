@@ -3,7 +3,9 @@ package it.unive.lisa.analysis.events;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.events.EndEvent;
+import it.unive.lisa.events.EvaluationEvent;
 import it.unive.lisa.events.Event;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
@@ -22,8 +24,10 @@ public class AnalysisErrorsToExecEnd<A extends AbstractLattice<A>>
 		Event
 		implements
 		AnalysisEvent,
-		EndEvent {
+		EndEvent,
+		EvaluationEvent<AnalysisState<A>, AnalysisState<A>> {
 
+	private final ProgramPoint pp;
 	private final AnalysisState<A> state;
 	private final AnalysisState<A> result;
 	private final ProtectedBlock block;
@@ -34,6 +38,7 @@ public class AnalysisErrorsToExecEnd<A extends AbstractLattice<A>>
 	/**
 	 * Builds the event.
 	 * 
+	 * @param pp       the program point where the transfer happens
 	 * @param state    the analysis state before the transfer
 	 * @param result   the analysis state after the transfer
 	 * @param block    the protected block where error states are being moved
@@ -42,12 +47,14 @@ public class AnalysisErrorsToExecEnd<A extends AbstractLattice<A>>
 	 * @param variable the (optional) variable where to move error states
 	 */
 	public AnalysisErrorsToExecEnd(
+			ProgramPoint pp,
 			AnalysisState<A> state,
 			AnalysisState<A> result,
 			ProtectedBlock block,
 			Collection<Type> targets,
 			Collection<Type> excluded,
 			VariableRef variable) {
+		this.pp = pp;
 		this.state = state;
 		this.result = result;
 		this.block = block;
@@ -56,21 +63,18 @@ public class AnalysisErrorsToExecEnd<A extends AbstractLattice<A>>
 		this.variable = variable;
 	}
 
-	/**
-	 * Yields the analysis state before the transfer.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getState() {
+	@Override
+	public ProgramPoint getProgramPoint() {
+		return pp;
+	}
+
+	@Override
+	public AnalysisState<A> getPreState() {
 		return state;
 	}
 
-	/**
-	 * Yields the analysis state after the transfer.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getResult() {
+	@Override
+	public AnalysisState<A> getPostState() {
 		return result;
 	}
 

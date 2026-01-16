@@ -2,9 +2,11 @@ package it.unive.lisa.interprocedural.events;
 
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.events.EvaluationEvent;
 import it.unive.lisa.events.Event;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
@@ -19,7 +21,8 @@ public class ComputedCallResult<A extends AbstractLattice<A>>
 		extends
 		Event
 		implements
-		InterproceduralEvent {
+		InterproceduralEvent,
+		EvaluationEvent<AnalysisState<A>, AnalysisState<A>> {
 
 	private final CFGCall call;
 	private final ScopeId<A> id;
@@ -58,12 +61,8 @@ public class ComputedCallResult<A extends AbstractLattice<A>>
 		return call;
 	}
 
-	/**
-	 * Yields the computed state.
-	 * 
-	 * @return the state
-	 */
-	public AnalysisState<A> getState() {
+	@Override
+	public AnalysisState<A> getPostState() {
 		return state;
 	}
 
@@ -76,13 +75,14 @@ public class ComputedCallResult<A extends AbstractLattice<A>>
 		return id;
 	}
 
-	/**
-	 * Yields the entry state at the call site.
-	 * 
-	 * @return the entry state
-	 */
-	public AnalysisState<A> getEntryState() {
+	@Override
+	public AnalysisState<A> getPreState() {
 		return entry;
+	}
+
+	@Override
+	public ProgramPoint getProgramPoint() {
+		return call.getSource() != null ? call.getSource() : call;
 	}
 
 	/**

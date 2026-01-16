@@ -135,7 +135,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			events.post(new NRDEvalStart<>(getClass(), environment, expression));
 		L value = expression.accept(this, environment, pp, oracle);
 		if (events != null)
-			events.post(new NRDEvalEnd<>(getClass(), environment, value, expression));
+			events.post(new NRDEvalEnd<>(getClass(), pp, environment, value, expression));
 		return value;
 	}
 

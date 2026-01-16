@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.events;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.events.EndEvent;
+import it.unive.lisa.events.EvaluationEvent;
 import it.unive.lisa.events.Event;
 import it.unive.lisa.program.cfg.ProgramPoint;
 
@@ -19,7 +20,8 @@ public class AnalysisOnCallReturnEnd<A extends AbstractLattice<A>>
 		Event
 		implements
 		AnalysisEvent,
-		EndEvent {
+		EndEvent,
+		EvaluationEvent<AnalysisState<A>, AnalysisState<A>> {
 
 	private final AnalysisState<A> callState;
 	private final AnalysisState<A> calleeResult;
@@ -45,13 +47,19 @@ public class AnalysisOnCallReturnEnd<A extends AbstractLattice<A>>
 		this.call = call;
 	}
 
-	/**
-	 * Yields the analysis state before the call.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getCallState() {
+	@Override
+	public ProgramPoint getProgramPoint() {
+		return call;
+	}
+
+	@Override
+	public AnalysisState<A> getPreState() {
 		return callState;
+	}
+
+	@Override
+	public AnalysisState<A> getPostState() {
+		return result;
 	}
 
 	/**
@@ -61,24 +69,6 @@ public class AnalysisOnCallReturnEnd<A extends AbstractLattice<A>>
 	 */
 	public AnalysisState<A> getCalleeResult() {
 		return calleeResult;
-	}
-
-	/**
-	 * Yields the analysis state after the context transfer.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getResult() {
-		return result;
-	}
-
-	/**
-	 * Yields the call program point.
-	 * 
-	 * @return the call program point
-	 */
-	public ProgramPoint getCall() {
-		return call;
 	}
 
 	@Override

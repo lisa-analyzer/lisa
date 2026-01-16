@@ -3,7 +3,9 @@ package it.unive.lisa.analysis.events;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.events.EndEvent;
+import it.unive.lisa.events.EvaluationEvent;
 import it.unive.lisa.events.Event;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
@@ -19,8 +21,10 @@ public class AnalysisAssignEnd<A extends AbstractLattice<A>>
 		Event
 		implements
 		AnalysisEvent,
-		EndEvent {
+		EndEvent,
+		EvaluationEvent<AnalysisState<A>, AnalysisState<A>> {
 
+	private final ProgramPoint pp;
 	private final AnalysisState<A> state;
 	private final AnalysisState<A> result;
 	private final SymbolicExpression assigned;
@@ -29,37 +33,37 @@ public class AnalysisAssignEnd<A extends AbstractLattice<A>>
 	/**
 	 * Builds the event.
 	 * 
+	 * @param pp       the program point where the assignment happens
 	 * @param state    the analysis state before the assignment
 	 * @param result   the analysis state after the assignment
 	 * @param assigned the symbolic expression being assigned to
 	 * @param value    the value being assigned
 	 */
 	public AnalysisAssignEnd(
+			ProgramPoint pp,
 			AnalysisState<A> state,
 			AnalysisState<A> result,
 			SymbolicExpression assigned,
 			SymbolicExpression value) {
+		this.pp = pp;
 		this.state = state;
 		this.result = result;
 		this.assigned = assigned;
 		this.value = value;
 	}
 
-	/**
-	 * Yields the analysis state before the assignment.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getState() {
+	@Override
+	public ProgramPoint getProgramPoint() {
+		return pp;
+	}
+
+	@Override
+	public AnalysisState<A> getPreState() {
 		return state;
 	}
 
-	/**
-	 * Yields the analysis state after the assignment.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getResult() {
+	@Override
+	public AnalysisState<A> getPostState() {
 		return result;
 	}
 

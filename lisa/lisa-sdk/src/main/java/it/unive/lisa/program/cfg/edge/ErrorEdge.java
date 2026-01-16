@@ -176,7 +176,8 @@ public class ErrorEdge
 				break;
 			}
 
-		return analysis.moveErrorsToExecution(state, protectedBlock, Arrays.asList(types), excluded, variable);
+		return analysis.moveErrorsToExecution(state, getSource(), protectedBlock, Arrays.asList(types), excluded,
+				variable);
 	}
 
 	@Override

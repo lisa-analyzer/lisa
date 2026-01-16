@@ -247,21 +247,22 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssignStart<>(heapDomain.getClass(), state.heapState, id, expression));
 			mo.heap = heapDomain.assign(mo.heap, id, expression, pp, mo).getLeft();
 			if (events != null) {
-				events.post(new DomainAssignEnd<>(heapDomain.getClass(), state.heapState, mo.heap, id, expression));
+				events.post(new DomainAssignEnd<>(heapDomain.getClass(), pp, state.heapState, mo.heap, id, expression));
 				events.post(new DomainAssignStart<>(typeDomain.getClass(), state.typeState, id, expression));
 			}
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
 			if (events != null) {
-				events.post(new DomainAssignEnd<>(typeDomain.getClass(), state.typeState, mo.type, id, expression));
+				events.post(new DomainAssignEnd<>(typeDomain.getClass(), pp, state.typeState, mo.type, id, expression));
 				events.post(new DomainAssignStart<>(valueDomain.getClass(), state.valueState, id, expression));
 			}
 			mo.value = valueDomain.assign(mo.value, id, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainAssignEnd<>(valueDomain.getClass(), state.valueState, mo.value, id, expression));
+				events.post(
+						new DomainAssignEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, id, expression));
 
 			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
-				events.post(new DomainAssignEnd<>(getClass(), state, res, id, expression));
+				events.post(new DomainAssignEnd<>(getClass(), pp, state, res, id, expression));
 			return res;
 		}
 
@@ -271,7 +272,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		mo.heap = heap.getLeft();
 
 		if (events != null) {
-			events.post(new DomainAssignEnd<>(heapDomain.getClass(), state.heapState, mo.heap, id, expression));
+			events.post(new DomainAssignEnd<>(heapDomain.getClass(), pp, state.heapState, mo.heap, id, expression));
 			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
 		}
 
@@ -281,7 +282,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		if (exprs.isEmpty()) {
 			SimpleAbstractState<H, V, T> res = state.bottom();
 			if (events != null)
-				events.post(new DomainAssignEnd<>(getClass(), state, res, id, expression));
+				events.post(new DomainAssignEnd<>(getClass(), pp, state, res, id, expression));
 			return res;
 		}
 
@@ -296,16 +297,16 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssignStart<>(typeDomain.getClass(), state.typeState, id, expr));
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
 			if (events != null) {
-				events.post(new DomainAssignEnd<>(typeDomain.getClass(), state.typeState, mo.type, id, expr));
+				events.post(new DomainAssignEnd<>(typeDomain.getClass(), pp, state.typeState, mo.type, id, expr));
 				events.post(new DomainAssignStart<>(valueDomain.getClass(), state.valueState, id, expr));
 			}
 			mo.value = valueDomain.assign(mo.value, id, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainAssignEnd<>(valueDomain.getClass(), state.valueState, mo.value, id, expr));
+				events.post(new DomainAssignEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, id, expr));
 
 			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
-				events.post(new DomainAssignEnd<>(getClass(), state, res, id, expression));
+				events.post(new DomainAssignEnd<>(getClass(), pp, state, res, id, expression));
 			return res;
 		}
 
@@ -320,12 +321,12 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssignStart<>(typeDomain.getClass(), state.typeState, id, expr));
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
 			if (events != null) {
-				events.post(new DomainAssignEnd<>(typeDomain.getClass(), state.typeState, mo.type, id, expr));
+				events.post(new DomainAssignEnd<>(typeDomain.getClass(), pp, state.typeState, mo.type, id, expr));
 				events.post(new DomainAssignStart<>(valueDomain.getClass(), state.valueState, id, expr));
 			}
 			V v = valueDomain.assign(mo.value, id, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainAssignEnd<>(valueDomain.getClass(), state.valueState, mo.value, id, expr));
+				events.post(new DomainAssignEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, id, expr));
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
 			// we rollback the pre-eval state for the next expression
@@ -334,7 +335,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 
 		SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
 		if (events != null)
-			events.post(new DomainAssignEnd<>(getClass(), state, res, id, expression));
+			events.post(new DomainAssignEnd<>(getClass(), pp, state, res, id, expression));
 		return res;
 	}
 
@@ -355,19 +356,19 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainSmallStepStart<>(heapDomain.getClass(), state.heapState, expression));
 			mo.heap = heapDomain.smallStepSemantics(mo.heap, expression, pp, mo).getLeft();
 			if (events != null) {
-				events.post(new DomainSmallStepEnd<>(heapDomain.getClass(), state.heapState, mo.heap, expression));
+				events.post(new DomainSmallStepEnd<>(heapDomain.getClass(), pp, state.heapState, mo.heap, expression));
 				events.post(new DomainSmallStepStart<>(typeDomain.getClass(), state.typeState, expression));
 			}
 			mo.type = typeDomain.smallStepSemantics(mo.type, ve, pp, mo);
 			if (events != null) {
-				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), state.typeState, mo.type, expression));
+				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), pp, state.typeState, mo.type, expression));
 				events.post(new DomainSmallStepStart<>(valueDomain.getClass(), state.valueState, expression));
 			}
 			mo.value = valueDomain.smallStepSemantics(mo.value, ve, pp, mo);
 
 			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
-				events.post(new DomainSmallStepEnd<>(getClass(), state, res, expression));
+				events.post(new DomainSmallStepEnd<>(getClass(), pp, state, res, expression));
 			return res;
 		}
 
@@ -377,7 +378,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		mo.heap = heap.getLeft();
 
 		if (events != null) {
-			events.post(new DomainSmallStepEnd<>(heapDomain.getClass(), state.heapState, mo.heap, expression));
+			events.post(new DomainSmallStepEnd<>(heapDomain.getClass(), pp, state.heapState, mo.heap, expression));
 			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
 		}
 
@@ -387,7 +388,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		if (exprs.isEmpty()) {
 			SimpleAbstractState<H, V, T> res = state.bottom();
 			if (events != null)
-				events.post(new DomainSmallStepEnd<>(getClass(), state, res, expression));
+				events.post(new DomainSmallStepEnd<>(getClass(), pp, state, res, expression));
 			return res;
 		}
 
@@ -406,16 +407,16 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				// registered in the type domain
 				mo.type = typeDomain.assign(mo.type, (Identifier) ve, ve, pp, mo);
 			if (events != null) {
-				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), state.typeState, mo.type, expr));
+				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), pp, state.typeState, mo.type, expr));
 				events.post(new DomainSmallStepStart<>(valueDomain.getClass(), state.valueState, expr));
 			}
 			mo.value = valueDomain.smallStepSemantics(mo.value, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainSmallStepEnd<>(valueDomain.getClass(), state.valueState, mo.value, expr));
+				events.post(new DomainSmallStepEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, expr));
 
 			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
-				events.post(new DomainSmallStepEnd<>(getClass(), state, res, expression));
+				events.post(new DomainSmallStepEnd<>(getClass(), pp, state, res, expression));
 			return res;
 		}
 
@@ -434,12 +435,12 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				// registered in the type domain
 				mo.type = typeDomain.assign(mo.type, (Identifier) ve, ve, pp, mo);
 			if (events != null) {
-				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), state.typeState, mo.type, expr));
+				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), pp, state.typeState, mo.type, expr));
 				events.post(new DomainSmallStepStart<>(valueDomain.getClass(), state.valueState, expr));
 			}
 			V v = valueDomain.smallStepSemantics(mo.value, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainSmallStepEnd<>(valueDomain.getClass(), state.valueState, mo.value, expr));
+				events.post(new DomainSmallStepEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, expr));
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
 			// we rollback the pre-eval state for the next expression
@@ -448,7 +449,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 
 		SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
 		if (events != null)
-			events.post(new DomainSmallStepEnd<>(getClass(), state, res, expression));
+			events.post(new DomainSmallStepEnd<>(getClass(), pp, state, res, expression));
 		return res;
 	}
 
@@ -470,11 +471,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssumeStart<>(heapDomain.getClass(), state.heapState, expression));
 			mo.heap = heapDomain.assume(mo.heap, expression, src, dest, mo).getLeft();
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(heapDomain.getClass(), state.heapState, mo.heap, expression));
+				events.post(new DomainAssumeEnd<>(heapDomain.getClass(), src, state.heapState, mo.heap, expression));
 			if (mo.heap.isBottom()) {
 				SimpleAbstractState<H, V, T> res = state.bottom();
 				if (events != null)
-					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
 			}
 
@@ -482,11 +483,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssumeStart<>(typeDomain.getClass(), state.typeState, expression));
 			mo.type = typeDomain.assume(mo.type, ve, src, dest, mo);
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), state.typeState, mo.type, expression));
+				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), src, state.typeState, mo.type, expression));
 			if (mo.type.isBottom()) {
 				SimpleAbstractState<H, V, T> res = state.bottom();
 				if (events != null)
-					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
 			}
 
@@ -494,17 +495,17 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssumeStart<>(valueDomain.getClass(), state.valueState, expression));
 			mo.value = valueDomain.assume(mo.value, ve, src, dest, mo);
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), state.valueState, mo.value, expression));
+				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), src, state.valueState, mo.value, expression));
 			if (mo.value.isBottom()) {
 				SimpleAbstractState<H, V, T> res = state.bottom();
 				if (events != null)
-					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
 			}
 
 			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 			return res;
 		}
 
@@ -513,11 +514,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		Pair<H, List<HeapReplacement>> heap = heapDomain.assume(mo.heap, expression, src, dest, mo);
 		mo.heap = heap.getLeft();
 		if (events != null)
-			events.post(new DomainAssumeEnd<>(heapDomain.getClass(), state.heapState, mo.heap, expression));
+			events.post(new DomainAssumeEnd<>(heapDomain.getClass(), src, state.heapState, mo.heap, expression));
 		if (mo.heap.isBottom()) {
 			SimpleAbstractState<H, V, T> res = state.bottom();
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 			return res;
 		}
 
@@ -529,7 +530,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		if (exprs.isEmpty()) {
 			SimpleAbstractState<H, V, T> res = state.bottom();
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 			return res;
 		}
 
@@ -544,11 +545,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssumeStart<>(typeDomain.getClass(), state.typeState, expr));
 			mo.type = typeDomain.assume(mo.type, ve, src, dest, mo);
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), state.typeState, mo.type, expr));
+				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), src, state.typeState, mo.type, expr));
 			if (mo.type.isBottom()) {
 				SimpleAbstractState<H, V, T> res = state.bottom();
 				if (events != null)
-					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
 			}
 
@@ -556,17 +557,17 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssumeStart<>(valueDomain.getClass(), state.valueState, expr));
 			mo.value = valueDomain.assume(mo.value, ve, src, dest, mo);
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), state.valueState, mo.value, expr));
+				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), src, state.valueState, mo.value, expr));
 			if (mo.value.isBottom()) {
 				SimpleAbstractState<H, V, T> res = state.bottom();
 				if (events != null)
-					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
 			}
 
 			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 			return res;
 		}
 
@@ -581,12 +582,12 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainAssumeStart<>(typeDomain.getClass(), state.typeState, expr));
 			mo.type = typeDomain.assume(mo.type, ve, src, dest, mo);
 			if (events != null) {
-				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), state.typeState, mo.type, expr));
+				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), src, state.typeState, mo.type, expr));
 				events.post(new DomainAssumeStart<>(valueDomain.getClass(), state.valueState, expr));
 			}
 			V v = valueDomain.assume(mo.value, ve, src, dest, mo);
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), state.valueState, mo.value, expr));
+				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), src, state.valueState, mo.value, expr));
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
 			// we rollback the pre-eval state for the next expression
@@ -599,7 +600,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		else
 			res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
 		if (events != null)
-			events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+			events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 		return res;
 	}
 
@@ -618,10 +619,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			events.post(new DomainSatisfiesStart<>(heapDomain.getClass(), state.heapState, expression));
 		Satisfiability heapsat = heapDomain.satisfies(state.heapState, expression, pp, mo);
 		if (events != null)
-			events.post(new DomainSatisfiesEnd<>(heapDomain.getClass(), state.heapState, heapsat, expression));
+			events.post(new DomainSatisfiesEnd<>(heapDomain.getClass(), pp, state.heapState, heapsat, expression));
 		if (heapsat == Satisfiability.BOTTOM) {
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(getClass(), state, heapsat, expression));
+				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, heapsat, expression));
 			return heapsat;
 		}
 
@@ -631,10 +632,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainSatisfiesStart<>(typeDomain.getClass(), state.typeState, expression));
 			Satisfiability typesat = typeDomain.satisfies(mo.type, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), state.typeState, typesat, expression));
+				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), pp, state.typeState, typesat, expression));
 			if (typesat == Satisfiability.BOTTOM) {
 				if (events != null)
-					events.post(new DomainSatisfiesEnd<>(getClass(), state, typesat, expression));
+					events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, typesat, expression));
 				return typesat;
 			}
 
@@ -642,16 +643,17 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainSatisfiesStart<>(valueDomain.getClass(), state.valueState, expression));
 			Satisfiability valuesat = valueDomain.satisfies(mo.value, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(valueDomain.getClass(), state.valueState, valuesat, expression));
+				events.post(
+						new DomainSatisfiesEnd<>(valueDomain.getClass(), pp, state.valueState, valuesat, expression));
 			if (valuesat == Satisfiability.BOTTOM) {
 				if (events != null)
-					events.post(new DomainSatisfiesEnd<>(getClass(), state, valuesat, expression));
+					events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, valuesat, expression));
 				return valuesat;
 			}
 
 			Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(getClass(), state, glb, expression));
+				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, glb, expression));
 			return glb;
 		}
 
@@ -662,7 +664,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
 		if (exprs.isEmpty()) {
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(getClass(), state, Satisfiability.BOTTOM, expression));
+				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, Satisfiability.BOTTOM, expression));
 			return Satisfiability.BOTTOM;
 		}
 
@@ -675,10 +677,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainSatisfiesStart<>(typeDomain.getClass(), state.typeState, expr));
 			Satisfiability typesat = typeDomain.satisfies(mo.type, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), state.typeState, typesat, expr));
+				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), pp, state.typeState, typesat, expr));
 			if (typesat == Satisfiability.BOTTOM) {
 				if (events != null)
-					events.post(new DomainSatisfiesEnd<>(getClass(), state, typesat, expression));
+					events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, typesat, expression));
 				return typesat;
 			}
 
@@ -686,16 +688,16 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainSatisfiesStart<>(valueDomain.getClass(), state.valueState, expr));
 			Satisfiability valuesat = valueDomain.satisfies(mo.value, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(valueDomain.getClass(), state.valueState, valuesat, expr));
+				events.post(new DomainSatisfiesEnd<>(valueDomain.getClass(), pp, state.valueState, valuesat, expr));
 			if (valuesat == Satisfiability.BOTTOM) {
 				if (events != null)
-					events.post(new DomainSatisfiesEnd<>(getClass(), state, valuesat, expression));
+					events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, valuesat, expression));
 				return valuesat;
 			}
 
 			Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(getClass(), state, glb, expression));
+				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, glb, expression));
 			return glb;
 		}
 
@@ -709,10 +711,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainSatisfiesStart<>(typeDomain.getClass(), state.typeState, expr));
 			Satisfiability sat = typeDomain.satisfies(mo.type, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), state.typeState, sat, expr));
+				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), pp, state.typeState, sat, expr));
 			if (sat == Satisfiability.BOTTOM) {
 				if (events != null)
-					events.post(new DomainSatisfiesEnd<>(getClass(), state, sat, expression));
+					events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, sat, expression));
 				return sat;
 			}
 			typesat = typesat.lub(sat);
@@ -721,10 +723,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainSatisfiesStart<>(valueDomain.getClass(), state.valueState, expr));
 			sat = valueDomain.satisfies(mo.value, ve, pp, mo);
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(valueDomain.getClass(), state.valueState, sat, expr));
+				events.post(new DomainSatisfiesEnd<>(valueDomain.getClass(), pp, state.valueState, sat, expr));
 			if (sat == Satisfiability.BOTTOM) {
 				if (events != null)
-					events.post(new DomainSatisfiesEnd<>(getClass(), state, sat, expression));
+					events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, sat, expression));
 				return sat;
 			}
 			valuesat = valuesat.lub(sat);
@@ -732,7 +734,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 
 		Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
 		if (events != null)
-			events.post(new DomainSatisfiesEnd<>(getClass(), state, glb, expression));
+			events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, glb, expression));
 		return glb;
 	}
 

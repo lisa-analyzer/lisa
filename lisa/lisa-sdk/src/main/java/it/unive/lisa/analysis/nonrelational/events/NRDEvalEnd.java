@@ -4,8 +4,10 @@ import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.events.DomainEvent;
 import it.unive.lisa.events.EndEvent;
+import it.unive.lisa.events.EvaluationEvent;
 import it.unive.lisa.events.Event;
 import it.unive.lisa.lattices.FunctionalLattice;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
@@ -25,48 +27,50 @@ public class NRDEvalEnd<
 		Event
 		implements
 		DomainEvent,
-		EndEvent {
+		EndEvent,
+		EvaluationEvent<M, L> {
 
 	private final Class<?> domain;
 	private final M state;
 	private final L result;
 	private final SymbolicExpression expression;
+	private final ProgramPoint pp;
 
 	/**
 	 * Builds the event.
 	 * 
 	 * @param domain     the domain class where the evaluation is happening
+	 * @param pp         the program point where the evaluation is happening
 	 * @param state      the state before the computation
 	 * @param result     the result of the evaluation
 	 * @param expression the symbolic expression being evaluated
 	 */
 	public NRDEvalEnd(
 			Class<?> domain,
+			ProgramPoint pp,
 			M state,
 			L result,
 			SymbolicExpression expression) {
 		this.domain = domain;
+		this.pp = pp;
 		this.state = state;
 		this.result = result;
 		this.expression = expression;
 	}
 
-	/**
-	 * Yields the state before the computation.
-	 * 
-	 * @return the state
-	 */
-	public M getState() {
+	@Override
+	public M getPreState() {
 		return state;
 	}
 
-	/**
-	 * Yields the result of the evaluation.
-	 * 
-	 * @return the result
-	 */
-	public L getResult() {
+	@Override
+	public L getPostState() {
 		return result;
+	}
+
+	@Override
+	public ProgramPoint getProgramPoint() {
+		return pp;
 	}
 
 	/**

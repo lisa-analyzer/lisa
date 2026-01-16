@@ -3,8 +3,10 @@ package it.unive.lisa.analysis.events;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.events.EndEvent;
+import it.unive.lisa.events.EvaluationEvent;
 import it.unive.lisa.events.Event;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
@@ -19,7 +21,8 @@ public class AnalysisTransferThrowersEnd<A extends AbstractLattice<A>>
 		Event
 		implements
 		AnalysisEvent,
-		EndEvent {
+		EndEvent,
+		EvaluationEvent<AnalysisState<A>, AnalysisState<A>> {
 
 	private final AnalysisState<A> state;
 	private final AnalysisState<A> result;
@@ -45,31 +48,19 @@ public class AnalysisTransferThrowersEnd<A extends AbstractLattice<A>>
 		this.origin = origin;
 	}
 
-	/**
-	 * Yields the analysis state before the transfer.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getState() {
+	@Override
+	public ProgramPoint getProgramPoint() {
+		return newThrower;
+	}
+
+	@Override
+	public AnalysisState<A> getPreState() {
 		return state;
 	}
 
-	/**
-	 * Yields the analysis state after the transfer.
-	 * 
-	 * @return the analysis state
-	 */
-	public AnalysisState<A> getResult() {
+	@Override
+	public AnalysisState<A> getPostState() {
 		return result;
-	}
-
-	/**
-	 * Yields the statement to use as new thrower.
-	 * 
-	 * @return the statement
-	 */
-	public Statement getNewThrower() {
-		return newThrower;
 	}
 
 	/**

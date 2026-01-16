@@ -142,7 +142,7 @@ public class Analysis<
 				state.getExecutionInformation()));
 
 		if (events != null)
-			events.post(new AnalysisAssignEnd<>(state, res, id, value));
+			events.post(new AnalysisAssignEnd<>(pp, state, res, id, value));
 
 		return res;
 	}
@@ -191,7 +191,7 @@ public class Analysis<
 				state.getExecutionInformation()));
 
 		if (events != null)
-			events.post(new AnalysisAssignEnd<>(state, res, id, expression));
+			events.post(new AnalysisAssignEnd<>(pp, state, res, id, expression));
 
 		return res;
 	}
@@ -212,7 +212,7 @@ public class Analysis<
 				state.getExecutionInformation()));
 
 		if (events != null)
-			events.post(new AnalysisSmallStepEnd<>(state, res, expression));
+			events.post(new AnalysisSmallStepEnd<>(pp, state, res, expression));
 
 		return res;
 	}
@@ -238,7 +238,7 @@ public class Analysis<
 					state.getExecutionInformation()));
 
 		if (events != null)
-			events.post(new AnalysisAssumeEnd<>(state, res, expression));
+			events.post(new AnalysisAssumeEnd<>(src, state, res, expression));
 
 		return res;
 	}
@@ -255,7 +255,7 @@ public class Analysis<
 		Satisfiability sat = domain.satisfies(state.getExecutionState(), expression, pp);
 
 		if (events != null)
-			events.post(new AnalysisSatisfiesEnd<>(state, sat, expression));
+			events.post(new AnalysisSatisfiesEnd<>(pp, state, sat, expression));
 
 		return sat;
 	}
@@ -476,6 +476,7 @@ public class Analysis<
 	 * 
 	 * @param state     the current analysis state
 	 * @param exception the exception to move the execution state to
+	 * @param pp        the program point where the move happens
 	 * 
 	 * @return the updated analysis state
 	 * 
@@ -483,7 +484,8 @@ public class Analysis<
 	 */
 	public AnalysisState<A> moveExecutionToError(
 			AnalysisState<A> state,
-			Error exception)
+			Error exception,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
 			return state;
@@ -499,7 +501,7 @@ public class Analysis<
 			result = result.addSmashedError(exception, state.getExecution());
 
 		if (events != null)
-			events.post(new AnalysisExecToErrorEnd<>(state, result, exception));
+			events.post(new AnalysisExecToErrorEnd<>(pp, state, result, exception));
 
 		return result;
 	}
@@ -517,6 +519,7 @@ public class Analysis<
 	 * are removed from the resulting state.
 	 * 
 	 * @param state          the current analysis state
+	 * @param pp             the program point where the move happens
 	 * @param protectedBlock the block that is being protected from the errors
 	 *                           to move
 	 * @param targets        the types to move
@@ -530,6 +533,7 @@ public class Analysis<
 	 */
 	public AnalysisState<A> moveErrorsToExecution(
 			AnalysisState<A> state,
+			ProgramPoint pp,
 			ProtectedBlock protectedBlock,
 			Collection<Type> targets,
 			Collection<Type> excluded,
@@ -589,7 +593,14 @@ public class Analysis<
 			AnalysisState<A> bottom = state.bottom();
 
 			if (events != null)
-				events.post(new AnalysisErrorsToExecEnd<>(state, bottom, protectedBlock, targets, excluded, variable));
+				events.post(new AnalysisErrorsToExecEnd<>(
+						pp,
+						state,
+						bottom,
+						protectedBlock,
+						targets,
+						excluded,
+						variable));
 
 			return bottom;
 		}
@@ -623,7 +634,7 @@ public class Analysis<
 		AnalysisState<A> res = state.removeAllErrors(false).withExecution(result);
 
 		if (events != null)
-			events.post(new AnalysisErrorsToExecEnd<>(state, res, protectedBlock, targets, excluded, variable));
+			events.post(new AnalysisErrorsToExecEnd<>(pp, state, res, protectedBlock, targets, excluded, variable));
 
 		return res;
 	}
@@ -769,13 +780,15 @@ public class Analysis<
 	 * exists for halting, it is merged with the current state.
 	 * 
 	 * @param state the current analysis state
+	 * @param pp    the program point where the move happens
 	 * 
 	 * @return the updated analysis state
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public AnalysisState<A> moveExecutionToHalting(
-			AnalysisState<A> state)
+			AnalysisState<A> state,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
 			return state;
@@ -787,7 +800,7 @@ public class Analysis<
 		AnalysisState<A> res = state.bottomExecution().withHalt(halt);
 
 		if (events != null)
-			events.post(new AnalysisExecToHaltEnd<>(state, res));
+			events.post(new AnalysisExecToHaltEnd<>(pp, state, res));
 
 		return res;
 	}
