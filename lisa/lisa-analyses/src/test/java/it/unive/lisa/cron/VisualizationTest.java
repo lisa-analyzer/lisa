@@ -94,6 +94,7 @@ public class VisualizationTest
 		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
+
 	@Test
 	public void testAnalysisTrace() {
 		TestConfiguration conf = config();
@@ -103,6 +104,7 @@ public class VisualizationTest
 		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
+
 	@Test
 	public void testDomainTrace() {
 		TestConfiguration conf = config();
@@ -112,6 +114,7 @@ public class VisualizationTest
 		conf.programFile = "visualization.imp";
 		perform(conf);
 	}
+
 	@Test
 	public void testAllTrace() {
 		TestConfiguration conf = config();

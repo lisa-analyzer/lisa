@@ -1,8 +1,5 @@
 package it.unive.lisa.listeners;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.ReportingTool;
 import it.unive.lisa.analysis.events.AnalysisEvent;
@@ -15,6 +12,8 @@ import it.unive.lisa.interprocedural.events.InterproceduralEvent;
 import it.unive.lisa.program.cfg.fixpoints.events.FixpointEvent;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
+import java.io.BufferedWriter;
+import java.io.IOException;
 
 /**
  * An event listener that traces {@link StartEvent}s and {@link EndEvent}s to a
@@ -69,6 +68,11 @@ public class TracingListener
 
 	private final TraceLevel level;
 
+	/**
+	 * Builds the listener.
+	 * 
+	 * @param level the level of tracing
+	 */
 	public TracingListener(
 			TraceLevel level) {
 		this.level = level;
