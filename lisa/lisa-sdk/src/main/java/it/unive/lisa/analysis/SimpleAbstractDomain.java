@@ -201,9 +201,6 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	public void setEventQueue(
 			EventQueue queue) {
 		this.events = queue;
-		heapDomain.setEventQueue(queue);
-		valueDomain.setEventQueue(queue);
-		typeDomain.setEventQueue(queue);
 	}
 
 	private void applySubstitution(
@@ -814,6 +811,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			this.heap = state.heapState;
 			this.value = state.valueState;
 			this.type = state.typeState;
+		}
+
+		@Override
+		public EventQueue getEventQueue() {
+			return events;
 		}
 
 		@Override

@@ -63,6 +63,11 @@ public class TestAbstractDomain
 			SemanticOracle {
 
 		@Override
+		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
 		public Set<Type> getRuntimeTypesOf(
 				SymbolicExpression e,
 				ProgramPoint pp)

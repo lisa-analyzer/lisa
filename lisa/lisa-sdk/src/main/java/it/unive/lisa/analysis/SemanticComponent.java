@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -170,20 +169,5 @@ public interface SemanticComponent<L extends DomainLattice<L, T>,
 			ProgramPoint call)
 			throws SemanticException {
 		return callres;
-	}
-
-	/**
-	 * Sets the {@link EventQueue} that this component can use to post analysis
-	 * events. This operation is optional: a component is not required to issue
-	 * events, and it is thus not required to store the given queue. However, as
-	 * this method will only be invoked once, implementations of this method
-	 * should forward the call to any sub-component that might need the event
-	 * queue.
-	 * 
-	 * @param queue the event queue to use
-	 */
-	default void setEventQueue(
-			EventQueue queue) {
-		// nothing to do by default
 	}
 }

@@ -39,6 +39,7 @@ import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -289,6 +290,11 @@ public class TestParameterProvider {
 	public static class FakeOracle
 			implements
 			SemanticOracle {
+
+		@Override
+		public EventQueue getEventQueue() {
+			return null;
+		}
 
 		@Override
 		public Set<Type> getRuntimeTypesOf(

@@ -75,6 +75,8 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 	 */
 	public final D domain;
 
+	private EventQueue events;
+
 	/**
 	 * Builds a new instance of this domain, with the default limits on the
 	 * number of loop iterations and conditions that can be tracked in a single
@@ -112,6 +114,7 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 	@Override
 	public void setEventQueue(
 			EventQueue queue) {
+		this.events = queue;
 		domain.setEventQueue(queue);
 	}
 
@@ -263,6 +266,11 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		private TraceOracle(
 				TraceLattice<A> state) {
 			this.state = state;
+		}
+
+		@Override
+		public EventQueue getEventQueue() {
+			return events;
 		}
 
 		@Override
