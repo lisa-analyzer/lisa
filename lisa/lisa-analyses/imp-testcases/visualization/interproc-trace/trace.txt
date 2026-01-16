@@ -1,0 +1,10 @@
+Program-wide fixpoint
+  Program-wide fixpoint iteration 1
+    Fixpoint of untyped tests::main(tests*)
+      Fixpoint of untyped A::A(A*)
+      Fixpoint of untyped A::getOne(A*)
+      Fixpoint of untyped A::getPositive(A*, untyped)
+      Fixpoint of untyped A::identity(A*, untyped)
+      Fixpoint of untyped A::identity(A*, untyped)
+      Fixpoint of untyped tests::helper(tests*, untyped, untyped)
+        Fixpoint of untyped A::identity(A*, untyped)

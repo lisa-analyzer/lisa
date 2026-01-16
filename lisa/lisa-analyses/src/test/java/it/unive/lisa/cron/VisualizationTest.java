@@ -4,6 +4,7 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.listeners.TracingListener;
+import it.unive.lisa.listeners.TracingListener.TraceLevel;
 import it.unive.lisa.outputs.DotResults;
 import it.unive.lisa.outputs.HtmlInputs;
 import it.unive.lisa.outputs.HtmlResults;
@@ -75,11 +76,48 @@ public class VisualizationTest
 	}
 
 	@Test
+	public void testInterproceduralTrace() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new TracingListener(TraceLevel.INTERPROCEDURAL));
+		conf.testDir = "visualization";
+		conf.testSubDir = "interproc-trace";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+
+	@Test
 	public void testFixpointTrace() {
 		TestConfiguration conf = config();
-		conf.asynchronousListeners.add(new TracingListener());
+		conf.asynchronousListeners.add(new TracingListener(TraceLevel.FIXPOINT));
 		conf.testDir = "visualization";
-		conf.testSubDir = "trace";
+		conf.testSubDir = "fix-trace";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+	@Test
+	public void testAnalysisTrace() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new TracingListener(TraceLevel.ANALYSIS));
+		conf.testDir = "visualization";
+		conf.testSubDir = "analysis-trace";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+	@Test
+	public void testDomainTrace() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new TracingListener(TraceLevel.DOMAIN));
+		conf.testDir = "visualization";
+		conf.testSubDir = "domain-trace";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+	@Test
+	public void testAllTrace() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new TracingListener(TraceLevel.ALL));
+		conf.testDir = "visualization";
+		conf.testSubDir = "all-trace";
 		conf.programFile = "visualization.imp";
 		perform(conf);
 	}

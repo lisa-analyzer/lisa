@@ -1,0 +1,115 @@
+Program-wide fixpoint
+  Program-wide fixpoint iteration 1
+    Semantics of #TOP#
+    Semantics of this
+    Fixpoint of untyped tests::main(tests*)
+      Semantics of a = new A()
+        Semantics of new A()
+          Fixpoint of untyped A::A(A*)
+            Semantics of i1 = 0
+              Semantics of 0
+              Semantics of i1
+            Traversal of [ i1 = 0 ] ---> [ ret ]
+            Semantics of ret
+        Semantics of a
+      Traversal of [ a = new A() ] ---> [ one = getPositive(a, getOne(a)) ]
+      Semantics of one = getPositive(a, getOne(a))
+        Semantics of getPositive(a, getOne(a))
+          Semantics of a
+          Semantics of getOne(a)
+            Semantics of a
+            Fixpoint of untyped A::getOne(A*)
+              Semantics of rec = new tests()
+                Semantics of new tests()
+                Semantics of rec
+              Traversal of [ rec = new tests() ] ---> [ x = open(rec) ]
+              Semantics of x = open(rec)
+                Semantics of open(rec)
+                  Semantics of rec
+                Semantics of x
+              Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
+              Semantics of <(x, 10)
+                Semantics of x
+                Semantics of 10
+              Traversal of [ <(x, 10) ] -T-> [ x = +(x, 1) ]
+              Semantics of x = +(x, 1)
+                Semantics of +(x, 1)
+                  Semantics of x
+                  Semantics of 1
+                Semantics of x
+              Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
+              Traversal of [ x = +(x, 1) ] ---> [ <(x, 10) ]
+              Semantics of <(x, 10)
+                Semantics of x
+                Semantics of 10
+              Traversal of [ <(x, 10) ] -F-> [ return 1 ]
+              Semantics of return 1
+                Semantics of 1
+          Fixpoint of untyped A::getPositive(A*, untyped)
+            Semantics of <=(i, 0)
+              Semantics of i
+              Semantics of 0
+            Traversal of [ <=(i, 0) ] -T-> [ i = 1 ]
+            Semantics of i = 1
+              Semantics of 1
+              Semantics of i
+            Traversal of [ <=(i, 0) ] -F-> [ i = 10 ]
+            Semantics of i = 10
+              Semantics of 10
+              Semantics of i
+            Traversal of [ i = 1 ] ---> [ return i ]
+            Traversal of [ i = 10 ] ---> [ return i ]
+            Semantics of return i
+              Semantics of i
+        Semantics of one
+      Traversal of [ one = getPositive(a, getOne(a)) ] ---> [ positive = identity(a, one) ]
+      Semantics of positive = identity(a, one)
+        Semantics of identity(a, one)
+          Semantics of a
+          Semantics of one
+          Fixpoint of untyped A::identity(A*, untyped)
+            Semantics of i3 = 1
+              Semantics of 1
+              Semantics of i3
+            Traversal of [ i3 = 1 ] ---> [ return i ]
+            Semantics of return i
+              Semantics of i
+        Semantics of positive
+      Traversal of [ positive = identity(a, one) ] ---> [ minusone = -1 ]
+      Semantics of minusone = -1
+        Semantics of -1
+        Semantics of minusone
+      Traversal of [ minusone = -1 ] ---> [ negative = identity(a, minusone) ]
+      Semantics of negative = identity(a, minusone)
+        Semantics of identity(a, minusone)
+          Semantics of a
+          Semantics of minusone
+          Fixpoint of untyped A::identity(A*, untyped)
+            Semantics of i3 = 1
+              Semantics of 1
+              Semantics of i3
+            Traversal of [ i3 = 1 ] ---> [ return i ]
+            Semantics of return i
+              Semantics of i
+        Semantics of negative
+      Traversal of [ negative = identity(a, minusone) ] ---> [ top = helper(this, one, a) ]
+      Semantics of top = helper(this, one, a)
+        Semantics of helper(this, one, a)
+          Semantics of this
+          Semantics of one
+          Semantics of a
+          Fixpoint of untyped tests::helper(tests*, untyped, untyped)
+            Semantics of return identity(dispatcher, i)
+              Semantics of identity(dispatcher, i)
+                Semantics of dispatcher
+                Semantics of i
+                Fixpoint of untyped A::identity(A*, untyped)
+                  Semantics of i3 = 1
+                    Semantics of 1
+                    Semantics of i3
+                  Traversal of [ i3 = 1 ] ---> [ return i ]
+                  Semantics of return i
+                    Semantics of i
+        Semantics of top
+      Traversal of [ top = helper(this, one, a) ] ---> [ ret ]
+      Semantics of ret

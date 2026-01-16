@@ -1,5 +1,8 @@
 package it.unive.lisa.listeners;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.ReportingTool;
 import it.unive.lisa.analysis.events.AnalysisEvent;
@@ -12,12 +15,10 @@ import it.unive.lisa.interprocedural.events.InterproceduralEvent;
 import it.unive.lisa.program.cfg.fixpoints.events.FixpointEvent;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-import java.io.BufferedWriter;
-import java.io.IOException;
 
 /**
- * An event listener that traces the start and end of events to a trace file,
- * constructing a timeline of how the analysis performed.
+ * An event listener that traces {@link StartEvent}s and {@link EndEvent}s to a
+ * trace file, constructing a timeline of how the analysis performed.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -26,9 +27,52 @@ public class TracingListener
 		EventListener {
 
 	/**
+	 * Levels of tracing supported.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public enum TraceLevel {
+
+		/**
+		 * Trace {@link InterproceduralEvent}s only.
+		 */
+		INTERPROCEDURAL,
+
+		/**
+		 * Trace everything admitted by {@link #INTERPROCEDURAL}, as well as
+		 * {@link FixpointEvent}s.
+		 */
+		FIXPOINT,
+
+		/**
+		 * Trace everything admitted by {@link #FIXPOINT}, as well as
+		 * {@link AnalysisEvent}s.
+		 */
+		ANALYSIS,
+
+		/**
+		 * Trace everything admitted by {@link #ANALYSIS}, as well as
+		 * {@link DomainEvent}s.
+		 */
+		DOMAIN,
+
+		/**
+		 * Trace all start and end events.
+		 */
+		ALL;
+	}
+
+	/**
 	 * The name of the trace file.
 	 */
 	public static final String TRACE_FNAME = "trace.txt";
+
+	private final TraceLevel level;
+
+	public TracingListener(
+			TraceLevel level) {
+		this.level = level;
+	}
 
 	private BufferedWriter writer;
 	private int indent;
@@ -63,8 +107,30 @@ public class TracingListener
 	public void onEvent(
 			Event event,
 			ReportingTool tool) {
-		if (!(event instanceof InterproceduralEvent || event instanceof FixpointEvent
-				|| event instanceof AnalysisEvent || event instanceof DomainEvent))
+		if (!(event instanceof StartEvent || event instanceof EndEvent))
+			return;
+
+		boolean pass = false;
+		switch (level) {
+		case ALL:
+			pass = true;
+			break;
+		case DOMAIN:
+			if (event instanceof DomainEvent)
+				pass = true;
+		case ANALYSIS:
+			if (event instanceof AnalysisEvent)
+				pass = true;
+		case FIXPOINT:
+			if (event instanceof FixpointEvent)
+				pass = true;
+		case INTERPROCEDURAL:
+			if (event instanceof InterproceduralEvent)
+				pass = true;
+		default:
+			break;
+		}
+		if (!pass)
 			return;
 
 		try {
