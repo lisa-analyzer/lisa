@@ -81,7 +81,6 @@ public class VisualizationTest
 		conf.testDir = "visualization";
 		conf.testSubDir = "trace";
 		conf.programFile = "visualization.imp";
-		conf.forceUpdate = true;
 		perform(conf);
 	}
 }

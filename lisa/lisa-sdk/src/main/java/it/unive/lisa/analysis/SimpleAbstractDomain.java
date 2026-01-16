@@ -1,5 +1,17 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.events.DomainAssignEnd;
+import it.unive.lisa.analysis.events.DomainAssignStart;
+import it.unive.lisa.analysis.events.DomainAssumeEnd;
+import it.unive.lisa.analysis.events.DomainAssumeStart;
+import it.unive.lisa.analysis.events.DomainSatisfiesEnd;
+import it.unive.lisa.analysis.events.DomainSatisfiesStart;
+import it.unive.lisa.analysis.events.DomainSmallStepEnd;
+import it.unive.lisa.analysis.events.DomainSmallStepStart;
+import it.unive.lisa.analysis.events.HeapRewriteEnd;
+import it.unive.lisa.analysis.events.HeapRewriteStart;
+import it.unive.lisa.analysis.events.SADSubsEnd;
+import it.unive.lisa.analysis.events.SADSubsStart;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
 import it.unive.lisa.analysis.heap.HeapLattice;
@@ -199,7 +211,13 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			MutableOracle mo,
 			ProgramPoint pp)
 			throws SemanticException {
-		if (subs != null)
+		if (subs != null) {
+			T t0 = mo.type;
+			V v0 = mo.value;
+
+			if (events != null)
+				events.post(new SADSubsStart<>(v0, t0, subs));
+
 			for (HeapReplacement repl : subs) {
 				T t = typeDomain.applyReplacement(mo.type, repl, pp, mo);
 				V v = valueDomain.applyReplacement(mo.value, repl, pp, mo);
@@ -208,6 +226,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				mo.type = t;
 				mo.value = v;
 			}
+
+			if (events != null)
+				events.post(new SADSubsEnd<>(v0, mo.value, t0, mo.type, subs));
+		}
 	}
 
 	@Override
@@ -219,19 +241,52 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			throws SemanticException {
 		MutableOracle mo = new MutableOracle(state);
 
+		if (events != null)
+			events.post(new DomainAssignStart<>(getClass(), state, id, expression));
+
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
+			if (events != null)
+				events.post(new DomainAssignStart<>(heapDomain.getClass(), state.heapState, id, expression));
 			mo.heap = heapDomain.assign(mo.heap, id, expression, pp, mo).getLeft();
+			if (events != null) {
+				events.post(new DomainAssignEnd<>(heapDomain.getClass(), state.heapState, mo.heap, id, expression));
+				events.post(new DomainAssignStart<>(typeDomain.getClass(), state.typeState, id, expression));
+			}
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
+			if (events != null) {
+				events.post(new DomainAssignEnd<>(typeDomain.getClass(), state.typeState, mo.type, id, expression));
+				events.post(new DomainAssignStart<>(valueDomain.getClass(), state.valueState, id, expression));
+			}
 			mo.value = valueDomain.assign(mo.value, id, ve, pp, mo);
-			return new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainAssignEnd<>(valueDomain.getClass(), state.valueState, mo.value, id, expression));
+
+			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainAssignEnd<>(getClass(), state, res, id, expression));
+			return res;
 		}
 
+		if (events != null)
+			events.post(new DomainAssignStart<>(heapDomain.getClass(), state.heapState, id, expression));
 		Pair<H, List<HeapReplacement>> heap = heapDomain.assign(mo.heap, id, expression, pp, mo);
 		mo.heap = heap.getLeft();
+
+		if (events != null) {
+			events.post(new DomainAssignEnd<>(heapDomain.getClass(), state.heapState, mo.heap, id, expression));
+			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
+		}
+
 		ExpressionSet exprs = heapDomain.rewrite(mo.heap, expression, pp, mo);
-		if (exprs.isEmpty())
-			return state.bottom();
+		if (events != null)
+			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
+		if (exprs.isEmpty()) {
+			SimpleAbstractState<H, V, T> res = state.bottom();
+			if (events != null)
+				events.post(new DomainAssignEnd<>(getClass(), state, res, id, expression));
+			return res;
+		}
 
 		applySubstitution(heap.getRight(), mo, pp);
 
@@ -240,9 +295,21 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
+			if (events != null)
+				events.post(new DomainAssignStart<>(typeDomain.getClass(), state.typeState, id, expr));
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
+			if (events != null) {
+				events.post(new DomainAssignEnd<>(typeDomain.getClass(), state.typeState, mo.type, id, expr));
+				events.post(new DomainAssignStart<>(valueDomain.getClass(), state.valueState, id, expr));
+			}
 			mo.value = valueDomain.assign(mo.value, id, ve, pp, mo);
-			return new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainAssignEnd<>(valueDomain.getClass(), state.valueState, mo.value, id, expr));
+
+			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainAssignEnd<>(getClass(), state, res, id, expression));
+			return res;
 		}
 
 		T typeRes = mo.type.bottom();
@@ -252,15 +319,26 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type;
+			if (events != null)
+				events.post(new DomainAssignStart<>(typeDomain.getClass(), state.typeState, id, expr));
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
+			if (events != null) {
+				events.post(new DomainAssignEnd<>(typeDomain.getClass(), state.typeState, mo.type, id, expr));
+				events.post(new DomainAssignStart<>(valueDomain.getClass(), state.valueState, id, expr));
+			}
 			V v = valueDomain.assign(mo.value, id, ve, pp, mo);
+			if (events != null)
+				events.post(new DomainAssignEnd<>(valueDomain.getClass(), state.valueState, mo.value, id, expr));
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
 			// we rollback the pre-eval state for the next expression
 			mo.type = t;
 		}
 
-		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+		SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+		if (events != null)
+			events.post(new DomainAssignEnd<>(getClass(), state, res, id, expression));
+		return res;
 	}
 
 	@Override
@@ -271,19 +349,50 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			throws SemanticException {
 		MutableOracle mo = new MutableOracle(state);
 
+		if (events != null)
+			events.post(new DomainSmallStepStart<>(getClass(), state, expression));
+
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
+			if (events != null)
+				events.post(new DomainSmallStepStart<>(heapDomain.getClass(), state.heapState, expression));
 			mo.heap = heapDomain.smallStepSemantics(mo.heap, expression, pp, mo).getLeft();
+			if (events != null) {
+				events.post(new DomainSmallStepEnd<>(heapDomain.getClass(), state.heapState, mo.heap, expression));
+				events.post(new DomainSmallStepStart<>(typeDomain.getClass(), state.typeState, expression));
+			}
 			mo.type = typeDomain.smallStepSemantics(mo.type, ve, pp, mo);
+			if (events != null) {
+				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), state.typeState, mo.type, expression));
+				events.post(new DomainSmallStepStart<>(valueDomain.getClass(), state.valueState, expression));
+			}
 			mo.value = valueDomain.smallStepSemantics(mo.value, ve, pp, mo);
-			return new SimpleAbstractState<>(mo);
+
+			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainSmallStepEnd<>(getClass(), state, res, expression));
+			return res;
 		}
 
+		if (events != null)
+			events.post(new DomainSmallStepStart<>(heapDomain.getClass(), state.heapState, expression));
 		Pair<H, List<HeapReplacement>> heap = heapDomain.smallStepSemantics(mo.heap, expression, pp, mo);
 		mo.heap = heap.getLeft();
+
+		if (events != null) {
+			events.post(new DomainSmallStepEnd<>(heapDomain.getClass(), state.heapState, mo.heap, expression));
+			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
+		}
+
 		ExpressionSet exprs = heapDomain.rewrite(heap.getLeft(), expression, pp, mo);
-		if (exprs.isEmpty())
-			return state.bottom();
+		if (events != null)
+			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
+		if (exprs.isEmpty()) {
+			SimpleAbstractState<H, V, T> res = state.bottom();
+			if (events != null)
+				events.post(new DomainSmallStepEnd<>(getClass(), state, res, expression));
+			return res;
+		}
 
 		applySubstitution(heap.getRight(), mo, pp);
 
@@ -292,13 +401,25 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
+			if (events != null)
+				events.post(new DomainSmallStepStart<>(typeDomain.getClass(), state.typeState, expr));
 			mo.type = typeDomain.smallStepSemantics(mo.type, ve, pp, mo);
 			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
 				// if the expression is a memory allocation, its type is
 				// registered in the type domain
 				mo.type = typeDomain.assign(mo.type, (Identifier) ve, ve, pp, mo);
+			if (events != null) {
+				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), state.typeState, mo.type, expr));
+				events.post(new DomainSmallStepStart<>(valueDomain.getClass(), state.valueState, expr));
+			}
 			mo.value = valueDomain.smallStepSemantics(mo.value, ve, pp, mo);
-			return new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainSmallStepEnd<>(valueDomain.getClass(), state.valueState, mo.value, expr));
+
+			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainSmallStepEnd<>(getClass(), state, res, expression));
+			return res;
 		}
 
 		T typeRes = mo.type.bottom();
@@ -308,19 +429,30 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type;
+			if (events != null)
+				events.post(new DomainSmallStepStart<>(typeDomain.getClass(), state.typeState, expr));
 			mo.type = typeDomain.smallStepSemantics(mo.type, ve, pp, mo);
 			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
 				// if the expression is a memory allocation, its type is
 				// registered in the type domain
 				mo.type = typeDomain.assign(mo.type, (Identifier) ve, ve, pp, mo);
+			if (events != null) {
+				events.post(new DomainSmallStepEnd<>(typeDomain.getClass(), state.typeState, mo.type, expr));
+				events.post(new DomainSmallStepStart<>(valueDomain.getClass(), state.valueState, expr));
+			}
 			V v = valueDomain.smallStepSemantics(mo.value, ve, pp, mo);
+			if (events != null)
+				events.post(new DomainSmallStepEnd<>(valueDomain.getClass(), state.valueState, mo.value, expr));
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
 			// we rollback the pre-eval state for the next expression
 			mo.type = t;
 		}
 
-		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+		SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+		if (events != null)
+			events.post(new DomainSmallStepEnd<>(getClass(), state, res, expression));
+		return res;
 	}
 
 	@Override
@@ -332,27 +464,77 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			throws SemanticException {
 		MutableOracle mo = new MutableOracle(state);
 
+		if (events != null)
+			events.post(new DomainAssumeStart<>(getClass(), state, expression));
+
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
+			if (events != null)
+				events.post(new DomainAssumeStart<>(heapDomain.getClass(), state.heapState, expression));
 			mo.heap = heapDomain.assume(mo.heap, expression, src, dest, mo).getLeft();
-			if (mo.heap.isBottom())
-				return state.bottom();
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(heapDomain.getClass(), state.heapState, mo.heap, expression));
+			if (mo.heap.isBottom()) {
+				SimpleAbstractState<H, V, T> res = state.bottom();
+				if (events != null)
+					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				return res;
+			}
+
+			if (events != null)
+				events.post(new DomainAssumeStart<>(typeDomain.getClass(), state.typeState, expression));
 			mo.type = typeDomain.assume(mo.type, ve, src, dest, mo);
-			if (mo.type.isBottom())
-				return state.bottom();
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), state.typeState, mo.type, expression));
+			if (mo.type.isBottom()) {
+				SimpleAbstractState<H, V, T> res = state.bottom();
+				if (events != null)
+					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				return res;
+			}
+
+			if (events != null)
+				events.post(new DomainAssumeStart<>(valueDomain.getClass(), state.valueState, expression));
 			mo.value = valueDomain.assume(mo.value, ve, src, dest, mo);
-			if (mo.value.isBottom())
-				return state.bottom();
-			return new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), state.valueState, mo.value, expression));
+			if (mo.value.isBottom()) {
+				SimpleAbstractState<H, V, T> res = state.bottom();
+				if (events != null)
+					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				return res;
+			}
+
+			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+			return res;
 		}
 
+		if (events != null)
+			events.post(new DomainAssumeStart<>(heapDomain.getClass(), state.heapState, expression));
 		Pair<H, List<HeapReplacement>> heap = heapDomain.assume(mo.heap, expression, src, dest, mo);
 		mo.heap = heap.getLeft();
-		if (mo.heap.isBottom())
-			return state.bottom();
+		if (events != null)
+			events.post(new DomainAssumeEnd<>(heapDomain.getClass(), state.heapState, mo.heap, expression));
+		if (mo.heap.isBottom()) {
+			SimpleAbstractState<H, V, T> res = state.bottom();
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+			return res;
+		}
+
+		if (events != null)
+			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
 		ExpressionSet exprs = heapDomain.rewrite(mo.heap, expression, src, mo);
-		if (exprs.isEmpty())
-			return state.bottom();
+		if (events != null)
+			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
+		if (exprs.isEmpty()) {
+			SimpleAbstractState<H, V, T> res = state.bottom();
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+			return res;
+		}
 
 		applySubstitution(heap.getRight(), mo, src);
 
@@ -361,13 +543,34 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
+			if (events != null)
+				events.post(new DomainAssumeStart<>(typeDomain.getClass(), state.typeState, expr));
 			mo.type = typeDomain.assume(mo.type, ve, src, dest, mo);
-			if (mo.type.isBottom())
-				return state.bottom();
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), state.typeState, mo.type, expr));
+			if (mo.type.isBottom()) {
+				SimpleAbstractState<H, V, T> res = state.bottom();
+				if (events != null)
+					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				return res;
+			}
+
+			if (events != null)
+				events.post(new DomainAssumeStart<>(valueDomain.getClass(), state.valueState, expr));
 			mo.value = valueDomain.assume(mo.value, ve, src, dest, mo);
-			if (mo.value.isBottom())
-				return state.bottom();
-			return new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), state.valueState, mo.value, expr));
+			if (mo.value.isBottom()) {
+				SimpleAbstractState<H, V, T> res = state.bottom();
+				if (events != null)
+					events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+				return res;
+			}
+
+			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+			return res;
 		}
 
 		T typeRes = mo.type.bottom();
@@ -377,18 +580,30 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
 			T t = mo.type;
+			if (events != null)
+				events.post(new DomainAssumeStart<>(typeDomain.getClass(), state.typeState, expr));
 			mo.type = typeDomain.assume(mo.type, ve, src, dest, mo);
+			if (events != null) {
+				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), state.typeState, mo.type, expr));
+				events.post(new DomainAssumeStart<>(valueDomain.getClass(), state.valueState, expr));
+			}
 			V v = valueDomain.assume(mo.value, ve, src, dest, mo);
+			if (events != null)
+				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), state.valueState, mo.value, expr));
 			typeRes = typeRes.lub(mo.type);
 			valueRes = valueRes.lub(v);
 			// we rollback the pre-eval state for the next expression
 			mo.type = t;
 		}
 
+		SimpleAbstractState<H, V, T> res;
 		if (typeRes.isBottom() || valueRes.isBottom())
-			return state.bottom();
-
-		return new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+			res = state.bottom();
+		else
+			res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+		if (events != null)
+			events.post(new DomainAssumeEnd<>(getClass(), state, res, expression));
+		return res;
 	}
 
 	@Override
@@ -399,37 +614,92 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			throws SemanticException {
 		MutableOracle mo = new MutableOracle(state);
 
+		if (events != null)
+			events.post(new DomainSatisfiesStart<>(getClass(), state, expression));
+
+		if (events != null)
+			events.post(new DomainSatisfiesStart<>(heapDomain.getClass(), state.heapState, expression));
 		Satisfiability heapsat = heapDomain.satisfies(state.heapState, expression, pp, mo);
-		if (heapsat == Satisfiability.BOTTOM)
-			return Satisfiability.BOTTOM;
+		if (events != null)
+			events.post(new DomainSatisfiesEnd<>(heapDomain.getClass(), state.heapState, heapsat, expression));
+		if (heapsat == Satisfiability.BOTTOM) {
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(getClass(), state, heapsat, expression));
+			return heapsat;
+		}
 
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
+			if (events != null)
+				events.post(new DomainSatisfiesStart<>(typeDomain.getClass(), state.typeState, expression));
 			Satisfiability typesat = typeDomain.satisfies(mo.type, ve, pp, mo);
-			if (typesat == Satisfiability.BOTTOM)
-				return Satisfiability.BOTTOM;
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), state.typeState, typesat, expression));
+			if (typesat == Satisfiability.BOTTOM) {
+				if (events != null)
+					events.post(new DomainSatisfiesEnd<>(getClass(), state, typesat, expression));
+				return typesat;
+			}
+
+			if (events != null)
+				events.post(new DomainSatisfiesStart<>(valueDomain.getClass(), state.valueState, expression));
 			Satisfiability valuesat = valueDomain.satisfies(mo.value, ve, pp, mo);
-			if (valuesat == Satisfiability.BOTTOM)
-				return Satisfiability.BOTTOM;
-			return heapsat.glb(typesat).glb(valuesat);
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(valueDomain.getClass(), state.valueState, valuesat, expression));
+			if (valuesat == Satisfiability.BOTTOM) {
+				if (events != null)
+					events.post(new DomainSatisfiesEnd<>(getClass(), state, valuesat, expression));
+				return valuesat;
+			}
+
+			Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(getClass(), state, glb, expression));
+			return glb;
 		}
 
+		if (events != null)
+			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
 		ExpressionSet exprs = heapDomain.rewrite(mo.heap, expression, pp, mo);
-		if (exprs.isEmpty())
+		if (events != null)
+			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
+		if (exprs.isEmpty()) {
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(getClass(), state, Satisfiability.BOTTOM, expression));
 			return Satisfiability.BOTTOM;
+		}
 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
+			if (events != null)
+				events.post(new DomainSatisfiesStart<>(typeDomain.getClass(), state.typeState, expr));
 			Satisfiability typesat = typeDomain.satisfies(mo.type, ve, pp, mo);
-			if (typesat == Satisfiability.BOTTOM)
-				return Satisfiability.BOTTOM;
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), state.typeState, typesat, expr));
+			if (typesat == Satisfiability.BOTTOM) {
+				if (events != null)
+					events.post(new DomainSatisfiesEnd<>(getClass(), state, typesat, expression));
+				return typesat;
+			}
+
+			if (events != null)
+				events.post(new DomainSatisfiesStart<>(valueDomain.getClass(), state.valueState, expr));
 			Satisfiability valuesat = valueDomain.satisfies(mo.value, ve, pp, mo);
-			if (valuesat == Satisfiability.BOTTOM)
-				return Satisfiability.BOTTOM;
-			return heapsat.glb(typesat).glb(valuesat);
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(valueDomain.getClass(), state.valueState, valuesat, expr));
+			if (valuesat == Satisfiability.BOTTOM) {
+				if (events != null)
+					events.post(new DomainSatisfiesEnd<>(getClass(), state, valuesat, expression));
+				return valuesat;
+			}
+
+			Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(getClass(), state, glb, expression));
+			return glb;
 		}
 
 		Satisfiability typesat = Satisfiability.BOTTOM;
@@ -438,17 +708,66 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (!(expr instanceof ValueExpression))
 				throw new SemanticException("Rewriting failed for expression " + expr);
 			ValueExpression ve = (ValueExpression) expr;
+			if (events != null)
+				events.post(new DomainSatisfiesStart<>(typeDomain.getClass(), state.typeState, expr));
 			Satisfiability sat = typeDomain.satisfies(mo.type, ve, pp, mo);
-			if (sat == Satisfiability.BOTTOM)
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(typeDomain.getClass(), state.typeState, sat, expr));
+			if (sat == Satisfiability.BOTTOM) {
+				if (events != null)
+					events.post(new DomainSatisfiesEnd<>(getClass(), state, sat, expression));
 				return sat;
+			}
 			typesat = typesat.lub(sat);
 
+			if (events != null)
+				events.post(new DomainSatisfiesStart<>(valueDomain.getClass(), state.valueState, expr));
 			sat = valueDomain.satisfies(mo.value, ve, pp, mo);
-			if (sat == Satisfiability.BOTTOM)
+			if (events != null)
+				events.post(new DomainSatisfiesEnd<>(valueDomain.getClass(), state.valueState, sat, expr));
+			if (sat == Satisfiability.BOTTOM) {
+				if (events != null)
+					events.post(new DomainSatisfiesEnd<>(getClass(), state, sat, expression));
 				return sat;
+			}
 			valuesat = valuesat.lub(sat);
 		}
-		return heapsat.glb(typesat).glb(valuesat);
+
+		Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
+		if (events != null)
+			events.post(new DomainSatisfiesEnd<>(getClass(), state, glb, expression));
+		return glb;
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> makeLattice() {
+		return new SimpleAbstractState<>(
+				heapDomain.makeLattice(),
+				valueDomain.makeLattice(),
+				typeDomain.makeLattice());
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> onCallReturn(
+			SimpleAbstractState<H, V, T> entryState,
+			SimpleAbstractState<H, V, T> callres,
+			ProgramPoint call)
+			throws SemanticException {
+		H h = heapDomain.onCallReturn(
+				entryState.heapState,
+				callres.heapState,
+				call);
+		V v = valueDomain.onCallReturn(
+				entryState.valueState,
+				callres.valueState,
+				call);
+		T t = typeDomain.onCallReturn(
+				entryState.typeState,
+				callres.typeState,
+				call);
+		if (h == callres.heapState && v == callres.valueState && t == callres.typeState)
+			return callres;
+		return new SimpleAbstractState<>(h, v, t);
 	}
 
 	@Override
@@ -572,36 +891,4 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		}
 
 	}
-
-	@Override
-	public SimpleAbstractState<H, V, T> makeLattice() {
-		return new SimpleAbstractState<>(
-				heapDomain.makeLattice(),
-				valueDomain.makeLattice(),
-				typeDomain.makeLattice());
-	}
-
-	@Override
-	public SimpleAbstractState<H, V, T> onCallReturn(
-			SimpleAbstractState<H, V, T> entryState,
-			SimpleAbstractState<H, V, T> callres,
-			ProgramPoint call)
-			throws SemanticException {
-		H h = heapDomain.onCallReturn(
-				entryState.heapState,
-				callres.heapState,
-				call);
-		V v = valueDomain.onCallReturn(
-				entryState.valueState,
-				callres.valueState,
-				call);
-		T t = typeDomain.onCallReturn(
-				entryState.typeState,
-				callres.typeState,
-				call);
-		if (h == callres.heapState && v == callres.valueState && t == callres.typeState)
-			return callres;
-		return new SimpleAbstractState<>(h, v, t);
-	}
-
 }

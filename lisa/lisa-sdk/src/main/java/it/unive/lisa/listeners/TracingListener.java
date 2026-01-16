@@ -3,6 +3,7 @@ package it.unive.lisa.listeners;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.ReportingTool;
 import it.unive.lisa.analysis.events.AnalysisEvent;
+import it.unive.lisa.analysis.events.DomainEvent;
 import it.unive.lisa.events.EndEvent;
 import it.unive.lisa.events.Event;
 import it.unive.lisa.events.EventListener;
@@ -63,7 +64,7 @@ public class TracingListener
 			Event event,
 			ReportingTool tool) {
 		if (!(event instanceof InterproceduralEvent || event instanceof FixpointEvent
-				|| event instanceof AnalysisEvent))
+				|| event instanceof AnalysisEvent || event instanceof DomainEvent))
 			return;
 
 		try {
