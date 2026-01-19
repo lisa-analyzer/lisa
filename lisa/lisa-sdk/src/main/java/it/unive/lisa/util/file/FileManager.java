@@ -229,7 +229,7 @@ public class FileManager {
 		}
 
 		for (String file : files)
-			try (InputStream stream = getClass().getClassLoader().getResourceAsStream("html-graph/" + file)) {
+			try (InputStream stream = getClass().getClassLoader().getResourceAsStream("html-files/" + file)) {
 				String content = IOUtils.toString(stream, StandardCharsets.UTF_8);
 				int pos = file.lastIndexOf("/");
 				if (pos == -1)
