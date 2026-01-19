@@ -51,6 +51,7 @@ public class VisualizationTest
 		conf.testDir = "visualization";
 		conf.testSubDir = "html";
 		conf.programFile = "visualization.imp";
+		conf.forceUpdate=true;
 		perform(conf);
 	}
 
@@ -61,6 +62,7 @@ public class VisualizationTest
 		conf.testDir = "visualization";
 		conf.testSubDir = "html-sub";
 		conf.programFile = "visualization.imp";
+		conf.forceUpdate=true;
 		perform(conf);
 	}
 
@@ -72,6 +74,7 @@ public class VisualizationTest
 		conf.testDir = "visualization";
 		conf.testSubDir = "html-inputs";
 		conf.programFile = "visualization.imp";
+		conf.forceUpdate=true;
 		perform(conf);
 	}
 

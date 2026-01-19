@@ -1336,7 +1336,8 @@ public class ResultComparer {
 				|| ext.equals("graphml")
 				|| ext.equals("png")
 				|| ext.equals("html")
-				|| ext.equals("js");
+				|| ext.equals("js")
+				|| ext.equals("css");
 	}
 
 	/**

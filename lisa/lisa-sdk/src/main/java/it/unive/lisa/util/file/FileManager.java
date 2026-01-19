@@ -226,6 +226,7 @@ public class FileManager {
 		if (usedHtmlViewer) {
 			files.add("assets/d3.v7.min.js");
 			files.add("assets/d3-graphviz.min.js");
+			files.add("assets/style.css");
 		}
 
 		for (String file : files)
