@@ -371,27 +371,20 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 	}
 
 	@Override
-	default L visit(VariadicExpression expression, L[] values, Map<String, L[]> variadicValues, Object... params) throws SemanticException {
+	default L visit(VariadicExpression expression, L[] values, Object... params) throws SemanticException {
 		for (L val : values) {
 			if (val.isBottom()) {
 				return val;
 			}
 		}
 
-		for (Map.Entry<String, L[]> entry : variadicValues.entrySet()) {
-			for (L val : entry.getValue()) {
-				if (val.isBottom()) {
-					return val;
-				}
-			}
-		}
 
 		ProgramPoint pp = (ProgramPoint) params[1];
 		SemanticOracle oracle = (SemanticOracle) params[2];
-		return evalVariadicExpression(expression, values, variadicValues, pp, oracle);
+		return evalVariadicExpression(expression, values, pp, oracle);
 	}
 
-	default L evalVariadicExpression(VariadicExpression expression, L[] values, Map<String,L[]> variadicValues, ProgramPoint pp, SemanticOracle oracle) {
+	default L evalVariadicExpression(VariadicExpression expression, L[] values, ProgramPoint pp, SemanticOracle oracle) {
 		return top();
 	}
 

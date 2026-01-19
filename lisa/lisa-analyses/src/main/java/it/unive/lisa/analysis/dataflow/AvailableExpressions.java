@@ -193,7 +193,7 @@ public class AvailableExpressions
 		}
 
 		@Override
-		public Collection<Identifier> visit(VariadicExpression expression, Collection<Identifier>[] values, Map<String, Collection<Identifier>[]> variadicValues, Object... params) throws SemanticException {
+		public Collection<Identifier> visit(VariadicExpression expression, Collection<Identifier>[] values, Object... params) throws SemanticException {
 			return result;
 		}
 

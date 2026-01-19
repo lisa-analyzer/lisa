@@ -144,7 +144,7 @@ public class ConstantPropagation
 		}
 
 		@Override
-		public Integer visit(VariadicExpression expression, Integer[] values, Map<String, Integer[]> variadicValues, Object... params) throws SemanticException {
+		public Integer visit(VariadicExpression expression, Integer[] values, Object... params) throws SemanticException {
 			return null;
 		}
 

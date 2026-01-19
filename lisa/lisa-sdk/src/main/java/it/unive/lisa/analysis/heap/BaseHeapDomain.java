@@ -174,7 +174,6 @@ public interface BaseHeapDomain<L extends HeapLattice<L>>
 		public ExpressionSet visit(
 				VariadicExpression expression,
 				ExpressionSet[] values,
-				Map<String, ExpressionSet[]> variadicValues,
 				Object... params) throws SemanticException {
 
 				Set<SymbolicExpression> result = new HashSet<>();

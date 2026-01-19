@@ -239,7 +239,6 @@ public interface ExpressionVisitor<T> {
 	T visit(
 			VariadicExpression expression,
 			T[] values,
-			Map<String, T[]> variadicValues,
 			Object... params)
 			throws SemanticException;
 
