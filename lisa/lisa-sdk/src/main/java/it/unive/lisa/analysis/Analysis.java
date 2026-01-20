@@ -662,11 +662,11 @@ public class Analysis<
 		if (state.isBottom() || state.isTop())
 			return state;
 
-		if (events != null)
-			events.post(new AnalysisTransferThrowersStart<>(state, target, origin));
-
 		if (target instanceof Call)
 			target = ((Call) target).getSource();
+
+		if (events != null)
+			events.post(new AnalysisTransferThrowersStart<>(state, target, origin));
 
 		Set<Error> oldErrors = new HashSet<>();
 		Map<Error, ProgramState<A>> newErrors = new HashMap<>();

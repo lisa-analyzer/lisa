@@ -1,5 +1,6 @@
 package it.unive.lisa.events;
 
+import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.ReportingTool;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -56,7 +57,6 @@ public final class EventQueue
 		this.asyncQueue = new LinkedBlockingQueue<>();
 
 		this.asyncThread = new Thread(this::asyncLoop, "event-async-dispatcher");
-		this.asyncThread.setDaemon(true);
 		this.asyncThread.start();
 	}
 
@@ -78,7 +78,8 @@ public final class EventQueue
 			}
 
 		if (asyncListeners.length > 0)
-			asyncQueue.offer(event);
+			if (!asyncQueue.offer(event))
+				throw new AnalysisExecutionException("Could not post event to async listeners");
 	}
 
 	/**
@@ -88,12 +89,13 @@ public final class EventQueue
 	 *                                  waiting
 	 */
 	public void join() throws InterruptedException {
-		if (asyncListeners.length == 0)
+		if (asyncListeners.length == 0 || !running)
 			// nothing async to wait for
 			return;
 
 		DrainEvent drain = new DrainEvent();
-		asyncQueue.offer(drain);
+		if (!asyncQueue.offer(drain))
+			throw new AnalysisExecutionException("Could not post drain event to async listeners");
 		drain.latch.await();
 	}
 
@@ -119,11 +121,21 @@ public final class EventQueue
 			}
 		} catch (InterruptedException ignored) {
 			// shutdown
+			running = false;
+		} catch (Exception e) {
+			// the thread must not die silently
+			// furthermore, if the thread dies without setting running to false,
+			// the close() method will block forever
+			tool.notice("Unexpected exception in event async dispatcher: " + e.getMessage());
+			running = false;
+			throw new AnalysisExecutionException("The event async dispatcher thread raised an exception", e);
 		}
 	}
 
 	@Override
 	public void close() throws InterruptedException {
+		if (!running)
+			return;
 		join();
 		running = false;
 		asyncThread.interrupt();

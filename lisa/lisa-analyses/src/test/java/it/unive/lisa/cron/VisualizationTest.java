@@ -3,6 +3,7 @@ package it.unive.lisa.cron;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.listeners.FlameGraphListener;
 import it.unive.lisa.listeners.TracingListener;
 import it.unive.lisa.listeners.TracingListener.TraceLevel;
 import it.unive.lisa.outputs.DotResults;
@@ -51,7 +52,6 @@ public class VisualizationTest
 		conf.testDir = "visualization";
 		conf.testSubDir = "html";
 		conf.programFile = "visualization.imp";
-		conf.forceUpdate=true;
 		perform(conf);
 	}
 
@@ -62,7 +62,6 @@ public class VisualizationTest
 		conf.testDir = "visualization";
 		conf.testSubDir = "html-sub";
 		conf.programFile = "visualization.imp";
-		conf.forceUpdate=true;
 		perform(conf);
 	}
 
@@ -74,7 +73,6 @@ public class VisualizationTest
 		conf.testDir = "visualization";
 		conf.testSubDir = "html-inputs";
 		conf.programFile = "visualization.imp";
-		conf.forceUpdate=true;
 		perform(conf);
 	}
 
@@ -124,6 +122,56 @@ public class VisualizationTest
 		conf.asynchronousListeners.add(new TracingListener(TraceLevel.ALL));
 		conf.testDir = "visualization";
 		conf.testSubDir = "all-trace";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testInterproceduralFlamegraph() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new FlameGraphListener(TraceLevel.INTERPROCEDURAL));
+		conf.testDir = "visualization";
+		conf.testSubDir = "interproc-flame";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testFixpointFlamegraph() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new FlameGraphListener(TraceLevel.FIXPOINT));
+		conf.testDir = "visualization";
+		conf.testSubDir = "fix-flame";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testAnalysisFlamegraph() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new FlameGraphListener(TraceLevel.ANALYSIS));
+		conf.testDir = "visualization";
+		conf.testSubDir = "analysis-flame";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testDomainFlamegraph() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new FlameGraphListener(TraceLevel.DOMAIN));
+		conf.testDir = "visualization";
+		conf.testSubDir = "domain-flame";
+		conf.programFile = "visualization.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testAllFlamegraph() {
+		TestConfiguration conf = config();
+		conf.asynchronousListeners.add(new FlameGraphListener(TraceLevel.ALL));
+		conf.testDir = "visualization";
+		conf.testSubDir = "all-flame";
 		conf.programFile = "visualization.imp";
 		perform(conf);
 	}

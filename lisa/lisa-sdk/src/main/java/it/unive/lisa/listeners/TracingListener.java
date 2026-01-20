@@ -99,6 +99,16 @@ public class TracingListener
 	@Override
 	public void afterExecution(
 			ReportingTool tool) {
+		if (!running.isEmpty()) {
+			int count = running.size();
+			String missing = "";
+			while (!running.isEmpty()) {
+				StartEvent pop = (StartEvent) running.pop();
+				missing += "\n - (" + pop.getClass().getSimpleName() + ") " + pop.getTarget();
+			}
+			tool.notice(count + " events not closed: " + missing);
+		}
+
 		try {
 			writer.flush();
 			writer.close();
@@ -148,7 +158,18 @@ public class TracingListener
 					writer.flush();
 			} else if (event instanceof EndEvent) {
 				indent--;
-				running.pop();
+				Event ended = running.pop();
+				if (!((StartEvent) ended).getTarget().equals(((EndEvent) event).getTarget())) {
+					tool.notice("Unmatched end event: expected "
+							+ ((StartEvent) ended).getTarget()
+							+ " (of type "
+							+ ended.getClass().getSimpleName()
+							+ ") but found "
+							+ ((EndEvent) event).getTarget()
+							+ " (of type "
+							+ event.getClass().getSimpleName()
+							+ ")");
+				}
 			}
 		} catch (IOException e) {
 			onError(event, e, tool);

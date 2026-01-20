@@ -365,6 +365,9 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(new DomainSmallStepStart<>(valueDomain.getClass(), state.valueState, expression));
 			}
 			mo.value = valueDomain.smallStepSemantics(mo.value, ve, pp, mo);
+			if (events != null)
+				events.post(
+						new DomainSmallStepEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, expression));
 
 			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)

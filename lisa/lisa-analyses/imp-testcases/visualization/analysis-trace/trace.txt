@@ -22,7 +22,7 @@ Program-wide fixpoint
             Traversal of [ i1 = 0 ] ---> [ ret ]
             Semantics of ret
               Analysis: Small step semantics of skip
-          Analysis: Transferring throwers from untyped A::A(A*) [at 'imp-testcases/visualization/visualization.imp':2:4] to [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
+          Analysis: Transferring throwers from untyped A::A(A*) [at 'imp-testcases/visualization/visualization.imp':2:4] to A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
           Analysis: Returning from call [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
           Analysis: Small step semantics of skip
         Semantics of a
@@ -91,7 +91,7 @@ Program-wide fixpoint
                   Analysis: Small step semantics of 1
                 Analysis: Assignment of ret_value@getOne to 1
             Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
-            Analysis: Transferring throwers from untyped A::getOne(A*) [at 'imp-testcases/visualization/visualization.imp':5:4] to [1 targets] getOne(a)
+            Analysis: Transferring throwers from untyped A::getOne(A*) [at 'imp-testcases/visualization/visualization.imp':5:4] to getOne(a)
             Analysis: Returning from call [1 targets] getOne(a)
           Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
           Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
@@ -125,7 +125,7 @@ Program-wide fixpoint
                 Analysis: Small step semantics of i
               Analysis: Assignment of ret_value@getPositive to i
           Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
-          Analysis: Transferring throwers from untyped A::getPositive(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':12:4] to [1 targets] getPositive(a, getOne(a))
+          Analysis: Transferring throwers from untyped A::getPositive(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':12:4] to getPositive(a, getOne(a))
           Analysis: Returning from call [1 targets] getPositive(a, getOne(a))
         Semantics of one
           Analysis: Small step semantics of one
@@ -152,7 +152,7 @@ Program-wide fixpoint
                 Analysis: Small step semantics of i
               Analysis: Assignment of ret_value@identity to i
           Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
-          Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to [1 targets] identity(a, one)
+          Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(a, one)
           Analysis: Returning from call [1 targets] identity(a, one)
         Semantics of positive
           Analysis: Small step semantics of positive
@@ -186,7 +186,7 @@ Program-wide fixpoint
                 Analysis: Small step semantics of i
               Analysis: Assignment of ret_value@identity to i
           Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
-          Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to [1 targets] identity(a, minusone)
+          Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(a, minusone)
           Analysis: Returning from call [1 targets] identity(a, minusone)
         Semantics of negative
           Analysis: Small step semantics of negative
@@ -225,11 +225,11 @@ Program-wide fixpoint
                       Analysis: Small step semantics of i
                     Analysis: Assignment of ret_value@identity to i
                 Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
-                Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to [1 targets] identity(dispatcher, i)
+                Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(dispatcher, i)
                 Analysis: Returning from call [1 targets] identity(dispatcher, i)
               Analysis: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
           Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
-          Analysis: Transferring throwers from untyped tests::helper(tests*, untyped, untyped) [at 'imp-testcases/visualization/visualization.imp':37:4] to [1 targets] helper(this, one, a)
+          Analysis: Transferring throwers from untyped tests::helper(tests*, untyped, untyped) [at 'imp-testcases/visualization/visualization.imp':37:4] to helper(this, one, a)
           Analysis: Returning from call [1 targets] helper(this, one, a)
         Semantics of top
           Analysis: Small step semantics of top

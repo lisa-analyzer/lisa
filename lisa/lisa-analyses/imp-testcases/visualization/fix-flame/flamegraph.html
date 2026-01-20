@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Analysis Flame Graph</title>
+
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
+
+	<script src="assets/d3.v7.min.js"></script>
+	<script src="assets/d3-graphviz.min.js"></script>
+	<link rel="stylesheet" href="assets/style.css">
+	</link>
+</head>
+
+<body>
+	<div class="box">
+		<header class="row header">
+			<img src="https://raw.githubusercontent.com/lisa-analyzer/lisa/master/logo.png" alt="LiSA logo" />
+			<h1>Analysis Flame Graph</h1>
+			<input id="search" type="text" class="searchbar" placeholder="Search node..." />
+			<input id="next" type="button" value="Next" class="button" disabled />
+			<input id="prev" type="button" value="Previous" class="button" disabled />
+			<button id="centerButton" class="button">Center graph</button>
+		</header>
+		<div id="heatmap-chart"></div>
+		<div class="heatmap-tooltip" id="heatmap-tooltip"></div>
+	</div>
+	<script>
+		/*<![CDATA[*/
+		const graph = "{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"24856383\",\"start_ns\":\"19937534\",\"text\":\"Semantics of #TOP#\"},{\"children\":[],\"end_ns\":\"25433285\",\"start_ns\":\"24891859\",\"text\":\"Semantics of this\"},{\"children\":[{\"children\":[{\"children\":[{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"75688722\",\"start_ns\":\"75589828\",\"text\":\"Semantics of 0\"},{\"children\":[],\"end_ns\":\"76659432\",\"start_ns\":\"75698004\",\"text\":\"Semantics of i1\"}],\"end_ns\":\"76947045\",\"start_ns\":\"75586321\",\"text\":\"Semantics of i1 = 0\"},{\"children\":[],\"end_ns\":\"81285021\",\"start_ns\":\"77548647\",\"text\":\"Traversal of [ i1 = 0 ] ---> [ ret ]\"},{\"children\":[],\"end_ns\":\"81407565\",\"start_ns\":\"81367862\",\"text\":\"Semantics of ret\"}],\"end_ns\":\"81519590\",\"start_ns\":\"75460467\",\"text\":\"Fixpoint of untyped A::A(A*)\"}],\"end_ns\":\"90060499\",\"start_ns\":\"28594699\",\"text\":\"Semantics of new A()\"},{\"children\":[],\"end_ns\":\"90136838\",\"start_ns\":\"90069742\",\"text\":\"Semantics of a\"}],\"end_ns\":\"90270544\",\"start_ns\":\"28583397\",\"text\":\"Semantics of a = new A()\"},{\"children\":[],\"end_ns\":\"90528242\",\"start_ns\":\"90371355\",\"text\":\"Traversal of [ a = new A() ] ---> [ one = getPositive(a, getOne(a)) ]\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"90645567\",\"start_ns\":\"90575219\",\"text\":\"Semantics of a\"},{\"children\":[{\"children\":[],\"end_ns\":\"90694483\",\"start_ns\":\"90664330\",\"text\":\"Semantics of a\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"95494547\",\"start_ns\":\"91575822\",\"text\":\"Semantics of new tests()\"},{\"children\":[],\"end_ns\":\"100891887\",\"start_ns\":\"95548341\",\"text\":\"Semantics of rec\"}],\"end_ns\":\"101176018\",\"start_ns\":\"91572524\",\"text\":\"Semantics of rec = new tests()\"},{\"children\":[],\"end_ns\":\"101361408\",\"start_ns\":\"101272835\",\"text\":\"Traversal of [ rec = new tests() ] ---> [ x = open(rec) ]\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"101450991\",\"start_ns\":\"101398727\",\"text\":\"Semantics of rec\"}],\"end_ns\":\"101926583\",\"start_ns\":\"101396601\",\"text\":\"Semantics of open(rec)\"},{\"children\":[],\"end_ns\":\"101979977\",\"start_ns\":\"101941788\",\"text\":\"Semantics of x\"}],\"end_ns\":\"102239371\",\"start_ns\":\"101393142\",\"text\":\"Semantics of x = open(rec)\"},{\"children\":[],\"end_ns\":\"102912885\",\"start_ns\":\"102746270\",\"text\":\"Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"103010520\",\"start_ns\":\"102956329\",\"text\":\"Semantics of x\"},{\"children\":[],\"end_ns\":\"103027297\",\"start_ns\":\"103013716\",\"text\":\"Semantics of 10\"}],\"end_ns\":\"114330156\",\"start_ns\":\"102953318\",\"text\":\"Semantics of <(x, 10)\"},{\"children\":[],\"end_ns\":\"131655267\",\"start_ns\":\"114963075\",\"text\":\"Traversal of [ <(x, 10) ] -T-> [ x = +(x, 1) ]\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"131774263\",\"start_ns\":\"131708355\",\"text\":\"Semantics of x\"},{\"children\":[],\"end_ns\":\"131793445\",\"start_ns\":\"131778397\",\"text\":\"Semantics of 1\"}],\"end_ns\":\"136668947\",\"start_ns\":\"131706628\",\"text\":\"Semantics of +(x, 1)\"},{\"children\":[],\"end_ns\":\"136893144\",\"start_ns\":\"136715545\",\"text\":\"Semantics of x\"}],\"end_ns\":\"141903134\",\"start_ns\":\"131703040\",\"text\":\"Semantics of x = +(x, 1)\"},{\"children\":[],\"end_ns\":\"142970782\",\"start_ns\":\"142815137\",\"text\":\"Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]\"},{\"children\":[],\"end_ns\":\"143057493\",\"start_ns\":\"143001438\",\"text\":\"Traversal of [ x = +(x, 1) ] ---> [ <(x, 10) ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"145112542\",\"start_ns\":\"145055789\",\"text\":\"Semantics of x\"},{\"children\":[],\"end_ns\":\"145144320\",\"start_ns\":\"145115931\",\"text\":\"Semantics of 10\"}],\"end_ns\":\"145593158\",\"start_ns\":\"145051297\",\"text\":\"Semantics of <(x, 10)\"},{\"children\":[],\"end_ns\":\"149763584\",\"start_ns\":\"147035633\",\"text\":\"Traversal of [ <(x, 10) ] -F-> [ return 1 ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"150138327\",\"start_ns\":\"150080553\",\"text\":\"Semantics of 1\"}],\"end_ns\":\"150784927\",\"start_ns\":\"150056657\",\"text\":\"Semantics of return 1\"}],\"end_ns\":\"150929716\",\"start_ns\":\"91448331\",\"text\":\"Fixpoint of untyped A::getOne(A*)\"}],\"end_ns\":\"152358007\",\"start_ns\":\"90653349\",\"text\":\"Semantics of getOne(a)\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"155006231\",\"start_ns\":\"154939099\",\"text\":\"Semantics of i\"},{\"children\":[],\"end_ns\":\"155032620\",\"start_ns\":\"155010410\",\"text\":\"Semantics of 0\"}],\"end_ns\":\"157572242\",\"start_ns\":\"154933889\",\"text\":\"Semantics of <=(i, 0)\"},{\"children\":[],\"end_ns\":\"158099557\",\"start_ns\":\"157775482\",\"text\":\"Traversal of [ <=(i, 0) ] -T-> [ i = 1 ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"158134789\",\"start_ns\":\"158115234\",\"text\":\"Semantics of 1\"},{\"children\":[],\"end_ns\":\"158181701\",\"start_ns\":\"158138568\",\"text\":\"Semantics of i\"}],\"end_ns\":\"158236313\",\"start_ns\":\"158111790\",\"text\":\"Semantics of i = 1\"},{\"children\":[],\"end_ns\":\"158642612\",\"start_ns\":\"158346437\",\"text\":\"Traversal of [ <=(i, 0) ] -F-> [ i = 10 ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"158696154\",\"start_ns\":\"158676605\",\"text\":\"Semantics of 10\"},{\"children\":[],\"end_ns\":\"158741864\",\"start_ns\":\"158705017\",\"text\":\"Semantics of i\"}],\"end_ns\":\"160218339\",\"start_ns\":\"158673292\",\"text\":\"Semantics of i = 10\"},{\"children\":[],\"end_ns\":\"160394976\",\"start_ns\":\"160344001\",\"text\":\"Traversal of [ i = 1 ] ---> [ return i ]\"},{\"children\":[],\"end_ns\":\"160463611\",\"start_ns\":\"160428038\",\"text\":\"Traversal of [ i = 10 ] ---> [ return i ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"160588560\",\"start_ns\":\"160540951\",\"text\":\"Semantics of i\"}],\"end_ns\":\"160700620\",\"start_ns\":\"160537702\",\"text\":\"Semantics of return i\"}],\"end_ns\":\"160760449\",\"start_ns\":\"154729071\",\"text\":\"Fixpoint of untyped A::getPositive(A*, untyped)\"}],\"end_ns\":\"161261345\",\"start_ns\":\"90565556\",\"text\":\"Semantics of getPositive(a, getOne(a))\"},{\"children\":[],\"end_ns\":\"161309508\",\"start_ns\":\"161268109\",\"text\":\"Semantics of one\"}],\"end_ns\":\"161400966\",\"start_ns\":\"90561900\",\"text\":\"Semantics of one = getPositive(a, getOne(a))\"},{\"children\":[],\"end_ns\":\"163598956\",\"start_ns\":\"161481984\",\"text\":\"Traversal of [ one = getPositive(a, getOne(a)) ] ---> [ positive = identity(a, one) ]\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"163735588\",\"start_ns\":\"163665367\",\"text\":\"Semantics of a\"},{\"children\":[],\"end_ns\":\"163772602\",\"start_ns\":\"163741852\",\"text\":\"Semantics of one\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"169555889\",\"start_ns\":\"169536794\",\"text\":\"Semantics of 1\"},{\"children\":[],\"end_ns\":\"169594810\",\"start_ns\":\"169558544\",\"text\":\"Semantics of i3\"}],\"end_ns\":\"169704451\",\"start_ns\":\"169534021\",\"text\":\"Semantics of i3 = 1\"},{\"children\":[],\"end_ns\":\"169808014\",\"start_ns\":\"169747240\",\"text\":\"Traversal of [ i3 = 1 ] ---> [ return i ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"169864383\",\"start_ns\":\"169829674\",\"text\":\"Semantics of i\"}],\"end_ns\":\"169956169\",\"start_ns\":\"169827071\",\"text\":\"Semantics of return i\"}],\"end_ns\":\"169993759\",\"start_ns\":\"169425634\",\"text\":\"Fixpoint of untyped A::identity(A*, untyped)\"}],\"end_ns\":\"170386689\",\"start_ns\":\"163663262\",\"text\":\"Semantics of identity(a, one)\"},{\"children\":[],\"end_ns\":\"170428357\",\"start_ns\":\"170391594\",\"text\":\"Semantics of positive\"}],\"end_ns\":\"170556592\",\"start_ns\":\"163657253\",\"text\":\"Semantics of positive = identity(a, one)\"},{\"children\":[],\"end_ns\":\"170705427\",\"start_ns\":\"170636296\",\"text\":\"Traversal of [ positive = identity(a, one) ] ---> [ minusone = -1 ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"170748909\",\"start_ns\":\"170729498\",\"text\":\"Semantics of -1\"},{\"children\":[],\"end_ns\":\"170782952\",\"start_ns\":\"170752299\",\"text\":\"Semantics of minusone\"}],\"end_ns\":\"174303016\",\"start_ns\":\"170726937\",\"text\":\"Semantics of minusone = -1\"},{\"children\":[],\"end_ns\":\"175308063\",\"start_ns\":\"175087142\",\"text\":\"Traversal of [ minusone = -1 ] ---> [ negative = identity(a, minusone) ]\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"175846327\",\"start_ns\":\"175529463\",\"text\":\"Semantics of a\"},{\"children\":[],\"end_ns\":\"177910245\",\"start_ns\":\"175876806\",\"text\":\"Semantics of minusone\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"184901814\",\"start_ns\":\"184852378\",\"text\":\"Semantics of 1\"},{\"children\":[],\"end_ns\":\"184981075\",\"start_ns\":\"184909761\",\"text\":\"Semantics of i3\"}],\"end_ns\":\"185240469\",\"start_ns\":\"184835331\",\"text\":\"Semantics of i3 = 1\"},{\"children\":[],\"end_ns\":\"185411700\",\"start_ns\":\"185343314\",\"text\":\"Traversal of [ i3 = 1 ] ---> [ return i ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"185501209\",\"start_ns\":\"185448847\",\"text\":\"Semantics of i\"}],\"end_ns\":\"185653490\",\"start_ns\":\"185440416\",\"text\":\"Semantics of return i\"}],\"end_ns\":\"185692829\",\"start_ns\":\"181542867\",\"text\":\"Fixpoint of untyped A::identity(A*, untyped)\"}],\"end_ns\":\"186074349\",\"start_ns\":\"175501616\",\"text\":\"Semantics of identity(a, minusone)\"},{\"children\":[],\"end_ns\":\"186117788\",\"start_ns\":\"186084494\",\"text\":\"Semantics of negative\"}],\"end_ns\":\"186242797\",\"start_ns\":\"175462156\",\"text\":\"Semantics of negative = identity(a, minusone)\"},{\"children\":[],\"end_ns\":\"186394344\",\"start_ns\":\"186318738\",\"text\":\"Traversal of [ negative = identity(a, minusone) ] ---> [ top = helper(this, one, a) ]\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"186455227\",\"start_ns\":\"186428822\",\"text\":\"Semantics of this\"},{\"children\":[],\"end_ns\":\"186481547\",\"start_ns\":\"186457280\",\"text\":\"Semantics of one\"},{\"children\":[],\"end_ns\":\"186504946\",\"start_ns\":\"186482949\",\"text\":\"Semantics of a\"},{\"children\":[{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"189895603\",\"start_ns\":\"189789817\",\"text\":\"Semantics of dispatcher\"},{\"children\":[],\"end_ns\":\"190000637\",\"start_ns\":\"189898941\",\"text\":\"Semantics of i\"},{\"children\":[{\"children\":[{\"children\":[],\"end_ns\":\"191695944\",\"start_ns\":\"191660680\",\"text\":\"Semantics of 1\"},{\"children\":[],\"end_ns\":\"191787067\",\"start_ns\":\"191700880\",\"text\":\"Semantics of i3\"}],\"end_ns\":\"192244996\",\"start_ns\":\"191655029\",\"text\":\"Semantics of i3 = 1\"},{\"children\":[],\"end_ns\":\"192832614\",\"start_ns\":\"192329859\",\"text\":\"Traversal of [ i3 = 1 ] ---> [ return i ]\"},{\"children\":[{\"children\":[],\"end_ns\":\"192984365\",\"start_ns\":\"192896759\",\"text\":\"Semantics of i\"}],\"end_ns\":\"193178710\",\"start_ns\":\"192892852\",\"text\":\"Semantics of return i\"}],\"end_ns\":\"193238922\",\"start_ns\":\"191506719\",\"text\":\"Fixpoint of untyped A::identity(A*, untyped)\"}],\"end_ns\":\"194055985\",\"start_ns\":\"189788560\",\"text\":\"Semantics of identity(dispatcher, i)\"}],\"end_ns\":\"194326584\",\"start_ns\":\"189762910\",\"text\":\"Semantics of return identity(dispatcher, i)\"}],\"end_ns\":\"194398556\",\"start_ns\":\"189630389\",\"text\":\"Fixpoint of untyped tests::helper(tests*, untyped, untyped)\"}],\"end_ns\":\"195170607\",\"start_ns\":\"186427204\",\"text\":\"Semantics of helper(this, one, a)\"},{\"children\":[],\"end_ns\":\"195256161\",\"start_ns\":\"195193873\",\"text\":\"Semantics of top\"}],\"end_ns\":\"195598259\",\"start_ns\":\"186424405\",\"text\":\"Semantics of top = helper(this, one, a)\"},{\"children\":[],\"end_ns\":\"196034913\",\"start_ns\":\"195682382\",\"text\":\"Traversal of [ top = helper(this, one, a) ] ---> [ ret ]\"},{\"children\":[],\"end_ns\":\"196238621\",\"start_ns\":\"196176430\",\"text\":\"Semantics of ret\"}],\"end_ns\":\"196371953\",\"start_ns\":\"26687772\",\"text\":\"Fixpoint of untyped tests::main(tests*)\"}],\"end_ns\":\"199208754\",\"start_ns\":\"2838772\",\"text\":\"Program-wide fixpoint iteration 1\"}],\"end_ns\":\"199408132\",\"start_ns\":\"0\",\"text\":\"Program-wide fixpoint\"}";
+		/*]]>*/
+
+		// flatten tree
+		const nodes = [];
+		function walk(node, depth = 0) {
+			const text = String(node.text);
+			const start = Number(node.start_ns);
+			const end = Number(node.end_ns);
+			if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) {
+				console.log("Discarding data at depth " + depth + " (" + text + "): invalid start or end time. Graph will be incomplete.");
+				console.log("start: " + start + ", end: " + end);
+				return;
+			}
+
+			const duration = end - start;
+			nodes.push({text, start, end, duration, depth});
+			for (const c of node.children || []) walk(c, depth + 1);
+		}
+		walk(JSON.parse(graph));
+
+		// layout
+		const rowHeight = 22;
+		const width = window.innerWidth;
+		const maxDepth = d3.max(nodes, d => d.depth);
+		const height = (maxDepth + 2) * rowHeight;
+		const minTime = d3.min(nodes, d => d.start);
+		const maxTime = d3.max(nodes, d => d.end);
+		const xScale = d3.scaleLinear()
+			.domain([minTime, maxTime])
+			.range([0, width]);
+		const colorScale = d3.scaleSequential()
+			.domain(d3.extent(nodes, d => d.duration))
+			.interpolator(d3.interpolateYlOrRd);
+
+		// SVG & zoom
+		const svg = d3.select("#heatmap-chart")
+			.append("svg")
+			.attr("width", width)
+			.attr("height", height);
+		const zoomLayer = svg.append("g");
+		const zoom = d3.zoom()
+			.scaleExtent([0.1, 50])
+			.on("zoom", (event) => {
+				zoomLayer.attr("transform", event.transform);
+				updateLabels();
+			});
+		svg.call(zoom);
+
+		// draw nodes
+		const tooltip = d3.select("#heatmap-tooltip");
+		function showTooltip(event, d) {
+			tooltip
+				.style("opacity", 1)
+				.html(`<b>${d.text}</b><br/>${(d.duration / 1e6).toFixed(2)} ms`);
+
+			moveTooltip(event);
+		}
+		function moveTooltip(event) {
+			const pad = 12;
+			const w = tooltip.node().offsetWidth;
+			const h = tooltip.node().offsetHeight;
+
+			let x = event.pageX + pad;
+			let y = event.pageY + pad;
+
+			if (x + w > window.innerWidth) x = event.pageX - w - pad;
+			if (y + h > window.innerHeight) y = event.pageY - h - pad;
+
+			tooltip.style("left", x + "px").style("top", y + "px");
+		}
+		function hideTooltip() {
+			tooltip.style("opacity", 0);
+		}
+		const rects = zoomLayer.selectAll("rect")
+			.data(nodes)
+			.enter()
+			.append("rect")
+			.attr("class", "heatmap-node")
+			.attr("x", d => xScale(d.start))
+			.attr("y", d => d.depth * rowHeight)
+			.attr("width", d => xScale(d.end) - xScale(d.start))
+			.attr("height", rowHeight - 2)
+			.attr("fill", d => colorScale(d.duration))
+			.on("mouseenter", showTooltip)
+			.on("mousemove", moveTooltip)
+			.on("mouseleave", hideTooltip);
+
+		// labels (elided)
+		const labels = zoomLayer.selectAll("text")
+			.data(nodes)
+			.enter()
+			.append("text")
+			.attr("class", "heatmap-label")
+			.attr("x", d => xScale(d.start) + 4)
+			.attr("y", d => d.depth * rowHeight + rowHeight * 0.7)
+			.text(d => d.text)
+			.on("mouseenter", showTooltip)
+			.on("mousemove", moveTooltip)
+			.on("mouseleave", hideTooltip);
+		labels.each(function (d) {
+			d._textWidth = this.getBBox().width;
+		});
+
+		// Hide labels that don't fit
+		function updateLabels() {
+			labels.each(function (d) {
+				const text = d3.select(this);
+				const rectScreenWidth = xScale(d.end) - xScale(d.start);
+				text.style("display", d._textWidth + 6 < rectScreenWidth ? null : "none");
+			});
+		}
+		updateLabels();
+
+		// search
+		d3.select("#search").node().value = "";
+		var hits = [];
+		var hit = -1;
+		function centerToSearch() {
+			rects.classed("heatmap-highlight", false);
+			const idx = hits[hit];
+			rects.filter((_, j) => j === idx).classed("heatmap-highlight", true);
+
+			const n = nodes[idx];
+			const cx = (xScale(n.start) + xScale(n.end)) / 2;
+			const cy = n.depth * rowHeight;
+
+			svg.transition().duration(300).call(
+				zoom.transform,
+				d3.zoomIdentity
+					.translate(width / 2 - cx, height / 2 - cy)
+					.scale(1.5)
+			);
+		}
+		d3.select("#search").on("input", function (e) {
+			var query = e.target.value.toLowerCase();
+			hits = [];
+			if (query !== "")
+				nodes.forEach((n, i) => {
+					if (n.text.toLowerCase().includes(query)) hits.push(i);
+				});
+			rects.classed("heatmap-highlight", false);
+			if (query === "" || hits.length == 0) {
+				hit = -1;
+				d3.select("#next").attr("disabled", true);
+				d3.select("#prev").attr("disabled", true);
+				d3.select(this).classed("no-results", true);
+			} else {
+				hit = 0;
+				d3.select("#next").attr("disabled", null);
+				d3.select("#prev").attr("disabled", null);
+				d3.select(this).classed("no-results", false);
+				centerToSearch();
+			}
+		});
+		d3.select("#next").on("click", function (e) {
+			if (hit != -1) {
+				hit = (hit + 1) % hits.length;
+				centerToSearch();
+			}
+		});
+		d3.select("#prev").on("click", function (e) {
+			if (hit != -1) {
+				hit = (hit - 1 + hits.length) % hits.length;
+				centerToSearch();
+			}
+		});
+
+		// recenter button
+		d3.select("#centerButton").on("click", function () {
+			svg.transition().duration(400).call(
+				zoom.transform,
+				d3.zoomIdentity
+			);
+		});
+	</script>
+</body>
+
+</html>

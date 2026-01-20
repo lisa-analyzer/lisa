@@ -57,9 +57,9 @@ public class FileManager {
 	}
 
 	/**
-	 * Takes note that the at least one of the dumped files needs cytoscape
-	 * support for non-compund graphs to be correctly visualized. This will have
-	 * an effect on the files produced by {@link #generateSupportFiles()}.
+	 * Takes note that the at least one of the dumped files needs html support
+	 * files (scripts and stylesheets). This will have an effect on the files
+	 * produced by {@link #generateSupportFiles()}.
 	 */
 	public void usedHtmlViewer() {
 		usedHtmlViewer = true;
