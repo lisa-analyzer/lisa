@@ -1,13 +1,13 @@
 package it.unive.lisa.util.datastructures.automaton;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ToRegexTest {
 

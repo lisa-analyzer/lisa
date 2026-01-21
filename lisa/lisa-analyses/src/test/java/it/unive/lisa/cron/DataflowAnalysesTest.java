@@ -26,7 +26,7 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.global.AccessGlobal;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import java.util.Arrays;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DataflowAnalysesTest
 		extends

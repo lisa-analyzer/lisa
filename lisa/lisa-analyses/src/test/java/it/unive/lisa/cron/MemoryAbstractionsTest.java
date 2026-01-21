@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.outputs.JSONResults;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MemoryAbstractionsTest
 		extends

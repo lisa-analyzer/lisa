@@ -11,7 +11,7 @@ import it.unive.lisa.outputs.HtmlInputs;
 import it.unive.lisa.outputs.HtmlResults;
 import it.unive.lisa.outputs.JSONInputs;
 import it.unive.lisa.util.testing.TestConfiguration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class VisualizationTest
 		extends

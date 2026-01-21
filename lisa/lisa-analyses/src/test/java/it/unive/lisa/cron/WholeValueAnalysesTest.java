@@ -57,8 +57,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 public class WholeValueAnalysesTest
 		extends
@@ -309,7 +309,7 @@ public class WholeValueAnalysesTest
 				}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void summary() {
 		for (String testFile : TESTFILES.keySet()) {
 			System.out.println("\n\n### Test file: " + testFile);

@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.outputs.JSONResults;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ArraysTest
 		extends

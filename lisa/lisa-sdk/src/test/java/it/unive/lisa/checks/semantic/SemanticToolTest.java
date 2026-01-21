@@ -1,7 +1,7 @@
 package it.unive.lisa.checks.semantic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.ReportingTool;
 import it.unive.lisa.TestAbstractDomain;
@@ -51,7 +51,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SemanticToolTest {
 
@@ -192,16 +192,16 @@ public class SemanticToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "faa"));
 
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
+		assertTrue(CollectionUtils.isEqualCollection(exp, tool.getWarnings()), "Wrong set of warnings");
 		assertTrue(
-				"Wrong set of warnings",
 				CollectionUtils.isEqualCollection(
 						exp,
 						new SemanticTool<>(
 								tool,
 								Map.of(),
 								fakeCallGraph,
-								new Analysis<>(new TestAbstractDomain())).getWarnings()));
+								new Analysis<>(new TestAbstractDomain())).getWarnings()),
+				"Wrong set of warnings");
 	}
 
 	@Test
@@ -222,7 +222,7 @@ public class SemanticToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new VariableRef(cfg, new SourceCodeLocation("fake", 4, 0), "x"), "foo"));
 
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
+		assertTrue(CollectionUtils.isEqualCollection(exp, tool.getWarnings()), "Wrong set of warnings");
 	}
 
 	@Test
@@ -241,7 +241,7 @@ public class SemanticToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "faa"));
 
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
+		assertTrue(CollectionUtils.isEqualCollection(exp, tool.getWarnings()), "Wrong set of warnings");
 	}
 
 	@Test
@@ -263,7 +263,7 @@ public class SemanticToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "faa"));
 
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
+		assertTrue(CollectionUtils.isEqualCollection(exp, tool.getWarnings()), "Wrong set of warnings");
 	}
 
 	@Test

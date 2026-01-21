@@ -1,6 +1,6 @@
 package it.unive.lisa.outputs;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.LiSA;
 import it.unive.lisa.LiSAReport;
@@ -20,9 +20,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.function.Consumer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class AdditionalInfoTest {
 
@@ -79,8 +79,8 @@ public class AdditionalInfoTest {
 		}
 	}
 
-	@Before
-	@After
+	@BeforeEach
+	@AfterEach
 	public void cleanUp()
 			throws IOException {
 		FileManager.forceDeleteFolder("tmp");

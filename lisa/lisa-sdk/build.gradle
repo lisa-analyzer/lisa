@@ -1,44 +1,44 @@
 dependencies {
-	// utils
+    // utils
     api 'commons-io:commons-io:2.8.0'
     api 'org.apache.commons:commons-lang3:3.9'
     api 'org.apache.commons:commons-text:1.10.0'
-	api 'org.apache.commons:commons-collections4:4.4'
-	
-	// json serialization/deserialization
-	api 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
+    api 'org.apache.commons:commons-collections4:4.4'
 
-	// dot file manipulation
-	api 'guru.nidi:graphviz-java:0.18.1'
-	
-	// html templating
+    // json serialization/deserialization
+    api 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
+
+    // dot file manipulation
+    api 'guru.nidi:graphviz-java:0.18.1'
+
+    // html templating
     api 'org.thymeleaf:thymeleaf:3.0.15.RELEASE'
-    
-	// logging
-	api 'org.apache.logging.log4j:log4j-api:2.17.1'
-	api 'org.apache.logging.log4j:log4j-core:2.17.1'
-	runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
-	
+
+    // logging
+    api 'org.apache.logging.log4j:log4j-api:2.17.1'
+    api 'org.apache.logging.log4j:log4j-core:2.17.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
+
     // reflective lookup
-	api 'org.reflections:reflections:0.9.12'
-	
-	// time handling
-	api 'joda-time:joda-time:2.10.14'
-	
-	// testing
-    testImplementation 'junit:junit:4.12'
-	testImplementation 'org.reflections:reflections:0.9.12'
+    api 'org.reflections:reflections:0.9.12'
+
+    // time handling
+    api 'joda-time:joda-time:2.10.14'
+
+    // testing
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+    testImplementation 'org.reflections:reflections:0.9.12'
 }
 
 tasks.register('generateVersionInfo', Copy) {
     description = 'Generates VersionInfo.java'
     group = 'build'
 
-	from "$projectDir"
+    from "$projectDir"
     into "$projectDir/src/main/java/it/unive/lisa"
     include('VersionInfo.template')
-	rename ('VersionInfo.template', 'VersionInfo.java')
-	filter { line -> line.replaceAll("@PRJ_VERSION@", project.version) }
+    rename ('VersionInfo.template', 'VersionInfo.java')
+    filter { line -> line.replaceAll("@PRJ_VERSION@", project.version) }
 }
 
 compileJava.dependsOn generateVersionInfo

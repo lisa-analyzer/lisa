@@ -1,9 +1,9 @@
 package it.unive.lisa.program.cfg;
 
 import static it.unive.lisa.util.collections.CollectionUtilities.collect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ConditionalsExtractionTest {
 
@@ -53,7 +53,7 @@ public class ConditionalsExtractionTest {
 		if (!extraNodes.isEmpty())
 			System.err.println("The following nodes are spurious in " + label + ": " + extraNodes);
 
-		assertTrue("Set of nodes does not match the expected results", missingNodes.isEmpty() && extraNodes.isEmpty());
+		assertTrue(missingNodes.isEmpty() && extraNodes.isEmpty(), "Set of nodes does not match the expected results");
 	}
 
 	private void assertIf(
@@ -62,8 +62,8 @@ public class ConditionalsExtractionTest {
 			Collection<Statement> tnodes,
 			Collection<Statement> fnodes,
 			IfThenElse ith) {
-		assertEquals("Wrong condition: " + ith.getCondition(), condition, ith.getCondition());
-		assertEquals("Wrong follower: " + ith.getFirstFollower(), follower, ith.getFirstFollower());
+		assertEquals(condition, ith.getCondition(), "Wrong condition: " + ith.getCondition());
+		assertEquals(follower, ith.getFirstFollower(), "Wrong follower: " + ith.getFirstFollower());
 		checkMatrix("true branch", ith.getTrueBranch(), tnodes);
 		checkMatrix("false branch", ith.getFalseBranch(), fnodes);
 	}
@@ -73,8 +73,8 @@ public class ConditionalsExtractionTest {
 			Statement follower,
 			Collection<Statement> nodes,
 			Loop loop) {
-		assertEquals("Wrong condition: " + loop.getCondition(), condition, loop.getCondition());
-		assertEquals("Wrong follower: " + loop.getFirstFollower(), follower, loop.getFirstFollower());
+		assertEquals(condition, loop.getCondition(), "Wrong condition: " + loop.getCondition());
+		assertEquals(follower, loop.getFirstFollower(), "Wrong follower: " + loop.getFirstFollower());
 		checkMatrix("loop body", loop.getBody(), nodes);
 	}
 
@@ -98,10 +98,10 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+		assertEquals(1, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
-		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+		assertTrue(struct instanceof IfThenElse, struct + " does not represent an if-then-else");
 
 		assertIf(condition, ret, collect(a1), collect(a2), (IfThenElse) struct);
 	}
@@ -119,10 +119,10 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new FalseEdge(condition, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+		assertEquals(1, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
-		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+		assertTrue(struct instanceof IfThenElse, struct + " does not represent an if-then-else");
 
 		assertIf(condition, ret, Collections.emptyList(), Collections.emptyList(), (IfThenElse) struct);
 	}
@@ -147,10 +147,10 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+		assertEquals(1, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
-		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+		assertTrue(struct instanceof IfThenElse, struct + " does not represent an if-then-else");
 
 		assertIf(condition, ret, collect(a1, a2), Collections.emptyList(), (IfThenElse) struct);
 	}
@@ -178,10 +178,10 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a3, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+		assertEquals(1, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
-		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+		assertTrue(struct instanceof IfThenElse, struct + " does not represent an if-then-else");
 
 		assertIf(condition, ret, collect(a1, a3), collect(a2), (IfThenElse) struct);
 	}
@@ -218,10 +218,10 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a6, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+		assertEquals(1, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
-		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+		assertTrue(struct instanceof IfThenElse, struct + " does not represent an if-then-else");
 
 		assertIf(condition, a6, collect(a1, a2, a3, a4), collect(a5), (IfThenElse) struct);
 	}
@@ -246,10 +246,10 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+		assertEquals(1, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
-		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
+		assertTrue(struct instanceof Loop, struct + " does not represent a loop");
 
 		assertLoop(condition, a2, collect(a1), (Loop) struct);
 	}
@@ -273,10 +273,10 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+		assertEquals(1, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
-		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
+		assertTrue(struct instanceof Loop, struct + " does not represent a loop");
 
 		assertLoop(condition, a2, Collections.emptyList(), (Loop) struct);
 	}
@@ -313,10 +313,10 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a6, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+		assertEquals(1, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		ControlFlowStructure struct = extracted.iterator().next();
-		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
+		assertTrue(struct instanceof Loop, struct + " does not represent a loop");
 
 		assertLoop(condition, a6, collect(a1, a2, a3, a4, a5), (Loop) struct);
 	}
@@ -355,7 +355,7 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new FalseEdge(loop_condition, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor().extract(cfg);
-		assertEquals("Incorrect number of structures: " + extracted.size(), 2, extracted.size());
+		assertEquals(2, extracted.size(), "Incorrect number of structures: " + extracted.size());
 
 		Iterator<ControlFlowStructure> it = extracted.iterator();
 		ControlFlowStructure first = it.next();
@@ -403,8 +403,8 @@ public class ConditionalsExtractionTest {
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
 		cfg.extractControlFlowStructures(new ControlFlowExtractor());
-		assertTrue("No guards registered for inner expression", cfg.getGuards(inner).contains(condition));
-		assertTrue("No guards registered for resolved call", cfg.getGuards(resolved).contains(condition));
+		assertTrue(cfg.getGuards(inner).contains(condition), "No guards registered for inner expression");
+		assertTrue(cfg.getGuards(resolved).contains(condition), "No guards registered for resolved call");
 	}
 
 }

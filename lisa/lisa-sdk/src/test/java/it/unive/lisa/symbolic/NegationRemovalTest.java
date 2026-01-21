@@ -1,8 +1,8 @@
 package it.unive.lisa.symbolic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -14,7 +14,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.Untyped;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class NegationRemovalTest {
 
@@ -44,13 +44,13 @@ public class NegationRemovalTest {
 				SyntheticLocation.INSTANCE);
 
 		ValueExpression result = negated.removeNegations();
-		assertTrue("Negation is not a binary expression", result instanceof BinaryExpression);
+		assertTrue(result instanceof BinaryExpression, "Negation is not a binary expression");
 
 		BinaryExpression actual = (BinaryExpression) result;
-		assertSame("Sub-expression has been re-created", x, actual.getLeft());
-		assertSame("Sub-expression has been re-created", y, actual.getRight());
-		assertSame("Operator has not been negated", ComparisonNe.INSTANCE, actual.getOperator());
-		assertEquals("Negated expression is different from expected", expected, actual);
+		assertSame(x, actual.getLeft(), "Sub-expression has been re-created");
+		assertSame(y, actual.getRight(), "Sub-expression has been re-created");
+		assertSame(ComparisonNe.INSTANCE, actual.getOperator(), "Operator has not been negated");
+		assertEquals(expected, actual, "Negated expression is different from expected");
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class NegationRemovalTest {
 				SyntheticLocation.INSTANCE);
 
 		ValueExpression result = negated.removeNegations();
-		assertSame("Negated expression has been recreated", negated, result);
+		assertSame(negated, result, "Negated expression has been recreated");
 	}
 
 }

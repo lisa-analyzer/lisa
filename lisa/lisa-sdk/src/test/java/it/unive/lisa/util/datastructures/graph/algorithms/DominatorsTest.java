@@ -1,6 +1,6 @@
 package it.unive.lisa.util.datastructures.graph.algorithms;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.util.datastructures.graph.TestGraph;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
@@ -8,7 +8,7 @@ import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DominatorsTest {
 
@@ -37,7 +37,6 @@ public class DominatorsTest {
 
 		Map<TestNode, Set<TestNode>> res = new Dominators<TestGraph, TestNode, TestEdge>().build(graph);
 		assertEquals(
-				"Fixpoint returned wrong result",
 				Map.of(
 						one,
 						Set.of(one),
@@ -51,7 +50,8 @@ public class DominatorsTest {
 						Set.of(one, two, five),
 						six,
 						Set.of(one, two, six)),
-				res);
+				res,
+				"Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -121,7 +121,7 @@ public class DominatorsTest {
 		exp.put(j, Set.of(r, c, g, j));
 		exp.put(k, Set.of(r, k));
 		exp.put(l, Set.of(r, d, l));
-		assertEquals("Fixpoint returned wrong result", exp, res);
+		assertEquals(exp, res, "Fixpoint returned wrong result");
 	}
 
 }

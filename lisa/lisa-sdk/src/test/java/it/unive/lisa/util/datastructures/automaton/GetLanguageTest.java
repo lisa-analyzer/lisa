@@ -1,11 +1,12 @@
 package it.unive.lisa.util.datastructures.automaton;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class GetLanguageTest {
 
@@ -28,7 +29,7 @@ public class GetLanguageTest {
 		assertEquals(exp, a.getLanguage());
 	}
 
-	@Test(expected = CyclicAutomatonException.class)
+	@Test
 	public void test02()
 			throws CyclicAutomatonException {
 		SortedSet<State> states = new TreeSet<>();
@@ -44,7 +45,7 @@ public class GetLanguageTest {
 
 		// accepts language {a^nb^m}^p
 		TestAutomaton nfa = new TestAutomaton(states, transitions);
-		assertEquals(nfa.getLanguage(), new TreeSet<String>());
+		Assertions.assertThrows(CyclicAutomatonException.class, () -> nfa.getLanguage());
 	}
 
 	@Test

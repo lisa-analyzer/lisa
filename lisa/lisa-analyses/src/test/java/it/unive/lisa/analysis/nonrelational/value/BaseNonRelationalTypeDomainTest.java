@@ -1,8 +1,8 @@
 package it.unive.lisa.analysis.nonrelational.value;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.Lattice;
@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BaseNonRelationalTypeDomainTest {
 
@@ -31,19 +31,19 @@ public class BaseNonRelationalTypeDomainTest {
 					Object ret = mtd.invoke(new TestParameterProvider.SampleNRTD(), params);
 					if (mtd.getName().startsWith("eval"))
 						assertTrue(
-								"Default implementation of " + mtd.getName() + " did not return top",
-								((Lattice<?>) ret).isTop());
+								((Lattice<?>) ret).isTop(),
+								"Default implementation of " + mtd.getName() + " did not return top");
 					else if (mtd.getName().startsWith("satisfies"))
 						assertSame(
-								"Default implementation of " + mtd.getName() + " did not return UNKNOWN",
 								Satisfiability.UNKNOWN,
-								ret);
+								ret,
+								"Default implementation of " + mtd.getName() + " did not return UNKNOWN");
 					else if (mtd.getName().startsWith("assume"))
 						assertSame(
-								"Default implementation of " + mtd.getName()
-										+ " did not return an unchanged environment",
 								params[envPos.get()],
-								ret);
+								ret,
+								"Default implementation of " + mtd.getName()
+										+ " did not return an unchanged environment");
 
 				} catch (Exception e) {
 					e.printStackTrace();

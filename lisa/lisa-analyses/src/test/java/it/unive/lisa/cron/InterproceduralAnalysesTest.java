@@ -16,7 +16,7 @@ import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.inlining.InliningAnalysis;
 import it.unive.lisa.outputs.JSONCallGraph;
 import it.unive.lisa.outputs.JSONResults;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class InterproceduralAnalysesTest
 		extends

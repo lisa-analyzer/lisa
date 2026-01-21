@@ -1,10 +1,10 @@
 package it.unive.lisa.util.datastructures.graph.algorithms;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.TestGraph;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FixpointTest {
 
@@ -89,8 +89,8 @@ public class FixpointTest {
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
-		assertTrue("Fixpoint returned wrong result", res.isEmpty());
+		assertNotNull(res, "Fixpoint failed");
+		assertTrue(res.isEmpty(), "Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -114,11 +114,11 @@ public class FixpointTest {
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
+		assertNotNull(res, "Fixpoint failed");
 		assertEquals(
-				"Fixpoint returned wrong result",
 				Map.of(source, Set.of(source), middle, Set.of(source, middle), end, Set.of(source, middle, end)),
-				res);
+				res,
+				"Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -149,9 +149,8 @@ public class FixpointTest {
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
+		assertNotNull(res, "Fixpoint failed");
 		assertEquals(
-				"Fixpoint returned wrong result",
 				Map.of(
 						source,
 						Set.of(source),
@@ -163,7 +162,8 @@ public class FixpointTest {
 						Set.of(source, left, right, join),
 						end,
 						Set.of(source, left, right, join, end)),
-				res);
+				res,
+				"Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -194,9 +194,8 @@ public class FixpointTest {
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
+		assertNotNull(res, "Fixpoint failed");
 		assertEquals(
-				"Fixpoint returned wrong result",
 				Map.of(
 						source,
 						Set.of(source),
@@ -208,7 +207,8 @@ public class FixpointTest {
 						Set.of(source, join, first, second),
 						end,
 						Set.of(source, join, first, second, end)),
-				res);
+				res,
+				"Fixpoint returned wrong result");
 	}
 
 	private static class ExceptionalTester
@@ -307,12 +307,12 @@ public class FixpointTest {
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("computing semantics"));
+			assertTrue(e.getMessage().contains("computing semantics"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 
 		fail = false;
 		try {
@@ -320,12 +320,12 @@ public class FixpointTest {
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("computing edge semantics"));
+			assertTrue(e.getMessage().contains("computing edge semantics"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 
 		fail = false;
 		try {
@@ -333,13 +333,13 @@ public class FixpointTest {
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("creating entry state"));
+			assertTrue(e.getMessage().contains("creating entry state"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 
 		fail = false;
 		try {
@@ -347,12 +347,12 @@ public class FixpointTest {
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("joining states"));
+			assertTrue(e.getMessage().contains("joining states"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 
 		fail = false;
 		try {
@@ -360,12 +360,12 @@ public class FixpointTest {
 					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("updating result"));
+			assertTrue(e.getMessage().contains("updating result"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 	}
 
 }

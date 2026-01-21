@@ -50,6 +50,8 @@ javadoc {
 }
 
 test {
+	useJUnitPlatform()
+
 	filter {
 		includeTestsMatching 'it.unive.lisa.*'
 		excludeTestsMatching 'it.unive.lisa.cron.*'

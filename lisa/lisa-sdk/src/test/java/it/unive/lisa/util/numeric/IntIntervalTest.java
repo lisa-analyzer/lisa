@@ -1,9 +1,9 @@
 package it.unive.lisa.util.numeric;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.function.BiFunction;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class IntIntervalTest {
 
@@ -14,7 +14,7 @@ public class IntIntervalTest {
 			String symbol,
 			BiFunction<IntInterval, IntInterval, IntInterval> operator) {
 		IntInterval actual = operator.apply(x, y);
-		assertEquals(x + " " + symbol + " " + y + " = " + expected + " (got " + actual + ")", expected, actual);
+		assertEquals(expected, actual, x + " " + symbol + " " + y + " = " + expected + " (got " + actual + ")");
 	}
 
 	private static void test(

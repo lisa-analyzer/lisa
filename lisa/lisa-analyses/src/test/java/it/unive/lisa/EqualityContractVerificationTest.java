@@ -1,6 +1,6 @@
 package it.unive.lisa;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import guru.nidi.graphviz.model.Factory;
 import guru.nidi.graphviz.model.MutableGraph;
@@ -156,9 +156,9 @@ import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
@@ -239,7 +239,7 @@ public class EqualityContractVerificationTest {
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		adj1.addNode(new Ret(cfg1, loc));
 		g1.add(Factory.mutNode("a"));
@@ -249,7 +249,7 @@ public class EqualityContractVerificationTest {
 		return new Reflections("it.unive.lisa", SemanticOracle.class, new SubTypesScanner(false));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void ensureAllTested()
 			throws ClassNotFoundException,
 			NoSuchMethodException,
@@ -278,7 +278,7 @@ public class EqualityContractVerificationTest {
 		if (!notTested.isEmpty())
 			System.err.println("The following equals/hashcode implementations have not been tested: " + notTested);
 
-		assertTrue("Not all equals/hashcode have been tested", notTested.isEmpty());
+		assertTrue(notTested.isEmpty(), "Not all equals/hashcode have been tested");
 	}
 
 	private static boolean definesEqualsHashcode(

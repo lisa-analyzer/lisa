@@ -1,6 +1,6 @@
 package it.unive.lisa.lattices.string;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StringConstantTest {
 

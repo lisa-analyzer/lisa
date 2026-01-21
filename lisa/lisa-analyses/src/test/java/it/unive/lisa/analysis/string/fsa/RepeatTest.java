@@ -1,11 +1,11 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RepeatTest {
 

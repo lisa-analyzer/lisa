@@ -1,7 +1,7 @@
 package it.unive.lisa.program.cfg;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.Analysis;
@@ -35,8 +35,8 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.numeric.IntInterval;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class CFGFixpointTest {
 
@@ -50,7 +50,7 @@ public class CFGFixpointTest {
 					ValueEnvironment<IntInterval>,
 					TypeEnvironment<TypeSet>>> conf;
 
-	@BeforeClass
+	@BeforeAll
 	public static void init() {
 		LiSAConfiguration base = new LiSAConfiguration();
 		base.glbThreshold = 5;

@@ -1,10 +1,10 @@
 package it.unive.lisa.analysis.string.tarsis;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.lattices.string.tarsis.RegexAutomaton;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TrimTest {
 

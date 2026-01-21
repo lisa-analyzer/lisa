@@ -1,8 +1,8 @@
 package it.unive.lisa.checks.messages;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
@@ -24,7 +24,7 @@ import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MessagesTest {
 
@@ -168,13 +168,13 @@ public class MessagesTest {
 				if (i != j) {
 					Message w1 = msgs.get(i), w2 = msgs.get(j);
 					assertNotEquals(
-							w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(),
 							0,
-							w1.compareTo(w2));
+							w1.compareTo(w2),
+							w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName());
 					assertNotEquals(
-							w2.getClass().getSimpleName() + " == " + w1.getClass().getSimpleName(),
 							0,
-							w2.compareTo(w1));
+							w2.compareTo(w1),
+							w2.getClass().getSimpleName() + " == " + w1.getClass().getSimpleName());
 
 					// these are here just to ensure that they don't throw
 					// exceptions

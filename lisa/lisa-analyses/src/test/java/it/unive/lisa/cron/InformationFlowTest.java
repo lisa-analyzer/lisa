@@ -37,7 +37,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class InformationFlowTest
 		extends

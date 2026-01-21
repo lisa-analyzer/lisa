@@ -5,13 +5,13 @@ import static it.unive.lisa.logging.TimeFormat.MILLIS;
 import static it.unive.lisa.logging.TimeFormat.MINUTES;
 import static it.unive.lisa.logging.TimeFormat.NANOS;
 import static it.unive.lisa.logging.TimeFormat.SECONDS;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.LongStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TimeFormatTest {
 
@@ -165,9 +165,9 @@ public class TimeFormatTest {
 				.limit((long) Math.log10(Long.MAX_VALUE))
 				.forEach(
 						random -> assertEquals(
-								"Conversion failed for long value " + random,
 								expectedGenerator.apply(random),
-								actualGenerator.apply(random)));
+								actualGenerator.apply(random),
+								"Conversion failed for long value " + random));
 	}
 
 }

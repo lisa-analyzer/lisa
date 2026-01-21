@@ -1,13 +1,13 @@
 package it.unive.lisa.imp;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.outputs.JSONInputs;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.testing.AnalysisTestExecutor;
 import it.unive.lisa.util.testing.TestConfiguration;
 import java.nio.file.Path;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class IMPFrontendTest
 		extends

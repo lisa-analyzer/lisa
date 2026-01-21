@@ -1,8 +1,8 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.ScopeToken;
@@ -42,7 +42,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PointBasedHeapTest {
 

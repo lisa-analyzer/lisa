@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.outputs.JSONResults;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TypeInferenceTest
 		extends

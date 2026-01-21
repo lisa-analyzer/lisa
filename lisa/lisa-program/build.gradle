@@ -3,5 +3,5 @@ dependencies {
 	api project(':lisa-sdk')
 
 	// testing
-    testImplementation 'junit:junit:4.12'
+	testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
 }

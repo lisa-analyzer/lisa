@@ -10,7 +10,7 @@ import it.unive.lisa.analysis.numeric.Pentagon;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class NumericAnalysesTest
 		extends

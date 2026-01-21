@@ -3,7 +3,7 @@ package it.unive.lisa.cron;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.traces.TracePartitioning;
 import it.unive.lisa.outputs.JSONResults;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TracePartitioningTest
 		extends

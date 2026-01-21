@@ -1,6 +1,6 @@
 package it.unive.lisa;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
@@ -25,7 +25,7 @@ import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ReportingToolTest {
 
@@ -98,9 +98,9 @@ public class ReportingToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "faa"));
 
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
-		assertTrue("Wrong set of warnings",
-				CollectionUtils.isEqualCollection(exp, new ReportingTool(tool).getWarnings()));
+		assertTrue(CollectionUtils.isEqualCollection(exp, tool.getWarnings()), "Wrong set of warnings");
+		assertTrue(CollectionUtils.isEqualCollection(exp, new ReportingTool(tool).getWarnings()),
+				"Wrong set of warnings");
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class ReportingToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new VariableRef(cfg, new SourceCodeLocation("fake", 4, 0), "x"), "foo"));
 
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
+		assertTrue(CollectionUtils.isEqualCollection(exp, tool.getWarnings()), "Wrong set of warnings");
 	}
 
 	@Test
@@ -128,7 +128,7 @@ public class ReportingToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "faa"));
 
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
+		assertTrue(CollectionUtils.isEqualCollection(exp, tool.getWarnings()), "Wrong set of warnings");
 	}
 
 	@Test
@@ -144,7 +144,7 @@ public class ReportingToolTest {
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "faa"));
 
-		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
+		assertTrue(CollectionUtils.isEqualCollection(exp, tool.getWarnings()), "Wrong set of warnings");
 	}
 
 }

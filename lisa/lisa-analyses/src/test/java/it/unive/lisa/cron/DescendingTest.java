@@ -4,7 +4,7 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingNarrowingFixpoint;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DescendingTest
 		extends

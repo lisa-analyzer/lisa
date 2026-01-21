@@ -1,8 +1,8 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
@@ -40,7 +40,7 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Map;
 import java.util.function.Predicate;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class OptimizedFixpointTest {
 
@@ -144,8 +144,8 @@ public class OptimizedFixpointTest {
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
-		assertEquals("Fixpoint returned wrong result", Map.of(middle, comp, end, comp), res);
+		assertNotNull(res, "Fixpoint failed");
+		assertEquals(Map.of(middle, comp, end, comp), res, "Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -184,8 +184,8 @@ public class OptimizedFixpointTest {
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
-		assertEquals("Fixpoint returned wrong result", Map.of(left, comp, end, comp), res);
+		assertNotNull(res, "Fixpoint failed");
+		assertEquals(Map.of(left, comp, end, comp), res, "Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -224,8 +224,8 @@ public class OptimizedFixpointTest {
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
-		assertEquals("Fixpoint returned wrong result", Map.of(join, comp, left, comp, end, comp), res);
+		assertNotNull(res, "Fixpoint failed");
+		assertEquals(Map.of(join, comp, left, comp, end, comp), res, "Fixpoint returned wrong result");
 	}
 
 }

@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
@@ -18,7 +18,7 @@ import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AnalyzedCFGTest {
 

@@ -1,8 +1,8 @@
 package it.unive.lisa.lattices.types;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
@@ -69,7 +69,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TypeSetTest {
 
@@ -129,7 +129,7 @@ public class TypeSetTest {
 		// cast(str, x) = emptyset if x does not contain type tokens
 		Set<Type> str = string.getRuntimeTypes();
 		Set<Type> cast = types.cast(str, str, null);
-		assertTrue("Casting where the second arg does not have tokens succeded", cast.isEmpty());
+		assertTrue(cast.isEmpty(), "Casting where the second arg does not have tokens succeded");
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class TypeSetTest {
 		Set<Type> str = string.getRuntimeTypes();
 		Set<Type> in = Collections.singleton(new TypeTokenType(integer.getRuntimeTypes()));
 		Set<Type> cast = types.cast(str, in, null);
-		assertTrue("Casting a string into an integer succeded", cast.isEmpty());
+		assertTrue(cast.isEmpty(), "Casting a string into an integer succeded");
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class TypeSetTest {
 		Set<Type> str = string.getRuntimeTypes();
 		Set<Type> tok = Collections.singleton(new TypeTokenType(str));
 		Set<Type> cast = types.cast(str, tok, null);
-		assertEquals("Casting a string into a string failed", str, cast);
+		assertEquals(str, cast, "Casting a string into a string failed");
 	}
 
 	@Test
@@ -158,7 +158,7 @@ public class TypeSetTest {
 		tok.add(new TypeTokenType(str));
 		tok.add(new TypeTokenType(integer.getRuntimeTypes()));
 		Set<Type> cast = types.cast(str, tok, null);
-		assertEquals("Casting a string into a string failed", str, cast);
+		assertEquals(str, cast, "Casting a string into a string failed");
 	}
 
 	@Test
@@ -169,7 +169,7 @@ public class TypeSetTest {
 		tt.addAll(integer.getRuntimeTypes());
 		Set<Type> tok = Collections.singleton(new TypeTokenType(tt));
 		Set<Type> cast = types.cast(str, tok, null);
-		assertEquals("Casting a string into a string failed", str, cast);
+		assertEquals(str, cast, "Casting a string into a string failed");
 	}
 
 	@Test
@@ -180,7 +180,7 @@ public class TypeSetTest {
 		tt.addAll(integer.getRuntimeTypes());
 		Set<Type> tok = Collections.singleton(new TypeTokenType(str));
 		Set<Type> cast = types.cast(tt, tok, null);
-		assertEquals("Casting a string into a string failed", str, cast);
+		assertEquals(str, cast, "Casting a string into a string failed");
 	}
 
 	@Test
@@ -188,14 +188,14 @@ public class TypeSetTest {
 		Set<Type> str = string.getRuntimeTypes();
 		Set<Type> in = integer.getRuntimeTypes();
 		Set<Type> common = NumericType.commonNumericalType(str, in);
-		assertTrue("Common numerical type between a string and an integer exists", common.isEmpty());
+		assertTrue(common.isEmpty(), "Common numerical type between a string and an integer exists");
 	}
 
 	@Test
 	public void testCommonNumericalTypeSame() {
 		Set<Type> in = integer.getRuntimeTypes();
 		Set<Type> common = NumericType.commonNumericalType(in, in);
-		assertEquals("Common numerical type between an integer and an integer does not exist", in, common);
+		assertEquals(in, common, "Common numerical type between an integer and an integer does not exist");
 	}
 
 	@Test
@@ -203,7 +203,7 @@ public class TypeSetTest {
 		Set<Type> in = integer.getRuntimeTypes();
 		Set<Type> fl = floating.getRuntimeTypes();
 		Set<Type> common = NumericType.commonNumericalType(in, fl);
-		assertEquals("Common numerical type between an integer and a float is not a float", fl, common);
+		assertEquals(fl, common, "Common numerical type between an integer and a float is not a float");
 	}
 
 	@Test
@@ -212,17 +212,17 @@ public class TypeSetTest {
 		Set<Type> fl = floating.getRuntimeTypes();
 		Set<Type> union = SetUtils.union(un, fl);
 		Set<Type> common = NumericType.commonNumericalType(un, fl);
-		assertEquals("Common numerical type between an untyped and a float is not a float", fl, common);
+		assertEquals(fl, common, "Common numerical type between an untyped and a float is not a float");
 		common = NumericType.commonNumericalType(fl, un);
-		assertEquals("Common numerical type between a float and un untyped is not a float", fl, common);
+		assertEquals(fl, common, "Common numerical type between a float and un untyped is not a float");
 		common = NumericType.commonNumericalType(un, un);
-		assertEquals("Common numerical type between two untyped is not empty", Collections.emptySet(), common);
+		assertEquals(Collections.emptySet(), common, "Common numerical type between two untyped is not empty");
 		common = NumericType.commonNumericalType(fl, union);
-		assertEquals("Common numerical type between a float and an (untyped,float) is not float", fl, common);
+		assertEquals(fl, common, "Common numerical type between a float and an (untyped,float) is not float");
 		common = NumericType.commonNumericalType(union, fl);
-		assertEquals("Common numerical type between an (untyped,float) and a float is not float", fl, common);
+		assertEquals(fl, common, "Common numerical type between an (untyped,float) and a float is not float");
 		common = NumericType.commonNumericalType(union, union);
-		assertEquals("Common numerical type between two (untyped,float) is not (untyped,float)", union, common);
+		assertEquals(union, common, "Common numerical type between two (untyped,float) is not (untyped,float)");
 	}
 
 	private void unaryLE(
@@ -242,16 +242,16 @@ public class TypeSetTest {
 					oracle);
 			if (operand.lessOrEqual(first.getValue())) {
 				assertFalse(
-						String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
-						eval.isBottom());
+						eval.isBottom(),
+						String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()));
 				assertEquals(
-						String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()),
 						expected.getRuntimeTypes(),
-						eval.getRuntimeTypes());
+						eval.getRuntimeTypes(),
+						String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()));
 			} else
 				assertTrue(
-						String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
-						eval.isBottom());
+						eval.isBottom(),
+						String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()));
 		}
 	}
 
@@ -271,16 +271,16 @@ public class TypeSetTest {
 					oracle);
 			if (expected.containsKey(first.getValue())) {
 				assertFalse(
-						String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
-						eval.isBottom());
+						eval.isBottom(),
+						String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()));
 				assertEquals(
-						String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()),
 						expected.get(first.getValue()).getRuntimeTypes(),
-						eval.getRuntimeTypes());
+						eval.getRuntimeTypes(),
+						String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()));
 			} else
 				assertTrue(
-						String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
-						eval.isBottom());
+						eval.isBottom(),
+						String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()));
 		}
 	}
 
@@ -333,25 +333,25 @@ public class TypeSetTest {
 						oracle);
 				if (left.lessOrEqual(first.getValue()) && right.lessOrEqual(second.getValue())) {
 					assertFalse(
+							eval.isBottom(),
 							String.format(
 									UNEXPECTED_BOTTOM,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+									first.getKey() + "," + second.getKey()));
 					assertEquals(
+							expected.getRuntimeTypes(),
+							eval.getRuntimeTypes(),
 							String.format(
 									WRONG_RESULT,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							expected.getRuntimeTypes(),
-							eval.getRuntimeTypes());
+									first.getKey() + "," + second.getKey()));
 				} else
 					assertTrue(
+							eval.isBottom(),
 							String.format(
 									RESULT_NOT_BOTTOM,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+									first.getKey() + "," + second.getKey()));
 			}
 	}
 
@@ -375,25 +375,25 @@ public class TypeSetTest {
 						oracle);
 				if (notExcluded(exclusions, first, second)) {
 					assertFalse(
+							eval.isBottom(),
 							String.format(
 									UNEXPECTED_BOTTOM,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+									first.getKey() + "," + second.getKey()));
 					assertEquals(
+							expected.getRuntimeTypes(),
+							eval.getRuntimeTypes(),
 							String.format(
 									WRONG_RESULT,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							expected.getRuntimeTypes(),
-							eval.getRuntimeTypes());
+									first.getKey() + "," + second.getKey()));
 				} else
 					assertTrue(
+							eval.isBottom(),
 							String.format(
 									RESULT_NOT_BOTTOM,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+									first.getKey() + "," + second.getKey()));
 			}
 	}
 
@@ -428,25 +428,25 @@ public class TypeSetTest {
 						oracle);
 				if (notExcluded(exclusions, first, second)) {
 					assertFalse(
+							eval.isBottom(),
 							String.format(
 									UNEXPECTED_BOTTOM,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+									first.getKey() + "," + second.getKey()));
 					assertEquals(
+							expected.apply(first.getValue(), second.getValue()).getRuntimeTypes(),
+							eval.getRuntimeTypes(),
 							String.format(
 									WRONG_RESULT,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							expected.apply(first.getValue(), second.getValue()).getRuntimeTypes(),
-							eval.getRuntimeTypes());
+									first.getKey() + "," + second.getKey()));
 				} else
 					assertTrue(
+							eval.isBottom(),
 							String.format(
 									RESULT_NOT_BOTTOM,
 									op.getClass().getSimpleName(),
-									first.getKey() + "," + second.getKey()),
-							eval.isBottom());
+									first.getKey() + "," + second.getKey()));
 			}
 	}
 
@@ -481,19 +481,19 @@ public class TypeSetTest {
 						fake,
 						oracle);
 				assertTrue(
+						eval.isBottom(),
 						String.format(
 								RESULT_NOT_BOTTOM,
 								op.getClass().getSimpleName(),
-								first.getKey() + "," + second.getKey()),
-						eval.isBottom());
+								first.getKey() + "," + second.getKey()));
 				// we don't check for bottom: it might be the right result...
 				assertEquals(
+						expected.apply(first.getValue(), st).getRuntimeTypes(),
+						evalT.getRuntimeTypes(),
 						String.format(
 								WRONG_RESULT,
 								op.getClass().getSimpleName(),
-								first.getKey() + "," + second.getKey() + "[transformed to " + st + "]"),
-						expected.apply(first.getValue(), st).getRuntimeTypes(),
-						evalT.getRuntimeTypes());
+								first.getKey() + "," + second.getKey() + "[transformed to " + st + "]"));
 			}
 	}
 
@@ -597,25 +597,25 @@ public class TypeSetTest {
 							&& middle.lessOrEqual(second.getValue())
 							&& right.lessOrEqual(third.getValue())) {
 						assertFalse(
+								eval.isBottom(),
 								String.format(
 										UNEXPECTED_BOTTOM,
 										op.getClass().getSimpleName(),
-										first.getKey() + "," + second.getKey() + "," + third.getKey()),
-								eval.isBottom());
+										first.getKey() + "," + second.getKey() + "," + third.getKey()));
 						assertEquals(
+								expected.getRuntimeTypes(),
+								eval.getRuntimeTypes(),
 								String.format(
 										WRONG_RESULT,
 										op.getClass().getSimpleName(),
-										first.getKey() + "," + second.getKey() + "," + third.getKey()),
-								expected.getRuntimeTypes(),
-								eval.getRuntimeTypes());
+										first.getKey() + "," + second.getKey() + "," + third.getKey()));
 					} else
 						assertTrue(
+								eval.isBottom(),
 								String.format(
 										RESULT_NOT_BOTTOM,
 										op.getClass().getSimpleName(),
-										first.getKey() + "," + second.getKey() + "," + third.getKey()),
-								eval.isBottom());
+										first.getKey() + "," + second.getKey() + "," + third.getKey()));
 				}
 	}
 
@@ -632,7 +632,6 @@ public class TypeSetTest {
 			TypeSet right,
 			Satisfiability expected) {
 		assertEquals(
-				"Satisfies(" + left + " " + op + " " + right + ") returned wrong result",
 				expected,
 				domain.satisfiesBinaryExpression(
 						new BinaryExpression(
@@ -644,7 +643,8 @@ public class TypeSetTest {
 						left,
 						right,
 						fake,
-						oracle));
+						oracle),
+				"Satisfies(" + left + " " + op + " " + right + ") returned wrong result");
 	}
 
 	@Test
@@ -706,7 +706,7 @@ public class TypeSetTest {
 				fake,
 				oracle);
 
-		assertEquals("Assume(x " + op + " " + expr + ") returned wrong result", expected, act.getState(variable));
+		assertEquals(expected, act.getState(variable), "Assume(x " + op + " " + expr + ") returned wrong result");
 	}
 
 	@Test

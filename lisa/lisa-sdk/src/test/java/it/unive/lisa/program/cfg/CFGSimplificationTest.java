@@ -1,7 +1,7 @@
 package it.unive.lisa.program.cfg;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
@@ -21,7 +21,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.util.Collection;
 import java.util.HashSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CFGSimplificationTest {
 
@@ -62,7 +62,7 @@ public class CFGSimplificationTest {
 		second.addEdge(new SequentialEdge(assign, ret));
 
 		first.simplify();
-		assertTrue("Different CFGs", second.isEqualTo(first));
+		assertTrue(second.isEqualTo(first), "Different CFGs");
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class CFGSimplificationTest {
 		second.addEdge(new SequentialEdge(assign, ret));
 
 		first.simplify();
-		assertTrue("Different CFGs", second.isEqualTo(first));
+		assertTrue(second.isEqualTo(first), "Different CFGs");
 	}
 
 	@Test
@@ -175,10 +175,10 @@ public class CFGSimplificationTest {
 		second.getDescriptor().addControlFlowStructure(new IfThenElse(second.getNodeList(), gt, ret, tbranch, fbranch));
 
 		first.simplify();
-		assertTrue("Different CFGs", second.isEqualTo(first));
+		assertTrue(second.isEqualTo(first), "Different CFGs");
 		ControlFlowStructure exp = second.getDescriptor().getControlFlowStructures().iterator().next();
 		ControlFlowStructure act = first.getDescriptor().getControlFlowStructures().iterator().next();
-		assertEquals("Simplification did not update control flow structures", exp, act);
+		assertEquals(exp, act, "Simplification did not update control flow structures");
 	}
 
 	@Test
@@ -218,7 +218,7 @@ public class CFGSimplificationTest {
 		second.addEdge(new SequentialEdge(assign, ret));
 
 		first.simplify();
-		assertTrue("Different CFGs", second.isEqualTo(first));
+		assertTrue(second.isEqualTo(first), "Different CFGs");
 	}
 
 	@Test
@@ -258,7 +258,7 @@ public class CFGSimplificationTest {
 		second.addEdge(new SequentialEdge(assign, ret));
 
 		first.simplify();
-		assertTrue("Different CFGs", second.isEqualTo(first));
+		assertTrue(second.isEqualTo(first), "Different CFGs");
 	}
 
 	@Test
@@ -306,7 +306,7 @@ public class CFGSimplificationTest {
 		second.addEdge(new SequentialEdge(assign1, assign2));
 
 		first.simplify();
-		assertTrue("Different CFGs", second.isEqualTo(first));
+		assertTrue(second.isEqualTo(first), "Different CFGs");
 	}
 
 	@Test
@@ -381,10 +381,10 @@ public class CFGSimplificationTest {
 				.addControlFlowStructure(new IfThenElse(second.getNodeList(), assign1, null, tbranch, fbranch));
 
 		first.simplify();
-		assertTrue("Different CFGs", second.isEqualTo(first));
+		assertTrue(second.isEqualTo(first), "Different CFGs");
 		ControlFlowStructure exp = second.getDescriptor().getControlFlowStructures().iterator().next();
 		ControlFlowStructure act = first.getDescriptor().getControlFlowStructures().iterator().next();
-		assertEquals("Simplification did not update control flow structures", exp, act);
+		assertEquals(exp, act, "Simplification did not update control flow structures");
 	}
 
 	@Test
