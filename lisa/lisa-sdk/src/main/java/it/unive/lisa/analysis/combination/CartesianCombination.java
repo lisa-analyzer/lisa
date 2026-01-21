@@ -131,6 +131,13 @@ public abstract class CartesianCombination<C extends CartesianCombination<C, T1,
 	}
 
 	@Override
+	public C upchainAux(
+			C other)
+			throws SemanticException {
+		return mk(first.upchain(other.first), second.upchain(other.second));
+	}
+
+	@Override
 	public C wideningAux(
 			C other)
 			throws SemanticException {
@@ -142,6 +149,13 @@ public abstract class CartesianCombination<C extends CartesianCombination<C, T1,
 			C other)
 			throws SemanticException {
 		return mk(first.glb(other.first), second.glb(other.second));
+	}
+
+	@Override
+	public C downchainAux(
+			C other)
+			throws SemanticException {
+		return mk(first.downchain(other.first), second.downchain(other.second));
 	}
 
 	@Override

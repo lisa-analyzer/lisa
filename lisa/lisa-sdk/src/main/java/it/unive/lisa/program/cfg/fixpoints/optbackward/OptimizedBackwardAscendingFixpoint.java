@@ -11,6 +11,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.events.JoinPerformed;
+import it.unive.lisa.program.cfg.fixpoints.events.LeqPerformed;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -29,8 +31,7 @@ import java.util.function.Predicate;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		OptimizedBackwardFixpoint<A, D> {
 
@@ -89,31 +90,37 @@ public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
+		CompoundState<A> result;
 		if (config.wideningThreshold < 0)
 			// invalid threshold means always lub
-			return old.lub(approx);
-
-		if (config.useWideningPoints && !wideningPoints.contains(node))
+			result = old.upchain(approx);
+		else if (config.useWideningPoints && !wideningPoints.contains(node))
 			// optimization: never apply widening on normal instructions,
 			// save time and precision and only apply to widening points
-			return old.lub(approx);
+			result = old.upchain(approx);
+		else {
+			int lub = lubs.computeIfAbsent(node, st -> config.wideningThreshold);
+			if (lub == 0) {
+				AnalysisState<A> post = old.postState.widening(approx.postState);
+				StatementStore<A> intermediate;
+				if (config.useWideningPoints)
+					// no need to widen the intermediate expressions as
+					// well: we force convergence on the final post state
+					// only, to recover as much precision as possible
+					intermediate = old.intermediateStates.upchain(approx.intermediateStates);
+				else
+					intermediate = old.intermediateStates.widening(approx.intermediateStates);
+				result = CompoundState.of(post, intermediate);
+			}
 
-		int lub = lubs.computeIfAbsent(node, st -> config.wideningThreshold);
-		if (lub == 0) {
-			AnalysisState<A> post = old.postState.widening(approx.postState);
-			StatementStore<A> intermediate;
-			if (config.useWideningPoints)
-				// no need to widen the intermediate expressions as
-				// well: we force convergence on the final post state
-				// only, to recover as much precision as possible
-				intermediate = old.intermediateStates.lub(approx.intermediateStates);
-			else
-				intermediate = old.intermediateStates.widening(approx.intermediateStates);
-			return CompoundState.of(post, intermediate);
+			lubs.put(node, --lub);
+			result = old.upchain(approx);
 		}
 
-		lubs.put(node, --lub);
-		return old.lub(approx);
+		if (events != null)
+			events.post(new JoinPerformed<>(node, old, approx, result));
+
+		return result;
 	}
 
 	@Override
@@ -122,7 +129,10 @@ public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
-		return approx.lessOrEqual(old);
+		boolean result = approx.lessOrEqual(old);
+		if (events != null)
+			events.post(new LeqPerformed<A>(node, old, approx, result));
+		return result;
 	}
 
 	@Override
@@ -141,7 +151,7 @@ public class OptimizedBackwardAscendingFixpoint<A extends AbstractLattice<A>,
 
 	@Override
 	public ForwardCFGFixpoint<A, D> asForward() {
-		return new OptimizedForwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config, hotspots);
+		return new OptimizedForwardAscendingFixpoint<>();
 	}
 
 	@Override

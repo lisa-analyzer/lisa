@@ -2,6 +2,7 @@ package it.unive.lisa.outputs.compare;
 
 import static java.lang.String.format;
 
+import it.unive.lisa.listeners.TracingListener;
 import it.unive.lisa.outputs.JSONReportDumper;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
@@ -14,6 +15,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -119,6 +121,8 @@ public class ResultComparer {
 	private static final String DESC_DIFF = "Different description for node %d (%s)";
 
 	private static final String DESC_DIFF_VERBOSE = "Different description for node %d (%s):\n%s";
+
+	private static final String TRACE_DIFF = "Line %d of trace file differs:\n\t'%s'\n\t<--->\n\t'%s'";
 
 	private static final String FILES_ONLY = "Files only in the {} report:";
 
@@ -331,8 +335,8 @@ public class ResultComparer {
 			Map<String, String> second,
 			TriConsumer<String, String, String> reporter,
 			Predicate<String> ignore) {
-		CollectionsDiffBuilder<
-				String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(), second.keySet());
+		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(),
+				second.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.getOnlyFirst().isEmpty())
@@ -426,8 +430,8 @@ public class ResultComparer {
 	public boolean compareFiles(
 			JsonReport first,
 			JsonReport second) {
-		CollectionsDiffBuilder<
-				String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(), second.getFiles());
+		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
+				second.getFiles());
 		files.compute(String::compareTo);
 
 		if (!files.getCommons().isEmpty())
@@ -479,8 +483,8 @@ public class ResultComparer {
 			File secondFileRoot)
 			throws FileNotFoundException,
 			IOException {
-		CollectionsDiffBuilder<
-				String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(), second.getFiles());
+		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
+				second.getFiles());
 		files.compute(String::compareTo);
 		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
@@ -498,6 +502,8 @@ public class ResultComparer {
 
 			if (isJsonGraph(path))
 				diffFound |= matchJsonGraphs(left, right);
+			else if (FilenameUtils.getName(path).equals(TracingListener.TRACE_FNAME))
+				diffFound |= matchTraceFiles(left, right);
 			else if (isVisualizationFile(path))
 				LOG.info(VIS_ONLY, left.toString(), right.toString());
 			else
@@ -928,8 +934,8 @@ public class ResultComparer {
 		SortedMap<String, SerializableValue> felements = first.getFields();
 		SortedMap<String, SerializableValue> selements = second.getFields();
 
-		CollectionsDiffBuilder<
-				String> diff = new CollectionsDiffBuilder<>(String.class, felements.keySet(), selements.keySet());
+		CollectionsDiffBuilder<String> diff = new CollectionsDiffBuilder<>(String.class, felements.keySet(),
+				selements.keySet());
 		diff.compute(String::compareTo);
 
 		boolean atLeastOne = false;
@@ -998,6 +1004,66 @@ public class ResultComparer {
 				.append("<--->\n")
 				.append("\t".repeat(depth))
 				.append(second);
+	}
+
+	/**
+	 * Compares two trace files line by line, ignoring the time taken to
+	 * complete each traced action.
+	 * 
+	 * @param left  the first trace file
+	 * @param right the second trace file
+	 * 
+	 * @return {@code true} if the trace files are equal, {@code false}
+	 *             otherwise
+	 * 
+	 * @throws IOException if an I/O error occurs
+	 */
+	public boolean matchTraceFiles(
+			File left,
+			File right)
+			throws IOException {
+		boolean diffFound = false;
+
+		try (BufferedReader l = new BufferedReader(
+				new InputStreamReader(
+						new FileInputStream(left),
+						StandardCharsets.UTF_8));
+				BufferedReader r = new BufferedReader(
+						new InputStreamReader(
+								new FileInputStream(right),
+								StandardCharsets.UTF_8))) {
+			String lineL;
+			String lineR;
+			int lineNum = 1;
+			while ((lineL = l.readLine()) != null & (lineR = r.readLine()) != null) {
+				if (!lineL.equals(lineR)) {
+					diffFound = true;
+					fileDiff(
+							left.toString(),
+							right.toString(),
+							format(TRACE_DIFF, lineNum, lineL, lineR));
+				}
+				lineNum++;
+			}
+			while ((lineL = l.readLine()) != null) {
+				diffFound = true;
+				fileDiff(
+						left.toString(),
+						right.toString(),
+						format(TRACE_DIFF, lineNum, lineL, "<no line>"));
+				lineNum++;
+			}
+			while ((lineR = r.readLine()) != null) {
+				diffFound = true;
+				fileDiff(
+						left.toString(),
+						right.toString(),
+						format(TRACE_DIFF, lineNum, "<no line>", lineR));
+				lineNum++;
+			}
+		}
+
+		return diffFound;
 	}
 
 	/**
@@ -1266,8 +1332,12 @@ public class ResultComparer {
 	public boolean isVisualizationFile(
 			String path) {
 		String ext = FilenameUtils.getExtension(path);
-		return ext.equals(
-				"dot") || ext.equals("graphml") || ext.equals("png") || ext.equals("html") || ext.equals("js");
+		return ext.equals("dot")
+				|| ext.equals("graphml")
+				|| ext.equals("png")
+				|| ext.equals("html")
+				|| ext.equals("js")
+				|| ext.equals("css");
 	}
 
 	/**

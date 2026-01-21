@@ -1,15 +1,16 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
@@ -206,8 +207,12 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 			}
 		}
 
-		ForwardAscendingFixpoint<A,
-				D> fix = new ForwardAscendingFixpoint<>(this, true, new PrecomputedAnalysis(), conf);
+		ForwardAscendingFixpoint<A, D> fix = new ForwardAscendingFixpoint<>(
+				this,
+				true,
+				new PrecomputedAnalysis(),
+				conf);
+
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix
@@ -259,6 +264,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 				Application app,
 				CallGraph callgraph,
 				OpenCallPolicy policy,
+				EventQueue events,
 				Analysis<A, D> analysis) {
 			throw new UnsupportedOperationException();
 		}
@@ -342,6 +348,11 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 			return interprocedural.getAnalysis();
 		}
 
+		@Override
+		public EventQueue getEventQueue() {
+			// we do not want events during unwinding
+			return null;
+		}
 	}
 
 	@Override

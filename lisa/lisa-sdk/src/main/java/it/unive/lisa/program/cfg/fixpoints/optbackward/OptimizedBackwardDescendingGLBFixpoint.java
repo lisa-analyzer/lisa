@@ -9,6 +9,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.events.JoinPerformed;
+import it.unive.lisa.program.cfg.fixpoints.events.LeqPerformed;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -26,8 +28,7 @@ import java.util.function.Predicate;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		OptimizedBackwardFixpoint<A, D> {
 
@@ -82,15 +83,23 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
+		CompoundState<A> result;
 		if (config.glbThreshold < 0)
-			return old;
+			result = old;
+		else {
+			int glb = glbs.computeIfAbsent(node, st -> config.glbThreshold);
+			if (glb == 0)
+				result = old;
+			else {
+				glbs.put(node, --glb);
+				result = old.downchain(approx);
+			}
+		}
 
-		int glb = glbs.computeIfAbsent(node, st -> config.glbThreshold);
-		if (glb == 0)
-			return old;
+		if (events != null)
+			events.post(new JoinPerformed<>(node, old, approx, result));
 
-		glbs.put(node, --glb);
-		return old.glb(approx);
+		return result;
 	}
 
 	@Override
@@ -99,7 +108,10 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
-		return old.lessOrEqual(approx);
+		boolean result = old.lessOrEqual(approx);
+		if (events != null)
+			events.post(new LeqPerformed<A>(node, old, approx, result));
+		return result;
 	}
 
 	@Override
@@ -108,7 +120,11 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration<A, D> config) {
-		return new OptimizedBackwardDescendingGLBFixpoint<>(graph, forceFullEvaluation, interprocedural, config,
+		return new OptimizedBackwardDescendingGLBFixpoint<>(
+				graph,
+				forceFullEvaluation,
+				interprocedural,
+				config,
 				hotspots);
 	}
 
@@ -119,14 +135,17 @@ public class OptimizedBackwardDescendingGLBFixpoint<A extends AbstractLattice<A>
 
 	@Override
 	public ForwardCFGFixpoint<A, D> asForward() {
-		return new OptimizedForwardDescendingGLBFixpoint<>(graph, forceFullEvaluation, interprocedural, config,
-				hotspots);
+		return new OptimizedForwardDescendingGLBFixpoint<>();
 	}
 
 	@Override
 	public BackwardCFGFixpoint<A, D> withHotspots(
 			Predicate<Statement> hotspots) {
-		return new OptimizedBackwardDescendingGLBFixpoint<>(graph, forceFullEvaluation, interprocedural, config,
+		return new OptimizedBackwardDescendingGLBFixpoint<>(
+				graph,
+				forceFullEvaluation,
+				interprocedural,
+				config,
 				hotspots);
 	}
 

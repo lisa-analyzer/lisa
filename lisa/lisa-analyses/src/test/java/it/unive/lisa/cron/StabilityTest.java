@@ -10,8 +10,8 @@ import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Stability;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.ParsingException;
@@ -34,6 +34,7 @@ import it.unive.lisa.util.representation.SetRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 public class StabilityTest
@@ -89,7 +90,7 @@ public class StabilityTest
 
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<
+				SemanticTool<
 						SimpleAbstractState<Monolith,
 								ValueLatticeProduct<ValueEnvironment<Trend>, ValueEnvironment<IntInterval>>,
 								TypeEnvironment<TypeSet>>,
@@ -181,7 +182,7 @@ public class StabilityTest
 				ValueEnvironment<Trend> left,
 				ValueEnvironment<Trend> right)
 				throws Exception {
-			return left.lub(right);
+			return left.upchain(right);
 		}
 
 		@Override
@@ -203,9 +204,10 @@ public class StabilityTest
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public ValueEnvironment<Trend> semantics(
+		public Pair<ValueEnvironment<Trend>, Statement> semantics(
 				Statement node,
-				ValueEnvironment<Trend> entrystate)
+				ValueEnvironment<Trend> entrystate,
+				Map<Statement, ValueEnvironment<Trend>> results)
 				throws Exception {
 			ValueEnvironment<Trend> post;
 			if (result instanceof OptimizedAnalyzedCFG) {
@@ -223,7 +225,7 @@ public class StabilityTest
 			} else
 				post = result.getAnalysisStateAfter(node)
 						.getExecutionState().valueState.first;
-			return analysis.combine(entrystate, post);
+			return Pair.of(analysis.combine(entrystate, post), node);
 		}
 
 		@Override

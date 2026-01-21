@@ -1,10 +1,31 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.AnalysisState.Error;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.GenericSetLattice;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.analysis.events.AnalysisAssignEnd;
+import it.unive.lisa.analysis.events.AnalysisAssignStart;
+import it.unive.lisa.analysis.events.AnalysisAssumeEnd;
+import it.unive.lisa.analysis.events.AnalysisAssumeStart;
+import it.unive.lisa.analysis.events.AnalysisErrorsToExecEnd;
+import it.unive.lisa.analysis.events.AnalysisErrorsToExecStart;
+import it.unive.lisa.analysis.events.AnalysisExecToErrorEnd;
+import it.unive.lisa.analysis.events.AnalysisExecToErrorStart;
+import it.unive.lisa.analysis.events.AnalysisExecToHaltEnd;
+import it.unive.lisa.analysis.events.AnalysisExecToHaltStart;
+import it.unive.lisa.analysis.events.AnalysisOnCallReturnEnd;
+import it.unive.lisa.analysis.events.AnalysisOnCallReturnStart;
+import it.unive.lisa.analysis.events.AnalysisRemoveCaughtEnd;
+import it.unive.lisa.analysis.events.AnalysisRemoveCaughtStart;
+import it.unive.lisa.analysis.events.AnalysisSatisfiesEnd;
+import it.unive.lisa.analysis.events.AnalysisSatisfiesStart;
+import it.unive.lisa.analysis.events.AnalysisSmallStepEnd;
+import it.unive.lisa.analysis.events.AnalysisSmallStepStart;
+import it.unive.lisa.analysis.events.AnalysisTransferThrowersEnd;
+import it.unive.lisa.analysis.events.AnalysisTransferThrowersStart;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.GenericSetLattice;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -48,9 +69,15 @@ import org.apache.commons.lang3.tuple.Pair;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+public class Analysis<
+		A extends AbstractLattice<A>,
+		D extends AbstractDomain<A>>
 		implements
-		SemanticDomain<AnalysisState<A>, AnalysisState<A>, SymbolicExpression, Identifier> {
+		SemanticDomain<
+				AnalysisState<A>,
+				AnalysisState<A>,
+				SymbolicExpression,
+				Identifier> {
 
 	/**
 	 * The domain to be executed.
@@ -62,6 +89,8 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 * errors. See {@link LiSAConfiguration#shouldSmashError} for more details.
 	 */
 	public final Predicate<Type> shouldSmashError;
+
+	private EventQueue events;
 
 	/**
 	 * Builds the analysis, wrapping the given domain.
@@ -90,14 +119,32 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	}
 
 	@Override
+	public void setEventQueue(
+			EventQueue queue) {
+		this.events = queue;
+		domain.setEventQueue(queue);
+	}
+
+	@Override
 	public AnalysisState<A> assign(
 			AnalysisState<A> state,
 			Identifier id,
 			SymbolicExpression value,
 			ProgramPoint pp)
 			throws SemanticException {
+		if (events != null)
+			events.post(new AnalysisAssignStart<>(state, id, value));
+
 		A s = domain.assign(state.getExecutionState(), id, value, pp);
-		return state.withExecution(new ProgramState<>(s, new ExpressionSet(id), state.getExecutionInformation()));
+		AnalysisState<A> res = state.withExecution(new ProgramState<>(
+				s,
+				new ExpressionSet(id),
+				state.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisAssignEnd<>(pp, state, res, id, value));
+
+		return res;
 	}
 
 	/**
@@ -125,6 +172,9 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		if (id instanceof Identifier)
 			return assign(state, (Identifier) id, expression, pp);
 
+		if (events != null)
+			events.post(new AnalysisAssignStart<>(state, id, expression));
+
 		A s = state.getExecutionState().bottom();
 		AnalysisState<A> sem = smallStepSemantics(state, id, pp);
 		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
@@ -134,7 +184,16 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
 				s = s.lub(domain.assign(sem.getExecutionState(), (Identifier) i, expression, pp));
-		return state.withExecution(new ProgramState<>(s, rewritten, state.getExecutionInformation()));
+
+		AnalysisState<A> res = state.withExecution(new ProgramState<>(
+				s,
+				rewritten,
+				state.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisAssignEnd<>(pp, state, res, id, expression));
+
+		return res;
 	}
 
 	@Override
@@ -143,11 +202,19 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
+		if (events != null)
+			events.post(new AnalysisSmallStepStart<>(state, expression));
+
 		A s = domain.smallStepSemantics(state.getExecutionState(), expression, pp);
-		return state.withExecution(new ProgramState<>(
+		AnalysisState<A> res = state.withExecution(new ProgramState<>(
 				s,
 				new ExpressionSet(expression),
 				state.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisSmallStepEnd<>(pp, state, res, expression));
+
+		return res;
 	}
 
 	@Override
@@ -157,14 +224,23 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException {
+		if (events != null)
+			events.post(new AnalysisAssumeStart<>(state, expression));
+
 		A assume = domain.assume(state.getExecutionState(), expression, src, dest);
+		AnalysisState<A> res;
 		if (assume.isBottom())
-			return state.bottomExecution();
-		return state.withExecution(
-				new ProgramState<>(
-						assume,
-						state.getExecutionExpressions(),
-						state.getExecutionInformation()));
+			res = state.bottomExecution();
+		else
+			res = state.withExecution(new ProgramState<>(
+					assume,
+					state.getExecutionExpressions(),
+					state.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisAssumeEnd<>(src, state, res, expression));
+
+		return res;
 	}
 
 	@Override
@@ -173,7 +249,15 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
-		return domain.satisfies(state.getExecutionState(), expression, pp);
+		if (events != null)
+			events.post(new AnalysisSatisfiesStart<>(state, expression));
+
+		Satisfiability sat = domain.satisfies(state.getExecutionState(), expression, pp);
+
+		if (events != null)
+			events.post(new AnalysisSatisfiesEnd<>(pp, state, sat, expression));
+
+		return sat;
 	}
 
 	/**
@@ -392,6 +476,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 * 
 	 * @param state     the current analysis state
 	 * @param exception the exception to move the execution state to
+	 * @param pp        the program point where the move happens
 	 * 
 	 * @return the updated analysis state
 	 * 
@@ -399,16 +484,26 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 */
 	public AnalysisState<A> moveExecutionToError(
 			AnalysisState<A> state,
-			Error exception)
+			Error exception,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
 			return state;
+
+		if (events != null)
+			events.post(new AnalysisExecToErrorStart<>(state, exception));
+
 		AnalysisState<A> result = state.bottomExecution();
 
 		if (shouldSmashError == null || !shouldSmashError.test(exception.getType()))
-			return result.addError(exception, state.getExecution());
+			result = result.addError(exception, state.getExecution());
+		else
+			result = result.addSmashedError(exception, state.getExecution());
 
-		return result.addSmashedError(exception, state.getExecution());
+		if (events != null)
+			events.post(new AnalysisExecToErrorEnd<>(pp, state, result, exception));
+
+		return result;
 	}
 
 	/**
@@ -424,6 +519,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 * are removed from the resulting state.
 	 * 
 	 * @param state          the current analysis state
+	 * @param pp             the program point where the move happens
 	 * @param protectedBlock the block that is being protected from the errors
 	 *                           to move
 	 * @param targets        the types to move
@@ -437,6 +533,7 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 */
 	public AnalysisState<A> moveErrorsToExecution(
 			AnalysisState<A> state,
+			ProgramPoint pp,
 			ProtectedBlock protectedBlock,
 			Collection<Type> targets,
 			Collection<Type> excluded,
@@ -444,6 +541,9 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			throws SemanticException {
 		if (state.isBottom() || state.isTop())
 			return state;
+
+		if (events != null)
+			events.post(new AnalysisErrorsToExecStart<>(state, protectedBlock, targets, excluded, variable));
 
 		Type varType = variable == null ? null : variable.getStaticType();
 		ProgramState<A> result = state.getExecution().bottom();
@@ -486,11 +586,24 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				excs.add(e);
 		}
 
-		if (result.isBottom())
+		if (result.isBottom()) {
 			// nothing to catch, result should be bottom
 			// we put the whole state to bottom here
 			// since the catch is unreachable
-			return state.bottom();
+			AnalysisState<A> bottom = state.bottom();
+
+			if (events != null)
+				events.post(new AnalysisErrorsToExecEnd<>(
+						pp,
+						state,
+						bottom,
+						protectedBlock,
+						targets,
+						excluded,
+						variable));
+
+			return bottom;
+		}
 
 		A start = result.getState();
 		A moved = start;
@@ -506,10 +619,9 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			moved = assigned.forgetIdentifiers(
 					toForget,
 					variable);
-			if (moved.isBottom()) {
+			if (moved.isBottom())
 				// no exceptions have been assigned to the variable
 				moved = domain.assign(start, target, new PushAny(varType, variable.getLocation()), variable);
-			}
 		} else
 			moved = moved.forgetIdentifiers(toForget, protectedBlock.getStart());
 
@@ -519,7 +631,12 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		// no uncaught exceptions should remain
 		// in the resulting state
 		// since they are not caught by this block
-		return state.removeAllErrors(false).withExecution(result);
+		AnalysisState<A> res = state.removeAllErrors(false).withExecution(result);
+
+		if (events != null)
+			events.post(new AnalysisErrorsToExecEnd<>(pp, state, res, protectedBlock, targets, excluded, variable));
+
+		return res;
 	}
 
 	/**
@@ -547,6 +664,9 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 
 		if (target instanceof Call)
 			target = ((Call) target).getSource();
+
+		if (events != null)
+			events.post(new AnalysisTransferThrowersStart<>(state, target, origin));
 
 		Set<Error> oldErrors = new HashSet<>();
 		Map<Error, ProgramState<A>> newErrors = new HashMap<>();
@@ -582,10 +702,15 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 				}
 			}
 
-		return state.removeErrors(oldErrors)
+		AnalysisState<A> res = state.removeErrors(oldErrors)
 				.addErrors(newErrors)
 				.removeSmashedErrors(toRemove)
 				.addSmashedErrors(toAdd, state.getSmashedErrorsState());
+
+		if (events != null)
+			events.post(new AnalysisTransferThrowersEnd<>(state, res, target, origin));
+
+		return res;
 	}
 
 	/**
@@ -613,6 +738,9 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		if (caught.isEmpty())
 			return state;
 
+		if (events != null)
+			events.post(new AnalysisRemoveCaughtStart<>(state, source));
+
 		Predicate<Type> isCaught = t -> caught.stream().anyMatch(target -> t.canBeAssignedTo(target.getLeft()));
 		BiPredicate<Statement, ProtectedBlock> aux = (
 				st,
@@ -638,7 +766,12 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 					caughtSmashedTypes.put(ex.getKey(), caughtThrowers);
 			}
 
-		return cleaned.removeSmashedErrors(caughtSmashedTypes);
+		AnalysisState<A> res = cleaned.removeSmashedErrors(caughtSmashedTypes);
+
+		if (events != null)
+			events.post(new AnalysisRemoveCaughtEnd<>(state, res, source));
+
+		return res;
 	}
 
 	/**
@@ -647,18 +780,29 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 	 * exists for halting, it is merged with the current state.
 	 * 
 	 * @param state the current analysis state
+	 * @param pp    the program point where the move happens
 	 * 
 	 * @return the updated analysis state
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public AnalysisState<A> moveExecutionToHalting(
-			AnalysisState<A> state)
+			AnalysisState<A> state,
+			ProgramPoint pp)
 			throws SemanticException {
 		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
 			return state;
+
+		if (events != null)
+			events.post(new AnalysisExecToHaltStart<>(state));
+
 		ProgramState<A> halt = state.getHalt().lub(state.getExecution());
-		return state.bottomExecution().withHalt(halt);
+		AnalysisState<A> res = state.bottomExecution().withHalt(halt);
+
+		if (events != null)
+			events.post(new AnalysisExecToHaltEnd<>(pp, state, res));
+
+		return res;
 	}
 
 	@Override
@@ -667,7 +811,10 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			AnalysisState<A> callres,
 			ProgramPoint call)
 			throws SemanticException {
-		return callres.withExecution(
+		if (events != null)
+			events.post(new AnalysisOnCallReturnStart<>(entryState, callres, call));
+
+		AnalysisState<A> res = callres.withExecution(
 				new ProgramState<>(
 						domain.onCallReturn(
 								entryState.getExecutionState(),
@@ -675,6 +822,11 @@ public class Analysis<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 								call),
 						callres.getExecutionExpressions(),
 						callres.getExecutionInformation()));
+
+		if (events != null)
+			events.post(new AnalysisOnCallReturnEnd<>(entryState, callres, res, call));
+
+		return res;
 	}
 
 }

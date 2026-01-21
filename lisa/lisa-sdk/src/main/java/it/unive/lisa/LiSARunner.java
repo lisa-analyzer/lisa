@@ -6,11 +6,12 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.checks.ChecksExecutor;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
-import it.unive.lisa.checks.syntactic.CheckTool;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventListener;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -83,13 +84,13 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	 * @return the tool used to run the checks, that contains all warnings and
 	 *             notices
 	 */
-	CheckTool run(
+	ReportingTool run(
 			Application app) {
 		finalize(app);
 
 		Collection<CFG> allCFGs = app.getAllCFGs();
 		FixpointConfiguration<A, D> fixconf = new FixpointConfiguration<>(conf);
-		CheckTool tool = new CheckTool(conf, fileManager);
+		ReportingTool tool = new ReportingTool(conf, fileManager);
 
 		if (fixconf.usesOptimizedForwardFixpoint() || fixconf.usesOptimizedBackwardFixpoint())
 			allCFGs.forEach(CFG::computeBasicBlocks);
@@ -100,15 +101,23 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			LOG.warn("Skipping syntactic checks execution since none have been provided");
 
 		if (canAnalyze()) {
-			init(app);
+			EventQueue events;
+			if (conf.synchronousListeners.isEmpty() && conf.asynchronousListeners.isEmpty())
+				// to avoid unnecessary overhead in calling posting events, we
+				// set this to null and require null checks during the analysis
+				events = null;
+			else
+				events = new EventQueue(conf.synchronousListeners, conf.asynchronousListeners, tool);
 
-			analyze(fixconf);
+			init(app, events);
+
+			analyze(fixconf, events, tool);
 
 			Map<CFG, Collection<AnalyzedCFG<A>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 
-			CheckToolWithAnalysisResults<A, D> tool2 = new CheckToolWithAnalysisResults<>(
+			SemanticTool<A, D> tool2 = new SemanticTool<>(
 					tool,
 					results,
 					callGraph,
@@ -150,16 +159,19 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	}
 
 	private void init(
-			Application app) {
+			Application app,
+			EventQueue events) {
+		analysis.setEventQueue(events);
+
 		try {
-			callGraph.init(app);
+			callGraph.init(app, events);
 		} catch (CallGraphConstructionException e) {
 			LOG.fatal("Exception while building the call graph for the input program", e);
 			throw new AnalysisSetupException("Exception while building the call graph for the input program", e);
 		}
 
 		try {
-			interproc.init(app, callGraph, conf.openCallPolicy, analysis);
+			interproc.init(app, callGraph, conf.openCallPolicy, events, analysis);
 		} catch (InterproceduralAnalysisException e) {
 			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisSetupException(
@@ -187,7 +199,17 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	}
 
 	private void analyze(
-			FixpointConfiguration<A, D> fixconf) {
+			FixpointConfiguration<A, D> fixconf,
+			EventQueue events,
+			ReportingTool tool) {
+		if (events != null)
+			TimerLogger.execAction(LOG, "Initializing event listeners", () -> {
+				for (EventListener listener : conf.synchronousListeners)
+					listener.beforeExecution(tool);
+				for (EventListener listener : conf.asynchronousListeners)
+					listener.beforeExecution(tool);
+			});
+
 		AnalysisState<A> state = this.analysis.makeLattice();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> {
 			try {
@@ -197,6 +219,24 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 				throw new AnalysisExecutionException("Exception during fixpoint computation", e);
 			}
 		});
+
+		if (events != null) {
+			TimerLogger.execAction(LOG, "Waiting for event listeners to complete", () -> {
+				try {
+					events.close();
+				} catch (InterruptedException e) {
+					LOG.fatal("Exception while waiting for event listeners to complete", e);
+					throw new AnalysisExecutionException("Exception while waiting for event listeners to complete", e);
+				}
+			});
+
+			TimerLogger.execAction(LOG, "Shutting down event listeners", () -> {
+				for (EventListener listener : conf.synchronousListeners)
+					listener.afterExecution(tool);
+				for (EventListener listener : conf.asynchronousListeners)
+					listener.afterExecution(tool);
+			});
+		}
 	}
 
 }

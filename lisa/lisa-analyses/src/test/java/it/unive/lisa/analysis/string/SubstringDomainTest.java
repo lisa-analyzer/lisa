@@ -5,8 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.ExpressionInverseSet;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.string.Substrings;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.type.BoolType;

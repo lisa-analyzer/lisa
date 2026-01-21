@@ -10,8 +10,8 @@ import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.CallGraphBasedAnalysis;
 import it.unive.lisa.interprocedural.FixpointResults;
@@ -19,6 +19,17 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.NoEntryPointException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.events.CFGFixpointEnd;
+import it.unive.lisa.interprocedural.events.CFGFixpointStart;
+import it.unive.lisa.interprocedural.events.CFGFixpointStored;
+import it.unive.lisa.interprocedural.events.ComputedCallResult;
+import it.unive.lisa.interprocedural.events.ComputedCallState;
+import it.unive.lisa.interprocedural.events.FixpointEnd;
+import it.unive.lisa.interprocedural.events.FixpointIterationEnd;
+import it.unive.lisa.interprocedural.events.FixpointIterationStart;
+import it.unive.lisa.interprocedural.events.FixpointStart;
+import it.unive.lisa.interprocedural.events.PrecomputedCallResult;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CodeUnit;
@@ -108,9 +119,10 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
-		super.init(app, callgraph, policy, analysis);
+		super.init(app, callgraph, policy, events, analysis);
 		this.conf = null;
 		this.results = null;
 	}
@@ -142,19 +154,37 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 						c2) -> c1.getDescriptor().getLocation().compareTo(c2.getDescriptor().getLocation()));
 		entryPoints.addAll(app.getEntryPoints());
 
+		if (events != null) {
+			events.post(new FixpointStart());
+			events.post(new FixpointIterationStart(1));
+		}
+
 		for (CFG cfg : IterationLogger.iterate(LOG, entryPoints, "Processing entrypoints", "entries"))
 			try {
 				token = empty;
 				AnalysisState<A> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
-				results.putResult(
-						cfg,
-						empty,
-						cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty));
+
+				if (events != null)
+					events.post(new CFGFixpointStart<>(cfg, token, entryState));
+
+				AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty);
+
+				if (events != null) {
+					events.post(new CFGFixpointEnd<>(cfg, token, entryState, fixpointResult));
+					events.post(new CFGFixpointStored<>(cfg, token, entryState, fixpointResult, fixpointResult));
+				}
+
+				results.putResult(cfg, empty, fixpointResult);
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 			} catch (FixpointException e) {
 				throw new AnalysisExecutionException("Error while computing fixpoint for entrypoint " + cfg, e);
 			}
+
+		if (events != null) {
+			events.post(new FixpointIterationEnd(1));
+			events.post(new FixpointEnd());
+		}
 	}
 
 	@Override
@@ -185,12 +215,22 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			AnalysisState<A> entryState)
 			throws FixpointException,
 			SemanticException {
+		if (events != null)
+			events.post(new CFGFixpointStart<>(cfg, token, entryState));
+
 		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, workingSet.mk(), conf, token);
+
+		if (events != null)
+			events.post(new CFGFixpointEnd<>(cfg, token, entryState, fixpointResult));
+
 		Pair<Boolean, AnalyzedCFG<A>> res = results.putResult(cfg, token, fixpointResult);
 		if (res.getLeft())
 			throw new FixpointException("Inconsistent fixpoint result for " + cfg + " under token " + token);
-		fixpointResult = res.getRight();
-		return fixpointResult;
+
+		if (events != null)
+			events.post(new CFGFixpointStored<>(cfg, token, entryState, fixpointResult, res.getRight()));
+
+		return res.getRight();
 	}
 
 	@Override
@@ -262,13 +302,23 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 							scope,
 							cfg);
 
+			if (events != null)
+				events.post(new ComputedCallState<>(call, prepared.getLeft(), prepared.getRight()));
+
 			AnalysisState<A> exitState;
-			if (states != null)
+			if (states != null) {
 				// no need to compute the fixpoint: we already have an
 				// exact approximation of the result having the same
 				// call stack and entry states
 				exitState = states.getExitState();
-			else {
+				if (events != null)
+					events.post(new PrecomputedCallResult<>(
+							call,
+							token,
+							prepared.getLeft(),
+							prepared.getRight(),
+							exitState));
+			} else {
 				// compute the result with a fixpoint iteration
 				AnalyzedCFG<A> fixpointResult = null;
 				try {
@@ -283,6 +333,14 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 							analysis.removeCaughtErrors(
 									fixpointResult.getAnalysisStateAfter(exit),
 									exit));
+
+				if (events != null)
+					events.post(new ComputedCallResult<>(
+							call,
+							token,
+							prepared.getLeft(),
+							prepared.getRight(),
+							exitState));
 			}
 
 			// save the resulting state

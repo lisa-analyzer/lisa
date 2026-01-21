@@ -4,8 +4,9 @@ import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.traces.Branching;
 import it.unive.lisa.lattices.traces.ExecutionTrace;
 import it.unive.lisa.lattices.traces.LoopIteration;
@@ -74,6 +75,8 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 	 */
 	public final D domain;
 
+	private EventQueue events;
+
 	/**
 	 * Builds a new instance of this domain, with the default limits on the
 	 * number of loop iterations and conditions that can be tracked in a single
@@ -106,6 +109,13 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		this.max_loop_iterations = maxLoopIterations;
 		this.max_conditions = maxConditions;
 		this.domain = domain;
+	}
+
+	@Override
+	public void setEventQueue(
+			EventQueue queue) {
+		this.events = queue;
+		domain.setEventQueue(queue);
 	}
 
 	@Override
@@ -256,6 +266,11 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		private TraceOracle(
 				TraceLattice<A> state) {
 			this.state = state;
+		}
+
+		@Override
+		public EventQueue getEventQueue() {
+			return events;
 		}
 
 		@Override

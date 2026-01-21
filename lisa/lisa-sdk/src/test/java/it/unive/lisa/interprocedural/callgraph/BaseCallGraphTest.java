@@ -115,7 +115,7 @@ public class BaseCallGraphTest {
 		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
 		Application app = new Application(p);
-		cg.init(app);
+		cg.init(app, null);
 		@SuppressWarnings("unchecked")
 		CFGCall resolved = (CFGCall) cg.resolve(call, new Set[0], new SymbolAliasing());
 		cg.registerCall(resolved);
@@ -185,7 +185,7 @@ public class BaseCallGraphTest {
 		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
 		Application app = new Application(p);
-		cg.init(app);
+		cg.init(app, null);
 
 		CFGCall resolved = (CFGCall) cg
 				.resolve(call, new Set[] { Collections.singleton(new StrType()) }, new SymbolAliasing());

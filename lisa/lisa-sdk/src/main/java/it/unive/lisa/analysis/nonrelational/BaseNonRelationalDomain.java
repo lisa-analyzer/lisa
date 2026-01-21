@@ -4,8 +4,11 @@ import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.analysis.nonrelational.events.NRDEvalEnd;
+import it.unive.lisa.analysis.nonrelational.events.NRDEvalStart;
+import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -127,7 +130,13 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		return expression.accept(this, environment, pp, oracle);
+		EventQueue events = oracle.getEventQueue();
+		if (events != null)
+			events.post(new NRDEvalStart<>(getClass(), environment, expression));
+		L value = expression.accept(this, environment, pp, oracle);
+		if (events != null)
+			events.post(new NRDEvalEnd<>(getClass(), pp, environment, value, expression));
+		return value;
 	}
 
 	@Override

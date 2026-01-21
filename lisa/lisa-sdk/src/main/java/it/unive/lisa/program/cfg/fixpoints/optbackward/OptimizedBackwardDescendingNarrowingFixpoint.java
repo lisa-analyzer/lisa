@@ -11,6 +11,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.events.JoinPerformed;
+import it.unive.lisa.program.cfg.fixpoints.events.LeqPerformed;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -27,8 +29,7 @@ import java.util.function.Predicate;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		OptimizedBackwardFixpoint<A, D> {
 
@@ -83,21 +84,28 @@ public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLatt
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
+		CompoundState<A> result;
 		if (wideningPoints == null || !wideningPoints.contains(node))
 			// optimization: never apply narrowing on normal instructions,
 			// save time and precision and only apply to widening points
-			return old.glb(approx);
+			result = old.downchain(approx);
+		else {
+			AnalysisState<A> post = old.postState.narrowing(approx.postState);
+			StatementStore<A> intermediate;
+			if (config.useWideningPoints)
+				// no need to narrow the intermediate expressions as
+				// well: we force convergence on the final post state
+				// only, to recover as much precision as possible
+				intermediate = old.intermediateStates.downchain(approx.intermediateStates);
+			else
+				intermediate = old.intermediateStates.narrowing(approx.intermediateStates);
+			result = CompoundState.of(post, intermediate);
+		}
 
-		AnalysisState<A> post = old.postState.narrowing(approx.postState);
-		StatementStore<A> intermediate;
-		if (config.useWideningPoints)
-			// no need to narrow the intermediate expressions as
-			// well: we force convergence on the final post state
-			// only, to recover as much precision as possible
-			intermediate = old.intermediateStates.glb(approx.intermediateStates);
-		else
-			intermediate = old.intermediateStates.narrowing(approx.intermediateStates);
-		return CompoundState.of(post, intermediate);
+		if (events != null)
+			events.post(new JoinPerformed<>(node, old, approx, result));
+
+		return result;
 	}
 
 	@Override
@@ -106,7 +114,10 @@ public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLatt
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
-		return old.lessOrEqual(approx);
+		boolean result = old.lessOrEqual(approx);
+		if (events != null)
+			events.post(new LeqPerformed<A>(node, old, approx, result));
+		return result;
 	}
 
 	@Override
@@ -115,7 +126,11 @@ public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLatt
 			boolean forceFullEvaluation,
 			InterproceduralAnalysis<A, D> interprocedural,
 			FixpointConfiguration<A, D> config) {
-		return new OptimizedBackwardDescendingNarrowingFixpoint<>(graph, forceFullEvaluation, interprocedural, config,
+		return new OptimizedBackwardDescendingNarrowingFixpoint<>(
+				graph,
+				forceFullEvaluation,
+				interprocedural,
+				config,
 				hotspots);
 	}
 
@@ -126,14 +141,17 @@ public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLatt
 
 	@Override
 	public ForwardCFGFixpoint<A, D> asForward() {
-		return new OptimizedForwardDescendingNarrowingFixpoint<>(graph, forceFullEvaluation, interprocedural, config,
-				hotspots);
+		return new OptimizedForwardDescendingNarrowingFixpoint<>();
 	}
 
 	@Override
 	public BackwardCFGFixpoint<A, D> withHotspots(
 			Predicate<Statement> hotspots) {
-		return new OptimizedBackwardDescendingNarrowingFixpoint<>(graph, forceFullEvaluation, interprocedural, config,
+		return new OptimizedBackwardDescendingNarrowingFixpoint<>(
+				graph,
+				forceFullEvaluation,
+				interprocedural,
+				config,
 				hotspots);
 	}
 

@@ -3,6 +3,8 @@ package it.unive.lisa.util.datastructures.graph.algorithms;
 import it.unive.lisa.util.datastructures.graph.Edge;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.Node;
+import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A fixpoint implementation for a {@link Graph}, defining the semantics of
@@ -24,8 +26,8 @@ public interface FixpointImplementation<
 		T> {
 
 	/**
-	 * Given a node and its entry state, computes its exit state relying on its
-	 * semantics.<br>
+	 * Given a node and its entry state, computes its exit state and the last
+	 * processed node relying on its semantics.<br>
 	 * <br>
 	 * This callback is invoked after the overall entry state for a node has
 	 * been computed through {@link #union(Node, Object, Object)} of the exit
@@ -33,14 +35,16 @@ public interface FixpointImplementation<
 	 * 
 	 * @param node       the node where the computation takes place
 	 * @param entrystate the computed state before the computation
+	 * @param result     the current (partial) fixpoint results
 	 * 
-	 * @return the exit state
+	 * @return the exit state and the last processed node
 	 * 
 	 * @throws Exception if something goes wrong during the computation
 	 */
-	T semantics(
+	Pair<T, N> semantics(
 			N node,
-			T entrystate)
+			T entrystate,
+			Map<N, T> result)
 			throws Exception;
 
 	/**
@@ -90,8 +94,8 @@ public interface FixpointImplementation<
 	 * <i>or</i> widening) together.<br>
 	 * <br>
 	 * This callback is invoked after the exit state of a node has been computed
-	 * through {@link #semantics(Node, Object)}, to join it with results from
-	 * older fixpoint iterations.
+	 * through {@link #semantics(Node, Object, Map)}, to join it with results
+	 * from older fixpoint iterations.
 	 * 
 	 * @param node   the node where the computation takes place
 	 * @param approx the most recent state
@@ -116,8 +120,8 @@ public interface FixpointImplementation<
 	 * process.<br>
 	 * <br>
 	 * This callback is invoked after the exit state of a node has been computed
-	 * through {@link #semantics(Node, Object)} and joined with the older one
-	 * through {@link #join(Node, Object, Object)}.
+	 * through {@link #semantics(Node, Object, Map)} and joined with the older
+	 * one through {@link #join(Node, Object, Object)}.
 	 * 
 	 * @param node   the node where the computation takes place
 	 * @param approx the most recent state

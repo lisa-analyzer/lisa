@@ -109,6 +109,22 @@ public final class CompoundState<A extends AbstractLattice<A>>
 	}
 
 	@Override
+	public CompoundState<A> upchain(
+			CompoundState<A> other)
+			throws SemanticException {
+		return CompoundState.of(postState.upchain(other.postState),
+				intermediateStates.upchain(other.intermediateStates));
+	}
+
+	@Override
+	public CompoundState<A> downchain(
+			CompoundState<A> other)
+			throws SemanticException {
+		return CompoundState.of(postState.downchain(other.postState),
+				intermediateStates.downchain(other.intermediateStates));
+	}
+
+	@Override
 	public CompoundState<A> top() {
 		return CompoundState.of(postState.top(), intermediateStates.top());
 	}

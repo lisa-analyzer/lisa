@@ -7,11 +7,12 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -56,6 +57,7 @@ public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends
 	 * @param app       the application to analyze
 	 * @param policy    the {@link OpenCallPolicy} to be used for computing the
 	 *                      result of {@link OpenCall}s
+	 * @param events    the event queue to use for this analysis
 	 * @param analysis  the {@link Analysis} that is being run
 	 *
 	 * @throws InterproceduralAnalysisException if an exception happens while
@@ -66,6 +68,7 @@ public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException;
 
@@ -76,6 +79,15 @@ public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends
 	 * @return the analysis being run
 	 */
 	Analysis<A, D> getAnalysis();
+
+	/**
+	 * Yields the event queue used by this interprocedural analysis to emit
+	 * events. Note that in case no listeners are registered for the analysis,
+	 * the return value of this method is {@code null}.
+	 * 
+	 * @return the event queue
+	 */
+	EventQueue getEventQueue();
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a

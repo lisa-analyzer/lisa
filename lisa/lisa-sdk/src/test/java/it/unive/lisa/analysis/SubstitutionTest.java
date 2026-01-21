@@ -4,8 +4,8 @@ import static it.unive.lisa.util.collections.CollectionUtilities.collect;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -101,6 +101,20 @@ public class SubstitutionTest {
 			lub.assigned.elements().addAll(other.assigned.elements());
 			lub.removed.elements().addAll(other.removed.elements());
 			return lub;
+		}
+
+		@Override
+		public Collector upchain(
+				Collector other)
+				throws SemanticException {
+			return lub(other);
+		}
+
+		@Override
+		public Collector downchain(
+				Collector other)
+				throws SemanticException {
+			return glb(other);
 		}
 
 		@Override

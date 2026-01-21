@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 public class FixpointTest {
@@ -30,13 +31,14 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> semantics(
+		public Pair<Set<TestNode>, TestNode> semantics(
 				TestNode node,
-				Set<TestNode> entrystate)
+				Set<TestNode> entrystate,
+				Map<TestNode, Set<TestNode>> result)
 				throws Exception {
 			Set<TestNode> res = new HashSet<>(entrystate);
 			res.add(node);
-			return res;
+			return Pair.of(res, node);
 		}
 
 		@Override
@@ -224,13 +226,14 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> semantics(
+		public Pair<Set<TestNode>, TestNode> semantics(
 				TestNode node,
-				Set<TestNode> entrystate)
+				Set<TestNode> entrystate,
+				Map<TestNode, Set<TestNode>> result)
 				throws Exception {
 			if (type == 0)
 				throw new Exception();
-			return Collections.emptySet();
+			return Pair.of(Collections.emptySet(), node);
 		}
 
 		@Override

@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
+import it.unive.lisa.events.EventListener;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.TopExecutionPolicy;
@@ -34,6 +35,8 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -241,6 +244,26 @@ public class LiSAConfiguration
 	 * smashed.
 	 */
 	public Predicate<Type> shouldSmashError = null;
+
+	/**
+	 * The collection of synchronous {@link EventListener}s to register with the
+	 * analysis' event queue. These listeners will be executed in the same
+	 * thread as the analysis itself. The order of execution of the listeners
+	 * preservers the insertion order into this collection. Synchronous
+	 * listeners are executed before asynchronous ones. Defaults to an empty
+	 * list.
+	 */
+	public final List<EventListener> synchronousListeners = new LinkedList<>();
+
+	/**
+	 * The collection of asynchronous {@link EventListener}s to register with
+	 * the analysis' event queue. These listeners will be executed in a separate
+	 * thread, and will thus not block the analysis. The order of execution of
+	 * the listeners preservers the insertion order into this collection.
+	 * Synchronous listeners are executed before asynchronous ones. Defaults to
+	 * an empty list.
+	 */
+	public final List<EventListener> asynchronousListeners = new LinkedList<>();
 
 	@Override
 	public String toString() {

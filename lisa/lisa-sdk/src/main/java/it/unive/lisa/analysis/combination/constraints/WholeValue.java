@@ -87,6 +87,36 @@ public class WholeValue<N extends WholeValueElement<N>, S extends WholeValueElem
 	}
 
 	@Override
+	public WholeValue<N, S, B> glbAux(
+			WholeValue<N, S, B> other)
+			throws SemanticException {
+		return new WholeValue<>(
+				this.intValue.glb(other.intValue),
+				this.stringValue.glb(other.stringValue),
+				this.boolValue.glb(other.boolValue));
+	}
+
+	@Override
+	public WholeValue<N, S, B> upchainAux(
+			WholeValue<N, S, B> other)
+			throws SemanticException {
+		return new WholeValue<>(
+				this.intValue.upchain(other.intValue),
+				this.stringValue.upchain(other.stringValue),
+				this.boolValue.upchain(other.boolValue));
+	}
+
+	@Override
+	public WholeValue<N, S, B> downchainAux(
+			WholeValue<N, S, B> other)
+			throws SemanticException {
+		return new WholeValue<>(
+				this.intValue.downchain(other.intValue),
+				this.stringValue.downchain(other.stringValue),
+				this.boolValue.downchain(other.boolValue));
+	}
+
+	@Override
 	public boolean lessOrEqualAux(
 			WholeValue<N, S, B> other)
 			throws SemanticException {
@@ -103,6 +133,16 @@ public class WholeValue<N extends WholeValueElement<N>, S extends WholeValueElem
 				this.intValue.widening(other.intValue),
 				this.stringValue.widening(other.stringValue),
 				this.boolValue.widening(other.boolValue));
+	}
+
+	@Override
+	public WholeValue<N, S, B> narrowingAux(
+			WholeValue<N, S, B> other)
+			throws SemanticException {
+		return new WholeValue<>(
+				this.intValue.narrowing(other.intValue),
+				this.stringValue.narrowing(other.stringValue),
+				this.boolValue.narrowing(other.boolValue));
 	}
 
 	@Override

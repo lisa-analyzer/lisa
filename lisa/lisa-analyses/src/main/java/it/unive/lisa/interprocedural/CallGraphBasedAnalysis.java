@@ -6,10 +6,11 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -31,7 +32,8 @@ import java.util.Set;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
+public abstract class CallGraphBasedAnalysis<
+		A extends AbstractLattice<A>,
 		D extends AbstractDomain<A>>
 		implements
 		InterproceduralAnalysis<A, D> {
@@ -57,6 +59,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 	protected Analysis<A, D> analysis;
 
 	/**
+	 * The event queue for the analysis.
+	 */
+	protected EventQueue events;
+
+	/**
 	 * Builds the analysis.
 	 */
 	protected CallGraphBasedAnalysis() {
@@ -73,6 +80,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 		this.app = other.app;
 		this.policy = other.policy;
 		this.analysis = other.analysis;
+		this.events = other.events;
 	}
 
 	@Override
@@ -86,16 +94,23 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractLattice<A>,
 	}
 
 	@Override
+	public EventQueue getEventQueue() {
+		return events;
+	}
+
+	@Override
 	public void init(
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.app = app;
 		this.policy = policy;
 		this.analysis = analysis;
+		this.events = events;
 	}
 
 	@Override

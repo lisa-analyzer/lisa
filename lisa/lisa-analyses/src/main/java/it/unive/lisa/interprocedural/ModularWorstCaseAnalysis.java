@@ -8,11 +8,19 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.interprocedural.events.CFGFixpointEnd;
+import it.unive.lisa.interprocedural.events.CFGFixpointStart;
+import it.unive.lisa.interprocedural.events.CFGFixpointStored;
+import it.unive.lisa.interprocedural.events.FixpointEnd;
+import it.unive.lisa.interprocedural.events.FixpointIterationEnd;
+import it.unive.lisa.interprocedural.events.FixpointIterationStart;
+import it.unive.lisa.interprocedural.events.FixpointStart;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CodeUnit;
@@ -59,6 +67,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 	private Application app;
 
 	/**
+	 * The event queue to use for this analysis.
+	 */
+	private EventQueue events;
+
+	/**
 	 * The policy used for computing the result of cfg calls.
 	 */
 	private OpenCallPolicy policy;
@@ -101,6 +114,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 		Collection<CFG> all = new TreeSet<>(ModularWorstCaseAnalysis::sorter);
 		all.addAll(app.getAllCFGs());
 
+		if (events != null) {
+			events.post(new FixpointStart());
+			events.post(new FixpointIterationStart(1));
+		}
+
 		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program", "cfgs"))
 			try {
 				StatementStore<A> store = new StatementStore<>(entryState.bottom());
@@ -115,13 +133,25 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 					prepared = a.forwardSemantics(prepared, this, store);
 				}
 
-				results.putResult(
-						cfg,
-						id,
-						cfg.fixpoint(prepared, this, conf.fixpointWorkingSet.mk(), conf, id));
+				if (events != null)
+					events.post(new CFGFixpointStart<>(cfg, id, entryState));
+
+				AnalyzedCFG<A> fixpointResult = cfg.fixpoint(prepared, this, conf.fixpointWorkingSet.mk(), conf, id);
+
+				if (events != null) {
+					events.post(new CFGFixpointEnd<>(cfg, id, entryState, fixpointResult));
+					events.post(new CFGFixpointStored<>(cfg, id, entryState, fixpointResult, fixpointResult));
+				}
+
+				results.putResult(cfg, id, fixpointResult);
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
+
+		if (events != null) {
+			events.post(new FixpointIterationEnd(1));
+			events.post(new FixpointEnd());
+		}
 	}
 
 	/**
@@ -189,12 +219,14 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		this.app = app;
 		this.policy = policy;
 		this.results = null;
 		this.analysis = analysis;
+		this.events = events;
 	}
 
 	@Override
@@ -216,4 +248,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 		return analysis;
 	}
 
+	@Override
+	public EventQueue getEventQueue() {
+		return events;
+	}
 }

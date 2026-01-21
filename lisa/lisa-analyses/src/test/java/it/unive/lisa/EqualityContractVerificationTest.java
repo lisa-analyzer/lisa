@@ -18,18 +18,13 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.informationFlow.NonInterference;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import it.unive.lisa.analysis.lattices.InverseSetLattice;
-import it.unive.lisa.analysis.lattices.SetLattice;
-import it.unive.lisa.analysis.lattices.SingleHeapLattice;
-import it.unive.lisa.analysis.lattices.SingleTypeLattice;
-import it.unive.lisa.analysis.lattices.SingleValueLattice;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.cron.CronConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -41,7 +36,14 @@ import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
 import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.inlining.CallStackId;
+import it.unive.lisa.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.HistoryState;
+import it.unive.lisa.lattices.InverseSetLattice;
 import it.unive.lisa.lattices.ReachLattice;
+import it.unive.lisa.lattices.SetLattice;
+import it.unive.lisa.lattices.SingleHeapLattice;
+import it.unive.lisa.lattices.SingleTypeLattice;
+import it.unive.lisa.lattices.SingleValueLattice;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
 import it.unive.lisa.lattices.numeric.NonRedundantIntervalSet;
@@ -335,6 +337,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(NonInterferenceValue.class, new NonInterference().top(),
 						new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
+				.withPrefabValues(EventQueue.class, new EventQueue(null), new EventQueue(null))
 				.withPrefabValues(Set.class, s1, s2)
 				.withPrefabValues(
 						AbstractDomain.class,
@@ -346,6 +349,16 @@ public class EqualityContractVerificationTest {
 								DefaultConfiguration.defaultHeapDomain(),
 								new Sign(),
 								DefaultConfiguration.defaultTypeDomain()))
+				.withPrefabValues(
+						HistoryState.class,
+						new HistoryState<>(DefaultConfiguration.simpleDomain(
+								DefaultConfiguration.defaultHeapDomain(),
+								new Interval(),
+								DefaultConfiguration.defaultTypeDomain()).makeLattice()),
+						new HistoryState<>(DefaultConfiguration.simpleDomain(
+								DefaultConfiguration.defaultHeapDomain(),
+								new Sign(),
+								DefaultConfiguration.defaultTypeDomain()).makeLattice()))
 				.withPrefabValues(MutableGraph.class, g1, g2);
 
 		if (getClass)

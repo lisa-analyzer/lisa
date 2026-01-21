@@ -2,9 +2,9 @@ package it.unive.lisa.lattices.string;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.lattices.ExpressionInverseSet;
+import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -73,6 +73,13 @@ public class Substrings
 	}
 
 	@Override
+	public Substrings upchainAux(
+			Substrings other)
+			throws SemanticException {
+		return lubAux(other);
+	}
+
+	@Override
 	public Substrings glbAux(
 			Substrings other)
 			throws SemanticException {
@@ -83,6 +90,13 @@ public class Substrings
 				(
 						o1,
 						o2) -> o1.glb(o2)).closure();
+	}
+
+	@Override
+	public Substrings downchainAux(
+			Substrings other)
+			throws SemanticException {
+		return glbAux(other);
 	}
 
 	@Override

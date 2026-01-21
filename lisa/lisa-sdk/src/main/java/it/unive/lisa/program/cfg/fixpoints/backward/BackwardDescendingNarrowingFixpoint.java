@@ -9,6 +9,8 @@ import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.events.JoinPerformed;
+import it.unive.lisa.program.cfg.fixpoints.events.LeqPerformed;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingNarrowingFixpoint;
@@ -77,21 +79,28 @@ public class BackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
+		CompoundState<A> result;
 		if (wideningPoints == null || !wideningPoints.contains(node))
 			// optimization: never apply narrowing on normal instructions,
 			// save time and precision and only apply to widening points
-			return old.glb(approx);
+			result = old.downchain(approx);
+		else {
+			AnalysisState<A> post = old.postState.narrowing(approx.postState);
+			StatementStore<A> intermediate;
+			if (config.useWideningPoints)
+				// no need to narrow the intermediate expressions as
+				// well: we force convergence on the final post state
+				// only, to recover as much precision as possible
+				intermediate = old.intermediateStates.downchain(approx.intermediateStates);
+			else
+				intermediate = old.intermediateStates.narrowing(approx.intermediateStates);
+			result = CompoundState.of(post, intermediate);
+		}
 
-		AnalysisState<A> post = old.postState.narrowing(approx.postState);
-		StatementStore<A> intermediate;
-		if (config.useWideningPoints)
-			// no need to narrow the intermediate expressions as
-			// well: we force convergence on the final post state
-			// only, to recover as much precision as possible
-			intermediate = old.intermediateStates.glb(approx.intermediateStates);
-		else
-			intermediate = old.intermediateStates.narrowing(approx.intermediateStates);
-		return CompoundState.of(post, intermediate);
+		if (events != null)
+			events.post(new JoinPerformed<>(node, old, approx, result));
+
+		return result;
 	}
 
 	@Override
@@ -100,7 +109,10 @@ public class BackwardDescendingNarrowingFixpoint<A extends AbstractLattice<A>,
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
-		return old.lessOrEqual(approx);
+		boolean result = old.lessOrEqual(approx);
+		if (events != null)
+			events.post(new LeqPerformed<A>(node, old, approx, result));
+		return result;
 	}
 
 	@Override

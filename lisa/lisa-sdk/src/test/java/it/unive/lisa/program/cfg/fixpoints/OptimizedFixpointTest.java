@@ -13,9 +13,9 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.CodeUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
@@ -39,6 +39,7 @@ import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Map;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 public class OptimizedFixpointTest {
@@ -56,11 +57,12 @@ public class OptimizedFixpointTest {
 		}
 
 		@Override
-		public CompoundState<TestAbstractState> semantics(
+		public Pair<CompoundState<TestAbstractState>, Statement> semantics(
 				Statement node,
-				CompoundState<TestAbstractState> entrystate)
+				CompoundState<TestAbstractState> entrystate,
+				Map<Statement, CompoundState<TestAbstractState>> result)
 				throws SemanticException {
-			return entrystate;
+			return Pair.of(entrystate, node);
 		}
 
 		@Override
@@ -77,7 +79,7 @@ public class OptimizedFixpointTest {
 				CompoundState<TestAbstractState> left,
 				CompoundState<TestAbstractState> right)
 				throws SemanticException {
-			return left.lub(right);
+			return left.upchain(right);
 		}
 
 		@Override

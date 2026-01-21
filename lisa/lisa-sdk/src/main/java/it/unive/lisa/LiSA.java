@@ -1,7 +1,6 @@
 package it.unive.lisa;
 
 import it.unive.lisa.analysis.Analysis;
-import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.logging.Log4jConfig;
 import it.unive.lisa.logging.TimerLogger;
@@ -104,7 +103,7 @@ public class LiSA {
 				conf.callGraph,
 				conf.analysis == null ? null : new Analysis(conf.analysis, conf.shouldSmashError));
 		Application app = new Application(programs);
-		CheckTool tool;
+		ReportingTool tool;
 
 		try {
 			tool = TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app));

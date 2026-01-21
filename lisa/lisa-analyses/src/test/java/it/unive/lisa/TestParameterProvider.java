@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.HistoryDomain;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.Reachability;
@@ -20,11 +21,6 @@ import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.heap.HeapLattice;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
-import it.unive.lisa.analysis.lattices.SingleHeapLattice;
-import it.unive.lisa.analysis.lattices.SingleTypeLattice;
-import it.unive.lisa.analysis.lattices.SingleValueLattice;
 import it.unive.lisa.analysis.nonRedundantPowerset.NonRedundantSetDomainLattice;
 import it.unive.lisa.analysis.nonRedundantPowerset.NonRedundantSetLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -43,6 +39,7 @@ import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -55,8 +52,13 @@ import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.ReachLattice;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.SimpleAbstractState;
+import it.unive.lisa.lattices.SingleHeapLattice;
+import it.unive.lisa.lattices.SingleTypeLattice;
+import it.unive.lisa.lattices.SingleValueLattice;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
 import it.unive.lisa.lattices.informationFlow.SimpleTaint;
@@ -290,6 +292,11 @@ public class TestParameterProvider {
 			SemanticOracle {
 
 		@Override
+		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
 		public Set<Type> getRuntimeTypesOf(
 				SymbolicExpression e,
 				ProgramPoint pp)
@@ -441,11 +448,12 @@ public class TestParameterProvider {
 		cg = new RTACallGraph();
 		interprocedural = new ModularWorstCaseAnalysis<>();
 		try {
-			cg.init(app);
+			cg.init(app, null);
 			interprocedural.init(
 					app,
 					cg,
 					WorstCasePolicy.INSTANCE,
+					null,
 					new Analysis<>(new SimpleAbstractDomain<>(new MonolithicHeap(), new Sign(), new InferredTypes())));
 		} catch (CallGraphConstructionException | InterproceduralAnalysisException e) {
 			fail("Unable to instantiate test parameters: " + e.getMessage());
@@ -725,7 +733,8 @@ public class TestParameterProvider {
 			return (R) new Bricks();
 		if (param == BoundedStringSet.class)
 			return (R) new BoundedStringSet();
-		if (root == TracePartitioning.class || root == Analysis.class || root == Reachability.class)
+		if (root == TracePartitioning.class || root == Analysis.class || root == Reachability.class
+				|| root == HistoryDomain.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
 
 		throw new UnsupportedOperationException(

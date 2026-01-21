@@ -3,8 +3,9 @@ package it.unive.lisa;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -60,6 +61,11 @@ public class TestAbstractDomain
 	public class TestOracle
 			implements
 			SemanticOracle {
+
+		@Override
+		public EventQueue getEventQueue() {
+			return null;
+		}
 
 		@Override
 		public Set<Type> getRuntimeTypesOf(
@@ -137,6 +143,11 @@ public class TestAbstractDomain
 			ProgramPoint call)
 			throws SemanticException {
 		return callres;
+	}
+
+	@Override
+	public void setEventQueue(
+			EventQueue queue) {
 	}
 
 }

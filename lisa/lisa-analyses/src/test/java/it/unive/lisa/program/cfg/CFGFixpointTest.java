@@ -9,7 +9,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.conf.FixpointConfiguration;
@@ -24,6 +23,7 @@ import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.types.TypeSet;
@@ -70,11 +70,12 @@ public class CFGFixpointTest {
 						TypeEnvironment<TypeSet>>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
 		Application app = new Application(p);
-		callgraph.init(app);
+		callgraph.init(app, null);
 		analysis.init(
 				app,
 				callgraph,
 				WorstCasePolicy.INSTANCE,
+				null,
 				new Analysis<>(DefaultConfiguration.defaultAbstractDomain()));
 		return analysis;
 	}

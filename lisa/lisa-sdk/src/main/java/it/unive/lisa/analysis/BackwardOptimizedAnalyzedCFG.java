@@ -1,9 +1,9 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
@@ -11,6 +11,7 @@ import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
@@ -52,8 +53,7 @@ import org.apache.logging.log4j.Logger;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		BackwardAnalyzedCFG<A> {
 
@@ -209,8 +209,11 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			}
 		}
 
-		BackwardAscendingFixpoint<A,
-				D> fix = new BackwardAscendingFixpoint<>(this, true, new PrecomputedAnalysis(), conf);
+		BackwardAscendingFixpoint<A, D> fix = new BackwardAscendingFixpoint<>(
+				this,
+				true,
+				new PrecomputedAnalysis(),
+				conf);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, new FIFOWorkingSet<>(), existing);
@@ -261,6 +264,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 				Application app,
 				CallGraph callgraph,
 				OpenCallPolicy policy,
+				EventQueue events,
 				Analysis<A, D> analysis)
 				throws InterproceduralAnalysisException {
 			throw new UnsupportedOperationException();
@@ -341,6 +345,11 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			return interprocedural.getAnalysis();
 		}
 
+		@Override
+		public EventQueue getEventQueue() {
+			// we do not want events during unwinding
+			return null;
+		}
 	}
 
 	@Override

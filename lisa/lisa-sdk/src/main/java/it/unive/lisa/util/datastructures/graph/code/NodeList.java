@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
@@ -302,7 +303,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1 || dest == -1)
 			return Collections.emptySet();
 
-		Set<E> result = new HashSet<>();
+		Set<E> result = new TreeSet<>();
 		if (src == dest - 1 && !cutoff.contains(src))
 			result.add(sequentialSingleton.newInstance(source, destination));
 
@@ -328,7 +329,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1)
 			return Collections.emptySet();
 
-		Set<E> result = new HashSet<>();
+		Set<E> result = new TreeSet<>();
 		if (src != 0 && !cutoff.contains(src - 1))
 			result.add(sequentialSingleton.newInstance(nodes.get(src - 1), node));
 
@@ -352,7 +353,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1)
 			return Collections.emptySet();
 
-		Set<E> result = new HashSet<>();
+		Set<E> result = new TreeSet<>();
 		if (src != nodes.size() - 1 && !cutoff.contains(src))
 			result.add(sequentialSingleton.newInstance(node, nodes.get(src + 1)));
 
@@ -397,7 +398,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1)
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
-		Set<N> result = new HashSet<>();
+		Set<N> result = new TreeSet<>();
 		if (src != nodes.size() - 1 && !cutoff.contains(src))
 			result.add(nodes.get(src + 1));
 
@@ -425,7 +426,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (src == -1)
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
-		Set<N> result = new HashSet<>();
+		Set<N> result = new TreeSet<>();
 		if (src != 0 && !cutoff.contains(src - 1))
 			result.add(nodes.get(src - 1));
 
@@ -832,8 +833,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 
 		private NodeEdges(
 				NodeEdges<G, N, E> other) {
-			ingoing = new HashSet<>(other.ingoing);
-			outgoing = new HashSet<>(other.outgoing);
+			ingoing = new TreeSet<>(other.ingoing);
+			outgoing = new TreeSet<>(other.outgoing);
 		}
 
 		/**

@@ -7,6 +7,8 @@ import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.events.JoinPerformed;
+import it.unive.lisa.program.cfg.fixpoints.events.LeqPerformed;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingGLBFixpoint;
@@ -24,8 +26,7 @@ import java.util.Map;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		BackwardCFGFixpoint<A, D> {
 
@@ -76,15 +77,23 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
+		CompoundState<A> result;
 		if (maxGLBs < 0)
-			return old;
+			result = old;
+		else {
+			int glb = glbs.computeIfAbsent(node, st -> maxGLBs);
+			if (glb == 0)
+				result = old;
+			else {
+				glbs.put(node, --glb);
+				result = old.downchain(approx);
+			}
+		}
 
-		int glb = glbs.computeIfAbsent(node, st -> maxGLBs);
-		if (glb == 0)
-			return old;
+		if (events != null)
+			events.post(new JoinPerformed<>(node, old, approx, result));
 
-		glbs.put(node, --glb);
-		return old.glb(approx);
+		return result;
 	}
 
 	@Override
@@ -93,7 +102,10 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 			CompoundState<A> approx,
 			CompoundState<A> old)
 			throws SemanticException {
-		return old.lessOrEqual(approx);
+		boolean result = old.lessOrEqual(approx);
+		if (events != null)
+			events.post(new LeqPerformed<A>(node, old, approx, result));
+		return result;
 	}
 
 	@Override

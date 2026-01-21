@@ -2,7 +2,7 @@ plugins.withType(JavaPlugin) {
 	if (git_ready) {
 		jar.doFirst {
 			manifest {
-				 attributes(
+				attributes(
 					'Implementation-Title': project.name,
 					'Implementation-Version': project.version,
 					'Implementation-Vendor': 'Ca\' Foscari University of Venice',
@@ -21,32 +21,32 @@ plugins.withType(JavaPlugin) {
 }
 
 compileJava {
-    options.debug = true
-    options.debugOptions.debugLevel = "source,lines,vars"
-  	sourceCompatibility = '11'
-  	targetCompatibility = '11'
+	options.debug = true
+	options.debugOptions.debugLevel = "source,lines,vars"
+	sourceCompatibility = '11'
+	targetCompatibility = '11'
 }
 
 compileTestJava {
-    options.debug = true
-    options.debugOptions.debugLevel = "source,lines,vars"
-  	sourceCompatibility = '11'
-  	targetCompatibility = '11'
+	options.debug = true
+	options.debugOptions.debugLevel = "source,lines,vars"
+	sourceCompatibility = '11'
+	targetCompatibility = '11'
 }
 
 java {
-    withJavadocJar()
-    withSourcesJar()
+	withJavadocJar()
+	withSourcesJar()
 }
 
 javadoc {
 	if(JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
-    }
-    options {
-        links 'https://docs.oracle.com/en/java/javase/11/docs/api/'
+		options.addBooleanOption('html5', true)
+	}
+	options {
+		links 'https://docs.oracle.com/en/java/javase/11/docs/api/'
 		addStringOption('Xdoclint:none', '-quiet')
-    }
+	}
 }
 
 test {
@@ -54,111 +54,111 @@ test {
 		includeTestsMatching 'it.unive.lisa.*'
 		excludeTestsMatching 'it.unive.lisa.cron.*'
 	}
-	
-    testLogging {
-        showStandardStreams = false
-        events "failed"
+
+	testLogging {
+		showStandardStreams = false
+		events "failed"
 		exceptionFormat "full"
-    }
+	}
 
-    def outputs = [:]  // map from test ID -> output buffer
-    onOutput { descriptor, event ->
-        def buf = outputs.computeIfAbsent(descriptor.id) { new StringBuilder() }
-        buf.append(event.message)
-    }
+	def outputs = [:]  // map from test ID -> output buffer
+	onOutput { descriptor, event ->
+		def buf = outputs.computeIfAbsent(descriptor.id) { new StringBuilder() }
+		buf.append(event.message)
+	}
 
-    afterTest { desc, result ->
-        if (result.resultType == org.gradle.api.tasks.testing.TestResult.ResultType.FAILURE) {
-            def buf = outputs.remove(desc.id)
-            if (buf) {
-                println "=== Captured output for ${desc.className}.${desc.name} ==="
-                print buf.toString()
-                println "============================================================="
-            }
-        } else {
-            outputs.remove(desc.id)
-        }
-    }
-	
+	afterTest { desc, result ->
+		if (result.resultType == org.gradle.api.tasks.testing.TestResult.ResultType.FAILURE) {
+			def buf = outputs.remove(desc.id)
+			if (buf) {
+				println "=== Captured output for ${desc.className}.${desc.name} ==="
+				print buf.toString()
+				println "============================================================="
+			}
+		} else {
+			outputs.remove(desc.id)
+		}
+	}
+
 	jacoco {
 		// we don't care about coverage of excpetion classes
 		// most of the times they only define constructors
 		// that invoke super constructors...
-        excludes = ['**/*Exception*']
-    }
+		excludes = ['**/*Exception*']
+	}
 }
 
 tasks.register('cron', Test) {
-    description = 'Runs cron tests'
-    group = 'verification'
+	description = 'Runs cron tests'
+	group = 'verification'
 
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    
-    filter {
-    	failOnNoMatchingTests false
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+
+	filter {
+		failOnNoMatchingTests false
 		includeTestsMatching 'it.unive.lisa.cron.*'
 	}
-	
-    testLogging {
-        showStandardStreams = false
-        events "failed"
+
+	testLogging {
+		showStandardStreams = false
+		events "failed"
 		exceptionFormat "full"
-    }
+	}
 
-    def outputs = [:]  // map from test ID -> output buffer
-    onOutput { descriptor, event ->
-        def buf = outputs.computeIfAbsent(descriptor.id) { new StringBuilder() }
-        buf.append(event.message)
-    }
+	def outputs = [:]  // map from test ID -> output buffer
+	onOutput { descriptor, event ->
+		def buf = outputs.computeIfAbsent(descriptor.id) { new StringBuilder() }
+		buf.append(event.message)
+	}
 
-    afterTest { desc, result ->
-        if (result.resultType == org.gradle.api.tasks.testing.TestResult.ResultType.FAILURE) {
-            def buf = outputs.remove(desc.id)
-            if (buf) {
-                println "=== Captured output for ${desc.className}.${desc.name} ==="
-                print buf.toString()
-                println "============================================================="
-            }
-        } else {
-            outputs.remove(desc.id)
-        }
-    }
+	afterTest { desc, result ->
+		if (result.resultType == org.gradle.api.tasks.testing.TestResult.ResultType.FAILURE) {
+			def buf = outputs.remove(desc.id)
+			if (buf) {
+				println "=== Captured output for ${desc.className}.${desc.name} ==="
+				print buf.toString()
+				println "============================================================="
+			}
+		} else {
+			outputs.remove(desc.id)
+		}
+	}
 }
 
 tasks.register('update-cron', Test) {
-    description = 'Runs cron tests, updating expected results of failed ones'
-    group = 'verification'
+	description = 'Runs cron tests, updating expected results of failed ones'
+	group = 'verification'
 
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    systemProperty "lisa.cron.update", "true"
-    
-    filter {
-    	failOnNoMatchingTests false
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	systemProperty "lisa.cron.update", "true"
+
+	filter {
+		failOnNoMatchingTests false
 		includeTestsMatching 'it.unive.lisa.cron.*'
 	}
 }
 
 tasks.register('allTests') {
-    description = 'Runs unit tests and cron tests'
-    group = 'verification'
+	description = 'Runs unit tests and cron tests'
+	group = 'verification'
 	dependsOn test, cron
 }
 
 tasks.register('completeBuild') {
-    description = 'build + cron + checkCodeStyle'
-    group = 'build'
+	description = 'build + cron + checkCodeStyle'
+	group = 'build'
 	dependsOn build, cron, checkCodeStyle
 }
 
 jacocoTestReport {
 	// we do not depend also on cron for now
-    dependsOn test // tests are required to run before generating the report
-    afterEvaluate {
-    	// this will effectively hide exception classes from the report
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: '**/*Exception*')
-        }))
-    }
+	dependsOn test // tests are required to run before generating the report
+	afterEvaluate {
+		// this will effectively hide exception classes from the report
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: '**/*Exception*')
+		}))
+	}
 }
