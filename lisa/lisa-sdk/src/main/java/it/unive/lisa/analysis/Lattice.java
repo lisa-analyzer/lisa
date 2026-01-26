@@ -153,9 +153,11 @@ public interface Lattice<L extends Lattice<L>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L upchain(
+	default L upchain(
 			L other)
-			throws SemanticException;
+			throws SemanticException {
+		return lub(other);
+	}
 
 	/**
 	 * Performs the upwards chain operation between this lattice element and the
@@ -291,9 +293,11 @@ public interface Lattice<L extends Lattice<L>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L downchain(
+	default L downchain(
 			L other)
-			throws SemanticException;
+			throws SemanticException {
+		return glb(other);
+	}
 
 	/**
 	 * Performs the downwards chain operation between this lattice element and
