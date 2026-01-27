@@ -25,8 +25,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cd lisa && ./gradlew publishAllPublicationsToOSSRHRepository
       - name: Finalize Publication to Maven Central
+        env:
+          MAVEN_PORTAL_B64_TOKEN: ${{ secrets.MAVEN_PORTAL_B64_TOKEN }}
         run: |
           # Send the POST request to the Staging API for automatic release
           curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.MAVEN_PORTA_B64_TOKEN }}" \
-            "https://ossrh-staging-api.central.sonatype.com"
+            -H "Authorization: Bearer $MAVEN_PORTAL_B64_TOKEN" \
+            "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.github.lisa-analyzer?publishing_type=automatic"
