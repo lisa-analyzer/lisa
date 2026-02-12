@@ -84,7 +84,7 @@ public abstract class TernaryStatement
 	 * @return the middle sub-expression
 	 */
 	public Expression getMiddle() {
-		return getSubExpressions()[2];
+		return getSubExpressions()[1];
 	}
 
 	/**
