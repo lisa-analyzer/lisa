@@ -300,7 +300,7 @@ public abstract class NaryExpression
 
 		AnalysisState<A> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
 		AnalysisState<A> result = forwardSemanticsAux(interprocedural, eval, computed, expressions);
-
+		//entryState.getExecutionInfo("bla").
 		Collection<Identifier> vars = getMetaVariables();
 		for (Expression sub : subExpressions) {
 			// we propagate the meta variables backward

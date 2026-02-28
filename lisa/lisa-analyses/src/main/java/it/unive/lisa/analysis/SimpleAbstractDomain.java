@@ -206,7 +206,6 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			ProgramPoint pp)
 			throws SemanticException {
 		MutableOracle mo = new MutableOracle(state);
-
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
 			mo.heap = heapDomain.assign(mo.heap, id, expression, pp, mo).getLeft();
@@ -500,6 +499,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				SymbolicExpression e,
 				ProgramPoint pp)
 				throws SemanticException {
+
 			return typeDomain.getRuntimeTypesOf(type, e, pp, this);
 		}
 

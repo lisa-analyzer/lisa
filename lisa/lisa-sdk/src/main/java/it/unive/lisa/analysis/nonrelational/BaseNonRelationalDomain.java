@@ -338,6 +338,12 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 		return evalTernaryExpression(expression, left, middle, right, pp, oracle);
 	}
 
+	/*@Override
+	default L visit(VariadicExpression expression, L[] values, Object... params) throws SemanticException {
+
+		return evalVariadicExpression(expression, values, null, (ProgramPoint) params[1], (SemanticOracle) params[2]);
+	}*/
+
 	/**
 	 * Yields the evaluation of a {@link TernaryExpression} applying its
 	 * operator to three expressions whose abstract values are {@code left},
@@ -388,10 +394,10 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 
 		ProgramPoint pp = (ProgramPoint) params[1];
 		SemanticOracle oracle = (SemanticOracle) params[2];
-		return evalVariadicExpression(expression, values, variadicValues, pp, oracle);
+		return evalVariadicExpression(expression, values, pp, oracle);
 	}
 
-	default L evalVariadicExpression(VariadicExpression expression, L[] values, Map<String,L[]> variadicValues, ProgramPoint pp, SemanticOracle oracle) {
+	default L evalVariadicExpression(VariadicExpression expression, L[] values, ProgramPoint pp, SemanticOracle oracle) {
 		return top();
 	}
 
