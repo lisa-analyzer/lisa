@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -19,6 +19,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * scope on the whole state using
  * {@link AnalysisState#pushScope(ScopeToken, ProgramPoint)} and
  * {@link AnalysisState#popScope(ScopeToken, ProgramPoint)}.
+ *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class DefaultScopingStrategy
 		implements

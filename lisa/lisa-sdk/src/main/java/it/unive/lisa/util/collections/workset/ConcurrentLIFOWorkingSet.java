@@ -17,19 +17,15 @@ public final class ConcurrentLIFOWorkingSet<E>
 
 	private final Deque<E> ws;
 
-	private ConcurrentLIFOWorkingSet() {
+	/**
+	 * Builds an empty working set.
+	 */
+	public ConcurrentLIFOWorkingSet() {
 		ws = new ConcurrentLinkedDeque<>();
 	}
 
-	/**
-	 * Yields a new, empty working set.
-	 * 
-	 * @param <E> the type of the elements that the returned working set
-	 *                contains
-	 * 
-	 * @return the new working set
-	 */
-	public static <E> ConcurrentLIFOWorkingSet<E> mk() {
+	@Override
+	public ConcurrentLIFOWorkingSet<E> mk() {
 		return new ConcurrentLIFOWorkingSet<>();
 	}
 

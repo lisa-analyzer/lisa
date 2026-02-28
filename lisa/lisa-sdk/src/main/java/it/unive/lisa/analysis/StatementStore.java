@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Map;
 

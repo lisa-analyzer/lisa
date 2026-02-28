@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -185,6 +185,31 @@ public class FixpointInfo
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public FixpointInfo upchainAux(
+			FixpointInfo other)
+			throws SemanticException {
+		Map<String, Lattice<?>> function = mkNewFunction(null, false);
+		Set<String> keys = SetUtils.union(this.getKeys(), other.getKeys());
+		for (String key : keys)
+			try {
+				// need to leave this raw to not have the compiler complaining
+				// about the chain invocation
+				Lattice v = this.get(key);
+				Lattice<?> o = other.get(key);
+				if (v != null && o != null)
+					function.put(key, v.upchain(o));
+				else if (v != null)
+					function.put(key, v);
+				else
+					function.put(key, o);
+			} catch (SemanticException e) {
+				throw new SemanticException("Exception while operating on '" + key + "'", e);
+			}
+		return new FixpointInfo(function);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public FixpointInfo glbAux(
 			FixpointInfo other)
 			throws SemanticException {
@@ -198,6 +223,27 @@ public class FixpointInfo
 				Lattice<?> o = other.get(key);
 				if (v != null && o != null)
 					function.put(key, v.glb(o));
+			} catch (SemanticException e) {
+				throw new SemanticException("Exception while operating on '" + key + "'", e);
+			}
+		return new FixpointInfo(function);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public FixpointInfo downchainAux(
+			FixpointInfo other)
+			throws SemanticException {
+		Map<String, Lattice<?>> function = mkNewFunction(null, false);
+		Set<String> keys = SetUtils.intersection(this.getKeys(), other.getKeys());
+		for (String key : keys)
+			try {
+				// need to leave this raw to not have the compiler complaining
+				// about the chain invocation
+				Lattice v = this.get(key);
+				Lattice<?> o = other.get(key);
+				if (v != null && o != null)
+					function.put(key, v.downchain(o));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception while operating on '" + key + "'", e);
 			}

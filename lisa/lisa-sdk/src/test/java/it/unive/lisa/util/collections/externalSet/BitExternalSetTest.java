@@ -1,7 +1,7 @@
 package it.unive.lisa.util.collections.externalSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
 public class BitExternalSetTest {
@@ -85,7 +85,7 @@ public class BitExternalSetTest {
 			BiFunction<Set<String>, Set<String>, Boolean> test,
 			Pair<Set<String>, Set<String>>... sets) {
 		for (Pair<Set<String>, Set<String>> pair : sets)
-			assertTrue("The pair of sets are different", test.apply(pair.getLeft(), pair.getRight()));
+			assertTrue(test.apply(pair.getLeft(), pair.getRight()), "The pair of sets are different");
 	}
 
 	@Test

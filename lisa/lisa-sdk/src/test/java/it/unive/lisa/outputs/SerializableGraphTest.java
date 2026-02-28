@@ -1,6 +1,6 @@
 package it.unive.lisa.outputs;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SerializableGraphTest {
 

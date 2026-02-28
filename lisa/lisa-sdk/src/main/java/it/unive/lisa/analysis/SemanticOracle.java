@@ -1,7 +1,8 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
@@ -23,6 +24,15 @@ import java.util.Set;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public interface SemanticOracle {
+
+	/**
+	 * Gets the {@link EventQueue} that can be used to post analysis events.
+	 * Note that in case no listeners are registered for the analysis, the
+	 * return value of this method is {@code null}.
+	 * 
+	 * @return the event queue
+	 */
+	EventQueue getEventQueue();
 
 	/**
 	 * Yields the runtime types that this analysis infers for the given

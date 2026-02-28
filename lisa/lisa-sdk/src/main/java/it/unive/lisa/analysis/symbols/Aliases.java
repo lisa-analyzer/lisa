@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis.symbols;
 
-import it.unive.lisa.analysis.lattices.SetLattice;
+import it.unive.lisa.lattices.SetLattice;
 import it.unive.lisa.util.collections.CastIterable;
 import java.util.Collections;
 import java.util.Set;

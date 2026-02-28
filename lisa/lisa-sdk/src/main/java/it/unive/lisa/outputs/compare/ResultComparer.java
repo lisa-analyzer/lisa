@@ -2,9 +2,10 @@ package it.unive.lisa.outputs.compare;
 
 import static java.lang.String.format;
 
-import it.unive.lisa.LiSA;
+import it.unive.lisa.listeners.TracingListener;
+import it.unive.lisa.outputs.JSONReportDumper;
 import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
 import it.unive.lisa.outputs.serializableGraph.SerializableArray;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -14,6 +15,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -53,12 +55,14 @@ import org.apache.logging.log4j.util.TriConsumer;
  * treating each field as a string but ignoring timestamps (duration, start,
  * end) and LiSA's version;</li>
  * <li>warnings ({@link JsonReport#getWarnings()}) are then compared, using
- * {@link JsonWarning#compareTo(JsonWarning)} method;</li>
+ * {@link JsonMessage#compareTo(JsonMessage)} method;</li>
+ * <li>notices ({@link JsonReport#getNotices()}) are then compared, using
+ * {@link JsonMessage#compareTo(JsonMessage)} method;</li>
  * <li>the set of files produced during the analysis
  * ({@link JsonReport#getFiles()}) is then compared, matching their paths;</li>
  * <li>finally, the contents of every file produced by both analyses are
- * compared, excluding the report itself ({@link LiSA#REPORT_NAME}) and
- * visualization-only files.</li>
+ * compared, excluding the report itself ({@link JSONReportDumper#REPORT_NAME})
+ * and visualization-only files.</li>
  * </ol>
  * All differences are reported by showing them in the log of the analysis.
  * Comparison and reporting can be customized by overriding the following
@@ -118,9 +122,13 @@ public class ResultComparer {
 
 	private static final String DESC_DIFF_VERBOSE = "Different description for node %d (%s):\n%s";
 
+	private static final String TRACE_DIFF = "Line %d of trace file differs:\n\t'%s'\n\t<--->\n\t'%s'";
+
 	private static final String FILES_ONLY = "Files only in the {} report:";
 
 	private static final String WARNINGS_ONLY = "Warnings only in the {} report:";
+
+	private static final String NOTICES_ONLY = "Notices only in the {} report:";
 
 	private static final String INFOS_ONLY = "Run info keys only in the {} report:";
 
@@ -187,6 +195,12 @@ public class ResultComparer {
 
 		/**
 		 * Indicates that the difference was found in the collection of
+		 * generated notices.
+		 */
+		NOTICES,
+
+		/**
+		 * Indicates that the difference was found in the collection of
 		 * generated files.
 		 */
 		FILES,
@@ -236,6 +250,10 @@ public class ResultComparer {
 		if (shouldFailFast() && !sameWarnings)
 			return false;
 
+		boolean sameNotices = !shouldCompareNotices() || compareNotices(first, second);
+		if (shouldFailFast() && !sameNotices)
+			return false;
+
 		boolean sameFiles = !shouldCompareFiles() || compareFiles(first, second);
 		if (shouldFailFast() && !sameFiles)
 			return false;
@@ -258,7 +276,7 @@ public class ResultComparer {
 		if (shouldFailFast() && !sameAddInfo)
 			return false;
 
-		return sameConfs && sameInfos && sameWarnings && sameFiles && sameFileContents && sameAddInfo;
+		return sameConfs && sameInfos && sameWarnings && sameNotices && sameFiles && sameFileContents && sameAddInfo;
 	}
 
 	/**
@@ -317,8 +335,8 @@ public class ResultComparer {
 			Map<String, String> second,
 			TriConsumer<String, String, String> reporter,
 			Predicate<String> ignore) {
-		CollectionsDiffBuilder<
-				String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(), second.keySet());
+		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(),
+				second.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.getOnlyFirst().isEmpty())
@@ -356,11 +374,11 @@ public class ResultComparer {
 	public boolean compareWarnings(
 			JsonReport first,
 			JsonReport second) {
-		CollectionsDiffBuilder<JsonWarning> warnings = new CollectionsDiffBuilder<>(
-				JsonWarning.class,
+		CollectionsDiffBuilder<JsonMessage> warnings = new CollectionsDiffBuilder<>(
+				JsonMessage.class,
 				first.getWarnings(),
 				second.getWarnings());
-		warnings.compute(JsonWarning::compareTo);
+		warnings.compute(JsonMessage::compareTo);
 
 		if (!warnings.getCommons().isEmpty())
 			report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.COMMON, warnings.getCommons());
@@ -369,6 +387,33 @@ public class ResultComparer {
 		if (!warnings.getOnlySecond().isEmpty())
 			report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_SECOND, warnings.getOnlySecond());
 		return warnings.sameContent();
+	}
+
+	/**
+	 * Compares the notices ({@link JsonReport#getNotices()}) of both reports,
+	 * relying on the {@link Comparable#compareTo(Object)} method.
+	 * 
+	 * @param first  the first report
+	 * @param second the second report
+	 * 
+	 * @return {@code true} if the notices are equal, {@code false} otherwise
+	 */
+	public boolean compareNotices(
+			JsonReport first,
+			JsonReport second) {
+		CollectionsDiffBuilder<JsonMessage> notices = new CollectionsDiffBuilder<>(
+				JsonMessage.class,
+				first.getNotices(),
+				second.getNotices());
+		notices.compute(JsonMessage::compareTo);
+
+		if (!notices.getCommons().isEmpty())
+			report(REPORTED_COMPONENT.NOTICES, REPORT_TYPE.COMMON, notices.getCommons());
+		if (!notices.getOnlyFirst().isEmpty())
+			report(REPORTED_COMPONENT.NOTICES, REPORT_TYPE.ONLY_FIRST, notices.getOnlyFirst());
+		if (!notices.getOnlySecond().isEmpty())
+			report(REPORTED_COMPONENT.NOTICES, REPORT_TYPE.ONLY_SECOND, notices.getOnlySecond());
+		return notices.sameContent();
 	}
 
 	/**
@@ -385,8 +430,8 @@ public class ResultComparer {
 	public boolean compareFiles(
 			JsonReport first,
 			JsonReport second) {
-		CollectionsDiffBuilder<
-				String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(), second.getFiles());
+		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
+				second.getFiles());
 		files.compute(String::compareTo);
 
 		if (!files.getCommons().isEmpty())
@@ -438,8 +483,8 @@ public class ResultComparer {
 			File secondFileRoot)
 			throws FileNotFoundException,
 			IOException {
-		CollectionsDiffBuilder<
-				String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(), second.getFiles());
+		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
+				second.getFiles());
 		files.compute(String::compareTo);
 		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
@@ -452,11 +497,13 @@ public class ResultComparer {
 				throw new FileNotFoundException(format(MISSING_FILE, pair.getRight(), "second"));
 
 			String path = left.getName();
-			if (FilenameUtils.getName(path).equals(LiSA.REPORT_NAME))
+			if (FilenameUtils.getName(path).equals(JSONReportDumper.REPORT_NAME))
 				continue;
 
 			if (isJsonGraph(path))
 				diffFound |= matchJsonGraphs(left, right);
+			else if (FilenameUtils.getName(path).equals(TracingListener.TRACE_FNAME))
+				diffFound |= matchTraceFiles(left, right);
 			else if (isVisualizationFile(path))
 				LOG.info(VIS_ONLY, left.toString(), right.toString());
 			else
@@ -887,8 +934,8 @@ public class ResultComparer {
 		SortedMap<String, SerializableValue> felements = first.getFields();
 		SortedMap<String, SerializableValue> selements = second.getFields();
 
-		CollectionsDiffBuilder<
-				String> diff = new CollectionsDiffBuilder<>(String.class, felements.keySet(), selements.keySet());
+		CollectionsDiffBuilder<String> diff = new CollectionsDiffBuilder<>(String.class, felements.keySet(),
+				selements.keySet());
 		diff.compute(String::compareTo);
 
 		boolean atLeastOne = false;
@@ -957,6 +1004,66 @@ public class ResultComparer {
 				.append("<--->\n")
 				.append("\t".repeat(depth))
 				.append(second);
+	}
+
+	/**
+	 * Compares two trace files line by line, ignoring the time taken to
+	 * complete each traced action.
+	 * 
+	 * @param left  the first trace file
+	 * @param right the second trace file
+	 * 
+	 * @return {@code true} if the trace files are equal, {@code false}
+	 *             otherwise
+	 * 
+	 * @throws IOException if an I/O error occurs
+	 */
+	public boolean matchTraceFiles(
+			File left,
+			File right)
+			throws IOException {
+		boolean diffFound = false;
+
+		try (BufferedReader l = new BufferedReader(
+				new InputStreamReader(
+						new FileInputStream(left),
+						StandardCharsets.UTF_8));
+				BufferedReader r = new BufferedReader(
+						new InputStreamReader(
+								new FileInputStream(right),
+								StandardCharsets.UTF_8))) {
+			String lineL;
+			String lineR;
+			int lineNum = 1;
+			while ((lineL = l.readLine()) != null & (lineR = r.readLine()) != null) {
+				if (!lineL.equals(lineR)) {
+					diffFound = true;
+					fileDiff(
+							left.toString(),
+							right.toString(),
+							format(TRACE_DIFF, lineNum, lineL, lineR));
+				}
+				lineNum++;
+			}
+			while ((lineL = l.readLine()) != null) {
+				diffFound = true;
+				fileDiff(
+						left.toString(),
+						right.toString(),
+						format(TRACE_DIFF, lineNum, lineL, "<no line>"));
+				lineNum++;
+			}
+			while ((lineR = r.readLine()) != null) {
+				diffFound = true;
+				fileDiff(
+						left.toString(),
+						right.toString(),
+						format(TRACE_DIFF, lineNum, "<no line>", lineR));
+				lineNum++;
+			}
+		}
+
+		return diffFound;
 	}
 
 	/**
@@ -1029,6 +1136,12 @@ public class ResultComparer {
 				LOG.warn(WARNINGS_ONLY, "first");
 			else
 				LOG.warn(WARNINGS_ONLY, "second");
+			break;
+		case NOTICES:
+			if (isFirst)
+				LOG.warn(NOTICES_ONLY, "first");
+			else
+				LOG.warn(NOTICES_ONLY, "second");
 			break;
 		case INFO:
 			if (isFirst)
@@ -1146,6 +1259,16 @@ public class ResultComparer {
 	}
 
 	/**
+	 * If {@code true}, notices ({@link JsonReport#getNotices()}) will be
+	 * compared.
+	 * 
+	 * @return whether or not notices should be compared
+	 */
+	public boolean shouldCompareNotices() {
+		return true;
+	}
+
+	/**
 	 * If {@code true}, files ({@link JsonReport#getFiles()}) will be compared.
 	 * 
 	 * @return whether or not files should be compared
@@ -1194,9 +1317,7 @@ public class ResultComparer {
 	 */
 	public boolean isJsonGraph(
 			String path) {
-		// TODO this is fragile, we should open the file and look for its
-		// contents
-		return FilenameUtils.getExtension(path).equals("json");
+		return path.endsWith(".graph.json");
 	}
 
 	/**
@@ -1211,8 +1332,12 @@ public class ResultComparer {
 	public boolean isVisualizationFile(
 			String path) {
 		String ext = FilenameUtils.getExtension(path);
-		return ext.equals(
-				"dot") || ext.equals("graphml") || ext.equals("png") || ext.equals("html") || ext.equals("js");
+		return ext.equals("dot")
+				|| ext.equals("graphml")
+				|| ext.equals("png")
+				|| ext.equals("html")
+				|| ext.equals("js")
+				|| ext.equals("css");
 	}
 
 	/**

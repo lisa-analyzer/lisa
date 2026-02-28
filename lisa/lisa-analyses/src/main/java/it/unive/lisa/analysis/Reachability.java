@@ -1,9 +1,10 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.ReachLattice.ReachabilityStatus;
 import it.unive.lisa.lattices.ReachabilityProduct;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -40,6 +41,12 @@ public class Reachability<D extends AbstractDomain<A>,
 	public Reachability(
 			D domain) {
 		this.domain = domain;
+	}
+
+	@Override
+	public void setEventQueue(
+			EventQueue queue) {
+		domain.setEventQueue(queue);
 	}
 
 	@Override
@@ -123,10 +130,6 @@ public class Reachability<D extends AbstractDomain<A>,
 				status = status == null ? reach : status.lub(reach);
 			}
 
-		// TODO the reachability after a call that does not throw exceptions/
-		// halt the execution should be restored to the reachability before
-		// the call, but there is no way of doing it right now
-
 		if (!toRemove.isEmpty()) {
 			Map<ProgramPoint, ReachabilityStatus> map = r.mkNewFunction(r.function, true);
 			if (map != null)
@@ -208,13 +211,33 @@ public class Reachability<D extends AbstractDomain<A>,
 
 	@Override
 	public ReachabilityProduct<A> makeLattice() {
-		return new ReachabilityProduct<>(new ReachLattice(), domain.makeLattice());
+		return new ReachabilityProduct<>(new ReachLattice().setToReachable(), domain.makeLattice());
 	}
 
 	@Override
 	public SemanticOracle makeOracle(
 			ReachabilityProduct<A> state) {
 		return domain.makeOracle(state.second);
+	}
+
+	@Override
+	public ReachabilityProduct<A> onCallReturn(
+			ReachabilityProduct<A> entryState,
+			ReachabilityProduct<A> callres,
+			ProgramPoint call)
+			throws SemanticException {
+		// TODO the reachability after a call that does not throw exceptions/
+		// halt the execution should be restored to the reachability before
+		// the call, but there is no way of doing it right now
+		ReachLattice reach = callres.first;
+		if (entryState.first.lattice == ReachabilityStatus.REACHABLE
+				&& callres.first.lattice != ReachabilityStatus.REACHABLE)
+			reach = reach.setToReachable();
+
+		A returned = domain.onCallReturn(entryState.second, callres.second, call);
+		if (returned == callres.second && reach == callres.first)
+			return callres;
+		return new ReachabilityProduct<>(reach, returned);
 	}
 
 }

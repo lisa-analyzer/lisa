@@ -1,6 +1,6 @@
 package it.unive.lisa.program;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.symbolic.value.Operator;
 import it.unive.lisa.type.Type;
@@ -8,7 +8,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 

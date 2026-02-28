@@ -18,19 +18,15 @@ public final class LIFOWorkingSet<E>
 
 	private final Deque<E> ws;
 
-	private LIFOWorkingSet() {
+	/**
+	 * Builds an empty working set.
+	 */
+	public LIFOWorkingSet() {
 		ws = new LinkedList<>();
 	}
 
-	/**
-	 * Yields a new, empty working set.
-	 * 
-	 * @param <E> the type of the elements that the returned working set
-	 *                contains
-	 * 
-	 * @return the new working set
-	 */
-	public static <E> LIFOWorkingSet<E> mk() {
+	@Override
+	public LIFOWorkingSet<E> mk() {
 		return new LIFOWorkingSet<>();
 	}
 

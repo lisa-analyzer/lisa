@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -123,10 +124,49 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	/**
 	 * Builds an instance of the lattice that this domain works with. The
 	 * returned value can be <i>any</i> instance of the lattice, including the
-	 * top or bottom element.
+	 * top or bottom element, and it should be what this analysis uses as a
+	 * start state at the beginning of the analysis (e.g., as an entry state to
+	 * the main function).
 	 * 
 	 * @return an instance of the lattice that this domain works with
 	 */
 	L makeLattice();
 
+	/**
+	 * Yields the state of this domain after a call has been performed. This
+	 * method allows the domain to properly merge the execution back into the
+	 * caller, possibly restoring portions of the execution state. This might be
+	 * useful, for instance, to restore some local security context that is not
+	 * dependent on the callee execution (e.g., if the callee's return is in
+	 * some user-controlled code, returning to the caller also goes back to non
+	 * user-controlled execution).
+	 * 
+	 * @param entryState the state before the call
+	 * @param callres    the state returned by the callee
+	 * @param call       the program point corresponding to the call
+	 * 
+	 * @return the state after the call
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	L onCallReturn(
+			L entryState,
+			L callres,
+			ProgramPoint call)
+			throws SemanticException;
+
+	/**
+	 * Sets the {@link EventQueue} that this domain can use to post analysis
+	 * events. This operation is optional: a domain is not required to issue
+	 * events, and it is thus not required to store the given queue. However, as
+	 * this method will only be invoked once, implementations of this method
+	 * should forward the call to any sub-domain that might need the event
+	 * queue. Also note that, to avoid unnecessary overhead, this method will
+	 * only be invoked if at least one event listener has been registered in the
+	 * event queue. Dereferences of the queue should thus be null-checked.
+	 * 
+	 * @param queue the event queue to use
+	 */
+	void setEventQueue(
+			EventQueue queue);
 }

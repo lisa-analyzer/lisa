@@ -5,8 +5,8 @@ import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
-import org.junit.Test;
+import it.unive.lisa.outputs.JSONResults;
+import org.junit.jupiter.api.Test;
 
 public class TypeInferenceTest
 		extends
@@ -15,7 +15,7 @@ public class TypeInferenceTest
 	@Test
 	public void testInferredTypesCollection() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -29,12 +29,12 @@ public class TypeInferenceTest
 	@Test
 	public void testInferredCasts() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "type-inference";
 		conf.testSubDir = "inferred-casts";
 		conf.programFile = "casts.imp";
@@ -44,12 +44,12 @@ public class TypeInferenceTest
 	@Test
 	public void testInferredTypesCollectionOnObjects() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "type-inference";
 		conf.testSubDir = "inferred-objects";
 		conf.programFile = "objects.imp";
@@ -59,7 +59,7 @@ public class TypeInferenceTest
 	@Test
 	public void testStaticTypesCollection() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
@@ -73,12 +73,12 @@ public class TypeInferenceTest
 	@Test
 	public void testStaticCasts() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "type-inference";
 		conf.testSubDir = "static-casts";
 		conf.programFile = "casts.imp";
@@ -88,12 +88,12 @@ public class TypeInferenceTest
 	@Test
 	public void testStaticTypesCollectionOnObjects() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				new FieldSensitivePointBasedHeap(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.testDir = "type-inference";
 		conf.testSubDir = "static-objects";
 		conf.programFile = "objects.imp";

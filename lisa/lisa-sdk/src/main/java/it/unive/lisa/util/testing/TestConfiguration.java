@@ -5,8 +5,7 @@ import it.unive.lisa.outputs.compare.ResultComparer;
 
 /**
  * An extended {@link LiSAConfiguration} that also holds test configuration
- * keys. This configuration disables optimizations
- * ({@link LiSAConfiguration#optimize}) by default.
+ * keys.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

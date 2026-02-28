@@ -1,8 +1,8 @@
 package it.unive.lisa.imp;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
@@ -13,7 +13,8 @@ import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class HierarchyComputationTest {
 
@@ -21,7 +22,7 @@ public class HierarchyComputationTest {
 			Program prog,
 			String name) {
 		Unit unit = prog.getUnits().stream().filter(u -> u.getName().equals(name)).findFirst().get();
-		assertNotNull("'" + name + "' unit not found", unit);
+		assertNotNull(unit, "'" + name + "' unit not found");
 		return unit;
 	}
 
@@ -33,7 +34,7 @@ public class HierarchyComputationTest {
 				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
-		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		assertNotNull(cfg, "'" + unit.getName() + "' unit does not contain cfg '" + name + "'");
 		return cfg;
 	}
 
@@ -45,7 +46,7 @@ public class HierarchyComputationTest {
 				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
-		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		assertNotNull(cfg, "'" + unit.getName() + "' unit does not contain cfg '" + name + "'");
 		return cfg;
 	}
 
@@ -57,7 +58,7 @@ public class HierarchyComputationTest {
 				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
-		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		assertNotNull(cfg, "'" + unit.getName() + "' unit does not contain cfg '" + name + "'");
 		return cfg;
 	}
 
@@ -69,7 +70,7 @@ public class HierarchyComputationTest {
 				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
-		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		assertNotNull(cfg, "'" + unit.getName() + "' unit does not contain cfg '" + name + "'");
 		return cfg;
 	}
 
@@ -77,17 +78,17 @@ public class HierarchyComputationTest {
 			CompilationUnit sup,
 			Unit unit) {
 		assertTrue(
-				"'" + unit.getName() + "' is not among '" + sup.getName() + "' instances",
-				sup.getInstances().contains(unit));
+				sup.getInstances().contains(unit),
+				"'" + unit.getName() + "' is not among '" + sup.getName() + "' instances");
 		if (sup != unit) {
 			if (unit instanceof ClassUnit)
 				assertTrue(
-						"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
-						((ClassUnit) unit).isInstanceOf(sup));
+						((ClassUnit) unit).isInstanceOf(sup),
+						"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits");
 			else
 				assertTrue(
-						"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
-						((InterfaceUnit) unit).isInstanceOf((InterfaceUnit) sup));
+						((InterfaceUnit) unit).isInstanceOf((InterfaceUnit) sup),
+						"'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits");
 		}
 	}
 
@@ -95,40 +96,40 @@ public class HierarchyComputationTest {
 			CompilationUnit sup,
 			CompilationUnit unit) {
 		assertFalse(
-				"'" + unit.getName() + "' is among '" + sup.getName() + "' instances",
-				sup.getInstances().contains(unit));
+				sup.getInstances().contains(unit),
+				"'" + unit.getName() + "' is among '" + sup.getName() + "' instances");
 		if (sup != unit)
 			assertFalse(
-					"'" + sup.getName() + "' is among '" + unit.getName() + "' superunits",
-					unit.getImmediateAncestors().contains(sup));
+					unit.getImmediateAncestors().contains(sup),
+					"'" + sup.getName() + "' is among '" + unit.getName() + "' superunits");
 	}
 
 	private static void overrides(
 			CodeMember sup,
 			CodeMember cfg) {
 		assertTrue(
+				sup.getDescriptor().overriddenBy().contains(cfg),
 				"'"
 						+ sup.getDescriptor().getFullName()
 						+ "' is not overridden by '"
 						+ cfg.getDescriptor().getFullName()
-						+ "'",
-				sup.getDescriptor().overriddenBy().contains(cfg));
+						+ "'");
 		assertTrue(
+				cfg.getDescriptor().overrides().contains(sup),
 				"'" + sup.getDescriptor().getFullName() + "' does not override '" + cfg.getDescriptor().getFullName()
-						+ "'",
-				cfg.getDescriptor().overrides().contains(sup));
+						+ "'");
 	}
 
 	private static void notOverrides(
 			CFG sup,
 			CFG cfg) {
 		assertFalse(
+				sup.getDescriptor().overriddenBy().contains(cfg),
 				"'" + sup.getDescriptor().getFullName() + "' is overridden by '" + cfg.getDescriptor().getFullName()
-						+ "'",
-				sup.getDescriptor().overriddenBy().contains(cfg));
+						+ "'");
 		assertFalse(
-				"'" + sup.getDescriptor().getFullName() + "' overrides '" + cfg.getDescriptor().getFullName() + "'",
-				cfg.getDescriptor().overrides().contains(sup));
+				cfg.getDescriptor().overrides().contains(sup),
+				"'" + sup.getDescriptor().getFullName() + "' overrides '" + cfg.getDescriptor().getFullName() + "'");
 	}
 
 	@Test
@@ -161,20 +162,22 @@ public class HierarchyComputationTest {
 		overrides(fooFirst, fooSecond);
 	}
 
-	@Test(expected = ProgramValidationException.class)
+	@Test
 	public void testFinalCfg()
 			throws ParsingException,
 			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/final-cfg.imp", false);
-		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
+		Assertions.assertThrows(ProgramValidationException.class,
+				() -> prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog));
 	}
 
-	@Test(expected = ProgramValidationException.class)
+	@Test
 	public void testTree()
 			throws ParsingException,
 			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp", false);
-		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
+		Assertions.assertThrows(ProgramValidationException.class,
+				() -> prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog));
 	}
 
 	@Test
@@ -351,12 +354,13 @@ public class HierarchyComputationTest {
 		notInstance(first, j);
 	}
 
-	@Test(expected = ProgramValidationException.class)
+	@Test
 	public void testInterfaces()
 			throws ParsingException,
 			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);
-		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
+		Assertions.assertThrows(ProgramValidationException.class,
+				() -> prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog));
 	}
 
 	@Test
@@ -391,21 +395,23 @@ public class HierarchyComputationTest {
 		notInstance(first, j);
 	}
 
-	@Test(expected = ProgramValidationException.class)
+	@Test
 	public void testAbstractClass()
 			throws ParsingException,
 			ProgramValidationException {
 		Program prog = IMPFrontend
 				.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp", false);
-		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
+		Assertions.assertThrows(ProgramValidationException.class,
+				() -> prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog));
 	}
 
-	@Test(expected = ProgramValidationException.class)
+	@Test
 	public void testExtendingButNotImpl()
 			throws ParsingException,
 			ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/extending-but-not-impl.imp", false);
-		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
+		Assertions.assertThrows(ProgramValidationException.class,
+				() -> prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog));
 	}
 
 	@Test

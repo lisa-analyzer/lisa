@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -292,6 +292,16 @@ public class ProgramState<A extends AbstractLattice<A>>
 	}
 
 	@Override
+	public ProgramState<A> upchainAux(
+			ProgramState<A> other)
+			throws SemanticException {
+		return new ProgramState<>(
+				state.upchain(other.state),
+				computedExpressions.upchain(other.computedExpressions),
+				info.upchain(other.info));
+	}
+
+	@Override
 	public ProgramState<A> glbAux(
 			ProgramState<A> other)
 			throws SemanticException {
@@ -299,6 +309,16 @@ public class ProgramState<A extends AbstractLattice<A>>
 				state.glb(other.state),
 				computedExpressions.glb(other.computedExpressions),
 				info.glb(other.info));
+	}
+
+	@Override
+	public ProgramState<A> downchainAux(
+			ProgramState<A> other)
+			throws SemanticException {
+		return new ProgramState<>(
+				state.downchain(other.state),
+				computedExpressions.downchain(other.computedExpressions),
+				info.downchain(other.info));
 	}
 
 	@Override

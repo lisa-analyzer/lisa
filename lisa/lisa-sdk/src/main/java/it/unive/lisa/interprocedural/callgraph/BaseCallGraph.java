@@ -5,6 +5,8 @@ import it.unive.lisa.analysis.symbols.NameSymbol;
 import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
 import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.callgraph.events.CallResolved;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Unit;
@@ -21,7 +23,6 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.MultiCall;
 import it.unive.lisa.program.cfg.statement.call.NativeCall;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.program.cfg.statement.call.ResolvedCall;
 import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
@@ -61,16 +62,20 @@ public abstract class BaseCallGraph
 
 	private Application app;
 
+	private EventQueue events;
+
 	private final Map<CodeMember, Collection<Call>> callsites = new HashMap<>();
 
 	private final Map<UnresolvedCall, Map<List<Set<Type>>, Call>> resolvedCache = new IdentityHashMap<>();
 
 	@Override
 	public void init(
-			Application app)
+			Application app,
+			EventQueue events)
 			throws CallGraphConstructionException {
-		super.init(app);
+		super.init(app, events);
 		this.app = app;
+		this.events = events;
 		this.callsites.clear();
 		this.resolvedCache.clear();
 	}
@@ -219,8 +224,8 @@ public abstract class BaseCallGraph
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
 
-		LOG.trace(
-				call + " [" + call.getLocation() + "] has been resolved to: " + ((ResolvedCall) resolved).getTargets());
+		if (events != null)
+			events.post(new CallResolved(call, types, aliasing, resolved));
 		return resolved;
 	}
 

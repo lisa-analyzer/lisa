@@ -1,7 +1,7 @@
 package it.unive.lisa.lattices.symbolic;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.InverseSetLattice;
+import it.unive.lisa.lattices.InverseSetLattice;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;

@@ -1,9 +1,9 @@
 package it.unive.lisa.util.collections.workset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class WorksetTest {
 
@@ -33,7 +33,7 @@ public class WorksetTest {
 			boolean lifo,
 			boolean duplicates,
 			T... elements) {
-		assertTrue("The working set is not empty at the beginning", ws.isEmpty());
+		assertTrue(ws.isEmpty(), "The working set is not empty at the beginning");
 
 		try {
 			ws.toString();
@@ -51,11 +51,11 @@ public class WorksetTest {
 
 			ws.push(elements[i]);
 			processed.add(elements[i]);
-			assertEquals("Incorrect size while populating the working set", i - skipped + 1, ws.size());
+			assertEquals(i - skipped + 1, ws.size(), "Incorrect size while populating the working set");
 			if (lifo)
-				assertSame("peek() did not return the top-most element", elements[i], ws.peek());
+				assertSame(elements[i], ws.peek(), "peek() did not return the top-most element");
 			else
-				assertSame("peek() did not return the bottom-most element", elements[0], ws.peek());
+				assertSame(elements[0], ws.peek(), "peek() did not return the bottom-most element");
 
 			try {
 				ws.toString();
@@ -77,14 +77,14 @@ public class WorksetTest {
 			T peeked = ws.peek();
 			T popped = ws.pop();
 
-			assertSame("pop() did not return the same element of peek()", peeked, popped);
+			assertSame(peeked, popped, "peek() did not return the bottom-most element");
 			if (lifo)
 				assertSame(
-						"pop() did not return the top-most element",
 						processed.get(processed.size() - i - 1),
-						popped);
+						popped,
+						"pop() did not return the top-most element");
 			else
-				assertSame("pop() did not return the bottom-most element", processed.get(i), popped);
+				assertSame(processed.get(i), popped, "peek() did not return the bottom-most element");
 
 			try {
 				ws.toString();
@@ -99,26 +99,26 @@ public class WorksetTest {
 
 	@Test
 	public void LIFOsWsTest() {
-		linear(LIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		linear(LIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", null);
-		random(LIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		random(LIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", null);
+		linear(new LIFOWorkingSet<>(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		linear(new LIFOWorkingSet<>(), true, true, "a", "b", "c", "d", null);
+		random(new LIFOWorkingSet<>(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		random(new LIFOWorkingSet<>(), true, true, "a", "b", "c", "d", null);
 
 		// Concurrent version does not support null elements
-		linear(ConcurrentLIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		random(ConcurrentLIFOWorkingSet.mk(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		linear(new ConcurrentLIFOWorkingSet<>(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		random(new ConcurrentLIFOWorkingSet<>(), true, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
 	}
 
 	@Test
 	public void FIFOsWsTest() {
-		linear(FIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		linear(FIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", null);
-		random(FIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		random(FIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", null);
+		linear(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		linear(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", null);
+		random(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		random(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", null);
 
 		// Concurrent version does not support null elements
-		linear(ConcurrentFIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
-		random(ConcurrentFIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		linear(new ConcurrentFIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
+		random(new ConcurrentFIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
 	}
 
 	interface Tester<T> {
@@ -147,16 +147,16 @@ public class WorksetTest {
 			set.add(s);
 			list.add(s);
 		});
-		assertEquals("Set of seen elements contains duplicates", set.size(), list.size());
+		assertEquals(set.size(), list.size(), "peek() did not return the bottom-most element");
 		assertTrue(
-				"Set of seen elements does not contain all elements",
-				elementsSet.containsAll(set) && set.containsAll(elementsSet));
+				elementsSet.containsAll(set) && set.containsAll(elementsSet),
+				"Set of seen elements does not contain all elements");
 	}
 
 	@Test
 	public void VisitOnceWsTest() {
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
+				new VisitOnceFIFOWorkingSet<>(),
 				false,
 				(
 						ws,
@@ -172,7 +172,7 @@ public class WorksetTest {
 				"b",
 				"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
+				new VisitOnceFIFOWorkingSet<>(),
 				false,
 				(
 						ws,
@@ -189,7 +189,7 @@ public class WorksetTest {
 				null,
 				"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
+				new VisitOnceFIFOWorkingSet<>(),
 				false,
 				(
 						ws,
@@ -205,7 +205,7 @@ public class WorksetTest {
 				"b",
 				"i");
 		unique(
-				VisitOnceFIFOWorkingSet.mk(),
+				new VisitOnceFIFOWorkingSet<>(),
 				false,
 				(
 						ws,
@@ -223,7 +223,7 @@ public class WorksetTest {
 				"i");
 
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
+				new VisitOnceLIFOWorkingSet<>(),
 				true,
 				(
 						ws,
@@ -239,7 +239,7 @@ public class WorksetTest {
 				"b",
 				"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
+				new VisitOnceLIFOWorkingSet<>(),
 				true,
 				(
 						ws,
@@ -256,7 +256,7 @@ public class WorksetTest {
 				null,
 				"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
+				new VisitOnceLIFOWorkingSet<>(),
 				true,
 				(
 						ws,
@@ -272,7 +272,7 @@ public class WorksetTest {
 				"b",
 				"i");
 		unique(
-				VisitOnceLIFOWorkingSet.mk(),
+				new VisitOnceLIFOWorkingSet<>(),
 				true,
 				(
 						ws,

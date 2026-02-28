@@ -1,12 +1,12 @@
 package it.unive.lisa.lattices.string;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ExpressionInverseSet;
 import it.unive.lisa.analysis.string.SubstringDomain;
+import it.unive.lisa.lattices.ExpressionInverseSet;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SubstringsTest {
 

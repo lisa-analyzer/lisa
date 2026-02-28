@@ -8,11 +8,19 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.interprocedural.events.CFGFixpointEnd;
+import it.unive.lisa.interprocedural.events.CFGFixpointStart;
+import it.unive.lisa.interprocedural.events.CFGFixpointStored;
+import it.unive.lisa.interprocedural.events.FixpointEnd;
+import it.unive.lisa.interprocedural.events.FixpointIterationEnd;
+import it.unive.lisa.interprocedural.events.FixpointIterationStart;
+import it.unive.lisa.interprocedural.events.FixpointStart;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CodeUnit;
@@ -24,7 +32,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Set;
@@ -34,6 +41,8 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
@@ -46,12 +55,17 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 
 	private static final Logger LOG = LogManager.getLogger(BackwardModularWorstCaseAnalysis.class);
 
-	private static final ScopeId ID = new UniqueScope();
+	private final ScopeId<A> id = new UniqueScope<>();
 
 	/**
 	 * The application.
 	 */
 	private Application app;
+
+	/**
+	 * The event queue to use for this analysis.
+	 */
+	private EventQueue events;
 
 	/**
 	 * The policy used for computing the result of cfg calls.
@@ -82,32 +96,50 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
-		if (conf.optimize)
+		if (conf.usesOptimizedBackwardFixpoint())
 			LOG.warn("Optimizations are turned on: this feature is experimental with backward analyses");
 
 		// new fixpoint iteration: restart
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));
-		AnalyzedCFG<A> graph = conf.optimize
-				? new OptimizedAnalyzedCFG<>(singleton, ID, entryState.bottom(), this)
-				: new AnalyzedCFG<>(singleton, ID, entryState);
+		AnalyzedCFG<A> graph = conf.usesOptimizedBackwardFixpoint()
+				? new OptimizedAnalyzedCFG<>(singleton, id, entryState.bottom(), this)
+				: new AnalyzedCFG<>(singleton, id, entryState);
 		CFGResults<A> value = new CFGResults<>(graph);
 		this.results = new FixpointResults<>(value.top());
 
 		Collection<CFG> all = new TreeSet<>(ModularWorstCaseAnalysis::sorter);
 		all.addAll(app.getAllCFGs());
 
+		if (events != null) {
+			events.post(new FixpointStart());
+			events.post(new FixpointIterationStart(1));
+		}
+
 		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program", "cfgs"))
 			try {
-				results.putResult(
-						cfg,
-						ID,
-						cfg.backwardFixpoint(entryState, this, WorkingSet.of(conf.fixpointWorkingSet), conf, ID));
+				if (events != null)
+					events.post(new CFGFixpointStart<>(cfg, id, entryState));
+
+				AnalyzedCFG<A> fixpointResult = cfg.backwardFixpoint(entryState, this, conf.fixpointWorkingSet.mk(),
+						conf, id);
+
+				if (events != null) {
+					events.post(new CFGFixpointEnd<>(cfg, id, entryState, fixpointResult));
+					events.post(new CFGFixpointStored<>(cfg, id, entryState, fixpointResult, fixpointResult));
+				}
+
+				results.putResult(cfg, id, fixpointResult);
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
+
+		if (events != null) {
+			events.post(new FixpointIterationEnd(1));
+			events.post(new FixpointEnd());
+		}
 	}
 
 	@Override
@@ -149,12 +181,14 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		this.app = app;
 		this.policy = policy;
 		this.results = null;
 		this.analysis = analysis;
+		this.events = events;
 	}
 
 	@Override
@@ -176,4 +210,8 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 		return analysis;
 	}
 
+	@Override
+	public EventQueue getEventQueue() {
+		return events;
+	}
 }

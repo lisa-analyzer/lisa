@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "assets/d3-graphviz.min.js", "assets/d3.v7.min.js", "assets/style.css", "flamegraph.html", "report.json" ],
+  "info" : {
+    "cfgs" : "6",
+    "duration" : "903ms",
+    "end" : "2026-01-20T16:25:04.592+01:00",
+    "expressions" : "49",
+    "files" : "4",
+    "globals" : "0",
+    "members" : "6",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-01-20T16:25:03.689+01:00",
+    "statements" : "21",
+    "units" : "2",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "FlameGraphListener",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/visualization/fix-flame"
+  }
+}

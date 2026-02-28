@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.dataflow;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.SetLattice;
+import it.unive.lisa.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.representation.SetRepresentation;

@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "callgraph.graph.json", "report.json", "untyped_A.A(A__this)_179929679.graph.json", "untyped_A.getOne(A__this)_179937398.graph.json", "untyped_A.getPositive(A__this,_untyped_i)_179949953.graph.json", "untyped_A.getPositive(A__this,_untyped_i)_179950883.graph.json", "untyped_tests.main(tests__this).graph.json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "12ms",
+    "end" : "2026-01-07T11:13:47.018+01:00",
+    "expressions" : "26",
+    "files" : "6",
+    "globals" : "0",
+    "members" : "5",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-01-07T11:13:47.006+01:00",
+    "statements" : "14",
+    "units" : "2",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONCallGraph, JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/inlining"
+  }
+}

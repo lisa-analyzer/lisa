@@ -4,9 +4,9 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
 import it.unive.lisa.analysis.heap.HeapLattice;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
-import it.unive.lisa.analysis.lattices.GenericMapLattice;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -282,11 +282,27 @@ public class HeapEnvWithFields
 	}
 
 	@Override
+	public HeapEnvWithFields upchainAux(
+			HeapEnvWithFields other)
+			throws SemanticException {
+		HeapEnvWithFields chain = super.upchainAux(other);
+		return new HeapEnvWithFields(chain.lattice, chain.function, fields.upchain(other.fields));
+	}
+
+	@Override
 	public HeapEnvWithFields glbAux(
 			HeapEnvWithFields other)
 			throws SemanticException {
 		HeapEnvWithFields glb = super.glbAux(other);
 		return new HeapEnvWithFields(glb.lattice, glb.function, fields.glb(other.fields));
+	}
+
+	@Override
+	public HeapEnvWithFields downchainAux(
+			HeapEnvWithFields other)
+			throws SemanticException {
+		HeapEnvWithFields chain = super.downchainAux(other);
+		return new HeapEnvWithFields(chain.lattice, chain.function, fields.downchain(other.fields));
 	}
 
 	@Override

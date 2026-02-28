@@ -1,26 +1,26 @@
 package it.unive.lisa.util.file;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class FileManagerTest {
 
 	private static final String TESTDIR = "tmp-testdir";
 
-	@Before
+	@BeforeEach
 	public void init() {
 		File dir = new File(TESTDIR);
 		if (dir.exists())
 			fail("The directory already exists");
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		File dir = new File(TESTDIR);
 
@@ -67,8 +67,8 @@ public class FileManagerTest {
 		if (!file.exists())
 			fail("The file has not been created");
 
-		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
-		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(), name);
+		assertEquals(manager.createdFiles().size(), 1, "FileManager did not track the correct number of files");
+		assertEquals(manager.createdFiles().iterator().next(), name, "FileManager did not track the created file");
 	}
 
 	@Test
@@ -90,8 +90,8 @@ public class FileManagerTest {
 		if (!file.exists())
 			fail("The file has not been created");
 
-		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
-		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(), name);
+		assertEquals(manager.createdFiles().size(), 1, "FileManager did not track the correct number of files");
+		assertEquals(manager.createdFiles().iterator().next(), name, "FileManager did not track the created file");
 	}
 
 	@Test
@@ -116,11 +116,9 @@ public class FileManagerTest {
 		if (!file.exists())
 			fail("The file has not been created");
 
-		assertEquals("FileManager did not track the correct number of files", 1, manager.createdFiles().size());
-		assertEquals(
-				"FileManager did not track the created file",
-				"sub/foo.txt",
-				manager.createdFiles().iterator().next());
+		assertEquals(1, manager.createdFiles().size(), "FileManager did not track the correct number of files");
+		assertEquals("sub/foo.txt", manager.createdFiles().iterator().next(),
+				"FileManager did not track the created file");
 	}
 
 	@Test
@@ -141,11 +139,9 @@ public class FileManagerTest {
 		if (!file.exists())
 			fail("The file has not been created");
 
-		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
-		assertEquals(
-				"FileManager did not track the created file",
-				manager.createdFiles().iterator().next(),
-				file.getName());
+		assertEquals(manager.createdFiles().size(), 1, "FileManager did not track the correct number of files");
+		assertEquals(manager.createdFiles().iterator().next(), file.getName(),
+				"FileManager did not track the created file");
 	}
 
 	@Test
@@ -166,11 +162,11 @@ public class FileManagerTest {
 		if (!file.exists())
 			fail("The file has not been created");
 
-		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
+		assertEquals(manager.createdFiles().size(), 1, "FileManager did not track the correct number of files");
 		assertEquals(
-				"FileManager did not track the created file",
 				manager.createdFiles().iterator().next(),
-				file.getName());
+				file.getName(),
+				"FileManager did not track the created file");
 	}
 
 	@Test
@@ -191,11 +187,9 @@ public class FileManagerTest {
 		if (!file.exists())
 			fail("The file has not been created");
 
-		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
-		assertEquals(
-				"FileManager did not track the created file",
-				manager.createdFiles().iterator().next(),
-				file.getName());
+		assertEquals(manager.createdFiles().size(), 1, "FileManager did not track the correct number of files");
+		assertEquals(manager.createdFiles().iterator().next(), file.getName(),
+				"FileManager did not track the created file");
 	}
 
 }

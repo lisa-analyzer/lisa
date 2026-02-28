@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_strings.constants(strings__this).graph.json", "untyped_strings.replace(strings__this,_untyped_s).graph.json", "untyped_strings.replace2(strings__this).graph.json", "untyped_strings.replace3(strings__this).graph.json", "untyped_strings.replace4(strings__this).graph.json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "19ms",
+    "end" : "2026-01-07T11:13:53.065+01:00",
+    "expressions" : "72",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "5",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-01-07T11:13:53.046+01:00",
+    "statements" : "24",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/string/subs-domain-constants/subs-domain-constants"
+  }
+}

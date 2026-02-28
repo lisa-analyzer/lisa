@@ -4,15 +4,12 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.ContextInsensitiveToken;
-import it.unive.lisa.interprocedural.context.FullStackToken;
-import it.unive.lisa.interprocedural.context.KDepthToken;
-import it.unive.lisa.interprocedural.context.LastCallToken;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import it.unive.lisa.outputs.JSONResults;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class RecursionsTest
 		extends
 		IMPCronExecutor {
@@ -20,12 +17,12 @@ public class RecursionsTest
 	@Test
 	public void testFibonacciFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/full";
@@ -36,12 +33,12 @@ public class RecursionsTest
 	@Test
 	public void testFibonacciKDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/kdepth";
@@ -52,12 +49,12 @@ public class RecursionsTest
 	@Test
 	public void testFibonacciLast() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/last";
@@ -68,12 +65,12 @@ public class RecursionsTest
 	@Test
 	public void testFibonacciInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "fibonacci/insensitive";
@@ -84,12 +81,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialLoopFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialLoop/full";
@@ -100,12 +97,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialLoopKDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialLoop/kdepth";
@@ -116,12 +113,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialLoopLast() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialLoop/last";
@@ -132,12 +129,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialLoopInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialLoop/insensitive";
@@ -148,12 +145,12 @@ public class RecursionsTest
 	@Test
 	public void testInfiniteRecursion2FullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion2/full";
@@ -165,12 +162,12 @@ public class RecursionsTest
 	@Test
 	public void testInfiniteRecursion2KDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion2/kdepth";
@@ -182,12 +179,12 @@ public class RecursionsTest
 	@Test
 	public void testInfiniteRecursion2Last() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion2/last";
@@ -199,12 +196,12 @@ public class RecursionsTest
 	@Test
 	public void testInfiniteRecursion2Insensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion2/insensitive";
@@ -216,12 +213,12 @@ public class RecursionsTest
 	@Test
 	public void testInfiniteRecursion1FullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion1/full";
@@ -233,12 +230,12 @@ public class RecursionsTest
 	@Test
 	public void testInfiniteRecursion1KDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion1/kdepth";
@@ -250,12 +247,12 @@ public class RecursionsTest
 	@Test
 	public void testInfiniteRecursion1Last() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion1/last";
@@ -267,12 +264,12 @@ public class RecursionsTest
 	@Test
 	public void testInfiniteRecursion1Insensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion1/insensitive";
@@ -284,12 +281,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorial/full";
@@ -300,12 +297,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialKDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorial/kdepth";
@@ -316,12 +313,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialLast() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorial/last";
@@ -332,12 +329,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorial/insensitive";
@@ -348,12 +345,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialInterleavedFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialInterleaved/full";
@@ -364,12 +361,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialInterleavedKDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialInterleaved/kdepth";
@@ -380,12 +377,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialInterleavedLast() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialInterleaved/last";
@@ -396,12 +393,12 @@ public class RecursionsTest
 	@Test
 	public void testFactorialInterleavedInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialInterleaved/insensitive";
@@ -412,12 +409,12 @@ public class RecursionsTest
 	@Test
 	public void testTwoRecursionsFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "twoRecursions/full";
@@ -428,12 +425,12 @@ public class RecursionsTest
 	@Test
 	public void testTwoRecursionsKDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "twoRecursions/kdepth";
@@ -444,12 +441,12 @@ public class RecursionsTest
 	@Test
 	public void testTwoRecursionsLast() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "twoRecursions/last";
@@ -460,12 +457,12 @@ public class RecursionsTest
 	@Test
 	public void testTwoRecursionsInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "twoRecursions/insensitive";
@@ -476,12 +473,12 @@ public class RecursionsTest
 	@Test
 	public void testNestedRecursionsFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "nestedRecursions/full";
@@ -492,12 +489,12 @@ public class RecursionsTest
 	@Test
 	public void testNestedRecursionsKDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "nestedRecursions/kdepth";
@@ -508,12 +505,12 @@ public class RecursionsTest
 	@Test
 	public void testNestedRecursionsLast() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "nestedRecursions/last";
@@ -524,12 +521,12 @@ public class RecursionsTest
 	@Test
 	public void testNestedRecursionsInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "nestedRecursions/insensitive";
@@ -540,12 +537,12 @@ public class RecursionsTest
 	@Test
 	public void testUnreachableBaseCaseFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "unreachableBaseCase/full";
@@ -556,12 +553,12 @@ public class RecursionsTest
 	@Test
 	public void testUnreachableBaseCaseKDepth() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "unreachableBaseCase/kdepth";
@@ -572,12 +569,12 @@ public class RecursionsTest
 	@Test
 	public void testUnreachableBaseCaseLast() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastCallToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "unreachableBaseCase/last";
@@ -588,12 +585,12 @@ public class RecursionsTest
 	@Test
 	public void testUnreachableBaseCaseInsensitive() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "unreachableBaseCase/insensitive";

@@ -18,7 +18,6 @@ import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedValue;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.BooleanPowerset;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
@@ -33,18 +32,20 @@ import it.unive.lisa.analysis.string.tarsis.Tarsis;
 import it.unive.lisa.analysis.traces.TracePartitioning;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.imp.constructs.StringContains.IMPStringContains;
 import it.unive.lisa.imp.expressions.IMPAssert;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.SimpleAbstractState;
+import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -56,8 +57,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 public class WholeValueAnalysesTest
 		extends
@@ -77,7 +78,7 @@ public class WholeValueAnalysesTest
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<A, D> tool,
+				SemanticTool<A, D> tool,
 				CFG graph,
 				Statement node) {
 
@@ -131,7 +132,7 @@ public class WholeValueAnalysesTest
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void containsCharAssertion(
-				CheckToolWithAnalysisResults<A, D> tool,
+				SemanticTool<A, D> tool,
 				Statement node,
 				AnalyzedCFG<A> res,
 				Expression variable,
@@ -162,7 +163,7 @@ public class WholeValueAnalysesTest
 		}
 
 		private void assertion(
-				CheckToolWithAnalysisResults<A, D> tool,
+				SemanticTool<A, D> tool,
 				Statement node,
 				AnalysisState<A> post,
 				D domain,
@@ -180,7 +181,7 @@ public class WholeValueAnalysesTest
 		}
 
 		private void warnOn(
-				CheckToolWithAnalysisResults<A, D> tool,
+				SemanticTool<A, D> tool,
 				Statement node,
 				String message) {
 			if (message != null) {
@@ -195,14 +196,13 @@ public class WholeValueAnalysesTest
 	private static TestConfiguration mkConf()
 			throws AnalysisSetupException {
 		CronConfiguration conf = new CronConfiguration();
-		conf.jsonOutput = true;
 		conf.semanticChecks.add(new AssertionCheck<>());
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
 		conf.callGraph = new RTACallGraph();
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.compareWithOptimization = false;
-		conf.optimize = true;
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
+		conf.forwardFixpoint = new OptimizedForwardAscendingFixpoint<>();
 		conf.hotspots = st -> st instanceof IMPAssert
 				|| (st instanceof Expression && ((Expression) st).getRootStatement() instanceof IMPAssert);
 		return conf;
@@ -309,7 +309,7 @@ public class WholeValueAnalysesTest
 				}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void summary() {
 		for (String testFile : TESTFILES.keySet()) {
 			System.out.println("\n\n### Test file: " + testFile);

@@ -1,6 +1,6 @@
 package it.unive.lisa.outputs;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.LiSA;
 import it.unive.lisa.LiSAReport;
@@ -20,9 +20,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.function.Consumer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class AdditionalInfoTest {
 
@@ -44,12 +44,12 @@ public class AdditionalInfoTest {
 
 		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.workdir = "tmp";
-		conf.jsonOutput = true;
+		conf.outputs.add(new JSONReportDumper());
 		LiSA lisa = new LiSA(conf);
 		LiSAReport report = lisa.run(program);
 
 		assertEquals(0, report.getAdditionalInfo().size());
-		try (FileReader reader = new FileReader("tmp/" + LiSA.REPORT_NAME)) {
+		try (FileReader reader = new FileReader("tmp/" + JSONReportDumper.REPORT_NAME)) {
 			JsonReport jsonReport = JsonReport.read(reader);
 			assertEquals(0, jsonReport.getAdditionalInfo().getFields().size());
 		}
@@ -67,20 +67,20 @@ public class AdditionalInfoTest {
 
 		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.workdir = "tmp";
-		conf.jsonOutput = true;
+		conf.outputs.add(new JSONReportDumper());
 		LiSA lisa = new LiSA(conf);
 		Consumer<LiSAReport> filler = r -> r.getAdditionalInfo().put("key", new StringRepresentation("value"));
 		LiSAReport report = lisa.run(filler, program);
 
 		assertEquals(1, report.getAdditionalInfo().size());
-		try (FileReader reader = new FileReader("tmp/" + LiSA.REPORT_NAME)) {
+		try (FileReader reader = new FileReader("tmp/" + JSONReportDumper.REPORT_NAME)) {
 			JsonReport jsonReport = JsonReport.read(reader);
 			assertEquals(1, jsonReport.getAdditionalInfo().getFields().size());
 		}
 	}
 
-	@Before
-	@After
+	@BeforeEach
+	@AfterEach
 	public void cleanUp()
 			throws IOException {
 		FileManager.forceDeleteFolder("tmp");

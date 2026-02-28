@@ -1,22 +1,22 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
-import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -24,8 +24,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,8 +35,8 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * An {@link AnalyzedCFG} that has been built using an
- * {@link OptimizedFixpoint}. This means that this graph will only contain
- * results for widening points (that is, {@link Statement}s that part of
+ * {@link OptimizedForwardFixpoint}. This means that this graph will only
+ * contain results for widening points (that is, {@link Statement}s that part of
  * {@link #getCycleEntries()}), exit statements (that is, {@link Statement}s
  * such that {@link Statement#stopsExecution()} holds), and hotspots (that is,
  * {@link Statement}s such that {@link LiSAConfiguration#hotspots} holds).
@@ -80,7 +78,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 */
 	public OptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			InterproceduralAnalysis<A, D> interprocedural) {
 		super(cfg, id, singleton);
@@ -106,7 +104,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 */
 	public OptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> entryStates,
 			Map<Statement, AnalysisState<A>> results,
@@ -130,7 +128,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 */
 	public OptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results,
 			InterproceduralAnalysis<A, D> interprocedural) {
@@ -140,7 +138,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 
 	private OptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> entryStates,
 			StatementStore<A> results,
 			StatementStore<A> expanded,
@@ -164,7 +162,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 */
 	public AnalysisState<A> getUnwindedAnalysisStateAfter(
 			Statement st,
-			FixpointConfiguration conf) {
+			FixpointConfiguration<A, D> conf) {
 		if (results.getKeys().contains(st))
 			return results.getState(st);
 
@@ -185,7 +183,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 	 *                 fixpoint computation
 	 */
 	public void unwind(
-			FixpointConfiguration conf) {
+			FixpointConfiguration<A, D> conf) {
 		AnalysisState<A> bottom = results.lattice.bottom();
 		StatementStore<A> bot = new StatementStore<>(bottom);
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
@@ -209,12 +207,16 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 			}
 		}
 
-		AscendingFixpoint<A, D> asc = new AscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
-		Fixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new Fixpoint<>(this, true);
+		ForwardAscendingFixpoint<A, D> fix = new ForwardAscendingFixpoint<>(
+				this,
+				true,
+				new PrecomputedAnalysis(),
+				conf);
+
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
 				Map<Statement, CompoundState<A>> res = fix
-						.fixpoint(starting, WorkingSet.of(conf.fixpointWorkingSet), asc, existing);
+						.fixpoint(starting, conf.fixpointWorkingSet.mk(), existing);
 				expanded = new StatementStore<>(bottom);
 				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
 					expanded.put(e.getKey(), e.getValue().postState);
@@ -262,6 +264,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 				Application app,
 				CallGraph callgraph,
 				OpenCallPolicy policy,
+				EventQueue events,
 				Analysis<A, D> analysis) {
 			throw new UnsupportedOperationException();
 		}
@@ -269,7 +272,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 		@Override
 		public void fixpoint(
 				AnalysisState<A> entryState,
-				FixpointConfiguration conf)
+				FixpointConfiguration<A, D> conf)
 				throws FixpointException {
 			throw new UnsupportedOperationException();
 		}
@@ -293,7 +296,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 
 			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
-			ScopeId id = getId().push(call);
+			ScopeId<A> id = getId().push(call, entryState);
 			AnalysisState<A> result = entryState.bottomExecution();
 			Analysis<A, D> analysis = interprocedural.getAnalysis();
 
@@ -345,6 +348,11 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 			return interprocedural.getAnalysis();
 		}
 
+		@Override
+		public EventQueue getEventQueue() {
+			// we do not want events during unwinding
+			return null;
+		}
 	}
 
 	@Override

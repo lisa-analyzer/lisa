@@ -1,14 +1,14 @@
 package it.unive.lisa.analysis;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.TestAbstractDomain;
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestInterproceduralAnalysis;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.interprocedural.UniqueScope;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -18,7 +18,7 @@ import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AnalyzedCFGTest {
 
@@ -43,7 +43,7 @@ public class AnalyzedCFGTest {
 		Map<Statement, AnalysisState<TestAbstractState>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
-		AnalyzedCFG<TestAbstractState> res = new AnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
+		AnalyzedCFG<TestAbstractState> res = new AnalyzedCFG<>(cfg, new UniqueScope<>(), state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -69,7 +69,7 @@ public class AnalyzedCFGTest {
 		OptimizedAnalyzedCFG<TestAbstractState,
 				TestAbstractDomain> res = new OptimizedAnalyzedCFG<>(
 						cfg,
-						new UniqueScope(),
+						new UniqueScope<>(),
 						state,
 						entries,
 						results,
@@ -97,7 +97,7 @@ public class AnalyzedCFGTest {
 		Map<Statement, AnalysisState<TestAbstractState>> results = Map.of(y, state, x, state);
 
 		BackwardAnalyzedCFG<
-				TestAbstractState> res = new BackwardAnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
+				TestAbstractState> res = new BackwardAnalyzedCFG<>(cfg, new UniqueScope<>(), state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));
@@ -123,7 +123,7 @@ public class AnalyzedCFGTest {
 		BackwardOptimizedAnalyzedCFG<TestAbstractState,
 				TestAbstractDomain> res = new BackwardOptimizedAnalyzedCFG<>(
 						cfg,
-						new UniqueScope(),
+						new UniqueScope<>(),
 						state,
 						entries,
 						results,

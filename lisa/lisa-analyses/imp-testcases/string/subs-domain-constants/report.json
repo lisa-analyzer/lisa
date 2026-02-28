@@ -1,6 +1,6 @@
 {
   "warnings" : [ ],
-  "files" : [ "report.json", "untyped_strings.constants(strings__this).json", "untyped_strings.replace(strings__this,_untyped_s).json", "untyped_strings.replace2(strings__this).json", "untyped_strings.replace3(strings__this).json", "untyped_strings.replace4(strings__this).json" ],
+  "files" : [ "report.json", "untyped_strings.constants(strings__this).graph.json", "untyped_strings.replace(strings__this,_untyped_s).graph.json", "untyped_strings.replace2(strings__this).graph.json", "untyped_strings.replace3(strings__this).graph.json", "untyped_strings.replace4(strings__this).graph.json" ],
   "info" : {
     "cfgs" : "5",
     "duration" : "16ms",

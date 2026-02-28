@@ -3,9 +3,9 @@ package it.unive.lisa.analysis.informationFlow;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.GenericMapLattice;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceEnvironment;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
 import it.unive.lisa.program.annotations.Annotation;
@@ -212,6 +212,31 @@ public class NonInterference
 	@Override
 	public NonInterferenceValue bottom() {
 		return NonInterferenceValue.BOTTOM;
+	}
+
+	@Override
+	public NonInterferenceEnvironment onCallReturn(
+			NonInterferenceEnvironment entryState,
+			NonInterferenceEnvironment callres,
+			ProgramPoint call)
+			throws SemanticException {
+		// the non-interference level goes back to the one
+		// of the caller after it returns
+		if (entryState.guards == null)
+			if (callres.guards == null)
+				return callres;
+			else
+				return new NonInterferenceEnvironment(
+						callres.lattice,
+						callres.function,
+						entryState.guards);
+		else if (entryState.guards.equals(callres.guards))
+			return callres;
+		else
+			return new NonInterferenceEnvironment(
+					callres.lattice,
+					callres.function,
+					entryState.guards);
 	}
 
 }

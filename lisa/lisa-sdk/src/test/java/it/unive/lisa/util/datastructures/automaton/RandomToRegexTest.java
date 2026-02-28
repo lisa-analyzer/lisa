@@ -2,25 +2,25 @@ package it.unive.lisa.util.datastructures.automaton;
 
 import static it.unive.lisa.util.datastructures.automaton.TestUtil.generateAutomaton;
 import static it.unive.lisa.util.datastructures.automaton.TestUtil.randomChar;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore("This sometimes causes OOM in GitHub actions")
+@Disabled("This sometimes causes OOM in GitHub actions")
 public class RandomToRegexTest {
 
 	private final SortedSet<State> states = new TreeSet<>();
 
 	private final Map<Integer, State> mapping = new HashMap<>();
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 		State q0 = new State(0, true, false);
 		states.add(q0);
@@ -47,7 +47,7 @@ public class RandomToRegexTest {
 			TestAutomaton a) {
 		RegularExpression fromRegex = a.toRegex().simplify();
 		TestAutomaton revert = fromRegex.toAutomaton(a);
-		assertTrue(a + " is different from " + revert, a.isEqualTo(revert));
+		assertTrue(a.isEqualTo(revert), a + " is different from " + revert);
 	}
 
 	/**

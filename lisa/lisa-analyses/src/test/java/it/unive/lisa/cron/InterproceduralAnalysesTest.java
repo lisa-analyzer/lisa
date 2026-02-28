@@ -13,8 +13,10 @@ import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CHACallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.FullStackToken;
-import org.junit.Test;
+import it.unive.lisa.interprocedural.inlining.InliningAnalysis;
+import it.unive.lisa.outputs.JSONCallGraph;
+import it.unive.lisa.outputs.JSONResults;
+import org.junit.jupiter.api.Test;
 
 public class InterproceduralAnalysesTest
 		extends
@@ -23,7 +25,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testWorstCaseCHA() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -39,7 +41,7 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testWorstCaseRTA() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -55,7 +57,8 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTA() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -71,7 +74,8 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTAHelper() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
@@ -87,12 +91,13 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTAHelperFullStack() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
 				DefaultConfiguration.defaultHeapDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
-		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(FullStackToken.getSingleton());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "context-helper-full";
@@ -103,7 +108,8 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTAArrayOpPP() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -117,7 +123,8 @@ public class InterproceduralAnalysesTest
 	@Test
 	public void testContextSensitiveRTATwoArraysPP() {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -133,7 +140,8 @@ public class InterproceduralAnalysesTest
 			throws ParsingException,
 			AnalysisException {
 		CronConfiguration conf = new CronConfiguration();
-		conf.serializeResults = true;
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
 				.simpleDomain(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(),
 						new InferredTypes());
@@ -145,4 +153,67 @@ public class InterproceduralAnalysesTest
 		perform(conf);
 	}
 
+	@Test
+	public void testInliningRTA() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "inlining";
+		conf.programFile = "context.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testInliningRTAHelper() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Sign(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "inlining-helper";
+		conf.programFile = "context-helper.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testInliningRTAArrayOpPP() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
+		conf.analysis = DefaultConfiguration
+				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "inlining-pp-arrayop";
+		conf.programFile = "array-op.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testInliningRTATwoArraysPP() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.outputs.add(new JSONCallGraph<>());
+		conf.analysis = DefaultConfiguration
+				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "inlining-pp-twoarrays";
+		conf.programFile = "two-arrays.imp";
+		perform(conf);
+	}
 }

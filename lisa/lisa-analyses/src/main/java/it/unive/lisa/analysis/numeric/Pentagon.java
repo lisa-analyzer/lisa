@@ -2,9 +2,9 @@ package it.unive.lisa.analysis.numeric;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.numeric.PentagonLattice;
 import it.unive.lisa.lattices.symbolic.DefiniteIdSet;
 import it.unive.lisa.program.cfg.ProgramPoint;

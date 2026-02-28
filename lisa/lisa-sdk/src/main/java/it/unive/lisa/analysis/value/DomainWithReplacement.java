@@ -2,7 +2,6 @@ package it.unive.lisa.analysis.value;
 
 import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.SemanticComponent;
-import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -12,7 +11,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
 /**
- * A {@link SemanticDomain} that can be modified by a substitution of
+ * A {@link SemanticComponent} that can be modified by a substitution of
  * identifiers that is caused by a modification of the abstraction provided in
  * the {@link HeapDomain} of the analysis. A substitution is composed by a list
  * of {@link HeapReplacement} instances, that <b>must be applied in order</b>.

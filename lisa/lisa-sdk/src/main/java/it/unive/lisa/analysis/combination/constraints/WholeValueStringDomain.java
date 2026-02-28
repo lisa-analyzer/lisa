@@ -2,8 +2,8 @@ package it.unive.lisa.analysis.combination.constraints;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import java.util.Set;
@@ -14,6 +14,8 @@ import java.util.Set;
  * to compute operations regarding strings where either the return value or the
  * arguments are of a different data type, and are thus expressed as
  * constraints.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <L> the type of lattice produced by this domain
  */

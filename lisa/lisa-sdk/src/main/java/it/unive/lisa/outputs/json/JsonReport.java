@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.LiSARunInfo;
-import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.outputs.messages.Message;
 import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -27,7 +27,9 @@ import java.util.TreeSet;
  */
 public class JsonReport {
 
-	private final Set<JsonWarning> warnings;
+	private final Set<JsonMessage> warnings;
+
+	private final Set<JsonMessage> notices;
 
 	private final Set<String> files;
 
@@ -56,7 +58,7 @@ public class JsonReport {
 	 * Builds an empty report.
 	 */
 	public JsonReport() {
-		this(Collections.emptyList(), Collections.emptyList(), Map.of(), Map.of(), Map.of());
+		this(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Map.of(), Map.of(), Map.of());
 	}
 
 	/**
@@ -68,6 +70,7 @@ public class JsonReport {
 			LiSAReport report) {
 		this(
 				report.getWarnings(),
+				report.getNotices(),
 				report.getCreatedFiles(),
 				report.getRunInfo().toPropertyBag(),
 				report.getConfiguration().toPropertyBag(),
@@ -75,7 +78,8 @@ public class JsonReport {
 	}
 
 	private JsonReport(
-			Collection<Warning> warnings,
+			Collection<Message> warnings,
+			Collection<Message> notices,
 			Collection<String> files,
 			Map<String, String> info,
 			Map<String, String> configuration,
@@ -84,20 +88,34 @@ public class JsonReport {
 		this.info = info;
 		this.configuration = configuration;
 		this.warnings = new TreeSet<>();
-		for (Warning warn : warnings)
-			this.warnings.add(new JsonWarning(warn));
+		for (Message warn : warnings)
+			this.warnings.add(new JsonMessage(warn));
+		this.notices = new TreeSet<>();
+		for (Message notice : notices)
+			this.notices.add(new JsonMessage(notice));
 
 		ObjectRepresentation obj = new ObjectRepresentation(additionalInfo);
 		this.additionalInfo = obj.toSerializableValue();
 	}
 
 	/**
-	 * Yields the collection of {@link JsonWarning}s contained into this report.
+	 * Yields the collection of warning {@link JsonMessage}s contained into this
+	 * report.
 	 * 
 	 * @return the collection of warnings
 	 */
-	public Collection<JsonWarning> getWarnings() {
+	public Collection<JsonMessage> getWarnings() {
 		return warnings;
+	}
+
+	/**
+	 * Yields the collection of notice {@link JsonMessage}s contained into this
+	 * report.
+	 * 
+	 * @return the collection of notices
+	 */
+	public Collection<JsonMessage> getNotices() {
+		return notices;
 	}
 
 	/**
@@ -186,6 +204,7 @@ public class JsonReport {
 		int result = 1;
 		result = prime * result + ((files == null) ? 0 : files.hashCode());
 		result = prime * result + ((warnings == null) ? 0 : warnings.hashCode());
+		result = prime * result + ((notices == null) ? 0 : notices.hashCode());
 		result = prime * result + ((info == null) ? 0 : info.hashCode());
 		result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
 		result = prime * result + ((additionalInfo == null) ? 0 : additionalInfo.hashCode());
@@ -212,6 +231,11 @@ public class JsonReport {
 				return false;
 		} else if (!warnings.equals(other.warnings))
 			return false;
+		if (notices == null) {
+			if (other.notices != null)
+				return false;
+		} else if (!notices.equals(other.notices))
+			return false;
 		if (info == null) {
 			if (other.info != null)
 				return false;
@@ -234,6 +258,8 @@ public class JsonReport {
 	public String toString() {
 		return "JsonReport [warnings="
 				+ warnings
+				+ ", notices="
+				+ notices
 				+ ", files="
 				+ files
 				+ ", info="
@@ -246,36 +272,36 @@ public class JsonReport {
 	}
 
 	/**
-	 * A warning that is ready to dump into a {@link JsonReport}.
+	 * A message that is ready to dump into a {@link JsonReport}.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class JsonWarning
+	public static class JsonMessage
 			implements
-			Comparable<JsonWarning> {
+			Comparable<JsonMessage> {
 
 		private String message;
 
 		/**
-		 * Builds an empty warning with no message.
+		 * Builds an empty message with no message.
 		 */
-		public JsonWarning() {
+		public JsonMessage() {
 			this.message = null;
 		}
 
 		/**
-		 * Builds the warning, cloning the information from the given
-		 * {@link Warning}.
+		 * Builds the message, cloning the information from the given
+		 * {@link Message}.
 		 * 
-		 * @param warning the warning to clone
+		 * @param message the message to clone
 		 */
-		public JsonWarning(
-				Warning warning) {
-			this.message = warning.toString();
+		public JsonMessage(
+				Message message) {
+			this.message = message.toString();
 		}
 
 		/**
-		 * Yields the message of this warning.
+		 * Yields the message of this message.
 		 * 
 		 * @return the message
 		 */
@@ -284,7 +310,7 @@ public class JsonReport {
 		}
 
 		/**
-		 * Sets the message of this warning.
+		 * Sets the message of this message.
 		 * 
 		 * @param message the message
 		 */
@@ -315,7 +341,7 @@ public class JsonReport {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			JsonWarning other = (JsonWarning) obj;
+			JsonMessage other = (JsonMessage) obj;
 			if (message == null) {
 				if (other.message != null)
 					return false;
@@ -326,7 +352,7 @@ public class JsonReport {
 
 		@Override
 		public int compareTo(
-				JsonWarning o) {
+				JsonMessage o) {
 			return message.compareTo(o.message);
 		}
 

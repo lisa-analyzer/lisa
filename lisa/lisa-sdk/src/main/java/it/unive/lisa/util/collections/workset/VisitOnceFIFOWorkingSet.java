@@ -23,19 +23,15 @@ public class VisitOnceFIFOWorkingSet<E>
 
 	private final Collection<E> seen;
 
-	/**
-	 * Yields a new, empty working set.
-	 * 
-	 * @param <E> the type of the elements that the returned working set
-	 *                contains
-	 * 
-	 * @return the new working set
-	 */
-	public static <E> VisitOnceFIFOWorkingSet<E> mk() {
+	@Override
+	public VisitOnceFIFOWorkingSet<E> mk() {
 		return new VisitOnceFIFOWorkingSet<>();
 	}
 
-	private VisitOnceFIFOWorkingSet() {
+	/**
+	 * Builds an empty working set.
+	 */
+	public VisitOnceFIFOWorkingSet() {
 		ws = new LinkedList<>();
 		seen = new HashSet<>();
 	}

@@ -7,7 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.value.Identifier;

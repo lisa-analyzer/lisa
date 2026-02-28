@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
 import it.unive.lisa.lattices.string.fsa.StringSymbol;
@@ -10,7 +10,7 @@ import it.unive.lisa.util.datastructures.automaton.Transition;
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ValidateStringTest {
 

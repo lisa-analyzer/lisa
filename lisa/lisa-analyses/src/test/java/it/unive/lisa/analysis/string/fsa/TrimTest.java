@@ -1,9 +1,9 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TrimTest {
 

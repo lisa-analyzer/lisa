@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.string.StrSuffix;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;

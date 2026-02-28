@@ -1,11 +1,11 @@
 package it.unive.lisa.analysis;
 
 import static it.unive.lisa.util.collections.CollectionUtilities.collect;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SubstitutionTest {
 
@@ -101,6 +101,20 @@ public class SubstitutionTest {
 			lub.assigned.elements().addAll(other.assigned.elements());
 			lub.removed.elements().addAll(other.removed.elements());
 			return lub;
+		}
+
+		@Override
+		public Collector upchain(
+				Collector other)
+				throws SemanticException {
+			return lub(other);
+		}
+
+		@Override
+		public Collector downchain(
+				Collector other)
+				throws SemanticException {
+			return glb(other);
 		}
 
 		@Override
@@ -186,17 +200,17 @@ public class SubstitutionTest {
 		rem.compute(comparer);
 
 		assertTrue(
-				"Applying " + sub + " assigned unexpected identifiers: " + add.getOnlySecond(),
-				add.getOnlySecond().isEmpty());
+				add.getOnlySecond().isEmpty(),
+				"Applying " + sub + " assigned unexpected identifiers: " + add.getOnlySecond());
 		assertTrue(
-				"Applying " + sub + " removed unexpected identifiers: " + rem.getOnlySecond(),
-				rem.getOnlySecond().isEmpty());
+				rem.getOnlySecond().isEmpty(),
+				"Applying " + sub + " removed unexpected identifiers: " + rem.getOnlySecond());
 		assertTrue(
-				"Applying " + sub + " did not assign some identifiers: " + add.getOnlyFirst(),
-				add.getOnlyFirst().isEmpty());
+				add.getOnlyFirst().isEmpty(),
+				"Applying " + sub + " did not assign some identifiers: " + add.getOnlyFirst());
 		assertTrue(
-				"Applying " + sub + " did not remove some identifiers: " + rem.getOnlyFirst(),
-				rem.getOnlyFirst().isEmpty());
+				rem.getOnlyFirst().isEmpty(),
+				"Applying " + sub + " did not remove some identifiers: " + rem.getOnlyFirst());
 	}
 
 	@Test

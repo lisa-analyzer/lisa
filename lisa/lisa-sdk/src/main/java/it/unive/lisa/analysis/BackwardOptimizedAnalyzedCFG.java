@@ -1,9 +1,9 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
@@ -11,13 +11,13 @@ import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.fixpoints.BackwardAscendingFixpoint;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
-import it.unive.lisa.program.cfg.fixpoints.OptimizedBackwardFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -26,7 +26,6 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.datastructures.graph.algorithms.BackwardFixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,8 +53,7 @@ import org.apache.logging.log4j.Logger;
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
  */
-public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
-		D extends AbstractDomain<A>>
+public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
 		BackwardAnalyzedCFG<A> {
 
@@ -82,7 +80,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 */
 	public BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			InterproceduralAnalysis<A, D> interprocedural) {
 		super(cfg, id, singleton);
@@ -108,7 +106,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 */
 	public BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			AnalysisState<A> singleton,
 			Map<Statement, AnalysisState<A>> exitStates,
 			Map<Statement, AnalysisState<A>> results,
@@ -132,7 +130,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 */
 	public BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> exitStates,
 			StatementStore<A> results,
 			InterproceduralAnalysis<A, D> interprocedural) {
@@ -142,7 +140,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 
 	private BackwardOptimizedAnalyzedCFG(
 			CFG cfg,
-			ScopeId id,
+			ScopeId<A> id,
 			StatementStore<A> exitStates,
 			StatementStore<A> results,
 			StatementStore<A> expanded,
@@ -166,7 +164,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 */
 	public AnalysisState<A> getUnwindedAnalysisStateBefore(
 			Statement st,
-			FixpointConfiguration conf) {
+			FixpointConfiguration<A, D> conf) {
 		if (results.getKeys().contains(st))
 			return results.getState(st);
 
@@ -187,7 +185,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 	 *                 fixpoint computation
 	 */
 	public void unwind(
-			FixpointConfiguration conf) {
+			FixpointConfiguration<A, D> conf) {
 		AnalysisState<A> bottom = results.lattice.bottom();
 		StatementStore<A> bot = new StatementStore<>(bottom);
 		Map<Statement, CompoundState<A>> starting = new HashMap<>();
@@ -211,11 +209,14 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			}
 		}
 
-		BackwardAscendingFixpoint<A, D> asc = new BackwardAscendingFixpoint<>(this, new PrecomputedAnalysis(), conf);
-		BackwardFixpoint<CFG, Statement, Edge, CompoundState<A>> fix = new BackwardFixpoint<>(this, true);
+		BackwardAscendingFixpoint<A, D> fix = new BackwardAscendingFixpoint<>(
+				this,
+				true,
+				new PrecomputedAnalysis(),
+				conf);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
-				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, FIFOWorkingSet.mk(), asc, existing);
+				Map<Statement, CompoundState<A>> res = fix.fixpoint(starting, new FIFOWorkingSet<>(), existing);
 				expanded = new StatementStore<>(bottom);
 				for (Entry<Statement, CompoundState<A>> e : res.entrySet()) {
 					expanded.put(e.getKey(), e.getValue().postState);
@@ -263,6 +264,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 				Application app,
 				CallGraph callgraph,
 				OpenCallPolicy policy,
+				EventQueue events,
 				Analysis<A, D> analysis)
 				throws InterproceduralAnalysisException {
 			throw new UnsupportedOperationException();
@@ -271,7 +273,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@Override
 		public void fixpoint(
 				AnalysisState<A> exitState,
-				FixpointConfiguration conf)
+				FixpointConfiguration<A, D> conf)
 				throws FixpointException {
 			throw new UnsupportedOperationException();
 		}
@@ -285,7 +287,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 		@Override
 		public AnalysisState<A> getAbstractResultOf(
 				CFGCall call,
-				AnalysisState<A> exitState,
+				AnalysisState<A> entryState,
 				ExpressionSet[] parameters,
 				StatementStore<A> expressions)
 				throws SemanticException {
@@ -295,8 +297,8 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 
 			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
-			ScopeId id = getId().push(call);
-			AnalysisState<A> state = exitState.bottom();
+			ScopeId<A> id = getId().push(call, entryState);
+			AnalysisState<A> state = entryState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();
 				state = state.lub(
@@ -343,6 +345,11 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>,
 			return interprocedural.getAnalysis();
 		}
 
+		@Override
+		public EventQueue getEventQueue() {
+			// we do not want events during unwinding
+			return null;
+		}
 	}
 
 	@Override

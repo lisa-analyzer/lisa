@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.CFG;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
@@ -58,7 +58,7 @@ public class FixpointResults<
 	 */
 	public Pair<Boolean, AnalyzedCFG<A>> putResult(
 			CFG cfg,
-			ScopeId token,
+			ScopeId<A> token,
 			AnalyzedCFG<A> result)
 			throws SemanticException {
 		if (function == null)

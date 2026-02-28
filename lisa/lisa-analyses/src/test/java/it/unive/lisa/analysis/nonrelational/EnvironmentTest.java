@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -18,7 +18,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class EnvironmentTest {
 

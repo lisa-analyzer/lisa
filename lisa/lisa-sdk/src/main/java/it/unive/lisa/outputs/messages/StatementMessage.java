@@ -1,0 +1,98 @@
+package it.unive.lisa.outputs.messages;
+
+import it.unive.lisa.program.cfg.statement.Statement;
+
+/**
+ * A message reported by LiSA on a statement.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class StatementMessage
+		extends
+		MessageWithLocation {
+
+	/**
+	 * The statement where this message was reported on
+	 */
+	private final Statement statement;
+
+	/**
+	 * Builds the message.
+	 * 
+	 * @param statement the statement where this message was reported on
+	 * @param message   the message of this message
+	 */
+	public StatementMessage(
+			Statement statement,
+			String message) {
+		super(statement.getLocation(), message);
+		this.statement = statement;
+	}
+
+	/**
+	 * Yields the statement where this message was reported on.
+	 * 
+	 * @return the statement
+	 */
+	public Statement getStatement() {
+		return statement;
+	}
+
+	@Override
+	public int compareTo(
+			Message o) {
+		int cmp;
+		if ((cmp = super.compareTo(o)) != 0)
+			return cmp;
+
+		if (!(o instanceof StatementMessage))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		StatementMessage other = (StatementMessage) o;
+		if ((cmp = statement.compareTo(other.statement)) != 0)
+			return cmp;
+
+		return 0;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((statement == null) ? 0 : statement.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		StatementMessage other = (StatementMessage) obj;
+		if (statement == null) {
+			if (other.statement != null)
+				return false;
+		} else if (!statement.equals(other.statement))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String getTag() {
+		return "STATEMENT";
+	}
+
+	@Override
+	public String toString() {
+		return getLocationWithBrackets()
+				+ " on '"
+				+ statement.getCFG().getDescriptor().getFullSignatureWithParNames()
+				+ "': "
+				+ getTaggedMessage();
+	}
+
+}

@@ -5,5 +5,5 @@ dependencies {
 
 	// testing
 	testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.19.4'
-    testImplementation 'junit:junit:4.12'
+	testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
 }

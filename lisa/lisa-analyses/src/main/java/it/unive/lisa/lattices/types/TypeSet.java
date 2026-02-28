@@ -1,7 +1,7 @@
 package it.unive.lisa.lattices.types;
 
-import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonrelational.type.TypeValue;
+import it.unive.lisa.lattices.SetLattice;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;

@@ -1,37 +1,44 @@
 package it.unive.lisa.util.datastructures.graph.algorithms;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.TestGraph;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.SetUtils;
-import org.junit.Test;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Test;
 
 public class FixpointTest {
 
 	private static class FixpointTester
-			implements
-			FixpointImplementation<TestNode, TestEdge, Set<TestNode>> {
+			extends
+			ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>> {
+
+		public FixpointTester(
+				TestGraph graph,
+				boolean forceFullEvaluation) {
+			super(graph, forceFullEvaluation);
+		}
 
 		@Override
-		public Set<TestNode> semantics(
+		public Pair<Set<TestNode>, TestNode> semantics(
 				TestNode node,
-				Set<TestNode> entrystate)
+				Set<TestNode> entrystate,
+				Map<TestNode, Set<TestNode>> result)
 				throws Exception {
 			Set<TestNode> res = new HashSet<>(entrystate);
 			res.add(node);
-			return res;
+			return Pair.of(res, node);
 		}
 
 		@Override
@@ -52,7 +59,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> operation(
+		public Set<TestNode> join(
 				TestNode node,
 				Set<TestNode> approx,
 				Set<TestNode> old)
@@ -61,7 +68,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public boolean equality(
+		public boolean leq(
 				TestNode node,
 				Set<TestNode> approx,
 				Set<TestNode> old)
@@ -75,15 +82,15 @@ public class FixpointTest {
 	public void testEmptyGraph() {
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(new TestGraph(), false)
-					.fixpoint(Map.of(), FIFOWorkingSet.mk(), new FixpointTester());
+			res = new FixpointTester(new TestGraph(), false)
+					.fixpoint(Map.of(), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
-		assertTrue("Fixpoint returned wrong result", res.isEmpty());
+		assertNotNull(res, "Fixpoint failed");
+		assertTrue(res.isEmpty(), "Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -100,18 +107,18 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
-					.fixpoint(Map.of(source, Set.of()), FIFOWorkingSet.mk(), new FixpointTester());
+			res = new FixpointTester(graph, false)
+					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
+		assertNotNull(res, "Fixpoint failed");
 		assertEquals(
-				"Fixpoint returned wrong result",
 				Map.of(source, Set.of(source), middle, Set.of(source, middle), end, Set.of(source, middle, end)),
-				res);
+				res,
+				"Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -135,16 +142,15 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
-					.fixpoint(Map.of(source, Set.of()), FIFOWorkingSet.mk(), new FixpointTester());
+			res = new FixpointTester(graph, false)
+					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
+		assertNotNull(res, "Fixpoint failed");
 		assertEquals(
-				"Fixpoint returned wrong result",
 				Map.of(
 						source,
 						Set.of(source),
@@ -156,7 +162,8 @@ public class FixpointTest {
 						Set.of(source, left, right, join),
 						end,
 						Set.of(source, left, right, join, end)),
-				res);
+				res,
+				"Fixpoint returned wrong result");
 	}
 
 	@Test
@@ -180,16 +187,15 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
-					.fixpoint(Map.of(source, Set.of()), FIFOWorkingSet.mk(), new FixpointTester());
+			res = new FixpointTester(graph, false)
+					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
 
-		assertNotNull("Fixpoint failed", res);
+		assertNotNull(res, "Fixpoint failed");
 		assertEquals(
-				"Fixpoint returned wrong result",
 				Map.of(
 						source,
 						Set.of(source),
@@ -201,28 +207,33 @@ public class FixpointTest {
 						Set.of(source, join, first, second),
 						end,
 						Set.of(source, join, first, second, end)),
-				res);
+				res,
+				"Fixpoint returned wrong result");
 	}
 
 	private static class ExceptionalTester
-			implements
-			FixpointImplementation<TestNode, TestEdge, Set<TestNode>> {
+			extends
+			ForwardFixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>> {
 
 		private final int type;
 
 		private ExceptionalTester(
+				TestGraph graph,
+				boolean forceFullEvaluation,
 				int type) {
+			super(graph, forceFullEvaluation);
 			this.type = type;
 		}
 
 		@Override
-		public Set<TestNode> semantics(
+		public Pair<Set<TestNode>, TestNode> semantics(
 				TestNode node,
-				Set<TestNode> entrystate)
+				Set<TestNode> entrystate,
+				Map<TestNode, Set<TestNode>> result)
 				throws Exception {
 			if (type == 0)
 				throw new Exception();
-			return Collections.emptySet();
+			return Pair.of(Collections.emptySet(), node);
 		}
 
 		@Override
@@ -247,7 +258,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> operation(
+		public Set<TestNode> join(
 				TestNode node,
 				Set<TestNode> approx,
 				Set<TestNode> old)
@@ -258,7 +269,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public boolean equality(
+		public boolean leq(
 				TestNode node,
 				Set<TestNode> approx,
 				Set<TestNode> old)
@@ -292,69 +303,69 @@ public class FixpointTest {
 		Map<TestNode, Set<TestNode>> res = null;
 		boolean fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
-					.fixpoint(Map.of(source, Set.of()), FIFOWorkingSet.mk(), new ExceptionalTester(0));
+			res = new ExceptionalTester(graph, false, 0)
+					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("computing semantics"));
+			assertTrue(e.getMessage().contains("computing semantics"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
-					.fixpoint(Map.of(source, Set.of()), FIFOWorkingSet.mk(), new ExceptionalTester(1));
+			res = new ExceptionalTester(graph, false, 1)
+					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("computing edge semantics"));
+			assertTrue(e.getMessage().contains("computing edge semantics"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
-					.fixpoint(Map.of(source, Set.of()), FIFOWorkingSet.mk(), new ExceptionalTester(2));
+			res = new ExceptionalTester(graph, false, 2)
+					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("creating entry state"));
+			assertTrue(e.getMessage().contains("creating entry state"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
-					.fixpoint(Map.of(source, Set.of()), FIFOWorkingSet.mk(), new ExceptionalTester(3));
+			res = new ExceptionalTester(graph, false, 3)
+					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("joining states"));
+			assertTrue(e.getMessage().contains("joining states"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false)
-					.fixpoint(Map.of(source, Set.of()), FIFOWorkingSet.mk(), new ExceptionalTester(4));
+			res = new ExceptionalTester(graph, false, 4)
+					.fixpoint(Map.of(source, Set.of()), new FIFOWorkingSet<>());
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("updating result"));
+			assertTrue(e.getMessage().contains("updating result"), "Wrong message: " + e.getMessage());
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
+		assertNull(res, "Fixpoint failed");
 	}
 
 }

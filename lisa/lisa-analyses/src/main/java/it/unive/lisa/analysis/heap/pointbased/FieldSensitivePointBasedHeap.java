@@ -2,8 +2,8 @@ package it.unive.lisa.analysis.heap.pointbased;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.GenericMapLattice;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.heap.allocations.AllocationSite;
 import it.unive.lisa.lattices.heap.allocations.AllocationSites;
 import it.unive.lisa.lattices.heap.allocations.HeapAllocationSite;

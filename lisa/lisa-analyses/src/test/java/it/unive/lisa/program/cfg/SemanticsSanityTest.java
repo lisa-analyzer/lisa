@@ -1,6 +1,6 @@
 package it.unive.lisa.program.cfg;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.AnalysisState;
@@ -9,9 +9,9 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticComponent;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.SyntheticLocation;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.MultiCall;
 import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 

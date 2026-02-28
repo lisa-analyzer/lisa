@@ -7,17 +7,18 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.GenericMapLattice;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.context.ContextSensitivityToken;
+import it.unive.lisa.interprocedural.context.KDepthToken;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -55,7 +56,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 
 	private final boolean returnsVoid;
 
-	private final Map<CFGCall, Pair<AnalysisState<A>, ContextSensitivityToken>> finalEntryStates;
+	private final Map<CFGCall, Pair<AnalysisState<A>, KDepthToken<A>>> finalEntryStates;
 
 	private final BaseCasesFinder<A, D> baseCases;
 
@@ -89,6 +90,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 			Application app,
 			CallGraph callgraph,
 			OpenCallPolicy policy,
+			EventQueue events,
 			Analysis<A, D> analysis)
 			throws InterproceduralAnalysisException {
 		// we mark this as unsupported to make sure it never gets used as a root
@@ -99,7 +101,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 	@Override
 	public void fixpoint(
 			AnalysisState<A> entryState,
-			FixpointConfiguration conf)
+			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
 		// we mark this as unsupported to make sure it never gets used as a root
 		// analysis
@@ -203,14 +205,14 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 			}
 		} while (!recursiveApprox.lessOrEqual(previousApprox));
 
-		if (conf.optimize)
+		if (conf.usesOptimizedForwardFixpoint())
 			// as the fixpoint results do not contain an explicit entry for the
 			// recursive call, we need to store the approximation for the
 			// recursive call manually or the unwinding won't manage to solve it
 			for (CFGCall call : ends) {
-				Pair<AnalysisState<A>, ContextSensitivityToken> pair = finalEntryStates.get(call);
+				Pair<AnalysisState<A>, KDepthToken<A>> pair = finalEntryStates.get(call);
 				AnalysisState<A> callEntry = pair.getLeft();
-				ContextSensitivityToken callingToken = pair.getRight();
+				KDepthToken<A> callingToken = pair.getRight();
 
 				// we get the cfg containing the call
 				@SuppressWarnings("unchecked")

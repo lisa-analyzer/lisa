@@ -1,11 +1,11 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.lattices.Satisfiability;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
 import it.unive.lisa.lattices.string.fsa.StringSymbol;
 import it.unive.lisa.program.SyntheticLocation;
@@ -19,7 +19,7 @@ import it.unive.lisa.util.datastructures.automaton.Transition;
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ContainsTest {
 

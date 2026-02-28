@@ -8,15 +8,15 @@ dependencies {
 
 	// parser generation
 	antlr 'org.antlr:antlr4:4.11.1'
-	
+
 	// testing
-    testImplementation 'junit:junit:4.12'
+	testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
 }
 
 generateGrammarSource {
-    maxHeapSize = "64m"
-    arguments += ["-visitor", "-no-listener"]
-    outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/it/unive/lisa/imp/antlr") // to match package declaration
+	maxHeapSize = "64m"
+	arguments += ["-visitor", "-no-listener"]
+	outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/it/unive/lisa/imp/antlr") // to match package declaration
 }
 
 sourcesJar {
@@ -24,5 +24,5 @@ sourcesJar {
 }
 
 checkstyleMain {
-    exclude 'it/unive/lisa/imp/antlr/*.java'
+	exclude 'it/unive/lisa/imp/antlr/*.java'
 }

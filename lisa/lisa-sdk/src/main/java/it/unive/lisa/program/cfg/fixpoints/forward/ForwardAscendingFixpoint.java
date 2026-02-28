@@ -1,0 +1,151 @@
+package it.unive.lisa.program.cfg.fixpoints.forward;
+
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardCFGFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.events.JoinPerformed;
+import it.unive.lisa.program.cfg.fixpoints.events.LeqPerformed;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * A {@link ForwardCFGFixpoint} that traverses ascending chains using lubs and
+ * widenings.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the kind of {@link AbstractLattice} produced by the domain
+ *                {@code D}
+ * @param <D> the kind of {@link AbstractDomain} to run during the analysis
+ */
+public class ForwardAscendingFixpoint<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+		extends
+		ForwardCFGFixpoint<A, D> {
+
+	private final FixpointConfiguration<A, D> config;
+
+	private final Map<Statement, Integer> lubs;
+
+	private final Collection<Statement> wideningPoints;
+
+	/**
+	 * Builds the fixpoint implementation. Note that the implementation built
+	 * with this constructor is inherently invalid, as it does not target any
+	 * cfg and has no information on the analysis to run. Valid instances should
+	 * be built throug the
+	 * {@link #ForwardAscendingFixpoint(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * constructor or the
+	 * {@link #mk(CFG, boolean, InterproceduralAnalysis, FixpointConfiguration)}
+	 * method.
+	 */
+	public ForwardAscendingFixpoint() {
+		super(null, false, null);
+		this.config = null;
+		this.wideningPoints = null;
+		this.lubs = null;
+	}
+
+	/**
+	 * Builds the fixpoint implementation.
+	 * 
+	 * @param target              the target of the implementation
+	 * @param forceFullEvaluation whether or not the fixpoint should evaluate
+	 *                                all nodes independently of the fixpoint
+	 *                                implementation
+	 * @param interprocedural     the {@link InterproceduralAnalysis} to use for
+	 *                                semantics computations
+	 * @param config              the {@link FixpointConfiguration} to use
+	 */
+	public ForwardAscendingFixpoint(
+			CFG target,
+			boolean forceFullEvaluation,
+			InterproceduralAnalysis<A, D> interprocedural,
+			FixpointConfiguration<A, D> config) {
+		super(target, forceFullEvaluation, interprocedural);
+		this.config = config;
+		this.wideningPoints = config.useWideningPoints ? target.getCycleEntries() : null;
+		this.lubs = new HashMap<>(config.useWideningPoints ? wideningPoints.size() : target.getNodesCount());
+	}
+
+	@Override
+	public CompoundState<A> join(
+			Statement node,
+			CompoundState<A> approx,
+			CompoundState<A> old)
+			throws SemanticException {
+		CompoundState<A> result;
+		if (config.wideningThreshold < 0)
+			// invalid threshold means always lub
+			result = old.upchain(approx);
+		else if (config.useWideningPoints && !wideningPoints.contains(node))
+			// optimization: never apply widening on normal instructions,
+			// save time and precision and only apply to widening points
+			result = old.upchain(approx);
+		else {
+			int lub = lubs.computeIfAbsent(node, st -> config.wideningThreshold);
+			if (lub == 0) {
+				AnalysisState<A> post = old.postState.widening(approx.postState);
+				StatementStore<A> intermediate;
+				if (config.useWideningPoints)
+					// no need to widen the intermediate expressions as
+					// well: we force convergence on the final post state
+					// only, to recover as much precision as possible
+					intermediate = old.intermediateStates.upchain(approx.intermediateStates);
+				else
+					intermediate = old.intermediateStates.widening(approx.intermediateStates);
+				result = CompoundState.of(post, intermediate);
+			} else {
+				lubs.put(node, --lub);
+				result = old.upchain(approx);
+			}
+		}
+
+		if (events != null)
+			events.post(new JoinPerformed<>(node, old, approx, result));
+
+		return result;
+	}
+
+	@Override
+	public boolean leq(
+			Statement node,
+			CompoundState<A> approx,
+			CompoundState<A> old)
+			throws SemanticException {
+		boolean result = approx.lessOrEqual(old);
+		if (events != null)
+			events.post(new LeqPerformed<A>(node, old, approx, result));
+		return result;
+	}
+
+	@Override
+	public ForwardCFGFixpoint<A, D> mk(
+			CFG graph,
+			boolean forceFullEvaluation,
+			InterproceduralAnalysis<A, D> interprocedural,
+			FixpointConfiguration<A, D> config) {
+		return new ForwardAscendingFixpoint<>(graph, forceFullEvaluation, interprocedural, config);
+	}
+
+	@Override
+	public ForwardCFGFixpoint<A, D> asOptimized() {
+		return new OptimizedForwardAscendingFixpoint<>();
+	}
+
+	@Override
+	public BackwardCFGFixpoint<A, D> asBackward() {
+		return new BackwardAscendingFixpoint<>();
+	}
+
+}

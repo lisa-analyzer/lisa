@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis.string;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.lattices.string.StringConstant;
 import it.unive.lisa.program.SyntheticLocation;
@@ -10,7 +10,7 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StringConstantPropagationTest {
 

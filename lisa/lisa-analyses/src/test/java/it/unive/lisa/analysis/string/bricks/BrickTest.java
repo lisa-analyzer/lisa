@@ -1,15 +1,15 @@
 package it.unive.lisa.analysis.string.bricks;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.string.Bricks;
 import it.unive.lisa.analysis.string.Bricks.Brick;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BrickTest {
 

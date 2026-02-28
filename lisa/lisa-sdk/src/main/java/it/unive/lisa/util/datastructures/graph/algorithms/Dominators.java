@@ -66,7 +66,7 @@ public class Dominators<G extends Graph<G, N, E>, N extends Node<G, N, E>, E ext
 			G graph) {
 		dominators.clear();
 		Collection<N> entries = graph.getEntrypoints();
-		WorkingSet<N> ws = FIFOWorkingSet.mk();
+		WorkingSet<N> ws = new FIFOWorkingSet<>();
 		entries.forEach(ws::push);
 		while (!ws.isEmpty()) {
 			N current = ws.pop();

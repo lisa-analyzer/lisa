@@ -1,6 +1,6 @@
 package it.unive.lisa.checks;
 
-import it.unive.lisa.checks.syntactic.CheckTool;
+import it.unive.lisa.ReportingTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.cron.CronConfiguration;
 import it.unive.lisa.cron.IMPCronExecutor;
@@ -9,7 +9,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.io.IOException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ChecksExecutorTest
 		extends
@@ -21,7 +21,7 @@ public class ChecksExecutorTest
 
 		@Override
 		public boolean visit(
-				CheckTool tool,
+				ReportingTool tool,
 				CFG graph,
 				Statement node) {
 			if (node instanceof VariableRef && ((VariableRef) node).getName().equals("i"))

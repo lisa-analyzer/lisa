@@ -102,7 +102,7 @@ public class HtmlGraph
 		resolver.setTemplateMode(TemplateMode.HTML);
 		templateEngine.setTemplateResolver(resolver);
 
-		String file = includeSubnodes ? "html-graph/viewer-compound.html" : "html-graph/viewer.html";
+		String file = includeSubnodes ? "html-files/viewer-compound.html" : "html-files/viewer.html";
 		String htmlTemplate = loadResourceTemplate(file);
 
 		Context context = new Context();
