@@ -1,15 +1,19 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.string.StringConstant;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
@@ -119,6 +123,45 @@ public class StringConstantPropagation
 
 		else
 			return Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public ValueEnvironment<StringConstant> assumeBinaryExpression(
+			ValueEnvironment<StringConstant> environment,
+			BinaryExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability sat = satisfies(environment, expression, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
+		BinaryOperator operator = expression.getOperator();
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
+		if (operator == ComparisonEq.INSTANCE) {
+			if (left instanceof Identifier) {
+				StringConstant eval = eval(environment, right, src, oracle);
+				if (eval.isBottom())
+					return environment.bottom();
+				// If eval is TOP, the rhs is unknown. Any abstract value of lhs
+				// satisfies lhs == TOP, so the lhs abstract value is preserved
+				// and no refinement is needed.
+				if (!eval.isTop())
+					return environment.putState((Identifier) left, eval);
+			} else if (right instanceof Identifier) {
+				StringConstant eval = eval(environment, left, src, oracle);
+				if (eval.isBottom())
+					return environment.bottom();
+				// Same reasoning as above, symmetric case.
+				if (!eval.isTop())
+					return environment.putState((Identifier) right, eval);
+			}
+		}
+		return environment;
 	}
 
 	@Override

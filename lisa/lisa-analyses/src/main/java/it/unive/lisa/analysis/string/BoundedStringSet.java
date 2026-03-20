@@ -5,11 +5,13 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -17,6 +19,7 @@ import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
@@ -510,6 +513,57 @@ public class BoundedStringSet
 			throw new SemanticException("Cannot convert stirng indexof bound to int", e1);
 		}
 		return constr;
+	}
+
+	@Override
+	public ValueEnvironment<BSS> assumeBinaryExpression(
+			ValueEnvironment<BSS> environment,
+			BinaryExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
+		if (operator != ComparisonEq.INSTANCE && operator != ComparisonNe.INSTANCE)
+			return environment;
+
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
+		Identifier id;
+		BSS rhsVal;
+		if (left instanceof Identifier) {
+			id = (Identifier) left;
+			rhsVal = eval(environment, right, src, oracle);
+		} else if (right instanceof Identifier) {
+			id = (Identifier) right;
+			rhsVal = eval(environment, left, src, oracle);
+		} else {
+			return environment;
+		}
+
+		if (rhsVal.isTop() || rhsVal.isBottom())
+			return environment;
+
+		BSS lhsVal = environment.getState(id);
+		if (operator == ComparisonEq.INSTANCE) {
+			BSS refined = lhsVal.glb(rhsVal);
+			if (refined.isBottom())
+				return environment.bottom();
+			if (!refined.equals(lhsVal))
+				return environment.putState(id, refined);
+		} else {
+			// ComparisonNe: remove rhsVal strings from lhsVal
+			if (lhsVal.isTop() || lhsVal.isBottom())
+				return environment;
+			Set<String> diff = new HashSet<>(lhsVal.elements);
+			diff.removeAll(rhsVal.elements);
+			BSS refined = top().mk(diff);
+			if (refined.isBottom())
+				return environment.bottom();
+			if (!refined.equals(lhsVal))
+				return environment.putState(id, refined);
+		}
+		return environment;
 	}
 
 	@Override
