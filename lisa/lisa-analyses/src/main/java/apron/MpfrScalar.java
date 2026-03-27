@@ -8,6 +8,11 @@
 
 package apron;
 
+// import dependency resolution
+import gmp.Mpfr;
+import gmp.Mpq;
+import gmp.Mpz;
+
 import java.io.*;
 
 /**
@@ -142,7 +147,7 @@ public class MpfrScalar
      *
      * @return 0 (exact) or 1 (NaN).
      */
-    public int toMpq(Mpq r, int round) 
+    public int toMpq(Mpq r, int round)
     {
         if (val.isNaN()) { r.set(0); return 1; }
         if (val.isInf()) {

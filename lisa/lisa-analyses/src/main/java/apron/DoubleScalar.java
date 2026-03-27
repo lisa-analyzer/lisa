@@ -10,6 +10,9 @@ package apron;
 
 import java.io.*;
 
+// import dependency resolution
+import gmp.*;
+
 /**
  * Class of Scalar objects backed up by a double-precision
  * floating-point number.

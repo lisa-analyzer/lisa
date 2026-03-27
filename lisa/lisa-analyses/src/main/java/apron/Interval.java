@@ -8,6 +8,11 @@
 
 package apron;
 
+// import dependency resolution
+import gmp.Mpfr;
+import gmp.Mpq;
+import gmp.Mpz;
+
 import java.io.*;
 import java.math.BigInteger;
 

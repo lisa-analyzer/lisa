@@ -8,6 +8,11 @@
 
 package apron;
 
+// import dependency resolution
+import gmp.Mpq;
+import gmp.Mpz;
+import gmp.Mpfr;
+
 import java.io.*;
 import java.math.BigInteger;
 
@@ -49,7 +54,7 @@ public class MpqScalar
     }
 
     /** Creates a new Mpq Scalar holding a copy of x. */
-    public MpqScalar(Mpz x) 
+    public MpqScalar(Mpz x)
     { 
         val = new Mpq(x); 
     }

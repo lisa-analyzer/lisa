@@ -8,6 +8,10 @@
 
 package apron;
 
+// import dependency resolution
+import gmp.Mpfr;
+import gmp.Mpq;
+
 import java.io.*;
 import java.util.Arrays;
 
