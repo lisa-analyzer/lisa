@@ -1,0 +1,254 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Analysis Flame Graph</title>
+
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
+
+	<script src="assets/d3.v7.min.js"></script>
+	<script src="assets/d3-graphviz.min.js"></script>
+	<link rel="stylesheet" href="assets/style.css">
+	</link>
+</head>
+
+<body>
+	<div class="box">
+		<header class="row header">
+			<img src="https://raw.githubusercontent.com/lisa-analyzer/lisa/master/logo.png" alt="LiSA logo" />
+			<h1>Analysis Flame Graph</h1>
+			<input id="search" type="text" class="searchbar" placeholder="Search node..." />
+			<input id="next" type="button" value="Next" class="button" disabled />
+			<input id="prev" type="button" value="Previous" class="button" disabled />
+			<button id="centerButton" class="button">Reset zoom &amp; recenter</button>
+			<button id="legendButton" class="button">Legend</button>
+		</header>
+		<div id="legend" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<b>Interprocedural event: <font color="red">red</font></b>
+				<b>Fixpoint event: <font color="blue">blue</font></b>
+				<b>Analysis event: <font color="green">green</font></b>
+				<b>Domain event: <font color="#d3d609">yellow</font></b>
+				<b>The lighter the color, the shorter the execution time</b>
+			</div>
+		</div>
+		<div id="heatmap-chart"></div>
+		<div class="heatmap-tooltip" id="heatmap-tooltip"></div>
+	</div>
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		const graph = /*[[${graphContent}]]*/ "default placeholder";
+		/*]]>*/
+
+		// flatten tree
+		const nodes = [];
+		function walk(node, depth = 0) {
+			const text = String(node.text);
+			const start = Number(node.start_ns);
+			const end = Number(node.end_ns);
+			if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) {
+				console.log("Discarding data at depth " + depth + " (" + text + "): invalid start or end time. Graph will be incomplete.");
+				console.log("start: " + start + ", end: " + end);
+				return;
+			}
+
+			const duration = end - start;
+			let kind;
+			if (text.startsWith("Analysis:")) kind = "Analysis";
+			else if (text.match(/^[a-zA-Z0-9_]+:/)) kind = "Domain";
+			else if (text.toLowerCase().includes("fixpoint")) kind = "Interprocedural";
+			else kind = "Fixpoint";
+
+			nodes.push({text, start, end, duration, kind, depth});
+			for (const c of node.children || []) walk(c, depth + 1);
+		}
+		walk(JSON.parse(graph));
+
+		// layout
+		const rowHeight = 22;
+		const width = window.innerWidth;
+		const height = window.innerHeight;
+		const minTime = d3.min(nodes, d => d.start);
+		const maxTime = d3.max(nodes, d => d.end);
+		const xScale = d3.scaleLinear()
+			.domain([minTime, maxTime])
+			.range([0, width]);
+
+		// SVG & zoom
+		const svg = d3.select("#heatmap-chart")
+			.append("svg")
+			.attr("width", width)
+			.attr("height", height);
+		const zoomLayer = svg.append("g");
+		const zoom = d3.zoom()
+			.scaleExtent([0.1, 50])
+			.on("zoom", (event) => {
+				zoomLayer.attr("transform", event.transform);
+				updateLabels();
+			});
+		svg.call(zoom);
+
+		// draw nodes
+		const tooltip = d3.select("#heatmap-tooltip");
+		function showTooltip(event, d) {
+			tooltip
+				.style("opacity", 1)
+				.html(`<b>${d.text}</b><br/>${(d.duration / 1e6).toFixed(2)} ms<br/>Kind: ${d.kind}`);
+
+			moveTooltip(event);
+		}
+		function moveTooltip(event) {
+			const pad = 12;
+			const w = tooltip.node().offsetWidth;
+			const h = tooltip.node().offsetHeight;
+
+			let x = event.pageX + pad;
+			let y = event.pageY + pad;
+
+			if (x + w > window.innerWidth) x = event.pageX - w - pad;
+			if (y + h > window.innerHeight) y = event.pageY - h - pad;
+
+			tooltip.style("left", x + "px").style("top", y + "px");
+		}
+		function hideTooltip() {
+			tooltip.style("opacity", 0);
+		}
+		const categoryHue = {
+			Interprocedural: 0, // red
+			Fixpoint: 210,      // blue
+			Analysis: 120,      // green
+			Domain: 60,         // yellow
+			unknown: 0
+		};
+		const durationByKind = d3.group(nodes, d => d.kind);
+		const scalesByKind = new Map(
+			Array.from(durationByKind, ([kind, arr]) => [
+				kind,
+				d3.scaleLinear()
+					.domain(d3.extent(arr, d => d.duration))
+					.range([90, 40])
+			])
+		);
+		function nodeColor(d) {
+			const hue = categoryHue[d.kind] ?? categoryHue.unknown;
+			const scale = scalesByKind.get(d.kind);
+			return `hsl(${hue}, 70%, ${scale(d.duration)}%)`;
+		}
+		const rects = zoomLayer.selectAll("rect")
+			.data(nodes)
+			.enter()
+			.append("rect")
+			.attr("class", "heatmap-node")
+			.attr("x", d => xScale(d.start))
+			.attr("y", d => d.depth * rowHeight)
+			.attr("width", d => xScale(d.end) - xScale(d.start))
+			.attr("height", rowHeight - 2)
+			.attr("fill", nodeColor)
+			.on("mouseenter", showTooltip)
+			.on("mousemove", moveTooltip)
+			.on("mouseleave", hideTooltip);
+
+		// labels (elided)
+		const labels = zoomLayer.selectAll("text")
+			.data(nodes)
+			.enter()
+			.append("text")
+			.attr("class", "heatmap-label")
+			.attr("x", d => xScale(d.start) + 4)
+			.attr("y", d => d.depth * rowHeight + rowHeight * 0.7)
+			.text(d => d.text)
+			.on("mouseenter", showTooltip)
+			.on("mousemove", moveTooltip)
+			.on("mouseleave", hideTooltip);
+		labels.each(function (d) {
+			d._textWidth = this.getBBox().width;
+		});
+
+		// Hide labels that don't fit
+		function updateLabels() {
+			labels.each(function (d) {
+				const text = d3.select(this);
+				const rectScreenWidth = xScale(d.end) - xScale(d.start);
+				text.style("display", d._textWidth + 6 < rectScreenWidth ? null : "none");
+			});
+		}
+		updateLabels();
+
+		// search
+		d3.select("#search").node().value = "";
+		var hits = [];
+		var hit = -1;
+		function centerToSearch() {
+			rects.classed("heatmap-highlight", false);
+			const idx = hits[hit];
+			rects.filter((_, j) => j === idx).classed("heatmap-highlight", true);
+
+			const n = nodes[idx];
+			const cx = (xScale(n.start) + xScale(n.end)) / 2;
+			const cy = n.depth * rowHeight;
+
+			svg.transition().duration(300).call(
+				zoom.transform,
+				d3.zoomIdentity
+					.translate(width / 2 - cx, height / 2 - cy)
+					.scale(1.5)
+			);
+		}
+		d3.select("#search").on("input", function (e) {
+			var query = e.target.value.toLowerCase();
+			hits = [];
+			if (query !== "")
+				nodes.forEach((n, i) => {
+					if (n.text.toLowerCase().includes(query)) hits.push(i);
+				});
+			rects.classed("heatmap-highlight", false);
+			if (query === "" || hits.length == 0) {
+				hit = -1;
+				d3.select("#next").attr("disabled", true);
+				d3.select("#prev").attr("disabled", true);
+				d3.select(this).classed("no-results", true);
+			} else {
+				hit = 0;
+				d3.select("#next").attr("disabled", null);
+				d3.select("#prev").attr("disabled", null);
+				d3.select(this).classed("no-results", false);
+				centerToSearch();
+			}
+		});
+		d3.select("#next").on("click", function (e) {
+			if (hit != -1) {
+				hit = (hit + 1) % hits.length;
+				centerToSearch();
+			}
+		});
+		d3.select("#prev").on("click", function (e) {
+			if (hit != -1) {
+				hit = (hit - 1 + hits.length) % hits.length;
+				centerToSearch();
+			}
+		});
+
+		// recenter button
+		d3.select("#centerButton").on("click", function () {
+			svg.transition().duration(400).call(
+				zoom.transform,
+				d3.zoomIdentity
+			);
+		});
+
+		/* Legend modal */
+		var modal = d3.select("#legend").on("click", function () {
+			d3.select(this).style("display", "none");
+		});
+		var btn = d3.select("#legendButton").on("click", function () {
+			modal.style("display", "block");
+		});
+		var span = d3.select(".close").on("click", function () {
+			modal.style("display", "none");
+		});
+	</script>
+</body>
+
+</html>
