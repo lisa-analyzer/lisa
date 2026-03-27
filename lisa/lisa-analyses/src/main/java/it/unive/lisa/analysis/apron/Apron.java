@@ -34,6 +34,8 @@ public class Apron implements ValueDomain<Apron>, ValueLattice<Apron> {
     static {
         boolean loaded = false;
         try {
+            // first dependence
+            System.loadLibrary("jgmp");
             System.loadLibrary("japron");
             loaded = true;
         } catch (UnsatisfiedLinkError e) {
