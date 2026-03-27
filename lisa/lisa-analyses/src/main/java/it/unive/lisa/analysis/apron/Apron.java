@@ -24,9 +24,23 @@ import java.util.function.Predicate;
 
 public class Apron implements ValueDomain<Apron>, ValueLattice<Apron> {
 
-    private static Manager manager = new apron.Box();
+    private static Manager manager;
+
 
     final Abstract1 state;
+
+    private static final boolean IS_AVAILABLE;
+
+    static {
+        boolean loaded = false;
+        try {
+            System.loadLibrary("japron");
+            loaded = true;
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("[WARNING]: Apron library not loaded: " + e.getMessage());
+        }
+        IS_AVAILABLE = loaded;
+    }
 
     /*
      * START TODO METHODS SECTIONS
@@ -87,6 +101,12 @@ public class Apron implements ValueDomain<Apron>, ValueLattice<Apron> {
     }
 
     public static void setManager(ApronDomain numericalDomain) {
+        if (!IS_AVAILABLE) {
+            throw new UnsupportedOperationException(
+                    "Failed to set Apron manager: native library missing."
+            );
+        }
+
         switch (numericalDomain) {
             case Box:
                 manager = new apron.Box();
@@ -104,14 +124,28 @@ public class Apron implements ValueDomain<Apron>, ValueLattice<Apron> {
             case PplGrid:
             case PplPoly:
                 throw new UnsupportedOperationException(
-                        numericalDomain + "domain require PPL library, which is not included in the current Apron compilation"
+                        numericalDomain + " domain require PPL library, which is not included in the current Apron compilation"
                 );
             default:
                 throw new UnsupportedOperationException("Numerical domain " + numericalDomain + " unknown in Apron");
         }
     }
 
+    // Allow to LiSA to verify if Apron is supported
+    public static Boolean isAvailable() {
+        return IS_AVAILABLE;
+    }
+
     public Apron() {
+        if (!isAvailable()) {
+            throw new UnsupportedOperationException("Failed to initialize Apron domain: native library missing.");
+        }
+
+        // If user doesn't set the manager, Box is used by default
+        if (manager == null) {
+            setManager(ApronDomain.Box);
+        }
+
         try {
             String[] vars = {"<ret>"}; // Variable needed to represent the returned value
             state = new Abstract1(manager, new apron.Environment(new String[0], vars));
