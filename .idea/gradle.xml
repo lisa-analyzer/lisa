@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/lisa" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/lisa" />
+            <option value="$PROJECT_DIR$/lisa/lisa-analyses" />
+            <option value="$PROJECT_DIR$/lisa/lisa-imp" />
+            <option value="$PROJECT_DIR$/lisa/lisa-program" />
+            <option value="$PROJECT_DIR$/lisa/lisa-sdk" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
