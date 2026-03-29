@@ -29,19 +29,35 @@ public class Apron implements ValueDomain<Apron>, ValueLattice<Apron> {
 
     final Abstract1 state;
 
-    private static final boolean IS_AVAILABLE;
+    private static boolean IS_AVAILABLE = false;
 
-    static {
+    public static void loadLibrary() {
         boolean loaded = false;
         try {
-            // first dependence
-            System.loadLibrary("jgmp");
             System.loadLibrary("japron");
             loaded = true;
         } catch (UnsatisfiedLinkError e) {
             System.err.println("[WARNING]: Apron library not loaded: " + e.getMessage());
         }
         IS_AVAILABLE = loaded;
+    }
+
+    public static void loadLibrary(String folderPath) {
+        boolean loaded = false;
+        try {
+            // gmp needed to japron as dependence
+            System.load(folderPath + "/libjgmp.so");
+            System.load(folderPath + "/libjapron.so");
+            loaded = true;
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("[WARNING]: Apron library not loaded from " + folderPath + ": " + e.getMessage());
+        }
+        IS_AVAILABLE = loaded;
+    }
+
+    // Allow to LiSA to verify if Apron is supported
+    public static Boolean isAvailable() {
+        return IS_AVAILABLE;
     }
 
     /*
@@ -131,11 +147,6 @@ public class Apron implements ValueDomain<Apron>, ValueLattice<Apron> {
             default:
                 throw new UnsupportedOperationException("Numerical domain " + numericalDomain + " unknown in Apron");
         }
-    }
-
-    // Allow to LiSA to verify if Apron is supported
-    public static Boolean isAvailable() {
-        return IS_AVAILABLE;
     }
 
     public Apron() {
