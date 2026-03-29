@@ -16,7 +16,7 @@ public class ApronTest {
         }
 
         // Expected absolute path
-        String libPath = "/Users/roccoferrari/apron-dist/lib";
+        String libPath = "insert/absolute/path";
 
         Apron.loadLibrary(libPath);
     }
