@@ -22,7 +22,10 @@ public class Polka
 
     private static native void class_init();
 
-    static { System.loadLibrary("japron"); class_init(); }
+    static {
+        // System.loadLibrary("japron");
+        class_init();
+    }
 
 
     // Constructors

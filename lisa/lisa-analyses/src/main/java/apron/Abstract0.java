@@ -58,7 +58,10 @@ public class Abstract0
 
     private static native void class_init();
 
-    static { System.loadLibrary("japron"); class_init(); }
+    static {
+        // System.loadLibrary("japron");
+        class_init();
+    }
 
     private Abstract0() { }
 

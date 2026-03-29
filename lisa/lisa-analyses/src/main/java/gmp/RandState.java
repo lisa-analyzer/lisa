@@ -48,7 +48,10 @@ public class RandState
 
     private static native void class_init();
 
-    static { System.loadLibrary("jgmp"); class_init(); }
+    static {
+        // System.loadLibrary("jgmp");
+        class_init();
+    }
 
 
     // Constructors

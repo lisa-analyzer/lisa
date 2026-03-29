@@ -43,7 +43,10 @@ public class Mpq
 
     private static native void class_init();
 
-    static { System.loadLibrary("jgmp"); class_init(); }
+    static {
+        // System.loadLibrary("jgmp");
+        class_init();
+    }
 
 
     // Canonicalization

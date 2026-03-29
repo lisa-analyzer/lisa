@@ -66,8 +66,11 @@ public class Mpz
     static final java.lang.ref.Cleaner cleaner = java.lang.ref.Cleaner.create();
 
     private static native void class_init();
-    
-    static { System.loadLibrary("jgmp"); class_init(); }
+
+    static {
+        // System.loadLibrary("jgmp");
+        class_init();
+    }
 
 
     // Constructors

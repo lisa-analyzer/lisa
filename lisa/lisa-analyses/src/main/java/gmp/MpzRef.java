@@ -60,7 +60,10 @@ public class MpzRef extends Mpz
 
     private static native void class_init();
 
-    static { System.loadLibrary("jgmp"); class_init(); }   
+    static {
+        // System.loadLibrary("jgmp");
+        class_init();
+    }
 
     /**
      * A MpzRef represents a reference and cannot be serialized. 

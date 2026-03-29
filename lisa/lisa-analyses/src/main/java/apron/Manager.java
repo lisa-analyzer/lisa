@@ -45,7 +45,10 @@ public class Manager
 
     private static native void class_init();
 
-    static { System.loadLibrary("japron"); class_init(); }
+    static {
+        // System.loadLibrary("japron");
+        class_init();
+    }
 
     static final java.lang.ref.Cleaner cleaner = java.lang.ref.Cleaner.create();
 

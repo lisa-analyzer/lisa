@@ -44,7 +44,10 @@ public class Texpr0Intern
 
     private static native void class_init();
 
-    static { System.loadLibrary("japron"); class_init(); }
+    static {
+        // System.loadLibrary("japron");
+        class_init();
+    }
 
     private Texpr0Intern() { }
 
