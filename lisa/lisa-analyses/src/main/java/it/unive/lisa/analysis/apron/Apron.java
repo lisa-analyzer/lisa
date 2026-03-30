@@ -689,7 +689,7 @@ public class Apron
 				return new Apron(unifiedOther);
 
 			if (state.isTop(manager) || other.state.isTop(manager))
-				return new Apron(unifiedOther);
+				return new Apron(new Abstract1(manager, lubEnv));
 
 			return new Apron(unifiedThis.joinCopy(manager, unifiedOther));
 		} catch (ApronException e) {
