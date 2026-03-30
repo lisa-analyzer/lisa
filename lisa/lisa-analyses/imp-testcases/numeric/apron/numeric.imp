@@ -1,0 +1,9 @@
+class tutorial {
+
+	constants() {
+		def c = 1;
+		def b = 0;
+		return b;
+	}
+
+}
