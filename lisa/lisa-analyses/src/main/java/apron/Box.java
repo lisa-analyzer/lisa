@@ -1,9 +1,5 @@
 /*
- * Box.java
- *
- * APRON Library / Java Apron binding
- *
- * Copyright (C) Antoine Mine' 2010
+ * Box.java APRON Library / Java Apron binding Copyright (C) Antoine Mine' 2010
  */
 
 package apron;
@@ -12,31 +8,29 @@ package apron;
  * Manager factory for the interval abstract domain.
  */
 public class Box
-    extends Manager
-{
+		extends
+		Manager {
 
-    // Internals
-    ////////////
+	// Internals
+	////////////
 
-    private native void init();
+	private native void init();
 
-    private static native void class_init();
+	private static native void class_init();
 
-    static {
-        // System.loadLibrary("japron");
-        class_init();
-    }
+	static {
+		// System.loadLibrary("japron");
+		class_init();
+	}
 
+	// Constructors
+	///////////////
 
-    // Constructors
-    ///////////////
-    
-    /**
-     * Creates a new manager to create and manipulate boxes.
-     */
-    public Box()
-    {
-        init(); 
-    }
+	/**
+	 * Creates a new manager to create and manipulate boxes.
+	 */
+	public Box() {
+		init();
+	}
 
 }

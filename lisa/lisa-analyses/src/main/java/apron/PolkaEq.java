@@ -1,9 +1,6 @@
 /*
- * PolkaEq.java
- *
- * APRON Library / Java Apron binding
- *
- * Copyright (C) Antoine Mine' 2010
+ * PolkaEq.java APRON Library / Java Apron binding Copyright (C) Antoine Mine'
+ * 2010
  */
 
 package apron;
@@ -12,30 +9,28 @@ package apron;
  * Manager factory for the linear equalities domain.
  */
 public class PolkaEq
-    extends Manager
-{
+		extends
+		Manager {
 
-    // Internals
-    ////////////
+	// Internals
+	////////////
 
-    private native void init();
+	private native void init();
 
-    private static native void class_init();
+	private static native void class_init();
 
-    static {
-        // System.loadLibrary("japron"); class_init();
-    }
+	static {
+		// System.loadLibrary("japron"); class_init();
+	}
 
+	// Constructors
+	///////////////
 
-    // Constructors
-    ///////////////
-    
-    /**
-     * Creates a new manager to create and manipulate  linear equalities.
-     */
-    public PolkaEq()
-    {
-        init(); 
-    }
+	/**
+	 * Creates a new manager to create and manipulate linear equalities.
+	 */
+	public PolkaEq() {
+		init();
+	}
 
 }
