@@ -18,7 +18,11 @@ public class ApronTest {
         // Expected absolute path
         String libPath = "insert/absolute/path";
 
-        Apron.loadLibrary(libPath);
+        // /Users/username/Library/Java/Extensions/
+        Apron.loadLibrary();
+
+        // Custom path
+        // Apron.loadLibrary(libPath);
     }
 
     @Test
