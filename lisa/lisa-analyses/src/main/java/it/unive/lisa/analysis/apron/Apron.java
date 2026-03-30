@@ -180,7 +180,7 @@ public class Apron implements ValueDomain<Apron>, ValueLattice<Apron> {
             Environment env = state.state.getEnvironment();
             Var variable = toApronVar(id);
             Abstract1 newState;
-            if (!containsIdentifier(id)) {
+            if (!env.hasVar(variable)) {
                 Var[] vars = {variable};
                 env = env.add(new Var[0], vars);
                 newState = state.state.changeEnvironmentCopy(manager, env, false);
@@ -351,7 +351,7 @@ public class Apron implements ValueDomain<Apron>, ValueLattice<Apron> {
             Identifier id = (Identifier) expression;
             Environment env = state.state.getEnvironment();
             Var variable = toApronVar(id);
-            if (!containsIdentifier(id)) {
+            if (!env.hasVar(variable)) {
                 Var[] vars = {variable};
                 env = env.add(new Var[0], vars);
                 try {
