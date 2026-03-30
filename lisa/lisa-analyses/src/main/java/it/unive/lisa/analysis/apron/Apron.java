@@ -20,11 +20,15 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.function.Predicate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Apron
 		implements
 		ValueDomain<Apron>,
 		ValueLattice<Apron> {
+
+	private static final Logger logger = LogManager.getLogger(Apron.class);
 
 	private static Manager manager;
 
@@ -40,7 +44,7 @@ public class Apron
 			System.loadLibrary("japron");
 			loaded = true;
 		} catch (UnsatisfiedLinkError e) {
-			System.err.println("[WARNING]: Apron library not loaded: " + e.getMessage());
+			logger.error("[WARNING]: Apron library not loaded:", e);
 		}
 		IS_AVAILABLE = loaded;
 	}
@@ -54,7 +58,7 @@ public class Apron
 			System.load(folderPath + "/libjapron.so");
 			loaded = true;
 		} catch (UnsatisfiedLinkError e) {
-			System.err.println("[WARNING]: Apron library not loaded from " + folderPath + ": " + e.getMessage());
+			logger.error("[WARNING]: Apron library not loaded from {}:", folderPath, e);
 		}
 		IS_AVAILABLE = loaded;
 	}
