@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_tutorial.arithmetic_crossing_zero(tutorial__this).graph.json", "untyped_tutorial.arithmetic_division_by_zero(tutorial__this).graph.json", "untyped_tutorial.arithmetic_multiplication(tutorial__this).graph.json", "untyped_tutorial.box_limits(tutorial__this).graph.json", "untyped_tutorial.branching_lub(tutorial__this).graph.json", "untyped_tutorial.constants(tutorial__this).graph.json", "untyped_tutorial.dead_code_narrowing(tutorial__this).graph.json", "untyped_tutorial.endless_lub(tutorial__this).graph.json", "untyped_tutorial.if_else(tutorial__this,_untyped_a).graph.json", "untyped_tutorial.logical_and(tutorial__this,_untyped_x).graph.json", "untyped_tutorial.logical_or(tutorial__this,_untyped_x).graph.json", "untyped_tutorial.nested_while_stress(tutorial__this).graph.json", "untyped_tutorial.relational_conditions(tutorial__this,_untyped_x,_untyped_y).graph.json", "untyped_tutorial.strong_update(tutorial__this).graph.json", "untyped_tutorial.while_widening_down_million(tutorial__this).graph.json", "untyped_tutorial.while_widening_down_ns(tutorial__this,_untyped_j).graph.json", "untyped_tutorial.while_widening_up_four(tutorial__this).graph.json", "untyped_tutorial.while_widening_up_million(tutorial__this).graph.json" ],
+  "info" : {
+    "cfgs" : "18",
+    "duration" : "224ms",
+    "end" : "2026-03-30T23:50:43.733+02:00",
+    "expressions" : "222",
+    "files" : "18",
+    "globals" : "0",
+    "members" : "18",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-03-30T23:50:43.509+02:00",
+    "statements" : "95",
+    "units" : "1",
+    "version" : "0.2",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/numeric/apron-box"
+  }
+}
