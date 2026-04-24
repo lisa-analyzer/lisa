@@ -92,6 +92,8 @@ public class CFGResults<
 				return Pair.of(false, previousResult);
 			else {
 				// result is bigger, store that instead
+				org.apache.logging.log4j.LogManager.getLogger(CFGResults.class).info(
+						"[CR-TRACK] result STRICTLY-BIGGER token={}", token);
 				function.put(token, result);
 				return Pair.of(true, result);
 			}
@@ -100,6 +102,8 @@ public class CFGResults<
 			return Pair.of(false, previousResult);
 		} else {
 			// result and previous are not comparable
+			org.apache.logging.log4j.LogManager.getLogger(CFGResults.class).info(
+					"[CR-TRACK] result INCOMPARABLE (lub'd) token={}", token);
 			AnalyzedCFG<A> lub = previousResult.lub(result);
 			function.put(token, lub);
 			return Pair.of(true, lub);

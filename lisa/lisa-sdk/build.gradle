@@ -1,3 +1,8 @@
+apply plugin: 'java-library'
+
+group = 'it.unive'
+version = '0.1'
+
 dependencies {
     // utils
     api 'commons-io:commons-io:2.8.0'
@@ -41,6 +46,6 @@ tasks.register('generateVersionInfo', Copy) {
     filter { line -> line.replaceAll("@PRJ_VERSION@", project.version) }
 }
 
-compileJava.dependsOn generateVersionInfo
-sourcesJar.dependsOn generateVersionInfo
+/*compileJava.dependsOn generateVersionInfo
+sourcesJar.dependsOn generateVersionInfo*/
 

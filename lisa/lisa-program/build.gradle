@@ -1,3 +1,8 @@
+apply plugin: 'java-library'
+
+group = 'it.unive'
+version = '0.1'
+
 dependencies {
 	// internal
 	api project(':lisa-sdk')

@@ -201,6 +201,18 @@ public class ProgramState<A extends AbstractLattice<A>>
 	}
 
 	/**
+	 * Yields a copy of this state where the additional fixpoint information
+	 * ({@link #getFixpointInformation()}) is bottom.
+	 *
+	 *
+	 * @return a new instance with the additional fixpint information at bottom.
+	 *
+	 */
+	public ProgramState<A> clearInfo() {
+		return new ProgramState<>(state, computedExpressions, FixpointInfo.BOTTOM);
+	}
+
+	/**
 	 * Yields the last computed expression. This is an instance of
 	 * {@link SymbolicExpression} that will contain markers for all abstract
 	 * values that would be present on the stack, as well as variable
@@ -352,22 +364,22 @@ public class ProgramState<A extends AbstractLattice<A>>
 
 	@Override
 	public ProgramState<A> top() {
-		return new ProgramState<>(state.top(), computedExpressions.top(), info.top());
+		return new ProgramState<>(state.top(), computedExpressions.top(), info);
 	}
 
 	@Override
 	public ProgramState<A> bottom() {
-		return new ProgramState<>(state.bottom(), computedExpressions.bottom(), FixpointInfo.BOTTOM);
+		return new ProgramState<>(state.bottom(), computedExpressions.bottom(), info);
 	}
 
 	@Override
 	public boolean isTop() {
-		return state.isTop() && computedExpressions.isTop() && info.isTop();
+		return state.isTop() && computedExpressions.isTop();
 	}
 
 	@Override
 	public boolean isBottom() {
-		return state.isBottom() && computedExpressions.isBottom() && info.isBottom();
+		return state.isBottom() && computedExpressions.isBottom();
 	}
 
 	@Override

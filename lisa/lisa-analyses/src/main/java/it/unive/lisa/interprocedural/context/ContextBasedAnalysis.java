@@ -484,6 +484,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		callgraph.registerCall(call);
+		System.out.println("[CBA] getAbstractResultOf: " + call.getCFG().getDescriptor().getUnit().getName() + "::" + call.getCFG().getDescriptor().getName() + " → " + call.getTargetedCFGs().stream().map(c -> c.getDescriptor().getUnit().getName() + "::" + c.getDescriptor().getName()).collect(java.util.stream.Collectors.toList()) + " @" + call.getLocation() + " token=" + token);
 
 		if (shouldCheckForRecursions()
 				&& (call.getTargetedCFGs().stream().anyMatch(call.getCFG()::equals)

@@ -174,7 +174,7 @@ public class LiSARunInfo {
 			Application app,
 			DateTime start,
 			DateTime end) {
-		this.version = VersionInfo.VERSION;
+		this.version = "0.1-LOCAL";
 		this.warnings = warnings.size();
 		this.notices = notices.size();
 		this.files = files.size();
