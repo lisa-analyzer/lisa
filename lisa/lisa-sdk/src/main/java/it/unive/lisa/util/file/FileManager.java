@@ -180,8 +180,8 @@ public class FileManager {
 		int len = name.codePointCount(0, name.length());
 		for (int i = 0; i < len; i++) {
 			int c = name.codePointAt(i);
-			// 57 is / and 92 is \
-			if ((keepDirSeparator && (c == 57 || c == 92)) || Arrays.binarySearch(illegalChars, c) < 0)
+			// 47 is / and 92 is \
+			if ((keepDirSeparator && (c == 47 || c == 92)) || Arrays.binarySearch(illegalChars, c) < 0)
 				cleanName.appendCodePoint(c);
 			else
 				cleanName.appendCodePoint('_');
