@@ -136,6 +136,10 @@ public class VariadicExpression extends ValueExpression {
 
     @Override
     public boolean mightNeedRewriting() {
+        for (SymbolicExpression operand : operands)
+            if (operand.mightNeedRewriting())
+                return true;
+
         return false;
     }
 
