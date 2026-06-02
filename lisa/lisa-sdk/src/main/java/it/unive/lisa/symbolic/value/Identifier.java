@@ -105,7 +105,7 @@ public abstract class Identifier
 	public abstract boolean canBeScoped();
 
 	@Override
-	public int hashCode() {
+	protected int computeHashCode() {
 		final int prime = 31;
 		// we do not call super here since variables should be uniquely
 		// identified by their name, regardless of their type

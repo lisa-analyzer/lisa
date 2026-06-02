@@ -107,9 +107,9 @@ public class NaryExpression extends ValueExpression {
     }
 
     @Override
-    public int hashCode() {
+    protected int computeHashCode() {
         final int prime = 31;
-        int result = super.hashCode();
+        int result = super.computeHashCode();
         result = prime * result + ((operator == null) ? 0 : operator.hashCode());
 
         for (SymbolicExpression expr : operands) {

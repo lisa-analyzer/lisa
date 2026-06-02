@@ -122,9 +122,9 @@ public class UnaryExpression
 	}
 
 	@Override
-	public int hashCode() {
+	protected int computeHashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = super.computeHashCode();
 		result = prime * result + ((expression == null) ? 0 : expression.hashCode());
 		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
 		return result;

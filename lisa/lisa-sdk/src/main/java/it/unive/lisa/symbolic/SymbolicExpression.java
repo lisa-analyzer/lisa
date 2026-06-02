@@ -36,6 +36,16 @@ public abstract class SymbolicExpression
 	private final Type staticType;
 
 	/**
+	 * Lazily-computed hash code. Zero is the "not yet computed" sentinel.
+	 * {@link SymbolicExpression} is structurally immutable (all subclass fields
+	 * are {@code final}), so the first computation is valid for the lifetime of
+	 * the instance. No {@code volatile} or synchronization is required: the
+	 * computed value is deterministic, so racing threads produce identical
+	 * results and a stale read at worst triggers one redundant computation.
+	 */
+	private int cachedHash;
+
+	/**
 	 * Builds the symbolic expression.
 	 * 
 	 * @param staticType the static type of this expression, determined at its
@@ -124,7 +134,33 @@ public abstract class SymbolicExpression
 			throws SemanticException;
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
+		int h = cachedHash;
+		if (h == 0) {
+			h = computeHashCode();
+			if (h == 0)
+				h = 1;
+			cachedHash = h;
+		}
+		return h;
+	}
+
+	/**
+	 * Computes the hash code for this expression. Called at most once per
+	 * instance: {@link #hashCode()} memoises the result. Subclasses that need
+	 * to incorporate their own fields override this method instead of
+	 * {@link #hashCode()}, which is {@code final}.
+	 * <p>
+	 * When overriding, call {@code super.computeHashCode()} (not
+	 * {@code super.hashCode()}). Calling the latter pollutes the parent's
+	 * cache with a partial value, dropping subclass contributions on every
+	 * subsequent cache hit. Recursive calls on <em>child</em> expressions
+	 * should use the cached {@code hashCode()}, which is the entire point of
+	 * the cache.
+	 *
+	 * @return the freshly-computed hash code
+	 */
+	protected int computeHashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());

@@ -45,9 +45,9 @@ public class HeapLocation
 	}
 
 	@Override
-	public int hashCode() {
+	protected int computeHashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = super.computeHashCode();
 		// isAllocation is not considered in hashCode, as it is a property
 		// that is not relevant for the identity of the heap location
 		// (it is just a property that can be used to refine reasoning)

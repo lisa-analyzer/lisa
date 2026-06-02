@@ -66,9 +66,9 @@ public class AccessChild
 	}
 
 	@Override
-	public int hashCode() {
+	protected int computeHashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = super.computeHashCode();
 		result = prime * result + ((container == null) ? 0 : container.hashCode());
 		result = prime * result + ((child == null) ? 0 : child.hashCode());
 		return result;

@@ -77,9 +77,9 @@ public class PushFromConstraints
 	}
 
 	@Override
-	public int hashCode() {
+	protected int computeHashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = super.computeHashCode();
 		result = prime * result + ((constraints == null) ? 0 : constraints.hashCode());
 		return result;
 	}

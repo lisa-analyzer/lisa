@@ -44,9 +44,9 @@ public class HeapReference
 	}
 
 	@Override
-	public int hashCode() {
+	protected int computeHashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = super.computeHashCode();
 		result = prime * result + ((expression == null) ? 0 : expression.hashCode());
 		return result;
 	}

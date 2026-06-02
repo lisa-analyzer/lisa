@@ -32,8 +32,8 @@ public class PushInv
 	}
 
 	@Override
-	public int hashCode() {
-		return super.hashCode();
+	protected int computeHashCode() {
+		return super.computeHashCode();
 	}
 
 	@Override

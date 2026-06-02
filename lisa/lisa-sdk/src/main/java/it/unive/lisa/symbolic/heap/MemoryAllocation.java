@@ -92,9 +92,9 @@ public class MemoryAllocation
 	}
 
 	@Override
-	public int hashCode() {
+	protected int computeHashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = super.computeHashCode();
 		result = prime * result + Objects.hash(anns, isStackAllocation);
 		return result;
 	}

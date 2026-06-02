@@ -132,9 +132,9 @@ public class TernaryExpression
 	}
 
 	@Override
-	public int hashCode() {
+	protected int computeHashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = super.computeHashCode();
 		result = prime * result + ((left == null) ? 0 : left.hashCode());
 		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
 		result = prime * result + ((right == null) ? 0 : right.hashCode());
