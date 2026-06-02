@@ -302,28 +302,46 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					.map(CFG.class::cast)
 					.collect(Collectors.toSet());
 			Set<Pair<KDepthToken<A>, CompoundState<A>>> entries = new HashSet<>();
-			for (Entry<ScopeId<A>, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
-				StatementStore<A> params = new StatementStore<>(entryState.bottom());
-				Expression[] parameters = starter.getParameters();
-				if (conf.usesOptimizedForwardFixpoint())
-					for (Expression actual : parameters)
-						params.put(
-								actual,
-								((OptimizedAnalyzedCFG<A, D>) res.getValue())
-										.getUnwindedAnalysisStateAfter(actual, conf));
-				else
-					for (Expression actual : parameters)
-						params.put(actual, res.getValue().getAnalysisStateAfter(actual));
+			// FixpointResults.get(CFG) returns null when the call site's host
+			// CFG was never analyzed — typically a stub CFG from a module that
+			// failed to parse, or a native/library CFG that the callgraph
+			// references but no fixpoint ever ran on. The two sibling call sites
+			// for this same method (this file line 519 and
+			// InliningAnalysis line 294) explicitly null-check the return value.
+			// Without the same guard here, an unanalyzed-host starter NPEs the
+			// entire post-fixpoint recursion-building pass, losing every artifact
+			// for the run even though the fixpoint converged.
+			//
+			// On IBM/mcp-context-forge this fires for starters hosted in
+			// mcpgateway.plugins.framework / mcpgateway.services.gateway_service:
+			// both have parse errors that produce stub CFGs (logged earlier as
+			// "[WARN] [PyLiSA] Failed to load project module ..."), and other
+			// modules call into them, registering call sites in the callgraph.
+			CFGResults<A> hostResults = results.get(starter.getCFG());
+			if (hostResults != null)
+				for (Entry<ScopeId<A>, AnalyzedCFG<A>> res : hostResults) {
+					StatementStore<A> params = new StatementStore<>(entryState.bottom());
+					Expression[] parameters = starter.getParameters();
+					if (conf.usesOptimizedForwardFixpoint())
+						for (Expression actual : parameters)
+							params.put(
+									actual,
+									((OptimizedAnalyzedCFG<A, D>) res.getValue())
+											.getUnwindedAnalysisStateAfter(actual, conf));
+					else
+						for (Expression actual : parameters)
+							params.put(actual, res.getValue().getAnalysisStateAfter(actual));
 
-				if (parameters.length == 0)
-					entries.add(Pair.of((KDepthToken<A>) res.getKey(),
-							CompoundState.of(res.getValue().getAnalysisStateBefore(starter), params)));
-				else
-					entries.add(
-							Pair.of(
-									(KDepthToken<A>) res.getKey(),
-									CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
-			}
+					if (parameters.length == 0)
+						entries.add(Pair.of((KDepthToken<A>) res.getKey(),
+								CompoundState.of(res.getValue().getAnalysisStateBefore(starter), params)));
+					else
+						entries.add(
+								Pair.of(
+										(KDepthToken<A>) res.getKey(),
+										CompoundState.of(params.getState(parameters[parameters.length - 1]),
+												params)));
+				}
 
 			for (CFG head : heads)
 				for (Pair<KDepthToken<A>, CompoundState<A>> entry : entries) {
