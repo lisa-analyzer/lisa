@@ -199,14 +199,26 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	public F lubAux(
 			F other)
 			throws SemanticException {
-		return lubLikeIncremental(other, (a, b) -> a.lub(b));
+		return functionalLift(
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
 	public F upchainAux(
 			F other)
 			throws SemanticException {
-		return lubLikeIncremental(other, (a, b) -> a.upchain(b));
+		return functionalLift(
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.upchain(o2));
 	}
 
 	@Override
@@ -239,7 +251,13 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	public F wideningAux(
 			F other)
 			throws SemanticException {
-		return lubLikeIncremental(other, (a, b) -> a.widening(b));
+		return functionalLift(
+				other,
+				lattice.bottom(),
+				this::lubKeys,
+				(
+						o1,
+						o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
 	/**
@@ -248,6 +266,17 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	 * the persistent backing in O(1) via {@link HamtBackedMap}) and only
 	 * mutates entries when the lifted value differs from the existing one,
 	 * leaving the rest of the map structurally untouched.
+	 *
+	 * <p><b>Currently not wired</b> as the default lub path: a single test
+	 * (MicroservicesTest.testPathTypedIntVsStrIsOverlap) fails with this
+	 * incremental form, suggesting some downstream code is sensitive to a
+	 * subtle semantic difference (likely related to the "skip when
+	 * equals" optimisation interacting with a state that has reference-
+	 * sensitive equality somewhere along its chain). Kept here as a
+	 * documented next step — re-wire once the failure mode is understood.
+	 * The bare {@link HamtBackedMap} swap in {@link #mkNewFunction} still
+	 * delivers the v12 fix (popScope/putState path); the incremental lub
+	 * is an additional speedup on top.
 	 * <p>
 	 * Soundness rests on the property {@code lifter(x, bottom) = x} which
 	 * holds for lub, upchain, and widening — the "missing" value on the

@@ -184,9 +184,20 @@ public final class HamtBackedMap<K, V> extends AbstractMap<K, V> {
 
 	@Override
 	public int hashCode() {
-		// Match java.util.Map's contract: sum of entry hashCodes.
-		// Vavr's hashCode is already structural; this delegates to it,
-		// which is consistent with Map.entrySet().stream().mapToInt(...).sum().
-		return backing.hashCode();
+		// java.util.Map contract (Map#hashCode javadoc): the hash code of a map
+		// is the SUM of the hash codes of each entry in its entrySet view.
+		// Vavr's HashMap.hashCode uses a polynomial accumulator instead, which
+		// produces a different value for the same logical contents. Mixing
+		// the two breaks equals-implies-same-hash for cross-type comparisons
+		// (e.g. when a HamtBackedMap is compared against a java.util.HashMap
+		// via Map.equals — equals returns true but hashCode would disagree).
+		// We therefore implement the spec form explicitly.
+		int h = 0;
+		for (Tuple2<K, V> t : backing) {
+			int keyHash = t._1 == null ? 0 : t._1.hashCode();
+			int valueHash = t._2 == null ? 0 : t._2.hashCode();
+			h += keyHash ^ valueHash;
+		}
+		return h;
 	}
 }
