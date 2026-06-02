@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -69,19 +70,26 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	 * Creates a new instance of the underlying function. The purpose of this
 	 * method is to provide a common function implementation to every subclass
 	 * that does not have implementation-specific requirements.
-	 * 
+	 * <p>
+	 * Backed by {@link HamtBackedMap}: when {@code other} is already a
+	 * {@link HamtBackedMap}, the returned map shares its persistent backing
+	 * in O(1) (vs the legacy O(n) {@code new HashMap<>(other)} copy).
+	 * Subsequent mutations to the returned map create new persistent paths
+	 * but do not alter {@code other}, preserving the "every state carries
+	 * its own lattice" invariant required by the fixpoint engine.
+	 *
 	 * @param other        an optional function to copy, can be {@code null}
 	 * @param preserveNull whether a null {@code other} should cause a
 	 *                         {@code null} return value or an empty function
-	 * 
+	 *
 	 * @return a new function
 	 */
 	public Map<K, V> mkNewFunction(
 			Map<K, V> other,
 			boolean preserveNull) {
 		if (other == null)
-			return preserveNull ? null : new HashMap<>();
-		return new HashMap<>(other);
+			return preserveNull ? null : new HamtBackedMap<>();
+		return new HamtBackedMap<>(other);
 	}
 
 	/**
@@ -191,26 +199,14 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	public F lubAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(
-				other,
-				lattice.bottom(),
-				this::lubKeys,
-				(
-						o1,
-						o2) -> o1 == null ? o2 : o1.lub(o2));
+		return lubLikeIncremental(other, (a, b) -> a.lub(b));
 	}
 
 	@Override
 	public F upchainAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(
-				other,
-				lattice.bottom(),
-				this::lubKeys,
-				(
-						o1,
-						o2) -> o1 == null ? o2 : o1.upchain(o2));
+		return lubLikeIncremental(other, (a, b) -> a.upchain(b));
 	}
 
 	@Override
@@ -243,13 +239,76 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	public F wideningAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(
-				other,
-				lattice.bottom(),
-				this::lubKeys,
-				(
-						o1,
-						o2) -> o1 == null ? o2 : o1.widening(o2));
+		return lubLikeIncremental(other, (a, b) -> a.widening(b));
+	}
+
+	/**
+	 * Lub-like incremental lift used by {@link #lubAux}, {@link #upchainAux}
+	 * and {@link #wideningAux}. Starts from {@code this.function} (sharing
+	 * the persistent backing in O(1) via {@link HamtBackedMap}) and only
+	 * mutates entries when the lifted value differs from the existing one,
+	 * leaving the rest of the map structurally untouched.
+	 * <p>
+	 * Soundness rests on the property {@code lifter(x, bottom) = x} which
+	 * holds for lub, upchain, and widening — the "missing" value on the
+	 * `other` side is the underlying lattice bottom, so a key present only
+	 * in {@code this} lifts to {@code thisV} and can be left in place. Keys
+	 * present only in {@code other} are lifted as {@code lifter(bottom,
+	 * otherV) = otherV} and added to the accumulator.
+	 * <p>
+	 * The savings are largest during fixpoint settling — when most lubs
+	 * produce values equal to those already stored, this method does an
+	 * O(min(|this|, |other|)) walk with zero allocations on the map
+	 * skeleton, instead of the O(|this|+|other|) rebuild done by the
+	 * generic {@link #functionalLift}.
+	 *
+	 * @param other  the other lattice
+	 * @param lifter the value-side combiner (must satisfy lifter(x, bottom)
+	 *                   = x)
+	 *
+	 * @return the lifted lattice
+	 *
+	 * @throws SemanticException if the value lifter throws
+	 */
+	@SuppressWarnings("unchecked")
+	protected F lubLikeIncremental(
+			F other,
+			FunctionalLift<V> lifter)
+			throws SemanticException {
+		// Bottom-on-one-side fast paths: lub(this, bot-only) = this, lub(bot-only, other) = other.
+		if (other.function == null && other.lattice.isBottom())
+			return (F) this;
+		if (this.function == null && this.lattice.isBottom())
+			return other;
+
+		// Share this.function's persistent backing in O(1).
+		Map<K, V> acc = mkNewFunction(this.function, false);
+		V bottom = lattice.bottom();
+
+		if (other.function != null) {
+			for (Map.Entry<K, V> e : other.function.entrySet()) {
+				K key = e.getKey();
+				V otherV = e.getValue();
+				V thisV;
+				if (acc.containsKey(key))
+					thisV = acc.get(key);
+				else
+					thisV = bottom;
+				V lifted;
+				try {
+					lifted = lifter.lift(thisV, otherV);
+				} catch (SemanticException se) {
+					throw new SemanticException("Exception during incremental lub-like lift of key '" + key + "'", se);
+				}
+				// Skip when the lifted value equals what's already stored —
+				// this is the entire point of the incremental form. Reference
+				// equality first (free), then equals (cheap with the
+				// SymbolicExpression hashCode cache + Vavr structural equals).
+				if (lifted != thisV && !Objects.equals(lifted, thisV))
+					acc.put(key, lifted);
+			}
+		}
+		return mk(lattice.lub(other.lattice), acc);
 	}
 
 	@Override

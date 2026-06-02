@@ -30,6 +30,12 @@ dependencies {
     // time handling
     api 'joda-time:joda-time:2.10.14'
 
+    // persistent collections (HAMT) for FunctionalLattice path-copy semantics.
+    // Vavr's io.vavr.collection.HashMap is a CHAMP-style HAMT: structural
+    // sharing on put/remove (O(log32 n) vs java.util.HashMap's O(n) copy),
+    // and the same backing for incremental lub when keys converge.
+    api 'io.vavr:vavr:0.10.4'
+
     // testing
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
     testImplementation 'org.reflections:reflections:0.9.12'
