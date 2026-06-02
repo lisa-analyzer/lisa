@@ -199,26 +199,14 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	public F lubAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(
-				other,
-				lattice.bottom(),
-				this::lubKeys,
-				(
-						o1,
-						o2) -> o1 == null ? o2 : o1.lub(o2));
+		return lubLikeIncremental(other, (a, b) -> a.lub(b));
 	}
 
 	@Override
 	public F upchainAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(
-				other,
-				lattice.bottom(),
-				this::lubKeys,
-				(
-						o1,
-						o2) -> o1 == null ? o2 : o1.upchain(o2));
+		return lubLikeIncremental(other, (a, b) -> a.upchain(b));
 	}
 
 	@Override
@@ -251,13 +239,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	public F wideningAux(
 			F other)
 			throws SemanticException {
-		return functionalLift(
-				other,
-				lattice.bottom(),
-				this::lubKeys,
-				(
-						o1,
-						o2) -> o1 == null ? o2 : o1.widening(o2));
+		return lubLikeIncremental(other, (a, b) -> a.widening(b));
 	}
 
 	/**
