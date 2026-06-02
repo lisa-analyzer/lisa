@@ -302,27 +302,44 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					.map(CFG.class::cast)
 					.collect(Collectors.toSet());
 			Set<Pair<KDepthToken<A>, CompoundState<A>>> entries = new HashSet<>();
-			for (Entry<ScopeId<A>, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
-				StatementStore<A> params = new StatementStore<>(entryState.bottom());
-				Expression[] parameters = starter.getParameters();
-				if (conf.usesOptimizedForwardFixpoint())
-					for (Expression actual : parameters)
-						params.put(
-								actual,
-								((OptimizedAnalyzedCFG<A, D>) res.getValue())
-										.getUnwindedAnalysisStateAfter(actual, conf));
-				else
-					for (Expression actual : parameters)
-						params.put(actual, res.getValue().getAnalysisStateAfter(actual));
+			try {
+				for (Entry<ScopeId<A>, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
+					StatementStore<A> params = new StatementStore<>(entryState.bottom());
+					Expression[] parameters = starter.getParameters();
+					if (conf.usesOptimizedForwardFixpoint())
+						for (Expression actual : parameters)
+							params.put(
+									actual,
+									((OptimizedAnalyzedCFG<A, D>) res.getValue())
+											.getUnwindedAnalysisStateAfter(actual, conf));
+					else
+						for (Expression actual : parameters)
+							params.put(actual, res.getValue().getAnalysisStateAfter(actual));
 
-				if (parameters.length == 0)
-					entries.add(Pair.of((KDepthToken<A>) res.getKey(),
-							CompoundState.of(res.getValue().getAnalysisStateBefore(starter), params)));
-				else
-					entries.add(
-							Pair.of(
-									(KDepthToken<A>) res.getKey(),
-									CompoundState.of(params.getState(parameters[parameters.length - 1]), params)));
+					if (parameters.length == 0)
+						entries.add(Pair.of((KDepthToken<A>) res.getKey(),
+								CompoundState.of(res.getValue().getAnalysisStateBefore(starter), params)));
+					else
+						entries.add(
+								Pair.of(
+										(KDepthToken<A>) res.getKey(),
+										CompoundState.of(params.getState(parameters[parameters.length - 1]),
+												params)));
+				}
+			} catch (IllegalArgumentException notInGraph) {
+				// Defensive: starter may be a synthetic call site (e.g. the
+				// module-init "$init()" calls pylisa injects to model `import`
+				// side-effects), in which case it is associated with a CFG by
+				// callgraph metadata but is not actually a node within that
+				// CFG's NodeList. predecessorsOf/getAnalysisStateBefore then
+				// throws and abort the entire recursion-building pass — which
+				// in turn loses every artifact for the run, even though the
+				// fixpoint itself converged. Skip this starter and move on;
+				// downstream consumers see an empty recursion for it rather
+				// than a complete analysis failure.
+				LOG.warn("Skipping recursion starter '" + starter
+						+ "' for which the host CFG does not contain the call site: "
+						+ notInGraph.getMessage());
 			}
 
 			for (CFG head : heads)
