@@ -2,6 +2,8 @@ package it.unive.lisa.lattices;
 
 import io.vavr.Tuple2;
 import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -161,6 +163,64 @@ public final class HamtBackedMap<K, V> extends AbstractMap<K, V> {
 		for (Tuple2<K, V> t : backing)
 			set.add(new SimpleImmutableEntry<>(t._1, t._2));
 		return set;
+	}
+
+	/**
+	 * Returns a lazy {@link Set} view over the keys of the persistent
+	 * map. Iteration walks the immutable HAMT trie node by node and
+	 * yields each key exactly once without materialising any
+	 * intermediate collection. {@link #size}, {@link #isEmpty},
+	 * {@link #contains}, and other {@link AbstractSet}-derived
+	 * operations delegate to constant-time operations on the backing
+	 * trie. The returned set is read-only: structural mutations are
+	 * not propagated to the persistent map.
+	 * <p>
+	 * Overriding the {@link AbstractMap#keySet} default — which derives
+	 * the key set from {@link #entrySet} — avoids constructing a
+	 * {@link LinkedHashSet} of {@link SimpleImmutableEntry} objects when
+	 * a caller only needs to enumerate domain elements.
+	 */
+	@Override
+	public Set<K> keySet() {
+		return new AbstractSet<K>() {
+
+			@Override
+			public Iterator<K> iterator() {
+				Iterator<Tuple2<K, V>> tuples = backing.iterator();
+				return new Iterator<K>() {
+
+					@Override
+					public boolean hasNext() {
+						return tuples.hasNext();
+					}
+
+					@Override
+					public K next() {
+						return tuples.next()._1;
+					}
+				};
+			}
+
+			@Override
+			public int size() {
+				return backing.size();
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return backing.isEmpty();
+			}
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public boolean contains(Object o) {
+				try {
+					return backing.containsKey((K) o);
+				} catch (ClassCastException ignored) {
+					return false;
+				}
+			}
+		};
 	}
 
 	@Override
