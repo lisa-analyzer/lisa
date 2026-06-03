@@ -138,12 +138,33 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 		ExpressionSet[] params = new ExpressionSet[actuals.length];
 		for (int i = 0; i < params.length; i++)
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getExecutionExpressions();
-		// it should be enough to send values to top, retaining all type
-		// information
-		// TODO what about heap?
+		// Send values AND the heap environment to top, retaining only the
+		// type information. The heap top-ing is the load-bearing change for
+		// recursion-solver scalability on codebases with deep transitive
+		// import chains (observed on IBM/mcp-context-forge): each call
+		// inside the recursion goes through pushScope, whose cost is linear
+		// in the number of identifiers in the heap environment. Preserving
+		// the recursion entry's heap makes pushScope copy a fat HAMT
+		// through every call in the recursion body — at IBM scale this
+		// exhausts 64g. Top-ing the heap drops pushScope to a constant-time
+		// operation (an empty / top environment has nothing to lift).
+		//
+		// Trade-off: any base-case-detecting branch that reads an
+		// object's field through the heap (e.g. {@code if obj.x: ...})
+		// loses its concrete heap value here and returns top — both
+		// branches get explored. This is sound (top always is) but less
+		// precise. Analyses that need heap precision inside the recursive
+		// function's base-case detection (taint through fields, for
+		// instance) should accept the precision loss in exchange for the
+		// scalability win; the alternative — preserving the entry-state
+		// heap — does not converge in bounded memory on real-world
+		// codebases. Module-top decorator analyses (the
+		// network/routing-defect line of work this checker family was
+		// built for) are unaffected, since the heap state for those is
+		// computed at module-level statements outside any recursion.
 		return start.forwardSemanticsAux(
 				this,
-				entryState.postState.withTopValues(),
+				entryState.postState.withTopValues().withTopMemory(),
 				params,
 				entryState.intermediateStates);
 	}
