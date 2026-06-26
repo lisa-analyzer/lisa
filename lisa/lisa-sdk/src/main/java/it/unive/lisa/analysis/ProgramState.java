@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 /**
  * The abstract program state at a given program point. A program state is
  * composed by an {@link AbstractLattice} modeling the abstract values of
- * program variables and heap locations, and a collection of
+ * program variables and memory locations, and a collection of
  * {@link SymbolicExpression}s keeping trace of what has been evaluated and is
  * available for later computations, but is not stored in memory (i.e. the
  * stack). Additionally, it maintains arbitrary information that can be used to

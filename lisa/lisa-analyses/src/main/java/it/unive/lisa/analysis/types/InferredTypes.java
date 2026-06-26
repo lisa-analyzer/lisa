@@ -14,8 +14,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryLocation;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
@@ -53,8 +53,8 @@ public class InferredTypes
 			SemanticOracle oracle)
 			throws SemanticException {
 		TypeSystem types = pp.getProgram().getTypes();
-		if (id instanceof HeapLocation && ((HeapLocation) id).isAllocation())
-			// if this is a heap location that is being allocated,
+		if (id instanceof MemoryLocation && ((MemoryLocation) id).isAllocation())
+			// if this is a memory location that is being allocated,
 			// its types are exactly the static type
 			return new TypeSet(types, id.getStaticType());
 		if (id instanceof MemoryPointer) {

@@ -14,7 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * A strategy for scoping around calls, i.e., converting the pre-state of a call
  * to a valid entry state for one of its targets, and converting state at return
  * points of a CFG to post-state of the call. Implementers have a degree of
- * freedom over what to scope: all variables, some variables, heap locations,
+ * freedom over what to scope: all variables, some variables, memory locations,
  * ...
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

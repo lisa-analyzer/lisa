@@ -25,7 +25,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.SimpleAbstractState;
-import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.memory.Monolith;
 import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;

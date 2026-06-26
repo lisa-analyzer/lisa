@@ -19,7 +19,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -35,7 +35,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -51,7 +51,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -67,7 +67,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
@@ -83,7 +83,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -99,7 +99,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -115,7 +115,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -131,7 +131,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
@@ -147,7 +147,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -164,7 +164,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -181,7 +181,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -198,7 +198,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
@@ -215,7 +215,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -232,7 +232,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -249,7 +249,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -266,7 +266,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
@@ -283,7 +283,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -299,7 +299,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -315,7 +315,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -331,7 +331,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
@@ -347,7 +347,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -363,7 +363,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -379,7 +379,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -395,7 +395,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
@@ -411,7 +411,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -427,7 +427,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -443,7 +443,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -459,7 +459,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
@@ -475,7 +475,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -491,7 +491,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -507,7 +507,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -523,7 +523,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
@@ -539,7 +539,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -555,7 +555,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
@@ -571,7 +571,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
@@ -587,7 +587,7 @@ public class RecursionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);

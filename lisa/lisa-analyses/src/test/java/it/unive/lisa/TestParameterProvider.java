@@ -19,12 +19,12 @@ import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
 import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
-import it.unive.lisa.analysis.heap.HeapLattice;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.memory.MemoryLattice;
+import it.unive.lisa.analysis.memory.MonolithicMemory;
 import it.unive.lisa.analysis.nonRedundantPowerset.NonRedundantSetDomainLattice;
 import it.unive.lisa.analysis.nonRedundantPowerset.NonRedundantSetLattice;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
+import it.unive.lisa.analysis.nonrelational.memory.MemoryEnvironment;
+import it.unive.lisa.analysis.nonrelational.memory.NonRelationalMemoryDomain;
 import it.unive.lisa.analysis.nonrelational.type.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
@@ -56,12 +56,12 @@ import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.SimpleAbstractState;
-import it.unive.lisa.lattices.SingleHeapLattice;
+import it.unive.lisa.lattices.SingleMemoryLattice;
 import it.unive.lisa.lattices.SingleTypeLattice;
 import it.unive.lisa.lattices.SingleValueLattice;
-import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
 import it.unive.lisa.lattices.informationFlow.SimpleTaint;
+import it.unive.lisa.lattices.memory.Monolith;
 import it.unive.lisa.lattices.numeric.NonRedundantIntervalSet;
 import it.unive.lisa.lattices.numeric.SignLattice;
 import it.unive.lisa.lattices.symbolic.DefiniteIdSet;
@@ -160,11 +160,11 @@ public class TestParameterProvider {
 
 	public static class SampleNRHD
 			implements
-			NonRelationalHeapDomain<SingleHeapLattice> {
+			NonRelationalMemoryDomain<SingleMemoryLattice> {
 
 		@Override
 		public ExpressionSet rewrite(
-				HeapEnvironment<SingleHeapLattice> state,
+				MemoryEnvironment<SingleMemoryLattice> state,
 				SymbolicExpression expression,
 				ProgramPoint pp,
 				SemanticOracle oracle)
@@ -174,7 +174,7 @@ public class TestParameterProvider {
 
 		@Override
 		public Satisfiability alias(
-				HeapEnvironment<SingleHeapLattice> state,
+				MemoryEnvironment<SingleMemoryLattice> state,
 				SymbolicExpression x,
 				SymbolicExpression y,
 				ProgramPoint pp,
@@ -185,7 +185,7 @@ public class TestParameterProvider {
 
 		@Override
 		public Satisfiability isReachableFrom(
-				HeapEnvironment<SingleHeapLattice> state,
+				MemoryEnvironment<SingleMemoryLattice> state,
 				SymbolicExpression x,
 				SymbolicExpression y,
 				ProgramPoint pp,
@@ -195,13 +195,13 @@ public class TestParameterProvider {
 		}
 
 		@Override
-		public HeapEnvironment<SingleHeapLattice> makeLattice() {
-			return new HeapEnvironment<>(SingleHeapLattice.SINGLETON);
+		public MemoryEnvironment<SingleMemoryLattice> makeLattice() {
+			return new MemoryEnvironment<>(SingleMemoryLattice.SINGLETON);
 		}
 
 		@Override
-		public Pair<HeapEnvironment<SingleHeapLattice>, List<HeapReplacement>> assign(
-				HeapEnvironment<SingleHeapLattice> state,
+		public Pair<MemoryEnvironment<SingleMemoryLattice>, List<MemoryReplacement>> assign(
+				MemoryEnvironment<SingleMemoryLattice> state,
 				Identifier id,
 				SymbolicExpression expression,
 				ProgramPoint pp,
@@ -211,8 +211,8 @@ public class TestParameterProvider {
 		}
 
 		@Override
-		public Pair<HeapEnvironment<SingleHeapLattice>, List<HeapReplacement>> smallStepSemantics(
-				HeapEnvironment<SingleHeapLattice> state,
+		public Pair<MemoryEnvironment<SingleMemoryLattice>, List<MemoryReplacement>> smallStepSemantics(
+				MemoryEnvironment<SingleMemoryLattice> state,
 				SymbolicExpression expression,
 				ProgramPoint pp,
 				SemanticOracle oracle)
@@ -221,8 +221,8 @@ public class TestParameterProvider {
 		}
 
 		@Override
-		public Pair<HeapEnvironment<SingleHeapLattice>, List<HeapReplacement>> assume(
-				HeapEnvironment<SingleHeapLattice> state,
+		public Pair<MemoryEnvironment<SingleMemoryLattice>, List<MemoryReplacement>> assume(
+				MemoryEnvironment<SingleMemoryLattice> state,
 				SymbolicExpression expression,
 				ProgramPoint src,
 				ProgramPoint dest,
@@ -232,28 +232,28 @@ public class TestParameterProvider {
 		}
 
 		@Override
-		public SingleHeapLattice eval(
-				HeapEnvironment<SingleHeapLattice> environment,
+		public SingleMemoryLattice eval(
+				MemoryEnvironment<SingleMemoryLattice> environment,
 				SymbolicExpression expression,
 				ProgramPoint pp,
 				SemanticOracle oracle)
 				throws SemanticException {
-			return SingleHeapLattice.SINGLETON;
+			return SingleMemoryLattice.SINGLETON;
 		}
 
 		@Override
-		public SingleHeapLattice fixedVariable(
+		public SingleMemoryLattice fixedVariable(
 				Identifier id,
 				ProgramPoint pp,
 				SemanticOracle oracle)
 				throws SemanticException {
-			return SingleHeapLattice.SINGLETON;
+			return SingleMemoryLattice.SINGLETON;
 		}
 
 		@Override
-		public SingleHeapLattice unknownValue(
+		public SingleMemoryLattice unknownValue(
 				Identifier id) {
-			return SingleHeapLattice.SINGLETON;
+			return SingleMemoryLattice.SINGLETON;
 		}
 
 		@Override
@@ -454,7 +454,8 @@ public class TestParameterProvider {
 					cg,
 					WorstCasePolicy.INSTANCE,
 					null,
-					new Analysis<>(new SimpleAbstractDomain<>(new MonolithicHeap(), new Sign(), new InferredTypes())));
+					new Analysis<>(
+							new SimpleAbstractDomain<>(new MonolithicMemory(), new Sign(), new InferredTypes())));
 		} catch (CallGraphConstructionException | InterproceduralAnalysisException e) {
 			fail("Unable to instantiate test parameters: " + e.getMessage());
 		}
@@ -632,9 +633,9 @@ public class TestParameterProvider {
 		if (param == BaseNonRelationalTypeDomain[].class)
 			return (R) new BaseNonRelationalTypeDomain[0];
 
-		// heap domains
-		if (param == HeapEnvironment.class)
-			return (R) new HeapEnvironment<>(SingleHeapLattice.SINGLETON);
+		// memory domains
+		if (param == MemoryEnvironment.class)
+			return (R) new MemoryEnvironment<>(SingleMemoryLattice.SINGLETON);
 		if (param == SampleNRHD.class)
 			return (R) new SampleNRHD();
 
@@ -658,8 +659,8 @@ public class TestParameterProvider {
 			return (R) Monolith.SINGLETON;
 		if (clazz == NonInterferenceValue.class)
 			return (R) NonInterferenceValue.HIGH_LOW;
-		if (clazz == SingleHeapLattice.class)
-			return (R) SingleHeapLattice.SINGLETON;
+		if (clazz == SingleMemoryLattice.class)
+			return (R) SingleMemoryLattice.SINGLETON;
 		if (clazz == SingleTypeLattice.class)
 			return (R) SingleTypeLattice.SINGLETON;
 		if (clazz == SingleValueLattice.class)
@@ -694,8 +695,8 @@ public class TestParameterProvider {
 		// lattice structures
 		if (root == ValueEnvironment.class || param == ValueLattice.class)
 			return (R) SingleValueLattice.SINGLETON;
-		if (root == HeapEnvironment.class || param == HeapLattice.class)
-			return (R) SingleHeapLattice.SINGLETON;
+		if (root == MemoryEnvironment.class || param == MemoryLattice.class)
+			return (R) SingleMemoryLattice.SINGLETON;
 		if (root == TypeEnvironment.class || param == TypeLattice.class)
 			return (R) SingleTypeLattice.SINGLETON;
 		if (param == AbstractLattice.class)

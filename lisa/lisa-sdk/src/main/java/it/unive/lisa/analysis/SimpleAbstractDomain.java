@@ -8,13 +8,13 @@ import it.unive.lisa.analysis.events.DomainSatisfiesEnd;
 import it.unive.lisa.analysis.events.DomainSatisfiesStart;
 import it.unive.lisa.analysis.events.DomainSmallStepEnd;
 import it.unive.lisa.analysis.events.DomainSmallStepStart;
-import it.unive.lisa.analysis.events.HeapRewriteEnd;
-import it.unive.lisa.analysis.events.HeapRewriteStart;
+import it.unive.lisa.analysis.events.MemoryRewriteEnd;
+import it.unive.lisa.analysis.events.MemoryRewriteStart;
 import it.unive.lisa.analysis.events.SADSubsEnd;
 import it.unive.lisa.analysis.events.SADSubsStart;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
-import it.unive.lisa.analysis.heap.HeapLattice;
+import it.unive.lisa.analysis.memory.MemoryDomain;
+import it.unive.lisa.analysis.memory.MemoryDomain.MemoryReplacement;
+import it.unive.lisa.analysis.memory.MemoryLattice;
 import it.unive.lisa.analysis.type.TypeDomain;
 import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -25,7 +25,7 @@ import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
@@ -34,31 +34,31 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * An abstract domain that combines a heap, a value, and a type domain into a
+ * An abstract domain that combines a memory, a value, and a type domain into a
  * single abstract domain of type {@link SimpleAbstractState}.<br>
  * <br>
- * The interaction between heap and value/type domains follows the one defined
+ * The interaction between memory and value/type domains follows the one defined
  * <a href=
  * "https://www.sciencedirect.com/science/article/pii/S0304397516300299">in this
  * paper</a>.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <H> the type of {@link HeapLattice} embedded in the states produced by
- *                this domain
+ * @param <M> the type of {@link MemoryLattice} embedded in the states produced
+ *                by this domain
  * @param <V> the type of {@link ValueLattice} embedded in the states produced
  *                by this domain
  * @param <T> the type of {@link TypeLattice} embedded in the states produced by
  *                this domain
  */
-public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLattice<V>, T extends TypeLattice<T>>
+public class SimpleAbstractDomain<M extends MemoryLattice<M>, V extends ValueLattice<V>, T extends TypeLattice<T>>
 		implements
-		AbstractDomain<SimpleAbstractState<H, V, T>> {
+		AbstractDomain<SimpleAbstractState<M, V, T>> {
 
 	/**
-	 * The heap domain used by this abstract domain.
+	 * The memory domain used by this abstract domain.
 	 */
-	public final HeapDomain<H> heapDomain;
+	public final MemoryDomain<M> memoryDomain;
 
 	/**
 	 * The value domain used by this abstract domain.
@@ -74,23 +74,23 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 
 	/**
 	 * Builds a new abstract domain. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * no-op ones (i.e., {@link NoOpMemory}, {@link NoOpValues}, and
 	 * {@link NoOpTypes}).
 	 * 
-	 * @param heapDomain the domain containing information regarding heap
-	 *                       structures
+	 * @param memoryDomain the domain containing information regarding memory
+	 *                         structures
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractDomain(
-			HeapDomain<H> heapDomain) {
-		this.heapDomain = heapDomain;
+			MemoryDomain<M> memoryDomain) {
+		this.memoryDomain = memoryDomain;
 		this.valueDomain = (ValueDomain<V>) new NoOpValues();
 		this.typeDomain = (TypeDomain<T>) new NoOpTypes();
 	}
 
 	/**
 	 * Builds a new abstract domain. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * no-op ones (i.e., {@link NoOpMemory}, {@link NoOpValues}, and
 	 * {@link NoOpTypes}).
 	 * 
 	 * @param valueDomain the domain containing information regarding values of
@@ -99,14 +99,14 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractDomain(
 			ValueDomain<V> valueDomain) {
-		this.heapDomain = (HeapDomain<H>) new NoOpHeap();
+		this.memoryDomain = (MemoryDomain<M>) new NoOpMemory();
 		this.valueDomain = valueDomain;
 		this.typeDomain = (TypeDomain<T>) new NoOpTypes();
 	}
 
 	/**
 	 * Builds a new abstract domain. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * no-op ones (i.e., {@link NoOpMemory}, {@link NoOpValues}, and
 	 * {@link NoOpTypes}).
 	 * 
 	 * @param typeDomain the domain containing information regarding runtime
@@ -116,53 +116,54 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractDomain(
 			TypeDomain<T> typeDomain) {
-		this.heapDomain = (HeapDomain<H>) new NoOpHeap();
+		this.memoryDomain = (MemoryDomain<M>) new NoOpMemory();
 		this.valueDomain = (ValueDomain<V>) new NoOpValues();
 		this.typeDomain = typeDomain;
 	}
 
 	/**
 	 * Builds a new abstract domain. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * no-op ones (i.e., {@link NoOpMemory}, {@link NoOpValues}, and
 	 * {@link NoOpTypes}).
 	 * 
-	 * @param heapDomain  the domain containing information regarding heap
-	 *                        structures
-	 * @param valueDomain the domain containing information regarding values of
-	 *                        program variables and concretized memory locations
+	 * @param memoryDomain the domain containing information regarding memory
+	 *                         structures
+	 * @param valueDomain  the domain containing information regarding values of
+	 *                         program variables and concretized memory
+	 *                         locations
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractDomain(
-			HeapDomain<H> heapDomain,
+			MemoryDomain<M> memoryDomain,
 			ValueDomain<V> valueDomain) {
-		this.heapDomain = heapDomain;
+		this.memoryDomain = memoryDomain;
 		this.valueDomain = valueDomain;
 		this.typeDomain = (TypeDomain<T>) new NoOpTypes();
 	}
 
 	/**
 	 * Builds a new abstract domain. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * no-op ones (i.e., {@link NoOpMemory}, {@link NoOpValues}, and
 	 * {@link NoOpTypes}).
 	 * 
-	 * @param heapDomain the domain containing information regarding heap
-	 *                       structures
-	 * @param typeDomain the domain containing information regarding runtime
-	 *                       types of program variables and concretized memory
-	 *                       locations
+	 * @param memoryDomain the domain containing information regarding memory
+	 *                         structures
+	 * @param typeDomain   the domain containing information regarding runtime
+	 *                         types of program variables and concretized memory
+	 *                         locations
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleAbstractDomain(
-			HeapDomain<H> heapDomain,
+			MemoryDomain<M> memoryDomain,
 			TypeDomain<T> typeDomain) {
-		this.heapDomain = heapDomain;
+		this.memoryDomain = memoryDomain;
 		this.valueDomain = (ValueDomain<V>) new NoOpValues();
 		this.typeDomain = typeDomain;
 	}
 
 	/**
 	 * Builds a new abstract domain. The missing domains are set to the default
-	 * no-op ones (i.e., {@link NoOpHeap}, {@link NoOpValues}, and
+	 * no-op ones (i.e., {@link NoOpMemory}, {@link NoOpValues}, and
 	 * {@link NoOpTypes}).
 	 * 
 	 * @param valueDomain the domain containing information regarding values of
@@ -175,24 +176,24 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	public SimpleAbstractDomain(
 			ValueDomain<V> valueDomain,
 			TypeDomain<T> typeDomain) {
-		this.heapDomain = (HeapDomain<H>) new NoOpHeap();
+		this.memoryDomain = (MemoryDomain<M>) new NoOpMemory();
 		this.valueDomain = valueDomain;
 		this.typeDomain = typeDomain;
 	}
 
 	/**
-	 * Builds a new simple abstract domain that combines the given heap, value,
-	 * and type domains.
+	 * Builds a new simple abstract domain that combines the given memory,
+	 * value, and type domains.
 	 * 
-	 * @param heapDomain  the heap domain used by this abstract domain
-	 * @param valueDomain the value domain used by this abstract domain
-	 * @param typeDomain  the type domain used by this abstract domain
+	 * @param memoryDomain the memory domain used by this abstract domain
+	 * @param valueDomain  the value domain used by this abstract domain
+	 * @param typeDomain   the type domain used by this abstract domain
 	 */
 	public SimpleAbstractDomain(
-			HeapDomain<H> heapDomain,
+			MemoryDomain<M> memoryDomain,
 			ValueDomain<V> valueDomain,
 			TypeDomain<T> typeDomain) {
-		this.heapDomain = heapDomain;
+		this.memoryDomain = memoryDomain;
 		this.valueDomain = valueDomain;
 		this.typeDomain = typeDomain;
 	}
@@ -204,7 +205,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	}
 
 	private void applySubstitution(
-			List<HeapReplacement> subs,
+			List<MemoryReplacement> subs,
 			MutableOracle mo,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -215,7 +216,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (events != null)
 				events.post(new SADSubsStart<>(v0, t0, subs));
 
-			for (HeapReplacement repl : subs) {
+			for (MemoryReplacement repl : subs) {
 				T t = mo.type.applyReplacement(repl, pp);
 				V v = mo.value.applyReplacement(repl, pp);
 				// we update the oracle after both replacements have been
@@ -230,8 +231,8 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> assign(
-			SimpleAbstractState<H, V, T> state,
+	public SimpleAbstractState<M, V, T> assign(
+			SimpleAbstractState<M, V, T> state,
 			Identifier id,
 			SymbolicExpression expression,
 			ProgramPoint pp)
@@ -244,10 +245,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
 			if (events != null)
-				events.post(new DomainAssignStart<>(heapDomain.getClass(), state.heapState, id, expression));
-			mo.heap = heapDomain.assign(mo.heap, id, expression, pp, mo).getLeft();
+				events.post(new DomainAssignStart<>(memoryDomain.getClass(), state.memoryState, id, expression));
+			mo.memory = memoryDomain.assign(mo.memory, id, expression, pp, mo).getLeft();
 			if (events != null) {
-				events.post(new DomainAssignEnd<>(heapDomain.getClass(), pp, state.heapState, mo.heap, id, expression));
+				events.post(new DomainAssignEnd<>(memoryDomain.getClass(), pp, state.memoryState, mo.memory, id,
+						expression));
 				events.post(new DomainAssignStart<>(typeDomain.getClass(), state.typeState, id, expression));
 			}
 			mo.type = typeDomain.assign(mo.type, id, ve, pp, mo);
@@ -260,33 +262,34 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(
 						new DomainAssignEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, id, expression));
 
-			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			SimpleAbstractState<M, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
 				events.post(new DomainAssignEnd<>(getClass(), pp, state, res, id, expression));
 			return res;
 		}
 
 		if (events != null)
-			events.post(new DomainAssignStart<>(heapDomain.getClass(), state.heapState, id, expression));
-		Pair<H, List<HeapReplacement>> heap = heapDomain.assign(mo.heap, id, expression, pp, mo);
-		mo.heap = heap.getLeft();
+			events.post(new DomainAssignStart<>(memoryDomain.getClass(), state.memoryState, id, expression));
+		Pair<M, List<MemoryReplacement>> memory = memoryDomain.assign(mo.memory, id, expression, pp, mo);
+		mo.memory = memory.getLeft();
 
 		if (events != null) {
-			events.post(new DomainAssignEnd<>(heapDomain.getClass(), pp, state.heapState, mo.heap, id, expression));
-			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
+			events.post(
+					new DomainAssignEnd<>(memoryDomain.getClass(), pp, state.memoryState, mo.memory, id, expression));
+			events.post(new MemoryRewriteStart<>(memoryDomain.getClass(), mo.memory, expression));
 		}
 
-		ExpressionSet exprs = heapDomain.rewrite(mo.heap, expression, pp, mo);
+		ExpressionSet exprs = memoryDomain.rewrite(mo.memory, expression, pp, mo);
 		if (events != null)
-			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
+			events.post(new MemoryRewriteEnd<>(memoryDomain.getClass(), mo.memory, expression, exprs));
 		if (exprs.isEmpty()) {
-			SimpleAbstractState<H, V, T> res = state.bottom();
+			SimpleAbstractState<M, V, T> res = state.bottom();
 			if (events != null)
 				events.post(new DomainAssignEnd<>(getClass(), pp, state, res, id, expression));
 			return res;
 		}
 
-		applySubstitution(heap.getRight(), mo, pp);
+		applySubstitution(memory.getRight(), mo, pp);
 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
@@ -304,7 +307,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (events != null)
 				events.post(new DomainAssignEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, id, expr));
 
-			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			SimpleAbstractState<M, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
 				events.post(new DomainAssignEnd<>(getClass(), pp, state, res, id, expression));
 			return res;
@@ -333,15 +336,15 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			mo.type = t;
 		}
 
-		SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+		SimpleAbstractState<M, V, T> res = new SimpleAbstractState<>(mo.memory, valueRes, typeRes);
 		if (events != null)
 			events.post(new DomainAssignEnd<>(getClass(), pp, state, res, id, expression));
 		return res;
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> smallStepSemantics(
-			SimpleAbstractState<H, V, T> state,
+	public SimpleAbstractState<M, V, T> smallStepSemantics(
+			SimpleAbstractState<M, V, T> state,
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -353,10 +356,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
 			if (events != null)
-				events.post(new DomainSmallStepStart<>(heapDomain.getClass(), state.heapState, expression));
-			mo.heap = heapDomain.smallStepSemantics(mo.heap, expression, pp, mo).getLeft();
+				events.post(new DomainSmallStepStart<>(memoryDomain.getClass(), state.memoryState, expression));
+			mo.memory = memoryDomain.smallStepSemantics(mo.memory, expression, pp, mo).getLeft();
 			if (events != null) {
-				events.post(new DomainSmallStepEnd<>(heapDomain.getClass(), pp, state.heapState, mo.heap, expression));
+				events.post(new DomainSmallStepEnd<>(memoryDomain.getClass(), pp, state.memoryState, mo.memory,
+						expression));
 				events.post(new DomainSmallStepStart<>(typeDomain.getClass(), state.typeState, expression));
 			}
 			mo.type = typeDomain.smallStepSemantics(mo.type, ve, pp, mo);
@@ -369,33 +373,34 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				events.post(
 						new DomainSmallStepEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, expression));
 
-			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			SimpleAbstractState<M, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
 				events.post(new DomainSmallStepEnd<>(getClass(), pp, state, res, expression));
 			return res;
 		}
 
 		if (events != null)
-			events.post(new DomainSmallStepStart<>(heapDomain.getClass(), state.heapState, expression));
-		Pair<H, List<HeapReplacement>> heap = heapDomain.smallStepSemantics(mo.heap, expression, pp, mo);
-		mo.heap = heap.getLeft();
+			events.post(new DomainSmallStepStart<>(memoryDomain.getClass(), state.memoryState, expression));
+		Pair<M, List<MemoryReplacement>> memory = memoryDomain.smallStepSemantics(mo.memory, expression, pp, mo);
+		mo.memory = memory.getLeft();
 
 		if (events != null) {
-			events.post(new DomainSmallStepEnd<>(heapDomain.getClass(), pp, state.heapState, mo.heap, expression));
-			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
+			events.post(
+					new DomainSmallStepEnd<>(memoryDomain.getClass(), pp, state.memoryState, mo.memory, expression));
+			events.post(new MemoryRewriteStart<>(memoryDomain.getClass(), mo.memory, expression));
 		}
 
-		ExpressionSet exprs = heapDomain.rewrite(heap.getLeft(), expression, pp, mo);
+		ExpressionSet exprs = memoryDomain.rewrite(memory.getLeft(), expression, pp, mo);
 		if (events != null)
-			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
+			events.post(new MemoryRewriteEnd<>(memoryDomain.getClass(), mo.memory, expression, exprs));
 		if (exprs.isEmpty()) {
-			SimpleAbstractState<H, V, T> res = state.bottom();
+			SimpleAbstractState<M, V, T> res = state.bottom();
 			if (events != null)
 				events.post(new DomainSmallStepEnd<>(getClass(), pp, state, res, expression));
 			return res;
 		}
 
-		applySubstitution(heap.getRight(), mo, pp);
+		applySubstitution(memory.getRight(), mo, pp);
 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
@@ -417,7 +422,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (events != null)
 				events.post(new DomainSmallStepEnd<>(valueDomain.getClass(), pp, state.valueState, mo.value, expr));
 
-			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			SimpleAbstractState<M, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
 				events.post(new DomainSmallStepEnd<>(getClass(), pp, state, res, expression));
 			return res;
@@ -450,15 +455,15 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			mo.type = t;
 		}
 
-		SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+		SimpleAbstractState<M, V, T> res = new SimpleAbstractState<>(mo.memory, valueRes, typeRes);
 		if (events != null)
 			events.post(new DomainSmallStepEnd<>(getClass(), pp, state, res, expression));
 		return res;
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> assume(
-			SimpleAbstractState<H, V, T> state,
+	public SimpleAbstractState<M, V, T> assume(
+			SimpleAbstractState<M, V, T> state,
 			SymbolicExpression expression,
 			ProgramPoint src,
 			ProgramPoint dest)
@@ -471,12 +476,13 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		if (!expression.mightNeedRewriting()) {
 			ValueExpression ve = (ValueExpression) expression;
 			if (events != null)
-				events.post(new DomainAssumeStart<>(heapDomain.getClass(), state.heapState, expression));
-			mo.heap = heapDomain.assume(mo.heap, expression, src, dest, mo).getLeft();
+				events.post(new DomainAssumeStart<>(memoryDomain.getClass(), state.memoryState, expression));
+			mo.memory = memoryDomain.assume(mo.memory, expression, src, dest, mo).getLeft();
 			if (events != null)
-				events.post(new DomainAssumeEnd<>(heapDomain.getClass(), src, state.heapState, mo.heap, expression));
-			if (mo.heap.isBottom()) {
-				SimpleAbstractState<H, V, T> res = state.bottom();
+				events.post(
+						new DomainAssumeEnd<>(memoryDomain.getClass(), src, state.memoryState, mo.memory, expression));
+			if (mo.memory.isBottom()) {
+				SimpleAbstractState<M, V, T> res = state.bottom();
 				if (events != null)
 					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
@@ -488,7 +494,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (events != null)
 				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), src, state.typeState, mo.type, expression));
 			if (mo.type.isBottom()) {
-				SimpleAbstractState<H, V, T> res = state.bottom();
+				SimpleAbstractState<M, V, T> res = state.bottom();
 				if (events != null)
 					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
@@ -500,44 +506,44 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (events != null)
 				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), src, state.valueState, mo.value, expression));
 			if (mo.value.isBottom()) {
-				SimpleAbstractState<H, V, T> res = state.bottom();
+				SimpleAbstractState<M, V, T> res = state.bottom();
 				if (events != null)
 					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
 			}
 
-			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			SimpleAbstractState<M, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
 				events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 			return res;
 		}
 
 		if (events != null)
-			events.post(new DomainAssumeStart<>(heapDomain.getClass(), state.heapState, expression));
-		Pair<H, List<HeapReplacement>> heap = heapDomain.assume(mo.heap, expression, src, dest, mo);
-		mo.heap = heap.getLeft();
+			events.post(new DomainAssumeStart<>(memoryDomain.getClass(), state.memoryState, expression));
+		Pair<M, List<MemoryReplacement>> memory = memoryDomain.assume(mo.memory, expression, src, dest, mo);
+		mo.memory = memory.getLeft();
 		if (events != null)
-			events.post(new DomainAssumeEnd<>(heapDomain.getClass(), src, state.heapState, mo.heap, expression));
-		if (mo.heap.isBottom()) {
-			SimpleAbstractState<H, V, T> res = state.bottom();
+			events.post(new DomainAssumeEnd<>(memoryDomain.getClass(), src, state.memoryState, mo.memory, expression));
+		if (mo.memory.isBottom()) {
+			SimpleAbstractState<M, V, T> res = state.bottom();
 			if (events != null)
 				events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 			return res;
 		}
 
 		if (events != null)
-			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
-		ExpressionSet exprs = heapDomain.rewrite(mo.heap, expression, src, mo);
+			events.post(new MemoryRewriteStart<>(memoryDomain.getClass(), mo.memory, expression));
+		ExpressionSet exprs = memoryDomain.rewrite(mo.memory, expression, src, mo);
 		if (events != null)
-			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
+			events.post(new MemoryRewriteEnd<>(memoryDomain.getClass(), mo.memory, expression, exprs));
 		if (exprs.isEmpty()) {
-			SimpleAbstractState<H, V, T> res = state.bottom();
+			SimpleAbstractState<M, V, T> res = state.bottom();
 			if (events != null)
 				events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 			return res;
 		}
 
-		applySubstitution(heap.getRight(), mo, src);
+		applySubstitution(memory.getRight(), mo, src);
 
 		if (exprs.elements.size() == 1) {
 			SymbolicExpression expr = exprs.elements.iterator().next();
@@ -550,7 +556,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (events != null)
 				events.post(new DomainAssumeEnd<>(typeDomain.getClass(), src, state.typeState, mo.type, expr));
 			if (mo.type.isBottom()) {
-				SimpleAbstractState<H, V, T> res = state.bottom();
+				SimpleAbstractState<M, V, T> res = state.bottom();
 				if (events != null)
 					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
@@ -562,13 +568,13 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			if (events != null)
 				events.post(new DomainAssumeEnd<>(valueDomain.getClass(), src, state.valueState, mo.value, expr));
 			if (mo.value.isBottom()) {
-				SimpleAbstractState<H, V, T> res = state.bottom();
+				SimpleAbstractState<M, V, T> res = state.bottom();
 				if (events != null)
 					events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 				return res;
 			}
 
-			SimpleAbstractState<H, V, T> res = new SimpleAbstractState<>(mo);
+			SimpleAbstractState<M, V, T> res = new SimpleAbstractState<>(mo);
 			if (events != null)
 				events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 			return res;
@@ -597,11 +603,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			mo.type = t;
 		}
 
-		SimpleAbstractState<H, V, T> res;
+		SimpleAbstractState<M, V, T> res;
 		if (typeRes.isBottom() || valueRes.isBottom())
 			res = state.bottom();
 		else
-			res = new SimpleAbstractState<>(mo.heap, valueRes, typeRes);
+			res = new SimpleAbstractState<>(mo.memory, valueRes, typeRes);
 		if (events != null)
 			events.post(new DomainAssumeEnd<>(getClass(), src, state, res, expression));
 		return res;
@@ -609,7 +615,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 
 	@Override
 	public Satisfiability satisfies(
-			SimpleAbstractState<H, V, T> state,
+			SimpleAbstractState<M, V, T> state,
 			SymbolicExpression expression,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -619,14 +625,15 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			events.post(new DomainSatisfiesStart<>(getClass(), state, expression));
 
 		if (events != null)
-			events.post(new DomainSatisfiesStart<>(heapDomain.getClass(), state.heapState, expression));
-		Satisfiability heapsat = heapDomain.satisfies(state.heapState, expression, pp, mo);
+			events.post(new DomainSatisfiesStart<>(memoryDomain.getClass(), state.memoryState, expression));
+		Satisfiability memorysat = memoryDomain.satisfies(state.memoryState, expression, pp, mo);
 		if (events != null)
-			events.post(new DomainSatisfiesEnd<>(heapDomain.getClass(), pp, state.heapState, heapsat, expression));
-		if (heapsat == Satisfiability.BOTTOM) {
+			events.post(
+					new DomainSatisfiesEnd<>(memoryDomain.getClass(), pp, state.memoryState, memorysat, expression));
+		if (memorysat == Satisfiability.BOTTOM) {
 			if (events != null)
-				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, heapsat, expression));
-			return heapsat;
+				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, memorysat, expression));
+			return memorysat;
 		}
 
 		if (!expression.mightNeedRewriting()) {
@@ -654,17 +661,17 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				return valuesat;
 			}
 
-			Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
+			Satisfiability glb = memorysat.glb(typesat).glb(valuesat);
 			if (events != null)
 				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, glb, expression));
 			return glb;
 		}
 
 		if (events != null)
-			events.post(new HeapRewriteStart<>(heapDomain.getClass(), mo.heap, expression));
-		ExpressionSet exprs = heapDomain.rewrite(mo.heap, expression, pp, mo);
+			events.post(new MemoryRewriteStart<>(memoryDomain.getClass(), mo.memory, expression));
+		ExpressionSet exprs = memoryDomain.rewrite(mo.memory, expression, pp, mo);
 		if (events != null)
-			events.post(new HeapRewriteEnd<>(heapDomain.getClass(), mo.heap, expression, exprs));
+			events.post(new MemoryRewriteEnd<>(memoryDomain.getClass(), mo.memory, expression, exprs));
 		if (exprs.isEmpty()) {
 			if (events != null)
 				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, Satisfiability.BOTTOM, expression));
@@ -698,7 +705,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				return valuesat;
 			}
 
-			Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
+			Satisfiability glb = memorysat.glb(typesat).glb(valuesat);
 			if (events != null)
 				events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, glb, expression));
 			return glb;
@@ -735,29 +742,29 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			valuesat = valuesat.lub(sat);
 		}
 
-		Satisfiability glb = heapsat.glb(typesat).glb(valuesat);
+		Satisfiability glb = memorysat.glb(typesat).glb(valuesat);
 		if (events != null)
 			events.post(new DomainSatisfiesEnd<>(getClass(), pp, state, glb, expression));
 		return glb;
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> makeLattice() {
+	public SimpleAbstractState<M, V, T> makeLattice() {
 		return new SimpleAbstractState<>(
-				heapDomain.makeLattice(),
+				memoryDomain.makeLattice(),
 				valueDomain.makeLattice(),
 				typeDomain.makeLattice());
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> onCallReturn(
-			SimpleAbstractState<H, V, T> entryState,
-			SimpleAbstractState<H, V, T> callres,
+	public SimpleAbstractState<M, V, T> onCallReturn(
+			SimpleAbstractState<M, V, T> entryState,
+			SimpleAbstractState<M, V, T> callres,
 			ProgramPoint call)
 			throws SemanticException {
-		H h = heapDomain.onCallReturn(
-				entryState.heapState,
-				callres.heapState,
+		M m = memoryDomain.onCallReturn(
+				entryState.memoryState,
+				callres.memoryState,
 				call);
 		V v = valueDomain.onCallReturn(
 				entryState.valueState,
@@ -767,14 +774,14 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				entryState.typeState,
 				callres.typeState,
 				call);
-		if (h == callres.heapState && v == callres.valueState && t == callres.typeState)
+		if (m == callres.memoryState && v == callres.valueState && t == callres.typeState)
 			return callres;
-		return new SimpleAbstractState<>(h, v, t);
+		return new SimpleAbstractState<>(m, v, t);
 	}
 
 	@Override
 	public SemanticOracle makeOracle(
-			SimpleAbstractState<H, V, T> state) {
+			SimpleAbstractState<M, V, T> state) {
 		return new MutableOracle(state);
 	}
 
@@ -790,9 +797,9 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			SemanticOracle {
 
 		/**
-		 * The state containing information regarding heap structures.
+		 * The state containing information regarding memory structures.
 		 */
-		public H heap;
+		public M memory;
 
 		/**
 		 * The state containing information regarding values of program
@@ -812,8 +819,8 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		 * @param state the state to use as a starting point for this oracle
 		 */
 		public MutableOracle(
-				SimpleAbstractState<H, V, T> state) {
-			this.heap = state.heapState;
+				SimpleAbstractState<M, V, T> state) {
+			this.memory = state.memoryState;
 			this.value = state.valueState;
 			this.type = state.typeState;
 		}
@@ -830,7 +837,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				throws SemanticException {
 			if (!expression.mightNeedRewriting())
 				return new ExpressionSet(expression);
-			return heapDomain.rewrite(heap, expression, pp, this);
+			return memoryDomain.rewrite(memory, expression, pp, this);
 		}
 
 		@Override
@@ -860,7 +867,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				SymbolicExpression y,
 				ProgramPoint pp)
 				throws SemanticException {
-			return heapDomain.alias(heap, x, y, pp, this);
+			return memoryDomain.alias(memory, x, y, pp, this);
 		}
 
 		@Override
@@ -869,7 +876,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				SymbolicExpression y,
 				ProgramPoint pp)
 				throws SemanticException {
-			return heapDomain.isReachableFrom(heap, x, y, pp, this);
+			return memoryDomain.isReachableFrom(memory, x, y, pp, this);
 		}
 
 		@Override
@@ -877,7 +884,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				ExpressionSet expressions,
 				ProgramPoint pp)
 				throws SemanticException {
-			return heapDomain.rewrite(heap, expressions, pp, this);
+			return memoryDomain.rewrite(memory, expressions, pp, this);
 		}
 
 		@Override
@@ -885,7 +892,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				SymbolicExpression e,
 				ProgramPoint pp)
 				throws SemanticException {
-			return heapDomain.reachableFrom(heap, e, pp, this);
+			return memoryDomain.reachableFrom(memory, e, pp, this);
 		}
 
 		@Override
@@ -894,7 +901,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 				SymbolicExpression y,
 				ProgramPoint pp)
 				throws SemanticException {
-			return heapDomain.areMutuallyReachable(heap, x, y, pp, this);
+			return memoryDomain.areMutuallyReachable(memory, x, y, pp, this);
 		}
 
 	}

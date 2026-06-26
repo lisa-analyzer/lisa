@@ -12,9 +12,9 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.DefaultParamInitialization;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.type.Int32Type;
-import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.MemoryAllocation;
+import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.value.InstrumentedReceiver;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
@@ -209,7 +209,7 @@ public final class ArrayType
 				Type type = getStaticType();
 				ReferenceType reftype = cfg.getProgram().getTypes().getReference(type);
 				MemoryAllocation creation = new MemoryAllocation(type, getLocation(), false);
-				HeapReference ref = new HeapReference(reftype, creation, getLocation());
+				MemoryReference ref = new MemoryReference(reftype, creation, getLocation());
 
 				// we start by allocating the memory region
 				AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);

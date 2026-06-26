@@ -18,8 +18,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -137,7 +137,7 @@ public class AccessInstanceGlobal
 				if (!inner.isUnitType())
 					continue;
 
-				HeapDereference container = new HeapDereference(inner, expr, loc);
+				MemoryDereference container = new MemoryDereference(inner, expr, loc);
 				CompilationUnit unit = inner.asUnitType().getUnit();
 
 				Set<CompilationUnit> seen = new HashSet<>();
@@ -170,7 +170,7 @@ public class AccessInstanceGlobal
 
 		Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
 		GlobalVariable var = new GlobalVariable(Untyped.INSTANCE, target, new Annotations(), getLocation());
-		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
+		MemoryDereference container = new MemoryDereference(rectype, expr, getLocation());
 		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
 		return analysis.smallStepSemantics(state, access, this);
 	}

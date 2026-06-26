@@ -5,7 +5,7 @@ import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.memory.MemoryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
@@ -69,8 +69,8 @@ public interface SemanticOracle {
 
 	/**
 	 * Rewrites the given expression to a simpler form containing no sub
-	 * expressions regarding the heap (that is, {@link HeapExpression}s). Every
-	 * expression contained in the result can be safely cast to
+	 * expressions regarding the memory (that is, {@link MemoryExpression}s).
+	 * Every expression contained in the result can be safely cast to
 	 * {@link ValueExpression}.
 	 * 
 	 * @param expression the expression to rewrite
@@ -87,8 +87,8 @@ public interface SemanticOracle {
 
 	/**
 	 * Rewrites the given expressions to a simpler form containing no sub
-	 * expressions regarding the heap (that is, {@link HeapExpression}s). Every
-	 * expression contained in the result can be safely cast to
+	 * expressions regarding the memory (that is, {@link MemoryExpression}s).
+	 * Every expression contained in the result can be safely cast to
 	 * {@link ValueExpression}.
 	 * 
 	 * @param expressions the expressions to rewrite

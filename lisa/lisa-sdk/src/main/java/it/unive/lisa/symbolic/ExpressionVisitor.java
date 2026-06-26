@@ -1,12 +1,12 @@
 package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapDereference;
-import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.heap.MemoryAllocation;
-import it.unive.lisa.symbolic.heap.NullConstant;
+import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.MemoryAllocation;
+import it.unive.lisa.symbolic.memory.MemoryDereference;
+import it.unive.lisa.symbolic.memory.MemoryExpression;
+import it.unive.lisa.symbolic.memory.MemoryReference;
+import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -30,7 +30,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 public interface ExpressionVisitor<T> {
 
 	/**
-	 * Visits a generic {@link HeapExpression}. This callback is invoked after
+	 * Visits a generic {@link MemoryExpression}. This callback is invoked after
 	 * the inner expressions have been visited, and their produced value is
 	 * passed as argument. <br>
 	 * <br>
@@ -52,7 +52,7 @@ public interface ExpressionVisitor<T> {
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
 	T visit(
-			HeapExpression expression,
+			MemoryExpression expression,
 			T[] subExpressions,
 			Object... params)
 			throws SemanticException;
@@ -100,41 +100,41 @@ public interface ExpressionVisitor<T> {
 			throws SemanticException;
 
 	/**
-	 * Visits a {@link HeapReference}.
+	 * Visits a {@link MemoryReference}.
 	 * 
-	 * @param expression the heap reference
+	 * @param expression the memory reference
 	 * @param arg        the value produced by visiting the argument of the
 	 *                       expression
 	 * @param params     the additional parameters provided to
 	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
 	 *                       if any
 	 * 
-	 * @return the value produced by visiting the heap reference
+	 * @return the value produced by visiting the memory reference
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
 	T visit(
-			HeapReference expression,
+			MemoryReference expression,
 			T arg,
 			Object... params)
 			throws SemanticException;
 
 	/**
-	 * Visits a {@link HeapDereference}.
+	 * Visits a {@link MemoryDereference}.
 	 * 
-	 * @param expression the heap dereference
+	 * @param expression the memory dereference
 	 * @param arg        the value produced by visiting the argument of the
 	 *                       expression
 	 * @param params     the additional parameters provided to
 	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
 	 *                       if any
 	 * 
-	 * @return the value produced by visiting the heap dereference
+	 * @return the value produced by visiting the memory dereference
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
 	T visit(
-			HeapDereference expression,
+			MemoryDereference expression,
 			T arg,
 			Object... params)
 			throws SemanticException;

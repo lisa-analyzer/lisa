@@ -37,7 +37,7 @@ public class DataflowAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new AvailableExpressions(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/ae";
@@ -50,7 +50,7 @@ public class DataflowAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new ConstantPropagation(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/cp";
@@ -63,7 +63,7 @@ public class DataflowAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new ReachingDefinitions(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/rd";
@@ -77,7 +77,7 @@ public class DataflowAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.interproceduralAnalysis = new BackwardModularWorstCaseAnalysis<>();
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Liveness(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "dataflow/liveness";
@@ -92,7 +92,7 @@ public class DataflowAnalysesTest
 
 		CronConfiguration conf = new CronConfiguration();
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new ReachingDefinitions(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);

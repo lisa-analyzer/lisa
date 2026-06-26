@@ -3,23 +3,23 @@ Program-wide fixpoint
     Semantics of #TOP#
       Analysis: Small step semantics of PUSHANY
         SimpleAbstractDomain: Small step semantics of PUSHANY
-          MonolithicHeap: Small step semantics of PUSHANY
-          MonolithicHeap: Rewriting of PUSHANY
+          MonolithicMemory: Small step semantics of PUSHANY
+          MonolithicMemory: Rewriting of PUSHANY
           SimpleAbstractDomain: application of substitutions
           InferredTypes: Small step semantics of PUSHANY
           Interval: Small step semantics of PUSHANY
     Semantics of this
       Analysis: Small step semantics of this
         SimpleAbstractDomain: Small step semantics of this
-          MonolithicHeap: Small step semantics of this
-          MonolithicHeap: Rewriting of this
+          MonolithicMemory: Small step semantics of this
+          MonolithicMemory: Rewriting of this
           SimpleAbstractDomain: application of substitutions
           InferredTypes: Small step semantics of this
           Interval: Small step semantics of this
     Analysis: Assignment of this to PUSHANY
       SimpleAbstractDomain: Assignment of this to PUSHANY
-        MonolithicHeap: Assignment of this to PUSHANY
-        MonolithicHeap: Rewriting of PUSHANY
+        MonolithicMemory: Assignment of this to PUSHANY
+        MonolithicMemory: Rewriting of PUSHANY
         SimpleAbstractDomain: application of substitutions
         InferredTypes: Assignment of this to PUSHANY
           InferredTypes: Evaluation of PUSHANY
@@ -30,34 +30,34 @@ Program-wide fixpoint
         Semantics of new A()
           Analysis: Small step semantics of new A
             SimpleAbstractDomain: Small step semantics of new A
-              MonolithicHeap: Small step semantics of new A
-              MonolithicHeap: Rewriting of new A
+              MonolithicMemory: Small step semantics of new A
+              MonolithicMemory: Rewriting of new A
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Small step semantics of heap[w]:heap
-                InferredTypes: Evaluation of heap[w]:heap
-              Interval: Small step semantics of heap[w]:heap
+              InferredTypes: Small step semantics of memory[w]:memory
+                InferredTypes: Evaluation of memory[w]:memory
+              Interval: Small step semantics of memory[w]:memory
           Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
             SimpleAbstractDomain: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-              MonolithicHeap: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-              MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':29:22
+              MonolithicMemory: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
+              MonolithicMemory: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':29:22
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
               Interval: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
           Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
             SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
-              MonolithicHeap: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
-              MonolithicHeap: Rewriting of ref$new A
+              MonolithicMemory: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
+              MonolithicMemory: Rewriting of ref$new A
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &heap
-                InferredTypes: Evaluation of &heap
-              Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &heap
-                InferredTypes: Evaluation of &heap
+              InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &memory
+                InferredTypes: Evaluation of &memory
+              Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &memory
+                InferredTypes: Evaluation of &memory
           InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
           InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
           Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
             SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
+              MonolithicMemory: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
@@ -68,20 +68,20 @@ Program-wide fixpoint
               Semantics of 0
                 Analysis: Small step semantics of 0
                   SimpleAbstractDomain: Small step semantics of 0
-                    MonolithicHeap: Small step semantics of 0
+                    MonolithicMemory: Small step semantics of 0
                     InferredTypes: Small step semantics of 0
                     Interval: Small step semantics of 0
               Semantics of i1
                 Analysis: Small step semantics of i1
                   SimpleAbstractDomain: Small step semantics of i1
-                    MonolithicHeap: Small step semantics of i1
-                    MonolithicHeap: Rewriting of i1
+                    MonolithicMemory: Small step semantics of i1
+                    MonolithicMemory: Rewriting of i1
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i1
                     Interval: Small step semantics of i1
               Analysis: Assignment of i1 to 0
                 SimpleAbstractDomain: Assignment of i1 to 0
-                  MonolithicHeap: Assignment of i1 to 0
+                  MonolithicMemory: Assignment of i1 to 0
                   InferredTypes: Assignment of i1 to 0
                     InferredTypes: Evaluation of 0
                   Interval: Assignment of i1 to 0
@@ -91,28 +91,28 @@ Program-wide fixpoint
             Semantics of ret
               Analysis: Small step semantics of skip
                 SimpleAbstractDomain: Small step semantics of skip
-                  MonolithicHeap: Small step semantics of skip
+                  MonolithicMemory: Small step semantics of skip
                   InferredTypes: Small step semantics of skip
                   Interval: Small step semantics of skip
           Analysis: Transferring throwers from untyped A::A(A*) [at 'imp-testcases/visualization/visualization.imp':2:4] to A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
           Analysis: Returning from call [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
           Analysis: Small step semantics of skip
             SimpleAbstractDomain: Small step semantics of skip
-              MonolithicHeap: Small step semantics of skip
+              MonolithicMemory: Small step semantics of skip
               InferredTypes: Small step semantics of skip
               Interval: Small step semantics of skip
         Semantics of a
           Analysis: Small step semantics of a
             SimpleAbstractDomain: Small step semantics of a
-              MonolithicHeap: Small step semantics of a
-              MonolithicHeap: Rewriting of a
+              MonolithicMemory: Small step semantics of a
+              MonolithicMemory: Rewriting of a
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of a
               Interval: Small step semantics of a
         Analysis: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
           SimpleAbstractDomain: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
-            MonolithicHeap: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
-            MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':29:22
+            MonolithicMemory: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
+            MonolithicMemory: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':29:22
             SimpleAbstractDomain: application of substitutions
             InferredTypes: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
               InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
@@ -124,8 +124,8 @@ Program-wide fixpoint
           Semantics of a
             Analysis: Small step semantics of a
               SimpleAbstractDomain: Small step semantics of a
-                MonolithicHeap: Small step semantics of a
-                MonolithicHeap: Rewriting of a
+                MonolithicMemory: Small step semantics of a
+                MonolithicMemory: Rewriting of a
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Small step semantics of a
                 Interval: Small step semantics of a
@@ -133,8 +133,8 @@ Program-wide fixpoint
             Semantics of a
               Analysis: Small step semantics of a
                 SimpleAbstractDomain: Small step semantics of a
-                  MonolithicHeap: Small step semantics of a
-                  MonolithicHeap: Rewriting of a
+                  MonolithicMemory: Small step semantics of a
+                  MonolithicMemory: Rewriting of a
                   SimpleAbstractDomain: application of substitutions
                   InferredTypes: Small step semantics of a
                   Interval: Small step semantics of a
@@ -142,8 +142,8 @@ Program-wide fixpoint
             InferredTypes: Evaluation of a
             Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
               SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
-                MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
-                MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:41]:a
+                MonolithicMemory: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
+                MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':30:41]:a
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
                   InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:41]:a
@@ -154,48 +154,48 @@ Program-wide fixpoint
                 Semantics of new tests()
                   Analysis: Small step semantics of new tests
                     SimpleAbstractDomain: Small step semantics of new tests
-                      MonolithicHeap: Small step semantics of new tests
-                      MonolithicHeap: Rewriting of new tests
+                      MonolithicMemory: Small step semantics of new tests
+                      MonolithicMemory: Rewriting of new tests
                       SimpleAbstractDomain: application of substitutions
-                      InferredTypes: Small step semantics of heap[w]:heap
-                        InferredTypes: Evaluation of heap[w]:heap
-                      Interval: Small step semantics of heap[w]:heap
+                      InferredTypes: Small step semantics of memory[w]:memory
+                        InferredTypes: Evaluation of memory[w]:memory
+                      Interval: Small step semantics of memory[w]:memory
                   Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
                     SimpleAbstractDomain: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                      MonolithicHeap: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                      MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':6:25
+                      MonolithicMemory: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
+                      MonolithicMemory: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':6:25
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
                       Interval: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
                   Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
                     SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
-                      MonolithicHeap: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
-                      MonolithicHeap: Rewriting of ref$new tests
+                      MonolithicMemory: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
+                      MonolithicMemory: Rewriting of ref$new tests
                       SimpleAbstractDomain: application of substitutions
-                      InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &heap
-                        InferredTypes: Evaluation of &heap
-                      Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &heap
-                        InferredTypes: Evaluation of &heap
+                      InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &memory
+                        InferredTypes: Evaluation of &memory
+                      Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &memory
+                        InferredTypes: Evaluation of &memory
                   InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:25
                   Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
                     SimpleAbstractDomain: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
-                      MonolithicHeap: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
-                      MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
+                      MonolithicMemory: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
+                      MonolithicMemory: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
                       Interval: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
                 Semantics of rec
                   Analysis: Small step semantics of rec
                     SimpleAbstractDomain: Small step semantics of rec
-                      MonolithicHeap: Small step semantics of rec
-                      MonolithicHeap: Rewriting of rec
+                      MonolithicMemory: Small step semantics of rec
+                      MonolithicMemory: Rewriting of rec
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of rec
                       Interval: Small step semantics of rec
                 Analysis: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
                   SimpleAbstractDomain: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
-                    MonolithicHeap: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
-                    MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':6:25
+                    MonolithicMemory: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
+                    MonolithicMemory: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':6:25
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
                       InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:25
@@ -207,31 +207,31 @@ Program-wide fixpoint
                   Semantics of rec
                     Analysis: Small step semantics of rec
                       SimpleAbstractDomain: Small step semantics of rec
-                        MonolithicHeap: Small step semantics of rec
-                        MonolithicHeap: Rewriting of rec
+                        MonolithicMemory: Small step semantics of rec
+                        MonolithicMemory: Rewriting of rec
                         SimpleAbstractDomain: application of substitutions
                         InferredTypes: Small step semantics of rec
                         Interval: Small step semantics of rec
                   InferredTypes: Evaluation of rec
                   Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
                     SimpleAbstractDomain: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                      MonolithicHeap: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                      MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                      MonolithicMemory: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                      MonolithicMemory: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
                       Interval: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
                 Semantics of x
                   Analysis: Small step semantics of x
                     SimpleAbstractDomain: Small step semantics of x
-                      MonolithicHeap: Small step semantics of x
-                      MonolithicHeap: Rewriting of x
+                      MonolithicMemory: Small step semantics of x
+                      MonolithicMemory: Rewriting of x
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of x
                       Interval: Small step semantics of x
                 Analysis: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
                   SimpleAbstractDomain: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                    MonolithicHeap: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                    MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                    MonolithicMemory: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                    MonolithicMemory: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
                       InferredTypes: Evaluation of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
@@ -243,31 +243,31 @@ Program-wide fixpoint
                 Semantics of x
                   Analysis: Small step semantics of x
                     SimpleAbstractDomain: Small step semantics of x
-                      MonolithicHeap: Small step semantics of x
-                      MonolithicHeap: Rewriting of x
+                      MonolithicMemory: Small step semantics of x
+                      MonolithicMemory: Rewriting of x
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of x
                       Interval: Small step semantics of x
                 Semantics of 10
                   Analysis: Small step semantics of 10
                     SimpleAbstractDomain: Small step semantics of 10
-                      MonolithicHeap: Small step semantics of 10
+                      MonolithicMemory: Small step semantics of 10
                       InferredTypes: Small step semantics of 10
                       Interval: Small step semantics of 10
                 InferredTypes: Evaluation of x
                 InferredTypes: Evaluation of 10
                 Analysis: Small step semantics of x < 10
                   SimpleAbstractDomain: Small step semantics of x < 10
-                    MonolithicHeap: Small step semantics of x < 10
-                    MonolithicHeap: Rewriting of x < 10
+                    MonolithicMemory: Small step semantics of x < 10
+                    MonolithicMemory: Rewriting of x < 10
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of x < 10
                     Interval: Small step semantics of x < 10
               Traversal of [ <(x, 10) ] -T-> [ x = +(x, 1) ]
                 Analysis: Assume of x < 10
                   SimpleAbstractDomain: Assume of x < 10
-                    MonolithicHeap: Assume of x < 10
-                    MonolithicHeap: Rewriting of x < 10
+                    MonolithicMemory: Assume of x < 10
+                    MonolithicMemory: Rewriting of x < 10
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Assume of x < 10
                       InferredTypes: Evaluation of x
@@ -284,45 +284,45 @@ Program-wide fixpoint
                   Semantics of x
                     Analysis: Small step semantics of x
                       SimpleAbstractDomain: Small step semantics of x
-                        MonolithicHeap: Small step semantics of x
-                        MonolithicHeap: Rewriting of x
+                        MonolithicMemory: Small step semantics of x
+                        MonolithicMemory: Rewriting of x
                         SimpleAbstractDomain: application of substitutions
                         InferredTypes: Small step semantics of x
                         Interval: Small step semantics of x
                   Semantics of 1
                     Analysis: Small step semantics of 1
                       SimpleAbstractDomain: Small step semantics of 1
-                        MonolithicHeap: Small step semantics of 1
+                        MonolithicMemory: Small step semantics of 1
                         InferredTypes: Small step semantics of 1
                         Interval: Small step semantics of 1
                   InferredTypes: Evaluation of x
                   InferredTypes: Evaluation of 1
                   Analysis: Small step semantics of x + 1
                     SimpleAbstractDomain: Small step semantics of x + 1
-                      MonolithicHeap: Small step semantics of x + 1
-                      MonolithicHeap: Rewriting of x + 1
+                      MonolithicMemory: Small step semantics of x + 1
+                      MonolithicMemory: Rewriting of x + 1
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of x + 1
                       Interval: Small step semantics of x + 1
                   Analysis: Small step semantics of x + 1
                     SimpleAbstractDomain: Small step semantics of x + 1
-                      MonolithicHeap: Small step semantics of x + 1
-                      MonolithicHeap: Rewriting of x + 1
+                      MonolithicMemory: Small step semantics of x + 1
+                      MonolithicMemory: Rewriting of x + 1
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of x + 1
                       Interval: Small step semantics of x + 1
                 Semantics of x
                   Analysis: Small step semantics of x
                     SimpleAbstractDomain: Small step semantics of x
-                      MonolithicHeap: Small step semantics of x
-                      MonolithicHeap: Rewriting of x
+                      MonolithicMemory: Small step semantics of x
+                      MonolithicMemory: Rewriting of x
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of x
                       Interval: Small step semantics of x
                 Analysis: Assignment of x to x + 1
                   SimpleAbstractDomain: Assignment of x to x + 1
-                    MonolithicHeap: Assignment of x to x + 1
-                    MonolithicHeap: Rewriting of x + 1
+                    MonolithicMemory: Assignment of x to x + 1
+                    MonolithicMemory: Rewriting of x + 1
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Assignment of x to x + 1
                       InferredTypes: Evaluation of x + 1
@@ -335,31 +335,31 @@ Program-wide fixpoint
                 Semantics of x
                   Analysis: Small step semantics of x
                     SimpleAbstractDomain: Small step semantics of x
-                      MonolithicHeap: Small step semantics of x
-                      MonolithicHeap: Rewriting of x
+                      MonolithicMemory: Small step semantics of x
+                      MonolithicMemory: Rewriting of x
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of x
                       Interval: Small step semantics of x
                 Semantics of 10
                   Analysis: Small step semantics of 10
                     SimpleAbstractDomain: Small step semantics of 10
-                      MonolithicHeap: Small step semantics of 10
+                      MonolithicMemory: Small step semantics of 10
                       InferredTypes: Small step semantics of 10
                       Interval: Small step semantics of 10
                 InferredTypes: Evaluation of x
                 InferredTypes: Evaluation of 10
                 Analysis: Small step semantics of x < 10
                   SimpleAbstractDomain: Small step semantics of x < 10
-                    MonolithicHeap: Small step semantics of x < 10
-                    MonolithicHeap: Rewriting of x < 10
+                    MonolithicMemory: Small step semantics of x < 10
+                    MonolithicMemory: Rewriting of x < 10
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of x < 10
                     Interval: Small step semantics of x < 10
               Traversal of [ <(x, 10) ] -F-> [ return 1 ]
                 Analysis: Assume of ! x < 10
                   SimpleAbstractDomain: Assume of ! x < 10
-                    MonolithicHeap: Assume of ! x < 10
-                    MonolithicHeap: Rewriting of ! x < 10
+                    MonolithicMemory: Assume of ! x < 10
+                    MonolithicMemory: Rewriting of ! x < 10
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Assume of ! x < 10
                       InferredTypes: Evaluation of x
@@ -377,12 +377,12 @@ Program-wide fixpoint
                 Semantics of 1
                   Analysis: Small step semantics of 1
                     SimpleAbstractDomain: Small step semantics of 1
-                      MonolithicHeap: Small step semantics of 1
+                      MonolithicMemory: Small step semantics of 1
                       InferredTypes: Small step semantics of 1
                       Interval: Small step semantics of 1
                 Analysis: Assignment of ret_value@getOne to 1
                   SimpleAbstractDomain: Assignment of ret_value@getOne to 1
-                    MonolithicHeap: Assignment of ret_value@getOne to 1
+                    MonolithicMemory: Assignment of ret_value@getOne to 1
                     InferredTypes: Assignment of ret_value@getOne to 1
                       InferredTypes: Evaluation of 1
                     Interval: Assignment of ret_value@getOne to 1
@@ -390,7 +390,7 @@ Program-wide fixpoint
                       Interval: Evaluation of 1
             Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
               SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
-                MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
+                MonolithicMemory: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
                 InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
                   InferredTypes: Evaluation of ret_value@getOne
                 Interval: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
@@ -404,8 +404,8 @@ Program-wide fixpoint
           InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
           Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
             SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:42]:a
+              MonolithicMemory: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':30:42]:a
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:a
@@ -414,8 +414,8 @@ Program-wide fixpoint
                 Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:a
           Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
             SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
+              MonolithicMemory: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
@@ -427,31 +427,31 @@ Program-wide fixpoint
               Semantics of i
                 Analysis: Small step semantics of i
                   SimpleAbstractDomain: Small step semantics of i
-                    MonolithicHeap: Small step semantics of i
-                    MonolithicHeap: Rewriting of i
+                    MonolithicMemory: Small step semantics of i
+                    MonolithicMemory: Rewriting of i
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i
                     Interval: Small step semantics of i
               Semantics of 0
                 Analysis: Small step semantics of 0
                   SimpleAbstractDomain: Small step semantics of 0
-                    MonolithicHeap: Small step semantics of 0
+                    MonolithicMemory: Small step semantics of 0
                     InferredTypes: Small step semantics of 0
                     Interval: Small step semantics of 0
               InferredTypes: Evaluation of i
               InferredTypes: Evaluation of 0
               Analysis: Small step semantics of i <= 0
                 SimpleAbstractDomain: Small step semantics of i <= 0
-                  MonolithicHeap: Small step semantics of i <= 0
-                  MonolithicHeap: Rewriting of i <= 0
+                  MonolithicMemory: Small step semantics of i <= 0
+                  MonolithicMemory: Rewriting of i <= 0
                   SimpleAbstractDomain: application of substitutions
                   InferredTypes: Small step semantics of i <= 0
                   Interval: Small step semantics of i <= 0
             Traversal of [ <=(i, 0) ] -T-> [ i = 1 ]
               Analysis: Assume of i <= 0
                 SimpleAbstractDomain: Assume of i <= 0
-                  MonolithicHeap: Assume of i <= 0
-                  MonolithicHeap: Rewriting of i <= 0
+                  MonolithicMemory: Assume of i <= 0
+                  MonolithicMemory: Rewriting of i <= 0
                   SimpleAbstractDomain: application of substitutions
                   InferredTypes: Assume of i <= 0
                     InferredTypes: Evaluation of i
@@ -464,27 +464,27 @@ Program-wide fixpoint
               Semantics of 1
                 Analysis: Small step semantics of 1
                   SimpleAbstractDomain: Small step semantics of 1
-                    MonolithicHeap: Small step semantics of 1
+                    MonolithicMemory: Small step semantics of 1
                     InferredTypes: Small step semantics of 1
                     Interval: Small step semantics of 1
               Semantics of i
                 Analysis: Small step semantics of i
                   SimpleAbstractDomain: Small step semantics of i
-                    MonolithicHeap: Small step semantics of i
-                    MonolithicHeap: Rewriting of i
+                    MonolithicMemory: Small step semantics of i
+                    MonolithicMemory: Rewriting of i
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i
                     Interval: Small step semantics of i
               Analysis: Assignment of i to 1
                 SimpleAbstractDomain: Assignment of i to 1
-                  MonolithicHeap: Assignment of i to 1
+                  MonolithicMemory: Assignment of i to 1
                   InferredTypes: Assignment of i to 1
                   Interval: Assignment of i to 1
             Traversal of [ <=(i, 0) ] -F-> [ i = 10 ]
               Analysis: Assume of ! i <= 0
                 SimpleAbstractDomain: Assume of ! i <= 0
-                  MonolithicHeap: Assume of ! i <= 0
-                  MonolithicHeap: Rewriting of ! i <= 0
+                  MonolithicMemory: Assume of ! i <= 0
+                  MonolithicMemory: Rewriting of ! i <= 0
                   SimpleAbstractDomain: application of substitutions
                   InferredTypes: Assume of ! i <= 0
                     InferredTypes: Evaluation of i
@@ -497,20 +497,20 @@ Program-wide fixpoint
               Semantics of 10
                 Analysis: Small step semantics of 10
                   SimpleAbstractDomain: Small step semantics of 10
-                    MonolithicHeap: Small step semantics of 10
+                    MonolithicMemory: Small step semantics of 10
                     InferredTypes: Small step semantics of 10
                     Interval: Small step semantics of 10
               Semantics of i
                 Analysis: Small step semantics of i
                   SimpleAbstractDomain: Small step semantics of i
-                    MonolithicHeap: Small step semantics of i
-                    MonolithicHeap: Rewriting of i
+                    MonolithicMemory: Small step semantics of i
+                    MonolithicMemory: Rewriting of i
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i
                     Interval: Small step semantics of i
               Analysis: Assignment of i to 10
                 SimpleAbstractDomain: Assignment of i to 10
-                  MonolithicHeap: Assignment of i to 10
+                  MonolithicMemory: Assignment of i to 10
                   InferredTypes: Assignment of i to 10
                     InferredTypes: Evaluation of 10
                   Interval: Assignment of i to 10
@@ -522,15 +522,15 @@ Program-wide fixpoint
               Semantics of i
                 Analysis: Small step semantics of i
                   SimpleAbstractDomain: Small step semantics of i
-                    MonolithicHeap: Small step semantics of i
-                    MonolithicHeap: Rewriting of i
+                    MonolithicMemory: Small step semantics of i
+                    MonolithicMemory: Rewriting of i
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i
                     Interval: Small step semantics of i
               Analysis: Assignment of ret_value@getPositive to i
                 SimpleAbstractDomain: Assignment of ret_value@getPositive to i
-                  MonolithicHeap: Assignment of ret_value@getPositive to i
-                  MonolithicHeap: Rewriting of i
+                  MonolithicMemory: Assignment of ret_value@getPositive to i
+                  MonolithicMemory: Rewriting of i
                   SimpleAbstractDomain: application of substitutions
                   InferredTypes: Assignment of ret_value@getPositive to i
                     InferredTypes: Evaluation of i
@@ -539,8 +539,8 @@ Program-wide fixpoint
                     Interval: Evaluation of i
           Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
             SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
-              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
-              MonolithicHeap: Rewriting of ret_value@getPositive
+              MonolithicMemory: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
+              MonolithicMemory: Rewriting of ret_value@getPositive
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
                 InferredTypes: Evaluation of ret_value@getPositive
@@ -552,15 +552,15 @@ Program-wide fixpoint
         Semantics of one
           Analysis: Small step semantics of one
             SimpleAbstractDomain: Small step semantics of one
-              MonolithicHeap: Small step semantics of one
-              MonolithicHeap: Rewriting of one
+              MonolithicMemory: Small step semantics of one
+              MonolithicMemory: Rewriting of one
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of one
               Interval: Small step semantics of one
         Analysis: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
           SimpleAbstractDomain: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-            MonolithicHeap: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
+            MonolithicMemory: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
+            MonolithicMemory: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
             SimpleAbstractDomain: application of substitutions
             InferredTypes: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
               InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
@@ -573,16 +573,16 @@ Program-wide fixpoint
           Semantics of a
             Analysis: Small step semantics of a
               SimpleAbstractDomain: Small step semantics of a
-                MonolithicHeap: Small step semantics of a
-                MonolithicHeap: Rewriting of a
+                MonolithicMemory: Small step semantics of a
+                MonolithicMemory: Rewriting of a
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Small step semantics of a
                 Interval: Small step semantics of a
           Semantics of one
             Analysis: Small step semantics of one
               SimpleAbstractDomain: Small step semantics of one
-                MonolithicHeap: Small step semantics of one
-                MonolithicHeap: Rewriting of one
+                MonolithicMemory: Small step semantics of one
+                MonolithicMemory: Rewriting of one
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Small step semantics of one
                 Interval: Small step semantics of one
@@ -592,8 +592,8 @@ Program-wide fixpoint
           InferredTypes: Evaluation of one
           Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
             SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':31:37]:a
+              MonolithicMemory: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':31:37]:a
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:a
@@ -602,8 +602,8 @@ Program-wide fixpoint
                 Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:a
           Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
             SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
-              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':31:37]:one
+              MonolithicMemory: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':31:37]:one
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:one
@@ -615,20 +615,20 @@ Program-wide fixpoint
               Semantics of 1
                 Analysis: Small step semantics of 1
                   SimpleAbstractDomain: Small step semantics of 1
-                    MonolithicHeap: Small step semantics of 1
+                    MonolithicMemory: Small step semantics of 1
                     InferredTypes: Small step semantics of 1
                     Interval: Small step semantics of 1
               Semantics of i3
                 Analysis: Small step semantics of i3
                   SimpleAbstractDomain: Small step semantics of i3
-                    MonolithicHeap: Small step semantics of i3
-                    MonolithicHeap: Rewriting of i3
+                    MonolithicMemory: Small step semantics of i3
+                    MonolithicMemory: Rewriting of i3
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i3
                     Interval: Small step semantics of i3
               Analysis: Assignment of i3 to 1
                 SimpleAbstractDomain: Assignment of i3 to 1
-                  MonolithicHeap: Assignment of i3 to 1
+                  MonolithicMemory: Assignment of i3 to 1
                   InferredTypes: Assignment of i3 to 1
                     InferredTypes: Evaluation of 1
                   Interval: Assignment of i3 to 1
@@ -639,15 +639,15 @@ Program-wide fixpoint
               Semantics of i
                 Analysis: Small step semantics of i
                   SimpleAbstractDomain: Small step semantics of i
-                    MonolithicHeap: Small step semantics of i
-                    MonolithicHeap: Rewriting of i
+                    MonolithicMemory: Small step semantics of i
+                    MonolithicMemory: Rewriting of i
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i
                     Interval: Small step semantics of i
               Analysis: Assignment of ret_value@identity to i
                 SimpleAbstractDomain: Assignment of ret_value@identity to i
-                  MonolithicHeap: Assignment of ret_value@identity to i
-                  MonolithicHeap: Rewriting of i
+                  MonolithicMemory: Assignment of ret_value@identity to i
+                  MonolithicMemory: Rewriting of i
                   SimpleAbstractDomain: application of substitutions
                   InferredTypes: Assignment of ret_value@identity to i
                     InferredTypes: Evaluation of i
@@ -656,8 +656,8 @@ Program-wide fixpoint
                     Interval: Evaluation of i
           Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
             SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
-              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
-              MonolithicHeap: Rewriting of ret_value@identity
+              MonolithicMemory: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
+              MonolithicMemory: Rewriting of ret_value@identity
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
                 InferredTypes: Evaluation of ret_value@identity
@@ -669,15 +669,15 @@ Program-wide fixpoint
         Semantics of positive
           Analysis: Small step semantics of positive
             SimpleAbstractDomain: Small step semantics of positive
-              MonolithicHeap: Small step semantics of positive
-              MonolithicHeap: Rewriting of positive
+              MonolithicMemory: Small step semantics of positive
+              MonolithicMemory: Rewriting of positive
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of positive
               Interval: Small step semantics of positive
         Analysis: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
           SimpleAbstractDomain: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-            MonolithicHeap: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
+            MonolithicMemory: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
+            MonolithicMemory: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
             SimpleAbstractDomain: application of substitutions
             InferredTypes: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
               InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
@@ -689,20 +689,20 @@ Program-wide fixpoint
         Semantics of -1
           Analysis: Small step semantics of -1
             SimpleAbstractDomain: Small step semantics of -1
-              MonolithicHeap: Small step semantics of -1
+              MonolithicMemory: Small step semantics of -1
               InferredTypes: Small step semantics of -1
               Interval: Small step semantics of -1
         Semantics of minusone
           Analysis: Small step semantics of minusone
             SimpleAbstractDomain: Small step semantics of minusone
-              MonolithicHeap: Small step semantics of minusone
-              MonolithicHeap: Rewriting of minusone
+              MonolithicMemory: Small step semantics of minusone
+              MonolithicMemory: Rewriting of minusone
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of minusone
               Interval: Small step semantics of minusone
         Analysis: Assignment of minusone to -1
           SimpleAbstractDomain: Assignment of minusone to -1
-            MonolithicHeap: Assignment of minusone to -1
+            MonolithicMemory: Assignment of minusone to -1
             InferredTypes: Assignment of minusone to -1
               InferredTypes: Evaluation of -1
             Interval: Assignment of minusone to -1
@@ -714,16 +714,16 @@ Program-wide fixpoint
           Semantics of a
             Analysis: Small step semantics of a
               SimpleAbstractDomain: Small step semantics of a
-                MonolithicHeap: Small step semantics of a
-                MonolithicHeap: Rewriting of a
+                MonolithicMemory: Small step semantics of a
+                MonolithicMemory: Rewriting of a
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Small step semantics of a
                 Interval: Small step semantics of a
           Semantics of minusone
             Analysis: Small step semantics of minusone
               SimpleAbstractDomain: Small step semantics of minusone
-                MonolithicHeap: Small step semantics of minusone
-                MonolithicHeap: Rewriting of minusone
+                MonolithicMemory: Small step semantics of minusone
+                MonolithicMemory: Rewriting of minusone
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Small step semantics of minusone
                 Interval: Small step semantics of minusone
@@ -733,8 +733,8 @@ Program-wide fixpoint
           InferredTypes: Evaluation of minusone
           Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
             SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':33:42]:a
+              MonolithicMemory: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':33:42]:a
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:a
@@ -743,8 +743,8 @@ Program-wide fixpoint
                 Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:a
           Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
             SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':33:42]:minusone
+              MonolithicMemory: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':33:42]:minusone
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:minusone
@@ -756,20 +756,20 @@ Program-wide fixpoint
               Semantics of 1
                 Analysis: Small step semantics of 1
                   SimpleAbstractDomain: Small step semantics of 1
-                    MonolithicHeap: Small step semantics of 1
+                    MonolithicMemory: Small step semantics of 1
                     InferredTypes: Small step semantics of 1
                     Interval: Small step semantics of 1
               Semantics of i3
                 Analysis: Small step semantics of i3
                   SimpleAbstractDomain: Small step semantics of i3
-                    MonolithicHeap: Small step semantics of i3
-                    MonolithicHeap: Rewriting of i3
+                    MonolithicMemory: Small step semantics of i3
+                    MonolithicMemory: Rewriting of i3
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i3
                     Interval: Small step semantics of i3
               Analysis: Assignment of i3 to 1
                 SimpleAbstractDomain: Assignment of i3 to 1
-                  MonolithicHeap: Assignment of i3 to 1
+                  MonolithicMemory: Assignment of i3 to 1
                   InferredTypes: Assignment of i3 to 1
                     InferredTypes: Evaluation of 1
                   Interval: Assignment of i3 to 1
@@ -780,15 +780,15 @@ Program-wide fixpoint
               Semantics of i
                 Analysis: Small step semantics of i
                   SimpleAbstractDomain: Small step semantics of i
-                    MonolithicHeap: Small step semantics of i
-                    MonolithicHeap: Rewriting of i
+                    MonolithicMemory: Small step semantics of i
+                    MonolithicMemory: Rewriting of i
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Small step semantics of i
                     Interval: Small step semantics of i
               Analysis: Assignment of ret_value@identity to i
                 SimpleAbstractDomain: Assignment of ret_value@identity to i
-                  MonolithicHeap: Assignment of ret_value@identity to i
-                  MonolithicHeap: Rewriting of i
+                  MonolithicMemory: Assignment of ret_value@identity to i
+                  MonolithicMemory: Rewriting of i
                   SimpleAbstractDomain: application of substitutions
                   InferredTypes: Assignment of ret_value@identity to i
                     InferredTypes: Evaluation of i
@@ -797,8 +797,8 @@ Program-wide fixpoint
                     Interval: Evaluation of i
           Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
             SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
-              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
-              MonolithicHeap: Rewriting of ret_value@identity
+              MonolithicMemory: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
+              MonolithicMemory: Rewriting of ret_value@identity
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
                 InferredTypes: Evaluation of ret_value@identity
@@ -810,15 +810,15 @@ Program-wide fixpoint
         Semantics of negative
           Analysis: Small step semantics of negative
             SimpleAbstractDomain: Small step semantics of negative
-              MonolithicHeap: Small step semantics of negative
-              MonolithicHeap: Rewriting of negative
+              MonolithicMemory: Small step semantics of negative
+              MonolithicMemory: Rewriting of negative
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of negative
               Interval: Small step semantics of negative
         Analysis: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
           SimpleAbstractDomain: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-            MonolithicHeap: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
+            MonolithicMemory: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
+            MonolithicMemory: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
             SimpleAbstractDomain: application of substitutions
             InferredTypes: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
               InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
@@ -831,24 +831,24 @@ Program-wide fixpoint
           Semantics of this
             Analysis: Small step semantics of this
               SimpleAbstractDomain: Small step semantics of this
-                MonolithicHeap: Small step semantics of this
-                MonolithicHeap: Rewriting of this
+                MonolithicMemory: Small step semantics of this
+                MonolithicMemory: Rewriting of this
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Small step semantics of this
                 Interval: Small step semantics of this
           Semantics of one
             Analysis: Small step semantics of one
               SimpleAbstractDomain: Small step semantics of one
-                MonolithicHeap: Small step semantics of one
-                MonolithicHeap: Rewriting of one
+                MonolithicMemory: Small step semantics of one
+                MonolithicMemory: Rewriting of one
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Small step semantics of one
                 Interval: Small step semantics of one
           Semantics of a
             Analysis: Small step semantics of a
               SimpleAbstractDomain: Small step semantics of a
-                MonolithicHeap: Small step semantics of a
-                MonolithicHeap: Rewriting of a
+                MonolithicMemory: Small step semantics of a
+                MonolithicMemory: Rewriting of a
                 SimpleAbstractDomain: application of substitutions
                 InferredTypes: Small step semantics of a
                 Interval: Small step semantics of a
@@ -860,8 +860,8 @@ Program-wide fixpoint
           InferredTypes: Evaluation of a
           Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
             SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:this
+              MonolithicMemory: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:this
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:this
@@ -870,8 +870,8 @@ Program-wide fixpoint
                 Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:this
           Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
             SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
-              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:one
+              MonolithicMemory: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:one
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:one
@@ -880,8 +880,8 @@ Program-wide fixpoint
                 Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:one
           Analysis: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
             SimpleAbstractDomain: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
-              MonolithicHeap: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:a
+              MonolithicMemory: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
+              MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:a
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
                 InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:a
@@ -894,16 +894,16 @@ Program-wide fixpoint
                 Semantics of dispatcher
                   Analysis: Small step semantics of dispatcher
                     SimpleAbstractDomain: Small step semantics of dispatcher
-                      MonolithicHeap: Small step semantics of dispatcher
-                      MonolithicHeap: Rewriting of dispatcher
+                      MonolithicMemory: Small step semantics of dispatcher
+                      MonolithicMemory: Rewriting of dispatcher
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of dispatcher
                       Interval: Small step semantics of dispatcher
                 Semantics of i
                   Analysis: Small step semantics of i
                     SimpleAbstractDomain: Small step semantics of i
-                      MonolithicHeap: Small step semantics of i
-                      MonolithicHeap: Rewriting of i
+                      MonolithicMemory: Small step semantics of i
+                      MonolithicMemory: Rewriting of i
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of i
                       Interval: Small step semantics of i
@@ -913,8 +913,8 @@ Program-wide fixpoint
                 InferredTypes: Evaluation of i
                 Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
                   SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                    MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                    MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
+                    MonolithicMemory: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
+                    MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
                       InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
@@ -923,8 +923,8 @@ Program-wide fixpoint
                       Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
                 Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
                   SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
-                    MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
-                    MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':38:36]:i
+                    MonolithicMemory: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
+                    MonolithicMemory: Rewriting of ['imp-testcases/visualization/visualization.imp':38:36]:i
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
                       InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:i
@@ -936,20 +936,20 @@ Program-wide fixpoint
                     Semantics of 1
                       Analysis: Small step semantics of 1
                         SimpleAbstractDomain: Small step semantics of 1
-                          MonolithicHeap: Small step semantics of 1
+                          MonolithicMemory: Small step semantics of 1
                           InferredTypes: Small step semantics of 1
                           Interval: Small step semantics of 1
                     Semantics of i3
                       Analysis: Small step semantics of i3
                         SimpleAbstractDomain: Small step semantics of i3
-                          MonolithicHeap: Small step semantics of i3
-                          MonolithicHeap: Rewriting of i3
+                          MonolithicMemory: Small step semantics of i3
+                          MonolithicMemory: Rewriting of i3
                           SimpleAbstractDomain: application of substitutions
                           InferredTypes: Small step semantics of i3
                           Interval: Small step semantics of i3
                     Analysis: Assignment of i3 to 1
                       SimpleAbstractDomain: Assignment of i3 to 1
-                        MonolithicHeap: Assignment of i3 to 1
+                        MonolithicMemory: Assignment of i3 to 1
                         InferredTypes: Assignment of i3 to 1
                           InferredTypes: Evaluation of 1
                         Interval: Assignment of i3 to 1
@@ -960,15 +960,15 @@ Program-wide fixpoint
                     Semantics of i
                       Analysis: Small step semantics of i
                         SimpleAbstractDomain: Small step semantics of i
-                          MonolithicHeap: Small step semantics of i
-                          MonolithicHeap: Rewriting of i
+                          MonolithicMemory: Small step semantics of i
+                          MonolithicMemory: Rewriting of i
                           SimpleAbstractDomain: application of substitutions
                           InferredTypes: Small step semantics of i
                           Interval: Small step semantics of i
                     Analysis: Assignment of ret_value@identity to i
                       SimpleAbstractDomain: Assignment of ret_value@identity to i
-                        MonolithicHeap: Assignment of ret_value@identity to i
-                        MonolithicHeap: Rewriting of i
+                        MonolithicMemory: Assignment of ret_value@identity to i
+                        MonolithicMemory: Rewriting of i
                         SimpleAbstractDomain: application of substitutions
                         InferredTypes: Assignment of ret_value@identity to i
                           InferredTypes: Evaluation of i
@@ -977,8 +977,8 @@ Program-wide fixpoint
                           Interval: Evaluation of i
                 Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
                   SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
-                    MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
-                    MonolithicHeap: Rewriting of ret_value@identity
+                    MonolithicMemory: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
+                    MonolithicMemory: Rewriting of ret_value@identity
                     SimpleAbstractDomain: application of substitutions
                     InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
                       InferredTypes: Evaluation of ret_value@identity
@@ -989,8 +989,8 @@ Program-wide fixpoint
                 Analysis: Returning from call [1 targets] identity(dispatcher, i)
               Analysis: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
                 SimpleAbstractDomain: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                  MonolithicHeap: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                  MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
+                  MonolithicMemory: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
+                  MonolithicMemory: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
                   SimpleAbstractDomain: application of substitutions
                   InferredTypes: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
                     InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
@@ -999,8 +999,8 @@ Program-wide fixpoint
                     Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
           Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
             SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
-              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
-              MonolithicHeap: Rewriting of ret_value@helper
+              MonolithicMemory: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
+              MonolithicMemory: Rewriting of ret_value@helper
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
                 InferredTypes: Evaluation of ret_value@helper
@@ -1012,15 +1012,15 @@ Program-wide fixpoint
         Semantics of top
           Analysis: Small step semantics of top
             SimpleAbstractDomain: Small step semantics of top
-              MonolithicHeap: Small step semantics of top
-              MonolithicHeap: Rewriting of top
+              MonolithicMemory: Small step semantics of top
+              MonolithicMemory: Rewriting of top
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of top
               Interval: Small step semantics of top
         Analysis: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
           SimpleAbstractDomain: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-            MonolithicHeap: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
+            MonolithicMemory: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
+            MonolithicMemory: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
             SimpleAbstractDomain: application of substitutions
             InferredTypes: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
               InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
@@ -1031,6 +1031,6 @@ Program-wide fixpoint
       Semantics of ret
         Analysis: Small step semantics of skip
           SimpleAbstractDomain: Small step semantics of skip
-            MonolithicHeap: Small step semantics of skip
+            MonolithicMemory: Small step semantics of skip
             InferredTypes: Small step semantics of skip
             Interval: Small step semantics of skip

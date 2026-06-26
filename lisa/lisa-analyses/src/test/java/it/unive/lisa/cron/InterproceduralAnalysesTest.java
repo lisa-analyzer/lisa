@@ -2,8 +2,8 @@ package it.unive.lisa.cron;
 
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.DefaultConfiguration;
-import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
-import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
+import it.unive.lisa.analysis.memory.pointbased.FieldSensitivePointBasedMemory;
+import it.unive.lisa.analysis.memory.pointbased.PointBasedMemory;
 import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
@@ -27,7 +27,7 @@ public class InterproceduralAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
@@ -43,7 +43,7 @@ public class InterproceduralAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
@@ -60,7 +60,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -77,7 +77,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
@@ -94,7 +94,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -111,7 +111,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
-				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+				.simpleDomain(new PointBasedMemory(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -126,7 +126,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
-				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+				.simpleDomain(new PointBasedMemory(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -143,7 +143,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
-				.simpleDomain(new FieldSensitivePointBasedHeap(), new IntegerConstantPropagation(),
+				.simpleDomain(new FieldSensitivePointBasedMemory(), new IntegerConstantPropagation(),
 						new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.callGraph = new RTACallGraph();
@@ -159,7 +159,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new InliningAnalysis<>();
@@ -176,7 +176,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new InliningAnalysis<>();
@@ -193,7 +193,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
-				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+				.simpleDomain(new PointBasedMemory(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new InliningAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
@@ -208,7 +208,7 @@ public class InterproceduralAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.outputs.add(new JSONCallGraph<>());
 		conf.analysis = DefaultConfiguration
-				.simpleDomain(new PointBasedHeap(), new Interval(), DefaultConfiguration.defaultTypeDomain());
+				.simpleDomain(new PointBasedMemory(), new Interval(), DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new InliningAnalysis<>();
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";

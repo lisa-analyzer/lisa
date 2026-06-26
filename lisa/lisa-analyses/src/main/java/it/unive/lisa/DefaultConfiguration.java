@@ -3,9 +3,9 @@ package it.unive.lisa;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.HeapLattice;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.memory.MemoryDomain;
+import it.unive.lisa.analysis.memory.MemoryLattice;
+import it.unive.lisa.analysis.memory.MonolithicMemory;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
@@ -20,7 +20,7 @@ import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.lattices.SimpleAbstractState;
-import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.memory.Monolith;
 import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.util.numeric.IntInterval;
 
@@ -78,40 +78,40 @@ public class DefaultConfiguration
 	}
 
 	/**
-	 * Yields a default {@link HeapDomain} that can be used to run analyses.
+	 * Yields a default {@link MemoryDomain} that can be used to run analyses.
 	 * 
-	 * @return the heap domain
+	 * @return the memory domain
 	 */
-	public static MonolithicHeap defaultHeapDomain() {
-		return new MonolithicHeap();
+	public static MonolithicMemory defaultMemoryDomain() {
+		return new MonolithicMemory();
 	}
 
 	/**
 	 * Yields an instance of {@link SimpleAbstractState} built using the given
 	 * sub-domains.
 	 * 
-	 * @param <H>   the type of {@link HeapLattice} produced by {@code HD}
-	 * @param <HD>  the type of {@link HeapDomain}
-	 * @param <V>   the type of {@link ValueLattice} produced by {@code VD}
-	 * @param <VD>  the type of {@link ValueDomain}
-	 * @param <T>   the type of {@link TypeLattice} produced by {@code TD}
-	 * @param <TD>  the type of {@link TypeDomain}
-	 * @param heap  the {@link HeapDomain} to embed in the returned state
-	 * @param value the {@link ValueDomain} to embed in the returned state
-	 * @param type  the {@link TypeDomain} to embed in the returned state
+	 * @param <M>    the type of {@link MemoryLattice} produced by {@code MD}
+	 * @param <MD>   the type of {@link MemoryDomain}
+	 * @param <V>    the type of {@link ValueLattice} produced by {@code VD}
+	 * @param <VD>   the type of {@link ValueDomain}
+	 * @param <T>    the type of {@link TypeLattice} produced by {@code TD}
+	 * @param <TD>   the type of {@link TypeDomain}
+	 * @param memory the {@link MemoryDomain} to embed in the returned state
+	 * @param value  the {@link ValueDomain} to embed in the returned state
+	 * @param type   the {@link TypeDomain} to embed in the returned state
 	 * 
 	 * @return the abstract state
 	 */
-	public static <H extends HeapLattice<H>,
-			HD extends HeapDomain<H>,
+	public static <M extends MemoryLattice<M>,
+			MD extends MemoryDomain<M>,
 			V extends ValueLattice<V>,
 			VD extends ValueDomain<V>,
 			T extends TypeLattice<T>,
-			TD extends TypeDomain<T>> SimpleAbstractDomain<H, V, T> simpleDomain(
-					HD heap,
+			TD extends TypeDomain<T>> SimpleAbstractDomain<M, V, T> simpleDomain(
+					MD memory,
 					VD value,
 					TD type) {
-		return new SimpleAbstractDomain<>(heap, value, type);
+		return new SimpleAbstractDomain<>(memory, value, type);
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class DefaultConfiguration
 	public static SimpleAbstractDomain<Monolith,
 			ValueEnvironment<IntInterval>,
 			TypeEnvironment<TypeSet>> defaultAbstractDomain() {
-		return simpleDomain(defaultHeapDomain(), defaultValueDomain(), defaultTypeDomain());
+		return simpleDomain(defaultMemoryDomain(), defaultValueDomain(), defaultTypeDomain());
 	}
 
 	/**

@@ -1,0 +1,137 @@
+package it.unive.lisa.symbolic.memory;
+
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.ExpressionVisitor;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.type.Type;
+
+/**
+ * A memory dereference expression.
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ */
+public class MemoryDereference
+		extends
+		MemoryExpression {
+
+	/**
+	 * The symbolic expression to be dereferenced.
+	 */
+	private final SymbolicExpression toDeref;
+
+	/**
+	 * Builds the memory dereference.
+	 * 
+	 * @param staticType the static type of this expression
+	 * @param toDeref    the expression to be dereference
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
+	 */
+	public MemoryDereference(
+			Type staticType,
+			SymbolicExpression toDeref,
+			CodeLocation location) {
+		super(staticType, location);
+		this.toDeref = toDeref;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((toDeref == null) ? 0 : toDeref.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MemoryDereference other = (MemoryDereference) obj;
+		if (toDeref == null) {
+			if (other.toDeref != null)
+				return false;
+		} else if (!toDeref.equals(other.toDeref))
+			return false;
+		return true;
+	}
+
+	@Override
+	public <T> T accept(
+			ExpressionVisitor<T> visitor,
+			Object... params)
+			throws SemanticException {
+		T deref = toDeref.accept(visitor, params);
+		return visitor.visit(this, deref, params);
+	}
+
+	/**
+	 * Yields the expression to be dereferenced.
+	 * 
+	 * @return the expression to be dereferenced
+	 */
+	public SymbolicExpression getExpression() {
+		return toDeref;
+	}
+
+	@Override
+	public String toString() {
+		return "*(" + toDeref + ")";
+	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression e = toDeref.removeTypingExpressions();
+		if (e == toDeref)
+			return this;
+		return new MemoryDereference(getStaticType(), e, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression e = toDeref.replace(source, target);
+		if (e == toDeref)
+			return this;
+		return new MemoryDereference(getStaticType(), e, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression pushScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		SymbolicExpression e = toDeref.pushScope(token, pp);
+		if (e == null)
+			return null;
+		if (e == toDeref || e.equals(toDeref))
+			return this;
+		return new MemoryDereference(getStaticType(), e, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression popScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		SymbolicExpression e = toDeref.popScope(token, pp);
+		if (e == null)
+			return null;
+		if (e == toDeref || e.equals(toDeref))
+			return this;
+		return new MemoryDereference(getStaticType(), e, getCodeLocation());
+	}
+
+}

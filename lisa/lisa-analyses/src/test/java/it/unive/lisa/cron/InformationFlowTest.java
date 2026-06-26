@@ -6,11 +6,11 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.informationFlow.BaseTaint;
 import it.unive.lisa.analysis.informationFlow.NonInterference;
 import it.unive.lisa.analysis.informationFlow.ThreeLevelsTaint;
 import it.unive.lisa.analysis.informationFlow.TwoLevelsTaint;
+import it.unive.lisa.analysis.memory.MonolithicMemory;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.types.InferredTypes;
@@ -20,10 +20,10 @@ import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.lattices.SimpleAbstractState;
-import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceEnvironment;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
 import it.unive.lisa.lattices.informationFlow.TaintLattice;
+import it.unive.lisa.lattices.memory.Monolith;
 import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.outputs.JSONResults;
 import it.unive.lisa.program.cfg.CFG;
@@ -47,7 +47,7 @@ public class InformationFlowTest
 	public void testTaint() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new TwoLevelsTaint(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.outputs.add(new JSONResults<>());
@@ -66,7 +66,7 @@ public class InformationFlowTest
 	public void testThreeLevelsTaint() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new ThreeLevelsTaint(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.outputs.add(new JSONResults<>());
@@ -147,7 +147,7 @@ public class InformationFlowTest
 	public void testConfidentialityNI() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
-		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
+		conf.analysis = new SimpleAbstractDomain<>(new MonolithicMemory(), new NonInterference(), new InferredTypes());
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/confidentiality";
 		conf.programFile = "program.imp";
@@ -160,7 +160,7 @@ public class InformationFlowTest
 	public void testIntegrityNI() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
-		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
+		conf.analysis = new SimpleAbstractDomain<>(new MonolithicMemory(), new NonInterference(), new InferredTypes());
 		conf.semanticChecks.add(new NICheck());
 		conf.testDir = "non-interference/integrity";
 		conf.programFile = "program.imp";
@@ -173,7 +173,7 @@ public class InformationFlowTest
 	public void testDeclassification() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
-		conf.analysis = new SimpleAbstractDomain<>(new MonolithicHeap(), new NonInterference(), new InferredTypes());
+		conf.analysis = new SimpleAbstractDomain<>(new MonolithicMemory(), new NonInterference(), new InferredTypes());
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
 		conf.semanticChecks.add(new NICheck());

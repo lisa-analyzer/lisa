@@ -5,9 +5,9 @@ import it.unive.lisa.analysis.value.LatticeWithReplacement;
 
 /**
  * A {@link DomainLattice} that tracks information about the types of variables
- * and heap locations in a program. This interface extends
+ * and memory locations in a program. This interface extends
  * {@link LatticeWithReplacement} to allow the application of substitutions that
- * modify the types of variables and heap locations.
+ * modify the types of variables and memory locations.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 

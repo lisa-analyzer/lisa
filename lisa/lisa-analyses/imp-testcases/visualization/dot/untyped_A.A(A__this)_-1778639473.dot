@@ -1,8 +1,8 @@
 digraph "untyped A::A(A* this)" {
 edge ["dir"="forward"]
 graph ["label"="untyped A::A(A* this)","labelloc"="t"]
-"node0" ["label"=<i1 = 0<br/><br/>{ expressions: [i1],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':29:22]:$lisareceiver: [A*],<br/>['imp-testcases/visualization/visualization.imp':29:22]:this: [tests*],<br/>i1: [int32],<br/>this: [A*] },<br/>value: { i1: [0, 0] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
-"node3" ["label"=<ret<br/><br/>{ expressions: [skip],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':29:22]:$lisareceiver: [A*],<br/>['imp-testcases/visualization/visualization.imp':29:22]:this: [tests*],<br/>i1: [int32],<br/>this: [A*] },<br/>value: { i1: [0, 0] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node3","color"="black"]
+"node0" ["label"=<i1 = 0<br/><br/>{ expressions: [i1],<br/>state: { memory: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':29:22]:$lisareceiver: [A*],<br/>['imp-testcases/visualization/visualization.imp':29:22]:this: [tests*],<br/>i1: [int32],<br/>this: [A*] },<br/>value: { i1: [0, 0] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
+"node3" ["label"=<ret<br/><br/>{ expressions: [skip],<br/>state: { memory: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':29:22]:$lisareceiver: [A*],<br/>['imp-testcases/visualization/visualization.imp':29:22]:this: [tests*],<br/>i1: [int32],<br/>this: [A*] },<br/>value: { i1: [0, 0] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node3","color"="black"]
 subgraph "cluster_legend" {
 edge ["dir"="none"]
 graph ["label"=<Legend>,"style"="dotted"]

@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this,_untyped_x,_untyped_y).graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586551.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586613.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586861.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586923.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657581188.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657582180.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657583358.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657581870.graph.json", "untyped_A.f1(A__this).graph.json", "untyped_A.f10(A__this).graph.json", "untyped_A.f2(A__this).graph.json", "untyped_A.f3(A__this).graph.json", "untyped_A.f4(A__this).graph.json", "untyped_A.f5(A__this).graph.json", "untyped_A.f6(A__this).graph.json", "untyped_A.f7(A__this).graph.json", "untyped_A.f8(A__this).graph.json", "untyped_A.f9(A__this).graph.json" ],
+  "info" : {
+    "cfgs" : "11",
+    "duration" : "53ms",
+    "end" : "2026-01-07T11:13:47.882+01:00",
+    "expressions" : "150",
+    "files" : "19",
+    "globals" : "2",
+    "members" : "11",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-01-07T11:13:47.829+01:00",
+    "statements" : "59",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/memory/pp"
+  }
+}

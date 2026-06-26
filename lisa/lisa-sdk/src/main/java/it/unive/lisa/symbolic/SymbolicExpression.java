@@ -6,8 +6,8 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryLocation;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
@@ -56,7 +56,7 @@ public abstract class SymbolicExpression
 	 * Yields the static type of this expression, as provided during
 	 * construction. The returned type should (but might not) be a supertype of
 	 * all the runtime types determined during the analysis, with the exception
-	 * of {@link HeapLocation}s representing more memory locations.
+	 * of {@link MemoryLocation}s representing more memory locations.
 	 * 
 	 * @return the static type
 	 */

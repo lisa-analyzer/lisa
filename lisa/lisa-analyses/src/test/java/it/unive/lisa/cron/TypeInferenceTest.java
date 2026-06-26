@@ -1,7 +1,7 @@
 package it.unive.lisa.cron;
 
 import it.unive.lisa.DefaultConfiguration;
-import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
+import it.unive.lisa.analysis.memory.pointbased.FieldSensitivePointBasedMemory;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
@@ -17,7 +17,7 @@ public class TypeInferenceTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
 		conf.testDir = "type-inference";
@@ -31,7 +31,7 @@ public class TypeInferenceTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -46,7 +46,7 @@ public class TypeInferenceTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new FieldSensitivePointBasedHeap(),
+				new FieldSensitivePointBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				new InferredTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -61,7 +61,7 @@ public class TypeInferenceTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
 		conf.testDir = "type-inference";
@@ -75,7 +75,7 @@ public class TypeInferenceTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
@@ -90,7 +90,7 @@ public class TypeInferenceTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new FieldSensitivePointBasedHeap(),
+				new FieldSensitivePointBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				new StaticTypes());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);

@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.events;
 
 import it.unive.lisa.analysis.SimpleAbstractDomain;
-import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
+import it.unive.lisa.analysis.memory.MemoryDomain.MemoryReplacement;
 import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.events.EndEvent;
@@ -28,7 +28,7 @@ public class SADSubsEnd<V extends ValueLattice<V>, T extends TypeLattice<T>>
 	private final V valueAfter;
 	private final T type;
 	private final T typeAfter;
-	private final List<HeapReplacement> subs;
+	private final List<MemoryReplacement> subs;
 
 	/**
 	 * Builds the event.
@@ -44,7 +44,7 @@ public class SADSubsEnd<V extends ValueLattice<V>, T extends TypeLattice<T>>
 			V valueAfter,
 			T type,
 			T typeAfter,
-			List<HeapReplacement> subs) {
+			List<MemoryReplacement> subs) {
 		this.value = value;
 		this.valueAfter = valueAfter;
 		this.type = type;
@@ -93,7 +93,7 @@ public class SADSubsEnd<V extends ValueLattice<V>, T extends TypeLattice<T>>
 	 * 
 	 * @return the substitutions
 	 */
-	public List<HeapReplacement> getSubs() {
+	public List<MemoryReplacement> getSubs() {
 		return subs;
 	}
 

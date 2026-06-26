@@ -1,9 +1,9 @@
 package it.unive.lisa.cron;
 
 import it.unive.lisa.DefaultConfiguration;
-import it.unive.lisa.analysis.heap.TypeBasedHeap;
-import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
-import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
+import it.unive.lisa.analysis.memory.TypeBasedMemory;
+import it.unive.lisa.analysis.memory.pointbased.FieldSensitivePointBasedMemory;
+import it.unive.lisa.analysis.memory.pointbased.PointBasedMemory;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.outputs.JSONResults;
 import org.junit.jupiter.api.Test;
@@ -13,49 +13,49 @@ public class MemoryAbstractionsTest
 		IMPCronExecutor {
 
 	@Test
-	public void testTypeBasedHeap() {
+	public void testTypeBasedMemory() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new TypeBasedHeap(),
+				new TypeBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
-		conf.testDir = "heap";
+		conf.testDir = "memory";
 		conf.testSubDir = "types";
-		conf.programFile = "heap-type.imp";
+		conf.programFile = "memory-type.imp";
 		conf.allMethods = true;
 		perform(conf);
 	}
 
 	@Test
-	public void fieldInsensitivePointBasedHeapTest() {
+	public void fieldInsensitivePointBasedMemoryTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new PointBasedHeap(),
+				new PointBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
-		conf.testDir = "heap";
+		conf.testDir = "memory";
 		conf.testSubDir = "pp";
-		conf.programFile = "heap-pp.imp";
+		conf.programFile = "memory-pp.imp";
 		conf.allMethods = true;
 		perform(conf);
 	}
 
 	@Test
-	public void fieldSensitivePointBasedHeapTest() {
+	public void FieldSensitivePointBasedMemoryTest() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new FieldSensitivePointBasedHeap(),
+				new FieldSensitivePointBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
-		conf.testDir = "heap";
+		conf.testDir = "memory";
 		conf.testSubDir = "pp-field";
-		conf.programFile = "heap-pp-field.imp";
+		conf.programFile = "memory-pp-field.imp";
 		conf.allMethods = true;
 		perform(conf);
 	}
@@ -65,11 +65,11 @@ public class MemoryAbstractionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new PointBasedHeap(),
+				new PointBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
-		conf.testDir = "heap";
+		conf.testDir = "memory";
 		conf.testSubDir = "pp-gc";
 		conf.programFile = "gc.imp";
 		perform(conf);
@@ -80,11 +80,11 @@ public class MemoryAbstractionsTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new FieldSensitivePointBasedHeap(),
+				new FieldSensitivePointBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
-		conf.testDir = "heap";
+		conf.testDir = "memory";
 		conf.testSubDir = "pp-field-gc";
 		conf.programFile = "gc.imp";
 		perform(conf);

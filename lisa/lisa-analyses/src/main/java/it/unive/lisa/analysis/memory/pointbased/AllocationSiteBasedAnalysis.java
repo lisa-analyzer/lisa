@@ -1,0 +1,680 @@
+package it.unive.lisa.analysis.memory.pointbased;
+
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.memory.BaseMemoryDomain;
+import it.unive.lisa.analysis.memory.MemoryLattice;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.FunctionalLattice;
+import it.unive.lisa.lattices.Satisfiability;
+import it.unive.lisa.lattices.memory.allocations.AllocationSite;
+import it.unive.lisa.lattices.memory.allocations.AllocationSites;
+import it.unive.lisa.lattices.memory.allocations.MemoryAllocationSite;
+import it.unive.lisa.lattices.memory.allocations.NullAllocationSite;
+import it.unive.lisa.lattices.memory.allocations.StackAllocationSite;
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.MemoryAllocation;
+import it.unive.lisa.symbolic.memory.MemoryDereference;
+import it.unive.lisa.symbolic.memory.MemoryExpression;
+import it.unive.lisa.symbolic.memory.MemoryReference;
+import it.unive.lisa.symbolic.memory.NullConstant;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryLocation;
+import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.type.NullType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
+
+/**
+ * A base class for memory analyses based on the allocation sites of the objects
+ * and arrays they track, namely the position of the code where memory locations
+ * are generated. All memory locations that are generated at the same allocation
+ * sites are abstracted into a single unique memory identifier. Concrete
+ * instances have control over their field-sensitivity.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <L> the type {@link FunctionalLattice} used to track points-to
+ *                information for the memory locations
+ */
+public abstract class AllocationSiteBasedAnalysis<
+		L extends FunctionalLattice<L, Identifier, AllocationSites> & MemoryLattice<L>>
+		implements
+		BaseMemoryDomain<L> {
+
+	@Override
+	public Pair<L, List<MemoryReplacement>> assign(
+			L state,
+			Identifier id,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isBottom())
+			return Pair.of(state, List.of());
+		Pair<L, List<MemoryReplacement>> sss = smallStepSemantics(state, expression, pp, oracle);
+		L result = state.bottom();
+		List<MemoryReplacement> replacements = new LinkedList<>();
+		sss.getRight().forEach(replacements::add);
+		ExpressionSet rhsExps;
+		boolean rhsIsReceiver = false;
+
+		expression = expression.removeTypingExpressions();
+
+		if (expression instanceof Identifier) {
+			rhsExps = new ExpressionSet(resolveIdentifier(state, (Identifier) expression, pp));
+			rhsIsReceiver = ((Identifier) expression).isInstrumentedReceiver();
+		} else if (expression.mightNeedRewriting())
+			rhsExps = rewrite(state, expression, pp, oracle);
+		else
+			rhsExps = new ExpressionSet(expression);
+
+		for (SymbolicExpression rhs : rhsExps)
+			result = result.lub(process(id, pp, oracle, sss.getLeft(), replacements, rhs, rhsIsReceiver));
+
+		if (!id.isWeak() && state.knowsIdentifier(id)) {
+			// we might make some location unreachable,
+			// so we have to perform garbage collection
+			MemoryReplacement r = new MemoryReplacement();
+			r.addSource(id);
+			replacements.addAll(state.expand(r));
+		}
+
+		return Pair.of(result, replacements);
+	}
+
+	private L process(
+			Identifier id,
+			ProgramPoint pp,
+			SemanticOracle oracle,
+			L sss,
+			List<MemoryReplacement> replacements,
+			SymbolicExpression rhs,
+			boolean rhsIsReceiver)
+			throws SemanticException {
+		if (rhs instanceof MemoryPointer) {
+			if (!(((MemoryPointer) rhs).getReferencedLocation() instanceof AllocationSite))
+				throw new SemanticException("Cannot assign a non-allocation site location");
+			// we have x = y, where y is a pointer to an allocation site
+			AllocationSite rhs_ref = (AllocationSite) ((MemoryPointer) rhs).getReferencedLocation();
+			if (id instanceof MemoryPointer) {
+				// we have x = y, where both are pointers
+				// we perform *x = *y so that x and y become aliases
+				Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
+				return store(sss, lhs_ref, rhs_ref);
+			} else if (rhs_ref instanceof StackAllocationSite
+					// if we are allocating, we just perform normal aliasing
+					// as there is nothing to copy
+					&& !((StackAllocationSite) rhs_ref).isAllocation()
+					// if rhs is an instrumented receiver, it corresponds to
+					// something that is still on the stack while being
+					// initialized (eg with a constructor call) so we
+					// perform normal aliasing as there is nothing to copy
+					&& !rhsIsReceiver
+					&& !getAllocatedAt(sss, ((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
+				// for stack elements, assignment works as a shallow copy
+				// since there are no pointers to alias
+				return shallowCopy(sss, id, (StackAllocationSite) rhs_ref, replacements);
+			else {
+				// aliasing: id and star_y points to the same object
+				return store(sss, id, rhs_ref);
+			}
+		} else
+			return sss;
+	}
+
+	/**
+	 * Stores the allocation site {@code site} in the identifier {@code id} in
+	 * the given state. This method ensures that (i) weak identifiers are
+	 * correctly handled (performing a join with the current state of the
+	 * identifier), and that the site being stored does not correspond to an
+	 * allocation according to {@link MemoryLocation#isAllocation()}.
+	 * 
+	 * @param state the state where to store the allocation site
+	 * @param id    the identifier where to store the allocation site
+	 * @param site  the allocation site to be stored
+	 * 
+	 * @return a new state where {@code id} is updated with {@code site}
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	protected L store(
+			L state,
+			Identifier id,
+			AllocationSite site)
+			throws SemanticException {
+		if (id instanceof NullAllocationSite)
+			// if we are assigning something to the null identifier
+			// we skip the assignment
+			return state.bottom();
+		if (site.isAllocation())
+			// we never store the allocation version of a site,
+			// otherwise it would be considered an allocation
+			// every time we retrieve it from the map
+			site = (AllocationSite) site.asNonAllocation();
+		AllocationSites states = new AllocationSites(site);
+		if (id.isWeak() && state.knowsIdentifier(id))
+			states = states.lub(state.getState(id));
+		return state.putState(id, states);
+	}
+
+	/**
+	 * Yields an allocation site name {@code id} if it is tracked by this
+	 * domain, {@code null} otherwise.
+	 * 
+	 * @param state    the current state of the analysis
+	 * @param location allocation site's name to be searched
+	 * 
+	 * @return an allocation site name {@code id} if it is tracked by this
+	 *             domain, {@code null} otherwise
+	 */
+	protected Set<AllocationSite> getAllocatedAt(
+			L state,
+			String location) {
+		Set<AllocationSite> sites = new HashSet<>();
+		for (AllocationSites set : state.getValues())
+			for (AllocationSite site : set)
+				if (site.getLocationName().equals(location))
+					sites.add(site);
+
+		return sites;
+	}
+
+	/**
+	 * Performs the assignment of {@code site} to the identifier {@code id} when
+	 * {@code site} is a stack allocation site, thus performing a shallow copy
+	 * instead of aliasing handling the memory replacements.
+	 * 
+	 * @param state        the current state of the analysis
+	 * @param id           the identifier to be updated
+	 * @param site         the allocation site to be assigned
+	 * @param replacements the list of replacements to be updated
+	 * 
+	 * @return the point-based memory instance where {@code id} is updated with
+	 *             {@code star_y} and the needed memory replacements
+	 * 
+	 * @throws SemanticException if something goes wrong during the analysis
+	 */
+	public L shallowCopy(
+			L state,
+			Identifier id,
+			StackAllocationSite site,
+			List<MemoryReplacement> replacements)
+			throws SemanticException {
+		// no aliasing: star_y must be cloned and the clone must
+		// be assigned to id
+		StackAllocationSite clone = new StackAllocationSite(
+				site.getStaticType(),
+				id.getCodeLocation().toString(),
+				site.isWeak(),
+				id.getCodeLocation());
+
+		MemoryReplacement replacement = new MemoryReplacement();
+		replacement.addSource(site);
+		replacement.addTarget(clone);
+		replacement.addTarget(site);
+		replacements.add(replacement);
+
+		return store(state, id, clone);
+	}
+
+	@Override
+	public Pair<L, List<MemoryReplacement>> assume(
+			L state,
+			SymbolicExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability sat = satisfies(state, expression, dest, oracle);
+		if (sat == Satisfiability.SATISFIED || sat == Satisfiability.UNKNOWN)
+			return Pair.of(state, List.of());
+		else
+			return Pair.of(state.bottom(), List.of());
+	}
+
+	@Override
+	public Satisfiability satisfies(
+			L state,
+			SymbolicExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Satisfiability.UNKNOWN;
+
+		// negation
+		if (expression instanceof UnaryExpression) {
+			UnaryExpression un = (UnaryExpression) expression;
+			if (un.getOperator() == LogicalNegation.INSTANCE)
+				return satisfies(state, un.getExpression(), pp, oracle).negate();
+		}
+
+		if (expression instanceof BinaryExpression) {
+			BinaryExpression bin = (BinaryExpression) expression;
+			if (bin.getOperator() == LogicalAnd.INSTANCE)
+				return satisfies(state, bin.getLeft(), pp, oracle).and(satisfies(state, bin.getRight(), pp, oracle));
+			else if (bin.getOperator() == LogicalOr.INSTANCE)
+				return satisfies(state, bin.getLeft(), pp, oracle).or(satisfies(state, bin.getRight(), pp, oracle));
+			else if (bin.getOperator() == ComparisonNe.INSTANCE) {
+				BinaryExpression negatedBin = new BinaryExpression(
+						bin.getStaticType(),
+						bin.getLeft(),
+						bin.getRight(),
+						ComparisonEq.INSTANCE,
+						expression.getCodeLocation());
+				return satisfies(state, negatedBin, pp, oracle).negate();
+			} else if (bin.getOperator() == ComparisonEq.INSTANCE) {
+				SymbolicExpression leftExpr = bin.getLeft();
+				SymbolicExpression rightExpr = bin.getRight();
+
+				ExpressionSet rhsExps;
+				ExpressionSet lhsExps;
+				if (leftExpr instanceof Identifier)
+					lhsExps = new ExpressionSet(resolveIdentifier(state, (Identifier) leftExpr, pp));
+				else if (expression.mightNeedRewriting())
+					lhsExps = rewrite(state, leftExpr, pp, oracle);
+				else
+					lhsExps = new ExpressionSet(leftExpr);
+
+				if (rightExpr instanceof Identifier)
+					rhsExps = new ExpressionSet(resolveIdentifier(state, (Identifier) rightExpr, pp));
+				else if (expression.mightNeedRewriting())
+					rhsExps = rewrite(state, rightExpr, pp, oracle);
+				else
+					rhsExps = new ExpressionSet(rightExpr);
+
+				Satisfiability sat = Satisfiability.BOTTOM;
+				for (SymbolicExpression l : lhsExps)
+					for (SymbolicExpression r : rhsExps)
+						if (l instanceof MemoryPointer && r instanceof MemoryPointer) {
+							MemoryLocation lp = ((MemoryPointer) l).getReferencedLocation();
+							MemoryLocation rp = ((MemoryPointer) r).getReferencedLocation();
+
+							// left is null
+							if (lp.equals(NullAllocationSite.INSTANCE))
+								if (rp.equals(NullAllocationSite.INSTANCE))
+									sat = sat.lub(Satisfiability.SATISFIED);
+								else
+									sat = sat.lub(Satisfiability.NOT_SATISFIED);
+							// right is null
+							else if (rp.equals(NullAllocationSite.INSTANCE))
+								sat = sat.lub(Satisfiability.NOT_SATISFIED);
+
+							// right is strong
+							else if (!rp.isWeak())
+								if (rp.equals(lp))
+									sat = sat.lub(Satisfiability.SATISFIED);
+								else if (!lp.isWeak())
+									sat = sat.lub(Satisfiability.NOT_SATISFIED);
+								else
+									sat = sat.lub(Satisfiability.UNKNOWN);
+							// left is strong
+							else if (!lp.isWeak())
+								if (rp.equals(lp))
+									sat = sat.lub(Satisfiability.SATISFIED);
+								else if (!rp.isWeak())
+									sat = sat.lub(Satisfiability.NOT_SATISFIED);
+								else
+									sat = sat.lub(Satisfiability.UNKNOWN);
+						}
+
+				// FIXME: we may improve this check
+				return sat != Satisfiability.BOTTOM ? sat : Satisfiability.UNKNOWN;
+			}
+		}
+
+		return Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public Pair<L, List<MemoryReplacement>> semanticsOf(
+			L state,
+			MemoryExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return Pair.of(state, List.of());
+	}
+
+	/**
+	 * Resolves the identifier {@code v} to the set of allocation sites that it
+	 * points to, if it is not a memory pointer and this domain instance
+	 * contains points-to information for {@code v}. Otherwise, a set with the
+	 * given identifier is returned.
+	 * 
+	 * @param state the current state of the analysis
+	 * @param v     the identifier to be resolved
+	 * @param pp    the program point where this resolution is applied
+	 * 
+	 * @return the set of allocation sites that {@code v} points to, or a set
+	 *             with {@code v} itself
+	 */
+	protected Set<SymbolicExpression> resolveIdentifier(
+			L state,
+			Identifier v,
+			ProgramPoint pp) {
+		if (v instanceof MemoryPointer || !state.getKeys().contains(v))
+			return Set.of(v);
+
+		Set<SymbolicExpression> result = new HashSet<>();
+		for (AllocationSite site : state.getState(v))
+			result.add(new MemoryPointer(pp.getProgram().getTypes().getReference(site.getStaticType()), site,
+					site.getCodeLocation()));
+
+		return result;
+	}
+
+	/*
+	 * note that all the cases where we are adding a plain expression to the
+	 * result set in these methods is because it could have been already
+	 * rewritten by other rewrite methods to an allocation site
+	 */
+
+	@Override
+	public ExpressionSet rewriteAccessChild(
+			AccessChild expression,
+			ExpressionSet receiver,
+			ExpressionSet child,
+			L state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Set<SymbolicExpression> result = new HashSet<>();
+		Set<SymbolicExpression> toProcess = new HashSet<>();
+		for (SymbolicExpression rec : receiver) {
+			rec = rec.removeTypingExpressions();
+			if (rec instanceof Identifier)
+				toProcess.addAll(resolveIdentifier(state, (Identifier) rec, pp));
+			else
+				toProcess.add(rec);
+		}
+
+		for (SymbolicExpression rec : toProcess)
+			if (rec instanceof MemoryPointer) {
+				MemoryPointer pid = (MemoryPointer) rec;
+				AllocationSite site = (AllocationSite) pid.getReferencedLocation();
+				AllocationSite e;
+				if (site instanceof StackAllocationSite)
+					e = new StackAllocationSite(
+							expression.getStaticType(),
+							site.getLocationName(),
+							true,
+							expression.getCodeLocation());
+				else
+					e = new MemoryAllocationSite(
+							expression.getStaticType(),
+							site.getLocationName(),
+							true,
+							expression.getCodeLocation());
+
+				// propagates the annotations of the child value expression
+				// to the newly created allocation site
+				for (SymbolicExpression f : child)
+					if (f instanceof Identifier)
+						for (Annotation ann : ((Identifier) f).getAnnotations())
+							e.addAnnotation(ann);
+
+				result.add(e);
+			} else if (rec instanceof AllocationSite)
+				result.add(((AllocationSite) rec).withType(expression.getStaticType()));
+
+		return new ExpressionSet(result);
+	}
+
+	@Override
+	public ExpressionSet rewriteMemoryAllocation(
+			MemoryAllocation expression,
+			L state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		AllocationSite id;
+		if (expression.isStackAllocation())
+			id = new StackAllocationSite(
+					expression.getStaticType(),
+					expression.getCodeLocation().getCodeLocation(),
+					true,
+					expression.getCodeLocation());
+		else
+			id = new MemoryAllocationSite(
+					expression.getStaticType(),
+					expression.getCodeLocation().getCodeLocation(),
+					true,
+					expression.getCodeLocation());
+		id.setAllocation(true);
+
+		// propagates the annotations of expression
+		// to the newly created allocation site
+		for (Annotation ann : expression.getAnnotations())
+			id.addAnnotation(ann);
+
+		return new ExpressionSet(id);
+	}
+
+	@Override
+	public ExpressionSet rewriteMemoryReference(
+			MemoryReference expression,
+			ExpressionSet arg,
+			L state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Set<SymbolicExpression> result = new HashSet<>();
+		Set<SymbolicExpression> toProcess = new HashSet<>();
+		for (SymbolicExpression loc : arg) {
+			loc = loc.removeTypingExpressions();
+			if (loc instanceof Identifier)
+				toProcess.addAll(resolveIdentifier(state, (Identifier) loc, pp));
+			else
+				toProcess.add(loc);
+		}
+
+		for (SymbolicExpression loc : toProcess)
+			if (loc instanceof AllocationSite) {
+				AllocationSite allocSite = (AllocationSite) loc;
+				MemoryPointer e = new MemoryPointer(
+						pp.getProgram().getTypes().getReference(loc.getStaticType()),
+						allocSite,
+						loc.getCodeLocation());
+
+				// propagates the annotations of the allocation site
+				// to the newly created memory pointer
+				for (Annotation ann : allocSite.getAnnotations())
+					e.addAnnotation(ann);
+
+				result.add(e);
+			} else
+				result.add(loc);
+
+		return new ExpressionSet(result);
+	}
+
+	@Override
+	public ExpressionSet rewriteMemoryDereference(
+			MemoryDereference expression,
+			ExpressionSet arg,
+			L state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Set<SymbolicExpression> result = new HashSet<>();
+		Set<SymbolicExpression> toProcess = new HashSet<>();
+		for (SymbolicExpression rec : arg) {
+			rec = rec.removeTypingExpressions();
+			if (rec instanceof Identifier)
+				toProcess.addAll(resolveIdentifier(state, (Identifier) rec, pp));
+			else
+				toProcess.add(rec);
+		}
+
+		for (SymbolicExpression ref : toProcess)
+			if (ref instanceof MemoryPointer)
+				result.add(((MemoryPointer) ref).getReferencedLocation());
+			else if (ref instanceof Identifier) {
+				// this could be aliasing!
+				Identifier id = (Identifier) ref;
+				if (state.getKeys().contains(id))
+					result.addAll(resolveIdentifier(state, id, pp));
+				else if (id instanceof Variable) {
+					// this is a variable from the program that we know
+					// nothing about
+					CodeLocation loc = expression.getCodeLocation();
+					AllocationSite site;
+					if (id.getStaticType().isPointerType())
+						site = new MemoryAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+					else if (id.getStaticType().isInMemoryType() || id.getStaticType().isUntyped())
+						site = new StackAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+					else
+						throw new SemanticException(
+								"The type " + id.getStaticType()
+										+ " cannot be allocated by point-based memory domains");
+
+					// propagates the annotations of the variable
+					// to the newly created allocation site
+					for (Annotation ann : id.getAnnotations())
+						site.addAnnotation(ann);
+
+					result.add(site);
+				}
+			} else
+				result.add(ref);
+
+		return new ExpressionSet(result);
+	}
+
+	@Override
+	public ExpressionSet rewritePushAny(
+			PushAny expression,
+			L state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (expression.getStaticType().isPointerType()) {
+			Type inner = expression.getStaticType().asPointerType().getInnerType();
+			CodeLocation loc = expression.getCodeLocation();
+			MemoryAllocationSite site = new MemoryAllocationSite(
+					inner,
+					"unknown@" + loc.getCodeLocation(),
+					false,
+					loc);
+			return new ExpressionSet(new MemoryPointer(expression.getStaticType(), site, loc));
+		} else if (expression.getStaticType().isInMemoryType()) {
+			Type type = expression.getStaticType();
+			CodeLocation loc = expression.getCodeLocation();
+			StackAllocationSite site = new StackAllocationSite(
+					type,
+					"unknown@" + loc.getCodeLocation(),
+					false,
+					loc);
+			return new ExpressionSet(new MemoryPointer(expression.getStaticType(), site, loc));
+		}
+		return new ExpressionSet(expression);
+	}
+
+	@Override
+	public ExpressionSet rewriteNullConstant(
+			NullConstant expression,
+			L state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		MemoryPointer mp = new MemoryPointer(
+				pp.getProgram().getTypes().getReference(NullType.INSTANCE),
+				NullAllocationSite.INSTANCE,
+				expression.getCodeLocation());
+		return new ExpressionSet(mp);
+	}
+
+	@Override
+	public Satisfiability alias(
+			L state,
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Satisfiability.UNKNOWN;
+		if (state.isBottom())
+			return Satisfiability.BOTTOM;
+
+		boolean atLeastOne = false;
+		boolean all = true;
+
+		ExpressionSet xrs = rewrite(state, x, pp, oracle);
+		ExpressionSet yrs = rewrite(state, y, pp, oracle);
+
+		for (SymbolicExpression xr : xrs)
+			for (SymbolicExpression yr : yrs)
+				if (xr instanceof MemoryPointer && yr instanceof MemoryPointer) {
+					MemoryLocation xloc = ((MemoryPointer) xr).getReferencedLocation();
+					MemoryLocation yloc = ((MemoryPointer) yr).getReferencedLocation();
+					if (xloc.equals(yloc)) {
+						atLeastOne = true;
+						all &= true;
+					} else
+						all = false;
+				} else
+					// they cannot be alias
+					all = false;
+
+		if (all && atLeastOne)
+			return Satisfiability.SATISFIED;
+		else if (atLeastOne)
+			return Satisfiability.UNKNOWN;
+		else
+			return Satisfiability.NOT_SATISFIED;
+	}
+
+	@Override
+	public Satisfiability isReachableFrom(
+			L state,
+			SymbolicExpression x,
+			SymbolicExpression y,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Satisfiability.UNKNOWN;
+		if (state.isBottom())
+			return Satisfiability.BOTTOM;
+
+		WorkingSet<SymbolicExpression> ws = new VisitOnceFIFOWorkingSet<>();
+		rewrite(state, x, pp, oracle).elements().forEach(ws::push);
+		ExpressionSet targets = rewrite(state, y, pp, oracle);
+
+		while (!ws.isEmpty()) {
+			SymbolicExpression current = ws.peek();
+			if (targets.elements().contains(current))
+				return Satisfiability.SATISFIED;
+
+			if (current instanceof Identifier && state.knowsIdentifier((Identifier) current))
+				state.getState((Identifier) current).elements().forEach(ws::push);
+			else
+				rewrite(state, current, pp, oracle).elements().forEach(ws::push);
+		}
+
+		return Satisfiability.NOT_SATISFIED;
+	}
+
+}

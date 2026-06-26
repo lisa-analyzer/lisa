@@ -12,12 +12,12 @@ import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapDereference;
-import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.heap.MemoryAllocation;
-import it.unive.lisa.symbolic.heap.NullConstant;
+import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.MemoryAllocation;
+import it.unive.lisa.symbolic.memory.MemoryDereference;
+import it.unive.lisa.symbolic.memory.MemoryExpression;
+import it.unive.lisa.symbolic.memory.MemoryReference;
+import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -118,10 +118,10 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 	}
 
 	/**
-	 * The error message thrown when a heap expression is encountered while
+	 * The error message thrown when a memory expression is encountered while
 	 * traversing an expression.
 	 */
-	static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with a non-relational value domain";
+	static final String CANNOT_PROCESS_ERROR = "Cannot process a memory expression with a non-relational value domain";
 
 	@Override
 	default L eval(
@@ -141,7 +141,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 
 	@Override
 	default L visit(
-			HeapExpression expression,
+			MemoryExpression expression,
 			L[] subExpressions,
 			Object... params)
 			throws SemanticException {
@@ -176,7 +176,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 
 	@Override
 	default L visit(
-			HeapReference expression,
+			MemoryReference expression,
 			L arg,
 			Object... params)
 			throws SemanticException {
@@ -185,7 +185,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 
 	@Override
 	default L visit(
-			HeapDereference expression,
+			MemoryDereference expression,
 			L arg,
 			Object... params)
 			throws SemanticException {

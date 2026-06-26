@@ -140,7 +140,7 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 			params[i] = entryState.intermediateStates.getState(actuals[i]).getExecutionExpressions();
 		// it should be enough to send values to top, retaining all type
 		// information
-		// TODO what about heap?
+		// TODO what about memory?
 		return start.forwardSemanticsAux(
 				this,
 				entryState.postState.withTopValues(),

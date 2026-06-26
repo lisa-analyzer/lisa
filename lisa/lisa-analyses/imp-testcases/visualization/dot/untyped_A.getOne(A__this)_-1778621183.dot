@@ -1,11 +1,11 @@
 digraph "untyped A::getOne(A* this)" {
 edge ["dir"="forward"]
 graph ["label"="untyped A::getOne(A* this)","labelloc"="t"]
-"node0" ["label"=<rec = new tests()<br/><br/>{ expressions: [rec],<br/>state: { heap: monolith,<br/>type: { heap[w]:heap: [tests],<br/>rec: [tests*] },<br/>value: #TOP# }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
-"node3" ["label"=<x = open(rec)<br/><br/>{ expressions: [x],<br/>state: { heap: monolith,<br/>type: { x: #TOP# },<br/>value: { x: [-Inf, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node3","color"="gray"]
-"node7" ["label"=<&lt;(x, 10)<br/><br/>{ expressions: [x &lt; 10],<br/>state: { heap: monolith,<br/>type: { x: #TOP# },<br/>value: { x: [-Inf, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node7","color"="gray"]
-"node10" ["label"=<x = +(x, 1)<br/><br/>{ expressions: [x],<br/>state: { heap: monolith,<br/>type: { x: [float32, int32] },<br/>value: { x: [-Inf, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node10","color"="gray"]
-"node15" ["label"=<return 1<br/><br/>{ expressions: [ret_value@getOne],<br/>state: { heap: monolith,<br/>type: { ret_value@getOne: [int32],<br/>x: #TOP# },<br/>value: { ret_value@getOne: [1, 1],<br/>x: [10, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node15","color"="black"]
+"node0" ["label"=<rec = new tests()<br/><br/>{ expressions: [rec],<br/>state: { memory: monolith,<br/>type: { memory[w]:memory: [tests],<br/>rec: [tests*] },<br/>value: #TOP# }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
+"node3" ["label"=<x = open(rec)<br/><br/>{ expressions: [x],<br/>state: { memory: monolith,<br/>type: { x: #TOP# },<br/>value: { x: [-Inf, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node3","color"="gray"]
+"node7" ["label"=<&lt;(x, 10)<br/><br/>{ expressions: [x &lt; 10],<br/>state: { memory: monolith,<br/>type: { x: #TOP# },<br/>value: { x: [-Inf, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node7","color"="gray"]
+"node10" ["label"=<x = +(x, 1)<br/><br/>{ expressions: [x],<br/>state: { memory: monolith,<br/>type: { x: [float32, int32] },<br/>value: { x: [-Inf, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node10","color"="gray"]
+"node15" ["label"=<return 1<br/><br/>{ expressions: [ret_value@getOne],<br/>state: { memory: monolith,<br/>type: { ret_value@getOne: [int32],<br/>x: #TOP# },<br/>value: { ret_value@getOne: [1, 1],<br/>x: [10, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node15","color"="black"]
 subgraph "cluster_legend" {
 edge ["dir"="none"]
 graph ["label"=<Legend>,"style"="dotted"]

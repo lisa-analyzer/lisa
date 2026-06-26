@@ -10,7 +10,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
- * A memory pointer to a heap location.
+ * A memory pointer to a memory location.
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
@@ -19,21 +19,21 @@ public class MemoryPointer
 		Identifier {
 
 	/**
-	 * The heap location memory pointed by this pointer.
+	 * The memory location memory pointed by this pointer.
 	 */
-	private final HeapLocation loc;
+	private final MemoryLocation loc;
 
 	/**
 	 * Builds a memory pointer with empty annotations.
 	 * 
 	 * @param staticType the static type of this expression
-	 * @param loc        the heap location pointed by this memory pointer
+	 * @param loc        the memory location pointed by this memory pointer
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
 	public MemoryPointer(
 			Type staticType,
-			HeapLocation loc,
+			MemoryLocation loc,
 			CodeLocation location) {
 		this(staticType, loc, new Annotations(), location);
 	}
@@ -42,14 +42,14 @@ public class MemoryPointer
 	 * Builds a memory pointer.
 	 * 
 	 * @param staticType  the static type of this expression
-	 * @param loc         the heap location pointed by this memory pointer
+	 * @param loc         the memory location pointed by this memory pointer
 	 * @param annotations the annotation of this memory pointer
 	 * @param location    the code location of the statement that has generated
 	 *                        this expression
 	 */
 	public MemoryPointer(
 			Type staticType,
-			HeapLocation loc,
+			MemoryLocation loc,
 			Annotations annotations,
 			CodeLocation location) {
 		// A pointer identifier is always a strong identifier
@@ -78,11 +78,11 @@ public class MemoryPointer
 	}
 
 	/**
-	 * Yields the heap location pointed by this pointer.
+	 * Yields the memory location pointed by this pointer.
 	 * 
-	 * @return the heap location pointed by this pointer
+	 * @return the memory location pointed by this pointer
 	 */
-	public HeapLocation getReferencedLocation() {
+	public MemoryLocation getReferencedLocation() {
 		return loc;
 	}
 

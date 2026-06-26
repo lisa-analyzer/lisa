@@ -22,7 +22,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Prefix(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
@@ -36,7 +36,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Suffix(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
@@ -50,7 +50,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new CharInclusion(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
@@ -64,7 +64,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Bricks(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
@@ -87,7 +87,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration
-				.simpleDomain(DefaultConfiguration.defaultHeapDomain(), new FSA(),
+				.simpleDomain(DefaultConfiguration.defaultMemoryDomain(), new FSA(),
 						DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
 		conf.testSubDir = "fsa";
@@ -100,7 +100,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Tarsis(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
@@ -114,7 +114,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new BoundedStringSet(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string";
@@ -128,7 +128,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new SubstringDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string/subs-domain";
@@ -143,7 +143,7 @@ public class StringAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new SubstringDomainWithConstants(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "string/subs-domain-constants";

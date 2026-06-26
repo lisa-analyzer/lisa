@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * An {@link Environment} that is also a {@link ValueLattice}, tracking abstract
- * values of variables and heap locations.
+ * values of variables and memory locations.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 

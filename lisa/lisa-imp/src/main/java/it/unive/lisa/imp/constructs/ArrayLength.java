@@ -20,8 +20,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
@@ -157,7 +157,7 @@ public class ArrayLength
 				return state.bottomExecution();
 
 			Type cst = Type.commonSupertype(arraytypes, getStaticType());
-			HeapDereference container = new HeapDereference(cst, expr, getLocation());
+			MemoryDereference container = new MemoryDereference(cst, expr, getLocation());
 			AccessChild len = new AccessChild(
 					Int32Type.INSTANCE,
 					container,

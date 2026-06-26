@@ -3,7 +3,7 @@ package it.unive.lisa.analysis;
 import static it.unive.lisa.util.collections.CollectionUtilities.collect;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
+import it.unive.lisa.analysis.memory.MemoryDomain.MemoryReplacement;
 import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.SyntheticLocation;
@@ -179,13 +179,13 @@ public class SubstitutionTest {
 			r) -> ((Identifier) l).getName().compareTo(((Identifier) r).getName());
 
 	private void check(
-			List<HeapReplacement> sub,
+			List<MemoryReplacement> sub,
 			Collection<SymbolicExpression> addexpected,
 			Collection<SymbolicExpression> remexpected)
 			throws SemanticException {
 		Collector c = new Collector();
 		if (sub != null)
-			for (HeapReplacement repl : sub)
+			for (MemoryReplacement repl : sub)
 				c = c.lub(c.applyReplacement(repl, fake));
 
 		CollectionsDiffBuilder<SymbolicExpression> add = new CollectionsDiffBuilder<>(
@@ -218,13 +218,13 @@ public class SubstitutionTest {
 			throws SemanticException {
 		check(null, collect(), collect());
 		check(new ArrayList<>(), collect(), collect());
-		check(Arrays.asList(new HeapReplacement()), collect(), collect());
+		check(Arrays.asList(new MemoryReplacement()), collect(), collect());
 	}
 
 	@Test
 	public void testSingleSubstitution()
 			throws SemanticException {
-		HeapReplacement rep = new HeapReplacement();
+		MemoryReplacement rep = new MemoryReplacement();
 		rep.addSource(x);
 		rep.addTarget(y);
 
@@ -234,7 +234,7 @@ public class SubstitutionTest {
 	@Test
 	public void testSingleWeakSubstitution()
 			throws SemanticException {
-		HeapReplacement rep = new HeapReplacement();
+		MemoryReplacement rep = new MemoryReplacement();
 		rep.addSource(x);
 		rep.addTarget(x);
 		rep.addTarget(y);
@@ -245,10 +245,10 @@ public class SubstitutionTest {
 	@Test
 	public void testNonInterferingSubstitution()
 			throws SemanticException {
-		HeapReplacement rep1 = new HeapReplacement();
+		MemoryReplacement rep1 = new MemoryReplacement();
 		rep1.addSource(x);
 		rep1.addTarget(y);
-		HeapReplacement rep2 = new HeapReplacement();
+		MemoryReplacement rep2 = new MemoryReplacement();
 		rep2.addSource(z);
 		rep2.addTarget(w);
 
@@ -258,10 +258,10 @@ public class SubstitutionTest {
 	@Test
 	public void testInterferingSubstitution()
 			throws SemanticException {
-		HeapReplacement rep1 = new HeapReplacement();
+		MemoryReplacement rep1 = new MemoryReplacement();
 		rep1.addSource(x);
 		rep1.addTarget(y);
-		HeapReplacement rep2 = new HeapReplacement();
+		MemoryReplacement rep2 = new MemoryReplacement();
 		rep2.addSource(w);
 		rep2.addTarget(x);
 
@@ -271,11 +271,11 @@ public class SubstitutionTest {
 	@Test
 	public void testResettingSubstitution()
 			throws SemanticException {
-		HeapReplacement rep1 = new HeapReplacement();
+		MemoryReplacement rep1 = new MemoryReplacement();
 		rep1.addSource(x);
 		rep1.addTarget(y);
-		HeapReplacement rep2 = new HeapReplacement();
-		HeapReplacement rep3 = new HeapReplacement();
+		MemoryReplacement rep2 = new MemoryReplacement();
+		MemoryReplacement rep3 = new MemoryReplacement();
 		rep3.addSource(z);
 		rep3.addTarget(w);
 

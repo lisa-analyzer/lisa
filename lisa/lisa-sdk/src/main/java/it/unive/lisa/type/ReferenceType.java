@@ -5,7 +5,7 @@ import java.util.Set;
 
 /**
  * A type for references to memory regions. This type is the one of variables
- * holding references to entities that leave in the heap. For instance, where
+ * holding references to entities that leave in the memory. For instance, where
  * creating an array if {@code int32}, the location in memory containing the
  * array will have type {@code int32[]}, while all variables referencing that
  * location will have type {@code referenceType(int32[])}. Subclasses should

@@ -16,8 +16,8 @@ import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
-import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.informationFlow.NonInterference;
+import it.unive.lisa.analysis.memory.MemoryDomain;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.Symbol;
@@ -41,11 +41,11 @@ import it.unive.lisa.lattices.HistoryState;
 import it.unive.lisa.lattices.InverseSetLattice;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.SetLattice;
-import it.unive.lisa.lattices.SingleHeapLattice;
+import it.unive.lisa.lattices.SingleMemoryLattice;
 import it.unive.lisa.lattices.SingleTypeLattice;
 import it.unive.lisa.lattices.SingleValueLattice;
-import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.informationFlow.NonInterferenceValue;
+import it.unive.lisa.lattices.memory.Monolith;
 import it.unive.lisa.lattices.numeric.NonRedundantIntervalSet;
 import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
 import it.unive.lisa.lattices.string.fsa.StringSymbol;
@@ -102,8 +102,8 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
@@ -342,21 +342,21 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(
 						AbstractDomain.class,
 						DefaultConfiguration.simpleDomain(
-								DefaultConfiguration.defaultHeapDomain(),
+								DefaultConfiguration.defaultMemoryDomain(),
 								new Interval(),
 								DefaultConfiguration.defaultTypeDomain()),
 						DefaultConfiguration.simpleDomain(
-								DefaultConfiguration.defaultHeapDomain(),
+								DefaultConfiguration.defaultMemoryDomain(),
 								new Sign(),
 								DefaultConfiguration.defaultTypeDomain()))
 				.withPrefabValues(
 						HistoryState.class,
 						new HistoryState<>(DefaultConfiguration.simpleDomain(
-								DefaultConfiguration.defaultHeapDomain(),
+								DefaultConfiguration.defaultMemoryDomain(),
 								new Interval(),
 								DefaultConfiguration.defaultTypeDomain()).makeLattice()),
 						new HistoryState<>(DefaultConfiguration.simpleDomain(
-								DefaultConfiguration.defaultHeapDomain(),
+								DefaultConfiguration.defaultMemoryDomain(),
 								new Sign(),
 								DefaultConfiguration.defaultTypeDomain()).makeLattice()))
 				.withPrefabValues(MutableGraph.class, g1, g2);
@@ -456,8 +456,9 @@ public class EqualityContractVerificationTest {
 	public void testSymbolicExpressions() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends SymbolicExpression> expr : scanner.getSubTypesOf(SymbolicExpression.class))
-			if (HeapLocation.class.isAssignableFrom(expr))
-				// heap locations use only their name and weakness for equality
+			if (MemoryLocation.class.isAssignableFrom(expr))
+				// memory locations use only their name and weakness for
+				// equality
 				verify(expr, verifier -> verifier.withOnlyTheseFields("name", "weak"));
 			else if (Identifier.class.isAssignableFrom(expr))
 				// identifiers use only their name for equality
@@ -562,7 +563,7 @@ public class EqualityContractVerificationTest {
 				verify(subject, verifier -> verifier.withIgnoredFields("singleton"));
 			else if (subject == RegexAutomaton.class || subject == SimpleAutomaton.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("deterministic", "minimized"));
-			else if (subject == SingleHeapLattice.class
+			else if (subject == SingleMemoryLattice.class
 					|| subject == SingleTypeLattice.class
 					|| subject == SingleValueLattice.class
 					|| subject == ReachLattice.ReachabilityStatus.class
@@ -578,7 +579,7 @@ public class EqualityContractVerificationTest {
 
 	@Test
 	public void testAnalysisObjects() {
-		verify(HeapDomain.HeapReplacement.class);
+		verify(MemoryDomain.MemoryReplacement.class);
 		verify(ScopeToken.class);
 		verify(CompoundState.class);
 		// we consider only fields that compose the results

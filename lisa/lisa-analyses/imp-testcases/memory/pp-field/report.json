@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this,_untyped_x,_untyped_y).graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061018727.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061017673.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061017983.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061016495.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061013240.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061012992.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061012930.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061013302.graph.json", "untyped_A.f1(A__this).graph.json", "untyped_A.f2(A__this).graph.json", "untyped_A.f3(A__this).graph.json", "untyped_A.f4(A__this).graph.json", "untyped_A.f5(A__this).graph.json", "untyped_A.f6(A__this).graph.json", "untyped_A.f7(A__this).graph.json", "untyped_A.f8(A__this).graph.json", "untyped_A.f9(A__this).graph.json" ],
+  "info" : {
+    "cfgs" : "10",
+    "duration" : "60ms",
+    "end" : "2026-01-07T11:13:47.130+01:00",
+    "expressions" : "149",
+    "files" : "18",
+    "globals" : "2",
+    "members" : "10",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-01-07T11:13:47.070+01:00",
+    "statements" : "58",
+    "units" : "1",
+    "version" : "0.1",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/memory/pp-field"
+  }
+}

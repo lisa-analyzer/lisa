@@ -13,8 +13,8 @@ import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryLocation;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import java.util.Set;
@@ -30,17 +30,19 @@ public class EnvironmentTest {
 
 	private static final Identifier varB = new Variable(Untyped.INSTANCE, "b", SyntheticLocation.INSTANCE);
 
-	private static final Identifier heapA = new HeapLocation(Untyped.INSTANCE, "a", false, SyntheticLocation.INSTANCE);
+	private static final Identifier memoryA = new MemoryLocation(Untyped.INSTANCE, "a", false,
+			SyntheticLocation.INSTANCE);
 
-	private static final Identifier heapB = new HeapLocation(Untyped.INSTANCE, "b", false, SyntheticLocation.INSTANCE);
+	private static final Identifier memoryB = new MemoryLocation(Untyped.INSTANCE, "b", false,
+			SyntheticLocation.INSTANCE);
 
-	private static final Identifier heapAweak = new HeapLocation(
+	private static final Identifier memoryAweak = new MemoryLocation(
 			Untyped.INSTANCE,
 			"a",
 			true,
 			SyntheticLocation.INSTANCE);
 
-	private static final Identifier heapBweak = new HeapLocation(
+	private static final Identifier memoryBweak = new MemoryLocation(
 			Untyped.INSTANCE,
 			"b",
 			true,
@@ -65,9 +67,9 @@ public class EnvironmentTest {
 			throws SemanticException {
 		assertEquals(Set.of(varA), env.lubKeys(Set.of(varA), Set.of(varA)));
 		assertEquals(Set.of(varA, varB), env.lubKeys(Set.of(varA), Set.of(varB)));
-		assertEquals(Set.of(heapAweak), env.lubKeys(Set.of(heapAweak), Set.of(heapA)));
-		assertEquals(Set.of(heapAweak, heapBweak), env.lubKeys(Set.of(heapAweak), Set.of(heapBweak)));
-		assertEquals(Set.of(heapA, heapB), env.lubKeys(Set.of(heapA), Set.of(heapB)));
+		assertEquals(Set.of(memoryAweak), env.lubKeys(Set.of(memoryAweak), Set.of(memoryA)));
+		assertEquals(Set.of(memoryAweak, memoryBweak), env.lubKeys(Set.of(memoryAweak), Set.of(memoryBweak)));
+		assertEquals(Set.of(memoryA, memoryB), env.lubKeys(Set.of(memoryA), Set.of(memoryB)));
 	}
 
 	@Test
@@ -102,9 +104,9 @@ public class EnvironmentTest {
 		assertEquals(onlyAscoped, actual);
 		assertEquals(onlyA, actual.popScope(scoper, pp));
 
-		ValueEnvironment<SignLattice> AandB = onlyA.putState(heapB, state);
+		ValueEnvironment<SignLattice> AandB = onlyA.putState(memoryB, state);
 		ValueEnvironment<
-				SignLattice> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper, pp), state);
+				SignLattice> AandBscoped = onlyAscoped.putState((Identifier) memoryB.pushScope(scoper, pp), state);
 		assertEquals(AandBscoped, AandB.pushScope(scoper, pp));
 	}
 

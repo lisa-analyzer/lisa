@@ -17,7 +17,7 @@ import it.unive.lisa.analysis.combination.smash.SmashedSum;
 import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedValue;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.memory.MonolithicMemory;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.BooleanPowerset;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
@@ -250,7 +250,7 @@ public class WholeValueAnalysesTest
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
 					TestConfiguration conf = mkConf();
 					conf.analysis = new SimpleAbstractDomain<>(
-							new MonolithicHeap(),
+							new MonolithicMemory(),
 							new SmashedSum<>(
 									(SmashedSumIntDomain) intDomain.getValue(),
 									(SmashedSumStringDomain) strDomain.getValue()),
@@ -284,7 +284,7 @@ public class WholeValueAnalysesTest
 				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
 					TestConfiguration conf = mkConf();
 					conf.analysis = new SimpleAbstractDomain<>(
-							new MonolithicHeap(),
+							new MonolithicMemory(),
 							new WholeValueAnalysis(
 									(BaseNonRelationalValueDomain<?>) intDomain.getValue(),
 									(WholeValueStringDomain<?>) strDomain.getValue(),

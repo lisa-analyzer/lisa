@@ -2,17 +2,17 @@ package it.unive.lisa.analysis.value;
 
 import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
+import it.unive.lisa.analysis.memory.MemoryDomain;
+import it.unive.lisa.analysis.memory.MemoryDomain.MemoryReplacement;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 
 /**
  * A {@link DomainLattice} that can be modified by a substitution of identifiers
  * that is caused by a modification of the abstraction provided in the
- * {@link HeapDomain} of the analysis. A substitution is composed by a list of
- * {@link HeapReplacement} instances, that <b>must be applied in order</b>. See
- * <a href=
+ * {@link MemoryDomain} of the analysis. A substitution is composed by a list of
+ * {@link MemoryReplacement} instances, that <b>must be applied in order</b>.
+ * See <a href=
  * "https://www.sciencedirect.com/science/article/pii/S0304397516300299">this
  * paper</a> for more details.
  * 
@@ -26,9 +26,9 @@ public interface LatticeWithReplacement<L extends LatticeWithReplacement<L>>
 
 	/**
 	 * Applies a substitution of identifiers that is caused by a modification of
-	 * the abstraction provided in the {@link HeapDomain} of the analysis. A
-	 * substitution is composed by a list of {@link HeapReplacement} instances,
-	 * that <b>must be applied in order</b>.
+	 * the abstraction provided in the {@link MemoryDomain} of the analysis. A
+	 * substitution is composed by a list of {@link MemoryReplacement}
+	 * instances, that <b>must be applied in order</b>.
 	 * 
 	 * @param r  the replacement to apply
 	 * @param pp the program point that where this operation is being evaluated
@@ -39,7 +39,7 @@ public interface LatticeWithReplacement<L extends LatticeWithReplacement<L>>
 	 */
 	@SuppressWarnings("unchecked")
 	default L applyReplacement(
-			HeapReplacement r,
+			MemoryReplacement r,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (isTop() || isBottom() || r.getSources().isEmpty())

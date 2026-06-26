@@ -192,7 +192,7 @@ public class SemanticsSanityTest {
 							TestParameterProvider.provideParam(null, SemanticOracle.class));
 				}
 				if (res instanceof Pair)
-					// heap domains return a pair of (state, replacements)
+					// memory domains return a pair of (state, replacements)
 					res = ((Pair) res).getLeft();
 				boolean isBottom = ((Lattice) res).isBottom();
 				if (res instanceof AnalysisState) {

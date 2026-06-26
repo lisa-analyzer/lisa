@@ -21,7 +21,7 @@ public class NumericAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Sign(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
@@ -35,7 +35,7 @@ public class NumericAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Parity(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
@@ -49,7 +49,7 @@ public class NumericAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Interval(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
@@ -64,7 +64,7 @@ public class NumericAnalysesTest
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = new HistoryDomain<>(
 				DefaultConfiguration.simpleDomain(
-						DefaultConfiguration.defaultHeapDomain(),
+						DefaultConfiguration.defaultMemoryDomain(),
 						new Interval(),
 						DefaultConfiguration.defaultTypeDomain()));
 		conf.testDir = "numeric";
@@ -82,7 +82,7 @@ public class NumericAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new IntegerConstantPropagation(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
@@ -96,7 +96,7 @@ public class NumericAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new NonRedundantIntervals(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";
@@ -117,7 +117,7 @@ public class NumericAnalysesTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Pentagon(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "numeric";

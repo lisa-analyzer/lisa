@@ -17,7 +17,7 @@ import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.program.type.StringType;
-import it.unive.lisa.symbolic.heap.NullConstant;
+import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryExpression;

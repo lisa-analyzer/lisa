@@ -1,9 +1,9 @@
 package it.unive.lisa.cron;
 
 import it.unive.lisa.DefaultConfiguration;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
-import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
+import it.unive.lisa.analysis.memory.MonolithicMemory;
+import it.unive.lisa.analysis.memory.pointbased.FieldSensitivePointBasedMemory;
+import it.unive.lisa.analysis.memory.pointbased.PointBasedMemory;
 import it.unive.lisa.outputs.JSONResults;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ public class ArraysTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new MonolithicHeap(),
+				new MonolithicMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "arrays";
@@ -30,7 +30,7 @@ public class ArraysTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new PointBasedHeap(),
+				new PointBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "arrays";
@@ -44,7 +44,7 @@ public class ArraysTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				new FieldSensitivePointBasedHeap(),
+				new FieldSensitivePointBasedMemory(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.testDir = "arrays";

@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  * An {@link Environment} that is also a {@link TypeLattice}, tracking types of
- * variables and heap locations.
+ * variables and memory locations.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 

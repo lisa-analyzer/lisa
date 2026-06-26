@@ -17,7 +17,7 @@ import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.lattices.SimpleAbstractState;
-import it.unive.lisa.lattices.heap.Monolith;
+import it.unive.lisa.lattices.memory.Monolith;
 import it.unive.lisa.lattices.numeric.Trend;
 import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.outputs.JSONResults;
@@ -48,7 +48,7 @@ public class StabilityTest
 		conf.outputs.add(new JSONResults<>());
 		Interval aux = new Interval();
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				new Stability<>(aux),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();

@@ -37,7 +37,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.memory.MemoryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
@@ -305,8 +305,8 @@ public class Analysis<
 
 	/**
 	 * Rewrites the given expression to a simpler form containing no sub
-	 * expressions regarding the heap (that is, {@link HeapExpression}s). Every
-	 * expression contained in the result can be safely cast to
+	 * expressions regarding the memory (that is, {@link MemoryExpression}s).
+	 * Every expression contained in the result can be safely cast to
 	 * {@link ValueExpression}.
 	 * 
 	 * @param state      the current analysis state
@@ -328,8 +328,8 @@ public class Analysis<
 
 	/**
 	 * Rewrites the given expressions to a simpler form containing no sub
-	 * expressions regarding the heap (that is, {@link HeapExpression}s). Every
-	 * expression contained in the result can be safely cast to
+	 * expressions regarding the memory (that is, {@link MemoryExpression}s).
+	 * Every expression contained in the result can be safely cast to
 	 * {@link ValueExpression}.
 	 * 
 	 * @param state       the current analysis state

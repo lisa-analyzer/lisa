@@ -15,7 +15,7 @@ public class DescendingTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.forwardDescendingFixpoint = new ForwardDescendingNarrowingFixpoint<>();
@@ -30,7 +30,7 @@ public class DescendingTest
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
 		conf.analysis = DefaultConfiguration.simpleDomain(
-				DefaultConfiguration.defaultHeapDomain(),
+				DefaultConfiguration.defaultMemoryDomain(),
 				DefaultConfiguration.defaultValueDomain(),
 				DefaultConfiguration.defaultTypeDomain());
 		conf.forwardDescendingFixpoint = new ForwardDescendingGLBFixpoint<>();
