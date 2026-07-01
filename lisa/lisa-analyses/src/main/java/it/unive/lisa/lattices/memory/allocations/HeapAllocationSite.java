@@ -5,12 +5,12 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
- * A memory allocation site, that is an allocation site pointing to something
- * allocated in the dynamic memory, the memory.
- * 
+ * A heap allocation site, that is an allocation site pointing to something
+ * allocated on the heap.
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class MemoryAllocationSite
+public class HeapAllocationSite
 		extends
 		AllocationSite {
 
@@ -24,7 +24,7 @@ public class MemoryAllocationSite
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public MemoryAllocationSite(
+	public HeapAllocationSite(
 			Type staticType,
 			String locationName,
 			boolean isWeak,
@@ -43,7 +43,7 @@ public class MemoryAllocationSite
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public MemoryAllocationSite(
+	public HeapAllocationSite(
 			Type staticType,
 			String locationName,
 			SymbolicExpression field,
@@ -63,7 +63,7 @@ public class MemoryAllocationSite
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
-	public MemoryAllocationSite(
+	public HeapAllocationSite(
 			Type staticType,
 			String locationName,
 			String field,
@@ -73,37 +73,37 @@ public class MemoryAllocationSite
 	}
 
 	@Override
-	public MemoryAllocationSite toWeak() {
+	public HeapAllocationSite toWeak() {
 		return isWeak() ? this
-				: new MemoryAllocationSite(getStaticType(), getLocationName(), getField(), true, getCodeLocation());
+				: new HeapAllocationSite(getStaticType(), getLocationName(), getField(), true, getCodeLocation());
 	}
 
 	@Override
-	public MemoryAllocationSite withField(
+	public HeapAllocationSite withField(
 			SymbolicExpression field) {
 		if (getField() != null)
 			throw new IllegalStateException("Cannot add a field to an allocation site that already has one");
-		return new MemoryAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());
 	}
 
 	@Override
-	public MemoryAllocationSite withType(
+	public HeapAllocationSite withType(
 			Type type) {
-		return new MemoryAllocationSite(type, getLocationName(), getField(), isWeak(), getCodeLocation());
+		return new HeapAllocationSite(type, getLocationName(), getField(), isWeak(), getCodeLocation());
 	}
 
 	@Override
-	public MemoryAllocationSite withoutField() {
+	public HeapAllocationSite withoutField() {
 		if (getField() == null)
 			return this;
-		return new MemoryAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
 	}
 
 	@Override
-	public MemoryAllocationSite asNonAllocation() {
+	public HeapAllocationSite asNonAllocation() {
 		if (!isAllocation())
 			return this;
-		return new MemoryAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
 	}
 
 }

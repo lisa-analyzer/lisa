@@ -9,7 +9,7 @@ import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.memory.allocations.AllocationSite;
 import it.unive.lisa.lattices.memory.allocations.AllocationSites;
-import it.unive.lisa.lattices.memory.allocations.MemoryAllocationSite;
+import it.unive.lisa.lattices.memory.allocations.HeapAllocationSite;
 import it.unive.lisa.lattices.memory.allocations.NullAllocationSite;
 import it.unive.lisa.lattices.memory.allocations.StackAllocationSite;
 import it.unive.lisa.program.annotations.Annotation;
@@ -421,7 +421,7 @@ public abstract class AllocationSiteBasedAnalysis<
 							true,
 							expression.getCodeLocation());
 				else
-					e = new MemoryAllocationSite(
+					e = new HeapAllocationSite(
 							expression.getStaticType(),
 							site.getLocationName(),
 							true,
@@ -456,7 +456,7 @@ public abstract class AllocationSiteBasedAnalysis<
 					true,
 					expression.getCodeLocation());
 		else
-			id = new MemoryAllocationSite(
+			id = new HeapAllocationSite(
 					expression.getStaticType(),
 					expression.getCodeLocation().getCodeLocation(),
 					true,
@@ -541,7 +541,7 @@ public abstract class AllocationSiteBasedAnalysis<
 					CodeLocation loc = expression.getCodeLocation();
 					AllocationSite site;
 					if (id.getStaticType().isPointerType())
-						site = new MemoryAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+						site = new HeapAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
 					else if (id.getStaticType().isInMemoryType() || id.getStaticType().isUntyped())
 						site = new StackAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
 					else
@@ -572,7 +572,7 @@ public abstract class AllocationSiteBasedAnalysis<
 		if (expression.getStaticType().isPointerType()) {
 			Type inner = expression.getStaticType().asPointerType().getInnerType();
 			CodeLocation loc = expression.getCodeLocation();
-			MemoryAllocationSite site = new MemoryAllocationSite(
+			HeapAllocationSite site = new HeapAllocationSite(
 					inner,
 					"unknown@" + loc.getCodeLocation(),
 					false,

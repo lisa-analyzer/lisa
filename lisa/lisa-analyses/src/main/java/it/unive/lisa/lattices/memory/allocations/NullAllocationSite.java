@@ -10,7 +10,7 @@ import it.unive.lisa.type.NullType;
  */
 public class NullAllocationSite
 		extends
-		MemoryAllocationSite {
+		HeapAllocationSite {
 
 	/**
 	 * The singleton instance of this allocation site.

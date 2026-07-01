@@ -13,7 +13,7 @@ import it.unive.lisa.analysis.nonrelational.memory.MemoryEnvironment;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.memory.allocations.AllocationSite;
 import it.unive.lisa.lattices.memory.allocations.AllocationSites;
-import it.unive.lisa.lattices.memory.allocations.MemoryAllocationSite;
+import it.unive.lisa.lattices.memory.allocations.HeapAllocationSite;
 import it.unive.lisa.lattices.memory.allocations.StackAllocationSite;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -54,9 +54,9 @@ public class PointBasedMemoryTest {
 
 	private final CodeLocation loc2 = new SourceCodeLocation("fake", 2, 2);
 
-	private final AllocationSite alloc1 = new MemoryAllocationSite(untyped, loc1.getCodeLocation(), true, loc1);
+	private final AllocationSite alloc1 = new HeapAllocationSite(untyped, loc1.getCodeLocation(), true, loc1);
 
-	private final AllocationSite alloc2 = new MemoryAllocationSite(untyped, loc2.getCodeLocation(), true, loc2);
+	private final AllocationSite alloc2 = new HeapAllocationSite(untyped, loc2.getCodeLocation(), true, loc2);
 
 	private final ProgramPoint pp1 = new ProgramPoint() {
 

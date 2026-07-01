@@ -6,7 +6,7 @@ import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.memory.allocations.AllocationSite;
 import it.unive.lisa.lattices.memory.allocations.AllocationSites;
-import it.unive.lisa.lattices.memory.allocations.MemoryAllocationSite;
+import it.unive.lisa.lattices.memory.allocations.HeapAllocationSite;
 import it.unive.lisa.lattices.memory.allocations.MemoryEnvWithFields;
 import it.unive.lisa.lattices.memory.allocations.NullAllocationSite;
 import it.unive.lisa.lattices.memory.allocations.StackAllocationSite;
@@ -265,7 +265,7 @@ public class FieldSensitivePointBasedMemory
 						site.isWeak(),
 						site.getCodeLocation());
 			else
-				e = new MemoryAllocationSite(
+				e = new HeapAllocationSite(
 						expression.getStaticType(),
 						site.getLocationName(),
 						target,
@@ -301,7 +301,7 @@ public class FieldSensitivePointBasedMemory
 		if (expression.isStackAllocation())
 			e = new StackAllocationSite(expression.getStaticType(), loc, weak, expression.getCodeLocation());
 		else
-			e = new MemoryAllocationSite(expression.getStaticType(), loc, weak, expression.getCodeLocation());
+			e = new HeapAllocationSite(expression.getStaticType(), loc, weak, expression.getCodeLocation());
 		e.setAllocation(true);
 
 		// propagates the annotations of expression
