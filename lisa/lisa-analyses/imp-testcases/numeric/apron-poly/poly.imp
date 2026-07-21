@@ -1,0 +1,297 @@
+class tutorial {
+
+    // Relational tracking
+
+    relation_1() {
+        def x = 10;
+        def y = 3 * x;
+        // Expected: Poly tracks y - 3x == 0
+        return y;
+    }
+
+    relation_2(x, y) {
+        def z = x + y;
+        // Expected: Poly tracks z - x - y == 0
+        return z;
+    }
+
+    relation_3() {
+        def a = 5;
+        def b = 10;
+        def c = 2 * a + 3 * b - 5;
+        // Expected: Tracks c == 35
+        return c;
+    }
+
+    // Loops and relational invariants
+
+    relation_4() {
+        def i = 0;
+        def j = 0;
+        while (i < 100) {
+            i = i + 1;
+            j = j + 2;
+        }
+        // Expected: The invariant j - 2i == 0 is maintained
+        return j;
+    }
+
+    relation_5() {
+        def x = 0;
+        def y = 0;
+        def z = 0;
+        while (x < 50) {
+            x = x + 1;
+            y = y + 2;
+            z = z + 3;
+        }
+        return z;
+    }
+
+    // Limits of representability (Non-linear operations)
+
+    relation_6(x) {
+        def y = x * x;
+        // Expected: Total loss of relational precision
+        return y;
+    }
+
+    relation_7(x, y) {
+        def z = x * y;
+        return z;
+    }
+
+    // Branching and lub
+
+    branching_1(flag) {
+        def x = 0;
+        def y = 0;
+        if (flag) {
+            x = 0;
+            y = 0;
+        } else {
+            x = 10;
+            y = 30;
+        }
+        def z = x / y;
+        return z;
+    }
+
+    branching_2(flag1, flag2) {
+        def x = 0;
+        def y = 0;
+        if (flag1) {
+            x = 10; y = 0;
+        } else {
+            if (flag2) {
+                x = 0;
+                y = 10;
+            } else {
+                x = 0;
+                y = 0;
+            }
+        }
+        // Expected Join: Infers the region
+        return x;
+    }
+
+    // Closure and Implicit Relations
+
+    dead_code_1() {
+        def a = 10;
+        def b = 0;
+
+        if(a != 30)
+            b = 10;
+        else
+            b = -10;
+        return b;
+    }
+
+    dead_code_2() {
+        def a = 10;
+        def b = 0;
+        def c = 3 * a;
+
+        if(c != 30)
+            b = 10;
+        else
+            b = -10;
+        return b;
+    }
+
+    dead_code_3() {
+        def a = 10;
+        def b = 0;
+        def c = 3 * a;
+
+        if(c > 30)
+            b = 10;
+        else
+            b = -10;
+        return b;
+    }
+
+    dead_code_4() {
+        def x = 10;
+        def y = 2 * x;
+        def z = x + y; // z=30, and z = 3x
+        def result = 0;
+
+        if (z != 3 * x) {
+            // Expected: Dead branch
+            result = -999;
+        } else {
+            result = 42;
+        }
+        return result;
+    }
+
+    dead_code_5(a, b, c, d) {
+        def result = 0;
+        if (a <= b + c) {
+            if (b + c <= d) {
+                if (a > d) {
+                    // Expected: Dead branch
+                    result = -1;
+                } else {
+                    result = 1;
+                }
+            }
+        }
+        return result;
+    }
+
+    // Div by zero
+
+    mod_by_zero_1() {
+        def x = 10;
+        def y = 0;
+        // Expected: Bottom
+        def z = x % y;
+        return z;
+    }
+
+    mod_by_zero_2() {
+        def a = 2 % 0;
+        return a;
+    }
+
+    mod_by_zero_3(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = 0;
+        } else {
+            b = 2;
+        }
+
+        def c = a % b;
+        return c;
+    }
+
+    mod_by_zero_4(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = -23;
+        } else {
+            b = 5;
+        }
+
+        def c = a % b;
+        return c;
+    }
+
+    mod_by_zero_5(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = -5;
+        } else {
+            b = 0;
+        }
+
+        def c = a % b;
+        return c;
+    }
+
+    div_by_zero_1() {
+        def x = 10;
+        def y = 0;
+        def z = 15;
+        def a = x + z / y;
+        return a;
+    }
+
+    div_by_zero_2() {
+        def x = 10;
+        def y = 0;
+        def z = 15;
+        def a = (x + z) /  y;
+        return a;
+    }
+
+    div_by_zero_3(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag)
+            b = 0;
+        else
+            b = 2;
+
+        def c = a / b;
+        return c;
+    }
+
+    div_by_zero_4(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = -23;
+        } else {
+            b = 5;
+        }
+
+        def c = a / b;
+        return c;
+    }
+
+    div_by_zero_5(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = -5;
+        } else {
+            b = 0;
+        }
+
+        def c = a / b;
+        return c;
+    }
+
+    div_by_zero_6(flag) {
+            def z = 1;
+            def k = 1;
+            def y = 30;
+
+            if(flag) {
+                z = -20;
+                k = -19;
+            } else {
+                z = 19;
+                k = 20;
+            }
+            def x = 7;
+            def w = 9;
+            x = (y/z) + (x/(z+3)) + w/k;
+            return x;
+        }
+
+}

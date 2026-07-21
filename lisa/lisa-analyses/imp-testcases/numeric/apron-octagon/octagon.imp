@@ -1,0 +1,267 @@
+class tutorial {
+
+    // Div by zero
+
+    div_by_zero_1() {
+        def x = 10;
+        def y = 0;
+        def z = 15;
+        def a = x + z / y;
+        return a;
+    }
+
+    div_by_zero_2() {
+        def x = 10;
+        def y = 0;
+        def z = 15;
+        def a = (x + z) /  y;
+        return a;
+    }
+
+    div_by_zero_3(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag)
+            b = 0;
+        else
+            b = 2;
+
+        def c = a / b;
+        return c;
+    }
+
+    div_by_zero_4(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = -23;
+        } else {
+            b = 5;
+        }
+
+        def c = a / b;
+        return c;
+    }
+
+    div_by_zero_5(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = -5;
+        } else {
+            b = 0;
+        }
+
+        def c = a / b;
+        return c;
+    }
+
+    div_by_zero_6(flag) {
+            def z = 1;
+            def k = 1;
+            def y = 30;
+
+            if(flag) {
+                z = -20;
+                k = -19;
+            } else {
+                z = 19;
+                k = 20;
+            }
+            def x = 7;
+            def w = 9;
+            x = (y/z) + (x/(z+3)) + w/k;
+            return x;
+        }
+
+    mod_by_zero_1() {
+        def x = 10;
+        def y = 0;
+        // Expected: Bottom
+        def z = x % y;
+        return z;
+    }
+
+    mod_by_zero_2() {
+        def a = 2 % 0;
+        return a;
+    }
+
+    mod_by_zero_3(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = 0;
+        } else {
+            b = 2;
+        }
+
+        def c = a % b;
+        return c;
+    }
+
+    mod_by_zero_4(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = -23;
+        } else {
+            b = 5;
+        }
+
+        def c = a % b;
+        return c;
+    }
+
+    mod_by_zero_5(flag) {
+        def a = 2;
+        def b = 0;
+
+        if (flag) {
+            b = -5;
+        } else {
+            b = 0;
+        }
+
+        def c = a % b;
+        return c;
+    }
+
+    // Relational tracking
+
+    relation_1() {
+        def x = 10;
+        def y = x;
+        // Expected: Octagon tracks x - y == 0
+        return y;
+    }
+
+    relation_2() {
+        def a = 5;
+        def b = a + 3;
+        // Expected: Octagon tracks b - a == 3
+        return b;
+    }
+
+    // Loops and relational invariants
+
+    relation_3() {
+        def i = 0;
+        def j = 5;
+        // Expected: j - i == 5 remains invariant throughout the loop
+        while (i < 100) {
+            i = i + 1;
+            j = j + 1;
+        }
+        return j;
+    }
+
+    relation_4() {
+        def x = 0;
+        def y = 100;
+        // Expected: x + y == 100 remains invariant
+        while (x < 100) {
+            x = x + 1;
+            y = y - 1;
+        }
+        return y;
+    }
+
+    relation_5() {
+        def x = 0;
+        def y = 0;
+        while (x < 1000) {
+            x = x + 1;
+            y = x;
+        }
+        return y;
+    }
+
+    // Limits of representability
+
+    relation_6(x, y) {
+        def z = x + y;
+        // Expected: The domain cannot express z - x - y == 0 (more than 2 vars)
+        return z;
+    }
+
+    relation_7(x) {
+        def y = 2 * x;
+        // Expected: Cannot track y - 2x == 0 (coeff. is not +/- 1)
+        return y;
+    }
+
+    relation_8(x) {
+        def y = x * x;
+        // Expected: Total loss of relational precision (not linear)
+        return y;
+    }
+
+    // Branching and LUB
+
+    branching_1(flag) {
+        def x = 0;
+        def y = 0;
+        if (flag) {
+            x = 10;
+            y = 15;
+        } else {
+            x = 20;
+            y = 30;
+        }
+        // Expected Join: 5 <= y - x <= 10 and 10 <= x <= 20
+        return y;
+    }
+
+    branching_2(flag) {
+        def a = 0;
+        def b = 0;
+        if (flag) {
+            a = 0;
+            b = 1;
+        } else {
+            a = 1;
+            b = 0;
+        }
+        // Expected Join: a + b == 1, a >= 0, b >= 0
+        return a;
+    }
+
+    // Closure and Implicit Relations
+
+    dead_code_1(x, y, z) {
+        def result = 0;
+        if (x <= y) {
+            if (y <= z) {
+                if (x > z) {
+                    // Unreachable code
+                    result = -1;
+                } else {
+                    result = 1;
+                }
+            }
+        }
+        // Expected: result = [0,1]
+        return result;
+    }
+
+    dead_code_2() {
+        def x = 10;
+        def y = x + 5;
+        def result = 0;
+
+        if (y <= x) {
+            // Expected: Unreachable code
+            result = -999;
+        } else {
+            result = 42;
+        }
+        return result;
+    }
+
+}

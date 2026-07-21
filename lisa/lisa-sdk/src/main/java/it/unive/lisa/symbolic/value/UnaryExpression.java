@@ -70,6 +70,22 @@ public class UnaryExpression
 		return operator;
 	}
 
+    /**
+     * Simplifies the expression tree by pushing logical negations downwards and
+     * eliminating them where possible.
+     * <p>
+     * If this unary expression represents a logical negation ({@link LogicalNegation})
+     * applied to an underlying {@link BinaryExpression}, it distributes the negation
+     * by transforming the binary operator into its logical opposite.
+     * It then recursively calls {@code removeNegations()} on the underlying
+     * operands to fully normalize the tree.
+     * If no structural simplification can be made, the original instance is returned
+     * to preserve reference equality and memory efficiency.
+     * </p>
+     *
+     * @return a logically equivalent {@link ValueExpression} with top-level negations
+     * removed or distributed downwards.
+     */
 	@Override
 	public ValueExpression removeNegations() {
 		if (operator instanceof LogicalNegation && expression instanceof BinaryExpression) {
@@ -79,8 +95,10 @@ public class UnaryExpression
 			BinaryOperator oppositeOp = op instanceof NegatableOperator
 					? (BinaryOperator) ((NegatableOperator) op).opposite()
 					: op;
-			ValueExpression oppositeLeft = left.removeNegations();
-			ValueExpression oppositeRight = right.removeNegations();
+
+            ValueExpression oppositeLeft = left.invertCondition().removeNegations();
+            ValueExpression oppositeRight = right.invertCondition().removeNegations();
+
 			if (op == oppositeOp && left == oppositeLeft && right == oppositeRight)
 				// if nothing changed, preserve reference equality
 				return this;

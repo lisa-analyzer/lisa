@@ -6,8 +6,11 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.operator.NegatableOperator;
 import it.unive.lisa.symbolic.value.operator.TypeOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.Type;
 
@@ -206,5 +209,45 @@ public class BinaryExpression
 			return this;
 		return new BinaryExpression(getStaticType(), l, r, operator, getCodeLocation());
 	}
+
+    /**
+     * Computes the logical inversion of this binary expression.
+     * <p>
+     * This method translates the current binary operator to its logical opposite,
+     * provided the operator implements {@link NegatableOperator}.
+     * Furthermore, if the operator is a logical conjunction ({@link LogicalAnd})
+     * or disjunction ({@link LogicalOr}), it recursively applies the inversion
+     * to both the left and right operands, effectively executing De Morgan's laws
+     * down the expression tree.
+     * </p>
+     *
+     * @return a new {@link ValueExpression} representing the inverted logical condition.
+     */
+    @Override
+    public ValueExpression invertCondition() {
+        BinaryOperator oppositeOp = operator instanceof NegatableOperator
+                ? (BinaryOperator) ((NegatableOperator) operator).opposite()
+                : operator;
+
+        if (operator instanceof LogicalAnd || operator instanceof LogicalOr) {
+            ValueExpression invertedLeft = ((ValueExpression) getLeft()).invertCondition();
+            ValueExpression invertedRight = ((ValueExpression) getRight()).invertCondition();
+            return new BinaryExpression(
+                    getStaticType(),
+                    invertedLeft,
+                    invertedRight,
+                    oppositeOp,
+                    getCodeLocation()
+            );
+        } else {
+            return new BinaryExpression(
+                    getStaticType(),
+                    getLeft(),
+                    getRight(),
+                    oppositeOp,
+                    getCodeLocation()
+            );
+        }
+    }
 
 }

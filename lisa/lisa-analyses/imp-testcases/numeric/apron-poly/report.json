@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_tutorial.branching_1(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.branching_2(tutorial__this,_untyped_flag1,_untyped_flag2).graph.json", "untyped_tutorial.dead_code_1(tutorial__this).graph.json", "untyped_tutorial.dead_code_2(tutorial__this).graph.json", "untyped_tutorial.dead_code_3(tutorial__this).graph.json", "untyped_tutorial.dead_code_4(tutorial__this).graph.json", "untyped_tutorial.dead_code_5(tutorial__this,_untyped_a,_untyped_b,_untyped_c,_untyped_d).graph.json", "untyped_tutorial.div_by_zero_1(tutorial__this).graph.json", "untyped_tutorial.div_by_zero_2(tutorial__this).graph.json", "untyped_tutorial.div_by_zero_3(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.div_by_zero_4(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.div_by_zero_5(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.div_by_zero_6(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.mod_by_zero_1(tutorial__this).graph.json", "untyped_tutorial.mod_by_zero_2(tutorial__this).graph.json", "untyped_tutorial.mod_by_zero_3(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.mod_by_zero_4(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.mod_by_zero_5(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.relation_1(tutorial__this).graph.json", "untyped_tutorial.relation_2(tutorial__this,_untyped_x,_untyped_y).graph.json", "untyped_tutorial.relation_3(tutorial__this).graph.json", "untyped_tutorial.relation_4(tutorial__this).graph.json", "untyped_tutorial.relation_5(tutorial__this).graph.json", "untyped_tutorial.relation_6(tutorial__this,_untyped_x).graph.json", "untyped_tutorial.relation_7(tutorial__this,_untyped_x,_untyped_y).graph.json" ],
+  "info" : {
+    "cfgs" : "25",
+    "duration" : "60ms",
+    "end" : "2026-05-06T20:32:01.700+02:00",
+    "expressions" : "337",
+    "files" : "25",
+    "globals" : "0",
+    "members" : "25",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-05-06T20:32:01.640+02:00",
+    "statements" : "152",
+    "units" : "1",
+    "version" : "0.2",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "ForwardDescendingNarrowingFixpoint",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/numeric/apron-poly"
+  }
+}

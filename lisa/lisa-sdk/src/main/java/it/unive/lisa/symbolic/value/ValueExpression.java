@@ -43,4 +43,14 @@ public abstract class ValueExpression
 		return this;
 	}
 
+    /**
+     * Yields a value expression representing the inverted logical condition,
+     * preserving its semantics, if possible.
+     * @return the value expression representing the inverted condition, preserving
+     * its semantics
+     */
+    public ValueExpression invertCondition() {
+        return this;
+    }
+
 }

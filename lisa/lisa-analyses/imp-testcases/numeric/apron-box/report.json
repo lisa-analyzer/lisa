@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_tutorial.arithmetic_crossing_zero(tutorial__this).graph.json", "untyped_tutorial.arithmetic_multiplication(tutorial__this).graph.json", "untyped_tutorial.box_1(tutorial__this).graph.json", "untyped_tutorial.box_2(tutorial__this,_untyped_x,_untyped_y).graph.json", "untyped_tutorial.branching_1(tutorial__this,_untyped_a).graph.json", "untyped_tutorial.branching_2(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.constants(tutorial__this).graph.json", "untyped_tutorial.dead_code_1(tutorial__this).graph.json", "untyped_tutorial.dead_code_2(tutorial__this).graph.json", "untyped_tutorial.div_by_zero_1(tutorial__this).graph.json", "untyped_tutorial.div_by_zero_2(tutorial__this).graph.json", "untyped_tutorial.div_by_zero_3(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.div_by_zero_4(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.div_by_zero_5(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.div_by_zero_6(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.logical_and(tutorial__this,_untyped_x).graph.json", "untyped_tutorial.logical_or(tutorial__this,_untyped_x).graph.json", "untyped_tutorial.lub_1(tutorial__this).graph.json", "untyped_tutorial.lub_2(tutorial__this).graph.json", "untyped_tutorial.mod_by_zero_1(tutorial__this).graph.json", "untyped_tutorial.mod_by_zero_2(tutorial__this).graph.json", "untyped_tutorial.mod_by_zero_3(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.mod_by_zero_4(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.mod_by_zero_5(tutorial__this,_untyped_flag).graph.json", "untyped_tutorial.nested_while(tutorial__this).graph.json", "untyped_tutorial.strong_update(tutorial__this).graph.json", "untyped_tutorial.widening_1(tutorial__this).graph.json", "untyped_tutorial.widening_2(tutorial__this).graph.json", "untyped_tutorial.widening_3(tutorial__this).graph.json", "untyped_tutorial.widening_4(tutorial__this,_untyped_j).graph.json" ],
+  "info" : {
+    "cfgs" : "30",
+    "duration" : "266ms",
+    "end" : "2026-05-12T18:01:52.223+02:00",
+    "expressions" : "376",
+    "files" : "30",
+    "globals" : "0",
+    "members" : "30",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-05-12T18:01:51.957+02:00",
+    "statements" : "170",
+    "units" : "1",
+    "version" : "0.2",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "ForwardDescendingNarrowingFixpoint",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/numeric/apron-box"
+  }
+}

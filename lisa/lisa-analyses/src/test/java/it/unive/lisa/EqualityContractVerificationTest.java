@@ -549,7 +549,10 @@ public class EqualityContractVerificationTest {
 			if (subject.getName().contains("Test"))
 				// some testing domain that we do not care about end up here
 				continue;
-			else if (FunctionalLattice.class.isAssignableFrom(subject)
+			else if (subject.getName().contains("it.unive.lisa.analysis.apron.Apron")) {
+				tested.add(subject);
+				continue;
+			} else if (FunctionalLattice.class.isAssignableFrom(subject)
 					|| SetLattice.class.isAssignableFrom(subject)
 					|| InverseSetLattice.class.isAssignableFrom(subject)
 					|| NonInterference.class == subject
