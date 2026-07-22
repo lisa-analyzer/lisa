@@ -16,12 +16,12 @@ import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.memory.AccessChild;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
 import it.unive.lisa.symbolic.memory.NullConstant;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryLocation;
@@ -391,8 +391,8 @@ public abstract class AllocationSiteBasedAnalysis<
 	 */
 
 	@Override
-	public ExpressionSet rewriteAccessChild(
-			AccessChild expression,
+	public ExpressionSet rewriteStaticAccess(
+			StaticAccess expression,
 			ExpressionSet receiver,
 			ExpressionSet child,
 			L state,

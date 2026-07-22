@@ -13,6 +13,7 @@ import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
 import it.unive.lisa.symbolic.memory.NullConstant;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryLocation;
 import it.unive.lisa.symbolic.value.MemoryPointer;
@@ -101,8 +102,8 @@ public class TypeBasedMemory
 	}
 
 	@Override
-	public ExpressionSet rewriteAccessChild(
-			AccessChild expression,
+	public ExpressionSet rewriteStaticAccess(
+			StaticAccess expression,
 			ExpressionSet receiver,
 			ExpressionSet child,
 			AllocatedTypes state,

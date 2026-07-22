@@ -4,17 +4,18 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
- * An expression that accesses a memory location that is a <i>child</i> of
- * another one, that is, the former is reachable from the latter.
- * 
+ * Base class for field access expressions ({@code p.f} and {@code p[s]}),
+ * representing access to a child memory location reachable from a container.
+ * Concrete subclasses are {@link StaticAccess} (compile-time field name) and
+ * {@link DynamicAccess} (runtime field name).
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessChild
+public abstract class AccessChild
 		extends
 		MemoryExpression {
 
@@ -97,20 +98,24 @@ public class AccessChild
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return container + "->" + child;
-	}
-
-	@Override
-	public <T> T accept(
-			ExpressionVisitor<T> visitor,
-			Object... params)
-			throws SemanticException {
-		T cont = container.accept(visitor, params);
-		T ch = child.accept(visitor, params);
-		return visitor.visit(this, cont, ch, params);
-	}
+	/**
+	 * Creates a new instance of the same concrete subclass with the given
+	 * arguments. Used by structural operations ({@link #pushScope},
+	 * {@link #popScope}, {@link #replace}, {@link #removeTypingExpressions}) to
+	 * preserve the subtype after rebuilding the expression.
+	 *
+	 * @param staticType the static type
+	 * @param container  the container expression
+	 * @param child      the child expression
+	 * @param location   the code location
+	 *
+	 * @return a new instance of the same subclass
+	 */
+	protected abstract AccessChild create(
+			Type staticType,
+			SymbolicExpression container,
+			SymbolicExpression child,
+			CodeLocation location);
 
 	@Override
 	public SymbolicExpression removeTypingExpressions() {
@@ -118,7 +123,7 @@ public class AccessChild
 		SymbolicExpression ch = child.removeTypingExpressions();
 		if (cont == container && ch == child)
 			return this;
-		return new AccessChild(getStaticType(), cont, ch, getCodeLocation());
+		return create(getStaticType(), cont, ch, getCodeLocation());
 	}
 
 	@Override
@@ -132,7 +137,7 @@ public class AccessChild
 		SymbolicExpression ch = child.replace(source, target);
 		if (cont == container && ch == child)
 			return this;
-		return new AccessChild(getStaticType(), cont, ch, getCodeLocation());
+		return create(getStaticType(), cont, ch, getCodeLocation());
 	}
 
 	@Override
@@ -145,7 +150,7 @@ public class AccessChild
 			return null;
 		if (e == container || e.equals(container))
 			return this;
-		return new AccessChild(getStaticType(), e, child, getCodeLocation());
+		return create(getStaticType(), e, child, getCodeLocation());
 	}
 
 	@Override
@@ -158,7 +163,7 @@ public class AccessChild
 			return null;
 		if (e == container || e.equals(container))
 			return this;
-		return new AccessChild(getStaticType(), e, child, getCodeLocation());
+		return create(getStaticType(), e, child, getCodeLocation());
 	}
 
 }

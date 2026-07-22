@@ -18,8 +18,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.memory.AccessChild;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -148,7 +148,7 @@ public class AccessInstanceGlobal
 						Global global = cu.getInstanceGlobal(target, false);
 						if (global != null) {
 							GlobalVariable var = global.toSymbolicVariable(loc);
-							AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
+							StaticAccess access = new StaticAccess(var.getStaticType(), container, var, loc);
 							result = result.lub(analysis.smallStepSemantics(state, access, this));
 							atLeastOne = true;
 							break;
@@ -171,7 +171,7 @@ public class AccessInstanceGlobal
 		Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
 		GlobalVariable var = new GlobalVariable(Untyped.INSTANCE, target, new Annotations(), getLocation());
 		MemoryDereference container = new MemoryDereference(rectype, expr, getLocation());
-		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
+		StaticAccess access = new StaticAccess(Untyped.INSTANCE, container, var, getLocation());
 		return analysis.smallStepSemantics(state, access, this);
 	}
 

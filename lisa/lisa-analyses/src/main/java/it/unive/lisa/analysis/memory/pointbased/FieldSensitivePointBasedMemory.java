@@ -15,6 +15,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import java.util.HashMap;
@@ -212,8 +213,8 @@ public class FieldSensitivePointBasedMemory
 	}
 
 	@Override
-	public ExpressionSet rewriteAccessChild(
-			AccessChild expression,
+	public ExpressionSet rewriteStaticAccess(
+			StaticAccess expression,
 			ExpressionSet receiver,
 			ExpressionSet child,
 			MemoryEnvWithFields state,

@@ -13,7 +13,7 @@ import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -78,7 +78,7 @@ public class IMPArrayAccess
 		Type cst = Type.commonSupertype(arraytypes, getStaticType());
 		Type inner = cst.isArrayType() ? cst.asArrayType().getInnerType() : Untyped.INSTANCE;
 		MemoryDereference container = new MemoryDereference(cst, left, getLocation());
-		AccessChild elem = new AccessChild(inner, container, right, getLocation());
+		DynamicAccess elem = new DynamicAccess(inner, container, right, getLocation());
 
 		return analysis.smallStepSemantics(state, elem, this);
 	}

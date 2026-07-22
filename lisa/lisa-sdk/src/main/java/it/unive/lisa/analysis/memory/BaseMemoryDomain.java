@@ -7,11 +7,13 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
 import it.unive.lisa.symbolic.memory.NullConstant;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -554,6 +556,7 @@ public interface BaseMemoryDomain<L extends MemoryLattice<L>>
 		return new ExpressionSet(expression);
 	}
 
+	// TODO remove together with ExpressionVisitor#visit(AccessChild,...).
 	@Override
 	@SuppressWarnings("unchecked")
 	default ExpressionSet visit(
@@ -562,37 +565,94 @@ public interface BaseMemoryDomain<L extends MemoryLattice<L>>
 			ExpressionSet child,
 			Object... params)
 			throws SemanticException {
-		return rewriteAccessChild(expression, receiver, child, (L) params[0], (ProgramPoint) params[1],
+		return rewriteStaticAccess((StaticAccess) expression, receiver, child, (L) params[0],
+				(ProgramPoint) params[1], (SemanticOracle) params[2]);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	default ExpressionSet visit(
+			StaticAccess expression,
+			ExpressionSet receiver,
+			ExpressionSet child,
+			Object... params)
+			throws SemanticException {
+		return rewriteStaticAccess(expression, receiver, child, (L) params[0], (ProgramPoint) params[1],
+				(SemanticOracle) params[2]);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	default ExpressionSet visit(
+			DynamicAccess expression,
+			ExpressionSet receiver,
+			ExpressionSet child,
+			Object... params)
+			throws SemanticException {
+		return rewriteDynamicAccess(expression, receiver, child, (L) params[0], (ProgramPoint) params[1],
 				(SemanticOracle) params[2]);
 	}
 
 	/**
-	 * Rewrites an {@link AccessChild} to the {@link MemoryLocation}s,
-	 * {@link MemoryPointer}s, or other {@link ValueExpression}s it can resolve
-	 * to. The arguments of the expression, that is, the receiver and the child,
-	 * are automatically rewritten first and are provided in the
-	 * {@code receiver} and {@code child} parameters.
-	 * 
+	 * Rewrites a {@link StaticAccess} ({@code p.f}) to the
+	 * {@link MemoryLocation}s, {@link MemoryPointer}s, or other
+	 * {@link ValueExpression}s it can resolve to.
+	 *
 	 * @param expression the expression to rewrite
 	 * @param receiver   the result of rewriting the receiver of this access
 	 * @param child      the result of rewriting the child of this access
 	 * @param state      the current state of this domain
-	 * @param pp         the program point that where this expression is being
+	 * @param pp         the program point where this expression is being
 	 *                       evaluated
 	 * @param oracle     the oracle for inter-domain communication
-	 * 
+	 *
 	 * @return the result of rewriting {@code expression}
-	 * 
+	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	ExpressionSet rewriteAccessChild(
-			AccessChild expression,
+	ExpressionSet rewriteStaticAccess(
+			StaticAccess expression,
 			ExpressionSet receiver,
 			ExpressionSet child,
 			L state,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException;
+
+	// TODO Step 2: evaluate oracle.eval(expression.getChild()) to resolve the
+	// runtime key. For now falls back to rewriteStaticAccess to preserve
+	// pre-split behaviour.
+	/**
+	 * Rewrites a {@link DynamicAccess} ({@code p[s]}) to the
+	 * {@link MemoryLocation}s, {@link MemoryPointer}s, or other
+	 * {@link ValueExpression}s it can resolve to.
+	 *
+	 * @param expression the expression to rewrite
+	 * @param receiver   the result of rewriting the receiver of this access
+	 * @param child      the result of rewriting the runtime key of this access
+	 * @param state      the current state of this domain
+	 * @param pp         the program point where this expression is being
+	 *                       evaluated
+	 * @param oracle     the oracle for inter-domain communication
+	 *
+	 * @return the result of rewriting {@code expression}
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default ExpressionSet rewriteDynamicAccess(
+			DynamicAccess expression,
+			ExpressionSet receiver,
+			ExpressionSet child,
+			L state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		// TODO remove the StaticAccess wrapping once Step 2 is implemented.
+		return rewriteStaticAccess(
+				new StaticAccess(expression.getStaticType(), expression.getContainer(), expression.getChild(),
+						expression.getCodeLocation()),
+				receiver, child, state, pp, oracle);
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")

@@ -23,11 +23,11 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.memory.AccessChild;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -204,7 +204,7 @@ public class PointBasedMemoryTest {
 				memory.rewrite(sss.getLeft(), MemoryExpression, pp1, fakeOracle));
 
 		// 3. Access child
-		MemoryExpression = new AccessChild(untyped, x, y, loc1);
+		MemoryExpression = new StaticAccess(untyped, x, y, loc1);
 
 		// from topState
 		sss = memory.semanticsOf(topMemory, MemoryExpression, pp1, fakeOracle);
@@ -465,13 +465,13 @@ public class PointBasedMemoryTest {
 				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 		// x.y rewritten in x -> pp1 = pp1
-		AccessChild accessChild = new AccessChild(untyped, x, y, loc1);
+		StaticAccess accessChild = new StaticAccess(untyped, x, y, loc1);
 
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
 		assertEquals(expectedRewritten, memory.rewrite(xAssign.getLeft(), accessChild, pp1, fakeOracle));
 
 		// y.x rewritten in x -> pp1 = empty set
-		accessChild = new AccessChild(untyped, y, x, loc1);
+		accessChild = new StaticAccess(untyped, y, x, loc1);
 		assertEquals(new ExpressionSet(), memory.rewrite(xAssign.getLeft(), accessChild, pp1, fakeOracle));
 	}
 
@@ -523,7 +523,7 @@ public class PointBasedMemoryTest {
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
 				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
-		SymbolicExpression e = new AccessChild(
+		SymbolicExpression e = new StaticAccess(
 				intType,
 				new BinaryExpression(
 						untyped,

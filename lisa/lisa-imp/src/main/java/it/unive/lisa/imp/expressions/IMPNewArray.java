@@ -16,9 +16,9 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.memory.AccessChild;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.InstrumentedReceiver;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
@@ -100,7 +100,7 @@ public class IMPNewArray
 		AnalysisState<A> tmp = analysis.assign(allocated, array, ref, this);
 
 		// we define the length of the array as a child element
-		AccessChild len = new AccessChild(
+		StaticAccess len = new StaticAccess(
 				Int32Type.INSTANCE,
 				array,
 				new Variable(Untyped.INSTANCE, "len", getLocation()),
