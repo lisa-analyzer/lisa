@@ -6,10 +6,10 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -147,7 +147,7 @@ public class AvailableExpressions
 
 		@Override
 		public Collection<Identifier> visit(
-				MemoryReference expression,
+				GetAddress expression,
 				Collection<Identifier> arg,
 				Object... params)
 				throws SemanticException {

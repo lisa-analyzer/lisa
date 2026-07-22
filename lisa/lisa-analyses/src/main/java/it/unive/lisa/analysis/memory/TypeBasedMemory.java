@@ -8,10 +8,10 @@ import it.unive.lisa.lattices.memory.AllocatedTypes;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryLocation;
@@ -91,8 +91,8 @@ public class TypeBasedMemory
 			return Pair.of(new AllocatedTypes(names), Collections.emptyList());
 		}
 
-		if (expression instanceof MemoryReference)
-			return smallStepSemantics(state, ((MemoryReference) expression).getExpression(), pp, oracle);
+		if (expression instanceof GetAddress)
+			return smallStepSemantics(state, ((GetAddress) expression).getExpression(), pp, oracle);
 
 		if (expression instanceof MemoryDereference)
 			return smallStepSemantics(state, ((MemoryDereference) expression).getExpression(), pp, oracle);
@@ -137,8 +137,8 @@ public class TypeBasedMemory
 	}
 
 	@Override
-	public ExpressionSet rewriteMemoryReference(
-			MemoryReference expression,
+	public ExpressionSet rewriteGetAddress(
+			GetAddress expression,
 			ExpressionSet ref,
 			AllocatedTypes state,
 			ProgramPoint pp,

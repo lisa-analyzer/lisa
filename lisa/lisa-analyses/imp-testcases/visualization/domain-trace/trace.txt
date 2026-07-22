@@ -43,15 +43,15 @@ Program-wide fixpoint
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
               Interval: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
-            SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
-              MonolithicMemory: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
-              MonolithicMemory: Rewriting of ref$new A
+          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &new A
+            SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &new A
+              MonolithicMemory: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &new A
+              MonolithicMemory: Rewriting of &new A
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &memory
-                InferredTypes: Evaluation of &memory
-              Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &memory
-                InferredTypes: Evaluation of &memory
+              InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to p:memory
+                InferredTypes: Evaluation of p:memory
+              Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to p:memory
+                InferredTypes: Evaluation of p:memory
           InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
           InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
           Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
@@ -167,15 +167,15 @@ Program-wide fixpoint
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
                       Interval: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
-                    SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
-                      MonolithicMemory: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
-                      MonolithicMemory: Rewriting of ref$new tests
+                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &new tests
+                    SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &new tests
+                      MonolithicMemory: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &new tests
+                      MonolithicMemory: Rewriting of &new tests
                       SimpleAbstractDomain: application of substitutions
-                      InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &memory
-                        InferredTypes: Evaluation of &memory
-                      Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &memory
-                        InferredTypes: Evaluation of &memory
+                      InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to p:memory
+                        InferredTypes: Evaluation of p:memory
+                      Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to p:memory
+                        InferredTypes: Evaluation of p:memory
                   InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:25
                   Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
                     SimpleAbstractDomain: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25

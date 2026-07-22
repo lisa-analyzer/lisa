@@ -2,10 +2,10 @@ package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -100,21 +100,20 @@ public interface ExpressionVisitor<T> {
 			throws SemanticException;
 
 	/**
-	 * Visits a {@link MemoryReference}.
-	 * 
-	 * @param expression the memory reference
-	 * @param arg        the value produced by visiting the argument of the
-	 *                       expression
+	 * Visits a {@link GetAddress}.
+	 *
+	 * @param expression the get-address expression
+	 * @param arg        the value produced by visiting the inner expression
 	 * @param params     the additional parameters provided to
 	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
 	 *                       if any
-	 * 
-	 * @return the value produced by visiting the memory reference
-	 * 
+	 *
+	 * @return the value produced by visiting the expression
+	 *
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
 	T visit(
-			MemoryReference expression,
+			GetAddress expression,
 			T arg,
 			Object... params)
 			throws SemanticException;

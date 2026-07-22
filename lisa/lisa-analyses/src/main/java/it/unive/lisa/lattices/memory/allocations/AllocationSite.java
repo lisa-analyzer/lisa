@@ -163,9 +163,17 @@ public abstract class AllocationSite
 	}
 
 	/**
+	 * Yields whether this allocation site is on the heap.
+	 *
+	 * @return {@code true} if this is a heap allocation site, {@code false} if
+	 *             it is on the stack
+	 */
+	public abstract boolean isHeap();
+
+	/**
 	 * Yields a weak copy of this allocation site, that is, a copy where
 	 * {@link #isWeak()} returns {@code true}.
-	 * 
+	 *
 	 * @return the weak copy
 	 */
 	public abstract AllocationSite toWeak();

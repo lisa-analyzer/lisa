@@ -9,7 +9,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
- * An expression that pushes an invalid value on the stack. This is useful to
+ * An expression that pushes an invalid value on the memory. This is useful to
  * represent bottom values.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

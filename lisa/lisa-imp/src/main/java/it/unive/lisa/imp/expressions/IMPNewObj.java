@@ -17,8 +17,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
@@ -92,7 +92,7 @@ public class IMPNewObj
 		ReferenceType reftype = staticType.isReferenceType() ? staticType.asReferenceType()
 				: new ReferenceType(staticType);
 		MemoryAllocation creation = new MemoryAllocation(type, getLocation(), staticallyAllocated);
-		MemoryReference ref = new MemoryReference(reftype, creation, getLocation());
+		GetAddress ref = new GetAddress(reftype, creation, getLocation());
 
 		// we start by allocating the memory region
 		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);

@@ -17,10 +17,10 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -472,8 +472,8 @@ public abstract class AllocationSiteBasedAnalysis<
 	}
 
 	@Override
-	public ExpressionSet rewriteMemoryReference(
-			MemoryReference expression,
+	public ExpressionSet rewriteGetAddress(
+			GetAddress expression,
 			ExpressionSet arg,
 			L state,
 			ProgramPoint pp,

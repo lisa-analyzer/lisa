@@ -9,28 +9,30 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
- * A reference to a memory location, identified by its name.
- * 
+ * The address-of operator ({@code &e}), yielding the address of its inner
+ * expression. Domains rewrite this into a
+ * {@link it.unive.lisa.symbolic.value.MemoryPointer}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MemoryReference
+public class GetAddress
 		extends
 		MemoryExpression {
 
 	/**
-	 * The expression referred by this expression
+	 * The expression whose address is taken.
 	 */
 	private final SymbolicExpression expression;
 
 	/**
-	 * Builds the memory reference.
-	 * 
+	 * Builds the get-address expression.
+	 *
 	 * @param staticType the static type of this expression
-	 * @param expression the expression that this refers to
+	 * @param expression the expression whose address is taken
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public MemoryReference(
+	public GetAddress(
 			Type staticType,
 			SymbolicExpression expression,
 			CodeLocation location) {
@@ -40,7 +42,7 @@ public class MemoryReference
 
 	@Override
 	public String toString() {
-		return "ref$" + expression.toString();
+		return "&" + expression.toString();
 	}
 
 	@Override
@@ -52,9 +54,9 @@ public class MemoryReference
 	}
 
 	/**
-	 * Yields the referred expression.
-	 * 
-	 * @return the referred expression
+	 * Yields the expression whose address is taken.
+	 *
+	 * @return the inner expression
 	 */
 	public SymbolicExpression getExpression() {
 		return expression;
@@ -69,7 +71,7 @@ public class MemoryReference
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MemoryReference other = (MemoryReference) obj;
+		GetAddress other = (GetAddress) obj;
 		if (expression == null) {
 			if (other.expression != null)
 				return false;
@@ -92,7 +94,7 @@ public class MemoryReference
 		SymbolicExpression e = expression.removeTypingExpressions();
 		if (e == expression)
 			return this;
-		return new MemoryReference(getStaticType(), e, getCodeLocation());
+		return new GetAddress(getStaticType(), e, getCodeLocation());
 	}
 
 	@Override
@@ -105,7 +107,7 @@ public class MemoryReference
 		SymbolicExpression e = expression.replace(source, target);
 		if (e == expression)
 			return this;
-		return new MemoryReference(getStaticType(), e, getCodeLocation());
+		return new GetAddress(getStaticType(), e, getCodeLocation());
 	}
 
 	@Override
@@ -118,7 +120,7 @@ public class MemoryReference
 			return null;
 		if (e == expression || e.equals(expression))
 			return this;
-		return new MemoryReference(getStaticType(), e, getCodeLocation());
+		return new GetAddress(getStaticType(), e, getCodeLocation());
 	}
 
 	@Override
@@ -131,7 +133,7 @@ public class MemoryReference
 			return null;
 		if (e == expression || e.equals(expression))
 			return this;
-		return new MemoryReference(getStaticType(), e, getCodeLocation());
+		return new GetAddress(getStaticType(), e, getCodeLocation());
 	}
 
 }

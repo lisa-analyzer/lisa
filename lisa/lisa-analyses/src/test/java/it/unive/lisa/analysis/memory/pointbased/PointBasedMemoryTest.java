@@ -24,10 +24,10 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -127,7 +127,7 @@ public class PointBasedMemoryTest {
 		// from empty environment, assignment x = *(pp1, fakeOracle)
 		// expected: x -> pp1
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 
 		AllocationSites xSites = new AllocationSites(Collections.singleton(alloc1));
@@ -140,7 +140,7 @@ public class PointBasedMemoryTest {
 				List<MemoryReplacement>> actual = memory.assign(
 						xAssign.getLeft(),
 						x,
-						new MemoryReference(untyped, new MemoryAllocation(untyped, loc2), loc2),
+						new GetAddress(untyped, new MemoryAllocation(untyped, loc2), loc2),
 						pp2,
 						fakeOracle);
 
@@ -175,7 +175,7 @@ public class PointBasedMemoryTest {
 
 		// from x -> pp1
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xToLoc1 = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 		sss = memory.semanticsOf(xToLoc1.getLeft(), MemoryExpression, pp1, fakeOracle);
 		assertEquals(
@@ -183,7 +183,7 @@ public class PointBasedMemoryTest {
 				memory.rewrite(sss.getLeft(), MemoryExpression, pp1, fakeOracle));
 
 		// 2. Memory reference
-		MemoryExpression = new MemoryReference(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1);
+		MemoryExpression = new GetAddress(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1);
 
 		// from topState
 		sss = memory.semanticsOf(topMemory, MemoryExpression, pp1, fakeOracle);
@@ -227,7 +227,7 @@ public class PointBasedMemoryTest {
 		// 4. Memory dereference
 		MemoryExpression = new MemoryDereference(
 				untyped,
-				new MemoryReference(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1),
+				new GetAddress(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1),
 				loc1);
 
 		// from topState
@@ -253,15 +253,15 @@ public class PointBasedMemoryTest {
 	public void testLub()
 			throws SemanticException {
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xToLoc1 = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xToLoc2 = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
 						fakeOracle);
 
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> yToLoc2 = memory
-				.assign(topMemory, y, new MemoryReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
+				.assign(topMemory, y, new GetAddress(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
 						fakeOracle);
 
 		// top lub <any memory> or <any memory> lub top = top
@@ -300,15 +300,15 @@ public class PointBasedMemoryTest {
 	public void testWidening()
 			throws SemanticException {
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xToLoc1 = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xToLoc2 = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
 						fakeOracle);
 
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> yToLoc2 = memory
-				.assign(topMemory, y, new MemoryReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
+				.assign(topMemory, y, new GetAddress(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
 						fakeOracle);
 
 		// top lub <any memory> or <any memory> lub top = top
@@ -347,11 +347,11 @@ public class PointBasedMemoryTest {
 	public void testLessOrEquals()
 			throws SemanticException {
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> yAssign = memory
-				.assign(topMemory, y, new MemoryReference(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
+				.assign(topMemory, y, new GetAddress(untyped, new MemoryAllocation(untyped, loc2), loc2), pp2,
 						fakeOracle);
 
 		// <any memory> <= top
@@ -387,7 +387,7 @@ public class PointBasedMemoryTest {
 		assertEquals(bottomMemory, bottomMemory.forgetIdentifier(x, pp1).getLeft());
 
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> result = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 
 		assertEquals(emptyMemory, result.getLeft().forgetIdentifier(x, pp1).getLeft());
@@ -410,13 +410,13 @@ public class PointBasedMemoryTest {
 		assertEquals(bottomMemory, bottomMemory.pushScope(token, pp1).getLeft());
 
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 		Pair<MemoryEnvironment<AllocationSites>,
 				List<MemoryReplacement>> xPushedScopeAssign = memory.assign(
 						topMemory,
 						new OutOfScopeIdentifier(x, token, loc1),
-						new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
+						new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1),
 						pp1,
 						fakeOracle);
 
@@ -440,14 +440,14 @@ public class PointBasedMemoryTest {
 		assertEquals(bottomMemory, bottomMemory.popScope(token, pp1).getLeft());
 
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 
 		Pair<MemoryEnvironment<AllocationSites>,
 				List<MemoryReplacement>> xScopedAssign = memory.assign(
 						topMemory,
 						(Identifier) x.pushScope(token, pp1),
-						new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
+						new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1),
 						pp1,
 						fakeOracle);
 
@@ -462,7 +462,7 @@ public class PointBasedMemoryTest {
 	public void testAccessChildRewrite()
 			throws SemanticException {
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 		// x.y rewritten in x -> pp1 = pp1
 		AccessChild accessChild = new AccessChild(untyped, x, y, loc1);
@@ -479,7 +479,7 @@ public class PointBasedMemoryTest {
 	public void testIdentifierRewrite()
 			throws SemanticException {
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 		// x rewritten in x -> pp1 = pp1
 		ExpressionSet expectedRewritten = new ExpressionSet(x);
@@ -495,7 +495,7 @@ public class PointBasedMemoryTest {
 		// *(&(new loc(pp1, fakeOracle)) rewritten in top -> pp1
 		MemoryDereference deref = new MemoryDereference(
 				untyped,
-				new MemoryReference(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1),
+				new GetAddress(untyped, new MemoryAllocation(untyped, loc1, new Annotations()), loc1),
 				loc1);
 
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
@@ -503,7 +503,7 @@ public class PointBasedMemoryTest {
 
 		// *(x) rewritten in x -> pp1 -> pp1
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 		deref = new MemoryDereference(untyped, x, loc1);
 		expectedRewritten = new ExpressionSet(alloc1);
@@ -521,7 +521,7 @@ public class PointBasedMemoryTest {
 			throws SemanticException {
 		// ((type) x).f rewritten in x -> pp1 -> pp1
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
-				.assign(topMemory, x, new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
+				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 		SymbolicExpression e = new AccessChild(
 				intType,
@@ -543,7 +543,7 @@ public class PointBasedMemoryTest {
 		// (ref(alloc) conv-as type) rewritten in &alloc.loc
 		SymbolicExpression e = new BinaryExpression(
 				untyped,
-				new MemoryReference(untyped, new MemoryAllocation(untyped, loc1), loc1),
+				new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1),
 				new Constant(new TypeTokenType(Collections.singleton(intType)), intType, loc1),
 				TypeConv.INSTANCE,
 				loc1);

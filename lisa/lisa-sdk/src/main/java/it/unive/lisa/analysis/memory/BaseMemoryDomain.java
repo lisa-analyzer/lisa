@@ -7,10 +7,10 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -628,26 +628,24 @@ public interface BaseMemoryDomain<L extends MemoryLattice<L>>
 	@Override
 	@SuppressWarnings("unchecked")
 	default ExpressionSet visit(
-			MemoryReference expression,
+			GetAddress expression,
 			ExpressionSet arg,
 			Object... params)
 			throws SemanticException {
-		return rewriteMemoryReference(expression, arg, (L) params[0], (ProgramPoint) params[1],
+		return rewriteGetAddress(expression, arg, (L) params[0], (ProgramPoint) params[1],
 				(SemanticOracle) params[2]);
 	}
 
 	/**
-	 * Rewrites a {@link MemoryReference} to the {@link MemoryLocation}s,
+	 * Rewrites a {@link GetAddress} to the {@link MemoryLocation}s,
 	 * {@link MemoryPointer}s, or other {@link ValueExpression}s it can resolve
-	 * to. The argument of the expression, that is, the referenced expression,
-	 * is automatically rewritten first and is provided in the {@code arg}
-	 * parameter.
+	 * to. The inner expression is automatically rewritten first and provided in
+	 * {@code arg}.
 	 *
 	 * @param expression the expression to rewrite
-	 * @param arg        the result of rewriting the inner expression of this
-	 *                       reference
+	 * @param arg        the result of rewriting the inner expression
 	 * @param state      the current state of this domain
-	 * @param pp         the program point that where this expression is being
+	 * @param pp         the program point where this expression is being
 	 *                       evaluated
 	 * @param oracle     the oracle for inter-domain communication
 	 *
@@ -655,8 +653,8 @@ public interface BaseMemoryDomain<L extends MemoryLattice<L>>
 	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	ExpressionSet rewriteMemoryReference(
-			MemoryReference expression,
+	ExpressionSet rewriteGetAddress(
+			GetAddress expression,
 			ExpressionSet arg,
 			L state,
 			ProgramPoint pp,

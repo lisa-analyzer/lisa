@@ -106,4 +106,9 @@ public class HeapAllocationSite
 		return new HeapAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
 	}
 
+	@Override
+	public boolean isHeap() {
+		return true;
+	}
+
 }

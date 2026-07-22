@@ -10,7 +10,7 @@ Program-wide fixpoint
         Semantics of new A()
           Analysis: Small step semantics of new A
           Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
+          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &new A
           Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
           Fixpoint of untyped A::A(A*)
             Semantics of i1 = 0
@@ -42,7 +42,7 @@ Program-wide fixpoint
                 Semantics of new tests()
                   Analysis: Small step semantics of new tests
                   Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
+                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &new tests
                   Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
                 Semantics of rec
                   Analysis: Small step semantics of rec

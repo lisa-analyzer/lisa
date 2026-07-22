@@ -106,4 +106,9 @@ public class StackAllocationSite
 		return new StackAllocationSite(getStaticType(), getLocationName(), getField(), isWeak(), getCodeLocation());
 	}
 
+	@Override
+	public boolean isHeap() {
+		return false;
+	}
+
 }

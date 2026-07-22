@@ -11,8 +11,8 @@ import it.unive.lisa.type.Type;
 import java.util.Objects;
 
 /**
- * An allocation of a memory location.
- * 
+ * An allocation of a memory location, either on the stack or on the heap.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class MemoryAllocation
@@ -20,7 +20,8 @@ public class MemoryAllocation
 		MemoryExpression {
 
 	/**
-	 * If this allocation is allocated in the stack.
+	 * Whether this allocation is on the stack ({@code true}) or heap
+	 * ({@code false}).
 	 */
 	private final boolean isStackAllocation;
 
@@ -31,7 +32,7 @@ public class MemoryAllocation
 
 	/**
 	 * Builds the memory allocation.
-	 * 
+	 *
 	 * @param staticType the static type of this expression
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
@@ -44,7 +45,7 @@ public class MemoryAllocation
 
 	/**
 	 * Builds the memory allocation.
-	 * 
+	 *
 	 * @param staticType the static type of this expression
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
@@ -59,11 +60,11 @@ public class MemoryAllocation
 
 	/**
 	 * Builds the memory allocation.
-	 * 
+	 *
 	 * @param staticType        the static type of this expression
 	 * @param location          the code location of the statement that has
 	 *                              generated this expression
-	 * @param isStackAllocation if this allocation is allocated in the stack
+	 * @param isStackAllocation whether this is a stack allocation
 	 */
 	public MemoryAllocation(
 			Type staticType,
@@ -74,12 +75,12 @@ public class MemoryAllocation
 
 	/**
 	 * Builds the memory allocation.
-	 * 
+	 *
 	 * @param staticType        the static type of this expression
 	 * @param location          the code location of the statement that has
 	 *                              generated this expression
 	 * @param anns              the annotations of this memory allocation
-	 * @param isStackAllocation if this allocation is allocated in the stack
+	 * @param isStackAllocation whether this is a stack allocation
 	 */
 	public MemoryAllocation(
 			Type staticType,
@@ -100,9 +101,9 @@ public class MemoryAllocation
 	}
 
 	/**
-	 * Yields whether this memory allocation is allocated in the stack.
-	 * 
-	 * @return whether this memory allocation is allocated in the stack
+	 * Yields whether this allocation is on the stack.
+	 *
+	 * @return {@code true} if this is a stack allocation
 	 */
 	public boolean isStackAllocation() {
 		return isStackAllocation;
@@ -110,7 +111,7 @@ public class MemoryAllocation
 
 	/**
 	 * Yields the annotations of this expression.
-	 * 
+	 *
 	 * @return the annotations of this expression
 	 */
 	public Annotations getAnnotations() {

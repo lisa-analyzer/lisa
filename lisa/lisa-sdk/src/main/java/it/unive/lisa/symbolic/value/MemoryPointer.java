@@ -96,7 +96,7 @@ public class MemoryPointer
 
 	@Override
 	public String toString() {
-		return "&" + getName();
+		return "p:" + getName();
 	}
 
 	@Override

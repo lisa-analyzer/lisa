@@ -8,10 +8,10 @@ import it.unive.lisa.lattices.memory.Monolith;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.memory.NullConstant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryLocation;
@@ -118,8 +118,8 @@ public class MonolithicMemory
 	}
 
 	@Override
-	public ExpressionSet rewriteMemoryReference(
-			MemoryReference expression,
+	public ExpressionSet rewriteGetAddress(
+			GetAddress expression,
 			ExpressionSet ref,
 			Monolith state,
 			ProgramPoint pp,

@@ -39,6 +39,9 @@ public class MemoryLocation
 		super(staticType, name, weak, new Annotations(), location);
 	}
 
+	// TODO CHECK subclasses may override isHeap() to distinguish stack vs heap
+	// locations
+
 	@Override
 	public String toString() {
 		return "memory[" + (isWeak() ? "w" : "s") + "]:" + getName();

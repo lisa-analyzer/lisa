@@ -17,8 +17,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
-import it.unive.lisa.symbolic.memory.MemoryReference;
 import it.unive.lisa.symbolic.value.InstrumentedReceiver;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
@@ -89,7 +89,7 @@ public class IMPNewArray
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
 		MemoryAllocation creation = new MemoryAllocation(type, getLocation(), staticallyAllocated);
-		MemoryReference ref = new MemoryReference(reftype, creation, getLocation());
+		GetAddress ref = new GetAddress(reftype, creation, getLocation());
 
 		// we start by allocating the memory region
 		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
