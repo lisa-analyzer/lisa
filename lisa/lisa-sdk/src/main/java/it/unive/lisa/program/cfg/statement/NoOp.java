@@ -64,6 +64,12 @@ public class NoOp
 	}
 
 	@Override
+	public NoOp clone(
+			CloneLocator locator) {
+		return new NoOp(getCFG(), locator.locationFor(this));
+	}
+
+	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A, D> interprocedural,

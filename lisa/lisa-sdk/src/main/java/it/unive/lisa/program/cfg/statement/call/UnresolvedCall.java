@@ -12,6 +12,7 @@ import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
@@ -162,6 +163,24 @@ public class UnresolvedCall
 		AnalysisState<A> result = resolved.forwardSemanticsAux(interprocedural, state, params, expressions);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
+	}
+
+	@Override
+	public UnresolvedCall clone(
+			CloneLocator locator) {
+		Expression[] src = getParameters();
+		Expression[] cloned = new Expression[src.length];
+		for (int i = 0; i < src.length; i++)
+			cloned[i] = (Expression) src[i].clone(locator);
+		return new UnresolvedCall(
+				getCFG(),
+				locator.locationFor(this),
+				getCallType(),
+				getQualifier(),
+				getTargetName(),
+				getOrder(),
+				getStaticType(),
+				cloned);
 	}
 
 }

@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -69,6 +70,16 @@ public class Subtraction
 				state,
 				new BinaryExpression(getStaticType(), left, right, NumericNonOverflowingSub.INSTANCE, getLocation()),
 				this);
+	}
+
+	@Override
+	public Subtraction clone(
+			CloneLocator locator) {
+		return new Subtraction(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(Expression) getRight().clone(locator));
 	}
 
 }

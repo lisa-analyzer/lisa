@@ -42,6 +42,7 @@
     "asynchronousListeners" : "",
     "backwardDescendingFixpoint" : "unset",
     "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "cfgTransformations" : "",
     "dumpForcesUnwinding" : "false",
     "fixpointWorkingSet" : "OrderBasedWorkingSet",
     "forwardDescendingFixpoint" : "unset",

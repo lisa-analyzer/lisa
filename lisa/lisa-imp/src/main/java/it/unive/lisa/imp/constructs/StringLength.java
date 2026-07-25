@@ -7,6 +7,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -111,6 +112,16 @@ public class StringLength
 				CodeLocation location,
 				Expression parameter) {
 			super(cfg, location, parameter);
+		}
+
+		@Override
+		public IMPStringLength clone(
+				CloneLocator locator) {
+			IMPStringLength result = new IMPStringLength(getCFG(), locator.locationFor(this),
+					(Expression) getSubExpression().clone(locator));
+			if (originating != null)
+				result.setOriginatingStatement(originating);
+			return result;
 		}
 
 	}

@@ -7,6 +7,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -126,6 +127,20 @@ public class StringSubstring
 				Expression middle,
 				Expression right) {
 			super(cfg, location, left, middle, right);
+		}
+
+		@Override
+		public IMPStringSubstring clone(
+				CloneLocator locator) {
+			IMPStringSubstring result = new IMPStringSubstring(
+					getCFG(),
+					locator.locationFor(this),
+					(Expression) getLeft().clone(locator),
+					(Expression) getMiddle().clone(locator),
+					(Expression) getRight().clone(locator));
+			if (originating != null)
+				result.setOriginatingStatement(originating);
+			return result;
 		}
 
 	}

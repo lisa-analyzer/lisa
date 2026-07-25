@@ -72,4 +72,10 @@ public class DefaultParamInitialization
 				.smallStepSemantics(entryState, new PushAny(getStaticType(), getLocation()), this);
 	}
 
+	@Override
+	public DefaultParamInitialization clone(
+			CloneLocator locator) {
+		return new DefaultParamInitialization(getCFG(), locator.locationFor(this), getStaticType());
+	}
+
 }

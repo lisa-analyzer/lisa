@@ -118,4 +118,10 @@ public class Continue
 		return CollectionUtilities.nullSafeCompare(true, label, ((Continue) o).label, String::compareTo);
 	}
 
+	@Override
+	public Continue clone(
+			CloneLocator locator) {
+		return new Continue(getCFG(), locator.locationFor(this), label);
+	}
+
 }

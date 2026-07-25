@@ -11,6 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -94,6 +95,16 @@ public class Concat
 				state,
 				new BinaryExpression(getStaticType(), left, right, StringConcat.INSTANCE, getLocation()),
 				originating == null ? this : originating);
+	}
+
+	@Override
+	public Concat clone(
+			CloneLocator locator) {
+		return new Concat(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(Expression) getRight().clone(locator));
 	}
 
 }

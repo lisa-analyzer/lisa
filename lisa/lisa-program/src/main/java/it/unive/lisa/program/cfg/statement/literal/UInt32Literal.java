@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.type.UInt32Type;
 
 /**
@@ -27,6 +28,12 @@ public class UInt32Literal
 			CodeLocation location,
 			int value) {
 		super(cfg, location, value, UInt32Type.INSTANCE);
+	}
+
+	@Override
+	public UInt32Literal clone(
+			CloneLocator locator) {
+		return new UInt32Literal(getCFG(), locator.locationFor(this), getValue().intValue());
 	}
 
 }

@@ -13,6 +13,7 @@ import it.unive.lisa.program.Global;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
@@ -173,6 +174,16 @@ public class AccessInstanceGlobal
 		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
 		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
 		return analysis.smallStepSemantics(state, access, this);
+	}
+
+	@Override
+	public AccessInstanceGlobal clone(
+			CloneLocator locator) {
+		return new AccessInstanceGlobal(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getReceiver().clone(locator),
+				target);
 	}
 
 }

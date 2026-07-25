@@ -96,4 +96,13 @@ public class Throw
 		return moved;
 	}
 
+	@Override
+	public Throw clone(
+			CloneLocator locator) {
+		return new Throw(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getSubExpression().clone(locator));
+	}
+
 }

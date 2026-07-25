@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.literal.TypeLiteral;
@@ -82,6 +83,16 @@ public class Cast
 								target.castIsConversion() ? TypeConv.INSTANCE : TypeCast.INSTANCE,
 								getLocation()),
 						this);
+	}
+
+	@Override
+	public Cast clone(
+			CloneLocator locator) {
+		return new Cast(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(TypeLiteral) getRight().clone(locator));
 	}
 
 }

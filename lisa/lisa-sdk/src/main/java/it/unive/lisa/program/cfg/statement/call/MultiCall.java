@@ -169,4 +169,14 @@ public class MultiCall
 				.collect(Collectors.toSet());
 	}
 
+	@Override
+	public MultiCall clone(
+			it.unive.lisa.program.cfg.statement.CloneLocator locator) {
+		UnresolvedCall clonedSource = (UnresolvedCall) getSource().clone(locator);
+		Call[] clonedCalls = calls.stream()
+				.map(c -> (Call) c.clone(locator))
+				.toArray(Call[]::new);
+		return new MultiCall(clonedSource, clonedCalls);
+	}
+
 }

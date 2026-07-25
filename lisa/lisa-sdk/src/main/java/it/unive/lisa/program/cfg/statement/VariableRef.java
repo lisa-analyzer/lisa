@@ -114,6 +114,12 @@ public class VariableRef
 		return name;
 	}
 
+	@Override
+	public VariableRef clone(
+			CloneLocator locator) {
+		return new VariableRef(getCFG(), locator.locationFor(this), name, getStaticType());
+	}
+
 	/**
 	 * Yields a {@link Variable} representing the referenced variable.
 	 * 

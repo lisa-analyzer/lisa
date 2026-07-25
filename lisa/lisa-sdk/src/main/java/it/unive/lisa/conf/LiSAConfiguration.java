@@ -24,6 +24,7 @@ import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.program.cfg.transform.CFGTransformation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.workset.OrderBasedWorkingSet;
@@ -264,6 +265,13 @@ public class LiSAConfiguration
 	 * an empty list.
 	 */
 	public final List<EventListener> asynchronousListeners = new LinkedList<>();
+
+	/**
+	 * The list of {@link CFGTransformation}s to apply, in order, to every CFG
+	 * in the application after program finalization and before the fixpoint.
+	 * Defaults to an empty list.
+	 */
+	public List<CFGTransformation> cfgTransformations = new LinkedList<>();
 
 	@Override
 	public String toString() {

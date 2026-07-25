@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.type.Float64Type;
 
 /**
@@ -27,6 +28,12 @@ public class Float64Literal
 			CodeLocation location,
 			double value) {
 		super(cfg, location, value, Float64Type.INSTANCE);
+	}
+
+	@Override
+	public Float64Literal clone(
+			CloneLocator locator) {
+		return new Float64Literal(getCFG(), locator.locationFor(this), getValue().doubleValue());
 	}
 
 }

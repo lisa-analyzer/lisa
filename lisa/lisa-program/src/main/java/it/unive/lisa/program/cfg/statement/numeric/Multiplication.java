@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -69,6 +70,16 @@ public class Multiplication
 				state,
 				new BinaryExpression(getStaticType(), left, right, NumericNonOverflowingMul.INSTANCE, getLocation()),
 				this);
+	}
+
+	@Override
+	public Multiplication clone(
+			CloneLocator locator) {
+		return new Multiplication(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(Expression) getRight().clone(locator));
 	}
 
 }

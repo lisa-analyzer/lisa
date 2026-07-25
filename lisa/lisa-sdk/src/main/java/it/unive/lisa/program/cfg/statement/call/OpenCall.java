@@ -10,6 +10,7 @@ import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
@@ -192,6 +193,24 @@ public class OpenCall
 	@Override
 	public Collection<CodeMember> getTargets() {
 		return Collections.emptySet();
+	}
+
+	@Override
+	public OpenCall clone(
+			CloneLocator locator) {
+		Expression[] src = getParameters();
+		Expression[] cloned = new Expression[src.length];
+		for (int i = 0; i < src.length; i++)
+			cloned[i] = (Expression) src[i].clone(locator);
+		return new OpenCall(
+				getCFG(),
+				locator.locationFor(this),
+				getCallType(),
+				getQualifier(),
+				getTargetName(),
+				getOrder(),
+				getStaticType(),
+				cloned);
 	}
 
 }

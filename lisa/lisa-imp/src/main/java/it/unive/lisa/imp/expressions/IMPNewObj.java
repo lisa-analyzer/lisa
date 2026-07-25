@@ -10,6 +10,8 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.InstrumentedReceiverRef;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
@@ -64,9 +66,27 @@ public class IMPNewObj
 			Type type,
 			boolean staticallyAllocated,
 			Expression... parameters) {
+		this(cfg, new SourceCodeLocation(sourceFile, line, col), type, staticallyAllocated, parameters);
+	}
+
+	/**
+	 * Builds the object allocation at the given {@link CodeLocation}.
+	 *
+	 * @param cfg                 the {@link CFG} where this operation lies
+	 * @param location            the location where this operation is defined
+	 * @param type                the type of the object that is being created
+	 * @param staticallyAllocated if this allocation is static or not
+	 * @param parameters          the parameters of the constructor call
+	 */
+	public IMPNewObj(
+			CFG cfg,
+			CodeLocation location,
+			Type type,
+			boolean staticallyAllocated,
+			Expression... parameters) {
 		super(
 				cfg,
-				new SourceCodeLocation(sourceFile, line, col),
+				location,
 				(staticallyAllocated ? "" : "new ") + type,
 				staticallyAllocated ? type : new ReferenceType(type),
 				parameters);
@@ -168,6 +188,19 @@ public class IMPNewObj
 			return false;
 		IMPNewObj other = (IMPNewObj) obj;
 		return staticallyAllocated == other.staticallyAllocated;
+	}
+
+	@Override
+	public IMPNewObj clone(
+			CloneLocator locator) {
+		Expression[] src = getSubExpressions();
+		Expression[] cloned = new Expression[src.length];
+		for (int i = 0; i < src.length; i++)
+			cloned[i] = (Expression) src[i].clone(locator);
+		Type declared = getStaticType().isReferenceType()
+				? getStaticType().asReferenceType().getInnerType()
+				: getStaticType();
+		return new IMPNewObj(getCFG(), locator.locationFor(this), declared, staticallyAllocated, cloned);
 	}
 
 }

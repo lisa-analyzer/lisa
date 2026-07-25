@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.type.NullType;
 
@@ -41,6 +42,12 @@ public class NullLiteral
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return interprocedural.getAnalysis().smallStepSemantics(entryState, new NullConstant(getLocation()), this);
+	}
+
+	@Override
+	public NullLiteral clone(
+			CloneLocator locator) {
+		return new NullLiteral(getCFG(), locator.locationFor(this));
 	}
 
 }

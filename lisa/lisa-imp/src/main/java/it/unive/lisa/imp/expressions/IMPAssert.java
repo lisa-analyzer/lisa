@@ -9,6 +9,8 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryStatement;
@@ -41,13 +43,36 @@ public class IMPAssert
 			int line,
 			int col,
 			Expression expression) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), "assert", expression);
+		this(cfg, new SourceCodeLocation(sourceFile, line, col), expression);
+	}
+
+	/**
+	 * Builds the assertion at the given {@link CodeLocation}.
+	 *
+	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param location   the location where this operation is defined
+	 * @param expression the expression being asserted
+	 */
+	public IMPAssert(
+			CFG cfg,
+			CodeLocation location,
+			Expression expression) {
+		super(cfg, location, "assert", expression);
 	}
 
 	@Override
 	protected int compareSameClassAndParams(
 			Statement o) {
 		return 0; // no extra fields to compare
+	}
+
+	@Override
+	public IMPAssert clone(
+			CloneLocator locator) {
+		return new IMPAssert(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getSubExpression().clone(locator));
 	}
 
 	@Override

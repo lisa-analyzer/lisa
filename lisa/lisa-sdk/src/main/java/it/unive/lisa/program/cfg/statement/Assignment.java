@@ -120,6 +120,18 @@ public class Assignment
 	}
 
 	@Override
+	public Assignment clone(
+			CloneLocator locator) {
+		return new Assignment(
+				getCFG(),
+				locator.locationFor(this),
+				getOrder(),
+				getStaticType(),
+				(Expression) getLeft().clone(locator),
+				(Expression) getRight().clone(locator));
+	}
+
+	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdBinarySemantics(
 			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,

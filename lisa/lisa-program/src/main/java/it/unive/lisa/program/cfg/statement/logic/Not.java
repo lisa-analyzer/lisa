@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -63,6 +64,15 @@ public class Not
 				state,
 				new UnaryExpression(getStaticType(), expr, LogicalNegation.INSTANCE, getLocation()),
 				this);
+	}
+
+	@Override
+	public Not clone(
+			CloneLocator locator) {
+		return new Not(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getSubExpression().clone(locator));
 	}
 
 }

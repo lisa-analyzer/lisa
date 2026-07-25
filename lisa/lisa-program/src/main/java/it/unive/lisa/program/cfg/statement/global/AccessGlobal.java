@@ -13,6 +13,7 @@ import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.GlobalVariable;
@@ -145,6 +146,12 @@ public class AccessGlobal
 				entryState,
 				new GlobalVariable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
 				this);
+	}
+
+	@Override
+	public AccessGlobal clone(
+			CloneLocator locator) {
+		return new AccessGlobal(getCFG(), locator.locationFor(this), container, target);
 	}
 
 }

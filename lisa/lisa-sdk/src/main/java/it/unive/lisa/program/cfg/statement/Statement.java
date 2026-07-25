@@ -129,6 +129,34 @@ public abstract class Statement
 	public abstract String toString();
 
 	/**
+	 * Produces a structural clone of this statement. The location of each
+	 * cloned node (this one and every descendant) is decided by the supplied
+	 * {@link CloneLocator}.
+	 * <p>
+	 * <b>Deep-copy contract.</b> Sub-expression children (any
+	 * {@link Expression} carried as a field on this statement, directly or via
+	 * {@code Expression[]}) MUST be recursively cloned by forwarding the same
+	 * {@code locator} down; their new parent link is re-established by the
+	 * constructor. External references (types, constants, operator kinds, call
+	 * target descriptors, method names, {@link String}s) MUST be shared by
+	 * reference — they are immutable value objects or point outside the
+	 * statement graph.
+	 * <p>
+	 * The returned clone reuses {@code this.getCFG()} (transformations run
+	 * within a single CFG).
+	 *
+	 * @param locator strategy that yields the {@link CodeLocation} for the
+	 *                    clone of each visited statement; the returned
+	 *                    locations must be equals-distinct from the originals
+	 *                    if the clones coexist with them in the same CFG
+	 *
+	 * @return a new {@code Statement} of the same runtime class with a
+	 *             freshly-cloned sub-expression tree
+	 */
+	public abstract Statement clone(
+			CloneLocator locator);
+
+	/**
 	 * Computes the forward semantics of the statement, expressing how semantic
 	 * information is transformed by the execution of this statement. This
 	 * method is also responsible for recursively invoking the

@@ -70,6 +70,12 @@ public class Return
 	}
 
 	@Override
+	public Return clone(
+			CloneLocator locator) {
+		return new Return(getCFG(), locator.locationFor(this), (Expression) getSubExpression().clone(locator));
+	}
+
+	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> fwdUnarySemantics(
 			InterproceduralAnalysis<A, D> interprocedural,
 			AnalysisState<A> state,

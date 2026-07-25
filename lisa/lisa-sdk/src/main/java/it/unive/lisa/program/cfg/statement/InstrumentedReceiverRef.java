@@ -61,4 +61,10 @@ public class InstrumentedReceiverRef
 		return v;
 	}
 
+	@Override
+	public InstrumentedReceiverRef clone(
+			CloneLocator locator) {
+		return new InstrumentedReceiverRef(getCFG(), locator.locationFor(this), isArray, getStaticType());
+	}
+
 }

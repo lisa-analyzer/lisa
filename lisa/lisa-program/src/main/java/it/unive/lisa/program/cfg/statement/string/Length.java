@@ -11,6 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -84,6 +85,15 @@ public class Length
 				state,
 				new UnaryExpression(getStaticType(), expr, StringLength.INSTANCE, getLocation()),
 				originating == null ? this : originating);
+	}
+
+	@Override
+	public Length clone(
+			CloneLocator locator) {
+		return new Length(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getSubExpression().clone(locator));
 	}
 
 }

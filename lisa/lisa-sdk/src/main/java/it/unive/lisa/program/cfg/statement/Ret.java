@@ -85,4 +85,10 @@ public class Ret
 		return visitor.visit(tool, getCFG(), this);
 	}
 
+	@Override
+	public Ret clone(
+			CloneLocator locator) {
+		return new Ret(getCFG(), locator.locationFor(this));
+	}
+
 }
