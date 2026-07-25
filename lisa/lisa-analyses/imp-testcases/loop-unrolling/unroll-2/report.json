@@ -1,0 +1,43 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_loops.conditionalCounter(loops__this).graph.json", "untyped_loops.longConst(loops__this).graph.json", "untyped_loops.nestedLoop(loops__this).graph.json", "untyped_loops.shortConst(loops__this).graph.json", "untyped_loops.unknownBound(loops__this,_untyped_b).graph.json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "145ms",
+    "end" : "2026-07-25T00:00:10.063-05:00",
+    "expressions" : "123",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "5",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-07-25T00:00:09.918-05:00",
+    "statements" : "51",
+    "units" : "1",
+    "version" : "1.0",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "cfgTransformations" : "LoopUnrolling",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/loop-unrolling/unroll-2"
+  }
+}

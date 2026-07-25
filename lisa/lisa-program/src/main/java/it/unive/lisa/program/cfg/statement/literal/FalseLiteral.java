@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.type.BooleanType;
 
 /**
@@ -24,6 +25,12 @@ public class FalseLiteral
 			CFG cfg,
 			CodeLocation location) {
 		super(cfg, location, false, cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType());
+	}
+
+	@Override
+	public FalseLiteral clone(
+			CloneLocator locator) {
+		return new FalseLiteral(getCFG(), locator.locationFor(this));
 	}
 
 }

@@ -11,6 +11,8 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -61,9 +63,27 @@ public class IMPNewArray
 			Type type,
 			boolean staticallyAllocated,
 			Expression[] dimensions) {
+		this(cfg, new SourceCodeLocation(sourceFile, line, col), type, staticallyAllocated, dimensions);
+	}
+
+	/**
+	 * Builds the array allocation at the given {@link CodeLocation}.
+	 *
+	 * @param cfg                 the {@link CFG} where this operation lies
+	 * @param location            the location where this operation is defined
+	 * @param type                the type of the array's elements
+	 * @param staticallyAllocated if this allocation is static or not
+	 * @param dimensions          the dimensions of the array
+	 */
+	public IMPNewArray(
+			CFG cfg,
+			CodeLocation location,
+			Type type,
+			boolean staticallyAllocated,
+			Expression[] dimensions) {
 		super(
 				cfg,
-				new SourceCodeLocation(sourceFile, line, col),
+				location,
 				(staticallyAllocated ? "" : "new ") + type + "[]",
 				ArrayType.register(type, dimensions.length),
 				dimensions);
@@ -151,6 +171,19 @@ public class IMPNewArray
 			return false;
 		IMPNewArray other = (IMPNewArray) obj;
 		return staticallyAllocated == other.staticallyAllocated;
+	}
+
+	@Override
+	public IMPNewArray clone(
+			CloneLocator locator) {
+		Expression[] src = getSubExpressions();
+		Expression[] cloned = new Expression[src.length];
+		for (int i = 0; i < src.length; i++)
+			cloned[i] = (Expression) src[i].clone(locator);
+		Type element = getStaticType().isArrayType()
+				? getStaticType().asArrayType().getInnerType()
+				: getStaticType();
+		return new IMPNewArray(getCFG(), locator.locationFor(this), element, staticallyAllocated, cloned);
 	}
 
 }

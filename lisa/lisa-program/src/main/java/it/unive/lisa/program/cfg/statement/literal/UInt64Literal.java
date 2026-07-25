@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.type.UInt64Type;
 
 /**
@@ -27,6 +28,12 @@ public class UInt64Literal
 			CodeLocation location,
 			long value) {
 		super(cfg, location, value, UInt64Type.INSTANCE);
+	}
+
+	@Override
+	public UInt64Literal clone(
+			CloneLocator locator) {
+		return new UInt64Literal(getCFG(), locator.locationFor(this), getValue().longValue());
 	}
 
 }

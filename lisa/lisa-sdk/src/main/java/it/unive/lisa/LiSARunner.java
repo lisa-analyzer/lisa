@@ -21,6 +21,7 @@ import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.transform.CFGTransformation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -87,6 +88,14 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	ReportingTool run(
 			Application app) {
 		finalize(app);
+
+		// apply CFG transformations
+		if (!conf.cfgTransformations.isEmpty())
+			TimerLogger.execAction(LOG, "Running CFG transformations", () -> {
+				for (CFG cfg : app.getAllCFGs())
+					for (CFGTransformation t : conf.cfgTransformations)
+						t.transform(cfg);
+			});
 
 		Collection<CFG> allCFGs = app.getAllCFGs();
 		FixpointConfiguration<A, D> fixconf = new FixpointConfiguration<>(conf);

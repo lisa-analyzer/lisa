@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.type.StringType;
 
 /**
@@ -31,6 +32,12 @@ public class StringLiteral
 	@Override
 	public String toString() {
 		return "\"" + super.toString() + "\"";
+	}
+
+	@Override
+	public StringLiteral clone(
+			CloneLocator locator) {
+		return new StringLiteral(getCFG(), locator.locationFor(this), getValue());
 	}
 
 }

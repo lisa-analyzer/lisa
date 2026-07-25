@@ -116,11 +116,17 @@ public class TruncatedParamsCall
 
 	/**
 	 * Yields the original call that this one was created from.
-	 * 
+	 *
 	 * @return the call
 	 */
 	public Call getInnerCall() {
 		return call;
+	}
+
+	@Override
+	public TruncatedParamsCall clone(
+			it.unive.lisa.program.cfg.statement.CloneLocator locator) {
+		return new TruncatedParamsCall((Call) call.clone(locator));
 	}
 
 }

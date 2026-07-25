@@ -11,6 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -100,6 +101,17 @@ public class Replace
 				state,
 				new TernaryExpression(getStaticType(), left, middle, right, StringReplace.INSTANCE, getLocation()),
 				originating == null ? this : originating);
+	}
+
+	@Override
+	public Replace clone(
+			CloneLocator locator) {
+		return new Replace(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(Expression) getMiddle().clone(locator),
+				(Expression) getRight().clone(locator));
 	}
 
 }

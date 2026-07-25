@@ -7,6 +7,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -118,6 +119,19 @@ public class StringContains
 				Expression left,
 				Expression right) {
 			super(cfg, location, left, right);
+		}
+
+		@Override
+		public IMPStringContains clone(
+				CloneLocator locator) {
+			IMPStringContains result = new IMPStringContains(
+					getCFG(),
+					locator.locationFor(this),
+					(Expression) getLeft().clone(locator),
+					(Expression) getRight().clone(locator));
+			if (originating != null)
+				result.setOriginatingStatement(originating);
+			return result;
 		}
 
 	}

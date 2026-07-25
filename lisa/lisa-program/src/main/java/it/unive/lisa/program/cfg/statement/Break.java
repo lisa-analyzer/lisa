@@ -117,4 +117,10 @@ public class Break
 		return CollectionUtilities.nullSafeCompare(true, label, ((Break) o).label, String::compareTo);
 	}
 
+	@Override
+	public Break clone(
+			CloneLocator locator) {
+		return new Break(getCFG(), locator.locationFor(this), label);
+	}
+
 }

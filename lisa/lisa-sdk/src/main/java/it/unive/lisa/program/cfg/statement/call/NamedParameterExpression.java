@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
@@ -99,6 +100,16 @@ public class NamedParameterExpression
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return interprocedural.getAnalysis().smallStepSemantics(state, expr, this);
+	}
+
+	@Override
+	public NamedParameterExpression clone(
+			CloneLocator locator) {
+		return new NamedParameterExpression(
+				getCFG(),
+				locator.locationFor(this),
+				parameterName,
+				(Expression) getSubExpression().clone(locator));
 	}
 
 }

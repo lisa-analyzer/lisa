@@ -1,0 +1,43 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "callgraph.graph.json", "report.json", "untyped_A.A(A__this)_-1952644172.graph.json", "untyped_A.foo(A__this,_untyped_x)_-1952651705.graph.json", "untyped_B.B(B__this)_-1952639336.graph.json", "untyped_B.foo(B__this,_untyped_x)_-1952651705.graph.json", "untyped_Base.Base(Base__this)_-1952649969.graph.json", "untyped_C.C(C__this)_-1952639305.graph.json", "untyped_C.foo(C__this,_untyped_x)_-1952651705.graph.json", "untyped_D.D(D__this)_-1952639274.graph.json", "untyped_D.foo(D__this,_untyped_x)_-1952651705.graph.json", "untyped_E.E(E__this)_-1952651736.graph.json", "untyped_E.foo(E__this,_untyped_x)_-1952651705.graph.json", "untyped_tests.main(tests__this,_untyped_sel).graph.json" ],
+  "info" : {
+    "cfgs" : "13",
+    "duration" : "693ms",
+    "end" : "2026-07-24T21:40:53.607-05:00",
+    "expressions" : "41",
+    "files" : "13",
+    "globals" : "0",
+    "members" : "13",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-07-24T21:40:52.914-05:00",
+    "statements" : "23",
+    "units" : "7",
+    "version" : "1.0",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "cfgTransformations" : "",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONCallGraph, JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/nondet-probe"
+  }
+}

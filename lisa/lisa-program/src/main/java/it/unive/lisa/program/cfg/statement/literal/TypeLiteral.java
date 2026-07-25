@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import java.util.Collections;
@@ -28,6 +29,12 @@ public class TypeLiteral
 			CodeLocation location,
 			Type value) {
 		super(cfg, location, value, new TypeTokenType(Collections.singleton(value)));
+	}
+
+	@Override
+	public TypeLiteral clone(
+			CloneLocator locator) {
+		return new TypeLiteral(getCFG(), locator.locationFor(this), getValue());
 	}
 
 }

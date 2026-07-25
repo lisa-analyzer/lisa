@@ -11,6 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -102,6 +103,17 @@ public class Substring
 				state,
 				new TernaryExpression(getStaticType(), left, middle, right, StringSubstring.INSTANCE, getLocation()),
 				originating == null ? this : originating);
+	}
+
+	@Override
+	public Substring clone(
+			CloneLocator locator) {
+		return new Substring(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(Expression) getMiddle().clone(locator),
+				(Expression) getRight().clone(locator));
 	}
 
 }

@@ -11,6 +11,7 @@ import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
@@ -229,6 +230,24 @@ public class CFGCall
 						getOrder(),
 						targets,
 						CanRemoveReceiver.truncate(getParameters())));
+	}
+
+	@Override
+	public CFGCall clone(
+			CloneLocator locator) {
+		Expression[] src = getParameters();
+		Expression[] cloned = new Expression[src.length];
+		for (int i = 0; i < src.length; i++)
+			cloned[i] = (Expression) src[i].clone(locator);
+		return new CFGCall(
+				getCFG(),
+				locator.locationFor(this),
+				getCallType(),
+				getQualifier(),
+				getTargetName(),
+				getOrder(),
+				targets,
+				cloned);
 	}
 
 }

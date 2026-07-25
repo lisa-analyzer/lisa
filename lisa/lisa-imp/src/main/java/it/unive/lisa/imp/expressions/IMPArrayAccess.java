@@ -9,7 +9,9 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.BinaryExpression;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -49,13 +51,39 @@ public class IMPArrayAccess
 			int col,
 			Expression container,
 			Expression location) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), "[]", container, location);
+		this(cfg, new SourceCodeLocation(sourceFile, line, col), container, location);
+	}
+
+	/**
+	 * Builds the array access at the given {@link CodeLocation}.
+	 *
+	 * @param cfg       the {@link CFG} where this operation lies
+	 * @param location  the location where this operation is defined
+	 * @param container the expression representing the array reference
+	 * @param index     the expression representing the accessed element
+	 */
+	public IMPArrayAccess(
+			CFG cfg,
+			CodeLocation location,
+			Expression container,
+			Expression index) {
+		super(cfg, location, "[]", container, index);
 	}
 
 	@Override
 	protected int compareSameClassAndParams(
 			Statement o) {
 		return 0; // no extra fields to compare
+	}
+
+	@Override
+	public IMPArrayAccess clone(
+			CloneLocator locator) {
+		return new IMPArrayAccess(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(Expression) getRight().clone(locator));
 	}
 
 	@Override

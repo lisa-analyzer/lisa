@@ -14,6 +14,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -165,6 +166,16 @@ public class ArrayLength
 					getLocation());
 
 			return analysis.smallStepSemantics(state, len, this);
+		}
+
+		@Override
+		public IMPArrayLength clone(
+				CloneLocator locator) {
+			IMPArrayLength result = new IMPArrayLength(getCFG(), locator.locationFor(this),
+					(Expression) getSubExpression().clone(locator));
+			if (originating != null)
+				result.setOriginatingStatement(originating);
+			return result;
 		}
 
 	}

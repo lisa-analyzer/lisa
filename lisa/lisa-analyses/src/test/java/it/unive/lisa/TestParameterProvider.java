@@ -513,6 +513,12 @@ public class TestParameterProvider {
 								expr);
 			}
 
+			@Override
+			public Statement clone(
+					it.unive.lisa.program.cfg.statement.CloneLocator locator) {
+				throw new UnsupportedOperationException();
+			}
+
 		};
 	}
 

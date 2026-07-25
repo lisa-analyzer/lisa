@@ -10,6 +10,8 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.StringType;
@@ -58,13 +60,39 @@ public class IMPAddOrConcat
 			int col,
 			Expression left,
 			Expression right) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), "+", left, right);
+		this(cfg, new SourceCodeLocation(sourceFile, line, col), left, right);
+	}
+
+	/**
+	 * Builds the addition at the given {@link CodeLocation}.
+	 *
+	 * @param cfg      the {@link CFG} where this operation lies
+	 * @param location the location where this operation is defined
+	 * @param left     the left-hand side of this operation
+	 * @param right    the right-hand side of this operation
+	 */
+	public IMPAddOrConcat(
+			CFG cfg,
+			CodeLocation location,
+			Expression left,
+			Expression right) {
+		super(cfg, location, "+", left, right);
 	}
 
 	@Override
 	protected int compareSameClassAndParams(
 			Statement o) {
 		return 0; // no extra fields to compare
+	}
+
+	@Override
+	public IMPAddOrConcat clone(
+			CloneLocator locator) {
+		return new IMPAddOrConcat(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(Expression) getRight().clone(locator));
 	}
 
 	@Override

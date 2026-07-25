@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.CloneLocator;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -49,6 +50,16 @@ public class LessThan
 	protected int compareSameClassAndParams(
 			Statement o) {
 		return 0; // no extra fields to compare
+	}
+
+	@Override
+	public LessThan clone(
+			CloneLocator locator) {
+		return new LessThan(
+				getCFG(),
+				locator.locationFor(this),
+				(Expression) getLeft().clone(locator),
+				(Expression) getRight().clone(locator));
 	}
 
 	@Override
