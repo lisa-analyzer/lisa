@@ -54,4 +54,12 @@ public class NoOpValues
 		return state;
 	}
 
+	@Override
+	public boolean canProcess(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		return true;
+	}
+
 }

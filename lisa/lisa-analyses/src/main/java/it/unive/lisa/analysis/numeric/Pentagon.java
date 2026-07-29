@@ -17,10 +17,17 @@ import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Implementation of the pentagons analysis of
- * <a href="https://doi.org/10.1016/j.scico.2009.04.004">this paper</a>.
+ * <a href="https://doi.org/10.1016/j.scico.2009.04.004">this paper</a>.<br/>
+ * <br/>
+ * The pentagons domain is a reduced product of the {@link Interval} domain and
+ * the {@link UpperBounds} domain, where the reduction operator is applied on
+ * assignments only. Reductions on lattice operators are applied only on the
+ * least upper bound.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -123,6 +130,37 @@ public class Pentagon
 			throws SemanticException {
 		return intervals.satisfies(state.first, expression, pp, oracle)
 				.glb(upperbounds.satisfies(state.second, expression, pp, oracle));
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueDomain<?> requesting,
+			PentagonLattice state,
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Set<BinaryExpression> intv = requesting == intervals ? null
+				: intervals.constraints(requesting, state.first, e, pp, oracle);
+		Set<BinaryExpression> ub = requesting == upperbounds ? null
+				: upperbounds.constraints(requesting, state.second, e, pp, oracle);
+		if (intv == null && ub == null)
+			return null;
+		if (intv == null)
+			return ub;
+		if (ub == null)
+			return intv;
+		Set<BinaryExpression> constr = new HashSet<>(intv);
+		constr.addAll(ub);
+		return constr;
+	}
+
+	@Override
+	public boolean canProcess(
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		return intervals.canProcess(e, pp, oracle) || upperbounds.canProcess(e, pp, oracle);
 	}
 
 }

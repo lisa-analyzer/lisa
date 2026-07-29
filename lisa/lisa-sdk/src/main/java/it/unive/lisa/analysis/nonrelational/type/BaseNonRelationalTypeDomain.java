@@ -34,15 +34,6 @@ public interface BaseNonRelationalTypeDomain<
 	}
 
 	@Override
-	default boolean canProcess(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		// a type domain can process everything
-		return true;
-	}
-
-	@Override
 	default Set<Type> getRuntimeTypesOf(
 			TypeEnvironment<L> state,
 			SymbolicExpression e,
@@ -87,4 +78,12 @@ public interface BaseNonRelationalTypeDomain<
 		return Type.commonSupertype(types, Untyped.INSTANCE);
 	}
 
+	@Override
+	default boolean canProcess(
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		// type domains can process anything
+		return true;
+	}
 }

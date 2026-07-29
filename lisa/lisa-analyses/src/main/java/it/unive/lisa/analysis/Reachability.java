@@ -31,7 +31,11 @@ public class Reachability<D extends AbstractDomain<A>,
 		implements
 		AbstractDomain<ReachabilityProduct<A>> {
 
-	private final D domain;
+	/**
+	 * The underlying domain that is used to compute the program state and
+	 * deduce reachability information.
+	 */
+	public final D domain;
 
 	/**
 	 * Builds the reachability domain.

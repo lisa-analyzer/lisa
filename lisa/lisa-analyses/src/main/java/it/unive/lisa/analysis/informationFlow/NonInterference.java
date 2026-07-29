@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.informationFlow;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.lattices.GenericMapLattice;
@@ -17,15 +18,23 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.type.Type;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Implementation of the non interference analysis, using annotations to detect
  * low confidentiality variables/fields/functions ({@link LOW_CONF_ANNOTATION})
  * and high integrity variables/fields/functions ({@link HIGH_INT_ANNOTATION}).
+ * <br/>
+ * <br/>
+ * As an information flow analysis, this domain does not take part in
+ * {@link WholeValueAnalysis}, meaning that it will never generate constraints
+ * when asked to.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -239,4 +248,31 @@ public class NonInterference
 					entryState.guards);
 	}
 
+	@Override
+	public boolean canProcess(
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		if (expression instanceof PushInv)
+			// the type approximation of a pushinv is bottom, so the below check
+			// will always fail regardless of the kind of value we are tracking
+			return expression.getStaticType().isValueType();
+
+		Set<Type> rts = null;
+		try {
+			rts = oracle.getRuntimeTypesOf(expression, pp);
+		} catch (SemanticException e) {
+			return false;
+		}
+
+		if (rts == null || rts.isEmpty())
+			// if we have no runtime types, either the type domain has no type
+			// information for the given expression (thus it can be anything,
+			// also something that we can track) or the computation returned
+			// bottom (and the whole state is likely going to go to bottom
+			// anyway).
+			return true;
+
+		return rts.stream().anyMatch(Type::isValueType);
+	}
 }

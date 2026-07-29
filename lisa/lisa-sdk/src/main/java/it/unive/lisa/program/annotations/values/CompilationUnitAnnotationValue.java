@@ -21,6 +21,15 @@ public class CompilationUnitAnnotationValue
 		this.unitName = unitName;
 	}
 
+	/**
+	 * A getter to retrieve the compilation unit's name.
+	 *
+	 * @return the string containing the compilation unit's name
+	 */
+	public String getUnitName() {
+		return unitName;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

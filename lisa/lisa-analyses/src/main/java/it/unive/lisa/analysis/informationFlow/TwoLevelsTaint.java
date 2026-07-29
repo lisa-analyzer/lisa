@@ -1,11 +1,16 @@
 package it.unive.lisa.analysis.informationFlow;
 
+import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
 import it.unive.lisa.lattices.informationFlow.SimpleTaint;
 
 /**
  * A {@link BaseTaint} implementation with only two level of taintedness: clean
  * and tainted. As such, this class distinguishes values that are always clean
- * from values that are tainted in at least one execution path.
+ * from values that are tainted in at least one execution path. <br/>
+ * <br/>
+ * As an information flow analysis, this domain does not take part in
+ * {@link WholeValueAnalysis}, meaning that it will never generate constraints
+ * when asked to.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

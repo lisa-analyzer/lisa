@@ -8,6 +8,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
+import java.util.Collection;
 
 /**
  * An identifier of a program variable, representing either a program variable
@@ -141,6 +142,15 @@ public abstract class Identifier
 	 */
 	public Annotations getAnnotations() {
 		return annotations;
+	}
+
+	/**
+	 * Yields the list of annotations of this identifier.
+	 *
+	 * @return the list of annotations of this identifier
+	 */
+	public Collection<Annotation> getAnnotationList() {
+		return annotations.getAnnotations();
 	}
 
 	/**

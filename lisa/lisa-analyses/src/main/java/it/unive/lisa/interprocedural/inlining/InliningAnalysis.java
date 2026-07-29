@@ -132,6 +132,9 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			AnalysisState<A> entryState,
 			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
+		if (conf.forwardFixpoint == null)
+			throw new IllegalArgumentException("A forward fixpoint is required for this analysis");
+
 		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
 

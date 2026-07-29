@@ -2,10 +2,10 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.lattices.ConstantValue;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -17,6 +17,7 @@ import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
 import it.unive.lisa.symbolic.value.operator.ModuloOperator;
 import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
+import it.unive.lisa.symbolic.value.operator.RemainderOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BitwiseAnd;
@@ -95,6 +96,7 @@ import it.unive.lisa.symbolic.value.operator.unary.StringToUpperCase;
 import it.unive.lisa.symbolic.value.operator.unary.StringTrim;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -109,7 +111,7 @@ public class ConstantValuePropagation
 
 	@Override
 	public boolean canProcess(
-			SymbolicExpression expression,
+			ValueExpression expression,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		if (expression instanceof PushInv)
@@ -231,7 +233,7 @@ public class ConstantValuePropagation
 
 		if (operator instanceof NumericAbs)
 			if (value instanceof Integer || value instanceof Short || value instanceof Byte)
-				return new ConstantValue(Math.abs((int) value));
+				return new ConstantValue(Math.abs(((Number) value).intValue()));
 			else if (value instanceof Long)
 				return new ConstantValue(Math.abs((long) value));
 			else if (value instanceof Float)
@@ -425,6 +427,26 @@ public class ConstantValuePropagation
 				return new ConstantValue(((Number) lVal).byteValue() % ((Number) rVal).byteValue());
 		}
 
+		if (operator instanceof RemainderOperator) {
+			if (lVal instanceof Character)
+				lVal = (int) ((Character) lVal).charValue();
+			if (rVal instanceof Character)
+				rVal = (int) ((Character) rVal).charValue();
+
+			if (lVal instanceof Double || rVal instanceof Double)
+				return new ConstantValue(((Number) lVal).doubleValue() % ((Number) rVal).doubleValue());
+			else if (lVal instanceof Float || rVal instanceof Float)
+				return new ConstantValue(((Number) lVal).floatValue() % ((Number) rVal).floatValue());
+			else if (lVal instanceof Long || rVal instanceof Long)
+				return new ConstantValue(((Number) lVal).longValue() % ((Number) rVal).longValue());
+			else if (lVal instanceof Integer || rVal instanceof Integer)
+				return new ConstantValue(((Number) lVal).intValue() % ((Number) rVal).intValue());
+			else if (lVal instanceof Short || rVal instanceof Short)
+				return new ConstantValue(((Number) lVal).shortValue() % ((Number) rVal).shortValue());
+			else if (lVal instanceof Byte || rVal instanceof Byte)
+				return new ConstantValue(((Number) lVal).byteValue() % ((Number) rVal).byteValue());
+		}
+
 		if (operator instanceof BitwiseOr) {
 			if (lVal instanceof Character)
 				lVal = (int) ((Character) lVal).charValue();
@@ -539,6 +561,108 @@ public class ConstantValuePropagation
 				return new ConstantValue(((Number) lVal).shortValue() < ((Number) rVal).shortValue());
 			else if (lVal instanceof Byte || rVal instanceof Byte)
 				return new ConstantValue(((Number) lVal).byteValue() < ((Number) rVal).byteValue());
+		}
+
+		if (operator instanceof ComparisonLe) {
+			if (lVal instanceof Character)
+				lVal = (int) ((Character) lVal).charValue();
+			if (rVal instanceof Character)
+				rVal = (int) ((Character) rVal).charValue();
+
+			if (lVal instanceof Double || rVal instanceof Double)
+				return new ConstantValue(((Number) lVal).doubleValue() <= ((Number) rVal).doubleValue());
+			else if (lVal instanceof Float || rVal instanceof Float)
+				return new ConstantValue(((Number) lVal).floatValue() <= ((Number) rVal).floatValue());
+			else if (lVal instanceof Long || rVal instanceof Long)
+				return new ConstantValue(((Number) lVal).longValue() <= ((Number) rVal).longValue());
+			else if (lVal instanceof Integer || rVal instanceof Integer)
+				return new ConstantValue(((Number) lVal).intValue() <= ((Number) rVal).intValue());
+			else if (lVal instanceof Short || rVal instanceof Short)
+				return new ConstantValue(((Number) lVal).shortValue() <= ((Number) rVal).shortValue());
+			else if (lVal instanceof Byte || rVal instanceof Byte)
+				return new ConstantValue(((Number) lVal).byteValue() <= ((Number) rVal).byteValue());
+		}
+
+		if (operator instanceof ComparisonGt) {
+			if (lVal instanceof Character)
+				lVal = (int) ((Character) lVal).charValue();
+			if (rVal instanceof Character)
+				rVal = (int) ((Character) rVal).charValue();
+
+			if (lVal instanceof Double || rVal instanceof Double)
+				return new ConstantValue(((Number) lVal).doubleValue() > ((Number) rVal).doubleValue());
+			else if (lVal instanceof Float || rVal instanceof Float)
+				return new ConstantValue(((Number) lVal).floatValue() > ((Number) rVal).floatValue());
+			else if (lVal instanceof Long || rVal instanceof Long)
+				return new ConstantValue(((Number) lVal).longValue() > ((Number) rVal).longValue());
+			else if (lVal instanceof Integer || rVal instanceof Integer)
+				return new ConstantValue(((Number) lVal).intValue() > ((Number) rVal).intValue());
+			else if (lVal instanceof Short || rVal instanceof Short)
+				return new ConstantValue(((Number) lVal).shortValue() > ((Number) rVal).shortValue());
+			else if (lVal instanceof Byte || rVal instanceof Byte)
+				return new ConstantValue(((Number) lVal).byteValue() > ((Number) rVal).byteValue());
+		}
+
+		if (operator instanceof ComparisonGe) {
+			if (lVal instanceof Character)
+				lVal = (int) ((Character) lVal).charValue();
+			if (rVal instanceof Character)
+				rVal = (int) ((Character) rVal).charValue();
+
+			if (lVal instanceof Double || rVal instanceof Double)
+				return new ConstantValue(((Number) lVal).doubleValue() >= ((Number) rVal).doubleValue());
+			else if (lVal instanceof Float || rVal instanceof Float)
+				return new ConstantValue(((Number) lVal).floatValue() >= ((Number) rVal).floatValue());
+			else if (lVal instanceof Long || rVal instanceof Long)
+				return new ConstantValue(((Number) lVal).longValue() >= ((Number) rVal).longValue());
+			else if (lVal instanceof Integer || rVal instanceof Integer)
+				return new ConstantValue(((Number) lVal).intValue() >= ((Number) rVal).intValue());
+			else if (lVal instanceof Short || rVal instanceof Short)
+				return new ConstantValue(((Number) lVal).shortValue() >= ((Number) rVal).shortValue());
+			else if (lVal instanceof Byte || rVal instanceof Byte)
+				return new ConstantValue(((Number) lVal).byteValue() >= ((Number) rVal).byteValue());
+		}
+
+		if (operator instanceof ComparisonEq) {
+			if (lVal instanceof Character)
+				lVal = (int) ((Character) lVal).charValue();
+			if (rVal instanceof Character)
+				rVal = (int) ((Character) rVal).charValue();
+
+			if (lVal instanceof Number && rVal instanceof Number) {
+				if (lVal instanceof Double || rVal instanceof Double)
+					return new ConstantValue(((Number) lVal).doubleValue() == ((Number) rVal).doubleValue());
+				else if (lVal instanceof Float || rVal instanceof Float)
+					return new ConstantValue(((Number) lVal).floatValue() == ((Number) rVal).floatValue());
+				else if (lVal instanceof Long || rVal instanceof Long)
+					return new ConstantValue(((Number) lVal).longValue() == ((Number) rVal).longValue());
+				else
+					return new ConstantValue(((Number) lVal).intValue() == ((Number) rVal).intValue());
+			} else if (lVal instanceof Boolean && rVal instanceof Boolean)
+				return new ConstantValue(((Boolean) lVal).booleanValue() == ((Boolean) rVal).booleanValue());
+			else if (lVal instanceof String && rVal instanceof String)
+				return new ConstantValue(lVal.equals(rVal));
+		}
+
+		if (operator instanceof ComparisonNe) {
+			if (lVal instanceof Character)
+				lVal = (int) ((Character) lVal).charValue();
+			if (rVal instanceof Character)
+				rVal = (int) ((Character) rVal).charValue();
+
+			if (lVal instanceof Number && rVal instanceof Number) {
+				if (lVal instanceof Double || rVal instanceof Double)
+					return new ConstantValue(((Number) lVal).doubleValue() != ((Number) rVal).doubleValue());
+				else if (lVal instanceof Float || rVal instanceof Float)
+					return new ConstantValue(((Number) lVal).floatValue() != ((Number) rVal).floatValue());
+				else if (lVal instanceof Long || rVal instanceof Long)
+					return new ConstantValue(((Number) lVal).longValue() != ((Number) rVal).longValue());
+				else
+					return new ConstantValue(((Number) lVal).intValue() != ((Number) rVal).intValue());
+			} else if (lVal instanceof Boolean && rVal instanceof Boolean)
+				return new ConstantValue(((Boolean) lVal).booleanValue() != ((Boolean) rVal).booleanValue());
+			else if (lVal instanceof String && rVal instanceof String)
+				return new ConstantValue(!lVal.equals(rVal));
 		}
 
 		if (operator instanceof NumericPow) {
@@ -896,7 +1020,7 @@ public class ConstantValuePropagation
 			Object lVal = left.getValue();
 			Object rVal = right.getValue();
 
-			if (lVal instanceof Number || rVal instanceof Number)
+			if (lVal instanceof Number && rVal instanceof Number)
 				if (lVal instanceof Double || rVal instanceof Double)
 					return ((Number) lVal).doubleValue() != ((Number) rVal).doubleValue() ? Satisfiability.SATISFIED
 							: Satisfiability.NOT_SATISFIED;
@@ -1083,5 +1207,33 @@ public class ConstantValuePropagation
 	@Override
 	public ConstantValue bottom() {
 		return ConstantValue.BOTTOM;
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueDomain<?> requesting,
+			ValueEnvironment<ConstantValue> state,
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Collections.emptySet();
+		if (state.isBottom())
+			return null;
+
+		ConstantValue value = eval(state, e, pp, oracle);
+		if (value.isTop())
+			return Collections.emptySet();
+		if (value.isBottom())
+			return null;
+		return Collections.singleton(
+				new BinaryExpression(
+						pp.getProgram().getTypes().getBooleanType(),
+						new Constant(pp.getProgram().getTypes().getIntegerType(), value.getValue(),
+								e.getCodeLocation()),
+						e,
+						ComparisonEq.INSTANCE,
+						pp.getLocation()));
 	}
 }

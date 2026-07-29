@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.numeric;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.value.NumericAbstraction;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.symbolic.DefiniteIdSet;
@@ -11,6 +12,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.ArithmeticOperator;
@@ -21,10 +23,15 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -35,7 +42,7 @@ import java.util.Set;
  */
 public class UpperBounds
 		implements
-		ValueDomain<ValueEnvironment<DefiniteIdSet>> {
+		NumericAbstraction<ValueEnvironment<DefiniteIdSet>> {
 
 	@Override
 	public ValueEnvironment<DefiniteIdSet> assign(
@@ -53,10 +60,11 @@ public class UpperBounds
 				continue;
 			if (!entry.getValue().contains(id))
 				cleanup.put(entry.getKey(), entry.getValue());
-
-			Set<Identifier> copy = new HashSet<>(entry.getValue().elements);
-			copy.remove(id);
-			cleanup.put(entry.getKey(), new DefiniteIdSet(copy));
+			else {
+				Set<Identifier> copy = new HashSet<>(entry.getValue().elements);
+				copy.remove(id);
+				cleanup.put(entry.getKey(), new DefiniteIdSet(copy));
+			}
 		}
 
 		if (expression instanceof BinaryExpression) {
@@ -126,13 +134,13 @@ public class UpperBounds
 		Identifier y = (Identifier) right;
 
 		if (operator instanceof ComparisonLt) {
-			return Satisfiability.fromBoolean(state.getState(x).contains(y));
+			return state.getState(x).contains(y) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
 		} else if (operator instanceof ComparisonLe) {
 			if (state.getState(x).contains(y))
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		} else if (operator instanceof ComparisonGt) {
-			return Satisfiability.fromBoolean(state.getState(y).contains(x));
+			return state.getState(y).contains(x) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
 		} else if (operator instanceof ComparisonGe) {
 			if (state.getState(y).contains(x))
 				return Satisfiability.SATISFIED;
@@ -219,4 +227,76 @@ public class UpperBounds
 		return new ValueEnvironment<>(new DefiniteIdSet(Collections.emptySet(), true));
 	}
 
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueDomain<?> requesting,
+			ValueEnvironment<DefiniteIdSet> state,
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Collections.emptySet();
+		if (state.isBottom())
+			return null;
+
+		if ((e instanceof UnaryExpression && ((UnaryExpression) e).getOperator() == LogicalNegation.INSTANCE)
+				|| (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalAnd.INSTANCE)
+				|| (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalOr.INSTANCE)) {
+			Satisfiability sat = satisfies(state, e, pp, oracle);
+			if (sat == Satisfiability.SATISFIED)
+				return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);
+			else if (sat == Satisfiability.NOT_SATISFIED)
+				return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), false, e, pp);
+			else if (sat == Satisfiability.UNKNOWN)
+				return Collections.emptySet();
+			else
+				return null;
+		}
+
+		if (e instanceof BinaryExpression) {
+			BinaryOperator operator = ((BinaryExpression) e).getOperator();
+			if (operator == ComparisonEq.INSTANCE
+					|| operator == ComparisonNe.INSTANCE
+					|| operator == ComparisonLe.INSTANCE
+					|| operator == ComparisonLt.INSTANCE
+					|| operator == ComparisonGe.INSTANCE
+					|| operator == ComparisonGt.INSTANCE) {
+				Satisfiability sat = satisfies(state, e, pp, oracle);
+				if (sat == Satisfiability.SATISFIED)
+					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);
+				else if (sat == Satisfiability.NOT_SATISFIED)
+					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), false, e, pp);
+				else if (sat == Satisfiability.UNKNOWN)
+					return Collections.emptySet();
+				else
+					return null;
+			}
+		}
+
+		if (e instanceof Identifier) {
+			Identifier id = (Identifier) e;
+			Set<BinaryExpression> constraints = new HashSet<>();
+			DefiniteIdSet set = state.getState(id);
+			if (!set.isTop() && !set.isBottom())
+				for (Identifier ub : state.getState(id).elements)
+					constraints.add(new BinaryExpression(
+							e.getStaticType(),
+							ub,
+							id,
+							ComparisonGt.INSTANCE,
+							e.getCodeLocation()));
+			for (Entry<Identifier, DefiniteIdSet> entry : state)
+				if (entry.getValue().contains(id))
+					constraints.add(new BinaryExpression(
+							e.getStaticType(),
+							entry.getKey(),
+							id,
+							ComparisonLt.INSTANCE,
+							e.getCodeLocation()));
+			return constraints;
+		}
+
+		return Collections.emptySet();
+	}
 }

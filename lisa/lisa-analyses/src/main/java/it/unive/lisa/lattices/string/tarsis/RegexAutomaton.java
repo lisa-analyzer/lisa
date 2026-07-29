@@ -3,22 +3,9 @@ package it.unive.lisa.lattices.string.tarsis;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
 import it.unive.lisa.lattices.string.fsa.StringSymbol;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
-import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
-import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import it.unive.lisa.symbolic.value.operator.unary.StringLength;
-import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
@@ -29,8 +16,6 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
-import it.unive.lisa.util.numeric.IntInterval;
-import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.ArrayList;
@@ -58,8 +43,7 @@ public class RegexAutomaton
 		extends
 		Automaton<RegexAutomaton, RegularExpression>
 		implements
-		BaseLattice<RegexAutomaton>,
-		WholeValueElement<RegexAutomaton> {
+		BaseLattice<RegexAutomaton> {
 
 	/**
 	 * Builds a {@link RegexAutomaton} recognizing the top string, that is, with
@@ -490,7 +474,7 @@ public class RegexAutomaton
 		Collection<RegexAutomaton> automata = new ArrayList<>();
 		boolean isSingleString = toReplace.getLanguage().size() == 1;
 		for (String s : toReplace.getLanguage())
-			automata.add(new StringReplacer(this).replace(s, str, isSingleString).collapse());
+			automata.add(new StringReplacer(this).replace(s, str, isSingleString).minimize().collapse());
 
 		if (automata.size() == 1)
 			return automata.iterator().next();
@@ -636,136 +620,6 @@ public class RegexAutomaton
 			RegexAutomaton other)
 			throws SemanticException {
 		return this.isContained(other);
-	}
-
-	@Override
-	public Set<BinaryExpression> constraints(
-			ValueExpression e,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isBottom())
-			return null;
-
-		BooleanType booleanType = pp.getProgram().getTypes().getBooleanType();
-		UnaryExpression strlen = new UnaryExpression(
-				pp.getProgram().getTypes().getIntegerType(),
-				e,
-				StringLength.INSTANCE,
-				pp.getLocation());
-
-		if (isTop())
-			return Collections.singleton(
-					new BinaryExpression(
-							booleanType,
-							new Constant(pp.getProgram().getTypes().getIntegerType(), 0, pp.getLocation()),
-							strlen,
-							ComparisonLe.INSTANCE,
-							e.getCodeLocation()));
-
-		try {
-			if (!hasCycle() && getLanguage().size() == 1) {
-				String str = getLanguage().iterator().next();
-				return Set.of(
-						new BinaryExpression(
-								booleanType,
-								new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(),
-										pp.getLocation()),
-								strlen,
-								ComparisonLe.INSTANCE,
-								e.getCodeLocation()),
-						new BinaryExpression(
-								booleanType,
-								new Constant(pp.getProgram().getTypes().getIntegerType(), str.length(),
-										pp.getLocation()),
-								strlen,
-								ComparisonGe.INSTANCE,
-								e.getCodeLocation()),
-						new BinaryExpression(
-								booleanType,
-								new Constant(pp.getProgram().getTypes().getStringType(), str, pp.getLocation()),
-								e,
-								ComparisonEq.INSTANCE,
-								e.getCodeLocation()));
-			}
-		} catch (CyclicAutomatonException e1) {
-			// should be unreachable, since we check for cycles before
-			throw new SemanticException("The automaton is cyclic", e1);
-		}
-
-		IntInterval length = length();
-		String lcp = longestCommonPrefix();
-		String lcs = reverse().longestCommonPrefix();
-
-		Set<BinaryExpression> constr = new HashSet<>();
-		try {
-			constr.add(
-					new BinaryExpression(
-							booleanType,
-							new Constant(
-									pp.getProgram().getTypes().getIntegerType(),
-									length.getLow().toInt(),
-									pp.getLocation()),
-							strlen,
-							ComparisonLe.INSTANCE,
-							e.getCodeLocation()));
-			if (length.getHigh().isFinite())
-				constr.add(
-						new BinaryExpression(
-								booleanType,
-								new Constant(
-										pp.getProgram().getTypes().getIntegerType(),
-										length.getHigh().toInt(),
-										pp.getLocation()),
-								strlen,
-								ComparisonGe.INSTANCE,
-								e.getCodeLocation()));
-		} catch (MathNumberConversionException e1) {
-			throw new SemanticException("Cannot convert stirng length bound to int", e1);
-		}
-
-		constr.add(
-				new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getStringType(), lcp, pp.getLocation()),
-						e,
-						StringStartsWith.INSTANCE,
-						e.getCodeLocation()));
-		constr.add(
-				new BinaryExpression(
-						booleanType,
-						new Constant(pp.getProgram().getTypes().getStringType(), lcs, pp.getLocation()),
-						e,
-						StringEndsWith.INSTANCE,
-						e.getCodeLocation()));
-		return constr;
-	}
-
-	@Override
-	public RegexAutomaton generate(
-			Set<BinaryExpression> constraints,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (constraints == null)
-			return bottom();
-
-		String prefix = null, suffix = null;
-		for (BinaryExpression expr : constraints)
-			if (expr.getLeft() instanceof Constant && ((Constant) expr.getLeft()).getValue() instanceof String) {
-				String val = (String) ((Constant) expr.getLeft()).getValue();
-				if (expr.getOperator() instanceof ComparisonEq)
-					return singleString(val);
-				else if (expr.getOperator() instanceof StringStartsWith)
-					prefix = val;
-				else if (expr.getOperator() instanceof StringEndsWith)
-					suffix = val;
-			}
-
-		RegexAutomaton res = TOP;
-		if (prefix != null)
-			res = singleString(prefix).concat(res);
-		if (suffix != null)
-			res = res.concat(singleString(suffix));
-		return res;
 	}
 
 	/**

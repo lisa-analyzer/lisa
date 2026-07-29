@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.dataflow;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -36,7 +37,11 @@ import java.util.Set;
 
 /**
  * An implementation of the overflow-insensitive constant propagation dataflow
- * analysis, that focuses only on integers.
+ * analysis, that focuses only on integers. <br/>
+ * <br/>
+ * As a dataflow analysis, this domain does not take part in
+ * {@link WholeValueAnalysis}, meaning that it will never generate constraints
+ * when asked to.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

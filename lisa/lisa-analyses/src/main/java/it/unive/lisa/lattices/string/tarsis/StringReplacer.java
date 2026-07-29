@@ -42,7 +42,7 @@ public class StringReplacer {
 	public StringReplacer(
 			RegexAutomaton origin) {
 		this.origin = origin.explode();
-		searcher = new StringSearcher(origin);
+		searcher = new StringSearcher(this.origin);
 	}
 
 	/**
@@ -71,7 +71,8 @@ public class StringReplacer {
 			return origin;
 
 		RegexAutomaton replaced = must ? str : str.union(origin.singleString(toReplace));
-		AtomicInteger counter = new AtomicInteger();
+		int maxId = origin.getStates().stream().mapToInt(s -> s.getId()).max().getAsInt();
+		AtomicInteger counter = new AtomicInteger(maxId + 1);
 
 		for (Vector<Transition<RegularExpression>> path : replaceablePaths) {
 

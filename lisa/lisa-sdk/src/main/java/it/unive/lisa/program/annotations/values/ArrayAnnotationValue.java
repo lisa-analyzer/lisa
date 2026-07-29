@@ -18,12 +18,21 @@ public class ArrayAnnotationValue
 
 	/**
 	 * Builds an array annotation value.
-	 * 
+	 *
 	 * @param arr the array of basic annotation values
 	 */
 	public ArrayAnnotationValue(
 			BasicAnnotationValue[] arr) {
 		this.arr = arr;
+	}
+
+	/**
+	 * A getter to retrieve the array.
+	 *
+	 * @return the array of type basic annotation value
+	 */
+	public BasicAnnotationValue[] getArray() {
+		return arr;
 	}
 
 	@Override

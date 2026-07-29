@@ -47,6 +47,9 @@ public class StringAnnotationValue
 		return true;
 	}
 
+	/**
+	 * Functions simultaneously as a getter to retrieve the value.
+	 */
 	@Override
 	public String toString() {
 		return s;

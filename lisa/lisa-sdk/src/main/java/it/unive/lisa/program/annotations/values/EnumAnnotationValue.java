@@ -26,6 +26,24 @@ public class EnumAnnotationValue
 		this.field = field;
 	}
 
+	/**
+	 * A getter to retrieve the enum's name.
+	 *
+	 * @return the string containing the enum's name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * A getter to retrieve the enum's field.
+	 *
+	 * @return the string containing the enum's field
+	 */
+	public String getField() {
+		return field;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

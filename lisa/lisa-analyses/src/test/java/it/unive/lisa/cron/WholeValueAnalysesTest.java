@@ -11,16 +11,11 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
 import it.unive.lisa.analysis.combination.constraints.WholeValue;
 import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
-import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
-import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSum;
-import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedValue;
 import it.unive.lisa.analysis.memory.MonolithicMemory;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.BooleanPowerset;
-import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.numeric.Interval;
@@ -31,6 +26,7 @@ import it.unive.lisa.analysis.string.Suffix;
 import it.unive.lisa.analysis.string.tarsis.Tarsis;
 import it.unive.lisa.analysis.traces.TracePartitioning;
 import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.analysis.value.StringAbstraction;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
@@ -54,6 +50,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.testing.TestConfiguration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -101,8 +98,16 @@ public class WholeValueAnalysesTest
 
 						if (first) {
 							first = false;
-							ValueEnvironment<
-									?> env = targetPost.getExecutionState().getLatticeInstance(ValueEnvironment.class);
+							ValueEnvironment<?> env = null;
+							if (domain instanceof WholeValueAnalysis) {
+								ValueDomain<?>[] participants = ((WholeValueAnalysis) domain).participants;
+								for (int i = 0; i < participants.length; i++)
+									if (participants[i] instanceof StringAbstraction)
+										env = (ValueEnvironment<?>) targetPost.getExecutionState()
+												.getLatticeInstance(WholeValue.class)
+												.get(i);
+							} else
+								env = targetPost.getExecutionState().getLatticeInstance(ValueEnvironment.class);
 							Lattice vals = null;
 							for (SymbolicExpression expr : targetPost.getExecutionExpressions()) {
 								Lattice val = env.getState((Identifier) expr);
@@ -140,18 +145,29 @@ public class WholeValueAnalysesTest
 				throws SemanticException {
 			AnalysisState<A> target = res.getAnalysisStateAfter(variable);
 			for (SymbolicExpression expr : target.getExecutionExpressions()) {
-				ValueEnvironment<?> values = target.getExecutionState().getLatticeInstance(ValueEnvironment.class);
-				Lattice<?> state = values.getState((Identifier) expr);
-				Satisfiability sat = Satisfiability.UNKNOWN;
 				ValueDomain<?> vdom = ((SimpleAbstractDomain<?, ?, ?>) tool.getAnalysis().domain).valueDomain;
-				if (state instanceof SmashedValue<?, ?>) {
+				Satisfiability sat = Satisfiability.UNKNOWN;
+				if (vdom instanceof SmashedSum<?, ?>) {
 					SmashedSumStringDomain dom = ((SmashedSum<?, ?>) vdom).strDom;
+					ValueEnvironment<?> values = target.getExecutionState().getLatticeInstance(ValueEnvironment.class);
+					Lattice<?> state = values.getState((Identifier) expr);
 					Lattice<?> abstractString = ((SmashedValue<?, ?>) state).getStringValue();
 					sat = dom.containsChar(abstractString, ch.getValue().charAt(0));
 				} else {
-					WholeValueStringDomain dom = ((WholeValueAnalysis<?, ?, ?>) vdom).strDom;
-					WholeValueElement<?> abstractString = ((WholeValue<?, ?, ?>) state).getStringValue();
-					sat = dom.containsChar(abstractString, ch.getValue().charAt(0));
+					ValueEnvironment<?> env = null;
+					SmashedSumStringDomain dom = null;
+					ValueDomain<?>[] participants = ((WholeValueAnalysis) vdom).participants;
+					for (int i = 0; i < participants.length; i++)
+						if (participants[i] instanceof StringAbstraction) {
+							env = (ValueEnvironment<?>) target.getExecutionState()
+									.getLatticeInstance(WholeValue.class)
+									.get(i);
+							// fine since all domains involved in the tests are
+							// smashed sum domains
+							dom = (SmashedSumStringDomain) participants[i];
+						}
+					Lattice<?> state = env.getState((Identifier) expr);
+					sat = dom.containsChar(state, ch.getValue().charAt(0));
 				}
 				if (sat == Satisfiability.UNKNOWN)
 					warnOn(tool, node, "This assertion might fail");
@@ -219,125 +235,1294 @@ public class WholeValueAnalysesTest
 		perform(conf);
 	}
 
-	private static Map<String, NonRelationalValueDomain<?>> INT_DOMAINS = Map
-			.of("intv", new Interval(), "cp", new IntegerConstantPropagation());
-
-	private static Map<String,
-			NonRelationalValueDomain<?>> STRING_DOMAINS = Map.of(
-					"prefix",
-					new Prefix(),
-					"suffix",
-					new Suffix(),
-					"ci",
-					new CharInclusion(),
-					"tarsis",
-					new Tarsis(),
-					"bss",
-					new BoundedStringSet(5));
-
-	private static Map<String,
-			Boolean> TESTFILES = Map.of("toString.imp", false, "subs.imp", false, "loop.imp", false, "count.imp", true);
-
 	private static Map<String, Map<String, Lattice<?>>> STATES = new HashMap<>();
 
 	private static Map<String, Map<String, Map<CodeLocation, String>>> MESSAGES = new HashMap<>();
 
 	@Test
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testSmashedSum() {
-		for (Map.Entry<String, NonRelationalValueDomain<?>> intDomain : INT_DOMAINS.entrySet())
-			for (Map.Entry<String, NonRelationalValueDomain<?>> strDomain : STRING_DOMAINS.entrySet())
-				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
-					TestConfiguration conf = mkConf();
-					conf.analysis = new SimpleAbstractDomain<>(
-							new MonolithicMemory(),
-							new SmashedSum<>(
-									(SmashedSumIntDomain) intDomain.getValue(),
-									(SmashedSumStringDomain) strDomain.getValue()),
-							new InferredTypes());
-					if (test.getValue())
-						conf.analysis = new TracePartitioning(conf.analysis);
-					// conf.analysisGraphs =
-					// it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
-					String testKey = intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey();
-					System.out.println("\n\n### Running test " + testKey);
-					perform("whole-value", "smashed/" + testKey.replace(".imp", ""), test.getKey(), conf);
-					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
-					STATES
-							.computeIfAbsent(
-									"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
-									k -> new HashMap<>())
-							.put(test.getKey(), check.valuesAtFirstAssertion);
-					MESSAGES
-							.computeIfAbsent(
-									"smashed-" + intDomain.getKey() + "-" + strDomain.getKey(),
-									k -> new HashMap<>())
-							.put(test.getKey(), check.assertions);
-				}
+	public void testSmashedCpPrefixToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Prefix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-prefix-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-prefix", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-prefix", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
 	}
 
 	@Test
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testConstraints() {
-		for (Map.Entry<String, NonRelationalValueDomain<?>> intDomain : INT_DOMAINS.entrySet())
-			for (Map.Entry<String, NonRelationalValueDomain<?>> strDomain : STRING_DOMAINS.entrySet())
-				for (Map.Entry<String, Boolean> test : TESTFILES.entrySet()) {
-					TestConfiguration conf = mkConf();
-					conf.analysis = new SimpleAbstractDomain<>(
-							new MonolithicMemory(),
-							new WholeValueAnalysis(
-									(BaseNonRelationalValueDomain<?>) intDomain.getValue(),
-									(WholeValueStringDomain<?>) strDomain.getValue(),
-									new BooleanPowerset()),
-							new InferredTypes());
-					if (test.getValue())
-						conf.analysis = new TracePartitioning(conf.analysis);
-					// conf.analysisGraphs =
-					// it.unive.lisa.conf.LiSAConfiguration.GraphType.HTML_WITH_SUBNODES;
-					String testKey = intDomain.getKey() + "-" + strDomain.getKey() + "-" + test.getKey();
-					System.out.println("\n\n### Running test " + testKey);
-					perform("whole-value", "constr/" + testKey.replace(".imp", ""), test.getKey(), conf);
-					AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
-					STATES.computeIfAbsent(
-							"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
-							k -> new HashMap<>())
-							.put(test.getKey(), check.valuesAtFirstAssertion);
-					MESSAGES.computeIfAbsent(
-							"constr-" + intDomain.getKey() + "-" + strDomain.getKey(),
-							k -> new HashMap<>())
-							.put(test.getKey(), check.assertions);
-				}
+	public void testSmashedCpSuffixToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Suffix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-suffix-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-suffix", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-suffix", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpBSSToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new BoundedStringSet(5)),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-bss-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-bss", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-bss", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpCIToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new CharInclusion()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-ci-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-ci", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-ci", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpTarsisToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Tarsis()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-tarsis-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-tarsis", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-tarsis", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvPrefixToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Prefix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-prefix-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-prefix", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-prefix", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvSuffixToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Suffix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-suffix-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-suffix", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-suffix", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvBSSToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new BoundedStringSet(5)),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-bss-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-bss", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-bss", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvCIToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new CharInclusion()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-ci-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-ci", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-ci", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvTarsisToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Tarsis()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-tarsis-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-tarsis", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-tarsis", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpPrefixLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Prefix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-prefix-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-prefix", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-prefix", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpSuffixLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Suffix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-suffix-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-suffix", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-suffix", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpBSSLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new BoundedStringSet(5)),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-bss-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-bss", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-bss", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpCILoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new CharInclusion()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-ci-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-ci", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-ci", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpTarsisLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Tarsis()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-tarsis-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-tarsis", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-tarsis", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvPrefixLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Prefix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-prefix-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-prefix", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-prefix", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvSuffixLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Suffix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-suffix-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-suffix", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-suffix", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvBSSLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new BoundedStringSet(5)),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-bss-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-bss", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-bss", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvCILoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new CharInclusion()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-ci-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-ci", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-ci", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvTarsisLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Tarsis()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-tarsis-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-tarsis", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-tarsis", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpPrefixSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Prefix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-prefix-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-prefix", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-prefix", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpSuffixSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Suffix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-suffix-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-suffix", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-suffix", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpBSSSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new BoundedStringSet(5)),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-bss-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-bss", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-bss", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpCISubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new CharInclusion()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-ci-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-ci", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-ci", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpTarsisSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Tarsis()),
+				new InferredTypes());
+		perform("whole-value", "smashed/cp-tarsis-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-tarsis", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-tarsis", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvPrefixSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Prefix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-prefix-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-prefix", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-prefix", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvSuffixSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Suffix()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-suffix-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-suffix", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-suffix", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvBSSSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new BoundedStringSet(5)),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-bss-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-bss", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-bss", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvCISubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new CharInclusion()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-ci-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-ci", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-ci", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvTarsisSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Tarsis()),
+				new InferredTypes());
+		perform("whole-value", "smashed/intv-tarsis-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-tarsis", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-tarsis", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpPrefixCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Prefix()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/cp-prefix-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-prefix", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-prefix", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpSuffixCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Suffix()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/cp-suffix-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-suffix", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-suffix", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpBSSCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new BoundedStringSet(5)),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/cp-bss-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-bss", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-bss", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpCICount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new CharInclusion()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/cp-ci-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-ci", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-ci", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedCpTarsisCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new IntegerConstantPropagation(), new Tarsis()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/cp-tarsis-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-cp-tarsis", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-cp-tarsis", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvPrefixCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Prefix()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/intv-prefix-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-prefix", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-prefix", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvSuffixCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Suffix()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/intv-suffix-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-suffix", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-suffix", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvBSSCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new BoundedStringSet(5)),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/intv-bss-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-bss", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-bss", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvCICount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new CharInclusion()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/intv-ci-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-ci", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-ci", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testSmashedIntvTarsisCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new SmashedSum<>(new Interval(), new Tarsis()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "smashed/intv-tarsis-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("smashed-intv-tarsis", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("smashed-intv-tarsis", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpPrefixToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Prefix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-prefix-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-prefix", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-prefix", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpSuffixToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Suffix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-suffix-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-suffix", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-suffix", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpBSSToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new BoundedStringSet(5),
+						new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-bss-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-bss", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-bss", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpCIToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new CharInclusion(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-ci-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-ci", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-ci", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpTarsisToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Tarsis(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-tarsis-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-tarsis", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-tarsis", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvPrefixToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Prefix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-prefix-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-prefix", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-prefix", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvSuffixToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Suffix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-suffix-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-suffix", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-suffix", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvBSSToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new BoundedStringSet(5), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-bss-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-bss", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-bss", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvCIToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new CharInclusion(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-ci-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-ci", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-ci", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvTarsisToString() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Tarsis(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-tarsis-toString", "toString.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-tarsis", k -> new HashMap<>())
+				.put("toString.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-tarsis", k -> new HashMap<>())
+				.put("toString.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpPrefixLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Prefix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-prefix-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-prefix", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-prefix", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpSuffixLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Suffix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-suffix-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-suffix", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-suffix", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpBSSLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new BoundedStringSet(5),
+						new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-bss-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-bss", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-bss", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpCILoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new CharInclusion(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-ci-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-ci", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-ci", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpTarsisLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Tarsis(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-tarsis-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-tarsis", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-tarsis", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvPrefixLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Prefix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-prefix-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-prefix", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-prefix", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvSuffixLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Suffix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-suffix-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-suffix", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-suffix", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvBSSLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new BoundedStringSet(5), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-bss-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-bss", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-bss", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvCILoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new CharInclusion(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-ci-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-ci", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-ci", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvTarsisLoop() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Tarsis(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-tarsis-loop", "loop.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-tarsis", k -> new HashMap<>())
+				.put("loop.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-tarsis", k -> new HashMap<>())
+				.put("loop.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpPrefixSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Prefix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-prefix-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-prefix", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-prefix", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpSuffixSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Suffix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-suffix-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-suffix", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-suffix", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpBSSSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new BoundedStringSet(5),
+						new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-bss-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-bss", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-bss", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpCISubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new CharInclusion(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-ci-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-ci", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-ci", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpTarsisSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Tarsis(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/cp-tarsis-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-tarsis", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-tarsis", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvPrefixSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Prefix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-prefix-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-prefix", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-prefix", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvSuffixSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Suffix(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-suffix-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-suffix", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-suffix", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvBSSSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new BoundedStringSet(5), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-bss-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-bss", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-bss", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvCISubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new CharInclusion(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-ci-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-ci", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-ci", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvTarsisSubs() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Tarsis(), new BooleanPowerset()),
+				new InferredTypes());
+		perform("whole-value", "constr/intv-tarsis-subs", "subs.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-tarsis", k -> new HashMap<>())
+				.put("subs.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-tarsis", k -> new HashMap<>())
+				.put("subs.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpPrefixCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Prefix(), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/cp-prefix-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-prefix", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-prefix", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpSuffixCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Suffix(), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/cp-suffix-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-suffix", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-suffix", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpBSSCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new BoundedStringSet(5),
+						new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/cp-bss-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-bss", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-bss", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpCICount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new CharInclusion(), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/cp-ci-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-ci", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-ci", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrCpTarsisCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new IntegerConstantPropagation(), new Tarsis(), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/cp-tarsis-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-cp-tarsis", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-cp-tarsis", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvPrefixCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Prefix(), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/intv-prefix-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-prefix", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-prefix", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvSuffixCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Suffix(), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/intv-suffix-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-suffix", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-suffix", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvBSSCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new BoundedStringSet(5), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/intv-bss-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-bss", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-bss", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvCICount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new CharInclusion(), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/intv-ci-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-ci", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-ci", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
+	}
+
+	@Test
+	public void testConstrIntvTarsisCount() {
+		TestConfiguration conf = mkConf();
+		conf.analysis = new SimpleAbstractDomain<>(
+				new MonolithicMemory(),
+				new WholeValueAnalysis(new Interval(), new Tarsis(), new BooleanPowerset()),
+				new InferredTypes());
+		conf.analysis = new TracePartitioning<>(conf.analysis);
+		perform("whole-value", "constr/intv-tarsis-count", "count.imp", conf);
+		AssertionCheck<?, ?> check = (AssertionCheck<?, ?>) conf.semanticChecks.iterator().next();
+		STATES.computeIfAbsent("constr-intv-tarsis", k -> new HashMap<>())
+				.put("count.imp", check.valuesAtFirstAssertion);
+		MESSAGES.computeIfAbsent("constr-intv-tarsis", k -> new HashMap<>())
+				.put("count.imp", check.assertions);
 	}
 
 	@AfterAll
 	public static void summary() {
-		for (String testFile : TESTFILES.keySet()) {
+		List<String> int_domains = List.of("intv", "cp");
+		List<String> string_domains = List.of("prefix", "suffix", "ci", "tarsis", "bss");
+		List<String> testfiles = List.of("toString.imp", "subs.imp", "loop.imp", "count.imp");
+
+		for (String testFile : testfiles) {
 			System.out.println("\n\n### Test file: " + testFile);
 
-			Set<CodeLocation> assertionLocs = new TreeSet<>(MESSAGES.values().iterator().next().get(testFile).keySet());
-			String[][] table = new String[STATES.size() + 1][2 + assertionLocs.size()];
+			Map<CodeLocation, String> map = MESSAGES.values().iterator().next().get(testFile);
+			if (map == null) {
+				System.out.println("No assertions found for test file " + testFile);
+				continue;
+			}
+			Set<CodeLocation> assertionLocs = new TreeSet<>(map.keySet());
+			Set<String> sortedDoms = new TreeSet<>();
+			for (String strDom : string_domains)
+				for (String intDom : int_domains) {
+					sortedDoms.add("smashed-" + intDom + "-" + strDom);
+					sortedDoms.add("constr-" + intDom + "-" + strDom);
+				}
+
+			String[][] table = new String[sortedDoms.size() + 1][2 + assertionLocs.size()];
 			table[0][0] = "DOMAIN";
 			int i = 1;
 			for (CodeLocation loc : assertionLocs)
 				table[0][i++] = "LINE " + ((SourceCodeLocation) loc).getLine();
 			table[0][i] = "APPROXIMATION";
 
-			Set<String> sortedDoms = new TreeSet<>();
-			for (String strDom : STRING_DOMAINS.keySet())
-				for (String intDom : INT_DOMAINS.keySet()) {
-					sortedDoms.add("smashed-" + intDom + "-" + strDom);
-					sortedDoms.add("constr-" + intDom + "-" + strDom);
-				}
 			i = 1;
 			for (String domain : sortedDoms) {
 				table[i][0] = domain;
-				Map<CodeLocation, String> messages = MESSAGES.get(domain).get(testFile);
 				int j = 1;
-				for (CodeLocation loc : assertionLocs) {
-					String msg = messages.get(loc);
-					table[i][j++] = msg;
+				Map<CodeLocation, String> messages;
+				Map<String, Map<CodeLocation, String>> dom = MESSAGES.get(domain);
+				if (dom == null) {
+					for (; j < assertionLocs.size() + 1; j++)
+						table[i][j] = "<missing>";
+				} else {
+					messages = dom.get(testFile);
+					if (messages == null) {
+						for (; j < assertionLocs.size() + 1; j++)
+							table[i][j] = "<missing>";
+					} else
+						for (CodeLocation loc : assertionLocs) {
+							String msg = messages.get(loc);
+							table[i][j++] = msg;
+						}
 				}
-				table[i][j] = STATES.get(domain).get(testFile).toString();
+
+				Map<String, Lattice<?>> states = STATES.get(domain);
+				if (states == null) {
+					table[i][j] = "<missing>";
+				} else {
+					Lattice<?> state = states.get(testFile);
+					if (state == null) {
+						table[i][j] = "<missing>";
+					} else
+						table[i][j] = state.toString();
+				}
 				i++;
 			}
 			System.out.println(toString(table));

@@ -328,4 +328,13 @@ public final class Or
 		return first.readsWhiteSpaceString() || second.readsWhiteSpaceString();
 	}
 
+	@Override
+	public RegularExpression toLower() {
+		return new Or(first.toLower(), second.toLower());
+	}
+
+	@Override
+	public RegularExpression toUpper() {
+		return new Or(first.toUpper(), second.toUpper());
+	}
 }

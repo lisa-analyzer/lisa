@@ -94,6 +94,8 @@ tasks.register('cron', Test) {
 	description = 'Runs cron tests'
 	group = 'verification'
 
+	useJUnitPlatform()
+
 	testClassesDirs = sourceSets.test.output.classesDirs
 	classpath = sourceSets.test.runtimeClasspath
 
@@ -131,6 +133,8 @@ tasks.register('cron', Test) {
 tasks.register('update-cron', Test) {
 	description = 'Runs cron tests, updating expected results of failed ones'
 	group = 'verification'
+
+	useJUnitPlatform()
 
 	testClassesDirs = sourceSets.test.output.classesDirs
 	classpath = sourceSets.test.runtimeClasspath

@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collections;
@@ -127,4 +128,34 @@ public class NonRedundantPowerset<S extends NonRedundantSetDomainLattice<S, L> &
 		return singleton.mk(Collections.singleton(valueDomain.makeLattice()));
 	}
 
+	@Override
+	public boolean canProcess(
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		return valueDomain.canProcess(e, pp, oracle);
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueDomain<?> requesting,
+			S state,
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Collections.emptySet();
+		if (state.isBottom())
+			return null;
+		if (state.elements.isEmpty())
+			return Collections.emptySet();
+		// since constraint sets can only represent convex information, we just
+		// delegate to the underlying domain with the union of all the elements
+		// in the non-redundant set
+		L lub = null;
+		for (L elem : state.elements)
+			lub = lub == null ? elem : lub.lub(elem);
+		return valueDomain.constraints(requesting, lub, e, pp, oracle);
+	}
 }

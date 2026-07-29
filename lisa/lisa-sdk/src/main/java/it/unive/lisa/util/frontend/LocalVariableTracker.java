@@ -1,5 +1,6 @@
 package it.unive.lisa.util.frontend;
 
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -8,11 +9,7 @@ import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Untyped;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -66,10 +63,19 @@ public class LocalVariableTracker {
 		/**
 		 * Yields the annotations of local variable.
 		 * 
-		 * @return annotations the annotations of local variable.
+		 * @return annotations of local variable.
 		 */
 		public Annotations getAnnotations() {
 			return annotations;
+		}
+
+		/**
+		 * Yields the list of annotations of local variable.
+		 *
+		 * @return the list of annotations of local variable.
+		 */
+		public Collection<Annotation> getAnnotationList() {
+			return annotations.getAnnotations();
 		}
 
 	}

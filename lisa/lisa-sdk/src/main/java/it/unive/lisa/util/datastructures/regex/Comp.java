@@ -336,7 +336,7 @@ public final class Comp
 		// first reads at least a whitespace string
 		else if (first.readsWhiteSpaceString())
 			return new Or(new Comp(trimLeftFirst, second), second.trimLeft());
-//			return new Comp(trimLeftFirst, new Or(second, second.trimLeft()));
+		// return new Comp(trimLeftFirst, new Or(second, second.trimLeft()));
 		else
 			return new Comp(trimLeftFirst, second);
 	}
@@ -351,7 +351,7 @@ public final class Comp
 		// second reads at least a whitespace string
 		else if (second.readsWhiteSpaceString())
 			return new Or(new Comp(first, trimRightSecond), first.trimRight());
-//			return new Comp(new Or(first, first.trimRight()), trimRightSecond);
+		// return new Comp(new Or(first, first.trimRight()), trimRightSecond);
 		else
 			return new Comp(this.first, trimRightSecond);
 	}
@@ -359,6 +359,16 @@ public final class Comp
 	@Override
 	protected boolean readsWhiteSpaceString() {
 		return first.readsWhiteSpaceString() && second.readsWhiteSpaceString();
+	}
+
+	@Override
+	public RegularExpression toLower() {
+		return new Comp(first.toLower(), second.toLower());
+	}
+
+	@Override
+	public RegularExpression toUpper() {
+		return new Comp(first.toUpper(), second.toUpper());
 	}
 
 }

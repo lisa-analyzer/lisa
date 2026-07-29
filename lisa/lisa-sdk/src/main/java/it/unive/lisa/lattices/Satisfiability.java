@@ -2,17 +2,8 @@ package it.unive.lisa.lattices;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
-import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * A lattice representing sets of possible Boolean values: {@code (true)},
@@ -22,8 +13,7 @@ import java.util.Set;
  */
 public enum Satisfiability
 		implements
-		BaseLattice<Satisfiability>,
-		WholeValueElement<Satisfiability> {
+		BaseLattice<Satisfiability> {
 
 	/**
 	 * Represent the fact that an expression is satisfied.
@@ -221,48 +211,6 @@ public enum Satisfiability
 			Satisfiability other)
 			throws SemanticException {
 		return false;
-	}
-
-	@Override
-	public Set<BinaryExpression> constraints(
-			ValueExpression e,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isTop())
-			return Collections.emptySet();
-		if (isBottom())
-			return null;
-
-		BooleanType boolType = pp.getProgram().getTypes().getBooleanType();
-		return Collections.singleton(
-				new BinaryExpression(
-						boolType,
-						new Constant(boolType, this == SATISFIED ? true : false, e.getCodeLocation()),
-						e,
-						ComparisonEq.INSTANCE,
-						e.getCodeLocation()));
-	}
-
-	@Override
-	public Satisfiability generate(
-			Set<BinaryExpression> constraints,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (constraints == null)
-			return BOTTOM;
-
-		for (BinaryExpression expr : constraints)
-			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant
-					&& ((Constant) expr.getLeft()).getValue() instanceof Boolean) {
-				Boolean val = (Boolean) ((Constant) expr.getLeft()).getValue();
-				if (val.booleanValue())
-					return SATISFIED;
-				else
-					return NOT_SATISFIED;
-			}
-
-		return UNKNOWN;
 	}
 
 }

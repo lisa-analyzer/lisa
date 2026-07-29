@@ -8,18 +8,18 @@
   "files" : [ "report.json", "untyped_toString.main(toString__this,_untyped_names).graph.json" ],
   "info" : {
     "cfgs" : "1",
-    "duration" : "484ms",
-    "end" : "2026-01-07T11:13:59.073+01:00",
+    "duration" : "1s 505ms",
+    "end" : "2026-07-01T15:47:05.515+02:00",
     "expressions" : "39",
     "files" : "1",
     "globals" : "0",
     "members" : "1",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:58.589+01:00",
+    "start" : "2026-07-01T15:47:04.010+02:00",
     "statements" : "12",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "0.2",
     "warnings" : "2"
   },
   "configuration" : {

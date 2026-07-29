@@ -102,6 +102,9 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			AnalysisState<A> entryState,
 			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
+		if (conf.forwardFixpoint == null)
+			throw new IllegalArgumentException("A forward fixpoint is required for this analysis");
+
 		// new fixpoint iteration: restart
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
 		CFG singleton = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "singleton"));

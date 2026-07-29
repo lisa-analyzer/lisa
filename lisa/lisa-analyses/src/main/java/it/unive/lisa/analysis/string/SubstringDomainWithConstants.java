@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.ValueLatticeProduct;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.analysis.value.StringAbstraction;
 import it.unive.lisa.lattices.string.StringConstant;
 import it.unive.lisa.lattices.string.Substrings;
 import it.unive.lisa.program.SyntheticLocation;
@@ -23,7 +23,11 @@ import java.util.Map.Entry;
  * product between {@link Substrings} and {@link StringConstant}. This domain
  * follows the one defined
  * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
- * this paper</a>.
+ * this paper</a>.<br/>
+ * <br/>
+ * This domain does not take part in the
+ * {@link it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis},
+ * meaning that it will not produce constraints for any expression.
  * 
  * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
@@ -31,7 +35,7 @@ import java.util.Map.Entry;
  */
 public class SubstringDomainWithConstants
 		implements
-		ValueDomain<ValueLatticeProduct<ValueEnvironment<StringConstant>, Substrings>> {
+		StringAbstraction<ValueLatticeProduct<ValueEnvironment<StringConstant>, Substrings>> {
 
 	private final StringConstantPropagation scp = new StringConstantPropagation();
 

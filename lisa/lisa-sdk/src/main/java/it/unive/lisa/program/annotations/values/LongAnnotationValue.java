@@ -21,6 +21,15 @@ public class LongAnnotationValue
 		this.l = l;
 	}
 
+	/**
+	 * A getter to retrieve the value.
+	 *
+	 * @return the long of this annotation value
+	 */
+	public long getLong() {
+		return l;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

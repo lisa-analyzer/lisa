@@ -5,18 +5,64 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.IntegerConstantPropagation;
+import it.unive.lisa.analysis.value.StringAbstraction;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.lattices.Satisfiability;
+import it.unive.lisa.lattices.numeric.IntegerConstant;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushFromConstraints;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
+import it.unive.lisa.symbolic.value.operator.binary.StringCharAt;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
+import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringEqualsIgnoreCase;
+import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIndexOfChar;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsPrefixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOfChar;
+import it.unive.lisa.symbolic.value.operator.binary.StringMatches;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.binary.StringSubstringToEnd;
+import it.unive.lisa.symbolic.value.operator.binary.ValueComparison;
+import it.unive.lisa.symbolic.value.operator.ternary.StringIndexOfCharFromIndex;
+import it.unive.lisa.symbolic.value.operator.ternary.StringIndexOfFromIndex;
+import it.unive.lisa.symbolic.value.operator.ternary.StringLastIndexOfCharFromIndex;
+import it.unive.lisa.symbolic.value.operator.ternary.StringLastIndexOfFromIndex;
+import it.unive.lisa.symbolic.value.operator.ternary.StringStartsWithFromIndex;
+import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.symbolic.value.operator.unary.NumericToString;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.symbolic.value.operator.unary.StringReverse;
+import it.unive.lisa.symbolic.value.operator.unary.StringToLowerCase;
+import it.unive.lisa.symbolic.value.operator.unary.StringToUpperCase;
+import it.unive.lisa.symbolic.value.operator.unary.StringTrim;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -36,6 +82,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Bricks
 		implements
+		StringAbstraction<ValueEnvironment<Bricks.BrickList>>,
 		SmashedSumStringDomain<Bricks.BrickList> {
 
 	/**
@@ -319,6 +366,48 @@ public class Bricks
 							+ ")");
 		}
 
+		/**
+		 * Applies the given operator to all the strings in the set of this
+		 * brick, yielding a new brick with the same interval and the new set of
+		 * strings.
+		 * 
+		 * @param operator the operator to apply to all the strings in the set
+		 *                     of this brick
+		 * 
+		 * @return a new brick with the same interval and the new set of strings
+		 */
+		public Brick onAllStrings(
+				java.util.function.UnaryOperator<String> operator) {
+			if (strings == null)
+				return this;
+
+			Set<String> newStrings = new TreeSet<>();
+			for (String s : strings)
+				newStrings.add(operator.apply(s));
+
+			return new Brick(interval, newStrings);
+		}
+
+		/**
+		 * Yields the length of the strings represented by this brick.
+		 *
+		 * @return the interval defining the length
+		 */
+		public IntInterval len() {
+			if (isTop())
+				return new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+			if (isBottom())
+				return IntInterval.BOTTOM;
+			if (strings == null || strings.isEmpty())
+				return IntInterval.ZERO;
+			String min = Collections.min(strings, (
+					s1,
+					s2) -> Integer.compare(s1.length(), s2.length()));
+			String max = Collections.max(strings, (
+					s1,
+					s2) -> Integer.compare(s1.length(), s2.length()));
+			return new IntInterval(min.length(), max.length()).mul(interval);
+		}
 	}
 
 	/**
@@ -674,7 +763,86 @@ public class Bricks
 			return Satisfiability.UNKNOWN;
 		}
 
+		/**
+		 * Applies the given operator to all the strings in the set of each
+		 * brick in this list, yielding a new brick list with the same bricks
+		 * and the new set of strings.
+		 *
+		 * @param operator the operator to apply to all the strings in the set
+		 *                     of each brick in this list
+		 *
+		 * @return a new brick list with the same bricks and the new set of
+		 *             strings
+		 */
+		public BrickList onAllStrings(
+				java.util.function.UnaryOperator<String> operator) {
+			List<Brick> newBricks = new ArrayList<>();
+			for (Brick b : bricks)
+				newBricks.add(b.onAllStrings(operator));
+			return new BrickList(newBricks);
+		}
+
+		/**
+		 * Helper method to determine if the list represents a finite set of
+		 * strings or not.
+		 *
+		 * @return true if the list represents a finite set of strings, false
+		 *             otherwise.
+		 */
+		public boolean isFinite() {
+			for (Brick b : bricks)
+				if (!b.isFinite())
+					return false;
+			return true;
+		}
+
+		/**
+		 * Yields all strings represented by this brick list, if it is finite.
+		 * 
+		 * @return the set of strings
+		 * 
+		 * @throws IllegalStateException if the brick is not finite.
+		 */
+		public Set<String> getReps() {
+			if (!isFinite())
+				throw new IllegalStateException("Brick list must be finite.");
+
+			Set<String> reps = new TreeSet<>();
+			for (Brick b : bricks)
+				if (reps.isEmpty()) {
+					reps.addAll(b.getReps());
+				} else {
+					Set<String> newReps = new TreeSet<>();
+					for (String s1 : reps)
+						for (String s2 : b.getReps())
+							newReps.add(s1 + s2);
+					reps = newReps;
+				}
+
+			return reps;
+		}
+
+		/**
+		 * Yields the length of the strings represented by this brick list.
+		 *
+		 * @return the interval defining the length
+		 */
+		public IntInterval len() {
+			if (isTop())
+				return new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+			if (isBottom())
+				return IntInterval.BOTTOM;
+			IntInterval result = IntInterval.ZERO;
+			for (Brick b : bricks)
+				result = result.plus(b.len());
+			return result;
+		}
 	}
+
+	/**
+	 * The integer domain that we use to process numerical constraints.
+	 */
+	private final IntegerConstantPropagation intDomain = new IntegerConstantPropagation();
 
 	/**
 	 * The maximum length of a bricks list used in the widening.
@@ -723,22 +891,6 @@ public class Bricks
 	}
 
 	@Override
-	public BrickList evalBinaryExpression(
-			BinaryExpression expression,
-			BrickList left,
-			BrickList right,
-			ProgramPoint pp,
-			SemanticOracle oracle)
-			throws SemanticException {
-		if (expression.getOperator() == StringConcat.INSTANCE) {
-			List<Brick> resultList = new ArrayList<>(left.bricks);
-			resultList.addAll(right.bricks);
-			return new BrickList(resultList);
-		}
-		return left.top();
-	}
-
-	@Override
 	public BrickList evalConstant(
 			Constant constant,
 			ProgramPoint pp,
@@ -760,6 +912,190 @@ public class Bricks
 	}
 
 	@Override
+	public BrickList evalPushAny(
+			PushAny pushAny,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (pushAny instanceof PushFromConstraints)
+			return generate(((PushFromConstraints) pushAny).getConstraints(), pp, oracle);
+		return SmashedSumStringDomain.super.evalPushAny(pushAny, pp, oracle);
+	}
+
+	@Override
+	public BrickList evalUnaryExpression(
+			UnaryExpression expression,
+			BrickList arg,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		UnaryOperator operator = expression.getOperator();
+
+		if (oracle.hasWholeValueAnlysis() && operator == NumericToString.INSTANCE) {
+			Set<BinaryExpression> constraints = oracle.constraints(this, expression, pp);
+			return generate(constraints, pp, oracle);
+		}
+
+		if (arg.isTop())
+			return top();
+
+		if (operator == StringReverse.INSTANCE)
+			// not handled for now
+			return top();
+		else if (operator == StringToLowerCase.INSTANCE)
+			return arg.onAllStrings(String::toLowerCase);
+		else if (operator == StringToUpperCase.INSTANCE)
+			return arg.onAllStrings(String::toUpperCase);
+		else if (operator == StringTrim.INSTANCE)
+			// not handled for now
+			return top();
+
+		return top();
+	}
+
+	@Override
+	public BrickList evalBinaryExpression(
+			BinaryExpression expression,
+			BrickList left,
+			BrickList right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		BinaryOperator operator = expression.getOperator();
+
+		if (left.isTop())
+			return left;
+
+		if (oracle.hasWholeValueAnlysis()
+				&& (operator == StringCharAt.INSTANCE
+						|| operator == StringSubstringToEnd.INSTANCE)) {
+			Set<BinaryExpression> constraints = oracle.constraints(this, (ValueExpression) expression.getRight(), pp);
+			IntegerConstant val = intDomain.generate(constraints, pp, oracle);
+			if (val.isBottom())
+				return bottom();
+			if (val.isTop())
+				return top();
+			if (operator == StringCharAt.INSTANCE) {
+				left.normBricks();
+
+				Brick first = left.bricks.get(0);
+				TreeSet<String> result = new TreeSet<>();
+
+				if (first.getMin().equals(MathNumber.ONE)
+						&& first.getMax().equals(MathNumber.ONE)
+						&& first.getStrings() != null
+						&& !first.getStrings().isEmpty()) {
+					first.getStrings().forEach(s -> {
+						if (s.length() > val.value)
+							result.add("" + s.charAt((int) val.value));
+					});
+				}
+
+				if (result.size() == first.getStrings().size()) {
+					List<Brick> resultList = new ArrayList<>();
+					resultList.add(new Brick(new IntInterval(1, 1), result));
+					return new BrickList(resultList);
+				}
+
+				return top();
+			}
+			if (operator == StringSubstringToEnd.INSTANCE) {
+				left.normBricks();
+
+				Brick first = left.bricks.get(0);
+				TreeSet<String> result = new TreeSet<>();
+
+				if (first.getMin().equals(MathNumber.ONE)
+						&& first.getMax().equals(MathNumber.ONE)
+						&& first.getStrings() != null
+						&& !first.getStrings().isEmpty()) {
+					first.getStrings().forEach(s -> {
+						if (s.length() >= val.value)
+							result.add(s.substring((int) val.value));
+					});
+				}
+
+				if (result.size() == first.getStrings().size()) {
+					List<Brick> resultList = new ArrayList<>();
+					resultList.add(new Brick(new IntInterval(1, 1), result));
+					return new BrickList(resultList);
+				}
+
+				return top();
+			}
+		}
+
+		if (right.isTop())
+			return right;
+
+		if (expression.getOperator() == StringConcat.INSTANCE) {
+			List<Brick> resultList = new ArrayList<>(left.bricks);
+			resultList.addAll(right.bricks);
+			return new BrickList(resultList);
+		}
+
+		return left.top();
+	}
+
+	@Override
+	public BrickList evalTernaryExpression(
+			TernaryExpression expression,
+			BrickList left,
+			BrickList middle,
+			BrickList right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		TernaryOperator operator = expression.getOperator();
+
+		if (left.isTop())
+			return top();
+
+		if (oracle.hasWholeValueAnlysis() && operator == StringSubstring.INSTANCE) {
+			Set<BinaryExpression> cM = oracle.constraints(this, (ValueExpression) expression.getMiddle(), pp);
+			IntegerConstant mid = intDomain.generate(cM, pp, oracle);
+			Set<BinaryExpression> cR = oracle.constraints(this, (ValueExpression) expression.getRight(), pp);
+			IntegerConstant rig = intDomain.generate(cR, pp, oracle);
+			if (mid.isBottom() || rig.isBottom())
+				return bottom();
+			if (mid.isTop() || rig.isTop())
+				return top();
+
+			left.normBricks();
+			Brick first = left.bricks.get(0);
+			TreeSet<String> result = new TreeSet<>();
+
+			if (first.getMin().equals(MathNumber.ONE)
+					&& first.getMax().equals(MathNumber.ONE)
+					&& first.getStrings() != null
+					&& !first.getStrings().isEmpty()) {
+				first.getStrings().forEach(s -> {
+					if (s.length() >= rig.value)
+						result.add(s.substring((int) mid.value, (int) rig.value));
+				});
+			}
+
+			if (result.size() == first.getStrings().size()) {
+				List<Brick> resultList = new ArrayList<>();
+				resultList.add(new Brick(new IntInterval(1, 1), result));
+				return new BrickList(resultList);
+			}
+
+			return top();
+		}
+
+		if (right.isTop() || middle.isTop())
+			return top();
+
+		// if (operator instanceof StringReplace)
+		// if (operator == StringReplaceAll.INSTANCE)
+		// if (operator == StringReplaceFirst.INSTANCE)
+		// not handled for now
+
+		return top();
+	}
+
+	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
 			BrickList left,
@@ -767,13 +1103,81 @@ public class Bricks
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (left.isTop())
+		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
-		if (expression.getOperator() == StringContains.INSTANCE)
+		BinaryOperator operator = expression.getOperator();
+		if (operator == ComparisonEq.INSTANCE)
+			return left.contains(right).and(right.contains(left));
+		else if (operator == ComparisonNe.INSTANCE)
+			return left.contains(right).negate().or(right.contains(left).negate());
+		else if (operator == StringContains.INSTANCE)
 			return left.contains(right);
+		else if (operator == StringEndsWith.INSTANCE)
+			return Satisfiability.UNKNOWN;
+		else if (operator == StringEquals.INSTANCE)
+			return left.contains(right).and(right.contains(left));
+		else if (operator == StringEqualsIgnoreCase.INSTANCE) {
+			BrickList leftLower = left.onAllStrings(String::toLowerCase);
+			BrickList rightLower = right.onAllStrings(String::toLowerCase);
+			return leftLower.contains(rightLower).and(rightLower.contains(leftLower));
+		} else if (operator == StringMatches.INSTANCE)
+			return Satisfiability.UNKNOWN;
+		else if (operator == StringStartsWith.INSTANCE)
+			return Satisfiability.UNKNOWN;
+		else if (operator == StringIsPrefixOf.INSTANCE)
+			return Satisfiability.UNKNOWN;
+		else if (operator == StringIsSuffixOf.INSTANCE)
+			return Satisfiability.UNKNOWN;
+		else
+			return Satisfiability.UNKNOWN;
+	}
 
-		return Satisfiability.UNKNOWN;
+	@Override
+	public ValueEnvironment<BrickList> assumeBinaryExpression(
+			ValueEnvironment<BrickList> environment,
+			BinaryExpression expression,
+			ProgramPoint src,
+			ProgramPoint dest,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Satisfiability sat = satisfies(environment, expression, src, oracle);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
+		BinaryOperator operator = expression.getOperator();
+		ValueExpression left = (ValueExpression) expression.getLeft();
+		ValueExpression right = (ValueExpression) expression.getRight();
+		if (operator == ComparisonEq.INSTANCE) {
+			if (left instanceof Identifier) {
+				if (!canProcess(right, src, oracle))
+					// the expression does not have a string value, we do not
+					// assume anything on it
+					return environment;
+				BrickList eval = eval(environment, right, src, oracle);
+				if (eval.isBottom())
+					return environment.bottom();
+				// If eval is TOP, the rhs is unknown. Any abstract value of lhs
+				// satisfies lhs == TOP, so the lhs abstract value is preserved
+				// and no refinement is needed.
+				if (!eval.isTop())
+					return environment.putState((Identifier) left, eval);
+			} else if (right instanceof Identifier) {
+				if (!canProcess(left, src, oracle))
+					// the expression does not have a string value, we do not
+					// assume anything on it
+					return environment;
+				BrickList eval = eval(environment, left, src, oracle);
+				if (eval.isBottom())
+					return environment.bottom();
+				// Same reasoning as above, symmetric case.
+				if (!eval.isTop())
+					return environment.putState((Identifier) right, eval);
+			}
+		}
+		return environment;
 	}
 
 	@Override
@@ -813,7 +1217,7 @@ public class Bricks
 	@Override
 	public IntInterval length(
 			BrickList current) {
-		return new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+		return current.len();
 	}
 
 	@Override
@@ -872,6 +1276,148 @@ public class Bricks
 	@Override
 	public BrickList bottom() {
 		return new BrickList().bottom();
+	}
+
+	private BrickList generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (constraints == null)
+			return bottom();
+
+		for (BinaryExpression expr : constraints)
+			if (expr.getLeft() instanceof Constant) {
+				String val = ((Constant) expr.getLeft()).getValue().toString();
+				if (expr.getOperator() instanceof ComparisonEq) {
+					Set<String> strings = new TreeSet<>();
+					strings.add(val);
+					List<Brick> resultList = new ArrayList<>();
+					resultList.add(new Brick(1, 1, strings));
+					return new BrickList(resultList);
+				}
+			}
+
+		return top();
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueDomain<?> requesting,
+			ValueEnvironment<BrickList> state,
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Collections.emptySet();
+		if (state.isBottom())
+			return null;
+
+		if ((e instanceof UnaryExpression && ((UnaryExpression) e).getOperator() == LogicalNegation.INSTANCE)
+				|| (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalAnd.INSTANCE)
+				|| (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalOr.INSTANCE)) {
+			Satisfiability sat = satisfies(state, e, pp, oracle);
+			if (sat == Satisfiability.SATISFIED)
+				return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);
+			else if (sat == Satisfiability.NOT_SATISFIED)
+				return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), false, e, pp);
+			else if (sat == Satisfiability.UNKNOWN)
+				return Collections.emptySet();
+			else
+				return null;
+		}
+
+		if (e instanceof UnaryExpression) {
+			UnaryOperator operator = ((UnaryExpression) e).getOperator();
+			if (operator == StringLength.INSTANCE) {
+				ValueExpression arg = (ValueExpression) ((UnaryExpression) e).getExpression();
+				BrickList value = eval(state, arg, pp, oracle);
+				IntInterval len = value.len();
+				if (value.isTop() || len.isTop())
+					return ValueDomain.makeRangeConstraints(
+							pp.getProgram().getTypes().getIntegerType(),
+							0,
+							null,
+							e,
+							pp);
+				if (value.isBottom() || len.isBottom())
+					return null;
+				try {
+					return ValueDomain.makeRangeConstraints(
+							pp.getProgram().getTypes().getIntegerType(),
+							len.getLow().toInt(),
+							len.highIsPlusInfinity() ? null : len.getHigh().toInt(),
+							e,
+							pp);
+				} catch (MathNumberConversionException e1) {
+					// should not happen
+					throw new SemanticException("Cannot convert math number to int", e1);
+				}
+			}
+		}
+
+		if (e instanceof BinaryExpression) {
+			BinaryOperator operator = ((BinaryExpression) e).getOperator();
+			if (operator == ComparisonEq.INSTANCE
+					|| operator == ComparisonNe.INSTANCE
+					|| operator == StringContains.INSTANCE
+					|| operator == StringEndsWith.INSTANCE
+					|| operator == StringEquals.INSTANCE
+					|| operator == StringEqualsIgnoreCase.INSTANCE
+					|| operator == StringMatches.INSTANCE
+					|| operator == StringStartsWith.INSTANCE
+					|| operator == StringIsPrefixOf.INSTANCE
+					|| operator == StringIsSuffixOf.INSTANCE) {
+				Satisfiability sat = satisfies(state, e, pp, oracle);
+				if (sat == Satisfiability.SATISFIED)
+					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);
+				else if (sat == Satisfiability.NOT_SATISFIED)
+					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), false, e, pp);
+				else if (sat == Satisfiability.UNKNOWN)
+					return Collections.emptySet();
+				else
+					return null;
+			} else if (operator == StringIndexOfChar.INSTANCE
+					|| operator == StringLastIndexOfChar.INSTANCE
+					|| operator == StringIndexOf.INSTANCE
+					|| operator == StringLastIndexOf.INSTANCE
+					|| operator == ValueComparison.INSTANCE) {
+				return Collections.emptySet();
+			}
+		}
+
+		if (e instanceof TernaryExpression) {
+			TernaryOperator operator = ((TernaryExpression) e).getOperator();
+			if (operator == StringIndexOfCharFromIndex.INSTANCE
+					|| operator == StringIndexOfFromIndex.INSTANCE
+					|| operator == StringLastIndexOfCharFromIndex.INSTANCE
+					|| operator == StringLastIndexOfFromIndex.INSTANCE) {
+				return Collections.emptySet();
+			}
+			if (operator == StringStartsWithFromIndex.INSTANCE) {
+				Satisfiability sat = satisfies(state, e, pp, oracle);
+				if (sat == Satisfiability.SATISFIED)
+					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);
+				else if (sat == Satisfiability.NOT_SATISFIED)
+					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), false, e, pp);
+				else if (sat == Satisfiability.UNKNOWN)
+					return Collections.emptySet();
+				else
+					return null;
+			}
+		}
+
+		BrickList value = eval(state, e, pp, oracle);
+		if (value.isTop() || !value.isFinite() || value.getReps().size() != 1)
+			return Collections.emptySet();
+		if (value.isBottom())
+			return null;
+		return ValueDomain.makeEqConstraint(
+				pp.getProgram().getTypes().getStringType(),
+				value.getReps().iterator().next(),
+				e,
+				pp);
 	}
 
 }

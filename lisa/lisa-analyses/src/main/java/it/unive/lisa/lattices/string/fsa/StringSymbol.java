@@ -123,4 +123,14 @@ public class StringSymbol
 		return symbol.length();
 	}
 
+	@Override
+	public StringSymbol toLower() {
+		return new StringSymbol(symbol.toLowerCase());
+	}
+
+	@Override
+	public StringSymbol toUpper() {
+		return new StringSymbol(symbol.toUpperCase());
+	}
+
 }

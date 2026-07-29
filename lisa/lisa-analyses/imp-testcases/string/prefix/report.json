@@ -4,18 +4,18 @@
   "files" : [ "report.json", "untyped_strings.branching(strings__this,_untyped_x).graph.json", "untyped_strings.constants(strings__this).graph.json", "untyped_strings.loops(strings__this,_untyped_x).graph.json" ],
   "info" : {
     "cfgs" : "3",
-    "duration" : "11ms",
-    "end" : "2026-01-07T11:13:53.312+01:00",
+    "duration" : "778ms",
+    "end" : "2026-06-30T12:48:20.639+02:00",
     "expressions" : "20",
     "files" : "3",
     "globals" : "0",
     "members" : "3",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:53.301+01:00",
+    "start" : "2026-06-30T12:48:19.861+02:00",
     "statements" : "12",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "0.2",
     "warnings" : "0"
   },
   "configuration" : {

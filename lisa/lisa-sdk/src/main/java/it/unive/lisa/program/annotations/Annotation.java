@@ -20,7 +20,7 @@ public class Annotation
 	private final boolean inherited;
 
 	/**
-	 * Builds an annotation from its name .
+	 * Builds an annotation from its name.
 	 * 
 	 * @param annotationName the name of the annotation
 	 */

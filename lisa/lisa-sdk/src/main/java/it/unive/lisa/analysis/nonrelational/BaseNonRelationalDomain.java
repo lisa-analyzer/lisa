@@ -6,12 +6,12 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.events.NRDEvalEnd;
 import it.unive.lisa.analysis.nonrelational.events.NRDEvalStart;
+import it.unive.lisa.analysis.value.ValueAbstraction;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.AccessChild;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
@@ -34,9 +34,7 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import it.unive.lisa.type.Type;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Base implementation for {@link NonRelationalDomain}s that can evaluate
@@ -63,6 +61,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 		M extends FunctionalLattice<M, Identifier, L> & DomainLattice<M, M>>
 		extends
 		NonRelationalDomain<L, M, M, ValueExpression>,
+		ValueAbstraction,
 		ExpressionVisitor<L> {
 
 	@Override
@@ -588,34 +587,6 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			SemanticOracle oracle)
 			throws SemanticException {
 		return top();
-	}
-
-	@Override
-	default boolean canProcess(
-			SymbolicExpression expression,
-			ProgramPoint pp,
-			SemanticOracle oracle) {
-		if (expression instanceof PushInv)
-			// the type approximation of a pushinv is bottom, so the below check
-			// will always fail regardless of the kind of value we are tracking
-			return expression.getStaticType().isValueType();
-
-		Set<Type> rts = null;
-		try {
-			rts = oracle.getRuntimeTypesOf(expression, pp);
-		} catch (SemanticException e) {
-			return false;
-		}
-
-		if (rts == null || rts.isEmpty())
-			// if we have no runtime types, either the type domain has no type
-			// information for the given expression (thus it can be anything,
-			// also something that we can track) or the computation returned
-			// bottom (and the whole state is likely going to go to bottom
-			// anyway).
-			return true;
-
-		return rts.stream().anyMatch(Type::isValueType);
 	}
 
 	@Override

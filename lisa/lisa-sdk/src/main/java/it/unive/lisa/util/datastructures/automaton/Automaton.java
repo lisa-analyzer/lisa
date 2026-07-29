@@ -347,6 +347,40 @@ public abstract class Automaton<A extends Automaton<A, T>,
 	}
 
 	/**
+	 * Creates an automaton that accept the same language but where all strings
+	 * are lower case.
+	 * 
+	 * @return a newly created automaton that accepts the lower case language of
+	 *             {@code this}.
+	 */
+	public A lowerCase() {
+		SortedSet<Transition<T>> tr = new TreeSet<>();
+
+		// create transitions using the new states of the reverse automaton
+		for (Transition<T> t : transitions)
+			tr.add(new Transition<T>(t.getSource(), t.getDestination(), t.getSymbol().toLower()));
+
+		return from(states, tr);
+	}
+
+	/**
+	 * Creates an automaton that accept the same language but where all strings
+	 * are upper case.
+	 * 
+	 * @return a newly created automaton that accepts the upper case language of
+	 *             {@code this}.
+	 */
+	public A upperCase() {
+		SortedSet<Transition<T>> tr = new TreeSet<>();
+
+		// create transitions using the new states of the reverse automaton
+		for (Transition<T> t : transitions)
+			tr.add(new Transition<T>(t.getSource(), t.getDestination(), t.getSymbol().toUpper()));
+
+		return from(states, tr);
+	}
+
+	/**
 	 * Computes the epsilon closure of this automaton starting from {@code s},
 	 * namely the set of states that are reachable from {@code s} just with
 	 * epsilon transitions.

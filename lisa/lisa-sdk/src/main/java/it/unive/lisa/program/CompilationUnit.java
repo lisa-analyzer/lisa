@@ -270,6 +270,15 @@ public abstract class CompilationUnit
 	}
 
 	/**
+	 * Yields the list of annotations.
+	 *
+	 * @return the list of annotations
+	 */
+	public Collection<Annotation> getAnnotationList() {
+		return annotations.getAnnotations();
+	}
+
+	/**
 	 * Adds an annotation to the annotations of this compilation unit.
 	 * 
 	 * @param ann the annotation to be added

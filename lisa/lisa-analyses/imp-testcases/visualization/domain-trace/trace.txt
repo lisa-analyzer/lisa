@@ -278,6 +278,7 @@ Program-wide fixpoint
                       Interval: Evaluation of 10
                       Interval: Evaluation of x
                       Interval: Evaluation of 10
+                      InferredTypes: Evaluation of 10
                       Interval: Evaluation of 10
               Semantics of x = +(x, 1)
                 Semantics of +(x, 1)
@@ -372,6 +373,7 @@ Program-wide fixpoint
                       Interval: Evaluation of 10
                       Interval: Evaluation of x
                       Interval: Evaluation of 10
+                      InferredTypes: Evaluation of 10
                       Interval: Evaluation of 10
               Semantics of return 1
                 Semantics of 1

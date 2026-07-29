@@ -2,14 +2,19 @@ package it.unive.lisa.analysis.numeric;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.value.NumericAbstraction;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.numeric.SignLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushFromConstraints;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
@@ -25,7 +30,16 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.symbolic.value.operator.unary.NumericToString;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * The basic overflow-insensitive Sign abstract domain, tracking zero, strictly
@@ -36,19 +50,51 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
  */
 public class Sign
 		implements
-		BaseNonRelationalValueDomain<SignLattice> {
+		NumericAbstraction<ValueEnvironment<SignLattice>>,
+		SmashedSumIntDomain<SignLattice> {
 
 	@Override
 	public SignLattice evalConstant(
 			Constant constant,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		if (constant.getValue() instanceof Byte) {
+			Byte i = (Byte) constant.getValue();
+			return i == 0 ? SignLattice.ZERO : i > 0 ? SignLattice.POS : SignLattice.NEG;
+		}
+		if (constant.getValue() instanceof Short) {
+			Short i = (Short) constant.getValue();
+			return i == 0 ? SignLattice.ZERO : i > 0 ? SignLattice.POS : SignLattice.NEG;
+		}
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return i == 0 ? SignLattice.ZERO : i > 0 ? SignLattice.POS : SignLattice.NEG;
 		}
+		if (constant.getValue() instanceof Long) {
+			Long i = (Long) constant.getValue();
+			return i == 0 ? SignLattice.ZERO : i > 0 ? SignLattice.POS : SignLattice.NEG;
+		}
+		if (constant.getValue() instanceof Float) {
+			Float i = (Float) constant.getValue();
+			return i == 0 ? SignLattice.ZERO : i > 0 ? SignLattice.POS : SignLattice.NEG;
+		}
+		if (constant.getValue() instanceof Double) {
+			Double i = (Double) constant.getValue();
+			return i == 0 ? SignLattice.ZERO : i > 0 ? SignLattice.POS : SignLattice.NEG;
+		}
 
 		return SignLattice.TOP;
+	}
+
+	@Override
+	public SignLattice evalPushAny(
+			PushAny pushAny,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (pushAny instanceof PushFromConstraints)
+			return generate(((PushFromConstraints) pushAny).getConstraints(), pp, oracle);
+		return SmashedSumIntDomain.super.evalPushAny(pushAny, pp, oracle);
 	}
 
 	@Override
@@ -178,10 +224,18 @@ public class Sign
 		ValueExpression left = (ValueExpression) expression.getLeft();
 		ValueExpression right = (ValueExpression) expression.getRight();
 		if (left instanceof Identifier) {
+			if (!canProcess(right, src, oracle))
+				// the expression does not have a numerical value, we do not
+				// assume anything on it
+				return environment;
 			eval = eval(environment, right, src, oracle);
 			id = (Identifier) left;
 			rightIsExpr = true;
 		} else if (right instanceof Identifier) {
+			if (!canProcess(left, src, oracle))
+				// the expression does not have a numerical value, we do not
+				// assume anything on it
+				return environment;
 			eval = eval(environment, left, src, oracle);
 			id = (Identifier) right;
 			rightIsExpr = false;
@@ -191,6 +245,10 @@ public class Sign
 		SignLattice starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
+		if (eval.isTop())
+			// we do not know anything about the expression, so we cannot assume
+			// anything on the identifier
+			return environment;
 
 		SignLattice update = null;
 		if (operator == ComparisonEq.INSTANCE)
@@ -258,6 +316,37 @@ public class Sign
 	}
 
 	@Override
+	public SignLattice fromInterval(
+			IntInterval intv)
+			throws SemanticException {
+		if (intv.is(0))
+			return SignLattice.ZERO;
+		if (!intv.lowIsMinusInfinity() && intv.getLow().compareTo(MathNumber.ZERO) > 0)
+			return SignLattice.POS;
+		if (!intv.highIsPlusInfinity() && intv.getHigh().compareTo(MathNumber.ZERO) < 0)
+			return SignLattice.NEG;
+		return SignLattice.TOP;
+	}
+
+	@Override
+	public IntInterval toInterval(
+			SignLattice sign)
+			throws SemanticException {
+		if (sign.isBottom())
+			return null;
+		if (sign.isTop())
+			return IntInterval.INFINITY;
+		if (sign.isZero())
+			return IntInterval.ZERO;
+		// in the cases below we use 0 even if it should not be included since
+		// eg a positive sign can represent 0.1, but the interval has integer
+		// bounds
+		if (sign.isPositive())
+			return new IntInterval(0, null);
+		return new IntInterval(null, 0);
+	}
+
+	@Override
 	public SignLattice top() {
 		return SignLattice.TOP;
 	}
@@ -265,6 +354,124 @@ public class Sign
 	@Override
 	public SignLattice bottom() {
 		return SignLattice.BOTTOM;
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueDomain<?> requesting,
+			ValueEnvironment<SignLattice> state,
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return Collections.emptySet();
+		if (state.isBottom())
+			return null;
+
+		if ((e instanceof UnaryExpression && ((UnaryExpression) e).getOperator() == LogicalNegation.INSTANCE)
+				|| (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalAnd.INSTANCE)
+				|| (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalOr.INSTANCE)) {
+			Satisfiability sat = satisfies(state, e, pp, oracle);
+			if (sat == Satisfiability.SATISFIED)
+				return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);
+			else if (sat == Satisfiability.NOT_SATISFIED)
+				return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), false, e, pp);
+			else if (sat == Satisfiability.UNKNOWN)
+				return Collections.emptySet();
+			else
+				return null;
+		}
+
+		if (e instanceof UnaryExpression) {
+			UnaryOperator operator = ((UnaryExpression) e).getOperator();
+			if (operator == NumericToString.INSTANCE) {
+				ValueExpression arg = (ValueExpression) ((UnaryExpression) e).getExpression();
+				SignLattice value = eval(state, arg, pp, oracle);
+				if (value.isTop())
+					return Collections.emptySet();
+				if (value.isBottom())
+					return null;
+				if (value.isZero())
+					return ValueDomain.makeEqConstraint(
+							pp.getProgram().getTypes().getStringType(),
+							"0",
+							e,
+							pp);
+			}
+		}
+
+		if (e instanceof BinaryExpression) {
+			BinaryOperator operator = ((BinaryExpression) e).getOperator();
+			if (operator == ComparisonEq.INSTANCE
+					|| operator == ComparisonNe.INSTANCE
+					|| operator == ComparisonLe.INSTANCE
+					|| operator == ComparisonLt.INSTANCE
+					|| operator == ComparisonGe.INSTANCE
+					|| operator == ComparisonGt.INSTANCE) {
+				Satisfiability sat = satisfies(state, e, pp, oracle);
+				if (sat == Satisfiability.SATISFIED)
+					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);
+				else if (sat == Satisfiability.NOT_SATISFIED)
+					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), false, e, pp);
+				else if (sat == Satisfiability.UNKNOWN)
+					return Collections.emptySet();
+				else
+					return null;
+			}
+		}
+
+		SignLattice value = eval(state, e, pp, oracle);
+		if (value.isBottom())
+			return null;
+		if (value.isTop())
+			return Collections.emptySet();
+		if (value == SignLattice.ZERO)
+			return ValueDomain.makeEqConstraint(
+					pp.getProgram().getTypes().getIntegerType(),
+					0,
+					e,
+					pp);
+		else if (value == SignLattice.POS)
+			return ValueDomain.makeRangeConstraints(pp.getProgram().getTypes().getIntegerType(), 0, null, e, pp);
+		else
+			return ValueDomain.makeRangeConstraints(pp.getProgram().getTypes().getIntegerType(), null, 0, e, pp);
+	}
+
+	private SignLattice generate(
+			Set<BinaryExpression> constraints,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (constraints == null)
+			return SignLattice.BOTTOM;
+
+		Integer ge = null, le = null;
+		for (BinaryExpression expr : constraints)
+			if (expr.getLeft() instanceof Constant && ((Constant) expr.getLeft()).getValue() instanceof Integer) {
+				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
+				if (expr.getOperator() instanceof ComparisonEq)
+					return val == 0 ? SignLattice.ZERO : val > 0 ? SignLattice.POS : SignLattice.NEG;
+				else if (expr.getOperator() instanceof ComparisonGe)
+					ge = val;
+				else if (expr.getOperator() instanceof ComparisonLe)
+					le = val;
+			}
+
+		if (ge != null && ge.equals(le))
+			return ge == 0 ? SignLattice.ZERO : ge > 0 ? SignLattice.POS : SignLattice.NEG;
+		else if (ge != null)
+			if (ge < 0)
+				return SignLattice.NEG;
+			else if (le != null && le > 0)
+				return SignLattice.POS;
+			else
+				return SignLattice.TOP;
+		else if (le != null)
+			if (le > 0)
+				return SignLattice.POS;
+
+		return SignLattice.TOP;
 	}
 
 }

@@ -21,6 +21,15 @@ public class FloatAnnotationValue
 		this.f = f;
 	}
 
+	/**
+	 * A getter to retrieve the value.
+	 *
+	 * @return the float of this annotation value
+	 */
+	public float getFloat() {
+		return f;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

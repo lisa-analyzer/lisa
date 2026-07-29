@@ -3,20 +3,10 @@ package it.unive.lisa.util.numeric;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.Set;
 import org.apache.commons.collections4.iterators.EmptyIterator;
 
 /**
@@ -28,7 +18,6 @@ public class IntInterval
 		implements
 		Iterable<Long>,
 		Comparable<IntInterval>,
-		WholeValueElement<IntInterval>,
 		BaseLattice<IntInterval> {
 
 	/**
@@ -240,6 +229,22 @@ public class IntInterval
 	public boolean is(
 			int n) {
 		return !isBottom() && isSingleton() && low.is(n);
+	}
+
+	/**
+	 * Yields the size of this interval, that is, the number of integers it
+	 * contains. If this interval is infinite, then
+	 * {@link MathNumber#PLUS_INFINITY} is returned. If this interval is bottom,
+	 * then {@link MathNumber#NaN} is returned.
+	 * 
+	 * @return the size of this interval
+	 */
+	public MathNumber size() {
+		if (isBottom())
+			return MathNumber.NaN;
+		if (isTop() || isInfinite())
+			return MathNumber.PLUS_INFINITY;
+		return high.subtract(low).add(MathNumber.ONE);
 	}
 
 	private static IntInterval cacheAndRound(
@@ -574,72 +579,6 @@ public class IntInterval
 			IntInterval other)
 			throws SemanticException {
 		return other.includes(this);
-	}
-
-	@Override
-	public Set<BinaryExpression> constraints(
-			ValueExpression e,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isTop())
-			return Collections.emptySet();
-		if (isBottom())
-			return null;
-
-		BinaryExpression lbound, ubound;
-		try {
-			ubound = new BinaryExpression(
-					pp.getProgram().getTypes().getBooleanType(),
-					new Constant(pp.getProgram().getTypes().getIntegerType(), getHigh().toInt(), pp.getLocation()),
-					e,
-					ComparisonGe.INSTANCE,
-					e.getCodeLocation());
-		} catch (MathNumberConversionException e1) {
-			ubound = null;
-		}
-
-		try {
-			lbound = new BinaryExpression(
-					pp.getProgram().getTypes().getBooleanType(),
-					new Constant(pp.getProgram().getTypes().getIntegerType(), getLow().toInt(), pp.getLocation()),
-					e,
-					ComparisonLe.INSTANCE,
-					e.getCodeLocation());
-		} catch (MathNumberConversionException e1) {
-			lbound = null;
-		}
-
-		if (getLow().isMinusInfinity())
-			return Collections.singleton(ubound);
-		if (getHigh().isPlusInfinity())
-			return Collections.singleton(lbound);
-		return Set.of(lbound, ubound);
-	}
-
-	@Override
-	public IntInterval generate(
-			Set<BinaryExpression> constraints,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (constraints == null)
-			return bottom();
-
-		Integer ge = null, le = null;
-		for (BinaryExpression expr : constraints)
-			if (expr.getLeft() instanceof Constant && ((Constant) expr.getLeft()).getValue() instanceof Integer) {
-				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
-				if (expr.getOperator() instanceof ComparisonEq)
-					return new IntInterval(val, val);
-				else if (expr.getOperator() instanceof ComparisonGe)
-					ge = val;
-				else if (expr.getOperator() instanceof ComparisonLe)
-					le = val;
-			}
-
-		if (ge == null && le == null)
-			return TOP;
-
-		return new IntInterval(le, ge);
 	}
 
 }

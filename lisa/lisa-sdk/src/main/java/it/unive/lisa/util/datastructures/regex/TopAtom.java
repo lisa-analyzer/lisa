@@ -193,4 +193,13 @@ public final class TopAtom
 		return 0;
 	}
 
+	@Override
+	public RegularExpression toLower() {
+		return this;
+	}
+
+	@Override
+	public RegularExpression toUpper() {
+		return this;
+	}
 }

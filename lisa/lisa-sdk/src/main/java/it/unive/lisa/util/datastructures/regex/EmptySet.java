@@ -167,4 +167,14 @@ public final class EmptySet
 		return false;
 	}
 
+	@Override
+	public RegularExpression toLower() {
+		return this;
+	}
+
+	@Override
+	public RegularExpression toUpper() {
+		return this;
+	}
+
 }

@@ -240,4 +240,13 @@ public class Atom
 		return string.trim().isEmpty();
 	}
 
+	@Override
+	public RegularExpression toLower() {
+		return new Atom(string.toLowerCase());
+	}
+
+	@Override
+	public RegularExpression toUpper() {
+		return new Atom(string.toUpperCase());
+	}
 }

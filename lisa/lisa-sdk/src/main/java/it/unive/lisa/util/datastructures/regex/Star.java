@@ -277,4 +277,13 @@ public final class Star
 		return op.readsWhiteSpaceString();
 	}
 
+	@Override
+	public RegularExpression toLower() {
+		return new Star(op.toLower());
+	}
+
+	@Override
+	public RegularExpression toUpper() {
+		return new Star(op.toUpper());
+	}
 }

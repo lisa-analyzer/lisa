@@ -7,6 +7,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -331,6 +332,15 @@ public class VariableTableEntry
 	 */
 	public Annotations getAnnotations() {
 		return annotations;
+	}
+
+	/**
+	 * Yields the list of annotations.
+	 *
+	 * @return the list of annotations
+	 */
+	public Collection<Annotation> getAnnotationList() {
+		return annotations.getAnnotations();
 	}
 
 	/**

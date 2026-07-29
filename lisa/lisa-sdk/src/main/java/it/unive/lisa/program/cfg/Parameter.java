@@ -8,6 +8,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -196,7 +197,16 @@ public class Parameter
 	}
 
 	/**
-	 * Adds an annotations to this parameter.
+	 * Yields the list of annotations of this parameter.
+	 *
+	 * @return the list of annotations of this parameter
+	 */
+	public Collection<Annotation> getAnnotationList() {
+		return annotations.getAnnotations();
+	}
+
+	/**
+	 * Adds an annotation to this parameter.
 	 * 
 	 * @param ann the annotation to be added
 	 */

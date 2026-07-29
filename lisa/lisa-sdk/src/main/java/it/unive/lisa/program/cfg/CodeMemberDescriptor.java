@@ -558,7 +558,16 @@ public class CodeMemberDescriptor
 	}
 
 	/**
-	 * Adds an annotations to this descriptor.
+	 * Yields the list of annotations.
+	 *
+	 * @return the list of annotations
+	 */
+	public Collection<Annotation> getAnnotationList() {
+		return annotations.getAnnotations();
+	}
+
+	/**
+	 * Adds an annotation to this descriptor.
 	 * 
 	 * @param ann the annotation to be added
 	 */
@@ -587,6 +596,25 @@ public class CodeMemberDescriptor
 			if (entry.getName().equals(variableName) && within(st, entry.getScopeStart(), entry.getScopeEnd()))
 				return entry.getAnnotations();
 		return new Annotations();
+	}
+
+	/**
+	 * Yields the list of annotations of the variable with the given name,
+	 * retrieved from the variable table.
+	 *
+	 * @param variableName the name of the variable whose annotations are to be
+	 *                         retrieved
+	 * @param st           the statement where the variable is being referenced,
+	 *                         to retrieve the annotations of the right variable
+	 *                         in case more with the same name are defined in
+	 *                         different scopes
+	 *
+	 * @return the list of annotations of the variable
+	 */
+	public Collection<Annotation> getAnnotationListOf(
+			String variableName,
+			Statement st) {
+		return getAnnotationsOf(variableName, st).getAnnotations();
 	}
 
 	private boolean within(

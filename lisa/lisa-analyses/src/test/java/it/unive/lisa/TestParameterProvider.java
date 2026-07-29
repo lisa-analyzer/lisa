@@ -9,14 +9,13 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.HistoryDomain;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NoOpValues;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.Reachability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
-import it.unive.lisa.analysis.combination.constraints.WholeValueStringDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumIntDomain;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
 import it.unive.lisa.analysis.memory.MemoryLattice;
@@ -140,6 +139,14 @@ public class TestParameterProvider {
 			return SingleValueLattice.BOTTOM;
 		}
 
+		@Override
+		public boolean canProcess(
+				ValueExpression e,
+				ProgramPoint pp,
+				SemanticOracle oracle) {
+			return true;
+		}
+
 	}
 
 	public static class SampleNRTD
@@ -256,14 +263,6 @@ public class TestParameterProvider {
 			return SingleMemoryLattice.SINGLETON;
 		}
 
-		@Override
-		public boolean canProcess(
-				SymbolicExpression expression,
-				ProgramPoint pp,
-				SemanticOracle oracle) {
-			return true;
-		}
-
 	}
 
 	public static class FakePP
@@ -361,6 +360,20 @@ public class TestParameterProvider {
 				ProgramPoint pp)
 				throws SemanticException {
 			return Satisfiability.UNKNOWN;
+		}
+
+		@Override
+		public boolean hasWholeValueAnlysis() {
+			return false;
+		}
+
+		@Override
+		public Set<BinaryExpression> constraints(
+				ValueDomain<?> requesting,
+				ValueExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Collections.emptySet();
 		}
 
 	};
@@ -714,7 +727,7 @@ public class TestParameterProvider {
 			return (R) IntInterval.TOP;
 		if (root == DefiniteIdSet.class && param == Set.class)
 			return (R) Collections.emptySet();
-		if (param == Satisfiability.class || param == WholeValueElement.class)
+		if (param == Satisfiability.class)
 			return (R) Satisfiability.UNKNOWN;
 		if (param == NonRedundantSetLattice.class)
 			return (R) new NonRedundantIntervalSet();
@@ -724,10 +737,12 @@ public class TestParameterProvider {
 				|| param == ValueDomain.class
 				|| param == SmashedSumIntDomain.class)
 			return (R) new Interval();
-		if (param == SmashedSumStringDomain.class || param == WholeValueStringDomain.class)
+		if (param == SmashedSumStringDomain.class)
 			return (R) new Prefix();
 		if (param == ReachLattice.class)
 			return (R) new ReachLattice();
+		if (param == ValueLattice[].class)
+			return (R) new ValueLattice[] { SingleValueLattice.SINGLETON };
 
 		// domains
 		if (param == Bricks.class)
@@ -737,6 +752,8 @@ public class TestParameterProvider {
 		if (root == TracePartitioning.class || root == Analysis.class || root == Reachability.class
 				|| root == HistoryDomain.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
+		if (param == ValueDomain[].class)
+			return (R) new ValueDomain[] { new NoOpValues() };
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);

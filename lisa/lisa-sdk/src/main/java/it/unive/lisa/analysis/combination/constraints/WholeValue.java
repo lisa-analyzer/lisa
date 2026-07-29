@@ -2,176 +2,120 @@ package it.unive.lisa.analysis.combination.constraints;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.representation.StringRepresentation;
+import it.unive.lisa.analysis.value.ValueLattice;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.representation.ListRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
- * A {@link BaseLattice} that represents a whole-value, which is either a
- * lattice representing a boolean, a lattice representing a number, or a lattice
- * representing a string. This is used in the whole-value analysis abstract
- * domain, which combines a non-relational numeric abstract domain, a
- * non-relational string abstract domain, and a non-relational boolean abstract
- * domain.
+ * A lattice element for a {@link WholeValueAnalysis} that is composed of a
+ * lattice instance for each component taking part in the analysis. Components
+ * are ordered, and each lattice operator is applied to the elements at the same
+ * index withouth checking if they are of the same type. No two instances of
+ * this class should be created with a different number or arrangement of
+ * components and used together in lattice operations, as this would lead to
+ * errors.
  * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
- * @param <N> the type of the numeric lattice
- * @param <S> the type of the string lattice
- * @param <B> the type of the boolean lattice
+ * @author <a href="mailto:luca.negrini@unive.it>">Luca Negrini</a>
  */
-public class WholeValue<N extends WholeValueElement<N>, S extends WholeValueElement<S>, B extends WholeValueElement<B>>
+public class WholeValue
 		implements
-		BaseLattice<WholeValue<N, S, B>> {
+		BaseLattice<WholeValue>,
+		ValueLattice<WholeValue> {
 
-	private final N intValue;
-
-	private final S stringValue;
-
-	private final B boolValue;
+	private final ValueLattice<?>[] components;
 
 	/**
-	 * Builds an abstract element of this lattice.
+	 * Builds a value with the given components.
 	 * 
-	 * @param intValue    the abstract value for intergers
-	 * @param stringValue the abstract value for strings
-	 * @param boolValue   the abstract value for booleans
+	 * @param components the components of this value
 	 */
 	public WholeValue(
-			N intValue,
-			S stringValue,
-			B boolValue) {
-		this.intValue = intValue;
-		this.stringValue = stringValue;
-		this.boolValue = boolValue;
+			ValueLattice<?>... components) {
+		this.components = components;
 	}
 
 	/**
-	 * Yields the integer abstract value (might be bottom if this value does not
-	 * abstract a number).
+	 * Returns the components of this value.
 	 * 
-	 * @return the integer abstract value
+	 * @return the components of this value
 	 */
-	public N getIntValue() {
-		return intValue;
+	public ValueLattice<?>[] getComponents() {
+		return components;
 	}
 
 	/**
-	 * Yields the string abstract value (might be bottom if this value does not
-	 * abstract a string).
-	 * 
-	 * @return the string abstract value
-	 */
-	public S getStringValue() {
-		return stringValue;
-	}
-
-	/**
-	 * Yields the boolean abstract value (might be bottom if this value does not
-	 * abstract a boolean).
+	 * Returns the component at the given index.
 	 *
-	 * @return the boolean abstract value
+	 * @param i the index of the component to return
+	 * 
+	 * @return the component at the given index
 	 */
-	public B getBoolValue() {
-		return boolValue;
+	public ValueLattice<?> get(
+			int i) {
+		return components[i];
 	}
 
-	@Override
-	public WholeValue<N, S, B> lubAux(
-			WholeValue<N, S, B> other)
+	/**
+	 * Returns the component at the given index, cast to the given type. If the
+	 * component at the given index is not of the given type, an exception is
+	 * thrown.
+	 *
+	 * @param <T>   the type of the component to return
+	 * @param i     the index of the component to return
+	 * @param clazz the class of the component to return
+	 * 
+	 * @return the component at the given index, cast to the given type
+	 * 
+	 * @throws SemanticException if the component at the given index is not of
+	 *                               the given type
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends ValueLattice<T>> T get(
+			int i,
+			Class<T> clazz)
 			throws SemanticException {
-		return new WholeValue<>(
-				this.intValue.lub(other.intValue),
-				this.stringValue.lub(other.stringValue),
-				this.boolValue.lub(other.boolValue));
+		try {
+			return (T) components[i];
+		} catch (ClassCastException e) {
+			throw new SemanticException("Component at index " + i + " is not of type " + clazz.getName());
+		}
 	}
 
-	@Override
-	public WholeValue<N, S, B> glbAux(
-			WholeValue<N, S, B> other)
+	/**
+	 * Returns the first component of the given type. If multiple components of
+	 * the same type are present, only the first one is returned. If no
+	 * component of the given type is present, an exception is thrown.
+	 *
+	 * @param <T>   the type of the component to return
+	 * @param clazz the class of the component to return
+	 * 
+	 * @return the first component of the given type
+	 * 
+	 * @throws SemanticException if no component of the given type is present
+	 */
+	public <T extends ValueLattice<T>> T get(
+			Class<T> clazz)
 			throws SemanticException {
-		return new WholeValue<>(
-				this.intValue.glb(other.intValue),
-				this.stringValue.glb(other.stringValue),
-				this.boolValue.glb(other.boolValue));
-	}
-
-	@Override
-	public WholeValue<N, S, B> upchainAux(
-			WholeValue<N, S, B> other)
-			throws SemanticException {
-		return new WholeValue<>(
-				this.intValue.upchain(other.intValue),
-				this.stringValue.upchain(other.stringValue),
-				this.boolValue.upchain(other.boolValue));
-	}
-
-	@Override
-	public WholeValue<N, S, B> downchainAux(
-			WholeValue<N, S, B> other)
-			throws SemanticException {
-		return new WholeValue<>(
-				this.intValue.downchain(other.intValue),
-				this.stringValue.downchain(other.stringValue),
-				this.boolValue.downchain(other.boolValue));
-	}
-
-	@Override
-	public boolean lessOrEqualAux(
-			WholeValue<N, S, B> other)
-			throws SemanticException {
-		return this.intValue.lessOrEqual(other.intValue)
-				&& this.stringValue.lessOrEqual(other.stringValue)
-				&& this.boolValue.lessOrEqual(other.boolValue);
-	}
-
-	@Override
-	public WholeValue<N, S, B> wideningAux(
-			WholeValue<N, S, B> other)
-			throws SemanticException {
-		return new WholeValue<>(
-				this.intValue.widening(other.intValue),
-				this.stringValue.widening(other.stringValue),
-				this.boolValue.widening(other.boolValue));
-	}
-
-	@Override
-	public WholeValue<N, S, B> narrowingAux(
-			WholeValue<N, S, B> other)
-			throws SemanticException {
-		return new WholeValue<>(
-				this.intValue.narrowing(other.intValue),
-				this.stringValue.narrowing(other.stringValue),
-				this.boolValue.narrowing(other.boolValue));
-	}
-
-	@Override
-	public boolean isTop() {
-		return intValue.isTop() && stringValue.isTop() && boolValue.isTop();
-	}
-
-	@Override
-	public WholeValue<N, S, B> top() {
-		return new WholeValue<>(intValue.top(), stringValue.top(), boolValue.top());
-	}
-
-	@Override
-	public boolean isBottom() {
-		return intValue.isBottom() && stringValue.isBottom() && boolValue.isBottom();
-	}
-
-	@Override
-	public WholeValue<N, S, B> bottom() {
-		return new WholeValue<>(intValue.bottom(), stringValue.bottom(), boolValue.bottom());
+		for (ValueLattice<?> c : components)
+			if (clazz.isInstance(c))
+				return clazz.cast(c);
+		throw new SemanticException("No component of type " + clazz.getName() + " found");
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((intValue == null) ? 0 : intValue.hashCode());
-		result = prime * result + ((stringValue == null) ? 0 : stringValue.hashCode());
-		result = prime * result + ((boolValue == null) ? 0 : boolValue.hashCode());
+		result = prime * result + Arrays.hashCode(components);
 		return result;
 	}
 
@@ -184,100 +128,229 @@ public class WholeValue<N extends WholeValueElement<N>, S extends WholeValueElem
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		WholeValue<?, ?, ?> other = (WholeValue<?, ?, ?>) obj;
-		if (intValue == null) {
-			if (other.intValue != null)
-				return false;
-		} else if (!intValue.equals(other.intValue))
-			return false;
-		if (stringValue == null) {
-			if (other.stringValue != null)
-				return false;
-		} else if (!stringValue.equals(other.stringValue))
-			return false;
-		if (boolValue == null) {
-			if (other.boolValue != null)
-				return false;
-		} else if (!boolValue.equals(other.boolValue))
+		WholeValue other = (WholeValue) obj;
+		if (!Arrays.equals(components, other.components))
 			return false;
 		return true;
 	}
 
 	@Override
-	public StructuredRepresentation representation() {
-		if (isBottom())
-			return Lattice.bottomRepresentation();
+	public WholeValue top() {
 		if (isTop())
-			return Lattice.topRepresentation();
-		if (isString())
-			return stringValue.representation();
-		if (isNumber())
-			return intValue.representation();
-		if (isBool())
-			return boolValue.representation();
-		return new StringRepresentation(
-				"("
-						+ intValue.representation().toString()
-						+ ", "
-						+ stringValue.representation().toString()
-						+ ", "
-						+ boolValue.representation().toString()
-						+ ")");
+			return this;
+		ValueLattice<?>[] top = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			top[i] = components[i].top();
+		return new WholeValue(top);
 	}
 
 	@Override
-	public String toString() {
-		return representation().toString();
+	public boolean isTop() {
+		for (ValueLattice<?> c : components)
+			if (!c.isTop())
+				return false;
+		return true;
 	}
 
-	/**
-	 * Yields whether this whole value is of the same kind as the given
-	 * {@code other} whole value, i.e., whether both are either top or bottom,
-	 * or both are numbers, or both are strings, or both are booleans.
-	 * 
-	 * @param other the whole value to compare with
-	 * 
-	 * @return {@code true} if this whole value is of the same kind as the given
-	 *             one, {@code false} otherwise
-	 */
-	public boolean sameKind(
-			WholeValue<N, S, B> other) {
-		return (intValue.isBottom() == other.intValue.isBottom())
-				&& (stringValue.isBottom() == other.stringValue.isBottom())
-				&& (boolValue.isBottom() == other.boolValue.isBottom());
+	@Override
+	public WholeValue bottom() {
+		if (isBottom())
+			return this;
+		ValueLattice<?>[] bottom = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			bottom[i] = components[i].bottom();
+		return new WholeValue(bottom);
 	}
 
-	/**
-	 * Returns {@code true} if this whole value is a number, i.e., it either is
-	 * top or it models a number value.
-	 * 
-	 * @return {@code true} if this whole value is a number, {@code false}
-	 *             otherwise
-	 */
-	public boolean isNumber() {
-		return isTop() || (!isBottom() && stringValue.isBottom() && boolValue.isBottom());
+	@Override
+	public boolean isBottom() {
+		for (ValueLattice<?> c : components)
+			if (!c.isBottom())
+				return false;
+		return true;
 	}
 
-	/**
-	 * Returns {@code true} if this whole value is a string, i.e., it either is
-	 * top or it models a string value.
-	 * 
-	 * @return {@code true} if this whole value is a string, {@code false}
-	 *             otherwise
-	 */
-	public boolean isString() {
-		return isTop() || (!isBottom() && intValue.isBottom() && boolValue.isBottom());
+	@Override
+	public StructuredRepresentation representation() {
+		List<StructuredRepresentation> res = new ArrayList<>(components.length);
+		for (ValueLattice<?> c : components)
+			res.add(c.representation());
+		return new ListRepresentation(res);
 	}
 
-	/**
-	 * Returns {@code true} if this whole value is a boolean, i.e., it either is
-	 * top or it models a boolean value.
-	 * 
-	 * @return {@code true} if this whole value is a boolean, {@code false}
-	 *             otherwise
-	 */
-	public boolean isBool() {
-		return isTop() || (!isBottom() && stringValue.isBottom() && intValue.isBottom());
+	@Override
+	public WholeValue store(
+			Identifier target,
+			Identifier source)
+			throws SemanticException {
+		ValueLattice<?>[] bottom = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			bottom[i] = components[i].bottom();
+		return new WholeValue(bottom);
+	}
+
+	@Override
+	public boolean knowsIdentifier(
+			Identifier id) {
+		for (ValueLattice<?> c : components)
+			if (c.knowsIdentifier(id))
+				return true;
+		return false;
+	}
+
+	@Override
+	public WholeValue forgetIdentifier(
+			Identifier id,
+			ProgramPoint pp)
+			throws SemanticException {
+		ValueLattice<?>[] forgotten = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			forgotten[i] = components[i].forgetIdentifier(id, pp);
+		return new WholeValue(forgotten);
+	}
+
+	@Override
+	public WholeValue forgetIdentifiersIf(
+			Predicate<Identifier> test,
+			ProgramPoint pp)
+			throws SemanticException {
+		ValueLattice<?>[] forgotten = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			forgotten[i] = components[i].forgetIdentifiersIf(test, pp);
+		return new WholeValue(forgotten);
+	}
+
+	@Override
+	public WholeValue forgetIdentifiers(
+			Iterable<Identifier> ids,
+			ProgramPoint pp)
+			throws SemanticException {
+		ValueLattice<?>[] forgotten = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			forgotten[i] = components[i].forgetIdentifiers(ids, pp);
+		return new WholeValue(forgotten);
+	}
+
+	@Override
+	public WholeValue pushScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		ValueLattice<?>[] pushed = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			pushed[i] = components[i].pushScope(token, pp);
+		return new WholeValue(pushed);
+	}
+
+	@Override
+	public WholeValue popScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		ValueLattice<?>[] popped = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			popped[i] = components[i].popScope(token, pp);
+		return new WholeValue(popped);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public boolean lessOrEqualAux(
+			WholeValue other)
+			throws SemanticException {
+		if (components.length != other.components.length)
+			throw new SemanticException("Cannot operate on domains with a different number of components");
+		for (int i = 0; i < components.length; i++)
+			if (!((ValueLattice) components[i]).lessOrEqual(other.components[i]))
+				return false;
+		return true;
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public WholeValue lubAux(
+			WholeValue other)
+			throws SemanticException {
+		if (components.length != other.components.length)
+			throw new SemanticException("Cannot operate on domains with a different number of components");
+		ValueLattice<?>[] lub = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			lub[i] = (ValueLattice) ((ValueLattice) components[i]).lub(other.components[i]);
+		return new WholeValue(lub);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public WholeValue glbAux(
+			WholeValue other)
+			throws SemanticException {
+		if (components.length != other.components.length)
+			throw new SemanticException("Cannot operate on domains with a different number of components");
+		ValueLattice<?>[] lub = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			lub[i] = (ValueLattice) ((ValueLattice) components[i]).glb(other.components[i]);
+		return new WholeValue(lub);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public WholeValue upchainAux(
+			WholeValue other)
+			throws SemanticException {
+		if (components.length != other.components.length)
+			throw new SemanticException("Cannot operate on domains with a different number of components");
+		ValueLattice<?>[] lub = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			lub[i] = (ValueLattice) ((ValueLattice) components[i]).upchain(other.components[i]);
+		return new WholeValue(lub);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public WholeValue downchainAux(
+			WholeValue other)
+			throws SemanticException {
+		if (components.length != other.components.length)
+			throw new SemanticException("Cannot operate on domains with a different number of components");
+		ValueLattice<?>[] lub = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			lub[i] = (ValueLattice) ((ValueLattice) components[i]).downchain(other.components[i]);
+		return new WholeValue(lub);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public WholeValue wideningAux(
+			WholeValue other)
+			throws SemanticException {
+		if (components.length != other.components.length)
+			throw new SemanticException("Cannot operate on domains with a different number of components");
+		ValueLattice<?>[] lub = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			lub[i] = (ValueLattice) ((ValueLattice) components[i]).widening(other.components[i]);
+		return new WholeValue(lub);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public WholeValue narrowingAux(
+			WholeValue other)
+			throws SemanticException {
+		if (components.length != other.components.length)
+			throw new SemanticException("Cannot operate on domains with a different number of components");
+		ValueLattice<?>[] lub = new ValueLattice<?>[components.length];
+		for (int i = 0; i < components.length; i++)
+			lub[i] = (ValueLattice) ((ValueLattice) components[i]).narrowing(other.components[i]);
+		return new WholeValue(lub);
+	}
+
+	@Override
+	public <D extends Lattice<D>> Collection<D> getAllLatticeInstances(
+			Class<D> domain) {
+		Collection<D> result = BaseLattice.super.getAllLatticeInstances(domain);
+		for (ValueLattice<?> c : components)
+			result.addAll(c.getAllLatticeInstances(domain));
+		return result;
 	}
 
 }

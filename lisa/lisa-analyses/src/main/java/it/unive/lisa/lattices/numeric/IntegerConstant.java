@@ -3,18 +3,8 @@ package it.unive.lisa.lattices.numeric;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.combination.constraints.WholeValueElement;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * A lattice structure for integer constants, that is, elements of the integer
@@ -24,8 +14,7 @@ import java.util.Set;
  */
 public class IntegerConstant
 		implements
-		BaseLattice<IntegerConstant>,
-		WholeValueElement<IntegerConstant> {
+		BaseLattice<IntegerConstant> {
 
 	/**
 	 * The top element of this lattice, representing the set of all integers.
@@ -148,47 +137,7 @@ public class IntegerConstant
 	}
 
 	@Override
-	public Set<BinaryExpression> constraints(
-			ValueExpression e,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (isTop())
-			return Collections.emptySet();
-		if (isBottom())
-			return null;
-		return Collections.singleton(
-				new BinaryExpression(
-						pp.getProgram().getTypes().getBooleanType(),
-						new Constant(pp.getProgram().getTypes().getIntegerType(), value, e.getCodeLocation()),
-						e,
-						ComparisonEq.INSTANCE,
-						pp.getLocation()));
+	public String toString() {
+		return representation().toString();
 	}
-
-	@Override
-	public IntegerConstant generate(
-			Set<BinaryExpression> constraints,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (constraints == null)
-			return BOTTOM;
-
-		Integer ge = null, le = null;
-		for (BinaryExpression expr : constraints)
-			if (expr.getLeft() instanceof Constant && ((Constant) expr.getLeft()).getValue() instanceof Integer) {
-				Integer val = (Integer) ((Constant) expr.getLeft()).getValue();
-				if (expr.getOperator() instanceof ComparisonEq)
-					return new IntegerConstant(val);
-				else if (expr.getOperator() instanceof ComparisonGe)
-					ge = val;
-				else if (expr.getOperator() instanceof ComparisonLe)
-					le = val;
-			}
-
-		if (ge != null && ge.equals(le))
-			return new IntegerConstant(ge);
-
-		return TOP;
-	}
-
 }

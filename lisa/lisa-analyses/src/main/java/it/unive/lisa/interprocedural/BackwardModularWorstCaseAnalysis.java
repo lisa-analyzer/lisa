@@ -98,6 +98,9 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			AnalysisState<A> entryState,
 			FixpointConfiguration<A, D> conf)
 			throws FixpointException {
+		if (conf.backwardFixpoint == null)
+			throw new IllegalArgumentException("A backward fixpoint is required for this analysis");
+
 		if (conf.usesOptimizedBackwardFixpoint())
 			LOG.warn("Optimizations are turned on: this feature is experimental with backward analyses");
 

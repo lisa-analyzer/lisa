@@ -3,12 +3,15 @@ package it.unive.lisa;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collections;
@@ -132,6 +135,20 @@ public class TestAbstractDomain
 				ProgramPoint pp)
 				throws SemanticException {
 			return Satisfiability.UNKNOWN;
+		}
+
+		@Override
+		public boolean hasWholeValueAnlysis() {
+			return false;
+		}
+
+		@Override
+		public Set<BinaryExpression> constraints(
+				ValueDomain<?> requesting,
+				ValueExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+			return Collections.emptySet();
 		}
 
 	}

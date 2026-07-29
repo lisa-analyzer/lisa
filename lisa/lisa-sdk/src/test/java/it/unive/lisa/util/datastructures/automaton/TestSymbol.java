@@ -81,4 +81,14 @@ public class TestSymbol
 		return symbol.length();
 	}
 
+	@Override
+	public TestSymbol toLower() {
+		return new TestSymbol(symbol.toLowerCase());
+	}
+
+	@Override
+	public TestSymbol toUpper() {
+		return new TestSymbol(symbol.toUpperCase());
+	}
+
 }

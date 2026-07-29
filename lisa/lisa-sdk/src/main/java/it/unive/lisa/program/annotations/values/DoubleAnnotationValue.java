@@ -21,6 +21,15 @@ public class DoubleAnnotationValue
 		this.d = d;
 	}
 
+	/**
+	 * A getter to retrieve the value.
+	 *
+	 * @return the double of this annotation value
+	 */
+	public double getDouble() {
+		return d;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

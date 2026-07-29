@@ -13,12 +13,21 @@ public class ByteAnnotationValue
 
 	/**
 	 * Builds a byte annotation value.
-	 * 
+	 *
 	 * @param b the byte value
 	 */
 	public ByteAnnotationValue(
 			byte b) {
 		this.b = b;
+	}
+
+	/**
+	 * A getter to retrieve the value.
+	 *
+	 * @return the byte of this annotation value
+	 */
+	public byte getByte() {
+		return b;
 	}
 
 	@Override

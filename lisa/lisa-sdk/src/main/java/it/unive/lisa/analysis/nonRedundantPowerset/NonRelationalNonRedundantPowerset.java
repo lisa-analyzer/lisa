@@ -6,11 +6,15 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -95,6 +99,40 @@ public class NonRelationalNonRedundantPowerset<S extends NonRedundantSetLattice<
 	}
 
 	@Override
+	public S evalTernaryExpression(
+			TernaryExpression expression,
+			S left,
+			S middle,
+			S right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		Set<L> newSet = new HashSet<>();
+		for (L sLeft : left.elements)
+			for (L sMiddle : middle.elements)
+				for (L sRight : right.elements)
+					newSet.add(valueDomain.evalTernaryExpression(expression, sLeft, sMiddle, sRight, pp, oracle));
+		return singleton.mk(newSet).removeRedundancy().removeOverlapping();
+
+	}
+
+	@Override
+	public Satisfiability satisfiesUnaryExpression(
+			UnaryExpression expression,
+			S arg,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (arg.isTop())
+			return Satisfiability.UNKNOWN;
+
+		Satisfiability sat = Satisfiability.BOTTOM;
+		for (L sArg : arg.elements)
+			sat = sat.lub(valueDomain.satisfiesUnaryExpression(expression, sArg, pp, oracle));
+		return sat;
+	}
+
+	@Override
 	public Satisfiability satisfiesBinaryExpression(
 			BinaryExpression expression,
 			S left,
@@ -113,6 +151,28 @@ public class NonRelationalNonRedundantPowerset<S extends NonRedundantSetLattice<
 	}
 
 	@Override
+	public Satisfiability satisfiesTernaryExpression(
+			TernaryExpression expression,
+			S left,
+			S middle,
+			S right,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (left.isTop() || middle.isTop() || right.isTop())
+			return Satisfiability.UNKNOWN;
+
+		Satisfiability sat = Satisfiability.BOTTOM;
+		for (L sLeft : left.elements)
+			for (L sMiddle : middle.elements)
+				for (L sRight : right.elements)
+					sat = sat.lub(
+							valueDomain.satisfiesTernaryExpression(expression, sLeft, sMiddle, sRight, pp, oracle));
+		return sat;
+
+	}
+
+	@Override
 	public S top() {
 		return singleton.top();
 	}
@@ -127,4 +187,24 @@ public class NonRelationalNonRedundantPowerset<S extends NonRedundantSetLattice<
 		return new ValueEnvironment<>(singleton.top());
 	}
 
+	@Override
+	public boolean canProcess(
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle) {
+		return valueDomain.canProcess(e, pp, oracle);
+	}
+
+	@Override
+	public Set<BinaryExpression> constraints(
+			ValueDomain<?> requesting,
+			ValueEnvironment<S> state,
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		// this operation is specific to the kind of set we are tracking, so
+		// we leave this as always returning top and let subclasses redefine
+		return Collections.emptySet();
+	}
 }

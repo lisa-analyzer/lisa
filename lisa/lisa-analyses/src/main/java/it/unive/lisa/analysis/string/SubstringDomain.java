@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.analysis.value.StringAbstraction;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.string.Substrings;
 import it.unive.lisa.program.SyntheticLocation;
@@ -34,7 +34,11 @@ import java.util.Set;
  * The substring relational abstract domain, tracking relation between string
  * expressions. This domain follows the one defined
  * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
- * this paper</a>.
+ * this paper</a>.<br/>
+ * <br/>
+ * This domain does not take part in the
+ * {@link it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis},
+ * meaning that it will not produce constraints for any expression.
  * 
  * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
@@ -42,7 +46,7 @@ import java.util.Set;
  */
 public class SubstringDomain
 		implements
-		ValueDomain<Substrings> {
+		StringAbstraction<Substrings> {
 
 	@Override
 	public Substrings makeLattice() {
@@ -57,7 +61,6 @@ public class SubstringDomain
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-
 		/*
 		 * If the assigned expression is not dynamically typed as a string (or
 		 * untyped) return this.
@@ -325,8 +328,7 @@ public class SubstringDomain
 			// Iterate over the length of the expression
 			for (int l = 1; l <= list.size(); l++) {
 				// Iterate from the start to the end according to the size of
-				// the
-				// expression to create
+				// the expression to create
 				for (int i = 0; i <= (list.size() - l); i++) {
 					List<ValueExpression> subList = list.subList(i, i + l);
 					result.add(composeExpression(subList));

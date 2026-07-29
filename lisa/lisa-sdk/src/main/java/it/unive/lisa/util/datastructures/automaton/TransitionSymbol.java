@@ -39,6 +39,20 @@ public interface TransitionSymbol<T>
 	T reverse();
 
 	/**
+	 * Yields a new symbol that corresponds to this one, but lower case.
+	 * 
+	 * @return the lower case symbol
+	 */
+	T toLower();
+
+	/**
+	 * Yields a new symbol that corresponds to this one, but upper case.
+	 * 
+	 * @return the upper case symbol
+	 */
+	T toUpper();
+
+	/**
 	 * Yields the maximum length of this symbol.
 	 * 
 	 * @return the maximum length

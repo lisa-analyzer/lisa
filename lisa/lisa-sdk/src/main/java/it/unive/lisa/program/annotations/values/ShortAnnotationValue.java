@@ -21,6 +21,15 @@ public class ShortAnnotationValue
 		this.s = s;
 	}
 
+	/**
+	 * A getter to retrieve the value.
+	 *
+	 * @return the short of this annotation value
+	 */
+	public short getShort() {
+		return s;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

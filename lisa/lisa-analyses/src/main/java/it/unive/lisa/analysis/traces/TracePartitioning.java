@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
@@ -18,9 +19,12 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -419,6 +423,29 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 					return sat;
 				result = result.lub(sat);
 			}
+			return result;
+		}
+
+		@Override
+		public boolean hasWholeValueAnlysis() {
+			return domain.makeOracle(state.lattice.top()).hasWholeValueAnlysis();
+		}
+
+		@Override
+		public Set<BinaryExpression> constraints(
+				ValueDomain<?> requesting,
+				ValueExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isBottom())
+				return null;
+			if (state.isTop() || state.function == null || state.function.isEmpty())
+				return Collections.emptySet();
+
+			Set<BinaryExpression> result = new HashSet<>();
+			for (Entry<ExecutionTrace, A> trace : state)
+				result.addAll(domain.makeOracle(trace.getValue()).constraints(requesting, e, pp));
+
 			return result;
 		}
 

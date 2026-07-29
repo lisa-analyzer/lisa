@@ -21,6 +21,15 @@ public class IntAnnotationValue
 		this.i = i;
 	}
 
+	/**
+	 * A getter to retrieve the value.
+	 *
+	 * @return the integer of this annotation value
+	 */
+	public int getInteger() {
+		return i;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

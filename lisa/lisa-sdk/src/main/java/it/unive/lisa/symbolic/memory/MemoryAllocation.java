@@ -2,12 +2,14 @@ package it.unive.lisa.symbolic.memory;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -116,6 +118,15 @@ public class MemoryAllocation
 	 */
 	public Annotations getAnnotations() {
 		return anns;
+	}
+
+	/**
+	 * Yields the list of annotations of this expression.
+	 *
+	 * @return the list of annotations of this expression
+	 */
+	public Collection<Annotation> getAnnotationList() {
+		return anns.getAnnotations();
 	}
 
 	@Override

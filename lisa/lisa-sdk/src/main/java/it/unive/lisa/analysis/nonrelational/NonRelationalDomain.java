@@ -3,7 +3,6 @@ package it.unive.lisa.analysis.nonrelational;
 import it.unive.lisa.analysis.DomainLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticComponent;
-import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.lattices.FunctionalLattice;
@@ -31,8 +30,7 @@ public interface NonRelationalDomain<L extends Lattice<L>,
 		M extends FunctionalLattice<M, Identifier, L> & DomainLattice<M, T>,
 		E extends SymbolicExpression>
 		extends
-		SemanticComponent<M, T, E, Identifier>,
-		SemanticEvaluator {
+		SemanticComponent<M, T, E, Identifier> {
 
 	/**
 	 * Evaluates a {@link SymbolicExpression}, assuming that the values of

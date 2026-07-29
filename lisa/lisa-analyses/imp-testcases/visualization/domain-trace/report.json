@@ -4,18 +4,18 @@
   "files" : [ "report.json", "trace.txt" ],
   "info" : {
     "cfgs" : "6",
-    "duration" : "15ms",
-    "end" : "2026-01-20T16:25:06.774+01:00",
+    "duration" : "12ms",
+    "end" : "2026-07-01T17:02:28.750+02:00",
     "expressions" : "49",
     "files" : "1",
     "globals" : "0",
     "members" : "6",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-20T16:25:06.759+01:00",
+    "start" : "2026-07-01T17:02:28.738+02:00",
     "statements" : "21",
     "units" : "2",
-    "version" : "0.1",
+    "version" : "0.2",
     "warnings" : "0"
   },
   "configuration" : {

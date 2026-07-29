@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -150,6 +151,16 @@ public class VariableRef
 	 */
 	public Annotations getAnnotations() {
 		return getCFG().getDescriptor().getAnnotationsOf(getName(), this);
+	}
+
+	/**
+	 * Yields the list of annotations of this variable, retrieved from the
+	 * variable table of the cfg this variable belongs to.
+	 *
+	 * @return the list of annotations of this variable.
+	 */
+	public Collection<Annotation> getAnnotationList() {
+		return getAnnotations().getAnnotations();
 	}
 
 }

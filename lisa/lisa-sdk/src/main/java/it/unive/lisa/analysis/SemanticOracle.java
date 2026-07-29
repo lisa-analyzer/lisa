@@ -1,11 +1,13 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
@@ -33,6 +35,56 @@ public interface SemanticOracle {
 	 * @return the event queue
 	 */
 	EventQueue getEventQueue();
+
+	/**
+	 * Yields whether or not this oracle is able to provide whole value analysis
+	 * constraints through the method
+	 * {@link #constraints(ValueDomain, ValueExpression, ProgramPoint)}. If this
+	 * method returns {@code false}, then the latter always returns an empty set
+	 * of constraints, meaning that no information about the concrete values of
+	 * expressions is available. For this method to return {@code true}, the
+	 * analysis has to be set up to use a
+	 * {@link it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis}
+	 * as value domain.
+	 * 
+	 * @return whether or not this oracle can provide whole value analysis
+	 *             constraints
+	 */
+	boolean hasWholeValueAnlysis();
+
+	/**
+	 * Generates a set of constraints that model the concrete values of
+	 * {@code e} in the state that this oracle models. The constraints must be
+	 * definite, as in with each constraint the set of concrete values shrinks.
+	 * An empty set of constraints thus represents any possible concrete value.
+	 * A {@code null} set of constraints represents a bottom value. <br/>
+	 * <br/>
+	 * Note that this method always returns an empty set if
+	 * {@link #hasWholeValueAnlysis} returns {@code false}. Instead, if the
+	 * whole value analysis is available, all domains involved in it are queried
+	 * for constraints if they can handle the target expression.<br/>
+	 * <br/>
+	 * The requesting domain is the one that is asking for the constraints, and
+	 * it is used to avoid recursive calls to the same domain. Each constraint
+	 * is given as a {@link BinaryExpression}, where the left operand is a
+	 * constant and the right operand is the expression whose value is being
+	 * constrained, corresponding to the parameter {@code e}.
+	 * 
+	 * @param requesting the domain that is requesting the constraints
+	 * @param e          the expression whose value is being constrained
+	 * @param pp         the program point at which the constraints are being
+	 *                       generated
+	 * 
+	 * @return a set of constraints modeling the possible values of {@code e} in
+	 *             the state modeled by this oracle
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	Set<BinaryExpression> constraints(
+			ValueDomain<?> requesting,
+			ValueExpression e,
+			ProgramPoint pp)
+			throws SemanticException;
 
 	/**
 	 * Yields the runtime types that this analysis infers for the given

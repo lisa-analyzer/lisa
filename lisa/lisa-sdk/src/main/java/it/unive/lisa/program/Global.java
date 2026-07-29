@@ -7,6 +7,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -213,6 +214,15 @@ public class Global
 	 */
 	public Annotations getAnnotations() {
 		return annotations;
+	}
+
+	/**
+	 * Yields the list of annotations.
+	 *
+	 * @return the list of annotations
+	 */
+	public Collection<Annotation> getAnnotationList() {
+		return annotations.getAnnotations();
 	}
 
 	/**

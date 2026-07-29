@@ -21,6 +21,15 @@ public class BoolAnnotationValue
 		this.b = b;
 	}
 
+	/**
+	 * A getter to retrieve the value.
+	 *
+	 * @return the boolean of this annotation value
+	 */
+	public boolean getBoolean() {
+		return b;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
