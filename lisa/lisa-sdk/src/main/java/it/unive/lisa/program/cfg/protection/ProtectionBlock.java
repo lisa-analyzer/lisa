@@ -33,6 +33,7 @@ public class ProtectionBlock {
 	 * 
 	 * @param tryBlock     the try block of this protection block
 	 * @param catchBlocks  the list of catch blocks of this protection block
+	 *                         (must be non-null but can be empty)
 	 * @param elseBlock    the else block of this protection block, if any
 	 * @param finallyBlock the finally block of this protection block, if any
 	 * @param closing      the closing statement of this protection block, if it
@@ -221,7 +222,10 @@ public class ProtectionBlock {
 		String comp = StringUtils.join(components, "-");
 		if (!comp.isEmpty())
 			comp = "-" + comp;
-		return "ProtectionBlock [try" + comp + ", " + StringUtils.join(catchBlocks, ", ") + "]";
+		String catches = "";
+		if (!catchBlocks.isEmpty())
+			catches = ", " + StringUtils.join(catchBlocks, ", ");
+		return "ProtectionBlock [try" + comp + catches + "]";
 	}
 
 }
