@@ -47,8 +47,9 @@ public class ProtectionBlock {
 			Statement closing) {
 		Objects.requireNonNull(tryBlock, "The try block of a protection block cannot be null");
 		Objects.requireNonNull(catchBlocks, "The list of catch blocks of a protection block cannot be null");
-		if (catchBlocks.isEmpty())
-			throw new IllegalArgumentException("A protection block must have at least one catch block");
+		if (catchBlocks.isEmpty() && finallyBlock == null)
+			throw new IllegalArgumentException(
+					"A protection block must have at least one catch block or a finally block");
 		this.tryBlock = tryBlock;
 		this.catchBlocks = catchBlocks;
 		this.elseBlock = elseBlock;
