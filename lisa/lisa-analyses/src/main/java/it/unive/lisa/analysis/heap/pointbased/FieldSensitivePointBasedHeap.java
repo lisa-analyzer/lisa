@@ -200,7 +200,15 @@ public class FieldSensitivePointBasedHeap
 		return sss;
 	}
 
-	private void addField(
+	/**
+	 * Tracks a new field for the given allocation site by inserting it in the
+	 * given mapping.
+	 *
+	 * @param site    the allocation site
+	 * @param field   the field to track
+	 * @param mapping the mapping to update
+	 */
+	protected void addField(
 			AllocationSite site,
 			SymbolicExpression field,
 			Map<AllocationSite, ExpressionSet> mapping) {
