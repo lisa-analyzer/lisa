@@ -6,12 +6,13 @@ import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
 import it.unive.lisa.symbolic.memory.NullConstant;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -69,7 +70,17 @@ public class ConstantPropagation
 
 		@Override
 		public Integer visit(
-				AccessChild expression,
+				StaticAccess expression,
+				Integer receiver,
+				String child,
+				Object... params)
+				throws SemanticException {
+			return null;
+		}
+
+		@Override
+		public Integer visit(
+				DynamicAccess expression,
 				Integer receiver,
 				Integer child,
 				Object... params)

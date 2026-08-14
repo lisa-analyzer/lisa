@@ -16,6 +16,7 @@ import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
@@ -394,7 +395,7 @@ public abstract class AllocationSiteBasedAnalysis<
 	public ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			ExpressionSet child,
+			String child,
 			L state,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -427,18 +428,29 @@ public abstract class AllocationSiteBasedAnalysis<
 							true,
 							expression.getCodeLocation());
 
-				// propagates the annotations of the child value expression
-				// to the newly created allocation site
-				for (SymbolicExpression f : child)
-					if (f instanceof Identifier)
-						for (Annotation ann : ((Identifier) f).getAnnotations())
-							e.addAnnotation(ann);
+				// propagates the annotations of the accessed field to the
+				// newly created allocation site
+				for (Annotation ann : expression.getAnnotations())
+					e.addAnnotation(ann);
 
 				result.add(e);
 			} else if (rec instanceof AllocationSite)
 				result.add(((AllocationSite) rec).withType(expression.getStaticType()));
 
 		return new ExpressionSet(result);
+	}
+
+	// TODO not yet implemented: stubbed just to compile.
+	@Override
+	public ExpressionSet rewriteDynamicAccess(
+			DynamicAccess expression,
+			ExpressionSet receiver,
+			ExpressionSet child,
+			L state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		throw new SemanticException("Rewriting of dynamic field accesses (p[s]) is not yet implemented");
 	}
 
 	@Override

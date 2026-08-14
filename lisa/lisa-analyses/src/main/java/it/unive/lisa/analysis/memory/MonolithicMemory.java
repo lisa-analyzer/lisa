@@ -7,6 +7,7 @@ import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.memory.Monolith;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
@@ -77,7 +78,7 @@ public class MonolithicMemory
 	public ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			ExpressionSet child,
+			String child,
 			Monolith state,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -87,9 +88,7 @@ public class MonolithicMemory
 
 		// any expression accessing an area of the memory or instantiating a
 		// new one is modeled through the monolith
-		Set<Type> acc = new HashSet<>();
-		child.forEach(e -> acc.add(e.getStaticType()));
-		Type refType = Type.commonSupertype(acc, Untyped.INSTANCE);
+		Type refType = expression.getStaticType();
 
 		MemoryLocation e = new MemoryLocation(refType, MONOLITH_NAME, true, expression.getCodeLocation());
 		if (receiver.elements.iterator().next() instanceof MemoryLocation) {
@@ -97,6 +96,19 @@ public class MonolithicMemory
 			e.setAllocation(loc.isAllocation());
 		}
 		return new ExpressionSet(e);
+	}
+
+	// TODO not yet implemented: stubbed just to compile.
+	@Override
+	public ExpressionSet rewriteDynamicAccess(
+			DynamicAccess expression,
+			ExpressionSet receiver,
+			ExpressionSet child,
+			Monolith state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		throw new SemanticException("Rewriting of dynamic field accesses (p[s]) is not yet implemented");
 	}
 
 	@Override

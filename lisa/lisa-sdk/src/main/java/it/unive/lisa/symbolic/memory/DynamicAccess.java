@@ -15,7 +15,7 @@ import it.unive.lisa.type.Type;
  */
 public class DynamicAccess
 		extends
-		AccessChild {
+		AccessChild<SymbolicExpression> {
 
 	/**
 	 * Builds the dynamic access.
@@ -34,11 +34,11 @@ public class DynamicAccess
 		super(staticType, container, child, location);
 	}
 
-	// TODO memory framework notation is "container[key]"; kept as "->" for
-	// compatibility with old tests
+	// TODO memory framework notation is "container[key]"; kept as "->[key]"
+	// for compatibility with old tests
 	@Override
 	public String toString() {
-		return getContainer() + "->" + getChild();
+		return getContainer() + "->[" + getChild() + "]";
 	}
 
 	@Override
@@ -49,6 +49,29 @@ public class DynamicAccess
 		T cont = getContainer().accept(visitor, params);
 		T ch = getChild().accept(visitor, params);
 		return visitor.visit(this, cont, ch, params);
+	}
+
+	@Override
+	public SymbolicExpression removeTypingExpressions() {
+		SymbolicExpression cont = getContainer().removeTypingExpressions();
+		SymbolicExpression ch = getChild().removeTypingExpressions();
+		if (cont == getContainer() && ch == getChild())
+			return this;
+		return create(getStaticType(), cont, ch, getCodeLocation());
+	}
+
+	@Override
+	public SymbolicExpression replace(
+			SymbolicExpression source,
+			SymbolicExpression target) {
+		if (this.equals(source))
+			return target;
+
+		SymbolicExpression cont = getContainer().replace(source, target);
+		SymbolicExpression ch = getChild().replace(source, target);
+		if (cont == getContainer() && ch == getChild())
+			return this;
+		return create(getStaticType(), cont, ch, getCodeLocation());
 	}
 
 	@Override

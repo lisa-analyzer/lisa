@@ -4,11 +4,10 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.memory.MemoryDomain.MemoryReplacement;
 import it.unive.lisa.analysis.memory.MemoryLattice;
-import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.lattices.GenericMapLattice;
+import it.unive.lisa.lattices.StringSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collections;
@@ -40,14 +39,14 @@ public class MemoryEnvWithFields
 	/**
 	 * Tracks the fields of each allocation site.
 	 */
-	public final GenericMapLattice<AllocationSite, ExpressionSet> fields;
+	public final GenericMapLattice<AllocationSite, StringSet> fields;
 
 	/**
 	 * Builds an empty environment.
 	 */
 	public MemoryEnvWithFields() {
 		super(new AllocationSites().top());
-		this.fields = new GenericMapLattice<AllocationSite, ExpressionSet>(new ExpressionSet()).top();
+		this.fields = new GenericMapLattice<AllocationSite, StringSet>(new StringSet()).top();
 	}
 
 	/**
@@ -67,7 +66,7 @@ public class MemoryEnvWithFields
 	public MemoryEnvWithFields(
 			AllocationSites lattice,
 			Map<Identifier, AllocationSites> function,
-			GenericMapLattice<AllocationSite, ExpressionSet> fields) {
+			GenericMapLattice<AllocationSite, StringSet> fields) {
 		super(lattice, function);
 		this.fields = fields;
 	}
@@ -100,7 +99,7 @@ public class MemoryEnvWithFields
 		for (Identifier id : base.getSources())
 			if (id instanceof AllocationSite)
 				sites.add((AllocationSite) id);
-		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
+		GenericMapLattice<AllocationSite, StringSet> f = fields.removeAll(sites);
 		return Pair
 				.of(new MemoryEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
 	}
@@ -133,7 +132,7 @@ public class MemoryEnvWithFields
 		for (Identifier id : base.getSources())
 			if (id instanceof AllocationSite)
 				sites.add((AllocationSite) id);
-		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
+		GenericMapLattice<AllocationSite, StringSet> f = fields.removeAll(sites);
 		return Pair
 				.of(new MemoryEnvWithFields(result.getLeft().lattice, result.getLeft().function, f), result.getRight());
 	}
@@ -178,7 +177,7 @@ public class MemoryEnvWithFields
 		if (isTop() || isBottom() || function == null)
 			return Pair.of(this, List.of());
 
-		GenericMapLattice<AllocationSite, ExpressionSet> f = fields;
+		GenericMapLattice<AllocationSite, StringSet> f = fields;
 		if (id instanceof AllocationSite)
 			f = f.remove((AllocationSite) id);
 
@@ -201,7 +200,7 @@ public class MemoryEnvWithFields
 		for (Identifier id : ids)
 			if (id instanceof AllocationSite)
 				sites.add((AllocationSite) id);
-		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
+		GenericMapLattice<AllocationSite, StringSet> f = fields.removeAll(sites);
 
 		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
 		for (Identifier id : ids)
@@ -226,7 +225,7 @@ public class MemoryEnvWithFields
 				.filter(k -> k instanceof AllocationSite)
 				.map(k -> (AllocationSite) k)
 				.collect(Collectors.toSet());
-		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
+		GenericMapLattice<AllocationSite, StringSet> f = fields.removeAll(sites);
 
 		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
 		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
@@ -347,7 +346,7 @@ public class MemoryEnvWithFields
 		lattice.reachableOnlyFrom(this, base.getSources()).forEach(k -> {
 			sub.addSource(k);
 			if (k instanceof AllocationSite)
-				for (SymbolicExpression field : fields.getOtDefault((AllocationSite) k, new ExpressionSet()))
+				for (String field : fields.getOtDefault((AllocationSite) k, new StringSet()))
 					sub.addSource(((AllocationSite) k).withField(field));
 		});
 		return List.of(sub);

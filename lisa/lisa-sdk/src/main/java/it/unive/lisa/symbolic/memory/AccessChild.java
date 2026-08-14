@@ -10,12 +10,16 @@ import it.unive.lisa.type.Type;
 /**
  * Base class for field access expressions ({@code p.f} and {@code p[s]}),
  * representing access to a child memory location reachable from a container.
- * Concrete subclasses are {@link StaticAccess} (compile-time field name) and
- * {@link DynamicAccess} (runtime field name).
+ * The type of the child is fixed by concrete subclasses through {@code C}:
+ * {@link StaticAccess} forces it to be a compile-time constant field name
+ * ({@code String}), while {@link DynamicAccess} keeps it as a full
+ * {@link SymbolicExpression} that must be evaluated at runtime.
+ *
+ * @param <C> the type of the child of this access
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class AccessChild
+public abstract class AccessChild<C>
 		extends
 		MemoryExpression {
 
@@ -25,23 +29,23 @@ public abstract class AccessChild
 	private final SymbolicExpression container;
 
 	/**
-	 * The expression representing the child memory location
+	 * The child memory location
 	 */
-	private final SymbolicExpression child;
+	private final C child;
 
 	/**
 	 * Builds the child access.
-	 * 
+	 *
 	 * @param staticType the static type of this expression
 	 * @param container  the expression representing the parent
-	 * @param child      the expression representing the child
+	 * @param child      the child memory location
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public AccessChild(
+	protected AccessChild(
 			Type staticType,
 			SymbolicExpression container,
-			SymbolicExpression child,
+			C child,
 			CodeLocation location) {
 		super(staticType, location);
 		this.container = container;
@@ -58,11 +62,11 @@ public abstract class AccessChild
 	}
 
 	/**
-	 * Yields the expression representing the child.
+	 * Yields the child memory location of this access.
 	 * 
 	 * @return the child
 	 */
-	public SymbolicExpression getChild() {
+	public C getChild() {
 		return child;
 	}
 
@@ -70,6 +74,8 @@ public abstract class AccessChild
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		// TODO null check on container/child can be replaced with
+		// Objects.hashCode(container/child)
 		result = prime * result + ((container == null) ? 0 : container.hashCode());
 		result = prime * result + ((child == null) ? 0 : child.hashCode());
 		return result;
@@ -84,12 +90,16 @@ public abstract class AccessChild
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AccessChild other = (AccessChild) obj;
+		AccessChild<?> other = (AccessChild<?>) obj;
+		// TODO null check on container can be replaced with
+		// Objects.equals(container, other.container)?
 		if (container == null) {
 			if (other.container != null)
 				return false;
 		} else if (!container.equals(other.container))
 			return false;
+		// TODO null check on child can be replaced with Objects.equals(child,
+		// other.child)?
 		if (child == null) {
 			if (other.child != null)
 				return false;
@@ -100,45 +110,20 @@ public abstract class AccessChild
 
 	/**
 	 * Creates a new instance of the same concrete subclass with the given
-	 * arguments. Used by structural operations ({@link #pushScope},
-	 * {@link #popScope}, {@link #replace}, {@link #removeTypingExpressions}) to
-	 * preserve the subtype after rebuilding the expression.
+	 * arguments.
 	 *
 	 * @param staticType the static type
 	 * @param container  the container expression
-	 * @param child      the child expression
+	 * @param child      the child of this access
 	 * @param location   the code location
 	 *
 	 * @return a new instance of the same subclass
 	 */
-	protected abstract AccessChild create(
+	protected abstract AccessChild<C> create(
 			Type staticType,
 			SymbolicExpression container,
-			SymbolicExpression child,
+			C child,
 			CodeLocation location);
-
-	@Override
-	public SymbolicExpression removeTypingExpressions() {
-		SymbolicExpression cont = container.removeTypingExpressions();
-		SymbolicExpression ch = child.removeTypingExpressions();
-		if (cont == container && ch == child)
-			return this;
-		return create(getStaticType(), cont, ch, getCodeLocation());
-	}
-
-	@Override
-	public SymbolicExpression replace(
-			SymbolicExpression source,
-			SymbolicExpression target) {
-		if (this.equals(source))
-			return target;
-
-		SymbolicExpression cont = container.replace(source, target);
-		SymbolicExpression ch = child.replace(source, target);
-		if (cont == container && ch == child)
-			return this;
-		return create(getStaticType(), cont, ch, getCodeLocation());
-	}
 
 	@Override
 	public SymbolicExpression pushScope(

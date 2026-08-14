@@ -78,9 +78,11 @@ public class HeapAllocationSite
 				: new HeapAllocationSite(getStaticType(), getLocationName(), getField(), true, getCodeLocation());
 	}
 
+	// TODO CHECK used to have a SymbolicExpression field, but it was never
+	// used.
 	@Override
 	public HeapAllocationSite withField(
-			SymbolicExpression field) {
+			String field) {
 		if (getField() != null)
 			throw new IllegalStateException("Cannot add a field to an allocation site that already has one");
 		return new HeapAllocationSite(getStaticType(), getLocationName(), field, isWeak(), getCodeLocation());

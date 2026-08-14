@@ -102,6 +102,7 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryLocation;
 import it.unive.lisa.type.Type;
@@ -463,6 +464,10 @@ public class EqualityContractVerificationTest {
 			else if (Identifier.class.isAssignableFrom(expr))
 				// identifiers use only their name for equality
 				verify(expr, verifier -> verifier.withOnlyTheseFields("name"));
+			else if (StaticAccess.class.isAssignableFrom(expr))
+				// static accesses do not consider their location or annotations
+				// for equality
+				verify(expr, verifier -> verifier.withIgnoredFields("location", "annotations"));
 			else
 				// location is excluded on purpose: it only brings syntactic
 				// information

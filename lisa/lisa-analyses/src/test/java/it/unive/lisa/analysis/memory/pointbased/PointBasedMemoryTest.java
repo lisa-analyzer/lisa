@@ -204,7 +204,7 @@ public class PointBasedMemoryTest {
 				memory.rewrite(sss.getLeft(), MemoryExpression, pp1, fakeOracle));
 
 		// 3. Access child
-		MemoryExpression = new StaticAccess(untyped, x, y, loc1);
+		MemoryExpression = new StaticAccess(untyped, x, y.getName(), loc1);
 
 		// from topState
 		sss = memory.semanticsOf(topMemory, MemoryExpression, pp1, fakeOracle);
@@ -465,13 +465,13 @@ public class PointBasedMemoryTest {
 				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
 		// x.y rewritten in x -> pp1 = pp1
-		StaticAccess accessChild = new StaticAccess(untyped, x, y, loc1);
+		StaticAccess accessChild = new StaticAccess(untyped, x, y.getName(), loc1);
 
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
 		assertEquals(expectedRewritten, memory.rewrite(xAssign.getLeft(), accessChild, pp1, fakeOracle));
 
 		// y.x rewritten in x -> pp1 = empty set
-		accessChild = new StaticAccess(untyped, y, x, loc1);
+		accessChild = new StaticAccess(untyped, y, x.getName(), loc1);
 		assertEquals(new ExpressionSet(), memory.rewrite(xAssign.getLeft(), accessChild, pp1, fakeOracle));
 	}
 
@@ -523,6 +523,8 @@ public class PointBasedMemoryTest {
 		Pair<MemoryEnvironment<AllocationSites>, List<MemoryReplacement>> xAssign = memory
 				.assign(topMemory, x, new GetAddress(untyped, new MemoryAllocation(untyped, loc1), loc1), pp1,
 						fakeOracle);
+
+		// TODO this must be converted to DynamicAccess
 		SymbolicExpression e = new StaticAccess(
 				intType,
 				new BinaryExpression(
@@ -531,7 +533,7 @@ public class PointBasedMemoryTest {
 						new Constant(new TypeTokenType(Collections.singleton(intType)), intType, loc1),
 						TypeConv.INSTANCE,
 						loc1),
-				new Constant(intType, 1, loc1),
+				"1",
 				loc1);
 		ExpressionSet expectedRewritten = new ExpressionSet(alloc1);
 		assertEquals(expectedRewritten, memory.rewrite(xAssign.getLeft(), e, pp1, fakeOracle));

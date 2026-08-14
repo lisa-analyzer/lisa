@@ -1,7 +1,6 @@
 package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.symbolic.memory.AccessChild;
 import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
@@ -60,57 +59,24 @@ public interface ExpressionVisitor<T> {
 			throws SemanticException;
 
 	/**
-	 * Visits an {@link AccessChild}. Only reachable from a custom third
-	 * subclass of {@link AccessChild} — {@link StaticAccess} and
-	 * {@link DynamicAccess} dispatch through their own overloads below. TODO
-	 * remove once the default overloads below no longer delegate here.
-	 *
-	 * @param expression the expression
-	 * @param receiver   the value produced by visiting the receiver
-	 *                       ({@link AccessChild#getContainer()}) of the access
-	 * @param child      the value produced by visiting the child
-	 *                       ({@link AccessChild#getChild()}) of the access
-	 * @param params     the additional parameters provided to
-	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
-	 *                       if any
-	 *
-	 * @return the value produced by visiting the expression
-	 *
-	 * @throws SemanticException if an error occurs during the visit operation
-	 */
-	T visit(
-			AccessChild expression,
-			T receiver,
-			T child,
-			Object... params)
-			throws SemanticException;
-
-	// TODO delegates to visit(AccessChild,...) for now; replace with direct
-	// dispatch once visit(AccessChild,...) is removed.
-	/**
 	 * Visits a {@link StaticAccess} ({@code p.f}).
-	 * 
+	 *
 	 * @param expression the expression
 	 * @param receiver   the value produced by visiting the container
-	 * @param child      the value produced by visiting the (constant) field
+	 * @param child      the (constant) name of the accessed field
 	 * @param params     the additional parameters
 	 *
 	 * @return the value produced by visiting the expression
 	 *
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	default T visit(
+	T visit(
 			StaticAccess expression,
 			T receiver,
-			T child,
+			String child,
 			Object... params)
-			throws SemanticException {
-		return visit((AccessChild) expression, receiver, child, params);
-	}
+			throws SemanticException;
 
-	// TODO Step 2: evaluate oracle.eval(expression.getChild()) to resolve the
-	// runtime key; for now falls back to visit(AccessChild,...) to preserve
-	// pre-split behaviour.
 	/**
 	 * Visits a {@link DynamicAccess} ({@code p[s]}).
 	 *
@@ -123,15 +89,13 @@ public interface ExpressionVisitor<T> {
 	 *
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	default T visit(
+	// TODO Step 2: replace with oracle.eval-based dispatch ?
+	T visit(
 			DynamicAccess expression,
 			T receiver,
 			T child,
 			Object... params)
-			throws SemanticException {
-		// TODO Step 2: replace with oracle.eval-based dispatch
-		return visit((AccessChild) expression, receiver, child, params);
-	}
+			throws SemanticException;
 
 	/**
 	 * Visits a {@link MemoryAllocation}.

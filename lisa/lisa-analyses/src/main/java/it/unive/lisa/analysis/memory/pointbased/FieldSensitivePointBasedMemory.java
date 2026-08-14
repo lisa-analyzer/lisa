@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.GenericMapLattice;
+import it.unive.lisa.lattices.StringSet;
 import it.unive.lisa.lattices.memory.allocations.AllocationSite;
 import it.unive.lisa.lattices.memory.allocations.AllocationSites;
 import it.unive.lisa.lattices.memory.allocations.HeapAllocationSite;
@@ -18,6 +19,7 @@ import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.type.Untyped;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -62,20 +64,20 @@ public class FieldSensitivePointBasedMemory
 				id.getCodeLocation());
 		MemoryEnvWithFields memory = store(state, id, clone);
 
-		Map<AllocationSite, ExpressionSet> newFields = new HashMap<>(state.fields.getMap());
+		Map<AllocationSite, StringSet> newFields = new HashMap<>(state.fields.getMap());
 
 		// all the allocation sites fields of star_y
 		if (state.fields.getKeys().contains(site)) {
-			for (SymbolicExpression field : state.fields.getState(site)) {
+			for (String field : state.fields.getState(site)) {
 				StackAllocationSite cloneWithField = new StackAllocationSite(
-						field.getStaticType(),
+						Untyped.INSTANCE,
 						id.getCodeLocation().toString(),
 						field,
 						site.isWeak(),
 						id.getCodeLocation());
 
 				StackAllocationSite star_yWithField = new StackAllocationSite(
-						field.getStaticType(),
+						Untyped.INSTANCE,
 						site.getCodeLocation().toString(),
 						field,
 						site.isWeak(),
@@ -118,8 +120,8 @@ public class FieldSensitivePointBasedMemory
 		MemoryEnvWithFields st = sss.getLeft();
 
 		if (expression instanceof AccessChild) {
-			AccessChild accessChild = (AccessChild) expression;
-			Map<AllocationSite, ExpressionSet> mapping = new HashMap<>(st.fields.getMap());
+			AccessChild<?> accessChild = (AccessChild<?>) expression;
+			Map<AllocationSite, StringSet> mapping = new HashMap<>(st.fields.getMap());
 
 			ExpressionSet exprs;
 			SymbolicExpression cont = accessChild.getContainer();
@@ -130,20 +132,19 @@ public class FieldSensitivePointBasedMemory
 			else
 				exprs = new ExpressionSet(cont);
 
+			String child;
+			if (accessChild instanceof StaticAccess)
+				child = (String) accessChild.getChild();
+			else
+				throw new SemanticException("DynamicAccess is not yet supported in FieldSensitivePointBasedMemory");
+
 			for (SymbolicExpression rec : exprs)
 				if (rec instanceof MemoryPointer) {
 					AllocationSite site = (AllocationSite) ((MemoryPointer) rec).getReferencedLocation();
-					ExpressionSet childs = rewrite(sss.getLeft(), accessChild.getChild(), pp, oracle);
-
-					for (SymbolicExpression child : childs)
-						addField(site, child, mapping);
-
+					addField(site, child, mapping);
 				} else if (rec instanceof AllocationSite) {
 					AllocationSite site = (AllocationSite) rec;
-					ExpressionSet childs = rewrite(sss.getLeft(), accessChild.getChild(), pp, oracle);
-
-					for (SymbolicExpression child : childs)
-						addField(site, child, mapping);
+					addField(site, child, mapping);
 				}
 
 			return Pair.of(
@@ -168,7 +169,7 @@ public class FieldSensitivePointBasedMemory
 						replacements.add(replacement);
 					}
 					if (st.fields.getKeys().contains(site))
-						for (SymbolicExpression field : st.fields.getState(site)) {
+						for (String field : st.fields.getState(site)) {
 							AllocationSite withField = site.withField(field);
 							if (!withField.isWeak()) {
 								MemoryReplacement replacement = new MemoryReplacement();
@@ -205,18 +206,18 @@ public class FieldSensitivePointBasedMemory
 
 	private void addField(
 			AllocationSite site,
-			SymbolicExpression field,
-			Map<AllocationSite, ExpressionSet> mapping) {
-		Set<SymbolicExpression> tmp = new HashSet<>(mapping.getOrDefault(site, new ExpressionSet()).elements());
+			String field,
+			Map<AllocationSite, StringSet> mapping) {
+		Set<String> tmp = new HashSet<>(mapping.getOrDefault(site, new StringSet()).elements());
 		tmp.add(field);
-		mapping.put(site, new ExpressionSet(tmp));
+		mapping.put(site, new StringSet(tmp));
 	}
 
 	@Override
 	public ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			ExpressionSet child,
+			String child,
 			MemoryEnvWithFields state,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -251,36 +252,33 @@ public class FieldSensitivePointBasedMemory
 	}
 
 	private void populate(
-			AccessChild expression,
-			ExpressionSet child,
+			StaticAccess expression,
+			String child,
 			Set<SymbolicExpression> result,
 			AllocationSite site) {
-		for (SymbolicExpression target : child) {
-			AllocationSite e;
+		AllocationSite e;
 
-			if (site instanceof StackAllocationSite)
-				e = new StackAllocationSite(
-						expression.getStaticType(),
-						site.getLocationName(),
-						target,
-						site.isWeak(),
-						site.getCodeLocation());
-			else
-				e = new HeapAllocationSite(
-						expression.getStaticType(),
-						site.getLocationName(),
-						target,
-						site.isWeak(),
-						site.getCodeLocation());
+		if (site instanceof StackAllocationSite)
+			e = new StackAllocationSite(
+					expression.getStaticType(),
+					site.getLocationName(),
+					child,
+					site.isWeak(),
+					site.getCodeLocation());
+		else
+			e = new HeapAllocationSite(
+					expression.getStaticType(),
+					site.getLocationName(),
+					child,
+					site.isWeak(),
+					site.getCodeLocation());
 
-			// propagates the annotations of the child value expression to
-			// the newly created allocation site
-			if (target instanceof Identifier)
-				for (Annotation ann : ((Identifier) target).getAnnotations())
-					e.addAnnotation(ann);
+		// propagates the annotations of the accessed field to the
+		// newly created allocation site
+		for (Annotation ann : expression.getAnnotations())
+			e.addAnnotation(ann);
 
-			result.add(e);
-		}
+		result.add(e);
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.memory.AllocatedTypes;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
@@ -74,8 +74,13 @@ public class TypeBasedMemory
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (expression instanceof AccessChild) {
-			AccessChild access = (AccessChild) expression;
+		if (expression instanceof StaticAccess) {
+			StaticAccess access = (StaticAccess) expression;
+			return smallStepSemantics(state, access.getContainer(), pp, oracle);
+		}
+
+		if (expression instanceof DynamicAccess) {
+			DynamicAccess access = (DynamicAccess) expression;
 			Pair<AllocatedTypes,
 					List<MemoryReplacement>> cont = smallStepSemantics(state, access.getContainer(), pp, oracle);
 			Pair<AllocatedTypes,
@@ -105,19 +110,31 @@ public class TypeBasedMemory
 	public ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			ExpressionSet child,
+			String child,
 			AllocatedTypes state,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		// we use the container because we are not field-sensitive
 		Set<SymbolicExpression> result = new HashSet<>();
-		for (SymbolicExpression ch : child)
-			for (Type t : oracle.getRuntimeTypesOf(ch, pp)) {
-				MemoryLocation e = new MemoryLocation(t, t.toString(), true, expression.getCodeLocation());
-				result.add(e);
-			}
+		for (Type t : oracle.getRuntimeTypesOf(expression, pp)) {
+			MemoryLocation e = new MemoryLocation(t, t.toString(), true, expression.getCodeLocation());
+			result.add(e);
+		}
 		return new ExpressionSet(result);
+	}
+
+	// TODO not yet implemented: stubbed just to compile.
+	@Override
+	public ExpressionSet rewriteDynamicAccess(
+			DynamicAccess expression,
+			ExpressionSet receiver,
+			ExpressionSet child,
+			AllocatedTypes state,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		throw new SemanticException("Rewriting of dynamic field accesses (p[s]) is not yet implemented");
 	}
 
 	@Override

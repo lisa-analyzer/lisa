@@ -178,16 +178,18 @@ public abstract class AllocationSite
 	 */
 	public abstract AllocationSite toWeak();
 
+	// TODO CHECK used to have a SymbolicExpression field, but it was never
+	// used.
 	/**
 	 * Yields a modified version of this allocation site by accessing the given
 	 * field.
-	 * 
-	 * @param field the field to access
-	 * 
+	 *
+	 * @param field the name of the field to access
+	 *
 	 * @return the modified allocation site
 	 */
 	public abstract AllocationSite withField(
-			SymbolicExpression field);
+			String field);
 
 	/**
 	 * Yields a modified version of this allocation site by removing any field.

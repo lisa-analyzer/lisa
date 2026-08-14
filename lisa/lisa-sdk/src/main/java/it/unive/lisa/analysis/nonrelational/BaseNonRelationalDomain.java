@@ -12,12 +12,13 @@ import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
-import it.unive.lisa.symbolic.memory.AccessChild;
+import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.MemoryExpression;
 import it.unive.lisa.symbolic.memory.NullConstant;
+import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -149,7 +150,17 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 
 	@Override
 	default L visit(
-			AccessChild expression,
+			StaticAccess expression,
+			L receiver,
+			String child,
+			Object... params)
+			throws SemanticException {
+		throw new SemanticException(CANNOT_PROCESS_ERROR);
+	}
+
+	@Override
+	default L visit(
+			DynamicAccess expression,
 			L receiver,
 			L child,
 			Object... params)
