@@ -47,6 +47,32 @@ public class CallStackId<A extends AbstractLattice<A>>
 	}
 
 	/**
+	 * Yields the call at the given index, counting from the end of the stack.
+	 * 
+	 * @param index the index of the call to retrieve, counting from the end of
+	 *                  the stack
+	 * 
+	 * @return the call at the given index, counting from the end of the stack
+	 */
+	public Pair<CFGCall, AnalysisState<A>> getCallFromEnd(
+			int index) {
+		return calls.get(calls.size() - index);
+	}
+
+	/**
+	 * Yields the call at the given index, counting from the start of the stack.
+	 * 
+	 * @param index the index of the call to retrieve, counting from the start
+	 *                  of the stack
+	 * 
+	 * @return the call at the given index, counting from the start of the stack
+	 */
+	public Pair<CFGCall, AnalysisState<A>> getCall(
+			int index) {
+		return calls.get(index);
+	}
+
+	/**
 	 * Creates an empty scope id with no calls in it.
 	 * 
 	 * @param <A> the type of {@link AbstractLattice} handled by the analysis
