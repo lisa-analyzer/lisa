@@ -38,6 +38,15 @@ public class CallStackId<A extends AbstractLattice<A>>
 	}
 
 	/**
+	 * Yields the number of calls in this call stack.
+	 * 
+	 * @return the number of calls in this call stack
+	 */
+	public int size() {
+		return calls.size();
+	}
+
+	/**
 	 * Creates an empty scope id with no calls in it.
 	 * 
 	 * @param <A> the type of {@link AbstractLattice} handled by the analysis

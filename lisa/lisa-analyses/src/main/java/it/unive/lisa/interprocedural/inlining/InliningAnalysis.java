@@ -72,12 +72,23 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 
 	private static final Logger LOG = LogManager.getLogger(InliningAnalysis.class);
 
-	private int maxCallStackDepth;
+	/**
+	 * The maximum call stack depth. A negative value means infinite depth. If a
+	 * call chain exceeds this depth, an exception is raised or top is returned,
+	 * depending on {@link #shouldRaieException}.
+	 */
+	protected final int maxCallStackDepth;
 
 	/**
-	 * The current sensitivity token.
+	 * Whether an exception should be raised when the maximum call stack depth
+	 * is reached. If {@code false}, then top is returned instead.
 	 */
-	private CallStackId<A> token;
+	protected final boolean shouldRaiseException;
+
+	/**
+	 * The current call stack.
+	 */
+	protected CallStackId<A> token;
 
 	/**
 	 * The results computed by this analysis.
@@ -98,19 +109,38 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	 * Builds the analysis, using an infinite call stack depth.
 	 */
 	public InliningAnalysis() {
-		this(-1);
+		this(-1, true);
+	}
+
+	/**
+	 * Builds the analysis that raises an exception when the maximum call stack
+	 * depth is reached.
+	 *
+	 * @param maxCallStackDepth the maximum call stack depth. A negative value
+	 *                              means infinite depth. If a call chain
+	 *                              exceeds this depth
+	 */
+	public InliningAnalysis(
+			int maxCallStackDepth) {
+		this(maxCallStackDepth, true);
 	}
 
 	/**
 	 * Builds the analysis.
 	 *
-	 * @param maxCallStackDepth the maximum call stack depth. A negative value
-	 *                              means infinite depth. If a call chain
-	 *                              exceeds this depth, an exception is raised
+	 * @param maxCallStackDepth    the maximum call stack depth. A negative
+	 *                                 value means infinite depth. If a call
+	 *                                 chain exceeds this depth
+	 * @param shouldRaiseException whether an exception should be raised when
+	 *                                 the maximum call stack depth is reached.
+	 *                                 If {@code false}, then top is returned
+	 *                                 instead
 	 */
 	public InliningAnalysis(
-			int maxCallStackDepth) {
+			int maxCallStackDepth,
+			boolean shouldRaiseException) {
 		this.maxCallStackDepth = maxCallStackDepth;
+		this.shouldRaiseException = shouldRaiseException;
 		this.token = CallStackId.create();
 	}
 
@@ -276,12 +306,16 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			throws SemanticException {
 		callgraph.registerCall(call);
 
-		if (maxCallStackDepth == 0)
-			throw new SemanticException("Maximum call stack depth reached");
+		if (maxCallStackDepth == token.size())
+			if (shouldRaiseException)
+				throw new SemanticException("Maximum call stack depth reached");
+			else if (call.returnsVoid(null))
+				return entryState.topExecution();
+			else
+				return entryState.topExecution().withExecutionExpression(call.getMetaVariable());
 
 		CallStackId<A> callerToken = token;
 		token = token.push(call, entryState);
-		maxCallStackDepth--;
 		ScopeToken scope = new ScopeToken(call);
 
 		// we exclude erroneous/halting executions from the
@@ -355,7 +389,6 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 		}
 
 		token = callerToken;
-		maxCallStackDepth++;
 		return result;
 	}
 
