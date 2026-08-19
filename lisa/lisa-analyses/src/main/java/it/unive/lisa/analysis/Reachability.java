@@ -1,5 +1,9 @@
 package it.unive.lisa.analysis;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.ReachLattice.ReachabilityStatus;
@@ -12,17 +16,14 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * An abstract domain that tracks the reachability of program points, exploiting
  * an underlying abstract domain to (i) compute approximations of the program
  * state, and (ii) deducing which branches are taken after traversing a guard.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <D> the type of the underlying domain
  * @param <A> the type of lattice tracked by the underlying domain
  */
@@ -109,8 +110,10 @@ public class Reachability<D extends AbstractDomain<A>,
 				// but where the lub on the guard would make the condition
 				// become possibly reachable, thus making the analysis
 				// less precise
-				ReachabilityStatus reach = r.getState(current);
-				status = reach != null ? reach : r.lattice;
+				if (r.getKeys().contains(current))
+					status = r.getState(current);
+				else
+					status = r.lattice;
 				break;
 			} else if (cfs.getFirstFollower() == current) {
 				Statement condition = cfs.getCondition();
