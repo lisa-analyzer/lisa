@@ -1,18 +1,16 @@
 package it.unive.lisa.interprocedural.inlining;
 
 import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A {@link ScopeId} that keeps track of the whole call stack and of the entry
- * state of each stack frame.
+ * A {@link ScopeId} that keeps track of the whole call stack.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -22,7 +20,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 		implements
 		ScopeId<A> {
 
-	private final List<Pair<CFGCall, AnalysisState<A>>> calls;
+	private final List<CFGCall> calls;
 
 	private CallStackId() {
 		this.calls = Collections.emptyList();
@@ -31,10 +29,10 @@ public class CallStackId<A extends AbstractLattice<A>>
 	private CallStackId(
 			CallStackId<A> source,
 			CFGCall newToken,
-			AnalysisState<A> state) {
+			CompoundState<A> state) {
 		this.calls = new ArrayList<>(source.calls.size() + 1);
 		source.calls.forEach(this.calls::add);
-		this.calls.add(Pair.of(newToken, state));
+		this.calls.add(newToken);
 	}
 
 	/**
@@ -54,22 +52,44 @@ public class CallStackId<A extends AbstractLattice<A>>
 	 * 
 	 * @return the call at the given index, counting from the end of the stack
 	 */
-	public Pair<CFGCall, AnalysisState<A>> getCallFromEnd(
+	public CFGCall getCallFromEnd(
 			int index) {
-		return calls.get(calls.size() - index);
+		return calls.get(calls.size() - index - 1);
 	}
 
 	/**
-	 * Yields the call at the given index, counting from the start of the stack.
+	 * Yields the call at the given index, counting from the start of the stack,
+	 * with its entry state.
 	 * 
 	 * @param index the index of the call to retrieve, counting from the start
 	 *                  of the stack
 	 * 
 	 * @return the call at the given index, counting from the start of the stack
 	 */
-	public Pair<CFGCall, AnalysisState<A>> getCall(
+	public CFGCall getCall(
 			int index) {
 		return calls.get(index);
+	}
+
+	/**
+	 * Yields all the calls in this id, in the order they appear in it (i.e.,
+	 * from less recent to most recent), with their entry state.
+	 * 
+	 * @return the calls
+	 */
+	public List<CFGCall> getCalls() {
+		return calls;
+	}
+
+	/**
+	 * Yields all the calls in this id, in the reverse order w.r.t. their
+	 * appearence (i.e., from most recent to less recent), with their entry
+	 * state.
+	 * 
+	 * @return the calls
+	 */
+	public List<CFGCall> getReversedCalls() {
+		return calls.reversed();
 	}
 
 	/**
@@ -88,7 +108,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 		if (calls.isEmpty())
 			return "<empty>";
 		return "["
-				+ calls.stream().map(call -> call.getLeft().getLocation())
+				+ calls.stream().map(call -> call.getLocation())
 						.collect(new CollectionUtilities.StringCollector<>(", "))
 				+ "]";
 	}
@@ -120,12 +140,12 @@ public class CallStackId<A extends AbstractLattice<A>>
 		if (calls == null)
 			result = prime * result;
 		else
-			for (Pair<CFGCall, AnalysisState<A>> call : calls)
+			for (CFGCall call : calls)
 				// we use the hashcode of the location as the hashcode of the
 				// call is based on the ones of its targets, and a CFG hashcode
 				// is not consistent between executions - this is a problem as
 				// this object's hashcode is used as suffix in some filenames
-				result = prime * result + call.getLeft().getLocation().hashCode();
+				result = prime * result + call.getLocation().hashCode();
 		return result;
 	}
 
@@ -142,8 +162,24 @@ public class CallStackId<A extends AbstractLattice<A>>
 	@Override
 	public CallStackId<A> push(
 			CFGCall c,
-			AnalysisState<A> state) {
+			CompoundState<A> state) {
 		return new CallStackId<>(this, c, state);
+	}
+
+	/**
+	 * Pops the specified amount of entries from this call stack id.
+	 *
+	 * @param amount the number of entries to pop
+	 * 
+	 * @return a new {@link CallStackId} with the specified number of entries
+	 *             popped
+	 */
+	public CallStackId<A> pop(
+			int amount) {
+		CallStackId<A> popped = new CallStackId<>();
+		for (int i = 0; i < this.calls.size() - amount; i++)
+			popped.calls.add(this.calls.get(i));
+		return popped;
 	}
 
 }

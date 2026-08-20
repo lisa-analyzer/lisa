@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_tests.init(tests__this,_untyped_x)_1748710429.graph.json", "untyped_tests.main(tests__this,_untyped_x).graph.json", "untyped_tests.rec(tests__this,_untyped_n)_-819357852.graph.json", "untyped_tests.rec(tests__this,_untyped_n)_124157764.graph.json", "untyped_tests.rec(tests__this,_untyped_n)_1302632453.graph.json", "untyped_tests.rec(tests__this,_untyped_n)_2118419429.graph.json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "466ms",
+    "end" : "2026-08-20T17:33:04.103+02:00",
+    "expressions" : "22",
+    "files" : "6",
+    "globals" : "0",
+    "members" : "3",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-08-20T17:33:03.637+02:00",
+    "statements" : "9",
+    "units" : "1",
+    "version" : "1.0",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/unreachableBaseCase/inlined"
+  }
+}

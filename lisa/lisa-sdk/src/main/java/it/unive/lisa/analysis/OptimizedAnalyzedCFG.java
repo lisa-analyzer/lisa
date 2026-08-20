@@ -296,7 +296,7 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 
 			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
-			ScopeId<A> id = getId().push(call, entryState);
+			ScopeId<A> id = getId().push(call, CompoundState.of(entryState, expressions));
 			AnalysisState<A> result = entryState.bottomExecution();
 			Analysis<A, D> analysis = interprocedural.getAnalysis();
 

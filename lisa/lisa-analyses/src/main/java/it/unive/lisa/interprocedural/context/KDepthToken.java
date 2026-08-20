@@ -1,8 +1,8 @@
 package it.unive.lisa.interprocedural.context;
 
 import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
@@ -131,7 +131,7 @@ public class KDepthToken<A extends AbstractLattice<A>>
 	@Override
 	public KDepthToken<A> push(
 			CFGCall c,
-			AnalysisState<A> state) {
+			CompoundState<A> state) {
 		return new KDepthToken<>(k, this, c);
 	}
 

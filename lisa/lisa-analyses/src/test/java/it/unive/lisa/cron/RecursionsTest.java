@@ -4,7 +4,10 @@ import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.inlining.InliningAnalysis;
+import it.unive.lisa.outputs.HtmlResults;
 import it.unive.lisa.outputs.JSONResults;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -79,6 +82,22 @@ public class RecursionsTest
 	}
 
 	@Test
+	public void testFibonacciInlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "fibonacci/inlined";
+		conf.programFile = "fibonacci.imp";
+		perform(conf);
+	}
+
+	@Test
 	public void testFactorialLoopFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
@@ -138,6 +157,22 @@ public class RecursionsTest
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorialLoop/insensitive";
+		conf.programFile = "factorialLoop.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testFactorialLoopInlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "factorialLoop/inlined";
 		conf.programFile = "factorialLoop.imp";
 		perform(conf);
 	}
@@ -205,6 +240,23 @@ public class RecursionsTest
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "infiniteRecursion2/insensitive";
+		conf.programFile = "infiniteRecursion2.imp";
+		// note: the result of this recursion is bottom as it never terminates
+		perform(conf);
+	}
+
+	@Test
+	public void testInfiniteRecursion2Inlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "infiniteRecursion2/inlined";
 		conf.programFile = "infiniteRecursion2.imp";
 		// note: the result of this recursion is bottom as it never terminates
 		perform(conf);
@@ -279,6 +331,23 @@ public class RecursionsTest
 	}
 
 	@Test
+	public void testInfiniteRecursion1Inlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "infiniteRecursion1/inlined";
+		conf.programFile = "infiniteRecursion1.imp";
+		// note: the result of this recursion is bottom as it never terminates
+		perform(conf);
+	}
+
+	@Test
 	public void testFactorialFullStack() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
@@ -338,6 +407,22 @@ public class RecursionsTest
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "factorial/insensitive";
+		conf.programFile = "factorial.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testFactorialInlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "factorial/inlined";
 		conf.programFile = "factorial.imp";
 		perform(conf);
 	}
@@ -406,6 +491,24 @@ public class RecursionsTest
 		perform(conf);
 	}
 
+	@Disabled
+	// this test is disabled as the analysis currently fails due to a limitation
+	// see BaseCaseFinder.getAbstractResultOf
+	public void testFactorialInterleavedInlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "factorialInterleaved/inlined";
+		conf.programFile = "factorialInterleaved.imp";
+		perform(conf);
+	}
+
 	@Test
 	public void testTwoRecursionsFullStack() {
 		CronConfiguration conf = new CronConfiguration();
@@ -466,6 +569,25 @@ public class RecursionsTest
 		conf.callGraph = new RTACallGraph();
 		conf.testDir = "interprocedural";
 		conf.testSubDir = "twoRecursions/insensitive";
+		conf.programFile = "twoRecursions.imp";
+		perform(conf);
+	}
+
+	@Disabled
+	// this test is disabled as the analysis currently fails due to a limitation
+	// see BaseCaseFinder.getAbstractResultOf
+	public void testTwoRecursionsInlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new HtmlResults<>(true));
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "twoRecursions/inlined";
 		conf.programFile = "twoRecursions.imp";
 		perform(conf);
 	}
@@ -534,6 +656,25 @@ public class RecursionsTest
 		perform(conf);
 	}
 
+	@Disabled
+	// this test is disabled as the analysis currently fails due to a limitation
+	// see BaseCaseFinder.getAbstractResultOf
+	public void testNestedRecursionsInlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new HtmlResults<>(true));
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "nestedRecursions/inlined";
+		conf.programFile = "nestedRecursions.imp";
+		perform(conf);
+	}
+
 	@Test
 	public void testUnreachableBaseCaseFullStack() {
 		CronConfiguration conf = new CronConfiguration();
@@ -598,4 +739,19 @@ public class RecursionsTest
 		perform(conf);
 	}
 
+	@Test
+	public void testUnreachableBaseCaseInlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(5, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "unreachableBaseCase/inlined";
+		conf.programFile = "unreachableBaseCase.imp";
+		perform(conf);
+	}
 }

@@ -11,6 +11,7 @@ import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
+import it.unive.lisa.interprocedural.Recursion;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.context.KDepthToken;
@@ -186,7 +187,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 
 			// we reset the analysis at the point where the starting call can be
 			// evaluated
-			token = recursion.getInvocationToken();
+			token = (KDepthToken<A>) recursion.getInvocationToken();
 			AnalysisState<A> post = start
 					.forwardSemanticsAux(this, entryState.postState, params, entryState.intermediateStates);
 
@@ -234,12 +235,9 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 					Identifier meta = call.getMetaVariable();
 					if (!returned.getExecutionState().knowsIdentifier(meta)) {
 						// if we have no information for the return value, we
-						// want to
-						// force it to bottom as it means that this is either
-						// the first
-						// execution (that must start from bottom) or that the
-						// recursion
-						// diverges
+						// want to force it to bottom as it means that this is
+						// either the first execution (that must start from
+						// bottom) or that the recursion diverges
 						PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
 						returned = analysis.assign(returned, meta, inv, call);
 					}

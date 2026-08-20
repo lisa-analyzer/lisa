@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.ReachLattice.ReachabilityStatus;
@@ -16,6 +12,9 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An abstract domain that tracks the reachability of program points, exploiting
