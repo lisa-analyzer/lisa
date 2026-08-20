@@ -17,6 +17,7 @@ import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryLocation;
 import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -78,7 +79,7 @@ public class MonolithicMemory
 	public ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			String child,
+			Variable child,
 			Monolith state,
 			ProgramPoint pp,
 			SemanticOracle oracle)

@@ -19,6 +19,7 @@ import it.unive.lisa.program.language.hierarchytraversal.HierarchyTraversalStrat
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.StaticAccess;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.HashSet;
@@ -145,7 +146,8 @@ public class AccessInstanceGlobal
 					if (seen.add(unit)) {
 						Global global = cu.getInstanceGlobal(target, false);
 						if (global != null) {
-							StaticAccess access = new StaticAccess(global.getStaticType(), container, global.getName(),
+							Variable field = new Variable(global.getStaticType(), global.getName(), loc);
+							StaticAccess access = new StaticAccess(global.getStaticType(), container, field,
 									loc);
 							result = result.lub(analysis.smallStepSemantics(state, access, this));
 							atLeastOne = true;
@@ -168,7 +170,8 @@ public class AccessInstanceGlobal
 
 		Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
 		MemoryDereference container = new MemoryDereference(rectype, expr, getLocation());
-		StaticAccess access = new StaticAccess(Untyped.INSTANCE, container, target, getLocation());
+		Variable field = new Variable(Untyped.INSTANCE, target, getLocation());
+		StaticAccess access = new StaticAccess(Untyped.INSTANCE, container, field, getLocation());
 		return analysis.smallStepSemantics(state, access, this);
 	}
 

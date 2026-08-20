@@ -24,6 +24,7 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -560,7 +561,7 @@ public interface BaseMemoryDomain<L extends MemoryLattice<L>>
 	default ExpressionSet visit(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			String child,
+			Variable child,
 			Object... params)
 			throws SemanticException {
 		return rewriteStaticAccess(expression, receiver, child, (L) params[0], (ProgramPoint) params[1],
@@ -586,7 +587,8 @@ public interface BaseMemoryDomain<L extends MemoryLattice<L>>
 	 *
 	 * @param expression the expression to rewrite
 	 * @param receiver   the result of rewriting the receiver of this access
-	 * @param child      the (constant) name of the accessed field
+	 * @param child      the variable representing the (constant) field being
+	 *                       accessed
 	 * @param state      the current state of this domain
 	 * @param pp         the program point where this expression is being
 	 *                       evaluated
@@ -599,7 +601,7 @@ public interface BaseMemoryDomain<L extends MemoryLattice<L>>
 	ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			String child,
+			Variable child,
 			L state,
 			ProgramPoint pp,
 			SemanticOracle oracle)

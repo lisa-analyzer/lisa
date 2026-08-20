@@ -395,7 +395,7 @@ public abstract class AllocationSiteBasedAnalysis<
 	public ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			String child,
+			Variable child,
 			L state,
 			ProgramPoint pp,
 			SemanticOracle oracle)

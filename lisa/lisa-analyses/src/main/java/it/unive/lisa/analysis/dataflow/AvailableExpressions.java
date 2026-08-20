@@ -22,6 +22,7 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
@@ -137,7 +138,7 @@ public class AvailableExpressions
 		public Collection<Identifier> visit(
 				StaticAccess expression,
 				Collection<Identifier> receiver,
-				String child,
+				Variable child,
 				Object... params)
 				throws SemanticException {
 			return result;

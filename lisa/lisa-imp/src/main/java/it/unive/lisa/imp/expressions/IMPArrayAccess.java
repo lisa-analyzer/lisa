@@ -13,8 +13,9 @@ import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.memory.DynamicAccess;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
+import it.unive.lisa.symbolic.memory.StaticAccess;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.HashSet;
@@ -78,7 +79,14 @@ public class IMPArrayAccess
 		Type cst = Type.commonSupertype(arraytypes, getStaticType());
 		Type inner = cst.isArrayType() ? cst.asArrayType().getInnerType() : Untyped.INSTANCE;
 		MemoryDereference container = new MemoryDereference(cst, left, getLocation());
-		DynamicAccess elem = new DynamicAccess(inner, container, right, getLocation());
+		// TODO make it dynamic
+		// DynamicAccess elem = new DynamicAccess(inner, container, right,
+		// getLocation());
+		StaticAccess elem = new StaticAccess(
+				inner,
+				container,
+				new Variable(inner, right.toString(), getLocation()),
+				getLocation());
 
 		return analysis.smallStepSemantics(state, elem, this);
 	}

@@ -8,8 +8,7 @@ import it.unive.lisa.type.Type;
 
 /**
  * A dynamic field access ({@code p[s]}), where the field name is computed at
- * runtime. Domains rewriting this need to evaluate the runtime key expression
- * first, which requires {@code oracle.eval(s)} — not yet fully implemented.
+ * runtime.
  *
  * @author <a href="mailto:giacomo.boldini@unive.it">Giacomo Boldini</a>
  */

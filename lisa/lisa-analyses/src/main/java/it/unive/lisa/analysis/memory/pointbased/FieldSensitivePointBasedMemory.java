@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -134,7 +135,7 @@ public class FieldSensitivePointBasedMemory
 
 			String child;
 			if (accessChild instanceof StaticAccess)
-				child = (String) accessChild.getChild();
+				child = ((StaticAccess) accessChild).getChild().getName();
 			else
 				throw new SemanticException("DynamicAccess is not yet supported in FieldSensitivePointBasedMemory");
 
@@ -217,7 +218,7 @@ public class FieldSensitivePointBasedMemory
 	public ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			String child,
+			Variable child,
 			MemoryEnvWithFields state,
 			ProgramPoint pp,
 			SemanticOracle oracle)
@@ -238,13 +239,13 @@ public class FieldSensitivePointBasedMemory
 				if (site.equals(NullAllocationSite.INSTANCE))
 					result.add(site);
 				else
-					populate(expression, child, result, site);
+					populate(expression, child.getName(), result, site);
 			} else if (rec instanceof AllocationSite) {
 				AllocationSite site = (AllocationSite) rec;
 				if (site.equals(NullAllocationSite.INSTANCE))
 					result.add(site);
 				else
-					populate(expression, child, result, site);
+					populate(expression, child.getName(), result, site);
 			}
 		}
 

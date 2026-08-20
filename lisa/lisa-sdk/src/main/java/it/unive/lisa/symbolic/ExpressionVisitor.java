@@ -17,6 +17,7 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * A visitor for {@link SymbolicExpression}s, to be used as parameter to
@@ -63,7 +64,8 @@ public interface ExpressionVisitor<T> {
 	 *
 	 * @param expression the expression
 	 * @param receiver   the value produced by visiting the container
-	 * @param child      the (constant) name of the accessed field
+	 * @param child      the variable representing the (constant) field being
+	 *                       accessed
 	 * @param params     the additional parameters
 	 *
 	 * @return the value produced by visiting the expression
@@ -73,7 +75,7 @@ public interface ExpressionVisitor<T> {
 	T visit(
 			StaticAccess expression,
 			T receiver,
-			String child,
+			Variable child,
 			Object... params)
 			throws SemanticException;
 

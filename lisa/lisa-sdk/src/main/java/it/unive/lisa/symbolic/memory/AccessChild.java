@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 
 /**
@@ -12,12 +13,12 @@ import it.unive.lisa.type.Type;
  * representing access to a child memory location reachable from a container.
  * The type of the child is fixed by concrete subclasses through {@code C}:
  * {@link StaticAccess} forces it to be a compile-time constant field name
- * ({@code String}), while {@link DynamicAccess} keeps it as a full
+ * ({@link Variable}), while {@link DynamicAccess} keeps it as a full
  * {@link SymbolicExpression} that must be evaluated at runtime.
  *
- * @param <C> the type of the child of this access
- *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @param <C> the type of the child of this access
  */
 public abstract class AccessChild<C>
 		extends

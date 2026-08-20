@@ -20,6 +20,7 @@ import it.unive.lisa.symbolic.memory.GetAddress;
 import it.unive.lisa.symbolic.memory.MemoryAllocation;
 import it.unive.lisa.symbolic.memory.StaticAccess;
 import it.unive.lisa.symbolic.value.InstrumentedReceiver;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import java.util.Objects;
@@ -101,7 +102,7 @@ public class IMPNewArray
 		StaticAccess len = new StaticAccess(
 				Int32Type.INSTANCE,
 				array,
-				"len",
+				new Variable(Int32Type.INSTANCE, "len", getLocation()),
 				getLocation());
 
 		AnalysisState<A> lenSt = state.bottomExecution();

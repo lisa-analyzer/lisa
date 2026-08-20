@@ -6,19 +6,19 @@ import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
 
 /**
  * A static field access ({@code p.f}), where the field name is known at compile
- * time. Domains rewrite this into an {@link AllocationSite} by appending the
- * (constant) field name to the container's allocation site.
+ * time.
  *
  * @author <a href="mailto:giacomo.boldini@unive.it">Giacomo Boldini</a>
  */
 public class StaticAccess
 		extends
-		AccessChild<String> {
+		AccessChild<Variable> {
 
 	private final Annotations annotations;
 
@@ -27,14 +27,15 @@ public class StaticAccess
 	 *
 	 * @param staticType the static type of this expression
 	 * @param container  the expression representing the parent
-	 * @param child      the (constant) name of the accessed field
+	 * @param child      the variable representing the (constant) field being
+	 *                       accessed
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
 	public StaticAccess(
 			Type staticType,
 			SymbolicExpression container,
-			String child,
+			Variable child,
 			CodeLocation location) {
 		super(staticType, container, child, location);
 		this.annotations = new Annotations();
@@ -109,7 +110,7 @@ public class StaticAccess
 	protected StaticAccess create(
 			Type staticType,
 			SymbolicExpression container,
-			String child,
+			Variable child,
 			CodeLocation location) {
 		StaticAccess result = new StaticAccess(staticType, container, child, location);
 		// Annotations don't affect equals/hashCode (inherited from

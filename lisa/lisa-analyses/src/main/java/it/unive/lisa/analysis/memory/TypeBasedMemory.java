@@ -110,14 +110,14 @@ public class TypeBasedMemory
 	public ExpressionSet rewriteStaticAccess(
 			StaticAccess expression,
 			ExpressionSet receiver,
-			String child,
+			Variable child,
 			AllocatedTypes state,
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
 		// we use the container because we are not field-sensitive
 		Set<SymbolicExpression> result = new HashSet<>();
-		for (Type t : oracle.getRuntimeTypesOf(expression, pp)) {
+		for (Type t : oracle.getRuntimeTypesOf(child, pp)) {
 			MemoryLocation e = new MemoryLocation(t, t.toString(), true, expression.getCodeLocation());
 			result.add(e);
 		}

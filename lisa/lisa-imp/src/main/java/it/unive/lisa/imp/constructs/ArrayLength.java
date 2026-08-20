@@ -22,6 +22,7 @@ import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.memory.MemoryDereference;
 import it.unive.lisa.symbolic.memory.StaticAccess;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -160,7 +161,7 @@ public class ArrayLength
 			StaticAccess len = new StaticAccess(
 					Int32Type.INSTANCE,
 					container,
-					"len",
+					new Variable(Int32Type.INSTANCE, "len", getLocation()),
 					getLocation());
 
 			return analysis.smallStepSemantics(state, len, this);
