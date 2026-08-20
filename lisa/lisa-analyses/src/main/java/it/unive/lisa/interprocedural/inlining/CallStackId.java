@@ -89,7 +89,9 @@ public class CallStackId<A extends AbstractLattice<A>>
 	 * @return the calls
 	 */
 	public List<CFGCall> getReversedCalls() {
-		return calls.reversed();
+		List<CFGCall> calls = new ArrayList<>(this.calls);
+		Collections.reverse(calls);
+		return calls;
 	}
 
 	/**
