@@ -9,10 +9,18 @@ import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
+// TODO tried making this class abstract with isHeap() as an abstract method:
+// only AllocationSite (and its Heap/Stack subclasses) actually distinguish
+// heap/stack, but MonolithicMemory and TypeBasedMemory instantiate
+// MemoryLocation directly, plus 4 test fixtures in EnvironmentTest.
+// Going abstract would require introducing a concrete fallback subclass
+// (e.g. a GenericMemoryLocation with isHeap() = true) for
+// all of them. Left concrete for now with isHeap() defaulting to true below.
+
 /**
  * An identifier of a synthetic program variable that represents a resolved
  * memory location.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class MemoryLocation
@@ -23,7 +31,7 @@ public class MemoryLocation
 
 	/**
 	 * Builds the memory location.
-	 * 
+	 *
 	 * @param staticType the static type of this expression
 	 * @param name       the name of the location
 	 * @param weak       whether or not this identifier is weak, meaning that it
@@ -39,12 +47,19 @@ public class MemoryLocation
 		super(staticType, name, weak, new Annotations(), location);
 	}
 
-	// TODO CHECK subclasses may override isHeap() to distinguish stack vs heap
-	// locations
+	/**
+	 * Yields whether this memory location is on the heap ({@code true}) or on
+	 * the stack ({@code false}). Defaults to {@code true}.
+	 *
+	 * @return whether this memory location is on the heap
+	 */
+	public boolean isHeap() {
+		return true;
+	}
 
 	@Override
 	public String toString() {
-		return "memory[" + (isWeak() ? "w" : "s") + "]:" + getName();
+		return (isHeap() ? "heap" : "stack") + "[" + (isWeak() ? "w" : "s") + "]:" + getName();
 	}
 
 	@Override
@@ -122,7 +137,7 @@ public class MemoryLocation
 	 * Returns whether this memory location is a reference to a region being
 	 * freshly allocated or not. Value/type domains can exploit this information
 	 * to refine their reasoning.
-	 * 
+	 *
 	 * @return whether this memory location is an allocation site or not
 	 */
 	public boolean isAllocation() {
@@ -133,7 +148,7 @@ public class MemoryLocation
 	 * Sets whether this memory location is a reference to a region being
 	 * freshly allocated or not. Value/type domains can exploit this information
 	 * to refine their reasoning.
-	 * 
+	 *
 	 * @param isAllocation whether this memory location is an allocation site or
 	 *                         not
 	 */
@@ -145,7 +160,7 @@ public class MemoryLocation
 	/**
 	 * Returns a non-allocation version of this location, that is, a version
 	 * where {@link #isAllocation()} returns false.
-	 * 
+	 *
 	 * @return the non-allocation version of this location
 	 */
 	public MemoryLocation asNonAllocation() {

@@ -33,9 +33,9 @@ Program-wide fixpoint
               MonolithicMemory: Small step semantics of new A
               MonolithicMemory: Rewriting of new A
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Small step semantics of memory[w]:memory
-                InferredTypes: Evaluation of memory[w]:memory
-              Interval: Small step semantics of memory[w]:memory
+              InferredTypes: Small step semantics of heap[w]:memory
+                InferredTypes: Evaluation of heap[w]:memory
+              Interval: Small step semantics of heap[w]:memory
           Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
             SimpleAbstractDomain: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
               MonolithicMemory: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
@@ -157,9 +157,9 @@ Program-wide fixpoint
                       MonolithicMemory: Small step semantics of new tests
                       MonolithicMemory: Rewriting of new tests
                       SimpleAbstractDomain: application of substitutions
-                      InferredTypes: Small step semantics of memory[w]:memory
-                        InferredTypes: Evaluation of memory[w]:memory
-                      Interval: Small step semantics of memory[w]:memory
+                      InferredTypes: Small step semantics of heap[w]:memory
+                        InferredTypes: Evaluation of heap[w]:memory
+                      Interval: Small step semantics of heap[w]:memory
                   Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
                     SimpleAbstractDomain: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
                       MonolithicMemory: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25

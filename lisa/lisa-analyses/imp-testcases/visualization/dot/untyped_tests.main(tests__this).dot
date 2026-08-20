@@ -1,7 +1,7 @@
 digraph "untyped tests::main(tests* this)" {
 edge ["dir"="forward"]
 graph ["label"="untyped tests::main(tests* this)","labelloc"="t"]
-"node0" ["label"=<a = new A()<br/><br/>{ expressions: [a],<br/>state: { memory: monolith,<br/>type: { a: [A*],<br/>memory[w]:memory: [A],<br/>this: [tests*] },<br/>value: #TOP# }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
+"node0" ["label"=<a = new A()<br/><br/>{ expressions: [a],<br/>state: { memory: monolith,<br/>type: { a: [A*],<br/>heap[w]:memory: [A],<br/>this: [tests*] },<br/>value: #TOP# }<br/> }<br/>>,"shape"="rect","id"="node0","color"="black","style"="dashed"]
 "node3" ["label"=<one = getPositive(a, getOne(a))<br/><br/>{ expressions: [one],<br/>state: { memory: monolith,<br/>type: { one: [int32] },<br/>value: { one: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node3","color"="gray"]
 "node9" ["label"=<positive = identity(a, one)<br/><br/>{ expressions: [positive],<br/>state: { memory: monolith,<br/>type: { one: [int32],<br/>positive: [int32] },<br/>value: { one: [10, 10],<br/>positive: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node9","color"="gray"]
 "node14" ["label"=<minusone = -1<br/><br/>{ expressions: [minusone],<br/>state: { memory: monolith,<br/>type: { minusone: [int32],<br/>one: [int32],<br/>positive: [int32] },<br/>value: { minusone: [-1, -1],<br/>one: [10, 10],<br/>positive: [10, 10] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node14","color"="gray"]
