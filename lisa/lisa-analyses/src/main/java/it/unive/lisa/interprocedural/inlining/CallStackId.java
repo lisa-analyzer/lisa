@@ -1,17 +1,15 @@
 package it.unive.lisa.interprocedural.inlining;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link ScopeId} that keeps track of the whole call stack and of the entry
@@ -178,6 +176,8 @@ public class CallStackId<A extends AbstractLattice<A>>
 	 * Pops the specified amount of entries from this call stack id.
 	 *
 	 * @param amount the number of entries to pop
+	 * 
+	 * @return a new id with the specified amount of entries popped
 	 */
 	public CallStackId<A> pop(
 			int amount) {
