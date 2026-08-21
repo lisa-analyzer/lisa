@@ -29,7 +29,6 @@ import it.unive.lisa.interprocedural.events.FixpointEnd;
 import it.unive.lisa.interprocedural.events.FixpointIterationEnd;
 import it.unive.lisa.interprocedural.events.FixpointIterationStart;
 import it.unive.lisa.interprocedural.events.FixpointStart;
-import it.unive.lisa.interprocedural.events.PrecomputedCallResult;
 import it.unive.lisa.interprocedural.inlining.recursion.RecursionSolver;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.IterationLogger;
@@ -371,8 +370,6 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 		// compute the result over all possible targets, and take the lub of
 		// the results
 		for (CFG cfg : call.getTargetedCFGs()) {
-			CFGResults<A> localResults = results.get(cfg);
-			AnalyzedCFG<A> states = localResults == null ? null : localResults.get(token);
 			Pair<AnalysisState<A>,
 					ExpressionSet[]> prepared = prepareEntryState(
 							call,
@@ -385,43 +382,28 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			if (events != null)
 				events.post(new ComputedCallState<>(call, prepared.getLeft(), prepared.getRight()));
 
-			AnalysisState<A> exitState;
-			if (canShortcut(cfg) && states != null) {
-				// no need to compute the fixpoint: we already have an
-				// exact approximation of the result having the same
-				// call stack and entry states
-				exitState = states.getExitState();
-				if (events != null)
-					events.post(new PrecomputedCallResult<>(
-							call,
-							token,
-							prepared.getLeft(),
-							prepared.getRight(),
-							exitState));
-			} else {
-				// compute the result with a fixpoint iteration
-				AnalyzedCFG<A> fixpointResult = null;
-				try {
-					fixpointResult = computeFixpoint(cfg, token, prepared.getLeft());
-				} catch (FixpointException e) {
-					throw new SemanticException("Exception during the interprocedural analysis", e);
-				}
-
-				exitState = initialState.bottom();
-				for (Statement exit : fixpointResult.getAllExitpoints())
-					exitState = exitState.lub(
-							analysis.removeCaughtErrors(
-									fixpointResult.getAnalysisStateAfter(exit),
-									exit));
-
-				if (events != null)
-					events.post(new ComputedCallResult<>(
-							call,
-							token,
-							prepared.getLeft(),
-							prepared.getRight(),
-							exitState));
+			// compute the result with a fixpoint iteration
+			AnalyzedCFG<A> fixpointResult = null;
+			try {
+				fixpointResult = computeFixpoint(cfg, token, prepared.getLeft());
+			} catch (FixpointException e) {
+				throw new SemanticException("Exception during the interprocedural analysis", e);
 			}
+
+			AnalysisState<A> exitState = initialState.bottom();
+			for (Statement exit : fixpointResult.getAllExitpoints())
+				exitState = exitState.lub(
+						analysis.removeCaughtErrors(
+								fixpointResult.getAnalysisStateAfter(exit),
+								exit));
+
+			if (events != null)
+				events.post(new ComputedCallResult<>(
+						call,
+						token,
+						prepared.getLeft(),
+						prepared.getRight(),
+						exitState));
 
 			// save the resulting state
 			ScopingStrategy strategy = call.getProgram().getFeatures().getScopingStrategy();
