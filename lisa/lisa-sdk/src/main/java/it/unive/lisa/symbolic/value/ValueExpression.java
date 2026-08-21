@@ -43,4 +43,16 @@ public abstract class ValueExpression
 		return this;
 	}
 
+	/**
+	 * Yields the value expression corresponding to the logical negation of
+	 * this expression. Subclasses can override this to simplify the negation
+	 * (e.g., by flipping a comparison or a logical operator) instead of
+	 * wrapping this expression in a {@link LogicalNegation}.
+	 *
+	 * @return the logical negation of this expression
+	 */
+	public ValueExpression negate() {
+		return new UnaryExpression(getStaticType(), this, LogicalNegation.INSTANCE, getCodeLocation());
+	}
+
 }
