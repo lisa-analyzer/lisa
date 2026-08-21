@@ -164,14 +164,17 @@ public class NegationRemovalTest {
 		Variable c = var("c");
 		Variable d = var("d");
 
-		BinaryExpression conjunction = bin(bin(a, b, ComparisonEq.INSTANCE), bin(c, d, ComparisonLt.INSTANCE), LogicalAnd.INSTANCE);
+		BinaryExpression conjunction = bin(bin(a, b, ComparisonEq.INSTANCE), bin(c, d, ComparisonLt.INSTANCE),
+				LogicalAnd.INSTANCE);
 		UnaryExpression negated = not(conjunction);
 
-		BinaryExpression expected = bin(bin(a, b, ComparisonNe.INSTANCE), bin(c, d, ComparisonGe.INSTANCE), LogicalOr.INSTANCE);
+		BinaryExpression expected = bin(bin(a, b, ComparisonNe.INSTANCE), bin(c, d, ComparisonGe.INSTANCE),
+				LogicalOr.INSTANCE);
 
 		ValueExpression result = negated.removeNegations();
 		assertTrue(result instanceof BinaryExpression, "Negation is not a binary expression");
-		assertSame(LogicalOr.INSTANCE, ((BinaryExpression) result).getOperator(), "Conjunction has not been turned into a disjunction");
+		assertSame(LogicalOr.INSTANCE, ((BinaryExpression) result).getOperator(),
+				"Conjunction has not been turned into a disjunction");
 		assertEquals(expected, result, "Negated conjunction is different from expected (De Morgan's law)");
 	}
 
@@ -182,14 +185,17 @@ public class NegationRemovalTest {
 		Variable c = var("c");
 		Variable d = var("d");
 
-		BinaryExpression disjunction = bin(bin(a, b, ComparisonEq.INSTANCE), bin(c, d, ComparisonLt.INSTANCE), LogicalOr.INSTANCE);
+		BinaryExpression disjunction = bin(bin(a, b, ComparisonEq.INSTANCE), bin(c, d, ComparisonLt.INSTANCE),
+				LogicalOr.INSTANCE);
 		UnaryExpression negated = not(disjunction);
 
-		BinaryExpression expected = bin(bin(a, b, ComparisonNe.INSTANCE), bin(c, d, ComparisonGe.INSTANCE), LogicalAnd.INSTANCE);
+		BinaryExpression expected = bin(bin(a, b, ComparisonNe.INSTANCE), bin(c, d, ComparisonGe.INSTANCE),
+				LogicalAnd.INSTANCE);
 
 		ValueExpression result = negated.removeNegations();
 		assertTrue(result instanceof BinaryExpression, "Negation is not a binary expression");
-		assertSame(LogicalAnd.INSTANCE, ((BinaryExpression) result).getOperator(), "Disjunction has not been turned into a conjunction");
+		assertSame(LogicalAnd.INSTANCE, ((BinaryExpression) result).getOperator(),
+				"Disjunction has not been turned into a conjunction");
 		assertEquals(expected, result, "Negated disjunction is different from expected (De Morgan's law)");
 	}
 
@@ -228,15 +234,18 @@ public class NegationRemovalTest {
 		Variable e = var("e");
 		Variable f = var("f");
 
-		BinaryExpression inner = bin(bin(a, b, ComparisonEq.INSTANCE), bin(c, d, ComparisonLt.INSTANCE), LogicalAnd.INSTANCE);
+		BinaryExpression inner = bin(bin(a, b, ComparisonEq.INSTANCE), bin(c, d, ComparisonLt.INSTANCE),
+				LogicalAnd.INSTANCE);
 		BinaryExpression outer = bin(inner, bin(e, f, ComparisonGt.INSTANCE), LogicalOr.INSTANCE);
 		UnaryExpression negated = not(outer);
 
-		BinaryExpression expectedInner = bin(bin(a, b, ComparisonNe.INSTANCE), bin(c, d, ComparisonGe.INSTANCE), LogicalOr.INSTANCE);
+		BinaryExpression expectedInner = bin(bin(a, b, ComparisonNe.INSTANCE), bin(c, d, ComparisonGe.INSTANCE),
+				LogicalOr.INSTANCE);
 		BinaryExpression expected = bin(expectedInner, bin(e, f, ComparisonLe.INSTANCE), LogicalAnd.INSTANCE);
 
 		ValueExpression result = negated.removeNegations();
-		assertEquals(expected, result, "Nested negation was not fully pushed down through both levels (De Morgan's law)");
+		assertEquals(expected, result,
+				"Nested negation was not fully pushed down through both levels (De Morgan's law)");
 	}
 
 	@Test
@@ -282,7 +291,8 @@ public class NegationRemovalTest {
 				bin(var("a"), var("b"), ComparisonEq.INSTANCE),
 				bin(var("c"), var("d"), ComparisonLt.INSTANCE),
 				LogicalAnd.INSTANCE);
-		assertSame(conjunction, conjunction.removeNegations(), "A conjunction that is not itself negated should be returned unchanged");
+		assertSame(conjunction, conjunction.removeNegations(),
+				"A conjunction that is not itself negated should be returned unchanged");
 	}
 
 	@Test
