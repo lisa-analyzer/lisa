@@ -1,16 +1,21 @@
 package it.unive.lisa.interprocedural.inlining;
 
-import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.interprocedural.ScopeId;
-import it.unive.lisa.program.cfg.fixpoints.CompoundState;
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.util.collections.CollectionUtilities;
+
 /**
- * A {@link ScopeId} that keeps track of the whole call stack.
+ * A {@link ScopeId} that keeps track of the whole call stack and of the entry
+ * state of each stack frame.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -20,7 +25,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 		implements
 		ScopeId<A> {
 
-	private final List<CFGCall> calls;
+	private final List<Pair<CFGCall, AnalysisState<A>>> calls;
 
 	private CallStackId() {
 		this.calls = Collections.emptyList();
@@ -29,10 +34,10 @@ public class CallStackId<A extends AbstractLattice<A>>
 	private CallStackId(
 			CallStackId<A> source,
 			CFGCall newToken,
-			CompoundState<A> state) {
+			AnalysisState<A> state) {
 		this.calls = new ArrayList<>(source.calls.size() + 1);
 		source.calls.forEach(this.calls::add);
-		this.calls.add(newToken);
+		this.calls.add(Pair.of(newToken, state));
 	}
 
 	/**
@@ -45,14 +50,15 @@ public class CallStackId<A extends AbstractLattice<A>>
 	}
 
 	/**
-	 * Yields the call at the given index, counting from the end of the stack.
+	 * Yields the call at the given index, counting from the end of the stack,
+	 * with its entry state.
 	 * 
 	 * @param index the index of the call to retrieve, counting from the end of
 	 *                  the stack
 	 * 
 	 * @return the call at the given index, counting from the end of the stack
 	 */
-	public CFGCall getCallFromEnd(
+	public Pair<CFGCall, AnalysisState<A>> getCallFromEnd(
 			int index) {
 		return calls.get(calls.size() - index - 1);
 	}
@@ -66,7 +72,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 	 * 
 	 * @return the call at the given index, counting from the start of the stack
 	 */
-	public CFGCall getCall(
+	public Pair<CFGCall, AnalysisState<A>> getCall(
 			int index) {
 		return calls.get(index);
 	}
@@ -77,7 +83,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 	 * 
 	 * @return the calls
 	 */
-	public List<CFGCall> getCalls() {
+	public List<Pair<CFGCall, AnalysisState<A>>> getCalls() {
 		return calls;
 	}
 
@@ -88,8 +94,8 @@ public class CallStackId<A extends AbstractLattice<A>>
 	 * 
 	 * @return the calls
 	 */
-	public List<CFGCall> getReversedCalls() {
-		List<CFGCall> calls = new ArrayList<>(this.calls);
+	public List<Pair<CFGCall, AnalysisState<A>>> getReversedCalls() {
+		List<Pair<CFGCall, AnalysisState<A>>> calls = new ArrayList<>(this.calls);
 		Collections.reverse(calls);
 		return calls;
 	}
@@ -110,7 +116,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 		if (calls.isEmpty())
 			return "<empty>";
 		return "["
-				+ calls.stream().map(call -> call.getLocation())
+				+ calls.stream().map(call -> call.getLeft().getLocation())
 						.collect(new CollectionUtilities.StringCollector<>(", "))
 				+ "]";
 	}
@@ -142,12 +148,12 @@ public class CallStackId<A extends AbstractLattice<A>>
 		if (calls == null)
 			result = prime * result;
 		else
-			for (CFGCall call : calls)
+			for (Pair<CFGCall, AnalysisState<A>> call : calls)
 				// we use the hashcode of the location as the hashcode of the
 				// call is based on the ones of its targets, and a CFG hashcode
 				// is not consistent between executions - this is a problem as
 				// this object's hashcode is used as suffix in some filenames
-				result = prime * result + call.getLocation().hashCode();
+				result = prime * result + call.getLeft().getLocation().hashCode();
 		return result;
 	}
 
@@ -165,16 +171,13 @@ public class CallStackId<A extends AbstractLattice<A>>
 	public CallStackId<A> push(
 			CFGCall c,
 			CompoundState<A> state) {
-		return new CallStackId<>(this, c, state);
+		return new CallStackId<>(this, c, state.postState);
 	}
 
 	/**
 	 * Pops the specified amount of entries from this call stack id.
 	 *
 	 * @param amount the number of entries to pop
-	 * 
-	 * @return a new {@link CallStackId} with the specified number of entries
-	 *             popped
 	 */
 	public CallStackId<A> pop(
 			int amount) {
