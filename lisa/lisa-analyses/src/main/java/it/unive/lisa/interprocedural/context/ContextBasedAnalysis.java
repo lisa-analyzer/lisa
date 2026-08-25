@@ -388,7 +388,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	 * @throws SemanticException if an exception happens while storing the
 	 *                               result of the fixpoint
 	 */
-	private AnalyzedCFG<A> computeFixpoint(
+	protected AnalyzedCFG<A> computeFixpoint(
 			CFG cfg,
 			KDepthToken<A> token,
 			AnalysisState<A> entryState)

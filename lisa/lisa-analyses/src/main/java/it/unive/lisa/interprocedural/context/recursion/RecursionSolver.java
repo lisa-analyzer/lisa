@@ -4,7 +4,9 @@ import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.conf.FixpointConfiguration;
@@ -21,10 +23,12 @@ import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushInv;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
@@ -39,9 +43,9 @@ import org.apache.logging.log4j.Logger;
  * bottom. This solver operates by restarting the recursion from
  * {@link Recursion#getInvocation()} a number of times, until the results of all
  * the members stabilize.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
@@ -59,6 +63,8 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 
 	private final Map<CFGCall, Pair<AnalysisState<A>, KDepthToken<A>>> finalEntryStates;
 
+	private final Map<CFGCall, AnalysisState<A>> finalResults;
+
 	private final BaseCasesFinder<A, D> baseCases;
 
 	private GenericMapLattice<CFGCall, AnalysisState<A>> previousApprox;
@@ -67,9 +73,15 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 
 	private AnalysisState<A> base;
 
+	private AnalysisState<A> previousEntry;
+
+	private AnalysisState<A> recursiveEntry;
+
+	private boolean recursionKickOff;
+
 	/**
 	 * Builds the solver.
-	 * 
+	 *
 	 * @param backing   the analysis that backs this solver, and that can be
 	 *                      used to query call results
 	 * @param recursion the recursion to solve
@@ -80,9 +92,17 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 		super(backing);
 		this.recursion = recursion;
 		finalEntryStates = new HashMap<>();
+		finalResults = new HashMap<>();
 		// the return value of each back call must be the same as the one
-		// starting the recursion, as they invoke the same cfg
-		returnsVoid = recursion.getInvocation().returnsVoid(null);
+		// starting the recursion, as they invoke the same cfg. we cannot ask
+		// recursion.getInvocation() directly, as the starting call comes
+		// from the call graph and might still be an UnresolvedCall: asking
+		// it would silently fall back to false regardless of the target,
+		// since the CFGCall-specific check in Call#returnsVoid never
+		// triggers. the recursion head, however, is always a proper,
+		// resolved CFG, so we replicate that same check on it directly
+		returnsVoid = !recursion.getRecursionHead().getNormalExitpoints().stream()
+				.anyMatch(st -> st instanceof MetaVariableCreator);
 		baseCases = new BaseCasesFinder<>(backing, recursion, returnsVoid);
 	}
 
@@ -117,20 +137,29 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 			StatementStore<A> expressions)
 			throws SemanticException {
 		boolean inRecursion = recursion.getMembers().contains(call.getCFG());
-		if (inRecursion && call.getTargetedCFGs().contains(recursion.getRecursionHead())) {
+		if (!recursionKickOff && inRecursion && call.getTargetedCFGs().contains(recursion.getRecursionHead())) {
 			// this is a back call
 			finalEntryStates.put(call, Pair.of(entryState, token));
 
+			for (CFG target : call.getTargetedCFGs()) {
+				ScopeToken scope = new ScopeToken(call);
+				AnalysisState<A> entry = prepareEntryState(call, entryState, parameters, expressions, scope, target)
+						.getLeft();
+				// we are interested in lub/widen only the call parameters
+				recursiveEntry = recursiveEntry.lub(
+						entry.forgetIdentifiersIf(i -> !(i instanceof Variable), call));
+			}
+
 			AnalysisState<A> approx = null;
-			if (recursiveApprox.getMap() != null)
-				approx = recursiveApprox.getMap().get(call);
+			if (previousApprox.getMap() != null)
+				approx = previousApprox.getMap().get(call);
 			if (approx == null)
 				// no state: we must start with the base cases
 				approx = transferToCallsite(recursion.getInvocation(), call, base);
 			// we bring in the entry state to carry over the correct scope
 			AnalysisState<A> res = approx.lub(entryState);
 			Identifier meta = call.getMetaVariable();
-			if (!res.getExecutionState().knowsIdentifier(meta)) {
+			if (!returnsVoid && !res.getExecutionState().knowsIdentifier(meta)) {
 				// if we have no information for the return value, we want to
 				// force it to bottom as it means that this is either the first
 				// execution (that must start from bottom) or that the recursion
@@ -138,6 +167,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 				PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
 				res = analysis.assign(res, meta, inv, call);
 			}
+			finalResults.put(call, res);
 			return res;
 		}
 		return super.getAbstractResultOf(call, entryState, parameters, expressions);
@@ -155,9 +185,40 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 		return false;
 	}
 
+	@Override
+	protected AnalyzedCFG<A> computeFixpoint(
+			CFG cfg,
+			KDepthToken<A> token,
+			AnalysisState<A> entryState)
+			throws FixpointException,
+			SemanticException {
+		if (recursionKickOff) {
+			// we inject the widened entry state in the recursion head
+			entryState = entryState.lub(previousEntry);
+			recursionKickOff = false;
+		}
+		return super.computeFixpoint(cfg, token, entryState);
+	}
+
+	@Override
+	protected Pair<AnalysisState<A>, ExpressionSet[]> prepareEntryState(
+			CFGCall call,
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions,
+			ScopeToken scope,
+			CFG cfg)
+			throws SemanticException {
+		Pair<AnalysisState<A>, ExpressionSet[]> prepared = super.prepareEntryState(call, entryState, parameters,
+				expressions, scope, cfg);
+		if (recursionKickOff)
+			prepared = Pair.of(prepared.getLeft().lub(previousEntry), prepared.getRight());
+		return prepared;
+	}
+
 	/**
 	 * Solves the recursion by applying its iterates starting from bottom.
-	 * 
+	 *
 	 * @throws SemanticException if an exception happens during the computation
 	 */
 	public void solve()
@@ -169,7 +230,8 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 
 		LOG.info("Solving recursion at " + start.getLocation() + " for context " + recursion.getInvocationToken());
 
-		recursiveApprox = new GenericMapLattice<CFGCall, AnalysisState<A>>(entryState.postState).bottom();
+		recursiveApprox = new GenericMapLattice<CFGCall, AnalysisState<A>>(entryState.postState);
+		recursiveEntry = entryState.postState.bottom();
 		base = baseCases.find();
 
 		Expression[] actuals = start.getParameters();
@@ -184,10 +246,14 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 							+ start.getLocation());
 
 			previousApprox = recursiveApprox;
+			previousEntry = recursiveEntry;
+			recursiveEntry = recursiveEntry.bottom();
+			recursiveApprox = recursiveApprox.bottom();
 
 			// we reset the analysis at the point where the starting call can be
 			// evaluated
 			token = (KDepthToken<A>) recursion.getInvocationToken();
+			recursionKickOff = true;
 			AnalysisState<A> post = start
 					.forwardSemanticsAux(this, entryState.postState, params, entryState.intermediateStates);
 
@@ -196,24 +262,25 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 				// are thus unique
 				recursiveApprox = recursiveApprox.putState(end, transferToCallsite(start, end, post));
 
-			if (conf.recursionWideningThreshold < 0)
+			if (conf.recursionWideningThreshold < 0) {
 				recursiveApprox = previousApprox.lub(recursiveApprox);
-			else if (recursionCount == conf.recursionWideningThreshold)
+				recursiveEntry = previousEntry.lub(recursiveEntry);
+			} else if (recursionCount == conf.recursionWideningThreshold) {
 				recursiveApprox = previousApprox.widening(recursiveApprox);
-			else {
+				recursiveEntry = previousEntry.widening(recursiveEntry);
+			} else {
 				recursionCount++;
 				recursiveApprox = previousApprox.lub(recursiveApprox);
+				recursiveEntry = previousEntry.lub(recursiveEntry);
 			}
-		} while (!recursiveApprox.lessOrEqual(previousApprox));
+		} while (!recursiveApprox.lessOrEqual(previousApprox) || !recursiveEntry.lessOrEqual(previousEntry));
 
 		if (conf.usesOptimizedForwardFixpoint())
 			// as the fixpoint results do not contain an explicit entry for the
 			// recursive call, we need to store the approximation for the
 			// recursive call manually or the unwinding won't manage to solve it
 			for (CFGCall call : ends) {
-				Pair<AnalysisState<A>, KDepthToken<A>> pair = finalEntryStates.get(call);
-				AnalysisState<A> callEntry = pair.getLeft();
-				KDepthToken<A> callingToken = pair.getRight();
+				KDepthToken<A> callingToken = finalEntryStates.get(call).getRight();
 
 				// we get the cfg containing the call
 				@SuppressWarnings("unchecked")
@@ -227,24 +294,15 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 
 				// it might happen that the call is a hotspot and we don't need
 				// any additional work
-				if (!caller.hasPostStateOf(source)) {
-					// we add the value to the entry state, bringing in also the
-					// base case
-					AnalysisState<A> local = transferToCallsite(start, call, base);
-					AnalysisState<A> returned = callEntry.lub(recursiveApprox.getState(call).lub(local));
-					Identifier meta = call.getMetaVariable();
-					if (!returned.getExecutionState().knowsIdentifier(meta)) {
-						// if we have no information for the return value, we
-						// want to force it to bottom as it means that this is
-						// either the first execution (that must start from
-						// bottom) or that the recursion diverges
-						PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-						returned = analysis.assign(returned, meta, inv, call);
-					}
-
-					// finally, we store it in the result
-					caller.storePostStateOf(source, returned);
-				}
+				if (!caller.hasPostStateOf(source))
+					// we reuse the exact value that was returned to the live
+					// evaluation of this back call during the last round
+					// (see #getAbstractResultOf), instead of recomputing it
+					// through transferToCallsite(start, call, post): the
+					// latter would carry over a dangling reference to
+					// start's own meta variable, as post never goes through
+					// the statement-level cleanup that forgets it
+					caller.storePostStateOf(source, finalResults.get(call));
 			}
 	}
 
@@ -257,18 +315,19 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 		Identifier meta = destination.getMetaVariable();
 		if (returnsVoid)
 			res = state;
-		else
+		else {
 			for (Identifier variable : original.getMetaVariables())
 				// we transfer the return value
 				res = res.lub(analysis.assign(state, meta, variable, original));
 
-		if (!res.getExecutionState().knowsIdentifier(meta)) {
-			// if we have no information for the return value, we want to
-			// force it to bottom as it means that this is either the first
-			// execution (that must start from bottom) or that the recursion
-			// diverges
-			PushInv inv = new PushInv(meta.getStaticType(), destination.getLocation());
-			res = analysis.assign(res, meta, inv, destination);
+			if (!res.getExecutionState().knowsIdentifier(meta)) {
+				// if we have no information for the return value, we want to
+				// force it to bottom as it means that this is either the first
+				// execution (that must start from bottom) or that the recursion
+				// diverges
+				PushInv inv = new PushInv(meta.getStaticType(), destination.getLocation());
+				res = analysis.assign(res, meta, inv, destination);
+			}
 		}
 
 		// we only keep variables that can be affected by the recursive

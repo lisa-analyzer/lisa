@@ -756,6 +756,72 @@ public class RecursionsTest
 	}
 
 	@Test
+	public void testLongRecursionFullStack() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "long/full";
+		conf.programFile = "long.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testLongRecursionKDepth() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(5);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "long/kdepth";
+		conf.programFile = "long.imp";
+		// see the comment in testLongRecursionFullStack
+		conf.compareWithOptimization = false;
+		perform(conf);
+	}
+
+	@Test
+	public void testLongRecursionLast() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(1);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "long/last";
+		conf.programFile = "long.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void testLongRecursionInsensitive() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(0);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "long/insensitive";
+		conf.programFile = "long.imp";
+		perform(conf);
+	}
+
+	@Test
 	public void testLongRecursionInlined() {
 		CronConfiguration conf = new CronConfiguration();
 		conf.outputs.add(new JSONResults<>());
