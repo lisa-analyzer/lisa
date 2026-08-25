@@ -50,12 +50,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -236,7 +236,10 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 				if (events != null)
 					events.post(new CFGFixpointStart<>(cfg, token, entryState));
 
+				Map<CFGCall, AnalysisState<A>> recursiveCalls = new HashMap<>();
+				recursionResults.addLast(recursiveCalls);
 				AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty);
+				recursionResults.removeLast();
 
 				if (events != null) {
 					events.post(new CFGFixpointEnd<>(cfg, token, entryState, fixpointResult));
@@ -348,8 +351,9 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			if (shouldRaiseException)
 				throw new SemanticException("Maximum call stack depth reached");
 			else {
-				Recursion<A> rec = buildRecursionFor(call);
-				AnalysisState<A> result = new RecursionSolver<>(this, rec).solve(call, entryState);
+				Recursion<A> rec = buildRecursionFor(call, entryState, parameters, expressions);
+				AnalysisState<
+						A> result = new RecursionSolver<>(this, rec).solve(call, entryState, parameters, expressions);
 				AnalysisState<A> prev = recursionResults.getLast().put(call, result);
 				if (prev != null)
 					throw new SemanticException("Inconsistent recursion result for " + call + " under token " + token);
@@ -437,60 +441,29 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	}
 
 	private Recursion<A> buildRecursionFor(
-			CFGCall call)
+			CFGCall call,
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
 			throws SemanticException {
 		Collection<Collection<CodeMember>> recursions = callgraph.getRecursionsContaining(call.getCFG());
 		if (recursions.isEmpty())
 			throw new SemanticException("Maximum call stack depth reached and no recursion found for " + call);
 		else if (recursions.size() > 1)
 			throw new SemanticException("Multiple recursions found for " + call + ": " + recursions);
-		Collection<CodeMember> rec = recursions.iterator().next();
+		Collection<CodeMember> members = recursions.iterator().next();
 
-		// these are the calls that start the recursion by invoking
-		// one of its members
-		Collection<Call> starters = callgraph.getCallSites(rec)
-				.stream()
-				.filter(site -> !rec.contains(site.getCFG()))
-				.collect(Collectors.toSet());
+		Set<CFG> heads = new HashSet<>();
+		for (CFG candidate : call.getTargetedCFGs())
+			if (members.contains(candidate))
+				heads.add(candidate);
+		if (heads.isEmpty())
+			throw new SemanticException("No recursion head found for " + call);
+		else if (heads.size() > 1)
+			throw new SemanticException("Multiple recursions heads for " + call + ": " + heads);
+		CFG head = heads.iterator().next();
 
-		Call starter = null;
-		CFG head = null;
-		int idx = 0;
-		for (Call candidate : starters) {
-			// these are the head of the recursion: members invoked
-			// from outside of it
-			Set<CFG> heads = callgraph.getCallees(candidate.getCFG())
-					.stream()
-					.filter(callee -> rec.contains(callee))
-					.filter(CFG.class::isInstance)
-					.map(CFG.class::cast)
-					.collect(Collectors.toSet());
-			if (heads.isEmpty())
-				throw new SemanticException("No recursion head found for " + call);
-			else if (heads.size() > 1)
-				throw new SemanticException("Multiple recursions heads for " + call + ": " + heads);
-			head = heads.iterator().next();
-
-			for (Pair<CFGCall, AnalysisState<A>> scoper : token.getReversedCalls()) {
-				if (candidate.equals(scoper.getKey()) || candidate.equals(scoper.getKey().getSource()))
-					if (starter == null)
-						starter = scoper.getKey();
-					else
-						throw new SemanticException(
-								"Multiple recursion starters found for "
-										+ call
-										+ ": "
-										+ starter
-										+ " and "
-										+ candidate);
-				idx++;
-			}
-		}
-
-		if (!entries.containsKey(starter))
-			throw new SemanticException("No entry state found for recursion starter " + starter);
-
-		return new Recursion<A>(starter, token.pop(idx + 1), entries.get(starter), head, rec);
+		return new Recursion<>(call, token, CompoundState.of(entryState, expressions), head, members);
 	}
 
 }

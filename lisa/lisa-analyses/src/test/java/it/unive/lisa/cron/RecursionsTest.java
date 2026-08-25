@@ -754,4 +754,20 @@ public class RecursionsTest
 		conf.programFile = "unreachableBaseCase.imp";
 		perform(conf);
 	}
+
+	@Test
+	public void testLongRecursionInlined() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				DefaultConfiguration.defaultHeapDomain(),
+				new Interval(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>(3, false);
+		conf.callGraph = new RTACallGraph();
+		conf.testDir = "interprocedural";
+		conf.testSubDir = "long/inlined";
+		conf.programFile = "long.imp";
+		perform(conf);
+	}
 }

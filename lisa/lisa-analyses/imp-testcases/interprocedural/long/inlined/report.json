@@ -1,19 +1,19 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_-1218290490.graph.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_-1504338471.graph.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_-616638183.graph.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_-894191002.graph.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_840511353.graph.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_854714150.graph.json", "untyped_factorial.main(factorial__this,_untyped_a).graph.json" ],
+  "files" : [ "report.json", "untyped_tests.long(tests__this,_untyped_x)_-1931841211.graph.json", "untyped_tests.long(tests__this,_untyped_x)_1289527877.graph.json", "untyped_tests.long(tests__this,_untyped_x)_1684460493.graph.json", "untyped_tests.long(tests__this,_untyped_x)_1926922957.graph.json", "untyped_tests.main(tests__this,_untyped_x).graph.json" ],
   "info" : {
     "cfgs" : "2",
-    "duration" : "164ms",
-    "end" : "2026-08-25T12:09:38.131+02:00",
+    "duration" : "394ms",
+    "end" : "2026-08-25T11:32:59.395+02:00",
     "expressions" : "16",
-    "files" : "7",
-    "globals" : "0",
+    "files" : "5",
+    "globals" : "1",
     "members" : "2",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-08-25T12:09:37.967+02:00",
-    "statements" : "6",
+    "start" : "2026-08-25T11:32:59.001+02:00",
+    "statements" : "8",
     "units" : "1",
     "version" : "1.0",
     "warnings" : "0"
@@ -37,6 +37,6 @@
     "syntacticChecks" : "",
     "useWideningPoints" : "true",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs/interprocedural/factorial/inlined"
+    "workdir" : "test-outputs/interprocedural/long/inlined"
   }
 }
