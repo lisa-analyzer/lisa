@@ -17,6 +17,7 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -376,9 +377,8 @@ public final class SimpleAutomaton
 								new TreeSet<Transition<StringSymbol>>(),
 								emptyLanguage()));
 			if (lowInt > 0)
-				return epsilon
-						.union(auxRepeat(i, getInitialState(), new TreeSet<Transition<StringSymbol>>(),
-								emptyLanguage()));
+				return auxRepeat(i, getInitialState(), new TreeSet<Transition<StringSymbol>>(),
+						emptyLanguage());
 		}
 
 		long highInt = high.toLong();
@@ -423,6 +423,25 @@ public final class SimpleAutomaton
 			SortedSet<Transition<StringSymbol>> delta,
 			SimpleAutomaton result)
 			throws MathNumberConversionException {
+		// the outgoing transitions of each state of this automaton are
+		// looked up repeatedly while exploring every path from the initial
+		// state to every final state: precomputing them once here, instead
+		// of re-scanning all of this automaton's transitions on every
+		// recursive call, avoids redundant work without changing the result
+		Map<State, SortedSet<Transition<StringSymbol>>> adjacency = new HashMap<>();
+		for (State s : getStates())
+			adjacency.put(s, getOutgoingTransitionsFrom(s));
+
+		return auxRepeat(i, currentState, delta, result, adjacency);
+	}
+
+	private SimpleAutomaton auxRepeat(
+			IntInterval i,
+			State currentState,
+			SortedSet<Transition<StringSymbol>> delta,
+			SimpleAutomaton result,
+			Map<State, SortedSet<Transition<StringSymbol>>> adjacency)
+			throws MathNumberConversionException {
 
 		if (currentState.isFinal()) {
 
@@ -453,10 +472,10 @@ public final class SimpleAutomaton
 
 		}
 
-		for (Transition<StringSymbol> t : getOutgoingTransitionsFrom(currentState)) {
+		for (Transition<StringSymbol> t : adjacency.get(currentState)) {
 			SortedSet<Transition<StringSymbol>> clone = new TreeSet<Transition<StringSymbol>>(delta);
 			clone.add(t);
-			result = auxRepeat(i, t.getDestination(), clone, result).union(result);
+			result = auxRepeat(i, t.getDestination(), clone, result, adjacency).union(result);
 		}
 
 		return result;
@@ -535,20 +554,24 @@ public final class SimpleAutomaton
 									secondMapping.get(t.getDestination()),
 									t.getSymbol()));
 				}
-				if (t.getSource().isInitial()) {
-					for (State s : connectOn) {
-						if (states.contains(secondMapping.get(t.getSource())))
-							delta.add(
-									new Transition<>(secondMapping.get(t.getSource()), firstMapping.get(s),
-											t.getSymbol()));
-					}
-				}
 			}
 
 			for (Transition<StringSymbol> t : second.getOutgoingTransitionsFrom(second.getInitialState())) {
 				for (State s : connectOn) {
 					delta.add(
 							new Transition<>(firstMapping.get(s), secondMapping.get(t.getDestination()),
+									t.getSymbol()));
+				}
+			}
+
+			// transitions going back into second's initial state (e.g. the
+			// looping transition introduced by star()) must be redirected to
+			// each connection point, otherwise they are silently dropped and
+			// the loop they close is lost
+			for (Transition<StringSymbol> t : second.getIngoingTransitionsFrom(second.getInitialState())) {
+				for (State s : connectOn) {
+					delta.add(
+							new Transition<>(secondMapping.get(t.getSource()), firstMapping.get(s),
 									t.getSymbol()));
 				}
 			}

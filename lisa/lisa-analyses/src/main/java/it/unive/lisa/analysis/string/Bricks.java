@@ -313,42 +313,36 @@ public class Bricks
 			Set<String> reps = new TreeSet<>();
 
 			try {
-				if (this.strings.size() == 1) {
-					String element = this.strings.iterator().next();
-					reps.add(element.repeat(this.getMin().toInt()));
-					reps.add(element.repeat(this.getMax().toInt()));
-					return reps;
-				}
+				int min = this.getMin().toInt();
+				int max = this.getMax().toInt();
 
-				this.recGetReps(reps, this.getMin().toInt(), 0, "");
+				if (min == 0)
+					reps.add("");
+
+				if (max == 0 || this.strings.isEmpty())
+					return reps;
+
+				// level holds all the concatenations of exactly `count`
+				// elements of the strings set; it is built once per
+				// repetition count and reused to build the next one,
+				// instead of being recomputed from scratch every time
+				Set<String> level = new TreeSet<>();
+				level.add("");
+				for (int count = 1; count <= max; count++) {
+					Set<String> next = new TreeSet<>();
+					for (String prefix : level)
+						for (String string : this.strings)
+							next.add(prefix + string);
+					level = next;
+
+					if (count >= min)
+						reps.addAll(level);
+				}
 			} catch (MathNumberConversionException e) {
 				throw new IllegalStateException("Brick must be finite.");
 			}
 
 			return reps;
-		}
-
-		// Recursive function that gets all the possible combinations of the set
-		// between min and max
-		private void recGetReps(
-				Set<String> reps,
-				int min,
-				int numberOfReps,
-				String currentStr)
-				throws MathNumberConversionException {
-			if (!isFinite())
-				throw new IllegalStateException("Brick must be finite.");
-
-			if (min > this.getMax().toInt() && numberOfReps >= this.getMin().toInt())
-				reps.add(currentStr);
-			else {
-				for (String string : this.strings) {
-					if ((!currentStr.equals("") || this.getMin().toInt() == 0) && numberOfReps >= this.getMin().toInt())
-						reps.add(currentStr);
-
-					recGetReps(reps, min + 1, numberOfReps + 1, currentStr + string);
-				}
-			}
 		}
 
 		@Override
@@ -819,9 +813,11 @@ public class Bricks
 				throw new IllegalStateException("Brick list must be finite.");
 
 			Set<String> reps = new TreeSet<>();
+			boolean first = true;
 			for (Brick b : bricks)
-				if (reps.isEmpty()) {
+				if (first) {
 					reps.addAll(b.getReps());
+					first = false;
 				} else {
 					Set<String> newReps = new TreeSet<>();
 					for (String s1 : reps)
