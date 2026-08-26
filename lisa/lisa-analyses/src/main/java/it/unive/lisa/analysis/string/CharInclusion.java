@@ -416,10 +416,15 @@ public class CharInclusion
 				return left;
 
 			Set<Character> included = new TreeSet<>(left.certainlyContained);
-			Set<Character> possibly = new TreeSet<>(left.maybeContained);
+			included.removeAll(middle.certainlyContained);
+
+			if (left.maybeContained == null || middle.maybeContained == null || right.maybeContained == null)
+				// we cannot bound the possibly-included characters
+				return new CI(included, null);
+
 			// since we do not know if the replace will happen, we move
 			// everything to the possibly included characters
-			included.removeAll(middle.certainlyContained);
+			Set<Character> possibly = new TreeSet<>(left.maybeContained);
 			possibly.addAll(middle.certainlyContained);
 
 			included.removeAll(middle.maybeContained);

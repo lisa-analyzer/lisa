@@ -242,6 +242,8 @@ public class BoundedStringSet
 			java.util.function.BinaryOperator<String> operator) {
 		if (left.isTop() || right.isTop())
 			return top();
+		if ((long) left.elements.size() * right.elements.size() > max_size)
+			return top();
 
 		Set<String> result = new TreeSet<>();
 		for (String ll : left.elements)

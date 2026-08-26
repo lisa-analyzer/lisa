@@ -987,9 +987,10 @@ public class Bricks
 			if (val.isTop())
 				return top();
 			if (operator == StringCharAt.INSTANCE) {
-				left.normBricks();
+				BrickList normalized = new BrickList(new ArrayList<>(left.bricks));
+				normalized.normBricks();
 
-				Brick first = left.bricks.get(0);
+				Brick first = normalized.bricks.get(0);
 				TreeSet<String> result = new TreeSet<>();
 
 				if (first.getMin().equals(MathNumber.ONE)
@@ -1002,7 +1003,7 @@ public class Bricks
 					});
 				}
 
-				if (result.size() == first.getStrings().size()) {
+				if (first.getStrings() != null && result.size() == first.getStrings().size()) {
 					List<Brick> resultList = new ArrayList<>();
 					resultList.add(new Brick(new IntInterval(1, 1), result));
 					return new BrickList(resultList);
@@ -1011,9 +1012,10 @@ public class Bricks
 				return top();
 			}
 			if (operator == StringSubstringToEnd.INSTANCE) {
-				left.normBricks();
+				BrickList normalized = new BrickList(new ArrayList<>(left.bricks));
+				normalized.normBricks();
 
-				Brick first = left.bricks.get(0);
+				Brick first = normalized.bricks.get(0);
 				TreeSet<String> result = new TreeSet<>();
 
 				if (first.getMin().equals(MathNumber.ONE)
@@ -1026,7 +1028,7 @@ public class Bricks
 					});
 				}
 
-				if (result.size() == first.getStrings().size()) {
+				if (first.getStrings() != null && result.size() == first.getStrings().size()) {
 					List<Brick> resultList = new ArrayList<>();
 					resultList.add(new Brick(new IntInterval(1, 1), result));
 					return new BrickList(resultList);
@@ -1072,8 +1074,9 @@ public class Bricks
 			if (mid.isTop() || rig.isTop())
 				return top();
 
-			left.normBricks();
-			Brick first = left.bricks.get(0);
+			BrickList normalized = new BrickList(new ArrayList<>(left.bricks));
+			normalized.normBricks();
+			Brick first = normalized.bricks.get(0);
 			TreeSet<String> result = new TreeSet<>();
 
 			if (first.getMin().equals(MathNumber.ONE)
@@ -1086,7 +1089,7 @@ public class Bricks
 				});
 			}
 
-			if (result.size() == first.getStrings().size()) {
+			if (first.getStrings() != null && result.size() == first.getStrings().size()) {
 				List<Brick> resultList = new ArrayList<>();
 				resultList.add(new Brick(new IntInterval(1, 1), result));
 				return new BrickList(resultList);
@@ -1196,9 +1199,10 @@ public class Bricks
 			BrickList current,
 			long e,
 			long b) {
-		current.normBricks();
+		BrickList normalized = new BrickList(new ArrayList<>(current.bricks));
+		normalized.normBricks();
 
-		Brick first = current.bricks.get(0);
+		Brick first = normalized.bricks.get(0);
 
 		TreeSet<String> result = new TreeSet<>();
 
@@ -1214,7 +1218,7 @@ public class Bricks
 			});
 		}
 
-		if (result.size() == first.getStrings().size()) {
+		if (first.getStrings() != null && result.size() == first.getStrings().size()) {
 			List<Brick> resultList = new ArrayList<>();
 
 			resultList.add(new Brick(new IntInterval(1, 1), result));
@@ -1286,7 +1290,7 @@ public class Bricks
 
 	@Override
 	public BrickList bottom() {
-		return new BrickList().bottom();
+		return new BrickList(new ArrayList<>());
 	}
 
 	private BrickList generate(

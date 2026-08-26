@@ -64,7 +64,10 @@ public class Supertype
 
 	@Override
 	public Set<Type> getRuntimeTypes() {
-		if (this.isBottom())
+		if (this.isBottom() || types == null)
+			// types is null only for degenerate instances (e.g., the ones
+			// built by the no-arg constructor) that were never associated
+			// with a program's type system
 			return Collections.emptySet();
 		return type.allInstances(types);
 	}

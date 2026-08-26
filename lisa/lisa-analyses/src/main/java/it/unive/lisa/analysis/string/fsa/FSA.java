@@ -126,9 +126,8 @@ public class FSA
 						result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
 					else
 						result = result.union(new SimpleAutomaton(""));
-
-					return result;
 				}
+				return result;
 			} catch (CyclicAutomatonException e) {
 				throw new SemanticException("The automaton is cyclic", e);
 			}
