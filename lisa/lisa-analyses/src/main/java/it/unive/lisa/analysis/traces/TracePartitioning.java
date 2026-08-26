@@ -53,9 +53,10 @@ import java.util.Set;
  *                the domain {@code D}
  * @param <D> the kind of {@link AbstractDomain} that manages the underlying
  *                states
- * 
- * @see <a href=
- *          "https://doi.org/10.1145/1275497.1275501">https://doi.org/10.1145/1275497.1275501</a>
+ *
+ * @see <a href="https://doi.org/10.1145/1275497.1275501">Xavier Rival, Laurent
+ *          Mauborgne. The trace partitioning abstract domain. ACM Transactions
+ *          on Programming Languages and Systems, 29(5), article 26, 2007.</a>
  */
 public class TracePartitioning<A extends AbstractLattice<A>,
 		D extends AbstractDomain<A>>

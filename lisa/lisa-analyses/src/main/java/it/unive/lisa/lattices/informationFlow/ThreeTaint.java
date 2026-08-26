@@ -6,9 +6,10 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
- * A three-level taint lattice with three levels: tainted, clean, and top (i.e.,
- * possibly tainted).
- * 
+ * A taint lattice with three levels: tainted, clean, and top (i.e., possibly
+ * tainted). This is the lattice used by
+ * {@link it.unive.lisa.analysis.informationFlow.ThreeLevelsTaint}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ThreeTaint

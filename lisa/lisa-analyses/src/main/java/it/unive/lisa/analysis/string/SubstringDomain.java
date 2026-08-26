@@ -31,18 +31,26 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The substring relational abstract domain, tracking relation between string
- * expressions. This domain follows the one defined
- * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
- * this paper</a>.<br/>
+ * The substring relational abstract domain, tracking, for pairs of string
+ * expressions, whether one is known to be a substring of the other (see
+ * {@link Substrings}). This domain does not approximate the content of a single
+ * string in isolation, but the substring relations between different
+ * expressions, which are inferred and propagated through operators such as
+ * concatenation, substring extraction and replacement.<br/>
  * <br/>
  * This domain does not take part in the
  * {@link it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis},
  * meaning that it will not produce constraints for any expression.
- * 
+ *
  * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ *
+ * @see <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">
+ *          Vincenzo Arceri, Martina Olliaro, Agostino Cortesi, Pietro Ferrara.
+ *          Relational String Abstract Domains. In Verification, Model Checking,
+ *          and Abstract Interpretation (VMCAI 2022), LNCS vol. 13182, Springer,
+ *          2022.</a>
  */
 public class SubstringDomain
 		implements

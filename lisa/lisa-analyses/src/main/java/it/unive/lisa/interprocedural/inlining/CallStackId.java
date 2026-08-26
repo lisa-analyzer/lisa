@@ -12,11 +12,13 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A {@link ScopeId} that keeps track of the whole call stack and of the entry
- * state of each stack frame.
- * 
+ * The context sensitivity token used by {@link InliningAnalysis}: a
+ * {@link ScopeId} that keeps track of the whole call stack and of the entry
+ * state of each stack frame, so that every distinct call stack yields a
+ * distinct context.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of {@link AbstractLattice} handled by the analysis
  */
 public class CallStackId<A extends AbstractLattice<A>>

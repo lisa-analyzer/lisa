@@ -81,10 +81,12 @@ import java.util.Set;
 
 /**
  * The overflow-insensitive basic integer constant propagation analysis,
- * tracking if a certain integer value has constant value or not, implemented as
+ * tracking whether an integer value is a known constant or not, implemented as
  * a {@link BaseNonRelationalValueDomain}. The lattice structure used by this
- * domain is {@link IntegerConstant}.
- * 
+ * domain is {@link IntegerConstant}, representing either a single known
+ * constant or "unknown" (top): every arithmetic and comparison operator is
+ * evaluated exactly whenever all of its operands are themselves constants.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IntegerConstantPropagation

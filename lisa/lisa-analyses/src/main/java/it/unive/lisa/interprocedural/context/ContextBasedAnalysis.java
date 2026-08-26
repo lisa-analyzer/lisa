@@ -66,17 +66,28 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A context sensitive interprocedural analysis. The context sensitivity is
- * tuned by the number of calls that tail the call stack to keep track of. This
- * happens concretely in {@link KDepthToken}. Recursions are approximated
- * applying the iterates of the recursion starting from bottom and using the
- * same widening threshold of cfg fixpoints.
- * 
+ * A context-sensitive {@link CallGraphBasedAnalysis} following the call-string
+ * approach to interprocedural analysis: each {@link CFGCall} is analyzed once
+ * per distinct calling context, so that its result can vary depending on where
+ * it was invoked from, rather than being approximated once and reused for every
+ * call site. Contexts are represented by {@link ScopeId}s and, concretely, by
+ * {@link KDepthToken}s, whose sensitivity is tuned by the number of calls that
+ * tail the call stack to keep track of. Recursions (see {@link Recursion}) are
+ * approximated by a dedicated {@link RecursionSolver}, iterating the members of
+ * the recursion starting from bottom and using the same widening threshold as
+ * regular {@link CFG} fixpoints.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
+ *
+ * @see <a href=
+ *          "https://www.cs.tau.ac.il/~michas/sharir_pnueli-PFA-TA-1981.pdf">
+ *          Micha Sharir, Amir Pnueli. Two Approaches to Interprocedural Data
+ *          Flow Analysis. In Program Flow Analysis: Theory and Applications,
+ *          chapter 7, pages 189-233, Prentice-Hall, 1981.</a>
  */
 public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		D extends AbstractDomain<A>>

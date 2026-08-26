@@ -17,9 +17,17 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * An abstract domain that tracks the reachability of program points, exploiting
- * an underlying abstract domain to (i) compute approximations of the program
- * state, and (ii) deducing which branches are taken after traversing a guard.
+ * A wrapper {@link AbstractDomain} that pairs an underlying domain {@code D}
+ * with a {@link ReachLattice}, tracking whether each program point is
+ * unreachable, possibly reachable, or definitely reachable given the
+ * information computed so far. Reachability is refined every time a guard
+ * (i.e., the condition of a branch or a loop) is traversed: the underlying
+ * domain's {@code satisfies} operator (see {@link SemanticDomain}) is used to
+ * determine, whenever possible, which branch is actually taken, so that the
+ * other one can be marked as unreachable instead of being conservatively joined
+ * with the reachable state. This allows the domains stacked on top of this one
+ * to avoid losing precision because of infeasible paths, without requiring any
+ * change to their own semantics.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *

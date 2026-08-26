@@ -16,14 +16,15 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 /**
- * A lattice that associates an abstract state to each execution trace. This is
- * implemented as a {@link FunctionalLattice} whose keys are the
- * {@link ExecutionTrace}s, and whose values are the abstract states associated
- * to those traces. All traces can be collapsed into a single abstract state by
- * {@link #collapse()}.
- * 
+ * The lattice structure used by
+ * {@link it.unive.lisa.analysis.traces.TracePartitioning}, associating an
+ * abstract state to each execution trace. This is implemented as a
+ * {@link FunctionalLattice} whose keys are the {@link ExecutionTrace}s, and
+ * whose values are the abstract states associated to those traces. All traces
+ * can be collapsed into a single abstract state by {@link #collapse()}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of the abstract states associated to traces
  */
 public class TraceLattice<A extends AbstractLattice<A>>

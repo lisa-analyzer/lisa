@@ -28,8 +28,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * A class that represent the Finite State Automaton domain for strings,
- * exploiting a {@link SimpleAutomaton}.<br>
+ * A class that represents the Finite State Automaton (FSA) domain for strings,
+ * exploiting a {@link SimpleAutomaton} to approximate the set of values that a
+ * string expression can take. String operators such as concatenation and
+ * replacement are computed through automata-theoretic operations (e.g.,
+ * automaton concatenation) on the tracked automata, allowing this domain to
+ * represent unions of strings and simple loop-based patterns.<br>
  * <br>
  * <b>Caution:</b> the FSA domain is buggy and requires lots of resources, to
  * the point where it might be hard to debug also on relatively small samples.
@@ -39,6 +43,11 @@ import java.util.TreeSet;
  *
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ *
+ * @see <a href="https://link.springer.com/chapter/10.1007/3-540-44898-5_1">
+ *          Aske Simon Christensen, Anders Møller, Michael I. Schwartzbach.
+ *          Precise Analysis of String Expressions. In Static Analysis (SAS
+ *          2003), LNCS vol. 2694, pages 1-18, Springer, 2003.</a>
  */
 public class FSA
 		implements

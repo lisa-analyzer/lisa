@@ -8,10 +8,18 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import java.util.Collection;
 
 /**
- * A recursion happening in the program.
- * 
+ * A recursion happening in the program, that is, a cycle in the call graph
+ * discovered while analyzing a {@link Call}. Instances of this class are built
+ * by {@link CallGraphBasedAnalysis} subclasses when a call is found to
+ * (transitively) invoke a member that is already being analyzed, and are used
+ * by their recursion solvers (see, e.g.,
+ * {@link it.unive.lisa.interprocedural.context.recursion.RecursionSolver} and
+ * {@link it.unive.lisa.interprocedural.inlining.recursion.RecursionSolver}) to
+ * compute a sound approximation of the recursion's effects, typically by
+ * iterating over the recursive members until a fixpoint is reached.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of {@link AbstractLattice} contained into the analysis
  *                state
  */

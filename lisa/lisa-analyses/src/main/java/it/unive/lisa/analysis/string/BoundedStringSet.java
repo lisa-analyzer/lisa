@@ -66,13 +66,22 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A domain computing bounded set of strings, where the maximum number of
- * elements is defined by {@link #max_size}. If the number of elements exceeds
- * this limit, the set is considered to be top. The domain is defined
- * <a href="https://link.springer.com/chapter/10.1007/978-3-642-54807-9_12">in
- * this paper</a>.
+ * A domain computing a bounded set of strings, where the maximum number of
+ * tracked elements is defined by {@link #max_size}. As long as the number of
+ * possible values of a string stays within this bound, the domain represents
+ * them precisely as a finite set of concrete strings (see {@link BSS}); as soon
+ * as the bound is exceeded, the set collapses to top, losing all information.
+ * This makes the domain very precise for strings assembled from a handful of
+ * alternatives (e.g., through conditional branches), while remaining bounded in
+ * size.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href=
+ *          "https://link.springer.com/chapter/10.1007/978-3-642-54807-9_12">
+ *          Magnus Madsen, Esben Andreasen. String Analysis for Dynamic Field
+ *          Access. In Compiler Construction (CC 2014), LNCS vol. 8409, pages
+ *          197-217, Springer, 2014.</a>
  */
 public class BoundedStringSet
 		implements

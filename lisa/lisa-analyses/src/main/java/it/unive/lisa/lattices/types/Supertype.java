@@ -14,10 +14,12 @@ import java.util.Set;
 import org.apache.commons.collections4.SetUtils;
 
 /**
- * A lattice structure tracking the common supertype of a set of {@link Type}s.
- * The set of types represented by values of this class correspond to all
- * possible instances of the common supertype.
- * 
+ * The lattice structure used by
+ * {@link it.unive.lisa.analysis.types.StaticTypes}, tracking the common
+ * supertype of a set of {@link Type}s. The set of types represented by values
+ * of this class corresponds to all possible instances of the tracked common
+ * supertype.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Supertype
@@ -63,7 +65,7 @@ public class Supertype
 	@Override
 	public Set<Type> getRuntimeTypes() {
 		if (this.isBottom())
-			Collections.emptySet();
+			return Collections.emptySet();
 		return type.allInstances(types);
 	}
 

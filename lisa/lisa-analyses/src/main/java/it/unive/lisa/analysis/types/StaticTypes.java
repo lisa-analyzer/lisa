@@ -32,9 +32,13 @@ import org.apache.commons.collections4.SetUtils;
 
 /**
  * A {@link NonRelationalTypeDomain} that tracks the static type of variables,
- * and that computes expression types using their static type. Typing
- * information is thus deemed to be the set of all subtypes of the tracked type.
- * 
+ * and that computes expression types using their static type
+ * ({@link Supertype}). Typing information is thus deemed to be the set of all
+ * subtypes of the tracked type: this domain never computes the actual runtime
+ * types of an expression, and it never narrows the type information beyond what
+ * is already known from the program's declared types, except when it can be
+ * refined by casts and type checks.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class StaticTypes

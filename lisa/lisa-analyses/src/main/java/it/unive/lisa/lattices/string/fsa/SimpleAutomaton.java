@@ -24,8 +24,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
- * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using a
- * standard alphabet of single characters.
+ * A generic finite state automaton (DFA, NFA, or epsilon-NFA) over an alphabet
+ * of single characters ({@link StringSymbol}), used by
+ * {@link it.unive.lisa.analysis.string.fsa.FSA} to approximate string values.
  *
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>

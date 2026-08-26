@@ -48,13 +48,26 @@ import org.apache.commons.lang3.tuple.Pair;
  * A base class for heap analyses based on the allocation sites of the objects
  * and arrays they track, namely the position of the code where heap locations
  * are generated. All heap locations that are generated at the same allocation
- * sites are abstracted into a single unique heap identifier. Concrete instances
- * have control over their field-sensitivity.
- * 
+ * sites are abstracted into a single unique heap identifier, distinguishing
+ * strong updates (when at most one instance can be associated with an
+ * allocation site) from weak ones (when the site might represent more than one
+ * runtime object, e.g., because it lies inside a loop or a recursive call).
+ * Program identifiers are tracked as points-to relations towards these
+ * allocation sites through the {@code L} lattice, and assignments between
+ * pointers are resolved by aliasing or by shallow-copying the pointed-to site,
+ * depending on whether the right-hand side is itself an allocation. Concrete
+ * subclasses have control over their field-sensitivity: this class follows the
+ * field-insensitive construction of X. Rival and K. Yi, "Introduction to Static
+ * Analysis: An Abstract Interpretation Perspective", Section 8.3.4.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <L> the type {@link FunctionalLattice} used to track points-to
  *                information for the heap locations
+ *
+ * @see <a href="https://mitpress.mit.edu/books/introduction-static-analysis">
+ *          Xavier Rival, Kwangkeun Yi. Introduction to Static Analysis: An
+ *          Abstract Interpretation Perspective. MIT Press, 2020.</a>
  */
 public abstract class AllocationSiteBasedAnalysis<
 		L extends FunctionalLattice<L, Identifier, AllocationSites> & HeapLattice<L>>
