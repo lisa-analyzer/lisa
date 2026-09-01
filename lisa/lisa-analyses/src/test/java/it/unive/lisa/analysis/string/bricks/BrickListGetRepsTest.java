@@ -11,12 +11,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests for {@link BrickList#getReps()}, which must yield the set of strings
- * obtained by concatenating, in order, one representative from each brick's own
- * {@link Brick#getReps()}. The expected results below are derived directly from
- * this definition.
- */
 public class BrickListGetRepsTest {
 
 	private final Bricks domain = new Bricks();

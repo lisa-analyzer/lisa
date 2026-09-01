@@ -230,19 +230,6 @@ public class StaticTypes
 
 		TypeSystem types = src.getProgram().getTypes();
 		Set<Type> elems = eval.type.allInstances(types);
-		// these are all types compatible with the type tokens
-		Set<Type> filtered = elems.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
-		if (filtered.isEmpty())
-			// if there is no type token in the evaluation,
-			// this is not a type condition and we cannot
-			// assume anything
-			return environment;
 
 		BinaryOperator operator = expression.getOperator();
 		Supertype starting = environment.getState(id);
@@ -258,6 +245,20 @@ public class StaticTypes
 			// is set the type to eval.type
 			update = eval.type.canBeAssignedTo(starting.type) ? eval : bottom();
 		else if (operator == TypeCheck.INSTANCE) {
+			// these are all types compatible with the type tokens
+			Set<Type> filtered = elems.stream()
+					.filter(Type::isTypeTokenType)
+					.map(Type::asTypeTokenType)
+					.map(TypeTokenType::getTypes)
+					.flatMap(Set::stream)
+					.flatMap(t -> t.allInstances(types).stream())
+					.collect(Collectors.toSet());
+			if (filtered.isEmpty())
+				// if there is no type token in the evaluation,
+				// this is not a type condition and we cannot
+				// assume anything
+				return environment;
+
 			// we keep only the ones that can be casted
 			Type sup = Type.commonSupertype(SetUtils.intersection(starting.type.allInstances(types), filtered), null);
 			if (sup == null)

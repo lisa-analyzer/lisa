@@ -107,7 +107,7 @@ public class HeapAllocationSite
 	public HeapAllocationSite asNonAllocation() {
 		if (!isAllocation())
 			return this;
-		return new HeapAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), getField(), isWeak(), getCodeLocation());
 	}
 
 }

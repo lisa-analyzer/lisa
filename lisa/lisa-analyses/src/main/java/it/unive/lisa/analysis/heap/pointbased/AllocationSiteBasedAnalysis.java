@@ -694,7 +694,7 @@ public abstract class AllocationSiteBasedAnalysis<
 		ExpressionSet targets = rewrite(state, y, pp, oracle);
 
 		while (!ws.isEmpty()) {
-			SymbolicExpression current = ws.peek();
+			SymbolicExpression current = ws.pop();
 			if (targets.elements().contains(current))
 				return Satisfiability.SATISFIED;
 

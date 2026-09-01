@@ -341,10 +341,16 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		}
 
 		try {
-			for (Recursion<A> rec : orderedRecursions) {
+			for (Recursion<A> rec : orderedRecursions)
+				// solving already goes through computeFixpoint() for the
+				// recursion's own members (RecursionSolver is not a
+				// shortcut for them), which stores their results and adds
+				// them to triggers when they actually change; unconditionally
+				// re-adding them here regardless of whether solving produced
+				// a new result made the outer fixpoint loop above never
+				// terminate, since a stabilized recursion kept being treated
+				// as "changed" on every single iteration
 				new RecursionSolver<>(this, rec).solve();
-				triggers.addAll(rec.getMembers());
-			}
 		} catch (SemanticException e) {
 			throw new AnalysisExecutionException("Unable to solve one or more recursions", e);
 		}

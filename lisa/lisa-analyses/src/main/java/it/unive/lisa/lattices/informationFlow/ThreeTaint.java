@@ -70,7 +70,7 @@ public class ThreeTaint
 
 	@Override
 	public boolean isPossiblyTainted() {
-		return this == TOP;
+		return this == TOP || this == TAINTED;
 	}
 
 	@Override

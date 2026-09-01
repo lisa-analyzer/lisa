@@ -40,6 +40,14 @@ public class CallStackId<A extends AbstractLattice<A>>
 		this.calls.add(Pair.of(newToken, state));
 	}
 
+	private CallStackId(
+			CallStackId<A> source,
+			int toPop) {
+		this.calls = new ArrayList<>(source.calls.size() - toPop);
+		for (int i = 0; i < source.calls.size() - toPop; i++)
+			this.calls.add(source.calls.get(i));
+	}
+
 	/**
 	 * Yields the number of calls in this call stack.
 	 * 
@@ -183,10 +191,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 	 */
 	public CallStackId<A> pop(
 			int amount) {
-		CallStackId<A> popped = new CallStackId<>();
-		for (int i = 0; i < this.calls.size() - amount; i++)
-			popped.calls.add(this.calls.get(i));
-		return popped;
+		return new CallStackId<>(this, amount);
 	}
 
 }

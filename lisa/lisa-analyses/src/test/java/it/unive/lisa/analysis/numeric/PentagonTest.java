@@ -48,7 +48,6 @@ public class PentagonTest {
 		return new Constant(Int32Type.INSTANCE, v, pp.getLocation());
 	}
 
-	/** Build a state with specific interval values and no upper-bound info. */
 	private PentagonLattice stateWithIntervals(
 			Variable v1,
 			IntInterval i1,
@@ -62,9 +61,6 @@ public class PentagonTest {
 		return new PentagonLattice(intv, ub);
 	}
 
-	/**
-	 * Build a state with interval values plus one upper-bound entry (a < b).
-	 */
 	private PentagonLattice stateWithIntervalsAndBound(
 			Variable v1,
 			IntInterval i1,

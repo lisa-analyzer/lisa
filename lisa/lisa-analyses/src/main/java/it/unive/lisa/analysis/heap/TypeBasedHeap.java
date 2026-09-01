@@ -215,8 +215,6 @@ public class TypeBasedHeap
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (state.isTop())
-			return Satisfiability.UNKNOWN;
 		if (state.isBottom())
 			return Satisfiability.BOTTOM;
 

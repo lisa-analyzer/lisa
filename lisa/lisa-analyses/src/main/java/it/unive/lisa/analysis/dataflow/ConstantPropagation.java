@@ -146,7 +146,7 @@ public class ConstantPropagation
 			if (expression.getOperator() instanceof AdditionOperator)
 				return left + right;
 			if (expression.getOperator() instanceof DivisionOperator)
-				return left == 0 ? null : (int) left / right;
+				return right == 0 ? null : left / right;
 			if (expression.getOperator() instanceof ModuloOperator)
 				return right == 0 ? null : left % right;
 			if (expression.getOperator() instanceof MultiplicationOperator)

@@ -11,13 +11,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests for {@link Brick#getReps()}, which must yield the set of all strings
- * obtained by concatenating, in any order and with repetition allowed, a number
- * of elements of the brick's string set that lies between the brick's minimum
- * and maximum (inclusive). The expected results below are derived directly from
- * this definition, independently of how the method is currently implemented.
- */
 public class GetRepsTest {
 
 	private final Bricks domain = new Bricks();
