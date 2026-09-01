@@ -158,7 +158,7 @@ public class Antlr4Util {
 	 */
 	public static int getCol(
 			ParserRuleContext ctx) {
-		return ctx.getStop().getCharPositionInLine();
+		return ctx.getStart().getCharPositionInLine();
 	}
 
 	/**
