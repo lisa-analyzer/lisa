@@ -110,6 +110,33 @@ public class WorksetTest {
 	}
 
 	@Test
+	public void duplicateFreeWsTest() {
+		linear(new DuplicateFreeFIFOWorkingSet<>(), false, false, "a", "b", "c", "a", "b");
+		random(new DuplicateFreeFIFOWorkingSet<>(), false, false, "a", "b", "c", "a", "b");
+		linear(new DuplicateFreeLIFOWorkingSet<>(), true, false, "a", "b", "c", "a", "b");
+		random(new DuplicateFreeLIFOWorkingSet<>(), true, false, "a", "b", "c", "a", "b");
+	}
+
+	// unlike VisitOnce*, DuplicateFree* only rejects an element that is
+	// currently present: once popped out, it can be pushed again
+	@Test
+	public void duplicateFreeAllowsRepushingAPoppedElement() {
+		for (WorkingSet<String> ws : List.of(new DuplicateFreeFIFOWorkingSet<String>(),
+				new DuplicateFreeLIFOWorkingSet<String>())) {
+			ws.push("a");
+			assertEquals(1, ws.size());
+			ws.pop();
+			assertTrue(ws.isEmpty());
+
+			ws.push("a");
+			assertEquals(
+					1,
+					ws.size(),
+					ws.getClass().getSimpleName() + " did not allow re-pushing a popped element");
+		}
+	}
+
+	@Test
 	public void FIFOsWsTest() {
 		linear(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
 		linear(new FIFOWorkingSet<>(), false, true, "a", "b", "c", "d", null);
