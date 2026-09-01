@@ -198,4 +198,39 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 			Predicate<Statement> hotspots) {
 		return this;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((graph == null) ? 0 : graph.hashCode());
+		result = prime * result + (forceFullEvaluation ? 1231 : 1237);
+		result = prime * result + ((interprocedural == null) ? 0 : interprocedural.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ForwardCFGFixpoint<?, ?> other = (ForwardCFGFixpoint<?, ?>) obj;
+		if (graph == null) {
+			if (other.graph != null)
+				return false;
+		} else if (!graph.equals(other.graph))
+			return false;
+		if (forceFullEvaluation != other.forceFullEvaluation)
+			return false;
+		if (interprocedural == null) {
+			if (other.interprocedural != null)
+				return false;
+		} else if (!interprocedural.equals(other.interprocedural))
+			return false;
+		return true;
+	}
 }

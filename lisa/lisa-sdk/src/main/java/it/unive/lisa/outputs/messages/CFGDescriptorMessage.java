@@ -32,9 +32,9 @@ public class CFGDescriptorMessage
 	}
 
 	/**
-	 * Yields the cfg where this message was reported on.
-	 * 
-	 * @return the column, or {@code -1}
+	 * Yields the descriptor where this message was reported on.
+	 *
+	 * @return the descriptor
 	 */
 	public CodeMemberDescriptor getDescriptor() {
 		return descriptor;

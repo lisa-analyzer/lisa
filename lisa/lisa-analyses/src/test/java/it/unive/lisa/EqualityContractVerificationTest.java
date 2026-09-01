@@ -86,6 +86,18 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
@@ -124,6 +136,7 @@ import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import it.unive.lisa.util.datastructures.regex.Atom;
@@ -325,6 +338,7 @@ public class EqualityContractVerificationTest {
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
 				.suppress(suppressions)
 				.withPrefabValues(CFG.class, cfg1, cfg2)
+				.withPrefabValues(Graph.class, cfg1, cfg2)
 				.withPrefabValues(AbstractCodeMember.class, signCfg1, signCfg2)
 				.withPrefabValues(CodeMemberDescriptor.class, descr1, descr2)
 				.withPrefabValues(ClassUnit.class, unit1, unit2)
@@ -378,6 +392,27 @@ public class EqualityContractVerificationTest {
 		verify(FixpointConfiguration.class);
 		verify(TestConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(CronConfiguration.class, Warning.NONFINAL_FIELDS);
+	}
+
+	private static <T> void verifyFixpoint(
+			Class<T> clazz) {
+		verify(clazz, verifier -> verifier.withIgnoredFields("events"));
+	}
+
+	@Test
+	public void testFixpoints() {
+		verifyFixpoint(ForwardAscendingFixpoint.class);
+		verifyFixpoint(ForwardDescendingGLBFixpoint.class);
+		verifyFixpoint(ForwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(BackwardAscendingFixpoint.class);
+		verifyFixpoint(BackwardDescendingGLBFixpoint.class);
+		verifyFixpoint(BackwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(OptimizedForwardAscendingFixpoint.class);
+		verifyFixpoint(OptimizedForwardDescendingGLBFixpoint.class);
+		verifyFixpoint(OptimizedForwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(OptimizedBackwardAscendingFixpoint.class);
+		verifyFixpoint(OptimizedBackwardDescendingGLBFixpoint.class);
+		verifyFixpoint(OptimizedBackwardDescendingNarrowingFixpoint.class);
 	}
 
 	@Test

@@ -768,7 +768,7 @@ public class ResultComparer {
 		SerializableNodeDescription currentF = null;
 		SerializableNodeDescription currentS = null;
 
-		while (ol.hasNext() && or.hasNext() || currentF != null || currentS != null) {
+		while (ol.hasNext() || or.hasNext() || currentF != null || currentS != null) {
 			if (ol.hasNext() && currentF == null)
 				currentF = ol.next();
 			if (or.hasNext() && currentS == null)
@@ -1035,30 +1035,20 @@ public class ResultComparer {
 			String lineL;
 			String lineR;
 			int lineNum = 1;
-			while ((lineL = l.readLine()) != null & (lineR = r.readLine()) != null) {
-				if (!lineL.equals(lineR)) {
+			while (true) {
+				lineL = l.readLine();
+				lineR = r.readLine();
+				if (lineL == null && lineR == null)
+					break;
+
+				if (lineL == null || lineR == null || !lineL.equals(lineR)) {
 					diffFound = true;
 					fileDiff(
 							left.toString(),
 							right.toString(),
-							format(TRACE_DIFF, lineNum, lineL, lineR));
+							format(TRACE_DIFF, lineNum, lineL == null ? "<no line>" : lineL,
+									lineR == null ? "<no line>" : lineR));
 				}
-				lineNum++;
-			}
-			while ((lineL = l.readLine()) != null) {
-				diffFound = true;
-				fileDiff(
-						left.toString(),
-						right.toString(),
-						format(TRACE_DIFF, lineNum, lineL, "<no line>"));
-				lineNum++;
-			}
-			while ((lineR = r.readLine()) != null) {
-				diffFound = true;
-				fileDiff(
-						left.toString(),
-						right.toString(),
-						format(TRACE_DIFF, lineNum, "<no line>", lineR));
 				lineNum++;
 			}
 		}

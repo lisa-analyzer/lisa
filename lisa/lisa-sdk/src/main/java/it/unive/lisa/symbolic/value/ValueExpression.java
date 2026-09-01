@@ -20,8 +20,8 @@ public abstract class ValueExpression
 		SymbolicExpression {
 
 	/**
-	 * Builds the heap expression.
-	 * 
+	 * Builds the value expression.
+	 *
 	 * @param staticType the static type of this expression
 	 * @param location   the code location of the statement that has generated
 	 *                       this value expression

@@ -23,7 +23,6 @@ public class RTACallGraphTest {
 	private static CFG cfg;
 	private static ClassType base;
 	private static ClassType sub;
-	private static ClassType unrelated;
 
 	@BeforeAll
 	public static void init()
@@ -33,7 +32,6 @@ public class RTACallGraphTest {
 		cfg = program.getAllCFGs().iterator().next();
 		base = ClassType.lookup("Base");
 		sub = ClassType.lookup("Sub");
-		unrelated = ClassType.lookup("Unrelated");
 	}
 
 	private Expression receiverOfType(

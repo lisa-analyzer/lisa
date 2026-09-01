@@ -14,7 +14,7 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.Type;
 
 /**
- * A bynary expression that applies a {@link BinaryOperator} to two
+ * A binary expression that applies a {@link BinaryOperator} to two
  * {@link SymbolicExpression}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
