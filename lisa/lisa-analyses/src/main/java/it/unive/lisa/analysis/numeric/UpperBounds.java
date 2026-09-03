@@ -27,6 +27,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.util.numeric.IntInterval;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -298,5 +299,25 @@ public class UpperBounds
 		}
 
 		return Collections.emptySet();
+	}
+
+	@Override
+	public IntInterval nonrel(
+			ValueEnvironment<DefiniteIdSet> state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return IntInterval.TOP;
+	}
+
+	@Override
+	public IntInterval nonrelTop() {
+		return IntInterval.TOP;
+	}
+
+	@Override
+	public IntInterval nonrelBottom() {
+		return IntInterval.BOTTOM;
 	}
 }

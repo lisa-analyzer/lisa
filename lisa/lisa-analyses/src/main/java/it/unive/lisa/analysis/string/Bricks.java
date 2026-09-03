@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
@@ -417,7 +418,8 @@ public class Bricks
 	 */
 	public class BrickList
 			implements
-			BaseLattice<BrickList> {
+			BaseLattice<BrickList>,
+			NonRelationalValue<BrickList> {
 
 		private final List<Brick> bricks;
 

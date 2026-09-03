@@ -1,6 +1,7 @@
 package it.unive.lisa.lattices;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -13,7 +14,8 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  */
 public enum Satisfiability
 		implements
-		BaseLattice<Satisfiability> {
+		BaseLattice<Satisfiability>,
+		NonRelationalValue<Satisfiability> {
 
 	/**
 	 * Represent the fact that an expression is satisfied.

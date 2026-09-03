@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.combination.constraints;
 
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.constraints.events.WholeValueConstraintsEnd;
@@ -31,7 +32,7 @@ import java.util.Set;
  * one defined in the paper is that the generator function {@code G} is absent
  * from the implementation: instead, the constraints are interpreted directly in
  * the abstract transformers that ask for them.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class WholeValueAnalysis
@@ -47,7 +48,7 @@ public class WholeValueAnalysis
 
 	/**
 	 * Builds a value with the given participants.
-	 * 
+	 *
 	 * @param participants the participants of this value
 	 */
 	public WholeValueAnalysis(
@@ -57,7 +58,7 @@ public class WholeValueAnalysis
 
 	/**
 	 * Returns the participant of this value.
-	 * 
+	 *
 	 * @return the participant of this value
 	 */
 	public ValueDomain<?>[] getParticipants() {
@@ -68,7 +69,7 @@ public class WholeValueAnalysis
 	 * Returns the participant at the given index.
 	 *
 	 * @param i the index of the participant to return
-	 * 
+	 *
 	 * @return the participant at the given index
 	 */
 	public ValueDomain<?> get(
@@ -85,9 +86,9 @@ public class WholeValueAnalysis
 	 * @param <L>   the type of the lattice that the component works with
 	 * @param i     the index of the participant to return
 	 * @param clazz the class of the participant to return
-	 * 
+	 *
 	 * @return the participant at the given index, cast to the given type
-	 * 
+	 *
 	 * @throws SemanticException if the participant at the given index is not of
 	 *                               the given type
 	 */
@@ -111,9 +112,9 @@ public class WholeValueAnalysis
 	 * @param <T>   the type of the component to return
 	 * @param <L>   the type of the lattice that the component works with
 	 * @param clazz the class of the participant to return
-	 * 
+	 *
 	 * @return the first participant of the given type
-	 * 
+	 *
 	 * @throws SemanticException if no participant of the given type is present
 	 */
 	public <L extends ValueLattice<L>, T extends ValueDomain<L>> T get(
@@ -276,4 +277,35 @@ public class WholeValueAnalysis
 			events.post(new WholeValueConstraintsEnd(state, e, result));
 		return result;
 	}
+
+	@Override
+	public NonRelationalValue<?> nonrel(
+			WholeValue state,
+			ValueExpression e,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		for (int i = 0; i < participants.length; i++) {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			NonRelationalValue<?> c = ((ValueDomain) participants[i]).nonrel(
+					state.get(i),
+					e,
+					pp,
+					oracle);
+			if (c.isBottom() || !c.isTop())
+				return c;
+		}
+		return participants[0].nonrelTop();
+	}
+
+	@Override
+	public NonRelationalValue<?> nonrelTop() {
+		return participants[0].nonrelTop();
+	}
+
+	@Override
+	public NonRelationalValue<?> nonrelBottom() {
+		return participants[0].nonrelBottom();
+	}
+
 }

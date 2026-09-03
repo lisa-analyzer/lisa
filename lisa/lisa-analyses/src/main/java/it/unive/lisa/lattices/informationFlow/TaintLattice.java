@@ -1,6 +1,7 @@
 package it.unive.lisa.lattices.informationFlow;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 
 /**
@@ -15,7 +16,8 @@ import it.unive.lisa.analysis.SemanticException;
  */
 public interface TaintLattice<L extends TaintLattice<L>>
 		extends
-		BaseLattice<L> {
+		BaseLattice<L>,
+		NonRelationalValue<L> {
 
 	/**
 	 * Yields the domain element that represents tainted values.

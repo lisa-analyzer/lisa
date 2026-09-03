@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.value;
 
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticComponent;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -178,4 +179,37 @@ public interface ValueDomain<L extends ValueLattice<L>>
 		return Set.of(lb, ub);
 	}
 
+	/**
+	 * Yields the non-relational abstract value that this domain associates to
+	 * {@code expression} in {@code state}.
+	 *
+	 * @param state      the abstract state to evaluate the expression in
+	 * @param expression the expression to evaluate
+	 * @param pp         the program point at which the evaluation happens
+	 * @param oracle     the oracle for inter-domain communication
+	 *
+	 * @return the non-relational abstract value of {@code expression}
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	NonRelationalValue<?> nonrel(
+			L state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException;
+
+	/**
+	 * Yields the top non-relational abstract value of this domain.
+	 *
+	 * @return the top value
+	 */
+	NonRelationalValue<?> nonrelTop();
+
+	/**
+	 * Yields the bottom non-relational abstract value of this domain.
+	 *
+	 * @return the bottom value
+	 */
+	NonRelationalValue<?> nonrelBottom();
 }

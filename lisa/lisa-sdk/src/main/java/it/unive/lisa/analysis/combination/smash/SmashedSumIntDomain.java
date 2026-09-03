@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.combination.smash;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.util.numeric.IntInterval;
@@ -13,7 +14,7 @@ import it.unive.lisa.util.numeric.IntInterval;
  *
  * @param <L> the type of lattice produced by this domain
  */
-public interface SmashedSumIntDomain<L extends Lattice<L>>
+public interface SmashedSumIntDomain<L extends Lattice<L> & NonRelationalValue<L>>
 		extends
 		BaseNonRelationalValueDomain<L> {
 

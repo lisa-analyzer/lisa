@@ -227,6 +227,24 @@ public class IntegerConstantPropagationTest {
 				ProgramPoint pp) {
 			return Satisfiability.UNKNOWN;
 		}
+
+		@Override
+		public IntegerConstant nonrel(
+				SymbolicExpression expression,
+				ProgramPoint pp)
+				throws SemanticException {
+			return IntegerConstant.TOP;
+		}
+
+		@Override
+		public IntegerConstant nonrelTop() {
+			return IntegerConstant.TOP;
+		}
+
+		@Override
+		public IntegerConstant nonrelBottom() {
+			return IntegerConstant.BOTTOM;
+		}
 	}
 
 	// --- evalConstant ---

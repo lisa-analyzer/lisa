@@ -1,5 +1,6 @@
 package it.unive.lisa.lattices.numeric;
 
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonRedundantPowerset.NonRedundantSetLattice;
 import it.unive.lisa.util.numeric.IntInterval;
@@ -19,7 +20,9 @@ import java.util.TreeSet;
  */
 public class NonRedundantIntervalSet
 		extends
-		NonRedundantSetLattice<NonRedundantIntervalSet, IntInterval> {
+		NonRedundantSetLattice<NonRedundantIntervalSet, IntInterval>
+		implements
+		NonRelationalValue<NonRedundantIntervalSet> {
 
 	/**
 	 * Builds a new non redundant intervals lattice with an empty set of

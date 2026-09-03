@@ -14,6 +14,7 @@ import it.unive.lisa.analysis.memory.MonolithicMemory;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
@@ -87,6 +88,7 @@ public class InformationFlowTest
 					SimpleAbstractDomain<Monolith, ValueEnvironment<L>, TypeEnvironment<TypeSet>>> {
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public boolean visit(
 				SemanticTool<
 						SimpleAbstractState<Monolith, ValueEnvironment<L>, TypeEnvironment<TypeSet>>,
@@ -97,7 +99,7 @@ public class InformationFlowTest
 				return true;
 
 			UnresolvedCall call = (UnresolvedCall) node;
-			BaseTaint<L> domain = (BaseTaint<L>) tool.getAnalysis().domain.valueDomain;
+			BaseTaint<L> domain = (BaseTaint<L>) (ValueDomain<?>) tool.getAnalysis().domain.valueDomain;
 
 			try {
 				for (AnalyzedCFG<

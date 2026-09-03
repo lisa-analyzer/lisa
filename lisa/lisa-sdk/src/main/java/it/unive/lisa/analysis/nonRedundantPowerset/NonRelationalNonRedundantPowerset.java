@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.nonRedundantPowerset;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
@@ -29,8 +30,10 @@ import java.util.Set;
  * @param <L> the type of the underlying lattice whose elements are contained in
  *                the non redundant set lattice
  */
-public class NonRelationalNonRedundantPowerset<S extends NonRedundantSetLattice<S, L>,
-		L extends Lattice<L>>
+public class NonRelationalNonRedundantPowerset<S extends NonRedundantSetLattice<S, L> & NonRelationalValue<S>,
+		L extends Lattice<L> & NonRelationalValue<L>>
+		// TODO remove Lattice where there is & NonRelationalValue all over the
+		// codebase
 		implements
 		BaseNonRelationalValueDomain<S> {
 

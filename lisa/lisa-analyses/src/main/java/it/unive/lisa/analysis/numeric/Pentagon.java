@@ -163,4 +163,24 @@ public class Pentagon
 		return intervals.canProcess(e, pp, oracle) || upperbounds.canProcess(e, pp, oracle);
 	}
 
+	@Override
+	public IntInterval nonrel(
+			PentagonLattice state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return intervals.nonrel(state.first, expression, pp, oracle);
+	}
+
+	@Override
+	public IntInterval nonrelTop() {
+		return intervals.nonrelTop();
+	}
+
+	@Override
+	public IntInterval nonrelBottom() {
+		return intervals.nonrelBottom();
+	}
+
 }

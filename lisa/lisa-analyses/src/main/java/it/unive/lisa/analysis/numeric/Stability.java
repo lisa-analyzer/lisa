@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.numeric;
 
 import it.unive.lisa.analysis.DomainLattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -644,4 +645,23 @@ public class Stability<L extends ValueLattice<L>>
 		return aux.canProcess(e, pp, oracle);
 	}
 
+	@Override
+	public NonRelationalValue<?> nonrel(
+			ValueLatticeProduct<ValueEnvironment<Trend>, L> state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return aux.nonrel(state.second, expression, pp, oracle);
+	}
+
+	@Override
+	public NonRelationalValue<?> nonrelTop() {
+		return aux.nonrelTop();
+	}
+
+	@Override
+	public NonRelationalValue<?> nonrelBottom() {
+		return aux.nonrelBottom();
+	}
 }

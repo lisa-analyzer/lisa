@@ -2,6 +2,7 @@ package it.unive.lisa.lattices.string;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -14,7 +15,8 @@ import java.util.Objects;
  */
 public class StrPrefix
 		implements
-		BaseLattice<StrPrefix> {
+		BaseLattice<StrPrefix>,
+		NonRelationalValue<StrPrefix> {
 
 	/**
 	 * The top element of this lattice, representing the empty prefix.

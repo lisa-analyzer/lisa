@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.nonRedundantPowerset;
 
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -157,5 +158,35 @@ public class NonRedundantPowerset<S extends NonRedundantSetDomainLattice<S, L> &
 		for (L elem : state.elements)
 			lub = lub == null ? elem : lub.lub(elem);
 		return valueDomain.constraints(requesting, lub, e, pp, oracle);
+	}
+
+	@Override
+	public NonRelationalValue<?> nonrel(
+			S state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		if (state.isTop())
+			return valueDomain.nonrelTop();
+		if (state.isBottom())
+			return valueDomain.nonrelBottom();
+		if (state.elements.isEmpty())
+			return valueDomain.nonrelTop();
+
+		L lub = null;
+		for (L elem : state.elements)
+			lub = lub == null ? elem : lub.lub(elem);
+		return valueDomain.nonrel(lub, expression, pp, oracle);
+	}
+
+	@Override
+	public NonRelationalValue<?> nonrelTop() {
+		return valueDomain.nonrelTop();
+	}
+
+	@Override
+	public NonRelationalValue<?> nonrelBottom() {
+		return valueDomain.nonrelBottom();
 	}
 }

@@ -2,6 +2,7 @@ package it.unive.lisa.lattices.string.tarsis;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.lattices.string.fsa.SimpleAutomaton;
@@ -43,7 +44,8 @@ public class RegexAutomaton
 		extends
 		Automaton<RegexAutomaton, RegularExpression>
 		implements
-		BaseLattice<RegexAutomaton> {
+		BaseLattice<RegexAutomaton>,
+		NonRelationalValue<RegexAutomaton> {
 
 	/**
 	 * Builds a {@link RegexAutomaton} recognizing the top string, that is, with

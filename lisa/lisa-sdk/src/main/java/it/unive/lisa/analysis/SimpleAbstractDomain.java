@@ -923,5 +923,56 @@ public class SimpleAbstractDomain<M extends MemoryLattice<M>, V extends ValueLat
 			return Collections.emptySet();
 		}
 
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public NonRelationalValue<?> nonrel(
+				SymbolicExpression e,
+				ProgramPoint pp)
+				throws SemanticException {
+
+			if (!e.mightNeedRewriting()) {
+				ValueExpression ve = (ValueExpression) e;
+				return valueDomain.nonrel(value, ve, pp, this);
+			}
+
+			ExpressionSet exprs = memoryDomain.rewrite(memory, e, pp, this);
+			if (exprs.isEmpty()) {
+				return valueDomain.nonrelBottom();
+			}
+
+			if (exprs.elements.size() == 1) {
+				SymbolicExpression expr = exprs.elements.iterator().next();
+				if (!(expr instanceof ValueExpression))
+					throw new SemanticException("Rewriting failed for expression " + expr);
+				ValueExpression ve = (ValueExpression) e;
+				return valueDomain.nonrel(value, ve, pp, this);
+			}
+
+			NonRelationalValue res = null;
+			for (SymbolicExpression expr : exprs) {
+				if (!(expr instanceof ValueExpression))
+					throw new SemanticException("Rewriting failed for expression " + expr);
+				ValueExpression ve = (ValueExpression) expr;
+				NonRelationalValue tmp = valueDomain.nonrel(value, ve, pp, this);
+				if (tmp == null)
+					res = tmp;
+				else
+					res = (NonRelationalValue) res.lub(tmp);
+			}
+
+			return res;
+
+		}
+
+		@Override
+		public NonRelationalValue<?> nonrelTop() {
+			return valueDomain.nonrelTop();
+		}
+
+		@Override
+		public NonRelationalValue<?> nonrelBottom() {
+			return valueDomain.nonrelBottom();
+		}
+
 	}
 }

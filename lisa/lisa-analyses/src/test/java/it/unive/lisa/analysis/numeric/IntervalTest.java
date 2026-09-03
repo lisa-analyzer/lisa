@@ -1252,6 +1252,24 @@ public class IntervalTest {
 			return Satisfiability.UNKNOWN;
 		}
 
+		@Override
+		public IntInterval nonrel(
+				SymbolicExpression expression,
+				ProgramPoint pp)
+				throws SemanticException {
+			return IntInterval.TOP;
+		}
+
+		@Override
+		public IntInterval nonrelTop() {
+			return IntInterval.TOP;
+		}
+
+		@Override
+		public IntInterval nonrelBottom() {
+			return IntInterval.BOTTOM;
+		}
+
 	}
 
 }

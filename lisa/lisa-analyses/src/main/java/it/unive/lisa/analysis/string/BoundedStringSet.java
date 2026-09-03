@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.string;
 
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
@@ -90,7 +91,9 @@ public class BoundedStringSet
 	 */
 	public class BSS
 			extends
-			SetLattice<BSS, String> {
+			SetLattice<BSS, String>
+			implements
+			NonRelationalValue<BSS> {
 
 		/**
 		 * Builds the top abstract value.

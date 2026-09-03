@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.smash.SmashedSumStringDomain;
@@ -101,7 +102,8 @@ public class CharInclusion
 	 */
 	public static class CI
 			implements
-			BaseLattice<CI> {
+			BaseLattice<CI>,
+			NonRelationalValue<CI> {
 
 		private static final CI TOP = new CI();
 

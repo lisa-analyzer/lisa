@@ -127,16 +127,16 @@ public class TestParameterProvider {
 
 	public static class SampleNRVD
 			implements
-			BaseNonRelationalValueDomain<SingleValueLattice> {
+			BaseNonRelationalValueDomain<Satisfiability> {
 
 		@Override
-		public SingleValueLattice top() {
-			return SingleValueLattice.SINGLETON;
+		public Satisfiability top() {
+			return Satisfiability.UNKNOWN;
 		}
 
 		@Override
-		public SingleValueLattice bottom() {
-			return SingleValueLattice.BOTTOM;
+		public Satisfiability bottom() {
+			return Satisfiability.BOTTOM;
 		}
 
 		@Override
@@ -374,6 +374,25 @@ public class TestParameterProvider {
 				ProgramPoint pp)
 				throws SemanticException {
 			return Collections.emptySet();
+		}
+
+		@Override
+		public IntInterval nonrel(
+				SymbolicExpression expression,
+				ProgramPoint pp)
+				throws SemanticException {
+			return IntInterval.TOP;
+		}
+
+		@Override
+		public IntInterval nonrelTop() {
+			return IntInterval.TOP;
+
+		}
+
+		@Override
+		public IntInterval nonrelBottom() {
+			return IntInterval.BOTTOM;
 		}
 
 	};
@@ -631,7 +650,7 @@ public class TestParameterProvider {
 			return (R) LogicalNegation.INSTANCE;
 
 		// value domains
-		if (param == ValueEnvironment.class)
+		if (param == ValueEnvironment.class || param == ValueLattice.class)
 			return (R) new ValueEnvironment<>(SingleValueLattice.SINGLETON);
 		if (param == SampleNRVD.class || param == BaseNonRelationalValueDomain.class)
 			return (R) new SampleNRVD();

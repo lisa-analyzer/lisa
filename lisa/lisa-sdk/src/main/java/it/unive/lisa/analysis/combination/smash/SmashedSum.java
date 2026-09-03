@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.combination.smash;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
@@ -51,8 +52,8 @@ import java.util.Set;
  * @param <I> the non-relational integer abstract domain
  * @param <S> the non-relational string abstract domain
  */
-public class SmashedSum<I extends Lattice<I>,
-		S extends Lattice<S>>
+public class SmashedSum<I extends Lattice<I> & NonRelationalValue<I>,
+		S extends Lattice<S> & NonRelationalValue<S>>
 		implements
 		BaseNonRelationalValueDomain<SmashedValue<I, S>> {
 

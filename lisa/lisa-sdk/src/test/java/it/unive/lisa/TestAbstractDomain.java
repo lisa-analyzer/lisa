@@ -14,6 +14,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.numeric.IntInterval;
 import java.util.Collections;
 import java.util.Set;
 
@@ -149,6 +150,24 @@ public class TestAbstractDomain
 				ProgramPoint pp)
 				throws SemanticException {
 			return Collections.emptySet();
+		}
+
+		@Override
+		public IntInterval nonrel(
+				SymbolicExpression expression,
+				ProgramPoint pp)
+				throws SemanticException {
+			return IntInterval.TOP;
+		}
+
+		@Override
+		public IntInterval nonrelTop() {
+			return IntInterval.TOP;
+		}
+
+		@Override
+		public IntInterval nonrelBottom() {
+			return IntInterval.BOTTOM;
 		}
 
 	}

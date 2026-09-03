@@ -2,6 +2,7 @@ package it.unive.lisa.util.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -18,7 +19,8 @@ public class IntInterval
 		implements
 		Iterable<Long>,
 		Comparable<IntInterval>,
-		BaseLattice<IntInterval> {
+		BaseLattice<IntInterval>,
+		NonRelationalValue<IntInterval> {
 
 	/**
 	 * The interval {@code [-Inf, +Inf]}.

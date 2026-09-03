@@ -2,6 +2,7 @@ package it.unive.lisa.lattices.string.fsa;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
@@ -35,7 +36,8 @@ public final class SimpleAutomaton
 		extends
 		Automaton<SimpleAutomaton, StringSymbol>
 		implements
-		BaseLattice<SimpleAutomaton> {
+		BaseLattice<SimpleAutomaton>,
+		NonRelationalValue<SimpleAutomaton> {
 
 	@Override
 	public SimpleAutomaton singleString(

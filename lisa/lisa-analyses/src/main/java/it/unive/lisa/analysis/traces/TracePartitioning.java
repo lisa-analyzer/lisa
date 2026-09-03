@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.traces;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -447,6 +448,38 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 				result.addAll(domain.makeOracle(trace.getValue()).constraints(requesting, e, pp));
 
 			return result;
+		}
+
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public NonRelationalValue<?> nonrel(
+				SymbolicExpression expression,
+				ProgramPoint pp)
+				throws SemanticException {
+			if (state.isBottom())
+				return nonrelBottom();
+			if (state.isTop() || state.function == null || state.function.isEmpty())
+				return nonrelTop();
+
+			NonRelationalValue result = null;
+			for (Entry<ExecutionTrace, A> trace : state)
+				if (result == null)
+					result = (domain.makeOracle(trace.getValue()).nonrel(expression, pp));
+				else
+					result = (NonRelationalValue) result
+							.lub((domain.makeOracle(trace.getValue()).nonrel(expression, pp)));
+
+			return result;
+		}
+
+		@Override
+		public NonRelationalValue<?> nonrelTop() {
+			return domain.makeOracle(state.lattice.top()).nonrelTop();
+		}
+
+		@Override
+		public NonRelationalValue<?> nonrelBottom() {
+			return domain.makeOracle(state.lattice.bottom()).nonrelBottom();
 		}
 
 	}

@@ -214,6 +214,24 @@ public class ParityTest {
 				ProgramPoint pp) {
 			return Satisfiability.UNKNOWN;
 		}
+
+		@Override
+		public ParityLattice nonrel(
+				SymbolicExpression expression,
+				ProgramPoint pp)
+				throws SemanticException {
+			return ParityLattice.TOP;
+		}
+
+		@Override
+		public ParityLattice nonrelTop() {
+			return ParityLattice.TOP;
+		}
+
+		@Override
+		public ParityLattice nonrelBottom() {
+			return ParityLattice.BOTTOM;
+		}
 	}
 
 	// --- evalConstant ---

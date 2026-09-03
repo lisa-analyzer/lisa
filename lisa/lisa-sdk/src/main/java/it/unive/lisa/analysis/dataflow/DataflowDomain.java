@@ -9,6 +9,7 @@ import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.functional.Supplier;
+import it.unive.lisa.util.numeric.IntInterval;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
@@ -193,4 +194,23 @@ public abstract class DataflowDomain<L extends DataflowDomainLattice<L, E>,
 			ProgramPoint pp)
 			throws SemanticException;
 
+	@Override
+	public IntInterval nonrel(
+			L state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return IntInterval.TOP;
+	}
+
+	@Override
+	public IntInterval nonrelTop() {
+		return IntInterval.TOP;
+	}
+
+	@Override
+	public IntInterval nonrelBottom() {
+		return IntInterval.BOTTOM;
+	}
 }

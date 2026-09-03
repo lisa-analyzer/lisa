@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.combination.smash;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.NonRelationalValue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.util.representation.StringRepresentation;
@@ -22,7 +23,8 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
  */
 public class SmashedValue<N extends Lattice<N>, S extends Lattice<S>>
 		implements
-		BaseLattice<SmashedValue<N, S>> {
+		BaseLattice<SmashedValue<N, S>>,
+		NonRelationalValue<SmashedValue<N, S>> {
 
 	private final N intValue;
 

@@ -23,6 +23,7 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.numeric.IntInterval;
 import java.util.Collection;
 import java.util.Set;
 
@@ -274,5 +275,25 @@ public class NonInterference
 			return true;
 
 		return rts.stream().anyMatch(Type::isValueType);
+	}
+
+	@Override
+	public IntInterval nonrel(
+			NonInterferenceEnvironment state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return IntInterval.TOP;
+	}
+
+	@Override
+	public IntInterval nonrelTop() {
+		return IntInterval.TOP;
+	}
+
+	@Override
+	public IntInterval nonrelBottom() {
+		return IntInterval.BOTTOM;
 	}
 }

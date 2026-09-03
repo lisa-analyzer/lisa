@@ -27,8 +27,13 @@ import java.util.Map.Entry;
  * <br/>
  * This domain does not take part in the
  * {@link it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis},
- * meaning that it will not produce constraints for any expression.
- * 
+ * meaning that it will not produce constraints for any expression. <br/>
+ * <br/>
+ * TODO in all of these classes where nonrel(), nonrelTop() and nonrelBottom()
+ * return some constants (like interval, string constant, etc.) add here
+ * something like: " This domain is not able to assign non-relational values to
+ * expressions, so they return ...
+ *
  * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
@@ -112,6 +117,26 @@ public class SubstringDomainWithConstants
 			SemanticOracle oracle)
 			throws SemanticException {
 		return state;
+	}
+
+	@Override
+	public StringConstant nonrel(
+			ValueLatticeProduct<ValueEnvironment<StringConstant>, Substrings> state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return StringConstant.TOP;
+	}
+
+	@Override
+	public StringConstant nonrelTop() {
+		return StringConstant.TOP;
+	}
+
+	@Override
+	public StringConstant nonrelBottom() {
+		return StringConstant.BOTTOM;
 	}
 
 }

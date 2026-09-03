@@ -5,6 +5,7 @@ import it.unive.lisa.lattices.SingleValueLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.util.numeric.IntInterval;
 
 /**
  * A no-op value domain that uses {@link SingleValueLattice} as lattice
@@ -60,6 +61,26 @@ public class NoOpValues
 			ProgramPoint pp,
 			SemanticOracle oracle) {
 		return true;
+	}
+
+	@Override
+	public IntInterval nonrel(
+			SingleValueLattice state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return IntInterval.TOP;
+	}
+
+	@Override
+	public IntInterval nonrelTop() {
+		return IntInterval.TOP;
+	}
+
+	@Override
+	public IntInterval nonrelBottom() {
+		return IntInterval.BOTTOM;
 	}
 
 }

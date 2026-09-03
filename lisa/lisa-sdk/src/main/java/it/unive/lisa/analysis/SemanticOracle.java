@@ -241,4 +241,35 @@ public interface SemanticOracle {
 			ProgramPoint pp)
 			throws SemanticException;
 
+	/**
+	 * Yields the non-relational abstract value that this oracle's value domain
+	 * associates to {@code expression}.
+	 *
+	 * @param expression the expression to evaluate
+	 * @param pp         the program point where the evaluation happens
+	 *
+	 * @return the non-relational abstract value of {@code expression}
+	 *
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	NonRelationalValue<?> nonrel(
+			SymbolicExpression expression,
+			ProgramPoint pp)
+			throws SemanticException;
+
+	/**
+	 * Yields the top non-relational abstract value of this oracle's value
+	 * domain.
+	 *
+	 * @return the top value
+	 */
+	NonRelationalValue<?> nonrelTop();
+
+	/**
+	 * Yields the bottom non-relational abstract value of this oracle's value
+	 * domain.
+	 *
+	 * @return the bottom value
+	 */
+	NonRelationalValue<?> nonrelBottom();
 }

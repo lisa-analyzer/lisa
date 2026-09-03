@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.value.StringAbstraction;
 import it.unive.lisa.lattices.Satisfiability;
+import it.unive.lisa.lattices.string.StringConstant;
 import it.unive.lisa.lattices.string.Substrings;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -653,6 +654,26 @@ public class SubstringDomain
 				composeExpression(expressions.subList(1, expressions.size())),
 				StringConcat.INSTANCE,
 				SyntheticLocation.INSTANCE);
+	}
+
+	@Override
+	public StringConstant nonrel(
+			Substrings state,
+			ValueExpression expression,
+			ProgramPoint pp,
+			SemanticOracle oracle)
+			throws SemanticException {
+		return StringConstant.TOP;
+	}
+
+	@Override
+	public StringConstant nonrelTop() {
+		return StringConstant.TOP;
+	}
+
+	@Override
+	public StringConstant nonrelBottom() {
+		return StringConstant.BOTTOM;
 	}
 
 }
