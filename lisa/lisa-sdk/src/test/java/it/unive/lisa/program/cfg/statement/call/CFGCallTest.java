@@ -18,6 +18,7 @@ import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.VoidType;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 public class CFGCallTest {
@@ -176,7 +177,7 @@ public class CFGCallTest {
 		Variable meta = (Variable) call.getMetaVariable();
 		assertTrue(meta.getName().startsWith("call_ret_value@"));
 		List<String> names = meta.getAnnotations().getAnnotations().stream()
-				.map(Annotation::getAnnotationName).sorted().toList();
+				.map(Annotation::getAnnotationName).sorted().collect(Collectors.toList());
 		assertEquals(List.of("First", "Second"), names);
 	}
 

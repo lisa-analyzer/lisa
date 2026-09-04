@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 
@@ -74,8 +75,10 @@ public class JsonReportTest {
 		JsonReport reRead = JsonReport.read(new StringReader(dumped));
 		assertEquals(original.getFiles(), reRead.getFiles());
 		assertEquals(
-				original.getWarnings().stream().map(JsonReport.JsonMessage::getMessage).sorted().toList(),
-				reRead.getWarnings().stream().map(JsonReport.JsonMessage::getMessage).sorted().toList());
+				original.getWarnings().stream().map(JsonReport.JsonMessage::getMessage).sorted()
+						.collect(Collectors.toList()),
+				reRead.getWarnings().stream().map(JsonReport.JsonMessage::getMessage).sorted()
+						.collect(Collectors.toList()));
 		assertEquals(original.getConfiguration(), reRead.getConfiguration());
 	}
 

@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 public class BaseCallGraphTest {
@@ -283,7 +284,8 @@ public class BaseCallGraphTest {
 
 		cg.resolve(call, types, new SymbolAliasing());
 
-		Collection<CodeMember> entrypoints = cg.getEntrypoints().stream().map(CallGraphNode::getCodeMember).toList();
+		Collection<CodeMember> entrypoints = cg.getEntrypoints().stream().map(CallGraphNode::getCodeMember)
+				.collect(Collectors.toList());
 		assertTrue(entrypoints.contains(target), "the target of the call should be marked as an entrypoint");
 		assertFalse(entrypoints.contains(caller), "the caller should not be marked as an entrypoint");
 	}
@@ -318,7 +320,8 @@ public class BaseCallGraphTest {
 		// resolve(): this is exactly the case registerCall is meant to handle
 		cg.registerCall(call);
 
-		Collection<CodeMember> entrypoints = cg.getEntrypoints().stream().map(CallGraphNode::getCodeMember).toList();
+		Collection<CodeMember> entrypoints = cg.getEntrypoints().stream().map(CallGraphNode::getCodeMember)
+				.collect(Collectors.toList());
 		assertTrue(entrypoints.contains(target), "the target of the call should be marked as an entrypoint");
 		assertFalse(entrypoints.contains(caller), "the caller should not be marked as an entrypoint");
 	}
