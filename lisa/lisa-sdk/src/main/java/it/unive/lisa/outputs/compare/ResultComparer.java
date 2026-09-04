@@ -120,7 +120,7 @@ public class ResultComparer {
 
 	private static final String DESC_DIFF = "Different description for node %d (%s)";
 
-	private static final String DESC_DIFF_VERBOSE = "Different description for node %d (%s):\n%s";
+	private static final String DESC_DIFF_VERBOSE = "\nDifferent description for node %d (%s):\n%s";
 
 	private static final String TRACE_DIFF = "Line %d of trace file differs:\n\t'%s'\n\t<--->\n\t'%s'";
 
@@ -833,44 +833,45 @@ public class ResultComparer {
 			SerializableValue first,
 			SerializableValue second) {
 		StringBuilder builder = new StringBuilder();
-		diff(0, builder, first, second);
+		diff("", builder, first, second);
 		// this removes empty/whitespace lines in the middle
-		return builder.toString().replaceAll("(?m)^[ \t]*\r?\n", "").trim();
+		// and leading .
+		return builder.toString().replaceAll("(?m)^[ \t]*\r?\n", "").replaceAll("(?m)^> \\.", "> ").trim();
 	}
 
 	private static boolean diff(
-			int depth,
+			String prefix,
 			StringBuilder builder,
 			SerializableValue first,
 			SerializableValue second) {
 		if (first.getClass() != second.getClass()) {
-			fillWithDiff(depth, builder, first, second);
+			fillWithDiff(prefix, builder, first, second);
 			return true;
 		}
 
 		if (first instanceof SerializableString)
-			return diff(depth, builder, (SerializableString) first, (SerializableString) second);
+			return diff(prefix, builder, (SerializableString) first, (SerializableString) second);
 
 		if (first instanceof SerializableArray)
-			return diff(depth, builder, (SerializableArray) first, (SerializableArray) second);
+			return diff(prefix, builder, (SerializableArray) first, (SerializableArray) second);
 
-		return diff(depth, builder, (SerializableObject) first, (SerializableObject) second);
+		return diff(prefix, builder, (SerializableObject) first, (SerializableObject) second);
 	}
 
 	private static boolean diff(
-			int depth,
+			String prefix,
 			StringBuilder builder,
 			SerializableString first,
 			SerializableString second) {
 		if (!first.getValue().equals(second.getValue())) {
-			fillWithDiff(depth, builder, first, second);
+			fillWithDiff(prefix, builder, first, second);
 			return true;
 		}
 		return false;
 	}
 
 	private static boolean diff(
-			int depth,
+			String prefix,
 			StringBuilder builder,
 			SerializableArray first,
 			SerializableArray second) {
@@ -880,29 +881,21 @@ public class ResultComparer {
 		int ssize = selements.size();
 		int min = Math.min(fsize, ssize);
 		boolean atLeastOne = false;
-		StringBuilder inner;
 		for (int i = 0; i < min; i++)
-			if (diff(depth + 1, inner = new StringBuilder(), felements.get(i), selements.get(i))) {
-				builder.append("\t".repeat(depth))
-						.append(">ELEMENT #")
-						.append(i)
-						.append(":\n")
-						.append(inner.toString())
-						.append("\n");
+			if (diff(prefix + "[" + i + "]", builder, felements.get(i), selements.get(i)))
 				atLeastOne = true;
-			}
 
 		if (fsize > min) {
-			builder.append("\t".repeat(depth))
-					.append(">EXPECTED HAS ")
+			builder.append("> ")
+					.append(prefix)
+					.append(": EXPECTED HAS ")
 					.append(fsize - min)
 					.append(" MORE ELEMENT(S):\n");
 			for (int i = min; i < fsize; i++) {
-				builder.append("\t".repeat(depth + 1))
-						.append(">ELEMENT #")
+				builder.append("\t- ")
+						.append("[")
 						.append(i)
-						.append(":\n")
-						.append("\t".repeat(depth + 2))
+						.append("]: ")
 						.append(felements.get(i))
 						.append("\n");
 			}
@@ -910,13 +903,16 @@ public class ResultComparer {
 		}
 
 		if (ssize > min) {
-			builder.append("\t".repeat(depth)).append(">ACTUAL HAS ").append(ssize - min).append(" MORE ELEMENT(S):\n");
+			builder.append("> ")
+					.append(prefix)
+					.append(": ACTUAL HAS ")
+					.append(ssize - min)
+					.append(" MORE ELEMENT(S):\n");
 			for (int i = min; i < ssize; i++) {
-				builder.append("\t".repeat(depth + 1))
-						.append(">ELEMENT #")
+				builder.append("\t- ")
+						.append("[")
 						.append(i)
-						.append(":\n")
-						.append("\t".repeat(depth + 2))
+						.append("]: ")
 						.append(selements.get(i))
 						.append("\n");
 			}
@@ -927,7 +923,7 @@ public class ResultComparer {
 	}
 
 	private static boolean diff(
-			int depth,
+			String prefix,
 			StringBuilder builder,
 			SerializableObject first,
 			SerializableObject second) {
@@ -939,33 +935,24 @@ public class ResultComparer {
 		diff.compute(String::compareTo);
 
 		boolean atLeastOne = false;
-		StringBuilder inner;
 		for (Pair<String, String> field : diff.getCommons())
 			if (diff(
-					depth + 1,
-					inner = new StringBuilder(),
+					prefix + "." + field.getLeft(),
+					builder,
 					felements.get(field.getLeft()),
-					selements.get(field.getLeft()))) {
-				builder.append("\t".repeat(depth))
-						.append(">FIELD ")
-						.append(field.getLeft())
-						.append(":\n")
-						.append(inner.toString())
-						.append("\n");
+					selements.get(field.getLeft())))
 				atLeastOne = true;
-			}
 
 		if (!diff.getOnlyFirst().isEmpty()) {
-			builder.append("\t".repeat(depth))
-					.append(">EXPECTED HAS ")
+			builder.append("> ")
+					.append(prefix)
+					.append(": EXPECTED HAS ")
 					.append(diff.getOnlyFirst().size())
 					.append(" MORE FIELD(S):\n");
 			for (String field : diff.getOnlyFirst()) {
-				builder.append("\t".repeat(depth + 1))
-						.append(">FIELD ")
+				builder.append("\t- ")
 						.append(field)
-						.append(":\n")
-						.append("\t".repeat(depth + 2))
+						.append(": ")
 						.append(felements.get(field))
 						.append("\n");
 			}
@@ -973,16 +960,15 @@ public class ResultComparer {
 		}
 
 		if (!diff.getOnlySecond().isEmpty()) {
-			builder.append("\t".repeat(depth))
-					.append(">ACTUAL HAS ")
+			builder.append("> ")
+					.append(prefix)
+					.append(": ACTUAL HAS ")
 					.append(diff.getOnlySecond().size())
 					.append(" MORE FIELD(S):\n");
 			for (String field : diff.getOnlySecond()) {
-				builder.append("\t".repeat(depth + 1))
-						.append(">FIELD ")
+				builder.append("\t- ")
 						.append(field)
-						.append(":\n")
-						.append("\t".repeat(depth + 2))
+						.append(": ")
 						.append(selements.get(field))
 						.append("\n");
 			}
@@ -993,17 +979,17 @@ public class ResultComparer {
 	}
 
 	private static void fillWithDiff(
-			int depth,
+			String prefix,
 			StringBuilder builder,
 			SerializableValue first,
 			SerializableValue second) {
-		builder.append("\t".repeat(depth))
+		builder.append("> ")
+				.append(prefix)
+				.append(":\n\t")
 				.append(first)
-				.append("\n")
-				.append("\t".repeat(depth))
-				.append("<--->\n")
-				.append("\t".repeat(depth))
-				.append(second);
+				.append("\n\t<--->\n\t")
+				.append(second)
+				.append("\n");
 	}
 
 	/**

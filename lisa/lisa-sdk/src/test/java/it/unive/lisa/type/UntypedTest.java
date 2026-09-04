@@ -46,6 +46,7 @@ public class UntypedTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsAcceptsAnyUntypedInstance() {
 		assertTrue(Untyped.INSTANCE.equals(Untyped.INSTANCE));
 		assertFalse(Untyped.INSTANCE.equals(null));

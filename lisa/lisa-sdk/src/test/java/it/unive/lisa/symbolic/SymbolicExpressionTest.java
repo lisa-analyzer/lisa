@@ -58,6 +58,7 @@ public class SymbolicExpressionTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsIsFalseAcrossDifferentConcreteClasses() {
 		Variable v = new Variable(Untyped.INSTANCE, "x", SyntheticLocation.INSTANCE);
 		assertFalse(v.equals("x"));

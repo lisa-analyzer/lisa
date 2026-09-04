@@ -16,6 +16,7 @@ public class StringTypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsFailsForNonStringTypes() {
 		assertFalse(StringType.INSTANCE.equals(Int32Type.INSTANCE));
 		assertFalse(StringType.INSTANCE.equals(BoolType.INSTANCE));

@@ -4,18 +4,18 @@
   "files" : [ "report.json", "untyped_typing.test1(typing__this).graph.json", "untyped_typing.test2(typing__this,_untyped_i).graph.json", "untyped_typing.test3(typing__this,_untyped_i).graph.json", "untyped_typing.test4(typing__this,_untyped_i).graph.json", "untyped_typing.test5(typing__this,_untyped_i).graph.json", "untyped_typing.test6(typing__this,_untyped_i).graph.json", "untyped_typing.test7(typing__this).graph.json" ],
   "info" : {
     "cfgs" : "7",
-    "duration" : "14ms",
-    "end" : "2026-01-07T11:13:54.305+01:00",
+    "duration" : "45ms",
+    "end" : "2026-09-04T15:53:54.132+02:00",
     "expressions" : "68",
     "files" : "7",
     "globals" : "0",
     "members" : "7",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:54.291+01:00",
+    "start" : "2026-09-04T15:53:54.087+02:00",
     "statements" : "32",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

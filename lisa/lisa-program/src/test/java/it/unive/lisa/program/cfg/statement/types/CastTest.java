@@ -86,8 +86,7 @@ public class CastTest {
 				new TypeTokenType(Collections.singleton(StringType.INSTANCE)), StringType.INSTANCE,
 				TestFixtures.LOCATION);
 
-		AnalysisState<UnitLattice> result = cast.fwdBinarySemantics(
-				interprocedural, state, leftOperand, target, expressions);
+		cast.fwdBinarySemantics(interprocedural, state, leftOperand, target, expressions);
 
 		assertEquals(1, domain.smallStepCalls.size());
 		BinaryExpression built = (BinaryExpression) domain.smallStepCalls.get(0);

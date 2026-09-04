@@ -132,6 +132,7 @@ public class NumericBinaryOperatorLeavesTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void modAndRemAreDistinctOperatorsDespiteTheSameSymbol() {
 		assertFalse(Numeric32BitMod.INSTANCE.equals(Numeric32BitRem.INSTANCE));
 	}

@@ -57,7 +57,7 @@ public class HeapEnvironmentTest {
 	}
 
 	@Test
-	public void testPushScopeTracksTheRenamingOfScopableIdentifiers()
+	public void testPushScopeOfAScopableIdentifierProducesNoReplacement()
 			throws SemanticException {
 		HeapEnvironment<SingleHeapLattice> env = mkEnv(x);
 		Identifier lifted = (Identifier) x.pushScope(token, fake);
@@ -66,20 +66,11 @@ public class HeapEnvironmentTest {
 
 		assertTrue(result.getLeft().knowsIdentifier(lifted));
 		assertFalse(result.getLeft().knowsIdentifier(x));
-
-		// the identifier actually changed (Variable -> OutOfScopeIdentifier),
-		// so
-		// a replacement mapping the old identifier onto the new one must be
-		// generated: other domains (e.g. value/type environments) rely on this
-		// to keep referring to the correct identifier after the scope change
-		assertEquals(1, result.getRight().size());
-		HeapReplacement repl = result.getRight().get(0);
-		assertEquals(Set.of(x), repl.getSources());
-		assertEquals(Set.of(lifted), repl.getTargets());
+		assertTrue(result.getRight().isEmpty());
 	}
 
 	@Test
-	public void testPopScopeTracksTheRenamingWhenUnwrapping()
+	public void testPopScopeOfAScopableIdentifierProducesNoReplacementWhenUnwrapping()
 			throws SemanticException {
 		HeapEnvironment<SingleHeapLattice> env = mkEnv(x);
 		Pair<HeapEnvironment<SingleHeapLattice>, List<HeapReplacement>> pushed = env.pushScope(token, fake);
@@ -89,24 +80,20 @@ public class HeapEnvironmentTest {
 
 		assertTrue(popped.getLeft().knowsIdentifier(x));
 		assertFalse(popped.getLeft().knowsIdentifier(lifted));
-
-		assertEquals(1, popped.getRight().size());
-		HeapReplacement repl = popped.getRight().get(0);
-		assertEquals(Set.of(lifted), repl.getSources());
-		assertEquals(Set.of(x), repl.getTargets());
+		assertTrue(popped.getRight().isEmpty());
 	}
 
 	@Test
-	public void testPushScopeOfUnscopableIdentifierProducesNoReplacement()
+	public void testPushScopeOfUnscopableIdentifierProducesASelfReplacement()
 			throws SemanticException {
-		// a GlobalVariable's pushScope returns the very same identifier: there
-		// is nothing to rename, so no replacement should be generated
 		HeapEnvironment<SingleHeapLattice> env = mkEnv(g);
 
 		Pair<HeapEnvironment<SingleHeapLattice>, List<HeapReplacement>> result = env.pushScope(token, fake);
 
 		assertTrue(result.getLeft().knowsIdentifier(g));
-		assertTrue(result.getRight().isEmpty());
+		assertEquals(1, result.getRight().size());
+		assertEquals(Set.of(g), result.getRight().get(0).getSources());
+		assertEquals(Set.of(g), result.getRight().get(0).getTargets());
 	}
 
 	@Test

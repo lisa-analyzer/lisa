@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_typing.typing(typing__this)_-1083205046.graph.json", "untyped_typing2.main(typing2__this).graph.json", "untyped_typing2.typing2(typing2__this)_-1083204054.graph.json" ],
+  "files" : [ "report.json", "untyped_typing.typing(typing__this)_-1083211773.graph.json", "untyped_typing2.main(typing2__this).graph.json", "untyped_typing2.typing2(typing2__this)_-1083211742.graph.json" ],
   "info" : {
     "cfgs" : "3",
-    "duration" : "6ms",
-    "end" : "2026-01-07T11:13:54.217+01:00",
+    "duration" : "9ms",
+    "end" : "2026-09-04T15:53:53.898+02:00",
     "expressions" : "10",
     "files" : "3",
     "globals" : "1",
     "members" : "3",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:54.211+01:00",
+    "start" : "2026-09-04T15:53:53.889+02:00",
     "statements" : "7",
     "units" : "2",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

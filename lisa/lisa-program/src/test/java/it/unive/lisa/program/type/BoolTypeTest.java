@@ -16,6 +16,7 @@ public class BoolTypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsFailsForNonBooleanTypes() {
 		assertFalse(BoolType.INSTANCE.equals(Int32Type.INSTANCE));
 		assertFalse(BoolType.INSTANCE.equals(StringType.INSTANCE));

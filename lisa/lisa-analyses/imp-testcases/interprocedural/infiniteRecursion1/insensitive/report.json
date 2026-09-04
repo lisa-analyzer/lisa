@@ -4,18 +4,18 @@
   "files" : [ "report.json", "untyped_factorial.factorial(factorial__this,_untyped_n).graph.json", "untyped_factorial.main(factorial__this,_untyped_a).graph.json" ],
   "info" : {
     "cfgs" : "2",
-    "duration" : "9ms",
-    "end" : "2026-01-07T11:13:50.590+01:00",
+    "duration" : "8ms",
+    "end" : "2026-09-04T15:53:46.132+02:00",
     "expressions" : "13",
     "files" : "2",
     "globals" : "0",
     "members" : "2",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:50.581+01:00",
+    "start" : "2026-09-04T15:53:46.124+02:00",
     "statements" : "4",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

@@ -65,6 +65,7 @@ public class PythonLikeMatchingStrategyTest {
 		@SuppressWarnings("unchecked")
 		Set<Type>[] slotTypes = new Set[2];
 
+		@SuppressWarnings("unchecked")
 		Boolean failure = PythonLikeMatchingStrategy.pythonLogic(
 				formals, actuals, actuals, emptyTypes(2), new Expression[2], new Set[2], slots, slotTypes, false);
 
@@ -91,6 +92,7 @@ public class PythonLikeMatchingStrategyTest {
 		@SuppressWarnings("unchecked")
 		Set<Type>[] slotTypes = new Set[2];
 
+		@SuppressWarnings("unchecked")
 		Boolean failure = PythonLikeMatchingStrategy.pythonLogic(
 				formals, actuals, actuals, emptyTypes(2), new Expression[2], new Set[2], slots, slotTypes, false);
 
@@ -117,6 +119,7 @@ public class PythonLikeMatchingStrategyTest {
 		@SuppressWarnings("unchecked")
 		Set<Type>[] slotTypes = new Set[2];
 
+		@SuppressWarnings("unchecked")
 		Boolean failure = PythonLikeMatchingStrategy.pythonLogic(
 				formals, actuals, actuals, emptyTypes(2), new Expression[2], new Set[2], slots, slotTypes, false);
 
@@ -157,6 +160,7 @@ public class PythonLikeMatchingStrategyTest {
 		@SuppressWarnings("unchecked")
 		Set<Type>[] slotTypes = new Set[2];
 
+		@SuppressWarnings("unchecked")
 		Boolean failure = PythonLikeMatchingStrategy.pythonLogic(
 				formals, actuals, actuals, emptyTypes(1), new Expression[2], new Set[2], slots, slotTypes, false);
 
@@ -173,6 +177,7 @@ public class PythonLikeMatchingStrategyTest {
 		@SuppressWarnings("unchecked")
 		Set<Type>[] slotTypes = new Set[1];
 
+		@SuppressWarnings("unchecked")
 		Boolean failure = PythonLikeMatchingStrategy.pythonLogic(
 				formals, actuals, actuals, emptyTypes(2), new Expression[1], new Set[1], slots, slotTypes, false);
 

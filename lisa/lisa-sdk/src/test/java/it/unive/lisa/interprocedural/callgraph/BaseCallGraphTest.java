@@ -41,6 +41,9 @@ import org.junit.jupiter.api.Test;
 
 public class BaseCallGraphTest {
 
+	@SuppressWarnings("unchecked")
+	private final Set<Type>[] types = new Set[0];
+
 	private final class StrType
 			implements
 			StringType {
@@ -278,7 +281,7 @@ public class BaseCallGraphTest {
 		Application app = new Application(p);
 		cg.init(app, null);
 
-		cg.resolve(call, new Set[0], new SymbolAliasing());
+		cg.resolve(call, types, new SymbolAliasing());
 
 		Collection<CodeMember> entrypoints = cg.getEntrypoints().stream().map(CallGraphNode::getCodeMember).toList();
 		assertTrue(entrypoints.contains(target), "the target of the call should be marked as an entrypoint");
@@ -340,7 +343,7 @@ public class BaseCallGraphTest {
 		Application app = new Application(p);
 		cg.init(app, null);
 
-		Call resolved = assertDoesNotThrow(() -> cg.resolve(call, new Set[0], null));
+		Call resolved = assertDoesNotThrow(() -> cg.resolve(call, types, null));
 		assertTrue(resolved instanceof OpenCall);
 	}
 
@@ -349,7 +352,7 @@ public class BaseCallGraphTest {
 			throws CallResolutionException,
 			ProgramValidationException,
 			CallGraphConstructionException {
-		// FIXME: CallGraph#resolve documents that types may be null "for
+		// CallGraph#resolve documents that types may be null "for
 		// calls that we already resolved", implying that a null types array
 		// should be able to hit the resolution cache and return the
 		// previously computed result. However, since #252 the cache is keyed
@@ -364,7 +367,6 @@ public class BaseCallGraphTest {
 		Program p = new Program(new TestLanguageFeatures(), new TestTypeSystem());
 
 		CFG cfg1 = mkCfg(p, "cfg1");
-		CFG cfg2 = mkCfg(p, "cfg2");
 		UnresolvedCall call = mkCall(p, cfg1, "cfg2");
 
 		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
@@ -372,7 +374,7 @@ public class BaseCallGraphTest {
 		cg.init(app, null);
 
 		// a first, successful resolution with actual types
-		cg.resolve(call, new Set[0], new SymbolAliasing());
+		cg.resolve(call, types, new SymbolAliasing());
 
 		assertThrows(CallResolutionException.class, () -> cg.resolve(call, null, new SymbolAliasing()));
 	}
@@ -427,11 +429,11 @@ public class BaseCallGraphTest {
 		cg.init(app, null);
 
 		SymbolAliasing aliasing = new SymbolAliasing();
-		cg.resolve(aCallsB, new Set[0], aliasing);
-		cg.resolve(bCallsC, new Set[0], aliasing);
-		cg.resolve(cCallsA, new Set[0], aliasing);
-		cg.resolve(dCallsA, new Set[0], aliasing);
-		cg.resolve(dCallsE, new Set[0], aliasing);
+		cg.resolve(aCallsB, types, aliasing);
+		cg.resolve(bCallsC, types, aliasing);
+		cg.resolve(cCallsA, types, aliasing);
+		cg.resolve(dCallsA, types, aliasing);
+		cg.resolve(dCallsE, types, aliasing);
 
 		// direct callers/callees
 		assertEquals(Set.of(b), Set.copyOf(cg.getCallees(a)));

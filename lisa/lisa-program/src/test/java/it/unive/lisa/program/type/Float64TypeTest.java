@@ -24,6 +24,7 @@ public class Float64TypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsFailsForDifferentBitWidthOrIntegralness() {
 		assertFalse(Float64Type.INSTANCE.equals(Float32Type.INSTANCE));
 		assertFalse(Float64Type.INSTANCE.equals(Int64Type.INSTANCE));

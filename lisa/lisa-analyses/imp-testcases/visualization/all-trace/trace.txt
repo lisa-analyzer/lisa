@@ -36,33 +36,33 @@ Program-wide fixpoint
               InferredTypes: Small step semantics of heap[w]:heap
                 InferredTypes: Evaluation of heap[w]:heap
               Interval: Small step semantics of heap[w]:heap
-          Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-            SimpleAbstractDomain: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-              MonolithicHeap: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-              MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':29:22
+          Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:20
+            SimpleAbstractDomain: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:20
+              MonolithicHeap: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:20
+              MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':29:20
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-              Interval: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
-            SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
-              MonolithicHeap: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
+              InferredTypes: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:20
+              Interval: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:20
+          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:20 to ref$new A
+            SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:20 to ref$new A
+              MonolithicHeap: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:20 to ref$new A
               MonolithicHeap: Rewriting of ref$new A
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &heap
+              InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:20 to &heap
                 InferredTypes: Evaluation of &heap
-              Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to &heap
+              Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:20 to &heap
                 InferredTypes: Evaluation of &heap
-          InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
-          InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
-            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
+          InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:20
+          InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:20
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
+            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
+              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
-              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
+              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
+              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
           Fixpoint of untyped A::A(A*)
             Semantics of i1 = 0
               Semantics of 0
@@ -94,8 +94,8 @@ Program-wide fixpoint
                   MonolithicHeap: Small step semantics of skip
                   InferredTypes: Small step semantics of skip
                   Interval: Small step semantics of skip
-          Analysis: Transferring throwers from untyped A::A(A*) [at 'imp-testcases/visualization/visualization.imp':2:4] to A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
-          Analysis: Returning from call [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
+          Analysis: Transferring throwers from untyped A::A(A*) [at 'imp-testcases/visualization/visualization.imp':2:4] to A::A($rec@'imp-testcases/visualization/visualization.imp':29:20)
+          Analysis: Returning from call [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:20)
           Analysis: Small step semantics of skip
             SimpleAbstractDomain: Small step semantics of skip
               MonolithicHeap: Small step semantics of skip
@@ -109,15 +109,15 @@ Program-wide fixpoint
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of a
               Interval: Small step semantics of a
-        Analysis: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
-          SimpleAbstractDomain: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
-            MonolithicHeap: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
-            MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':29:22
+        Analysis: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:20
+          SimpleAbstractDomain: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:20
+            MonolithicHeap: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:20
+            MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':29:20
             SimpleAbstractDomain: application of substitutions
-            InferredTypes: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
-              InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
-            Interval: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
-              InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:22
+            InferredTypes: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:20
+              InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:20
+            Interval: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:20
+              InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':29:20
       Traversal of [ a = new A() ] ---> [ one = getPositive(a, getOne(a)) ]
       Semantics of one = getPositive(a, getOne(a))
         Semantics of getPositive(a, getOne(a))
@@ -140,15 +140,15 @@ Program-wide fixpoint
                   Interval: Small step semantics of a
             InferredTypes: Evaluation of a
             InferredTypes: Evaluation of a
-            Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
-              SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
-                MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
-                MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:41]:a
+            Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:32]:a
+              SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:32]:a
+                MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:32]:a
+                MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:32]:a
                 SimpleAbstractDomain: application of substitutions
-                InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
-                  InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:41]:a
-                Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
-                  InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:41]:a
+                InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:32]:a
+                  InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:32]:a
+                Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:32]:a
+                  InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:32]:a
             Fixpoint of untyped A::getOne(A*)
               Semantics of rec = new tests()
                 Semantics of new tests()
@@ -160,30 +160,30 @@ Program-wide fixpoint
                       InferredTypes: Small step semantics of heap[w]:heap
                         InferredTypes: Evaluation of heap[w]:heap
                       Interval: Small step semantics of heap[w]:heap
-                  Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                    SimpleAbstractDomain: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                      MonolithicHeap: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                      MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':6:25
+                  Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:19
+                    SimpleAbstractDomain: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:19
+                      MonolithicHeap: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:19
+                      MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':6:19
                       SimpleAbstractDomain: application of substitutions
-                      InferredTypes: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                      Interval: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
-                    SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
-                      MonolithicHeap: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
+                      InferredTypes: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:19
+                      Interval: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:19
+                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:19 to ref$new tests
+                    SimpleAbstractDomain: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:19 to ref$new tests
+                      MonolithicHeap: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:19 to ref$new tests
                       MonolithicHeap: Rewriting of ref$new tests
                       SimpleAbstractDomain: application of substitutions
-                      InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &heap
+                      InferredTypes: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:19 to &heap
                         InferredTypes: Evaluation of &heap
-                      Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to &heap
+                      Interval: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:19 to &heap
                         InferredTypes: Evaluation of &heap
-                  InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
-                    SimpleAbstractDomain: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
-                      MonolithicHeap: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
-                      MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
+                  InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:19
+                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:19
+                    SimpleAbstractDomain: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:19
+                      MonolithicHeap: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:19
+                      MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:19
                       SimpleAbstractDomain: application of substitutions
-                      InferredTypes: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
-                      Interval: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
+                      InferredTypes: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:19
+                      Interval: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:19
                 Semantics of rec
                   Analysis: Small step semantics of rec
                     SimpleAbstractDomain: Small step semantics of rec
@@ -192,15 +192,15 @@ Program-wide fixpoint
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of rec
                       Interval: Small step semantics of rec
-                Analysis: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
-                  SimpleAbstractDomain: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
-                    MonolithicHeap: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
-                    MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':6:25
+                Analysis: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:19
+                  SimpleAbstractDomain: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:19
+                    MonolithicHeap: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:19
+                    MonolithicHeap: Rewriting of $rec@'imp-testcases/visualization/visualization.imp':6:19
                     SimpleAbstractDomain: application of substitutions
-                    InferredTypes: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
-                      InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                    Interval: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
-                      InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:25
+                    InferredTypes: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:19
+                      InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:19
+                    Interval: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:19
+                      InferredTypes: Evaluation of $rec@'imp-testcases/visualization/visualization.imp':6:19
               Traversal of [ rec = new tests() ] ---> [ x = open(rec) ]
               Semantics of x = open(rec)
                 Semantics of open(rec)
@@ -213,13 +213,13 @@ Program-wide fixpoint
                         InferredTypes: Small step semantics of rec
                         Interval: Small step semantics of rec
                   InferredTypes: Evaluation of rec
-                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                    SimpleAbstractDomain: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                      MonolithicHeap: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                      MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                    SimpleAbstractDomain: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                      MonolithicHeap: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                      MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
                       SimpleAbstractDomain: application of substitutions
-                      InferredTypes: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                      Interval: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                      InferredTypes: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                      Interval: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
                 Semantics of x
                   Analysis: Small step semantics of x
                     SimpleAbstractDomain: Small step semantics of x
@@ -228,16 +228,16 @@ Program-wide fixpoint
                       SimpleAbstractDomain: application of substitutions
                       InferredTypes: Small step semantics of x
                       Interval: Small step semantics of x
-                Analysis: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                  SimpleAbstractDomain: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                    MonolithicHeap: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                    MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                Analysis: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                  SimpleAbstractDomain: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                    MonolithicHeap: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                    MonolithicHeap: Rewriting of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
                     SimpleAbstractDomain: application of substitutions
-                    InferredTypes: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                      InferredTypes: Evaluation of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                    Interval: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                      InferredTypes: Evaluation of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
-                      Interval: Evaluation of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                    InferredTypes: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                      InferredTypes: Evaluation of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                    Interval: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                      InferredTypes: Evaluation of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
+                      Interval: Evaluation of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
               Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
               Semantics of <(x, 10)
                 Semantics of x
@@ -390,40 +390,40 @@ Program-wide fixpoint
                     Interval: Assignment of ret_value@getOne to 1
                       InferredTypes: Evaluation of 1
                       Interval: Evaluation of 1
-            Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
-              SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
-                MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
-                InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
+            Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:32]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32 to ret_value@getOne
+              SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':30:32]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32 to ret_value@getOne
+                MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':30:32]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32 to ret_value@getOne
+                InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':30:32]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32 to ret_value@getOne
                   InferredTypes: Evaluation of ret_value@getOne
-                Interval: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
+                Interval: Assignment of ['imp-testcases/visualization/visualization.imp':30:32]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32 to ret_value@getOne
                   InferredTypes: Evaluation of ret_value@getOne
                   Interval: Evaluation of ret_value@getOne
             Analysis: Transferring throwers from untyped A::getOne(A*) [at 'imp-testcases/visualization/visualization.imp':5:4] to getOne(a)
             Analysis: Returning from call [1 targets] getOne(a)
           InferredTypes: Evaluation of a
-          InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
+          InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
           InferredTypes: Evaluation of a
-          InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
-            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:42]:a
+          InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:18]:a
+            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:18]:a
+              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:18]:a
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:18]:a
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:a
-              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:a
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:a
-          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-            SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
+              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:18]:a
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:18]:a
+              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:18]:a
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:18]:a
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':30:18]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
+            SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
+              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-              Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
+              InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
+              Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
           Fixpoint of untyped A::getPositive(A*, untyped)
             Semantics of <=(i, 0)
               Semantics of i
@@ -539,14 +539,14 @@ Program-wide fixpoint
                   Interval: Assignment of ret_value@getPositive to i
                     InferredTypes: Evaluation of i
                     Interval: Evaluation of i
-          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
-            SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
-              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:18 to ret_value@getPositive
+            SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:18 to ret_value@getPositive
+              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:18 to ret_value@getPositive
               MonolithicHeap: Rewriting of ret_value@getPositive
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
+              InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:18 to ret_value@getPositive
                 InferredTypes: Evaluation of ret_value@getPositive
-              Interval: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
+              Interval: Assignment of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:18 to ret_value@getPositive
                 InferredTypes: Evaluation of ret_value@getPositive
                 Interval: Evaluation of ret_value@getPositive
           Analysis: Transferring throwers from untyped A::getPositive(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':12:4] to getPositive(a, getOne(a))
@@ -559,16 +559,16 @@ Program-wide fixpoint
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of one
               Interval: Small step semantics of one
-        Analysis: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-          SimpleAbstractDomain: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-            MonolithicHeap: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
+        Analysis: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
+          SimpleAbstractDomain: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
+            MonolithicHeap: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
+            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
             SimpleAbstractDomain: application of substitutions
-            InferredTypes: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-            Interval: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
-              Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
+            InferredTypes: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
+              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
+            Interval: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
+              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
+              Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
       Traversal of [ one = getPositive(a, getOne(a)) ] ---> [ positive = identity(a, one) ]
       Semantics of positive = identity(a, one)
         Semantics of identity(a, one)
@@ -592,26 +592,26 @@ Program-wide fixpoint
           InferredTypes: Evaluation of one
           InferredTypes: Evaluation of a
           InferredTypes: Evaluation of one
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
-            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':31:37]:a
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:23]:a
+            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:23]:a
+              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:23]:a
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':31:23]:a
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:a
-              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:a
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:a
-          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
-            SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
-              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':31:37]:one
+              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:23]:a
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:23]:a
+              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:23]:a
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:23]:a
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':31:23]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:23]:one
+            SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:23]:one
+              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:23]:one
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':31:23]:one
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:one
-              Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:one
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':31:37]:one
+              InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:23]:one
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:23]:one
+              Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:23]:one
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':31:23]:one
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':31:23]:one
           Fixpoint of untyped A::identity(A*, untyped)
             Semantics of i3 = 1
               Semantics of 1
@@ -656,14 +656,14 @@ Program-wide fixpoint
                   Interval: Assignment of ret_value@identity to i
                     InferredTypes: Evaluation of i
                     Interval: Evaluation of i
-          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
-            SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
-              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':31:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:23 to ret_value@identity
+            SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':31:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:23 to ret_value@identity
+              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':31:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:23 to ret_value@identity
               MonolithicHeap: Rewriting of ret_value@identity
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
+              InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':31:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:23 to ret_value@identity
                 InferredTypes: Evaluation of ret_value@identity
-              Interval: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
+              Interval: Assignment of ['imp-testcases/visualization/visualization.imp':31:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:23 to ret_value@identity
                 InferredTypes: Evaluation of ret_value@identity
                 Interval: Evaluation of ret_value@identity
           Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(a, one)
@@ -676,16 +676,16 @@ Program-wide fixpoint
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of positive
               Interval: Small step semantics of positive
-        Analysis: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-          SimpleAbstractDomain: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-            MonolithicHeap: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
+        Analysis: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
+          SimpleAbstractDomain: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
+            MonolithicHeap: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
+            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
             SimpleAbstractDomain: application of substitutions
-            InferredTypes: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-            Interval: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
-              Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
+            InferredTypes: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
+              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
+            Interval: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
+              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
+              Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
       Traversal of [ positive = identity(a, one) ] ---> [ minusone = -1 ]
       Semantics of minusone = -1
         Semantics of -1
@@ -733,26 +733,26 @@ Program-wide fixpoint
           InferredTypes: Evaluation of minusone
           InferredTypes: Evaluation of a
           InferredTypes: Evaluation of minusone
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
-            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':33:42]:a
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:23]:a
+            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:23]:a
+              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:23]:a
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':33:23]:a
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:a
-              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:a
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:a
-          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-            SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':33:42]:minusone
+              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:23]:a
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:23]:a
+              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:23]:a
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:23]:a
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':33:23]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:23]:minusone
+            SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:23]:minusone
+              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:23]:minusone
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':33:23]:minusone
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-              Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:minusone
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':33:42]:minusone
+              InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:23]:minusone
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:23]:minusone
+              Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:23]:minusone
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':33:23]:minusone
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':33:23]:minusone
           Fixpoint of untyped A::identity(A*, untyped)
             Semantics of i3 = 1
               Semantics of 1
@@ -797,14 +797,14 @@ Program-wide fixpoint
                   Interval: Assignment of ret_value@identity to i
                     InferredTypes: Evaluation of i
                     Interval: Evaluation of i
-          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
-            SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
-              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':33:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:23 to ret_value@identity
+            SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':33:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:23 to ret_value@identity
+              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':33:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:23 to ret_value@identity
               MonolithicHeap: Rewriting of ret_value@identity
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
+              InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':33:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:23 to ret_value@identity
                 InferredTypes: Evaluation of ret_value@identity
-              Interval: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
+              Interval: Assignment of ['imp-testcases/visualization/visualization.imp':33:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:23 to ret_value@identity
                 InferredTypes: Evaluation of ret_value@identity
                 Interval: Evaluation of ret_value@identity
           Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(a, minusone)
@@ -817,16 +817,16 @@ Program-wide fixpoint
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of negative
               Interval: Small step semantics of negative
-        Analysis: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-          SimpleAbstractDomain: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-            MonolithicHeap: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
+        Analysis: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
+          SimpleAbstractDomain: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
+            MonolithicHeap: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
+            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
             SimpleAbstractDomain: application of substitutions
-            InferredTypes: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-            Interval: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
-              Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
+            InferredTypes: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
+              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
+            Interval: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
+              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
+              Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
       Traversal of [ negative = identity(a, minusone) ] ---> [ top = helper(this, one, a) ]
       Semantics of top = helper(this, one, a)
         Semantics of helper(this, one, a)
@@ -860,36 +860,36 @@ Program-wide fixpoint
           InferredTypes: Evaluation of this
           InferredTypes: Evaluation of one
           InferredTypes: Evaluation of a
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
-            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
-              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:this
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:18]:this
+            SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:18]:this
+              MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:18]:this
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:18]:this
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:this
-              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:this
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:this
-          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
-            SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
-              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:one
+              InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:18]:this
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:this
+              Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:18]:this
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:this
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:this
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:18]:one
+            SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:18]:one
+              MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:18]:one
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:18]:one
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:one
-              Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:one
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:one
-          Analysis: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
-            SimpleAbstractDomain: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
-              MonolithicHeap: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
-              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:36]:a
+              InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:18]:one
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:one
+              Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:18]:one
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:one
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:one
+          Analysis: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:18]:a
+            SimpleAbstractDomain: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:18]:a
+              MonolithicHeap: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:18]:a
+              MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':34:18]:a
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:a
-              Interval: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
-                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:a
-                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':34:36]:a
+              InferredTypes: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:18]:a
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:a
+              Interval: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:18]:a
+                InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:a
+                Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':34:18]:a
           Fixpoint of untyped tests::helper(tests*, untyped, untyped)
             Semantics of return identity(dispatcher, i)
               Semantics of identity(dispatcher, i)
@@ -913,26 +913,26 @@ Program-wide fixpoint
                 InferredTypes: Evaluation of i
                 InferredTypes: Evaluation of dispatcher
                 InferredTypes: Evaluation of i
-                Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                  SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                    MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                    MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
+                Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                  SimpleAbstractDomain: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                    MonolithicHeap: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                    MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
                     SimpleAbstractDomain: application of substitutions
-                    InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                      InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                    Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                      InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                      Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
-                  SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
-                    MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
-                    MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':38:36]:i
+                    InferredTypes: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                      InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                    Interval: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                      InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                      Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:15]:i
+                  SimpleAbstractDomain: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:15]:i
+                    MonolithicHeap: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:15]:i
+                    MonolithicHeap: Rewriting of ['imp-testcases/visualization/visualization.imp':38:15]:i
                     SimpleAbstractDomain: application of substitutions
-                    InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
-                      InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:i
-                    Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
-                      InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:i
-                      Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':38:36]:i
+                    InferredTypes: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:15]:i
+                      InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:15]:i
+                    Interval: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:15]:i
+                      InferredTypes: Evaluation of ['imp-testcases/visualization/visualization.imp':38:15]:i
+                      Interval: Evaluation of ['imp-testcases/visualization/visualization.imp':38:15]:i
                 Fixpoint of untyped A::identity(A*, untyped)
                   Semantics of i3 = 1
                     Semantics of 1
@@ -977,36 +977,36 @@ Program-wide fixpoint
                         Interval: Assignment of ret_value@identity to i
                           InferredTypes: Evaluation of i
                           Interval: Evaluation of i
-                Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
-                  SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
-                    MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
+                Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':38:15]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:15 to ret_value@identity
+                  SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':38:15]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:15 to ret_value@identity
+                    MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':38:15]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:15 to ret_value@identity
                     MonolithicHeap: Rewriting of ret_value@identity
                     SimpleAbstractDomain: application of substitutions
-                    InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
+                    InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':38:15]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:15 to ret_value@identity
                       InferredTypes: Evaluation of ret_value@identity
-                    Interval: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
+                    Interval: Assignment of ['imp-testcases/visualization/visualization.imp':38:15]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:15 to ret_value@identity
                       InferredTypes: Evaluation of ret_value@identity
                       Interval: Evaluation of ret_value@identity
                 Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(dispatcher, i)
                 Analysis: Returning from call [1 targets] identity(dispatcher, i)
-              Analysis: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                SimpleAbstractDomain: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                  MonolithicHeap: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                  MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
+              Analysis: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+                SimpleAbstractDomain: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+                  MonolithicHeap: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+                  MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
                   SimpleAbstractDomain: application of substitutions
-                  InferredTypes: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                    InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                  Interval: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                    InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-                    Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
-            SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
-              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
+                  InferredTypes: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+                    InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+                  Interval: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+                    InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+                    Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':34:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:18 to ret_value@helper
+            SimpleAbstractDomain: Assignment of ['imp-testcases/visualization/visualization.imp':34:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:18 to ret_value@helper
+              MonolithicHeap: Assignment of ['imp-testcases/visualization/visualization.imp':34:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:18 to ret_value@helper
               MonolithicHeap: Rewriting of ret_value@helper
               SimpleAbstractDomain: application of substitutions
-              InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
+              InferredTypes: Assignment of ['imp-testcases/visualization/visualization.imp':34:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:18 to ret_value@helper
                 InferredTypes: Evaluation of ret_value@helper
-              Interval: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
+              Interval: Assignment of ['imp-testcases/visualization/visualization.imp':34:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:18 to ret_value@helper
                 InferredTypes: Evaluation of ret_value@helper
                 Interval: Evaluation of ret_value@helper
           Analysis: Transferring throwers from untyped tests::helper(tests*, untyped, untyped) [at 'imp-testcases/visualization/visualization.imp':37:4] to helper(this, one, a)
@@ -1019,16 +1019,16 @@ Program-wide fixpoint
               SimpleAbstractDomain: application of substitutions
               InferredTypes: Small step semantics of top
               Interval: Small step semantics of top
-        Analysis: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-          SimpleAbstractDomain: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-            MonolithicHeap: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
+        Analysis: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
+          SimpleAbstractDomain: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
+            MonolithicHeap: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
+            MonolithicHeap: Rewriting of call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
             SimpleAbstractDomain: application of substitutions
-            InferredTypes: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-            Interval: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
-              Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
+            InferredTypes: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
+              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
+            Interval: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
+              InferredTypes: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
+              Interval: Evaluation of call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
       Traversal of [ top = helper(this, one, a) ] ---> [ ret ]
       Semantics of ret
         Analysis: Small step semantics of skip

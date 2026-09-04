@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 public class BaseConfigurationTest {
 
+	@SuppressWarnings("unused")
 	private static class FakeConfiguration
 			extends
 			BaseConfiguration {
@@ -21,6 +22,7 @@ public class BaseConfigurationTest {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class OtherConfiguration
 			extends
 			BaseConfiguration {

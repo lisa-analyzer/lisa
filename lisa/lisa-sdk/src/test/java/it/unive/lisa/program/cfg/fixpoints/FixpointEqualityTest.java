@@ -45,6 +45,7 @@ public class FixpointEqualityTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsIsReflexiveAndNullAndOtherTypeSafe() {
 		ForwardAscendingFixpoint<?, ?> f = new ForwardAscendingFixpoint<>();
 		assertTrue(f.equals(f));

@@ -24,6 +24,7 @@ public class UInt8TypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsFailsForDifferentBitWidthOrIntegralness() {
 		assertFalse(UInt8Type.INSTANCE.equals(UInt16Type.INSTANCE));
 		assertFalse(UInt8Type.INSTANCE.equals(Float32Type.INSTANCE));
@@ -31,6 +32,7 @@ public class UInt8TypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsFailsAcrossSignedness() {
 		// NumericType.sameNumericTypes() (which equals() delegates to) also
 		// compares isUnsigned(), so same-width same-integralness types with

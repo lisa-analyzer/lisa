@@ -48,6 +48,7 @@ public class NullTypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsAcceptsAnyNullTypeInstance() {
 		assertTrue(NullType.INSTANCE.equals(NullType.INSTANCE));
 		assertFalse(NullType.INSTANCE.equals(null));

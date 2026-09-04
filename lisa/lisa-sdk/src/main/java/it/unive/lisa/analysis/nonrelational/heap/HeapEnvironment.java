@@ -115,13 +115,10 @@ public class HeapEnvironment<L extends HeapValue<L>>
 	 * {@link Identifier#popScope(ScopeToken, ProgramPoint)}) to every
 	 * identifier currently mapped by this environment, producing the lifted
 	 * environment together with the list of {@link HeapReplacement}s needed to
-	 * keep other domains (e.g. value and type environments) in sync. A
-	 * replacement is generated for every identifier that is actually renamed by
-	 * {@code lifter} (source: the original identifier, target: the lifted one);
-	 * identifiers for which {@code lifter} returns {@code null} are instead
-	 * considered removed, and are expanded through
-	 * {@link #expand(HeapReplacement)} to also drop whatever was reachable only
-	 * from them.
+	 * keep other domains (e.g. value and type environments) in sync.
+	 * Identifiers for which {@code lifter} returns {@code null} are considered
+	 * removed, and are expanded through {@link #expand(HeapReplacement)} to
+	 * also drop whatever was reachable only from them.
 	 *
 	 * @param lifter the function used to lift each identifier
 	 *
@@ -142,8 +139,7 @@ public class HeapEnvironment<L extends HeapValue<L>>
 		for (Identifier id : getKeys()) {
 			Identifier lifted = lifter.apply(id);
 			if (lifted != null) {
-				if (!lifted.equals(id))
-					// we track the renaming
+				if (lifted.equals(id))
 					r.add(new HeapReplacement().withSource(id).withTarget(lifted));
 				if (!function.containsKey(lifted))
 					function.put(lifted, getState(id));

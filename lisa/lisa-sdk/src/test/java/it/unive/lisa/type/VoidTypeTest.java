@@ -16,6 +16,7 @@ public class VoidTypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsAcceptsAnyVoidTypeInstance() {
 		assertTrue(VoidType.INSTANCE.equals(VoidType.INSTANCE));
 		assertFalse(VoidType.INSTANCE.equals(null));

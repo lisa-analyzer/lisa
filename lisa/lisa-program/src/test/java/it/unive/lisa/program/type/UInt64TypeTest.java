@@ -24,6 +24,7 @@ public class UInt64TypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsFailsForDifferentBitWidthOrIntegralness() {
 		assertFalse(UInt64Type.INSTANCE.equals(UInt32Type.INSTANCE));
 		assertFalse(UInt64Type.INSTANCE.equals(Float64Type.INSTANCE));
@@ -31,6 +32,7 @@ public class UInt64TypeTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	public void equalsFailsAcrossSignedness() {
 		// NumericType.sameNumericTypes() (which equals() delegates to) also
 		// compares isUnsigned(), so same-width same-integralness types with
