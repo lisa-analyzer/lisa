@@ -1,6 +1,7 @@
 package it.unive.lisa.checks.semantic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.ReportingTool;
@@ -296,6 +297,77 @@ public class SemanticToolTest {
 
 		assertEquals(res1, tool.getResultOf(cfg).iterator().next());
 		assertEquals(res2, tool.getResultOf(cfg2).iterator().next());
+	}
+
+	@Test
+	public void getCallersCalleesAndCallSitesDelegateToTheCallGraph() {
+		CallGraph recording = new CallGraph() {
+
+			@Override
+			public void registerCall(
+					CFGCall call) {
+			}
+
+			@Override
+			public void init(
+					Application app,
+					EventQueue events)
+					throws CallGraphConstructionException {
+				super.init(app, events);
+			}
+
+			@Override
+			public Collection<CodeMember> getCallers(
+					CodeMember cm) {
+				return cm == cfg ? Collections.singleton((CodeMember) cfg2) : Collections.emptySet();
+			}
+
+			@Override
+			public Collection<CodeMember> getCallees(
+					CodeMember cm) {
+				return cm == cfg ? Collections.singleton((CodeMember) cfg2) : Collections.emptySet();
+			}
+
+			@Override
+			public Collection<Call> getCallSites(
+					CodeMember cm) {
+				return Collections.emptySet();
+			}
+
+			@Override
+			public Call resolve(
+					UnresolvedCall call,
+					Set<Type>[] types,
+					SymbolAliasing aliasing)
+					throws CallResolutionException {
+				return null;
+			}
+
+			@Override
+			public Collection<Collection<CodeMember>> getRecursions() {
+				return null;
+			}
+
+			@Override
+			public Collection<Collection<CodeMember>> getRecursionsContaining(
+					CodeMember cm) {
+				return null;
+			}
+
+		};
+
+		SemanticTool<TestAbstractState,
+				TestAbstractDomain> tool = new SemanticTool<>(
+						new LiSAConfiguration(),
+						new FileManager("foo"),
+						Map.of(),
+						recording,
+						new Analysis<>(new TestAbstractDomain()));
+
+		assertEquals(Collections.singleton(cfg2), tool.getCallers(cfg));
+		assertEquals(Collections.singleton(cfg2), tool.getCallees(cfg));
+		assertTrue(tool.getCallSites(cfg).isEmpty());
+		assertSame(recording, tool.getCallGraph());
 	}
 
 }

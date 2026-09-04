@@ -40,10 +40,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A worst case modular analysis were all cfg calls are treated as open calls.
- * 
+ * The backward counterpart of {@link ModularWorstCaseAnalysis}: a worst-case
+ * modular {@link InterproceduralAnalysis} where every {@link CFGCall} is
+ * treated as an {@link OpenCall}, and every {@link CFG} of the application is
+ * analyzed exactly once, in isolation, using a backward fixpoint instead of a
+ * forward one.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis

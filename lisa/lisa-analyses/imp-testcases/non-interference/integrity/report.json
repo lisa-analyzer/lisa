@@ -1,41 +1,41 @@
 {
   "warnings" : [ {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':101:7] on 'untyped Integrity::integrity_lec19ex5(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':101:3] on 'untyped Integrity::integrity_lec19ex5(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':16:7] on 'untyped Integrity::integrity_lec6(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':16:3] on 'untyped Integrity::integrity_lec6(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':18:7] on 'untyped Integrity::integrity_lec6(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':18:3] on 'untyped Integrity::integrity_lec6(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':26:11] on 'untyped Integrity::integrity_lec7(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':26:3] on 'untyped Integrity::integrity_lec7(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':48:10] on 'untyped Integrity::integrity_lec17(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':48:2] on 'untyped Integrity::integrity_lec17(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':4:34] on 'untyped Integrity::integrity_lec5ex1(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':4:2] on 'untyped Integrity::integrity_lec5ex1(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':61:7] on 'untyped Integrity::integrity_lec18ex2(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':61:3] on 'untyped Integrity::integrity_lec18ex2(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':91:6] on 'untyped Integrity::integrity_lec19ex4(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':91:2] on 'untyped Integrity::integrity_lec19ex4(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':99:7] on 'untyped Integrity::integrity_lec19ex5(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':99:3] on 'untyped Integrity::integrity_lec19ex5(Integrity* this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
   }, {
-    "message" : "['imp-testcases/non-interference/integrity/program.imp':9:38] on 'untyped Integrity::integrity_lec5ex2(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':9:2] on 'untyped Integrity::integrity_lec5ex2(Integrity* this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
   } ],
   "notices" : [ ],
   "files" : [ "report.json", "untyped_Integrity.integrity_lec16(Integrity__this).graph.json", "untyped_Integrity.integrity_lec17(Integrity__this).graph.json", "untyped_Integrity.integrity_lec18ex1(Integrity__this).graph.json", "untyped_Integrity.integrity_lec18ex2(Integrity__this).graph.json", "untyped_Integrity.integrity_lec19ex1(Integrity__this).graph.json", "untyped_Integrity.integrity_lec19ex2(Integrity__this).graph.json", "untyped_Integrity.integrity_lec19ex3(Integrity__this).graph.json", "untyped_Integrity.integrity_lec19ex4(Integrity__this).graph.json", "untyped_Integrity.integrity_lec19ex5(Integrity__this).graph.json", "untyped_Integrity.integrity_lec5ex1(Integrity__this).graph.json", "untyped_Integrity.integrity_lec5ex2(Integrity__this).graph.json", "untyped_Integrity.integrity_lec6(Integrity__this).graph.json", "untyped_Integrity.integrity_lec7(Integrity__this).graph.json", "untyped_Integrity.integrity_lec8(Integrity__this).graph.json" ],
   "info" : {
     "cfgs" : "14",
-    "duration" : "54ms",
-    "end" : "2026-01-07T11:13:44.931+01:00",
+    "duration" : "255ms",
+    "end" : "2026-09-04T15:53:28.654+02:00",
     "expressions" : "130",
     "files" : "14",
     "globals" : "0",
     "members" : "14",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:44.877+01:00",
+    "start" : "2026-09-04T15:53:28.399+02:00",
     "statements" : "70",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "10"
   },
   "configuration" : {

@@ -109,6 +109,23 @@ public class HeapEnvironment<L extends HeapValue<L>>
 		return result;
 	}
 
+	/**
+	 * Applies {@code lifter} (either
+	 * {@link Identifier#pushScope(ScopeToken, ProgramPoint)} or
+	 * {@link Identifier#popScope(ScopeToken, ProgramPoint)}) to every
+	 * identifier currently mapped by this environment, producing the lifted
+	 * environment together with the list of {@link HeapReplacement}s needed to
+	 * keep other domains (e.g. value and type environments) in sync.
+	 * Identifiers for which {@code lifter} returns {@code null} are considered
+	 * removed, and are expanded through {@link #expand(HeapReplacement)} to
+	 * also drop whatever was reachable only from them.
+	 *
+	 * @param lifter the function used to lift each identifier
+	 *
+	 * @return the lifted environment and the list of replacements it requires
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	private Pair<HeapEnvironment<L>, List<HeapReplacement>> liftIdentifiers(
 			UnaryOperator<Identifier> lifter)
 			throws SemanticException {
@@ -123,7 +140,6 @@ public class HeapEnvironment<L extends HeapValue<L>>
 			Identifier lifted = lifter.apply(id);
 			if (lifted != null) {
 				if (lifted.equals(id))
-					// we track the renaming
 					r.add(new HeapReplacement().withSource(id).withTarget(lifted));
 				if (!function.containsKey(lifted))
 					function.put(lifted, getState(id));
@@ -134,10 +150,14 @@ public class HeapEnvironment<L extends HeapValue<L>>
 				removed.addSource(id);
 		}
 
-		if (r.isEmpty() && removed.getSources().isEmpty())
+		if (!removed.getSources().isEmpty())
+			// avoid generating a spurious no-op replacement (with no sources
+			// and no targets) when nothing was actually removed
+			r.addAll(expand(removed));
+
+		if (r.isEmpty())
 			return Pair.of(new HeapEnvironment<>(lattice, function), Collections.emptyList());
 
-		r.addAll(expand(removed));
 		return Pair.of(new HeapEnvironment<>(lattice, function), r);
 	}
 

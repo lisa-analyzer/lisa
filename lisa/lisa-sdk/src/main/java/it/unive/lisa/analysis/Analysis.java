@@ -516,8 +516,13 @@ public class Analysis<
 	 * currently associated with it. The smashed errors are also updated by
 	 * removing the caught errors, and their state is taken into the lub if at
 	 * least one error is removed. All error(s) not matching the given targets
-	 * are removed from the resulting state.
-	 * 
+	 * are removed from the resulting state as well: this method is meant to be
+	 * invoked once per outgoing error-handling edge of {@code protectedBlock}
+	 * (see {@code ErrorEdge}), each one starting from the same {@code state}
+	 * and independently computing the state entering its own destination, so
+	 * errors that are not caught by this specific invocation are expected to
+	 * still be available, unaltered, to the other edges that process them.
+	 *
 	 * @param state          the current analysis state
 	 * @param pp             the program point where the move happens
 	 * @param protectedBlock the block that is being protected from the errors
@@ -558,13 +563,11 @@ public class Analysis<
 				? protectedBlock.getBody().contains(((Expression) st).getRootStatement())
 				: protectedBlock.getBody().contains(st);
 
-		Set<Error> caught = new HashSet<>();
 		Map<Type, Set<Statement>> caughtSmashed = new HashMap<>();
 
 		for (Entry<Error, ProgramState<A>> entry : state.getErrors()) {
 			if (!isCaught.test(entry.getKey().getType()) || !isProtected.test(entry.getKey().getThrower()))
 				continue;
-			caught.add(entry.getKey());
 			result = result.lub(entry.getValue());
 			for (SymbolicExpression e : entry.getValue().getComputedExpressions())
 				excs.add(e);
@@ -662,8 +665,12 @@ public class Analysis<
 		if (state.isBottom() || state.isTop())
 			return state;
 
-		if (target instanceof Call)
-			target = ((Call) target).getSource();
+		if (target instanceof Call) {
+			Call original = (Call) target;
+			while (original.getSource() != null)
+				original = original.getSource();
+			target = original;
+		}
 
 		if (events != null)
 			events.post(new AnalysisTransferThrowersStart<>(state, target, origin));

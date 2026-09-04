@@ -18,12 +18,19 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * A lattice structure for substring relations. The domain is implemented as a
- * {@link FunctionalLattice}, mapping identifiers to string expressions,
- * tracking which string expressions are <i>definitely</i> substring of an
- * identifier.
- * 
- * @author <a href="mailto:vincenzo.arceri@unipr.it>">Vincenzo Arceri</a>
+ * The lattice structure used by
+ * {@link it.unive.lisa.analysis.string.SubstringDomain}. It is implemented as a
+ * {@link FunctionalLattice} mapping identifiers to sets of string expressions
+ * ({@link ExpressionInverseSet}), tracking which string expressions are
+ * <i>definitely</i> substrings of an identifier. Since
+ * {@link ExpressionInverseSet} orders its elements by reverse set inclusion (a
+ * smaller set of candidate expressions is a more precise, i.e., a lower,
+ * lattice element), joining ({@link #lubAux(Substrings)}) and meeting
+ * ({@link #glbAux(Substrings)}) two mappings for the same identifier simply
+ * delegates to the least upper bound and greatest lower bound of the
+ * corresponding {@link ExpressionInverseSet}s.
+ *
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class Substrings
 		extends
@@ -289,15 +296,18 @@ public class Substrings
 	}
 
 	/**
-	 * First step of assignment, removing obsolete relations.
-	 * 
-	 * @param extracted Expression assigned
-	 * @param id        Expression getting assigned
-	 * 
-	 * @return Copy of the domain, with the holding relations after the
-	 *             assignment.
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
+	 * First step of the semantics of an assignment, removing the relations that
+	 * become obsolete because of it: all relations tracked for {@code id} are
+	 * dropped, unless {@code id} itself appears in {@code extracted} (i.e., the
+	 * assigned expression still depends on the previous value of {@code id}, as
+	 * in {@code id = id + ...}), and every relation mentioning {@code id} on
+	 * the right-hand side is removed from the other entries.
+	 *
+	 * @param extracted the identifiers and expressions extracted from the
+	 *                      right-hand side of the assignment
+	 * @param id        the identifier being assigned
+	 *
+	 * @return a copy of this domain with the obsolete relations removed
 	 */
 	public Substrings remove(
 			Set<SymbolicExpression> extracted,
@@ -334,14 +344,18 @@ public class Substrings
 	}
 
 	/**
-	 * Performs the inter-assignment phase.
-	 * 
-	 * @param assignedId         Variable getting assigned
-	 * @param assignedExpression Expression assigned
-	 * 
-	 * @return Copy of the domain with new relations following the
-	 *             inter-assignment phase
-	 * 
+	 * Performs the inter-assignment phase of the semantics of an assignment
+	 * {@code assignedId = assignedExpression}: every other identifier that was
+	 * already known to have {@code assignedExpression} as one of its substrings
+	 * is also given {@code assignedId} as a (definite) substring, since after
+	 * the assignment the two are known to hold the same value.
+	 *
+	 * @param assignedId         the identifier being assigned
+	 * @param assignedExpression the expression being assigned to
+	 *                               {@code assignedId}
+	 *
+	 * @return a copy of this domain with the new relations added
+	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public Substrings interasg(
@@ -373,13 +387,15 @@ public class Substrings
 	}
 
 	/**
-	 * Performs the closure over an identifier. The method adds to {@code id}
-	 * the expressions found in the variables mapped to {@code id}
-	 * 
+	 * Performs the closure of the substring relations tracked for {@code id}:
+	 * for every other identifier {@code y} that is a known substring of
+	 * {@code id}, the substrings already known for {@code y} are also added as
+	 * substrings of {@code id}, since substring is a transitive relation.
+	 *
 	 * @param id the identifier to perform the closure on
-	 * 
-	 * @return A copy of the domain with the added relations
-	 * 
+	 *
+	 * @return a copy of this domain with the added relations
+	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public Substrings closure(

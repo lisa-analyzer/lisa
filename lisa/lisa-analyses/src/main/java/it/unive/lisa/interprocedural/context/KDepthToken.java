@@ -10,12 +10,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A context sensitive token representing the last {@code k} elements of the
- * call chain, with {@code k} being specified in the singleton creation
- * ({@link #create(int)}).
- * 
+ * A call-string-based context sensitivity token (see
+ * {@link ContextBasedAnalysis}), representing the last {@code k} elements of
+ * the call chain that led to the current call, with {@code k} being specified
+ * when the starting token is created ({@link #create(int)}). {@code k = 0}
+ * yields a context-insensitive token (the call chain is never tracked), while
+ * {@code k < 0} keeps the whole call chain, trading precision for the size of
+ * the state space explored by the analysis.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of {@link AbstractLattice} handled by the analysis
  */
 public class KDepthToken<A extends AbstractLattice<A>>

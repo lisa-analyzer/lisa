@@ -77,15 +77,10 @@ public class SingleInheritanceTraversalStrategy
 				else {
 					// single inheritance!
 					current = current.getImmediateAncestors().iterator().next();
-
-					// we avoid re-processing what we already seen
-					// note that current will have been visited during the
-					// previous iteration
 					current.getImmediateAncestors().forEach(su -> {
 						if (seen.add(su))
 							remaining.add(su);
 					});
-					remaining.addFirst(current);
 				}
 
 			return cu;

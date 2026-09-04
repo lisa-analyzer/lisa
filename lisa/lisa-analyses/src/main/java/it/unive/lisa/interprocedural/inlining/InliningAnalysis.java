@@ -61,16 +61,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * An inlining-based interprocedural analysis. This means that each call
- * receives its own result, with no "compacting" based on context or other
- * technique: each call receives its own result that is uniquely determined by
- * the call's entry strate. Recursions are not supported: either they converge
- * to a result, or the analysis (i) diverges if no maximum call stack depth is
- * set through the constructor, or (ii) terminates with an exception when the
- * maximum call stack depth has been reached.
- * 
+ * An inlining-based, fully context-sensitive {@link CallGraphBasedAnalysis}:
+ * each {@link CFGCall} receives its own result, uniquely determined by the
+ * call's entry state, with no "compacting" of results across calls based on
+ * context or other technique. The whole call stack is tracked through
+ * {@link CallStackId}. Since call chains are never merged, general recursion is
+ * not supported: recursive calls either converge to a result (see
+ * {@link it.unive.lisa.interprocedural.inlining.recursion.RecursionSolver}), or
+ * the analysis (i) diverges if no maximum call stack depth is set through the
+ * constructor, or (ii) terminates with an exception when the maximum call stack
+ * depth has been reached.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis

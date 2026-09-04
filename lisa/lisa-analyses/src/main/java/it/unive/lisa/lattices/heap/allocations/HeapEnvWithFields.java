@@ -26,9 +26,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An instance of {@link FunctionalLattice} representing a map from identifiers
- * to sets of {@link AllocationSite}s, that also tracks the fields of each
- * allocation site that have been assigned to some value.
- * 
+ * to sets of {@link AllocationSite}s (i.e., points-to information), that also
+ * tracks, in {@link #fields}, which fields of each allocation site have been
+ * assigned to some value. This is the lattice backing
+ * {@link it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap}.
+ * Every lattice operation (least upper bound, greatest lower bound, widening,
+ * narrowing, less-or-equal) is computed by applying the corresponding operation
+ * of {@link FunctionalLattice} to the points-to map and combining it with the
+ * same operation applied to {@link #fields}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class HeapEnvWithFields

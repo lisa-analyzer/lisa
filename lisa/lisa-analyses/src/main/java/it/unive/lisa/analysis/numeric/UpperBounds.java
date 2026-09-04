@@ -35,10 +35,21 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * Relational implementation of the upper bounds analysis of
- * <a href="https://doi.org/10.1016/j.scico.2009.04.004">this paper</a>.
- * 
+ * Relational implementation of the upper bounds analysis, the relational
+ * component of the Pentagons domain (see {@link Pentagon}). For every
+ * identifier, this domain tracks the set of other identifiers that are
+ * certainly strictly greater than it (i.e., its known upper bounds), capturing
+ * relations of the form {@code x < y}. This information is updated on
+ * assignments of the form {@code id = y - c} or {@code id = y + c}, where
+ * {@code c} is a constant, and refined whenever a comparison between two
+ * identifiers is assumed.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1016/j.scico.2009.04.004">Francesco Logozzo,
+ *          Manuel Fähndrich. Pentagons: a weakly relational abstract domain for
+ *          the efficient validation of array accesses. Science of Computer
+ *          Programming, 75(9):796-807, 2010.</a>
  */
 public class UpperBounds
 		implements

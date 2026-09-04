@@ -28,10 +28,19 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * An interprocedural analysis based on a call graph.
- * 
+ * A base class for {@link InterproceduralAnalysis} implementations that resolve
+ * calls through a {@link CallGraph} (see
+ * {@link #resolve(UnresolvedCall, Set[], SymbolAliasing)}) and analyze
+ * {@link CFGCall}s by propagating the caller's state into the callee:
+ * subclasses only need to provide the actual fixpoint strategy (e.g.,
+ * context-insensitive, k-depth context-sensitive, or inlining-based), while
+ * this class provides the common machinery for preparing entry states (scoping
+ * visible variables and binding actual to formal parameters, see
+ * {@link #prepareEntryState}) and for evaluating {@link OpenCall}s through the
+ * configured {@link OpenCallPolicy}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis

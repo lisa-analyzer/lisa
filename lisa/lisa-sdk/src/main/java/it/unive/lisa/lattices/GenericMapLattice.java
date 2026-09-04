@@ -125,7 +125,7 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 			return this;
 
 		Map<K, V> result = mkNewFunction(function, false);
-		function.keySet().removeIf(test);
+		result.keySet().removeIf(test);
 		if (result.isEmpty())
 			return mk(lattice, null);
 		return mk(lattice, result);

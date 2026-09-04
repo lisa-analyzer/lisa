@@ -27,14 +27,18 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A field-insensitive program point-based {@link AllocationSiteBasedAnalysis}.
- * The implementation follows X. Rival and K. Yi, "Introduction to Static
- * Analysis An Abstract Interpretation Perspective", Section 8.3.4
- * 
+ * A field-sensitive, allocation-site-based heap domain: in addition to the
+ * allocation site of an object or array, heap locations also track, for each
+ * allocation site, the fields (or elements) that have been accessed on it and
+ * the allocation sites they in turn point to. The implementation follows X.
+ * Rival and K. Yi, "Introduction to Static Analysis: An Abstract Interpretation
+ * Perspective", Section 8.3.4.
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
- * 
- * @see <a href=
- *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
+ *
+ * @see <a href="https://mitpress.mit.edu/books/introduction-static-analysis">
+ *          Xavier Rival, Kwangkeun Yi. Introduction to Static Analysis: An
+ *          Abstract Interpretation Perspective. MIT Press, 2020.</a>
  */
 public class FieldSensitivePointBasedHeap
 		extends

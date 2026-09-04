@@ -166,4 +166,36 @@ public abstract class OptimizedBackwardFixpoint<
 	public BackwardCFGFixpoint<A, D> asBackward() {
 		return this;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((hotspots == null) ? 0 : hotspots.hashCode());
+		result = prime * result + ((bbs == null) ? 0 : bbs.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		OptimizedBackwardFixpoint<?, ?> other = (OptimizedBackwardFixpoint<?, ?>) obj;
+		if (hotspots == null) {
+			if (other.hotspots != null)
+				return false;
+		} else if (!hotspots.equals(other.hotspots))
+			return false;
+		if (bbs == null) {
+			if (other.bbs != null)
+				return false;
+		} else if (!bbs.equals(other.bbs))
+			return false;
+		return true;
+	}
 }
