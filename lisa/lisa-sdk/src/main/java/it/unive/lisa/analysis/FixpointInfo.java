@@ -133,10 +133,14 @@ public class FixpointInfo
 	 * 
 	 * @param key  the key
 	 * @param info the information to store
-	 * 
+	 *
 	 * @return a new instance with the updated mapping
-	 * 
-	 * @throws SemanticException if something goes wrong during the lub
+	 *
+	 * @throws SemanticException        if something goes wrong during the lub
+	 * @throws IllegalArgumentException if this mapping already associates
+	 *                                      {@code key} to a {@link Lattice}
+	 *                                      instance whose runtime type differs
+	 *                                      from {@code info}'s one
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public FixpointInfo putWeak(
@@ -147,7 +151,7 @@ public class FixpointInfo
 		// need to leave this raw to not have the compiler complaining about the
 		// lub invocation
 		Lattice prev = get(key);
-		if (prev.getClass() != info.getClass())
+		if (prev != null && prev.getClass() != info.getClass())
 			throw new IllegalArgumentException(
 					"The given lattice instance has a different type ("
 							+ info.getClass().getName()

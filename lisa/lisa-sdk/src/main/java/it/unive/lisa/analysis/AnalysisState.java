@@ -47,9 +47,18 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	private final GenericMapLattice<Error, ProgramState<A>> errors;
 
 	/**
-	 * Builds a new analysis state.
-	 * 
-	 * @param lattice the program state to embed in this analysis state
+	 * Builds the top analysis state. All continuations (including the normal
+	 * execution one) are set to the top of the lattice induced by
+	 * {@code lattice}'s type: the given instance is used only to derive that
+	 * type through {@link ProgramState#top()}, and is otherwise discarded,
+	 * regardless of whether it is itself top, bottom, or a concrete value.
+	 * Callers that want the normal execution to actually carry {@code lattice}
+	 * should follow up with {@link #withExecution(ProgramState)} (this is the
+	 * idiom used throughout the codebase, e.g.
+	 * {@code new AnalysisState<>(lattice).withExecution(lattice)}).
+	 *
+	 * @param lattice the program state used to determine the concrete type of
+	 *                    this analysis state
 	 */
 	public AnalysisState(
 			ProgramState<A> lattice) {
