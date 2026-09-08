@@ -150,6 +150,11 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieBranch;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieCollision;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieLeaf;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieNode;
 import it.unive.lisa.util.frontend.ParsedBlock;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
@@ -353,6 +358,10 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(EventQueue.class, new EventQueue(null), new EventQueue(null))
 				.withPrefabValues(Set.class, s1, s2)
+				.withPrefabValues(PatriciaTrieMap.class, PatriciaTrieMap.empty().put(2, 1),
+						PatriciaTrieMap.empty().put(3, 2))
+				.withPrefabValues(PatriciaTrieNode.class, new PatriciaTrieLeaf<>(2, 2, 1),
+						new PatriciaTrieLeaf<>(3, 3, 2))
 				.withPrefabValues(
 						AbstractDomain.class,
 						DefaultConfiguration.simpleDomain(
@@ -443,6 +452,11 @@ public class EqualityContractVerificationTest {
 		verify(DuplicateFreeFIFOWorkingSet.class);
 		verify(DuplicateFreeLIFOWorkingSet.class);
 		verify(OrderBasedWorkingSet.class);
+
+		verify(PatriciaTrieMap.class);
+		verify(PatriciaTrieLeaf.class);
+		verify(PatriciaTrieBranch.class, verifier -> verifier.withIgnoredFields("size"));
+		verify(PatriciaTrieCollision.class);
 	}
 
 	@Test
