@@ -6,8 +6,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.operator.NegatableOperator;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
@@ -72,27 +70,23 @@ public class UnaryExpression
 
 	@Override
 	public ValueExpression removeNegations() {
-		if (operator instanceof LogicalNegation && expression instanceof BinaryExpression) {
-			ValueExpression left = (ValueExpression) ((BinaryExpression) expression).getLeft();
-			ValueExpression right = (ValueExpression) ((BinaryExpression) expression).getRight();
-			BinaryOperator op = ((BinaryExpression) expression).getOperator();
-			BinaryOperator oppositeOp = op instanceof NegatableOperator
-					? (BinaryOperator) ((NegatableOperator) op).opposite()
-					: op;
-			ValueExpression oppositeLeft = left.removeNegations();
-			ValueExpression oppositeRight = right.removeNegations();
-			if (op == oppositeOp && left == oppositeLeft && right == oppositeRight)
-				// if nothing changed, preserve reference equality
-				return this;
-			return new BinaryExpression(
-					expression.getStaticType(),
-					oppositeLeft,
-					oppositeRight,
-					oppositeOp,
-					getCodeLocation());
-		}
+		if (!(operator instanceof LogicalNegation))
+			return this;
 
-		return this;
+		ValueExpression cleaned = ((ValueExpression) expression).removeNegations();
+		ValueExpression negated = cleaned.negate();
+		if (cleaned == expression && negated.equals(this))
+			// if nothing changed, preserve reference equality
+			return this;
+		return negated;
+	}
+
+	@Override
+	public ValueExpression negate() {
+		if (operator instanceof LogicalNegation)
+			// double negation: !(!expression) == expression
+			return (ValueExpression) expression;
+		return super.negate();
 	}
 
 	@Override

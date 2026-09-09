@@ -26,9 +26,12 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A monolithic heap implementation that abstracts all heap locations to a
- * unique identifier.
- * 
+ * A monolithic heap implementation that abstracts all heap locations,
+ * regardless of where and how they are allocated, to a single unique identifier
+ * (named {@value #MONOLITH_NAME}). It does not distinguish between different
+ * objects, arrays or fields, and it never answers positively to aliasing or
+ * reachability queries other than {@link Satisfiability#UNKNOWN}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class MonolithicHeap

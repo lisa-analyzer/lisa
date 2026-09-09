@@ -18,9 +18,9 @@ import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.NoEntryPointException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
+import it.unive.lisa.interprocedural.Recursion;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.context.recursion.RecursionSolver;
 import it.unive.lisa.interprocedural.events.CFGFixpointEnd;
 import it.unive.lisa.interprocedural.events.CFGFixpointStart;
@@ -42,13 +42,11 @@ import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
-import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.language.scoping.ScopingStrategy;
 import it.unive.lisa.util.StringUtilities;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -57,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -67,17 +66,28 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A context sensitive interprocedural analysis. The context sensitivity is
- * tuned by the number of calls that tail the call stack to keep track of. This
- * happens concretely in {@link KDepthToken}. Recursions are approximated
- * applying the iterates of the recursion starting from bottom and using the
- * same widening threshold of cfg fixpoints.
- * 
+ * A context-sensitive {@link CallGraphBasedAnalysis} following the call-string
+ * approach to interprocedural analysis: each {@link CFGCall} is analyzed once
+ * per distinct calling context, so that its result can vary depending on where
+ * it was invoked from, rather than being approximated once and reused for every
+ * call site. Contexts are represented by {@link ScopeId}s and, concretely, by
+ * {@link KDepthToken}s, whose sensitivity is tuned by the number of calls that
+ * tail the call stack to keep track of. Recursions (see {@link Recursion}) are
+ * approximated by a dedicated {@link RecursionSolver}, iterating the members of
+ * the recursion starting from bottom and using the same widening threshold as
+ * regular {@link CFG} fixpoints.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
+ *
+ * @see <a href=
+ *          "https://www.cs.tau.ac.il/~michas/sharir_pnueli-PFA-TA-1981.pdf">
+ *          Micha Sharir, Amir Pnueli. Two Approaches to Interprocedural Data
+ *          Flow Analysis. In Program Flow Analysis: Theory and Applications,
+ *          chapter 7, pages 189-233, Prentice-Hall, 1981.</a>
  */
 public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		D extends AbstractDomain<A>>
@@ -228,7 +238,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 
 				for (Collection<CodeMember> rec : callgraph.getRecursions())
 					try {
-						buildRecursion(entryState, recursions, rec);
+						recursions.addAll(buildRecursionsFor(entryState, rec, results, conf));
 					} catch (SemanticException e) {
 						throw new FixpointException("Unable to build recursion", e);
 					}
@@ -255,38 +265,12 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			events.post(new FixpointEnd());
 	}
 
-	private void solveRecursions(
-			Set<Recursion<A>> recursions) {
-		List<Recursion<A>> orderedRecursions = new ArrayList<>(recursions.size());
-		for (Recursion<A> rec : recursions) {
-			int pos = 0;
-			for (; pos < orderedRecursions.size(); pos++)
-				if (orderedRecursions.get(pos).getMembers().contains(rec.getInvocation().getCFG()))
-					// as the recursion at pos contains the member
-					// invoking rec, rec must be solved before the
-					// recursion at pos
-					break;
-			// if no match is found, add() will place the element at the
-			// end (pos == size())
-			// otherwise, elements will be shifted
-			orderedRecursions.add(pos, rec);
-		}
-
-		try {
-			for (Recursion<A> rec : orderedRecursions) {
-				new RecursionSolver<>(this, rec).solve();
-				triggers.addAll(rec.getMembers());
-			}
-		} catch (SemanticException e) {
-			throw new AnalysisExecutionException("Unable to solve one or more recursions", e);
-		}
-	}
-
 	@SuppressWarnings("unchecked")
-	private void buildRecursion(
-			AnalysisState<A> entryState,
-			Set<Recursion<A>> recursions,
-			Collection<CodeMember> rec)
+	private Collection<Recursion<A>> buildRecursionsFor(
+			AnalysisState<A> state,
+			Collection<CodeMember> rec,
+			FixpointResults<A> results,
+			FixpointConfiguration<A, D> conf)
 			throws SemanticException {
 		// these are the calls that start the recursion by invoking
 		// one of its members
@@ -295,6 +279,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 				.filter(site -> !rec.contains(site.getCFG()))
 				.collect(Collectors.toSet());
 
+		Collection<Recursion<A>> recursions = new LinkedList<>();
 		for (Call starter : starters) {
 			// these are the head of the recursion: members invoked
 			// from outside of it
@@ -306,7 +291,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					.collect(Collectors.toSet());
 			Set<Pair<KDepthToken<A>, CompoundState<A>>> entries = new HashSet<>();
 			for (Entry<ScopeId<A>, AnalyzedCFG<A>> res : results.get(starter.getCFG())) {
-				StatementStore<A> params = new StatementStore<>(entryState.bottom());
+				StatementStore<A> params = new StatementStore<>(state.bottom());
 				Expression[] parameters = starter.getParameters();
 				if (conf.usesOptimizedForwardFixpoint())
 					for (Expression actual : parameters)
@@ -333,6 +318,41 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 					Recursion<A> recursion = new Recursion<>(starter, entry.getLeft(), entry.getRight(), head, rec);
 					recursions.add(recursion);
 				}
+		}
+
+		return recursions;
+	}
+
+	private void solveRecursions(
+			Set<Recursion<A>> recursions) {
+		List<Recursion<A>> orderedRecursions = new ArrayList<>(recursions.size());
+		for (Recursion<A> rec : recursions) {
+			int pos = 0;
+			for (; pos < orderedRecursions.size(); pos++)
+				if (orderedRecursions.get(pos).getMembers().contains(rec.getInvocation().getCFG()))
+					// as the recursion at pos contains the member
+					// invoking rec, rec must be solved before the
+					// recursion at pos
+					break;
+			// if no match is found, add() will place the element at the
+			// end (pos == size())
+			// otherwise, elements will be shifted
+			orderedRecursions.add(pos, rec);
+		}
+
+		try {
+			for (Recursion<A> rec : orderedRecursions)
+				// solving already goes through computeFixpoint() for the
+				// recursion's own members (RecursionSolver is not a
+				// shortcut for them), which stores their results and adds
+				// them to triggers when they actually change; unconditionally
+				// re-adding them here regardless of whether solving produced
+				// a new result made the outer fixpoint loop above never
+				// terminate, since a stabilized recursion kept being treated
+				// as "changed" on every single iteration
+				new RecursionSolver<>(this, rec).solve();
+		} catch (SemanticException e) {
+			throw new AnalysisExecutionException("Unable to solve one or more recursions", e);
 		}
 	}
 
@@ -385,7 +405,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	 * @throws SemanticException if an exception happens while storing the
 	 *                               result of the fixpoint
 	 */
-	private AnalyzedCFG<A> computeFixpoint(
+	protected AnalyzedCFG<A> computeFixpoint(
 			CFG cfg,
 			KDepthToken<A> token,
 			AnalysisState<A> entryState)
@@ -453,32 +473,6 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		return results;
 	}
 
-	private Pair<AnalysisState<A>, ExpressionSet[]> prepareEntryState(
-			CFGCall call,
-			AnalysisState<A> entryState,
-			ExpressionSet[] parameters,
-			StatementStore<A> expressions,
-			ScopeToken scope,
-			CFG cfg)
-			throws SemanticException {
-		Parameter[] formals = cfg.getDescriptor().getFormals();
-
-		// prepare the state for the call: hide the visible variables
-		Pair<AnalysisState<A>,
-				ExpressionSet[]> scoped = call.getProgram()
-						.getFeatures()
-						.getScopingStrategy()
-						.scope(call, scope, entryState, analysis, parameters);
-		AnalysisState<A> callState = scoped.getLeft();
-		ExpressionSet[] locals = scoped.getRight();
-
-		// assign parameters between the caller and the callee contexts
-		ParameterAssigningStrategy strategy = call.getProgram().getFeatures().getAssigningStrategy();
-		Pair<AnalysisState<A>,
-				ExpressionSet[]> prepared = strategy.prepare(call, callState, this, expressions, formals, locals);
-		return prepared;
-	}
-
 	@Override
 	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
@@ -505,7 +499,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 		}
 
 		KDepthToken<A> callerToken = token;
-		token = token.push(call, entryState);
+		token = token.push(call, CompoundState.of(entryState, expressions));
 		ScopeToken scope = new ScopeToken(call);
 
 		// we exclude erroneous/halting executions from the

@@ -21,15 +21,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Implementation of the pentagons analysis of
- * <a href="https://doi.org/10.1016/j.scico.2009.04.004">this paper</a>.<br/>
- * <br/>
- * The pentagons domain is a reduced product of the {@link Interval} domain and
- * the {@link UpperBounds} domain, where the reduction operator is applied on
- * assignments only. Reductions on lattice operators are applied only on the
- * least upper bound.
- * 
+ * Implementation of the Pentagons abstract domain, a weakly relational
+ * numerical domain designed to be efficient enough for the validation of array
+ * accesses. The pentagons domain is a reduced product of the {@link Interval}
+ * domain and the {@link UpperBounds} domain, where the reduction operator is
+ * applied on assignments only, so that, e.g., an assignment of the form
+ * {@code r = x - y} can refine the interval of {@code r} to be strictly
+ * positive whenever {@code x} is known to be an upper bound of {@code y}.
+ * Reductions on lattice operators are applied only on the least upper bound.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1016/j.scico.2009.04.004">Francesco Logozzo,
+ *          Manuel Fähndrich. Pentagons: a weakly relational abstract domain for
+ *          the efficient validation of array accesses. Science of Computer
+ *          Programming, 75(9):796-807, 2010.</a>
  */
 public class Pentagon
 		implements

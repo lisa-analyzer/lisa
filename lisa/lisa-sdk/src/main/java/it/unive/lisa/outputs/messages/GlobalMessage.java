@@ -14,7 +14,7 @@ public class GlobalMessage
 		MessageWithLocation {
 
 	/**
-	 * The nit containing the global where this message was reported on
+	 * The unit containing the global where this message was reported on
 	 */
 	private final Unit unit;
 
@@ -42,8 +42,8 @@ public class GlobalMessage
 
 	/**
 	 * Yields the unit containing the global where this message was reported on.
-	 * 
-	 * @return the global
+	 *
+	 * @return the unit
 	 */
 	public Unit getUnit() {
 		return unit;

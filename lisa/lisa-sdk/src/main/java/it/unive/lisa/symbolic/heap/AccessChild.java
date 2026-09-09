@@ -135,6 +135,12 @@ public class AccessChild
 		return new AccessChild(getStaticType(), cont, ch, getCodeLocation());
 	}
 
+	// FIXME: pushScope/popScope only propagate through the container, not the
+	// child. The child is not necessarily a synthetic marker (e.g., it is the
+	// index expression for array accesses, see IMPArrayAccess): it can
+	// contain scoped identifiers too, and should thus be pushed/popped as
+	// well. Left as-is for now: this area is planned to change soon, so the
+	// fix is deferred until then.
 	@Override
 	public SymbolicExpression pushScope(
 			ScopeToken token,

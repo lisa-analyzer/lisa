@@ -229,14 +229,11 @@ public class DefiniteSet<E extends DataflowElement<E>>
 		if (isTop() || isBottom())
 			return this;
 
-		Set<E> elements = new HashSet<>();
-		for (E e : elements) {
-			if (e.getInvolvedIdentifiers().contains(source))
-				elements.add(e.replaceIdentifier(source, target));
-			elements.add(e);
-		}
+		Set<E> updated = new HashSet<>();
+		for (E e : elements)
+			updated.add(e.getInvolvedIdentifiers().contains(source) ? e.replaceIdentifier(source, target) : e);
 
-		return new DefiniteSet<>(elements, isTop);
+		return new DefiniteSet<>(updated, isTop);
 	}
 
 }

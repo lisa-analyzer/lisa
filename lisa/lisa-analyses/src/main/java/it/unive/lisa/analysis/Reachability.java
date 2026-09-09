@@ -12,17 +12,25 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
- * An abstract domain that tracks the reachability of program points, exploiting
- * an underlying abstract domain to (i) compute approximations of the program
- * state, and (ii) deducing which branches are taken after traversing a guard.
- * 
+ * A wrapper {@link AbstractDomain} that pairs an underlying domain {@code D}
+ * with a {@link ReachLattice}, tracking whether each program point is
+ * unreachable, possibly reachable, or definitely reachable given the
+ * information computed so far. Reachability is refined every time a guard
+ * (i.e., the condition of a branch or a loop) is traversed: the underlying
+ * domain's {@code satisfies} operator (see {@link SemanticDomain}) is used to
+ * determine, whenever possible, which branch is actually taken, so that the
+ * other one can be marked as unreachable instead of being conservatively joined
+ * with the reachable state. This allows the domains stacked on top of this one
+ * to avoid losing precision because of infeasible paths, without requiring any
+ * change to their own semantics.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <D> the type of the underlying domain
  * @param <A> the type of lattice tracked by the underlying domain
  */
@@ -109,8 +117,10 @@ public class Reachability<D extends AbstractDomain<A>,
 				// but where the lub on the guard would make the condition
 				// become possibly reachable, thus making the analysis
 				// less precise
-				ReachabilityStatus reach = r.getState(current);
-				status = reach != null ? reach : r.lattice;
+				if (r.getKeys().contains(current))
+					status = r.getState(current);
+				else
+					status = r.lattice;
 				break;
 			} else if (cfs.getFirstFollower() == current) {
 				Statement condition = cfs.getCondition();
@@ -135,9 +145,11 @@ public class Reachability<D extends AbstractDomain<A>,
 			}
 
 		if (!toRemove.isEmpty()) {
-			Map<ProgramPoint, ReachabilityStatus> map = r.mkNewFunction(r.function, true);
+			PatriciaTrieMap<ProgramPoint, ReachabilityStatus> map = r.mkNewFunction(r.function, true);
 			if (map != null)
-				toRemove.forEach(map::remove);
+				for (Statement st : toRemove)
+					map = map.remove(st);
+			toRemove.forEach(map::remove);
 			r = new ReachLattice(status, map == null || map.isEmpty() ? null : map);
 		} else if (status != null)
 			// we might have a new status from guards
@@ -182,13 +194,14 @@ public class Reachability<D extends AbstractDomain<A>,
 		if (current instanceof Expression)
 			current = ((Expression) current).getRootStatement();
 
-		Map<ProgramPoint, ReachabilityStatus> map = r.mkNewFunction(r.function, false);
-		ReachabilityStatus prev = map.put(current, state.first.lattice);
+		PatriciaTrieMap<ProgramPoint, ReachabilityStatus> map = r.mkNewFunction(r.function, false);
+		ReachabilityStatus prev = map.get(current);
 		if (prev != null && prev != state.first.lattice)
 			throw new SemanticException(
 					"Conflicting reachability information for " + current + " at " + current.getLocation()
 							+ ": " + prev + " vs " + state.first.lattice);
 
+		map = map.put(current, state.first.lattice);
 		Satisfiability sat = domain.satisfies(state.second, expression, src);
 		if (sat == Satisfiability.BOTTOM || sat == Satisfiability.NOT_SATISFIED)
 			r = new ReachLattice(ReachabilityStatus.UNREACHABLE, map);

@@ -48,13 +48,26 @@ import org.apache.commons.lang3.tuple.Pair;
  * A base class for heap analyses based on the allocation sites of the objects
  * and arrays they track, namely the position of the code where heap locations
  * are generated. All heap locations that are generated at the same allocation
- * sites are abstracted into a single unique heap identifier. Concrete instances
- * have control over their field-sensitivity.
- * 
+ * sites are abstracted into a single unique heap identifier, distinguishing
+ * strong updates (when at most one instance can be associated with an
+ * allocation site) from weak ones (when the site might represent more than one
+ * runtime object, e.g., because it lies inside a loop or a recursive call).
+ * Program identifiers are tracked as points-to relations towards these
+ * allocation sites through the {@code L} lattice, and assignments between
+ * pointers are resolved by aliasing or by shallow-copying the pointed-to site,
+ * depending on whether the right-hand side is itself an allocation. Concrete
+ * subclasses have control over their field-sensitivity: this class follows the
+ * field-insensitive construction of X. Rival and K. Yi, "Introduction to Static
+ * Analysis: An Abstract Interpretation Perspective", Section 8.3.4.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <L> the type {@link FunctionalLattice} used to track points-to
  *                information for the heap locations
+ *
+ * @see <a href="https://mitpress.mit.edu/books/introduction-static-analysis">
+ *          Xavier Rival, Kwangkeun Yi. Introduction to Static Analysis: An
+ *          Abstract Interpretation Perspective. MIT Press, 2020.</a>
  */
 public abstract class AllocationSiteBasedAnalysis<
 		L extends FunctionalLattice<L, Identifier, AllocationSites> & HeapLattice<L>>
@@ -89,7 +102,7 @@ public abstract class AllocationSiteBasedAnalysis<
 			rhsExps = new ExpressionSet(expression);
 
 		for (SymbolicExpression rhs : rhsExps)
-			result = result.lub(process(id, pp, oracle, sss.getLeft(), replacements, rhs, rhsIsReceiver));
+			result = result.lub(process(sss.getLeft(), id, rhs, pp, oracle, replacements, rhsIsReceiver));
 
 		if (!id.isWeak() && state.knowsIdentifier(id)) {
 			// we might make some location unreachable,
@@ -102,13 +115,30 @@ public abstract class AllocationSiteBasedAnalysis<
 		return Pair.of(result, replacements);
 	}
 
-	private L process(
+	/**
+	 * Processes the assignment of {@code rhs} to {@code id} in the given state,
+	 * updating the list of heap replacements as needed.
+	 *
+	 * @param state         the state before the assignment
+	 * @param id            the identifier being assigned to
+	 * @param rhs           the right-hand side of the assignment
+	 * @param pp            the program point where this assignment is applied
+	 * @param oracle        the semantic oracle
+	 * @param replacements  the list of heap replacements to be updated
+	 * @param rhsIsReceiver whether the right-hand side is an instrumented
+	 *                          receiver
+	 * 
+	 * @return a new state where {@code id} is updated with {@code rhs}
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	protected L process(
+			L state,
 			Identifier id,
+			SymbolicExpression rhs,
 			ProgramPoint pp,
 			SemanticOracle oracle,
-			L sss,
 			List<HeapReplacement> replacements,
-			SymbolicExpression rhs,
 			boolean rhsIsReceiver)
 			throws SemanticException {
 		if (rhs instanceof MemoryPointer) {
@@ -120,7 +150,7 @@ public abstract class AllocationSiteBasedAnalysis<
 				// we have x = y, where both are pointers
 				// we perform *x = *y so that x and y become aliases
 				Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
-				return store(sss, lhs_ref, rhs_ref);
+				return store(state, lhs_ref, rhs_ref);
 			} else if (rhs_ref instanceof StackAllocationSite
 					// if we are allocating, we just perform normal aliasing
 					// as there is nothing to copy
@@ -130,16 +160,16 @@ public abstract class AllocationSiteBasedAnalysis<
 					// initialized (eg with a constructor call) so we
 					// perform normal aliasing as there is nothing to copy
 					&& !rhsIsReceiver
-					&& !getAllocatedAt(sss, ((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
+					&& !getAllocatedAt(state, ((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
 				// for stack elements, assignment works as a shallow copy
 				// since there are no pointers to alias
-				return shallowCopy(sss, id, (StackAllocationSite) rhs_ref, replacements);
+				return shallowCopy(state, id, (StackAllocationSite) rhs_ref, replacements);
 			else {
 				// aliasing: id and star_y points to the same object
-				return store(sss, id, rhs_ref);
+				return store(state, id, rhs_ref);
 			}
 		} else
-			return sss;
+			return state;
 	}
 
 	/**
@@ -664,7 +694,7 @@ public abstract class AllocationSiteBasedAnalysis<
 		ExpressionSet targets = rewrite(state, y, pp, oracle);
 
 		while (!ws.isEmpty()) {
-			SymbolicExpression current = ws.peek();
+			SymbolicExpression current = ws.pop();
 			if (targets.elements().contains(current))
 				return Satisfiability.SATISFIED;
 

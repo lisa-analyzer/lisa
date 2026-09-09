@@ -139,7 +139,7 @@ public class PentagonLattice
 	 */
 	public PentagonLattice closure()
 			throws SemanticException {
-		ValueEnvironment<DefiniteIdSet> newBounds = new ValueEnvironment<>(second.lattice, second.getMap());
+		ValueEnvironment<DefiniteIdSet> newBounds = new ValueEnvironment<>(second.lattice, second.function);
 
 		for (Identifier id1 : first.getKeys()) {
 			Set<Identifier> closure = new HashSet<>();

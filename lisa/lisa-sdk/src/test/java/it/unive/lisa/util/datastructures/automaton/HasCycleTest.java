@@ -44,6 +44,24 @@ public class HasCycleTest {
 	}
 
 	@Test
+	public void unreachableStateDoesNotCauseInfiniteLoop() {
+		// q1 is not reachable from the (only) initial state q0: hasCycle must
+		// terminate by exploring only the reachable part of the automaton
+		SortedSet<State> states = new TreeSet<>();
+		State q0 = new State(0, true, true);
+		State q1 = new State(1, false, false);
+		Collections.addAll(states, q0, q1);
+
+		SortedSet<Transition<TestSymbol>> delta = new TreeSet<>();
+		// q1 has a self loop, but since it is unreachable it must not be
+		// seen by hasCycle
+		delta.add(new Transition<>(q1, q1, new TestSymbol("a")));
+
+		TestAutomaton a = new TestAutomaton(states, delta);
+		assertFalse(a.hasCycle());
+	}
+
+	@Test
 	public void test03() {
 		SortedSet<State> states = new TreeSet<>();
 		SortedSet<Transition<TestSymbol>> delta = new TreeSet<>();

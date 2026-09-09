@@ -1,7 +1,6 @@
 package it.unive.lisa.program;
 
 import it.unive.lisa.program.cfg.CodeLocation;
-import java.util.Objects;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -43,15 +42,29 @@ public class SourceCodeLocation
 	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this code element happens in the
 	 *                       source file. If unknown, use {@code -1}
+	 *
+	 * @throws IllegalArgumentException if {@code line} or {@code col} is a
+	 *                                      negative value other than the
+	 *                                      {@code -1} "unknown" sentinel
 	 */
 	public SourceCodeLocation(
 			String sourceFile,
 			int line,
 			int col) {
-		Objects.requireNonNull(sourceFile, "The source file cannot be null");
-		if (line == -1)
+		// sourceFile is intentionally NOT null-checked: null is the
+		// documented sentinel for "unknown source file" (see this class'
+		// field javadoc, this constructor's own @param doc, and
+		// #getSourceFile()'s "returns the string 'null'" doc), and every
+		// other member of this class (equals/hashCode/compareTo, and
+		// FilenameUtils#separatorsToUnix itself) already handles a null
+		// sourceFile gracefully
+		// -1 is the documented sentinel for "unknown" (see
+		// #getLine()/#getCol())
+		// and must remain constructible; only genuinely invalid negative
+		// values are rejected here
+		if (line < -1)
 			throw new IllegalArgumentException("Line number cannot be negative");
-		if (col == -1)
+		if (col < -1)
 			throw new IllegalArgumentException("Column number cannot be negative");
 		this.sourceFile = FilenameUtils.separatorsToUnix(sourceFile);
 		this.line = line;

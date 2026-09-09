@@ -138,10 +138,6 @@ public class StringConstantPropagationTest {
 		return new TernaryExpression(StringType.INSTANCE, VAR_X, VAR_Y, VAR_Z, op, SyntheticLocation.INSTANCE);
 	}
 
-	/**
-	 * Returns a constraint set: Constant(val) == VAR_X, usable by
-	 * IntegerConstantPropagation.generate().
-	 */
 	private static Set<BinaryExpression> intConstraint(
 			int val) {
 		Set<BinaryExpression> cs = new HashSet<>();
@@ -154,10 +150,6 @@ public class StringConstantPropagationTest {
 		return cs;
 	}
 
-	/**
-	 * Returns a constraint set: Constant(val) == VAR_X, usable by
-	 * StringConstantPropagation.generate().
-	 */
 	private static Set<BinaryExpression> strConstraint(
 			String val) {
 		Set<BinaryExpression> cs = new HashSet<>();

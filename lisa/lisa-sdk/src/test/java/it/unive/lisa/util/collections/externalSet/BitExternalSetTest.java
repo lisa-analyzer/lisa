@@ -1,6 +1,7 @@
 package it.unive.lisa.util.collections.externalSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -468,6 +469,34 @@ public class BitExternalSetTest {
 				Pair.of(set1, eset1),
 				Pair.of(set2, eset2),
 				Pair.of(set3, eset3));
+	}
+
+	// remove() must follow the Set#remove contract: it returns true only if
+	// the set actually changed. Since the cache is shared across sibling
+	// sets, an element can have a valid index in the cache while not being a
+	// member of this particular set: removing it must be a no-op that
+	// returns false, not a silent (incorrect) success.
+	@Test
+	public void testRemoveOfElementNotInThisSetReturnsFalse() {
+		ExternalSetCache<String> cache = new ExternalSetCache<>();
+		ExternalSet<String> populated = cache.mkEmptySet();
+		populated.add("a");
+		populated.add("b");
+
+		ExternalSet<String> empty = cache.mkEmptySet();
+		assertFalse(empty.remove("a"), "removing an element that is cached but absent from this set returned true");
+		assertTrue(empty.isEmpty(), "the set changed despite remove() returning false");
+
+		assertTrue(populated.remove("a"), "removing a present element returned false");
+		assertFalse(populated.remove("a"), "removing an already-removed element returned true");
+	}
+
+	@Test
+	public void testRemoveOfNeverCachedElementReturnsFalse() {
+		ExternalSetCache<String> cache = new ExternalSetCache<>();
+		ExternalSet<String> eset = cache.mkEmptySet();
+		eset.add("a");
+		assertFalse(eset.remove("never added to any set"));
 	}
 
 	@Test

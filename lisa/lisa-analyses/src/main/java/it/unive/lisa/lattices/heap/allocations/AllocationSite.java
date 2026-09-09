@@ -6,9 +6,15 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.type.Type;
 
 /**
- * A heap identifier that track also the source location where it has been
- * allocated and a field (optional).
- * 
+ * A heap identifier used by allocation-site-based heap domains (see
+ * {@link it.unive.lisa.analysis.heap.pointbased.AllocationSiteBasedAnalysis}),
+ * that also tracks the source code location where it has been allocated
+ * ({@link #getLocationName()}) and, optionally, a field accessed on it
+ * ({@link #getField()}) for field-sensitive domains. Allocation sites can be
+ * strong (representing exactly one runtime object) or weak (representing
+ * possibly more than one, e.g., because they lie inside a loop), as reflected
+ * by {@link #isWeak()}.
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public abstract class AllocationSite

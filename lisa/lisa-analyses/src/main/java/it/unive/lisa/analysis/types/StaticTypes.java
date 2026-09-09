@@ -32,9 +32,13 @@ import org.apache.commons.collections4.SetUtils;
 
 /**
  * A {@link NonRelationalTypeDomain} that tracks the static type of variables,
- * and that computes expression types using their static type. Typing
- * information is thus deemed to be the set of all subtypes of the tracked type.
- * 
+ * and that computes expression types using their static type
+ * ({@link Supertype}). Typing information is thus deemed to be the set of all
+ * subtypes of the tracked type: this domain never computes the actual runtime
+ * types of an expression, and it never narrows the type information beyond what
+ * is already known from the program's declared types, except when it can be
+ * refined by casts and type checks.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class StaticTypes
@@ -226,19 +230,6 @@ public class StaticTypes
 
 		TypeSystem types = src.getProgram().getTypes();
 		Set<Type> elems = eval.type.allInstances(types);
-		// these are all types compatible with the type tokens
-		Set<Type> filtered = elems.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
-		if (filtered.isEmpty())
-			// if there is no type token in the evaluation,
-			// this is not a type condition and we cannot
-			// assume anything
-			return environment;
 
 		BinaryOperator operator = expression.getOperator();
 		Supertype starting = environment.getState(id);
@@ -254,6 +245,20 @@ public class StaticTypes
 			// is set the type to eval.type
 			update = eval.type.canBeAssignedTo(starting.type) ? eval : bottom();
 		else if (operator == TypeCheck.INSTANCE) {
+			// these are all types compatible with the type tokens
+			Set<Type> filtered = elems.stream()
+					.filter(Type::isTypeTokenType)
+					.map(Type::asTypeTokenType)
+					.map(TypeTokenType::getTypes)
+					.flatMap(Set::stream)
+					.flatMap(t -> t.allInstances(types).stream())
+					.collect(Collectors.toSet());
+			if (filtered.isEmpty())
+				// if there is no type token in the evaluation,
+				// this is not a type condition and we cannot
+				// assume anything
+				return environment;
+
 			// we keep only the ones that can be casted
 			Type sup = Type.commonSupertype(SetUtils.intersection(starting.type.allInstances(types), filtered), null);
 			if (sup == null)

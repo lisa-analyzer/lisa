@@ -11,7 +11,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.string.Replace;
-import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.StringType;
 
 /**
@@ -41,7 +40,7 @@ public class StringReplace
 						stringUnit,
 						true,
 						"replace",
-						BoolType.INSTANCE,
+						StringType.INSTANCE,
 						new Parameter(location, "this", StringType.INSTANCE),
 						new Parameter(location, "search", StringType.INSTANCE),
 						new Parameter(location, "replacement", StringType.INSTANCE)),

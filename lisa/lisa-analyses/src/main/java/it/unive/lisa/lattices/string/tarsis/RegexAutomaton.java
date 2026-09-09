@@ -33,9 +33,13 @@ import java.util.Vector;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using an
- * alphabet of strings, extended with a special symbol for statically unknown
- * ones. Transition symbols are {@link RegularExpression}s.
+ * A generic finite state automaton (DFA, NFA, or epsilon-NFA) whose alphabet is
+ * made of whole strings, extended with {@link TopAtom} to represent statically
+ * unknown substrings, used by
+ * {@link it.unive.lisa.analysis.string.tarsis.Tarsis} to approximate string
+ * values. Transition symbols are {@link RegularExpression}s (typically
+ * {@link Atom}s), and can be labeled with arbitrarily long strings, as opposed
+ * to the single-character transitions of {@link SimpleAutomaton}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

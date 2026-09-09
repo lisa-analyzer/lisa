@@ -3,6 +3,7 @@ package it.unive.lisa.interprocedural.inlining;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
@@ -11,11 +12,13 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A {@link ScopeId} that keeps track of the whole call stack and of the entry
- * state of each stack frame.
- * 
+ * The context sensitivity token used by {@link InliningAnalysis}: a
+ * {@link ScopeId} that keeps track of the whole call stack and of the entry
+ * state of each stack frame, so that every distinct call stack yields a
+ * distinct context.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of {@link AbstractLattice} handled by the analysis
  */
 public class CallStackId<A extends AbstractLattice<A>>
@@ -35,6 +38,74 @@ public class CallStackId<A extends AbstractLattice<A>>
 		this.calls = new ArrayList<>(source.calls.size() + 1);
 		source.calls.forEach(this.calls::add);
 		this.calls.add(Pair.of(newToken, state));
+	}
+
+	private CallStackId(
+			CallStackId<A> source,
+			int toPop) {
+		this.calls = new ArrayList<>(source.calls.size() - toPop);
+		for (int i = 0; i < source.calls.size() - toPop; i++)
+			this.calls.add(source.calls.get(i));
+	}
+
+	/**
+	 * Yields the number of calls in this call stack.
+	 * 
+	 * @return the number of calls in this call stack
+	 */
+	public int size() {
+		return calls.size();
+	}
+
+	/**
+	 * Yields the call at the given index, counting from the end of the stack,
+	 * with its entry state.
+	 * 
+	 * @param index the index of the call to retrieve, counting from the end of
+	 *                  the stack
+	 * 
+	 * @return the call at the given index, counting from the end of the stack
+	 */
+	public Pair<CFGCall, AnalysisState<A>> getCallFromEnd(
+			int index) {
+		return calls.get(calls.size() - index - 1);
+	}
+
+	/**
+	 * Yields the call at the given index, counting from the start of the stack,
+	 * with its entry state.
+	 * 
+	 * @param index the index of the call to retrieve, counting from the start
+	 *                  of the stack
+	 * 
+	 * @return the call at the given index, counting from the start of the stack
+	 */
+	public Pair<CFGCall, AnalysisState<A>> getCall(
+			int index) {
+		return calls.get(index);
+	}
+
+	/**
+	 * Yields all the calls in this id, in the order they appear in it (i.e.,
+	 * from less recent to most recent), with their entry state.
+	 * 
+	 * @return the calls
+	 */
+	public List<Pair<CFGCall, AnalysisState<A>>> getCalls() {
+		return calls;
+	}
+
+	/**
+	 * Yields all the calls in this id, in the reverse order w.r.t. their
+	 * appearence (i.e., from most recent to less recent), with their entry
+	 * state.
+	 * 
+	 * @return the calls
+	 */
+	public List<Pair<CFGCall, AnalysisState<A>>> getReversedCalls() {
+		List<Pair<CFGCall, AnalysisState<A>>> calls = new ArrayList<>(this.calls);
+		Collections.reverse(calls);
+		return calls;
 	}
 
 	/**
@@ -107,8 +178,20 @@ public class CallStackId<A extends AbstractLattice<A>>
 	@Override
 	public CallStackId<A> push(
 			CFGCall c,
-			AnalysisState<A> state) {
-		return new CallStackId<>(this, c, state);
+			CompoundState<A> state) {
+		return new CallStackId<>(this, c, state.postState);
+	}
+
+	/**
+	 * Pops the specified amount of entries from this call stack id.
+	 *
+	 * @param amount the number of entries to pop
+	 * 
+	 * @return a new id with the specified amount of entries popped
+	 */
+	public CallStackId<A> pop(
+			int amount) {
+		return new CallStackId<>(this, amount);
 	}
 
 }

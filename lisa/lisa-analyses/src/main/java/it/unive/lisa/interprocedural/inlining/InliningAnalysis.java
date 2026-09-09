@@ -18,6 +18,7 @@ import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.NoEntryPointException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
+import it.unive.lisa.interprocedural.Recursion;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.events.CFGFixpointEnd;
 import it.unive.lisa.interprocedural.events.CFGFixpointStart;
@@ -29,38 +30,50 @@ import it.unive.lisa.interprocedural.events.FixpointIterationEnd;
 import it.unive.lisa.interprocedural.events.FixpointIterationStart;
 import it.unive.lisa.interprocedural.events.FixpointStart;
 import it.unive.lisa.interprocedural.events.PrecomputedCallResult;
+import it.unive.lisa.interprocedural.inlining.recursion.RecursionSolver;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CodeUnit;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
-import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.language.scoping.ScopingStrategy;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * An inlining-based interprocedural analysis. This means that each call
- * receives its own result, with no "compacting" based on context or other
- * technique: each call receives its own result that is uniquely determined by
- * the call's entry strate. Recursions are not supported: either they converge
- * to a result, or the analysis (i) diverges if no maximum call stack depth is
- * set through the constructor, or (ii) terminates with an exception when the
- * maximum call stack depth has been reached.
- * 
+ * An inlining-based, fully context-sensitive {@link CallGraphBasedAnalysis}:
+ * each {@link CFGCall} receives its own result, uniquely determined by the
+ * call's entry state, with no "compacting" of results across calls based on
+ * context or other technique. The whole call stack is tracked through
+ * {@link CallStackId}. Since call chains are never merged, general recursion is
+ * not supported: recursive calls either converge to a result (see
+ * {@link it.unive.lisa.interprocedural.inlining.recursion.RecursionSolver}), or
+ * the analysis (i) diverges if no maximum call stack depth is set through the
+ * constructor, or (ii) terminates with an exception when the maximum call stack
+ * depth has been reached.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
@@ -72,46 +85,102 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 
 	private static final Logger LOG = LogManager.getLogger(InliningAnalysis.class);
 
-	private int maxCallStackDepth;
+	/**
+	 * The maximum call stack depth. A negative value means infinite depth. If a
+	 * call chain exceeds this depth, an exception is raised or top is returned,
+	 * depending on {@link #shouldRaiseException}.
+	 */
+	protected final int maxCallStackDepth;
 
 	/**
-	 * The current sensitivity token.
+	 * Whether an exception should be raised when the maximum call stack depth
+	 * is reached. If {@code false}, then top is returned instead.
 	 */
-	private CallStackId<A> token;
+	protected final boolean shouldRaiseException;
+
+	/**
+	 * The current call stack.
+	 */
+	protected CallStackId<A> token;
+
+	/**
+	 * The entry state of each call currently on the call stack.
+	 */
+	protected Map<CFGCall, CompoundState<A>> entries = new HashMap<>();
 
 	/**
 	 * The results computed by this analysis.
 	 */
-	private FixpointResults<A> results;
+	protected FixpointResults<A> results;
 
 	/**
 	 * The kind of {@link WorkingSet} to use during this analysis.
 	 */
-	private WorkingSet<Statement> workingSet;
+	protected WorkingSet<Statement> workingSet;
 
 	/**
 	 * The fixpoint configuration.
 	 */
-	private FixpointConfiguration<A, D> conf;
+	protected FixpointConfiguration<A, D> conf;
+
+	/**
+	 * The results of the recursive calls, if any.
+	 */
+	protected Deque<Map<CFGCall, AnalysisState<A>>> recursionResults = new LinkedList<>();
 
 	/**
 	 * Builds the analysis, using an infinite call stack depth.
 	 */
 	public InliningAnalysis() {
-		this(-1);
+		this(-1, true);
+	}
+
+	/**
+	 * Builds the analysis that raises an exception when the maximum call stack
+	 * depth is reached.
+	 *
+	 * @param maxCallStackDepth the maximum call stack depth. A negative value
+	 *                              means infinite depth. If a call chain
+	 *                              exceeds this depth
+	 */
+	public InliningAnalysis(
+			int maxCallStackDepth) {
+		this(maxCallStackDepth, true);
 	}
 
 	/**
 	 * Builds the analysis.
 	 *
-	 * @param maxCallStackDepth the maximum call stack depth. A negative value
-	 *                              means infinite depth. If a call chain
-	 *                              exceeds this depth, an exception is raised
+	 * @param maxCallStackDepth    the maximum call stack depth. A negative
+	 *                                 value means infinite depth. If a call
+	 *                                 chain exceeds this depth
+	 * @param shouldRaiseException whether an exception should be raised when
+	 *                                 the maximum call stack depth is reached.
+	 *                                 If {@code false}, then top is returned
+	 *                                 instead
 	 */
 	public InliningAnalysis(
-			int maxCallStackDepth) {
+			int maxCallStackDepth,
+			boolean shouldRaiseException) {
 		this.maxCallStackDepth = maxCallStackDepth;
+		this.shouldRaiseException = shouldRaiseException;
 		this.token = CallStackId.create();
+	}
+
+	/**
+	 * Builds the analysis by copying the given one.
+	 * 
+	 * @param other the original analysis to copy
+	 */
+	protected InliningAnalysis(
+			InliningAnalysis<A, D> other) {
+		super(other);
+		this.maxCallStackDepth = other.maxCallStackDepth;
+		this.shouldRaiseException = other.shouldRaiseException;
+		this.token = other.token;
+		this.results = other.results;
+		this.workingSet = other.workingSet;
+		this.conf = other.conf;
 	}
 
 	@Override
@@ -170,7 +239,10 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 				if (events != null)
 					events.post(new CFGFixpointStart<>(cfg, token, entryState));
 
+				Map<CFGCall, AnalysisState<A>> recursiveCalls = new HashMap<>();
+				recursionResults.addLast(recursiveCalls);
 				AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryStateCFG, this, workingSet.mk(), conf, empty);
+				recursionResults.removeLast();
 
 				if (events != null) {
 					events.post(new CFGFixpointEnd<>(cfg, token, entryState, fixpointResult));
@@ -212,7 +284,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	 * @throws SemanticException if an exception happens while storing the
 	 *                               result of the fixpoint
 	 */
-	private AnalyzedCFG<A> computeFixpoint(
+	protected AnalyzedCFG<A> computeFixpoint(
 			CFG cfg,
 			CallStackId<A> token,
 			AnalysisState<A> entryState)
@@ -221,50 +293,52 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 		if (events != null)
 			events.post(new CFGFixpointStart<>(cfg, token, entryState));
 
+		Map<CFGCall, AnalysisState<A>> recursiveCalls = new HashMap<>();
+		recursionResults.addLast(recursiveCalls);
 		AnalyzedCFG<A> fixpointResult = cfg.fixpoint(entryState, this, workingSet.mk(), conf, token);
+		recursionResults.removeLast();
+
+		if (conf.usesOptimizedForwardFixpoint() && !recursiveCalls.isEmpty())
+			// as the fixpoint results do not contain an explicit entry for the
+			// recursive call, we need to store the approximation for the
+			// recursive call manually or the unwinding won't manage to solve it
+			for (Entry<CFGCall, AnalysisState<A>> entry : recursiveCalls.entrySet()) {
+				// we get the cfg containing the call
+				@SuppressWarnings("unchecked")
+				OptimizedAnalyzedCFG<A, D> fixRes = (OptimizedAnalyzedCFG<A, D>) fixpointResult;
+
+				// we get the actual call that is part of the cfg
+				Call source = entry.getKey();
+				while (source.getSource() != null)
+					source = source.getSource();
+
+				// it might happen that the call is a hotspot and we don't need
+				// any additional work
+				if (!fixRes.hasPostStateOf(source))
+					// finally, we store it in the result
+					fixRes.storePostStateOf(source, entry.getValue());
+			}
 
 		if (events != null)
 			events.post(new CFGFixpointEnd<>(cfg, token, entryState, fixpointResult));
 
-		Pair<Boolean, AnalyzedCFG<A>> res = results.putResult(cfg, token, fixpointResult);
-		if (res.getLeft())
-			throw new FixpointException("Inconsistent fixpoint result for " + cfg + " under token " + token);
+		if (shouldStoreFixpointResults()) {
+			Pair<Boolean, AnalyzedCFG<A>> res = results.putResult(cfg, token, fixpointResult);
+			if (shouldStoreFixpointResults() && Boolean.TRUE.equals(res.getLeft()))
+				throw new FixpointException("Inconsistent fixpoint result for " + cfg + " under token " + token);
 
-		if (events != null)
-			events.post(new CFGFixpointStored<>(cfg, token, entryState, fixpointResult, res.getRight()));
+			if (events != null)
+				events.post(new CFGFixpointStored<>(cfg, token, entryState, fixpointResult, res.getRight()));
 
-		return res.getRight();
+			fixpointResult = res.getRight();
+		}
+
+		return fixpointResult;
 	}
 
 	@Override
 	public FixpointResults<A> getFixpointResults() {
 		return results;
-	}
-
-	private Pair<AnalysisState<A>, ExpressionSet[]> prepareEntryState(
-			CFGCall call,
-			AnalysisState<A> entryState,
-			ExpressionSet[] parameters,
-			StatementStore<A> expressions,
-			ScopeToken scope,
-			CFG cfg)
-			throws SemanticException {
-		Parameter[] formals = cfg.getDescriptor().getFormals();
-
-		// prepare the state for the call: hide the visible variables
-		Pair<AnalysisState<A>,
-				ExpressionSet[]> scoped = call.getProgram()
-						.getFeatures()
-						.getScopingStrategy()
-						.scope(call, scope, entryState, analysis, parameters);
-		AnalysisState<A> callState = scoped.getLeft();
-		ExpressionSet[] locals = scoped.getRight();
-
-		// assign parameters between the caller and the callee contexts
-		ParameterAssigningStrategy strategy = call.getProgram().getFeatures().getAssigningStrategy();
-		Pair<AnalysisState<A>,
-				ExpressionSet[]> prepared = strategy.prepare(call, callState, this, expressions, formals, locals);
-		return prepared;
 	}
 
 	@Override
@@ -276,13 +350,23 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			throws SemanticException {
 		callgraph.registerCall(call);
 
-		if (maxCallStackDepth == 0)
-			throw new SemanticException("Maximum call stack depth reached");
+		if (shouldCheckForRecursions() && maxCallStackDepth == token.size())
+			if (shouldRaiseException)
+				throw new SemanticException("Maximum call stack depth reached");
+			else {
+				Recursion<A> rec = buildRecursionFor(call, entryState, parameters, expressions);
+				AnalysisState<
+						A> result = new RecursionSolver<>(this, rec).solve(call, entryState, parameters, expressions);
+				AnalysisState<A> prev = recursionResults.getLast().put(call, result);
+				if (prev != null)
+					throw new SemanticException("Inconsistent recursion result for " + call + " under token " + token);
+				return result;
+			}
 
 		CallStackId<A> callerToken = token;
-		token = token.push(call, entryState);
-		maxCallStackDepth--;
+		token = token.push(call, CompoundState.of(entryState, expressions));
 		ScopeToken scope = new ScopeToken(call);
+		entries.put(call, CompoundState.of(entryState, expressions));
 
 		// we exclude erroneous/halting executions from the
 		// initial states, since they will not be affected
@@ -309,7 +393,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 				events.post(new ComputedCallState<>(call, prepared.getLeft(), prepared.getRight()));
 
 			AnalysisState<A> exitState;
-			if (states != null) {
+			if (canShortcut(cfg) && states != null) {
 				// no need to compute the fixpoint: we already have an
 				// exact approximation of the result having the same
 				// call stack and entry states
@@ -355,8 +439,34 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 		}
 
 		token = callerToken;
-		maxCallStackDepth++;
+		entries.remove(call);
 		return result;
+	}
+
+	private Recursion<A> buildRecursionFor(
+			CFGCall call,
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		Collection<Collection<CodeMember>> recursions = callgraph.getRecursionsContaining(call.getCFG());
+		if (recursions.isEmpty())
+			throw new SemanticException("Maximum call stack depth reached and no recursion found for " + call);
+		else if (recursions.size() > 1)
+			throw new SemanticException("Multiple recursions found for " + call + ": " + recursions);
+		Collection<CodeMember> members = recursions.iterator().next();
+
+		Set<CFG> heads = new HashSet<>();
+		for (CFG candidate : call.getTargetedCFGs())
+			if (members.contains(candidate))
+				heads.add(candidate);
+		if (heads.isEmpty())
+			throw new SemanticException("No recursion head found for " + call);
+		else if (heads.size() > 1)
+			throw new SemanticException("Multiple recursions heads for " + call + ": " + heads);
+		CFG head = heads.iterator().next();
+
+		return new Recursion<>(call, token, CompoundState.of(entryState, expressions), head, members);
 	}
 
 }
