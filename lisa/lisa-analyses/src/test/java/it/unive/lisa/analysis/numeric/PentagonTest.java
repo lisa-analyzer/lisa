@@ -24,10 +24,9 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingRem;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingSub;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import it.unive.lisa.util.numeric.IntInterval;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -355,15 +354,14 @@ public class PentagonTest {
 		Identifier varX = new Variable(Int32Type.INSTANCE, "x", pp.getLocation());
 		Identifier varY = new Variable(Int32Type.INSTANCE, "y", pp.getLocation());
 
-		Map<Identifier, IntInterval> intervalFunction = new HashMap<>();
-		intervalFunction.put(varX, IntInterval.ONE);
-		intervalFunction.put(varY, IntInterval.BOTTOM);
+		PatriciaTrieMap<Identifier, IntInterval> intervalFunction = PatriciaTrieMap.<Identifier, IntInterval>empty()
+				.put(varX, IntInterval.ONE)
+				.put(varY, IntInterval.BOTTOM);
 		ValueEnvironment<IntInterval> interval = new ValueEnvironment<IntInterval>(IntInterval.TOP, intervalFunction);
 
-		Map<Identifier, DefiniteIdSet> boundsFunction = new HashMap<>();
-
-		boundsFunction.put(varX, new DefiniteIdSet(new HashSet<>()));
-		boundsFunction.put(varY, new DefiniteIdSet(Set.of(varX)));
+		PatriciaTrieMap<Identifier, DefiniteIdSet> boundsFunction = PatriciaTrieMap.<Identifier, DefiniteIdSet>empty()
+				.put(varX, new DefiniteIdSet(new HashSet<>()))
+				.put(varY, new DefiniteIdSet(Set.of(varX)));
 
 		ValueEnvironment<DefiniteIdSet> bounds = new ValueEnvironment<DefiniteIdSet>(
 				new DefiniteIdSet(new HashSet<Identifier>()), boundsFunction);

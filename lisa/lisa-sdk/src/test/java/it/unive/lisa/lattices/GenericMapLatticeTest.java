@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.analysis.SemanticException;
-import java.util.HashMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class GenericMapLatticeTest {
 		// "function == null", so an empty map must collapse to null for the
 		// top/bottom checks to remain meaningful
 		GenericMapLattice<String, SingleValueLattice> m = new GenericMapLattice<>(
-				SingleValueLattice.SINGLETON, new HashMap<>());
+				SingleValueLattice.SINGLETON, PatriciaTrieMap.empty());
 		assertNull(m.function);
 		assertTrue(m.isTop());
 	}
@@ -100,7 +100,7 @@ public class GenericMapLatticeTest {
 				.putState("y", SingleValueLattice.SINGLETON)
 				.putState("z", SingleValueLattice.SINGLETON);
 		GenericMapLattice<String, SingleValueLattice> removed = m.removeAll(List.of("x", "y"));
-		assertEquals(Map.of("z", SingleValueLattice.SINGLETON), removed.getMap());
+		assertEquals(Map.of("z", SingleValueLattice.SINGLETON), removed.function.toHashMap());
 	}
 
 	// regression test: removeAllMatching used to call
@@ -118,10 +118,10 @@ public class GenericMapLatticeTest {
 
 		GenericMapLattice<String, SingleValueLattice> result = m.removeAllMatching(k -> k.startsWith("drop"));
 
-		assertEquals(Map.of("keep", SingleValueLattice.SINGLETON), result.getMap());
+		assertEquals(Map.of("keep", SingleValueLattice.SINGLETON), result.function.toHashMap());
 		// the receiver must be untouched
-		assertEquals(3, m.getMap().size());
-		assertTrue(m.getMap().containsKey("drop1"));
+		assertEquals(3, m.function.size());
+		assertTrue(m.function.containsKey("drop1"));
 	}
 
 	@Test
@@ -140,7 +140,8 @@ public class GenericMapLatticeTest {
 				SingleValueLattice.BOTTOM).putState("y", SingleValueLattice.SINGLETON);
 
 		GenericMapLattice<String, SingleValueLattice> lub = a.lub(b);
-		assertEquals(Map.of("x", SingleValueLattice.SINGLETON, "y", SingleValueLattice.SINGLETON), lub.getMap());
+		assertEquals(Map.of("x", SingleValueLattice.SINGLETON, "y", SingleValueLattice.SINGLETON),
+				lub.function.toHashMap());
 	}
 
 	@Test

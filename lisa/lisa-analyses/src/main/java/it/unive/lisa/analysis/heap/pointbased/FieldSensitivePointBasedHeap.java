@@ -17,11 +17,10 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
-import java.util.HashMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
@@ -65,7 +64,8 @@ public class FieldSensitivePointBasedHeap
 				id.getCodeLocation());
 		HeapEnvWithFields heap = store(state, id, clone);
 
-		Map<AllocationSite, ExpressionSet> newFields = new HashMap<>(state.fields.getMap());
+		PatriciaTrieMap<AllocationSite,
+				ExpressionSet> newFields = state.fields.mkNewFunction(state.fields.function, false);
 
 		// all the allocation sites fields of star_y
 		if (state.fields.getKeys().contains(site)) {
@@ -89,7 +89,7 @@ public class FieldSensitivePointBasedHeap
 				replacement.addTarget(star_yWithField);
 
 				// need to update also the fields of the clone
-				addField(clone, field, newFields);
+				newFields = addField(clone, field, newFields);
 
 				replacements.add(replacement);
 			}
@@ -121,7 +121,7 @@ public class FieldSensitivePointBasedHeap
 
 		if (expression instanceof AccessChild) {
 			AccessChild accessChild = (AccessChild) expression;
-			Map<AllocationSite, ExpressionSet> mapping = new HashMap<>(st.fields.getMap());
+			PatriciaTrieMap<AllocationSite, ExpressionSet> mapping = st.fields.mkNewFunction(st.fields.function, false);
 
 			ExpressionSet exprs;
 			SymbolicExpression cont = accessChild.getContainer();
@@ -138,14 +138,14 @@ public class FieldSensitivePointBasedHeap
 					ExpressionSet childs = rewrite(sss.getLeft(), accessChild.getChild(), pp, oracle);
 
 					for (SymbolicExpression child : childs)
-						addField(site, child, mapping);
+						mapping = addField(site, child, mapping);
 
 				} else if (rec instanceof AllocationSite) {
 					AllocationSite site = (AllocationSite) rec;
 					ExpressionSet childs = rewrite(sss.getLeft(), accessChild.getChild(), pp, oracle);
 
 					for (SymbolicExpression child : childs)
-						addField(site, child, mapping);
+						mapping = addField(site, child, mapping);
 				}
 
 			return Pair.of(
@@ -182,7 +182,7 @@ public class FieldSensitivePointBasedHeap
 
 				if (!replacements.isEmpty()) {
 					// we must apply the replacements to our mapping as well
-					Map<Identifier, AllocationSites> map = new HashMap<>(st.getMap());
+					PatriciaTrieMap<Identifier, AllocationSites> map = st.mkNewFunction(st.function, false);
 					for (Entry<Identifier, AllocationSites> entry : st) {
 						Identifier id = entry.getKey();
 						AllocationSites sites = entry.getValue();
@@ -192,7 +192,7 @@ public class FieldSensitivePointBasedHeap
 								id = repl.getTargets().iterator().next();
 							sites = sites.applyReplacement(repl, pp);
 						}
-						map.put(id, sites);
+						map = map.put(id, sites);
 					}
 					st = new HeapEnvWithFields(st.lattice, map, st.fields);
 				}
@@ -206,19 +206,23 @@ public class FieldSensitivePointBasedHeap
 
 	/**
 	 * Tracks a new field for the given allocation site by inserting it in the
-	 * given mapping.
+	 * given mapping, returning the updated mapping. If the site is already
+	 * present in the mapping, the field is added to the existing set of fields,
+	 * otherwise a new set is created and added to the mapping.
 	 *
 	 * @param site    the allocation site
 	 * @param field   the field to track
 	 * @param mapping the mapping to update
+	 * 
+	 * @return the updated mapping
 	 */
-	protected void addField(
+	protected PatriciaTrieMap<AllocationSite, ExpressionSet> addField(
 			AllocationSite site,
 			SymbolicExpression field,
-			Map<AllocationSite, ExpressionSet> mapping) {
+			PatriciaTrieMap<AllocationSite, ExpressionSet> mapping) {
 		Set<SymbolicExpression> tmp = new HashSet<>(mapping.getOrDefault(site, new ExpressionSet()).elements());
 		tmp.add(field);
-		mapping.put(site, new ExpressionSet(tmp));
+		return mapping.put(site, new ExpressionSet(tmp));
 	}
 
 	@Override

@@ -16,7 +16,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import org.junit.jupiter.api.Test;
 
 public class StatementStoreTest {
@@ -132,9 +132,8 @@ public class StatementStoreTest {
 		StatementStore<TestAbstractState> store = new StatementStore<>(mkState());
 		Statement s1 = mkStatement(1);
 		AnalysisState<TestAbstractState> value = mkState();
-
-		StatementStore<TestAbstractState> built = store.mk(store.lattice, Map.of(s1, value));
-
+		StatementStore<TestAbstractState> built = store.mk(store.lattice,
+				PatriciaTrieMap.<Statement, AnalysisState<TestAbstractState>>empty().put(s1, value));
 		assertEquals(value, built.getState(s1));
 	}
 

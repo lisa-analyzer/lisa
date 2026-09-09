@@ -11,12 +11,12 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -72,7 +72,7 @@ public class HeapEnvWithFields
 	 */
 	public HeapEnvWithFields(
 			AllocationSites lattice,
-			Map<Identifier, AllocationSites> function,
+			PatriciaTrieMap<Identifier, AllocationSites> function,
 			GenericMapLattice<AllocationSite, ExpressionSet> fields) {
 		super(lattice, function);
 		this.fields = fields;
@@ -150,7 +150,7 @@ public class HeapEnvWithFields
 		if (isBottom() || isTop())
 			return Pair.of(this, List.of());
 
-		Map<Identifier, AllocationSites> function = mkNewFunction(null, false);
+		PatriciaTrieMap<Identifier, AllocationSites> result = mkNewFunction(null, false);
 		HeapReplacement removed = new HeapReplacement();
 		List<HeapReplacement> r = new LinkedList<>();
 
@@ -160,20 +160,20 @@ public class HeapEnvWithFields
 				if (lifted.equals(id))
 					// we track the renaming
 					r.add(new HeapReplacement().withSource(id).withTarget(lifted));
-				if (!function.containsKey(lifted))
-					function.put(lifted, getState(id));
+				if (!result.containsKey(lifted))
+					result = result.put(lifted, getState(id));
 				else
-					function.put(lifted, getState(id).lub(function.get(lifted)));
+					result = result.put(lifted, getState(id).lub(result.get(lifted)));
 			} else
 				// we track the removal
 				removed.addSource(id);
 		}
 
 		if (r.isEmpty() && removed.getSources().isEmpty())
-			return Pair.of(new HeapEnvWithFields(lattice, function, fields), Collections.emptyList());
+			return Pair.of(new HeapEnvWithFields(lattice, result, fields), Collections.emptyList());
 
 		r.addAll(expand(removed));
-		return Pair.of(new HeapEnvWithFields(lattice, function, fields), r);
+		return Pair.of(new HeapEnvWithFields(lattice, result, fields), r);
 	}
 
 	@Override
@@ -188,8 +188,8 @@ public class HeapEnvWithFields
 		if (id instanceof AllocationSite)
 			f = f.remove((AllocationSite) id);
 
-		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
-		result.remove(id);
+		PatriciaTrieMap<Identifier, AllocationSites> result = mkNewFunction(function, false);
+		result = result.remove(id);
 		HeapReplacement r = new HeapReplacement().withSource(id);
 
 		return Pair.of(new HeapEnvWithFields(lattice, result, f), expand(r));
@@ -209,9 +209,9 @@ public class HeapEnvWithFields
 				sites.add((AllocationSite) id);
 		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
 
-		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, AllocationSites> result = mkNewFunction(function, false);
 		for (Identifier id : ids)
-			result.remove(id);
+			result = result.remove(id);
 
 		HeapReplacement r = new HeapReplacement();
 		ids.forEach(r::addSource);
@@ -234,9 +234,10 @@ public class HeapEnvWithFields
 				.collect(Collectors.toSet());
 		GenericMapLattice<AllocationSite, ExpressionSet> f = fields.removeAll(sites);
 
-		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, AllocationSites> result = mkNewFunction(function, false);
 		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
-		keys.forEach(result::remove);
+		for (Identifier id : keys)
+			result = result.remove(id);
 
 		if (keys.isEmpty())
 			return Pair.of(new HeapEnvWithFields(lattice, function, f), Collections.emptyList());
@@ -341,7 +342,7 @@ public class HeapEnvWithFields
 	@Override
 	public HeapEnvWithFields mk(
 			AllocationSites lattice,
-			Map<Identifier, AllocationSites> function) {
+			PatriciaTrieMap<Identifier, AllocationSites> function) {
 		return new HeapEnvWithFields(lattice, function, fields);
 	}
 

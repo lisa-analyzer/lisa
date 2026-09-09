@@ -15,8 +15,7 @@ import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.value.Variable;
-import java.util.HashMap;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import org.junit.jupiter.api.Test;
 
 public class TraceLatticeTest {
@@ -42,7 +41,7 @@ public class TraceLatticeTest {
 
 	private TraceLattice<
 			SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> mk(
-					Map<ExecutionTrace,
+					PatriciaTrieMap<ExecutionTrace,
 							SimpleAbstractState<Monolith,
 									ValueEnvironment<SignLattice>,
 									TypeEnvironment<TypeSet>>> function) {
@@ -51,19 +50,19 @@ public class TraceLatticeTest {
 
 	@Test
 	public void topHasNoTraces() {
-		assertTrue(mk(new HashMap<>()).top().isTop());
+		assertTrue(mk(PatriciaTrieMap.empty()).top().isTop());
 	}
 
 	@Test
 	public void bottomIsBottom() {
-		assertTrue(mk(new HashMap<>()).bottom().isBottom());
+		assertTrue(mk(PatriciaTrieMap.empty()).bottom().isBottom());
 	}
 
 	@Test
 	public void collapseOnTopYieldsTheUnderlyingLatticeTop() {
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> top = mk(
-						new HashMap<>()).top();
+						PatriciaTrieMap.empty()).top();
 		assertTrue(top.collapse().isTop());
 	}
 
@@ -71,19 +70,19 @@ public class TraceLatticeTest {
 	public void collapseOnBottomYieldsTheUnderlyingLatticeBottom() {
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> bottom = mk(
-						new HashMap<>()).bottom();
+						PatriciaTrieMap.empty()).bottom();
 		assertTrue(bottom.collapse().isBottom());
 	}
 
 	@Test
 	public void collapseOverApproximatesAllTracesWithTheirLub()
 			throws SemanticException {
-		Map<ExecutionTrace,
+		PatriciaTrieMap<ExecutionTrace,
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<SignLattice>,
-						TypeEnvironment<TypeSet>>> function = new HashMap<>();
-		function.put(ExecutionTrace.EMPTY, stateWith(SignLattice.POS));
-		function.put(ExecutionTrace.EMPTY.push(new Branching(pp, true)), stateWith(SignLattice.NEG));
+						TypeEnvironment<TypeSet>>> function = PatriciaTrieMap.empty();
+		function = function.put(ExecutionTrace.EMPTY, stateWith(SignLattice.POS));
+		function = function.put(ExecutionTrace.EMPTY.push(new Branching(pp, true)), stateWith(SignLattice.NEG));
 
 		SimpleAbstractState<Monolith,
 				ValueEnvironment<SignLattice>,
@@ -95,41 +94,41 @@ public class TraceLatticeTest {
 	@Test
 	public void knowsIdentifierIsTrueIfAnyTraceKnowsIt()
 			throws SemanticException {
-		Map<ExecutionTrace,
+		PatriciaTrieMap<ExecutionTrace,
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<SignLattice>,
-						TypeEnvironment<TypeSet>>> function = new HashMap<>();
-		function.put(ExecutionTrace.EMPTY, singleton);
-		function.put(ExecutionTrace.EMPTY.push(new Branching(pp, true)), stateWith(SignLattice.POS));
+						TypeEnvironment<TypeSet>>> function = PatriciaTrieMap.empty();
+		function = function.put(ExecutionTrace.EMPTY, singleton);
+		function = function.put(ExecutionTrace.EMPTY.push(new Branching(pp, true)), stateWith(SignLattice.POS));
 
 		assertTrue(mk(function).knowsIdentifier(x));
 	}
 
 	@Test
 	public void knowsIdentifierIsFalseWhenNoTraceKnowsIt() {
-		Map<ExecutionTrace,
+		PatriciaTrieMap<ExecutionTrace,
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<SignLattice>,
-						TypeEnvironment<TypeSet>>> function = new HashMap<>();
-		function.put(ExecutionTrace.EMPTY, singleton);
+						TypeEnvironment<TypeSet>>> function = PatriciaTrieMap.empty();
+		function = function.put(ExecutionTrace.EMPTY, singleton);
 		assertFalse(mk(function).knowsIdentifier(x));
 	}
 
 	@Test
 	public void knowsIdentifierOnTopIsFalse() {
 		// top has no concrete traces to look the identifier up in
-		assertFalse(mk(new HashMap<>()).top().knowsIdentifier(x));
+		assertFalse(mk(PatriciaTrieMap.empty()).top().knowsIdentifier(x));
 	}
 
 	@Test
 	public void forgetIdentifierRemovesItFromEveryTrace()
 			throws SemanticException {
-		Map<ExecutionTrace,
+		PatriciaTrieMap<ExecutionTrace,
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<SignLattice>,
-						TypeEnvironment<TypeSet>>> function = new HashMap<>();
-		function.put(ExecutionTrace.EMPTY, stateWith(SignLattice.POS));
-		function.put(ExecutionTrace.EMPTY.push(new Branching(pp, true)), stateWith(SignLattice.NEG));
+						TypeEnvironment<TypeSet>>> function = PatriciaTrieMap.empty();
+		function = function.put(ExecutionTrace.EMPTY, stateWith(SignLattice.POS));
+		function = function.put(ExecutionTrace.EMPTY.push(new Branching(pp, true)), stateWith(SignLattice.NEG));
 
 		TraceLattice<
 				SimpleAbstractState<Monolith,
@@ -144,19 +143,19 @@ public class TraceLatticeTest {
 			throws SemanticException {
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> top = mk(
-						new HashMap<>()).top();
+						PatriciaTrieMap.empty()).top();
 		assertTrue(top.forgetIdentifier(x, pp).isTop());
 	}
 
 	@Test
 	public void withTopValuesIsAppliedToEveryTrace()
 			throws SemanticException {
-		Map<ExecutionTrace,
+		PatriciaTrieMap<ExecutionTrace,
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<SignLattice>,
-						TypeEnvironment<TypeSet>>> function = new HashMap<>();
+						TypeEnvironment<TypeSet>>> function = PatriciaTrieMap.empty();
 		ExecutionTrace trace = ExecutionTrace.EMPTY.push(new Branching(pp, true));
-		function.put(trace, stateWith(SignLattice.POS));
+		function = function.put(trace, stateWith(SignLattice.POS));
 
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> result = mk(

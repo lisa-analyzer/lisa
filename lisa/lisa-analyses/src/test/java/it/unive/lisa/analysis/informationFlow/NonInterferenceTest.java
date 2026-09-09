@@ -22,7 +22,7 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import java.util.HashMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import org.junit.jupiter.api.Test;
 
 public class NonInterferenceTest {
@@ -136,12 +136,12 @@ public class NonInterferenceTest {
 		GenericMapLattice<ProgramPoint, NonInterferenceValue> callerGuards = new GenericMapLattice<ProgramPoint,
 				NonInterferenceValue>(NonInterferenceValue.LOW_HIGH).top().putState(pp, NonInterferenceValue.LOW_LOW);
 		NonInterferenceEnvironment entry = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW,
-				new HashMap<>(), callerGuards);
+				PatriciaTrieMap.empty(), callerGuards);
 
 		GenericMapLattice<ProgramPoint, NonInterferenceValue> calleeGuards = new GenericMapLattice<ProgramPoint,
 				NonInterferenceValue>(NonInterferenceValue.LOW_HIGH).top().putState(pp, NonInterferenceValue.HIGH_HIGH);
 		NonInterferenceEnvironment callResult = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW,
-				new HashMap<>(), calleeGuards);
+				PatriciaTrieMap.empty(), calleeGuards);
 
 		NonInterferenceEnvironment result = domain.onCallReturn(entry, callResult, pp);
 		assertEquals(callerGuards, result.guards);
@@ -153,9 +153,9 @@ public class NonInterferenceTest {
 		GenericMapLattice<ProgramPoint, NonInterferenceValue> guards = new GenericMapLattice<ProgramPoint,
 				NonInterferenceValue>(NonInterferenceValue.LOW_HIGH).top().putState(pp, NonInterferenceValue.LOW_LOW);
 		NonInterferenceEnvironment entry = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW,
-				new HashMap<>(), guards);
+				PatriciaTrieMap.empty(), guards);
 		NonInterferenceEnvironment callResult = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW,
-				new HashMap<>(), guards);
+				PatriciaTrieMap.empty(), guards);
 
 		assertSame(callResult, domain.onCallReturn(entry, callResult, pp));
 	}

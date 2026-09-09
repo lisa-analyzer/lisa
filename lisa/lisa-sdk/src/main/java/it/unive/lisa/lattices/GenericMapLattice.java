@@ -1,8 +1,8 @@
 package it.unive.lisa.lattices;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collection;
-import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -40,7 +40,7 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 	 */
 	public GenericMapLattice(
 			V lattice,
-			Map<K, V> function) {
+			PatriciaTrieMap<K, V> function) {
 		super(lattice, function);
 	}
 
@@ -57,7 +57,7 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 	@Override
 	public GenericMapLattice<K, V> mk(
 			V lattice,
-			Map<K, V> function) {
+			PatriciaTrieMap<K, V> function) {
 		return new GenericMapLattice<>(lattice, function);
 	}
 
@@ -81,8 +81,8 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 		if (isBottom() || isTop() || function == null)
 			return this;
 
-		Map<K, V> result = mkNewFunction(function, false);
-		result.remove(key);
+		PatriciaTrieMap<K, V> result = mkNewFunction(function, false);
+		result = result.remove(key);
 		if (result.isEmpty())
 			return mk(lattice, null);
 		return mk(lattice, result);
@@ -103,8 +103,9 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 		if (isBottom() || isTop() || function == null)
 			return this;
 
-		Map<K, V> result = mkNewFunction(function, false);
-		keys.forEach(result::remove);
+		PatriciaTrieMap<K, V> result = mkNewFunction(function, false);
+		for (K key : keys)
+			result = result.remove(key);
 		if (result.isEmpty())
 			return mk(lattice, null);
 		return mk(lattice, result);
@@ -124,8 +125,10 @@ public class GenericMapLattice<K, V extends Lattice<V>>
 		if (isBottom() || isTop() || function == null)
 			return this;
 
-		Map<K, V> result = mkNewFunction(function, false);
-		result.keySet().removeIf(test);
+		PatriciaTrieMap<K, V> result = mkNewFunction(function, false);
+		for (K key : result.keySet())
+			if (test.test(key))
+				result = result.remove(key);
 		if (result.isEmpty())
 			return mk(lattice, null);
 		return mk(lattice, result);

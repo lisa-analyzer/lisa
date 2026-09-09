@@ -26,9 +26,8 @@ import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import it.unive.lisa.util.numeric.IntInterval;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -158,12 +157,12 @@ public class TracePartitioningTest {
 						ValueEnvironment<IntInterval>,
 						TypeEnvironment<TypeSet>>> tp = new TracePartitioning<>(domain);
 
-		Map<ExecutionTrace,
+		PatriciaTrieMap<ExecutionTrace,
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<IntInterval>,
-						TypeEnvironment<TypeSet>>> function = new HashMap<>();
+						TypeEnvironment<TypeSet>>> function = PatriciaTrieMap.empty();
 		ExecutionTrace atIterationTwo = ExecutionTrace.EMPTY.push(new LoopIteration(loopCondition, 2));
-		function.put(atIterationTwo, domain.makeLattice());
+		function = function.put(atIterationTwo, domain.makeLattice());
 		TraceLattice<
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<IntInterval>,
@@ -188,12 +187,12 @@ public class TracePartitioningTest {
 						ValueEnvironment<IntInterval>,
 						TypeEnvironment<TypeSet>>> tp = new TracePartitioning<>(1, 5, domain);
 
-		Map<ExecutionTrace,
+		PatriciaTrieMap<ExecutionTrace,
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<IntInterval>,
-						TypeEnvironment<TypeSet>>> function = new HashMap<>();
+						TypeEnvironment<TypeSet>>> function = PatriciaTrieMap.empty();
 		ExecutionTrace atIterationOne = ExecutionTrace.EMPTY.push(new LoopIteration(loopCondition, 1));
-		function.put(atIterationOne, domain.makeLattice());
+		function = function.put(atIterationOne, domain.makeLattice());
 		TraceLattice<
 				SimpleAbstractState<Monolith,
 						ValueEnvironment<IntInterval>,

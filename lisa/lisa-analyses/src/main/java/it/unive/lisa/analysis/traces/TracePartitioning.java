@@ -24,9 +24,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -133,12 +133,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		if (state.isBottom())
 			return state;
 
-		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = state.mkNewFunction(null, false);
 		if (state.isTop() || state.function == null)
-			result.put(ExecutionTrace.EMPTY, domain.assign(state.lattice.top(), id, expression, pp));
+			result = result.put(ExecutionTrace.EMPTY, domain.assign(state.lattice.top(), id, expression, pp));
 		else
 			for (Entry<ExecutionTrace, A> trace : state)
-				result.put(trace.getKey(), domain.assign(trace.getValue(), id, expression, pp));
+				result = result.put(trace.getKey(), domain.assign(trace.getValue(), id, expression, pp));
 		return new TraceLattice<>(state.lattice, result);
 	}
 
@@ -151,12 +151,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		if (state.isBottom())
 			return state;
 
-		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = state.mkNewFunction(null, false);
 		if (state.isTop() || state.function == null)
-			result.put(ExecutionTrace.EMPTY, domain.smallStepSemantics(state.lattice.top(), expression, pp));
+			result = result.put(ExecutionTrace.EMPTY, domain.smallStepSemantics(state.lattice.top(), expression, pp));
 		else
 			for (Entry<ExecutionTrace, A> trace : state)
-				result.put(trace.getKey(), domain.smallStepSemantics(trace.getValue(), expression, pp));
+				result = result.put(trace.getKey(), domain.smallStepSemantics(trace.getValue(), expression, pp));
 		return new TraceLattice<>(state.lattice, result);
 	}
 
@@ -171,12 +171,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 			return state;
 
 		ControlFlowStructure struct = src.getCFG().getControlFlowStructureOf(src);
-		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = state.mkNewFunction(null, false);
 
 		if (state.isTop() || state.function == null) {
 			ExecutionTrace trace = ExecutionTrace.EMPTY;
 			ExecutionTrace nextTrace = generateTraceFor(trace, struct, src, dest);
-			result.put(nextTrace, state.lattice.top());
+			result = result.put(nextTrace, state.lattice.top());
 		} else
 			for (Entry<ExecutionTrace, A> trace : state) {
 				A st = trace.getValue();
@@ -190,7 +190,7 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 				// when we hit one of the limits, more traces can get smashed
 				// into one
 				A prev = result.get(nextTrace);
-				result.put(nextTrace, prev == null ? assume : assume.lub(prev));
+				result = result.put(nextTrace, prev == null ? assume : assume.lub(prev));
 			}
 
 		if (result.isEmpty())

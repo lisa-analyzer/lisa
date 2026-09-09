@@ -27,8 +27,8 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -63,20 +63,16 @@ public class UpperBounds
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		PatriciaTrieMap<Identifier, DefiniteIdSet> cleanup = state.mkNewFunction(state.function, false);
 		// cleanup: if a variable is reassigned, it can no longer be an
 		// upperbound of other variables
-		Map<Identifier, DefiniteIdSet> cleanup = new HashMap<>();
-		for (Map.Entry<Identifier, DefiniteIdSet> entry : state) {
-			if (entry.getKey().equals(id))
-				continue;
-			if (!entry.getValue().contains(id))
-				cleanup.put(entry.getKey(), entry.getValue());
-			else {
+		cleanup = cleanup.remove(id);
+		for (Map.Entry<Identifier, DefiniteIdSet> entry : state)
+			if (entry.getValue().contains(id)) {
 				Set<Identifier> copy = new HashSet<>(entry.getValue().elements);
 				copy.remove(id);
-				cleanup.put(entry.getKey(), new DefiniteIdSet(copy));
+				cleanup = cleanup.put(entry.getKey(), new DefiniteIdSet(copy));
 			}
-		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression be = (BinaryExpression) expression;
@@ -93,18 +89,18 @@ public class UpperBounds
 					// id = y - c (where c is the constant)
 					Identifier y = (Identifier) be.getLeft();
 					if (sign > 0)
-						cleanup.put(id, state.getState(y).add(y));
+						cleanup = cleanup.put(id, state.getState(y).add(y));
 					else if (sign < 0)
 						// this is effectively an addition
-						cleanup.put(y, state.getState(y).add(id));
+						cleanup = cleanup.put(y, state.getState(y).add(id));
 				} else if (op instanceof AdditionOperator) {
 					// bonus: id = y + c (where c is the constant)
 					Identifier y = (Identifier) be.getLeft();
 					if (sign > 0)
-						cleanup.put(y, state.getState(y).add(id));
+						cleanup = cleanup.put(y, state.getState(y).add(id));
 					else if (sign < 0)
 						// this is effectively a subtraction
-						cleanup.put(id, state.getState(y).add(y));
+						cleanup = cleanup.put(id, state.getState(y).add(y));
 				}
 			}
 		}

@@ -4,6 +4,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -763,6 +764,25 @@ public final class PatriciaTrieMap<K, V>
 	}
 
 	/**
+	 * Returns the value to which the given key is mapped, or
+	 * {@code defaultValue} if this map contains no mapping for the key.
+	 *
+	 * @param key          the key to look up (may be {@code null})
+	 * @param defaultValue the value to return if {@code key} is absent (may be
+	 *                         {@code null})
+	 *
+	 * @return the mapped value, or {@code defaultValue} if absent
+	 */
+	public V getOrDefault(
+			Object key,
+			V defaultValue) {
+		V trieLookup = trieLookup(Objects.hashCode(key), key, root);
+		if (trieLookup == null)
+			return defaultValue;
+		return trieLookup;
+	}
+
+	/**
 	 * Returns a new map that is identical to this one except that {@code key}
 	 * is mapped to {@code value}. If {@code key} was already present its old
 	 * value is discarded.
@@ -1093,5 +1113,18 @@ public final class PatriciaTrieMap<K, V>
 		}
 		sb.append('}');
 		return sb.toString();
+	}
+
+	/**
+	 * Returns a new {@link HashMap} containing the same key-value pairs as this
+	 * map.
+	 *
+	 * @return a new {@code HashMap} with the same entries
+	 */
+	public Map<K, V> toHashMap() {
+		HashMap<K, V> map = new HashMap<>();
+		for (Map.Entry<K, V> e : this)
+			map.put(e.getKey(), e.getValue());
+		return map;
 	}
 }

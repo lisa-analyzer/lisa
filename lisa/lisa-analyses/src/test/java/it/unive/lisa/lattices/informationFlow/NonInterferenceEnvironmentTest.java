@@ -15,8 +15,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
-import java.util.HashMap;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import org.junit.jupiter.api.Test;
 
 public class NonInterferenceEnvironmentTest {
@@ -57,7 +56,7 @@ public class NonInterferenceEnvironmentTest {
 
 	private NonInterferenceEnvironment withGuards(
 			GenericMapLattice<ProgramPoint, NonInterferenceValue> guards) {
-		return new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW, new HashMap<>(), guards);
+		return new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW, PatriciaTrieMap.empty(), guards);
 	}
 
 	private GenericMapLattice<ProgramPoint, NonInterferenceValue> emptyGuards() {
@@ -99,14 +98,14 @@ public class NonInterferenceEnvironmentTest {
 	@Test
 	public void lubCombinesBothTheMapAndTheGuards()
 			throws SemanticException {
-		Map<Identifier, NonInterferenceValue> f1 = new HashMap<>();
-		f1.put(x, NonInterferenceValue.LOW_LOW);
+		PatriciaTrieMap<Identifier, NonInterferenceValue> f1 = PatriciaTrieMap.empty();
+		f1 = f1.put(x, NonInterferenceValue.LOW_LOW);
 		GenericMapLattice<ProgramPoint, NonInterferenceValue> g1 = emptyGuards().putState(pp1,
 				NonInterferenceValue.LOW_LOW);
 		NonInterferenceEnvironment e1 = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW, f1, g1);
 
-		Map<Identifier, NonInterferenceValue> f2 = new HashMap<>();
-		f2.put(x, NonInterferenceValue.HIGH_HIGH);
+		PatriciaTrieMap<Identifier, NonInterferenceValue> f2 = PatriciaTrieMap.empty();
+		f2 = f2.put(x, NonInterferenceValue.HIGH_HIGH);
 		GenericMapLattice<ProgramPoint, NonInterferenceValue> g2 = emptyGuards().putState(pp1,
 				NonInterferenceValue.HIGH_HIGH);
 		NonInterferenceEnvironment e2 = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW, f2, g2);
@@ -119,8 +118,8 @@ public class NonInterferenceEnvironmentTest {
 	@Test
 	public void storeCopiesTheStateOfAKnownSourceIdentifier()
 			throws SemanticException {
-		Map<Identifier, NonInterferenceValue> f = new HashMap<>();
-		f.put(x, NonInterferenceValue.LOW_LOW);
+		PatriciaTrieMap<Identifier, NonInterferenceValue> f = PatriciaTrieMap.empty();
+		f = f.put(x, NonInterferenceValue.LOW_LOW);
 		NonInterferenceEnvironment env = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW, f,
 				emptyGuards());
 
@@ -131,7 +130,8 @@ public class NonInterferenceEnvironmentTest {
 	@Test
 	public void storeIsANoOpForAnUnknownSourceIdentifier()
 			throws SemanticException {
-		NonInterferenceEnvironment env = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW, new HashMap<>(),
+		NonInterferenceEnvironment env = new NonInterferenceEnvironment(NonInterferenceValue.HIGH_LOW,
+				PatriciaTrieMap.empty(),
 				emptyGuards());
 		assertSame(env, env.store(y, x));
 	}

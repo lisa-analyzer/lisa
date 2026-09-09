@@ -3,17 +3,18 @@ package it.unive.lisa.lattices;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -35,7 +36,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	/**
 	 * The function implemented by this lattice.
 	 */
-	public Map<K, V> function;
+	public PatriciaTrieMap<K, V> function;
 
 	/**
 	 * The underlying lattice.
@@ -60,7 +61,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	 */
 	public FunctionalLattice(
 			V lattice,
-			Map<K, V> function) {
+			PatriciaTrieMap<K, V> function) {
 		this.lattice = lattice;
 		this.function = function != null && function.isEmpty() ? null : function;
 	}
@@ -76,12 +77,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	 * 
 	 * @return a new function
 	 */
-	public Map<K, V> mkNewFunction(
-			Map<K, V> other,
+	public PatriciaTrieMap<K, V> mkNewFunction(
+			PatriciaTrieMap<K, V> other,
 			boolean preserveNull) {
 		if (other == null)
-			return preserveNull ? null : new HashMap<>();
-		return new HashMap<>(other);
+			return preserveNull ? null : PatriciaTrieMap.empty();
+		return other;
 	}
 
 	/**
@@ -167,8 +168,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 			K key,
 			V state) {
 		// we are only adding elements here, so it is fine to not preserve null
-		Map<K, V> result = mkNewFunction(function, false);
-		result.put(key, state);
+		PatriciaTrieMap<K, V> result = mkNewFunction(function, false);
+		result = result.put(key, state);
 		return mk(lattice, result);
 	}
 
@@ -185,7 +186,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 	 */
 	public abstract F mk(
 			V lattice,
-			Map<K, V> function);
+			PatriciaTrieMap<K, V> function);
 
 	@Override
 	public F lubAux(
@@ -370,17 +371,17 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 			KeySetLift<K> keyLifter,
 			FunctionalLift<V> valueLifter)
 			throws SemanticException {
-		Map<K, V> function = mkNewFunction(null, false);
+		PatriciaTrieMap<K, V> result = mkNewFunction(null, false);
 		Set<K> keys = keyLifter.keyLift(this.getKeys(), other.getKeys());
 		for (K key : keys)
 			try {
 				V s1 = getOtDefault(key, missing);
 				V s2 = other.getOtDefault(key, missing);
-				function.put(key, valueLifter.lift(s1, s2));
+				result = result.put(key, valueLifter.lift(s1, s2));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
 			}
-		return mk(lattice.lub(other.lattice), function);
+		return mk(lattice.lub(other.lattice), result);
 	}
 
 	/**
@@ -411,18 +412,18 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 		if (isBottom() || isTop() || function == null)
 			return (F) this;
 
-		Map<K, V> function = mkNewFunction(null, false);
+		PatriciaTrieMap<K, V> result = mkNewFunction(null, false);
 		for (K id : getKeys()) {
 			K tKey = keyTransformer.transform(id);
 			V tValue = valueTransformer.transform(getState(id));
 			if (tKey != null && tValue != null)
-				if (!function.containsKey(tKey))
-					function.put(tKey, tValue);
+				if (!result.containsKey(tKey))
+					result = result.put(tKey, tValue);
 				else
-					function.put(tKey, combiner.lift(function.get(tKey), tValue));
+					result = result.put(tKey, combiner.lift(result.get(tKey), tValue));
 		}
 
-		return mk(lattice, function);
+		return mk(lattice, result);
 	}
 
 	/**
@@ -555,17 +556,6 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 		return function.values();
 	}
 
-	/**
-	 * Yields the map associated with this functional lattice element.
-	 * 
-	 * @return the map associated with this functional lattice element.
-	 */
-	public Map<K, V> getMap() {
-		if (function == null)
-			return Map.of();
-		return function;
-	}
-
 	@Override
 	public StructuredRepresentation representation() {
 		if (isTop())
@@ -577,7 +567,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>,
 		if (function == null)
 			return new StringRepresentation("empty");
 
-		return new MapRepresentation(function, StringRepresentation::new, Lattice::representation);
+		Map<StructuredRepresentation, StructuredRepresentation> map = new TreeMap<>();
+		for (Entry<K, V> entry : function)
+			map.put(new StringRepresentation(entry.getKey()), entry.getValue().representation());
+		return new MapRepresentation(map);
 	}
 
 }

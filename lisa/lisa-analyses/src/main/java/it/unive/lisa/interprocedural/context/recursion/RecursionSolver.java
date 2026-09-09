@@ -151,8 +151,8 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 			}
 
 			AnalysisState<A> approx = null;
-			if (previousApprox.getMap() != null)
-				approx = previousApprox.getMap().get(call);
+			if (previousApprox.function != null)
+				approx = previousApprox.function.get(call);
 			if (approx == null)
 				// no state: we must start with the base cases
 				approx = transferToCallsite(recursion.getInvocation(), call, base);

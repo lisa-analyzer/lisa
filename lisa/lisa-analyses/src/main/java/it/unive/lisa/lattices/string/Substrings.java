@@ -11,6 +11,8 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +59,7 @@ public class Substrings
 	 */
 	public Substrings(
 			ExpressionInverseSet lattice,
-			Map<Identifier, ExpressionInverseSet> function) {
+			PatriciaTrieMap<Identifier, ExpressionInverseSet> function) {
 		super(lattice, function);
 	}
 
@@ -125,7 +127,7 @@ public class Substrings
 	@Override
 	public Substrings mk(
 			ExpressionInverseSet lattice,
-			Map<Identifier, ExpressionInverseSet> function) {
+			PatriciaTrieMap<Identifier, ExpressionInverseSet> function) {
 		return new Substrings(lattice.isBottom() ? lattice.bottom() : lattice.top(), function);
 	}
 
@@ -156,14 +158,16 @@ public class Substrings
 		if (!knowsIdentifier(id))
 			return this;
 
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-		newFunction.remove(id);
-		newFunction.replaceAll(
-				(
-						key,
-						value) -> removeFromSet(value, id));
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
+		result = result.remove(id);
+		if (function != null)
+			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function)
+				if (!entry.getKey().equals(id)) {
+					ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
+					result = result.put(entry.getKey(), newSet);
+				}
 
-		return mk(lattice, newFunction);
+		return mk(lattice, result);
 	}
 
 	@Override
@@ -174,16 +178,27 @@ public class Substrings
 		if (function == null || function.keySet().isEmpty())
 			return this;
 
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-		ids.forEach(id -> {
-			newFunction.remove(id);
-			newFunction.replaceAll(
-					(
-							key,
-							value) -> removeFromSet(value, id));
-		});
+		Collection<Identifier> toForget;
+		if (ids instanceof Collection)
+			toForget = (Collection<Identifier>) ids;
+		else {
+			toForget = new HashSet<>();
+			for (Identifier id : ids)
+				toForget.add(id);
+		}
 
-		return mk(lattice, newFunction);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
+		for (Identifier id : ids) {
+			result = result.remove(id);
+			if (function != null)
+				for (Map.Entry<Identifier, ExpressionInverseSet> entry : function)
+					if (!toForget.contains(entry.getKey())) {
+						ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
+						result = result.put(entry.getKey(), newSet);
+					}
+		}
+
+		return mk(lattice, result);
 	}
 
 	@Override
@@ -250,7 +265,7 @@ public class Substrings
 			Identifier id)
 			throws SemanticException {
 
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
 
 		// Don't add the expressions that contain the key variable (ex: x ->
 		// x,
@@ -266,12 +281,12 @@ public class Substrings
 
 		ExpressionInverseSet newSet = new ExpressionInverseSet(expressionsToAdd);
 
-		if (!(newFunction.get(id) == null))
-			newSet = newSet.glb(newFunction.get(id));
+		if (!(result.get(id) == null))
+			newSet = newSet.glb(result.get(id));
 
-		newFunction.put(id, newSet);
+		result = result.put(id, newSet);
 
-		return mk(lattice, newFunction);
+		return mk(lattice, result);
 	}
 
 	/**
@@ -312,22 +327,22 @@ public class Substrings
 	public Substrings remove(
 			Set<SymbolicExpression> extracted,
 			Identifier id) {
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
 
 		// If assignment is similar to x = x + ..., then we keep current
 		// relations to x, otherwise we remove them.
-		if (!extracted.contains(id)) {
-			newFunction.remove(id);
-		}
+		if (!extracted.contains(id))
+			result = result.remove(id);
 
 		// Remove relations containing id from the other entries
-		for (Map.Entry<Identifier, ExpressionInverseSet> entry : newFunction.entrySet()) {
-			ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
+		if (function != null)
+			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function)
+				if (!entry.getKey().equals(id)) {
+					ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
+					result = result.put(entry.getKey(), newSet);
+				}
 
-			entry.setValue(newSet);
-		}
-
-		return mk(lattice, newFunction);
+		return mk(lattice, result);
 	}
 
 	/*
@@ -362,7 +377,7 @@ public class Substrings
 			Identifier assignedId,
 			SymbolicExpression assignedExpression)
 			throws SemanticException {
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
 
 		if (!knowsIdentifier(assignedId))
 			return this;
@@ -376,14 +391,14 @@ public class Substrings
 				Set<SymbolicExpression> newRelation = new HashSet<>();
 				newRelation.add(assignedId);
 
-				ExpressionInverseSet newSet = newFunction.get(entry.getKey())
+				ExpressionInverseSet newSet = result.get(entry.getKey())
 						.glb(new ExpressionInverseSet(newRelation));
-				newFunction.put(entry.getKey(), newSet);
+				result = result.put(entry.getKey(), newSet);
 			}
 
 		}
 
-		return mk(lattice, newFunction);
+		return mk(lattice, result);
 	}
 
 	/**
@@ -467,11 +482,12 @@ public class Substrings
 	 */
 	public Substrings clear()
 			throws SemanticException {
-		Map<Identifier, ExpressionInverseSet> newMap = mkNewFunction(function, false);
-
-		newMap.entrySet().removeIf(entry -> entry.getValue().isTop());
-
-		return new Substrings(lattice, newMap);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
+		if (function != null)
+			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function)
+				if (entry.getValue().isTop())
+					result = result.remove(entry.getKey());
+		return new Substrings(lattice, result);
 	}
 
 	private static boolean appears(

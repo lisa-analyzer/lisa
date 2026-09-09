@@ -19,8 +19,7 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
-import java.util.HashMap;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import org.junit.jupiter.api.Test;
 
 public class FieldSensitivePointBasedHeapTest {
@@ -68,9 +67,9 @@ public class FieldSensitivePointBasedHeapTest {
 		Variable f1 = new Variable(Untyped.INSTANCE, "f1", loc);
 		Variable f2 = new Variable(Untyped.INSTANCE, "f2", loc);
 
-		Map<AllocationSite, ExpressionSet> mapping = new HashMap<>();
-		heap.addField(site, f1, mapping);
-		heap.addField(site, f2, mapping);
+		PatriciaTrieMap<AllocationSite, ExpressionSet> mapping = PatriciaTrieMap.empty();
+		mapping = heap.addField(site, f1, mapping);
+		mapping = heap.addField(site, f2, mapping);
 
 		assertEquals(1, mapping.size());
 		assertTrue(mapping.get(site).elements.contains(f1));
