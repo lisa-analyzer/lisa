@@ -131,7 +131,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			events.post(new FixpointIterationStart(1));
 		}
 
-		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program", "cfgs"))
+		for (CFG cfg : IterationLogger.iterate(LOG, all, "Analyzing control flow graphs", "cfgs"))
 			try {
 				StatementStore<A> store = new StatementStore<>(entryState.bottom());
 				AnalysisState<A> prepared = entryState;

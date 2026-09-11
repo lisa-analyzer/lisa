@@ -125,7 +125,7 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			events.post(new FixpointIterationStart(1));
 		}
 
-		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program", "cfgs"))
+		for (CFG cfg : IterationLogger.iterate(LOG, all, "Analyzing control flow graphs", "cfgs"))
 			try {
 				if (events != null)
 					events.post(new CFGFixpointStart<>(cfg, id, entryState));

@@ -2,6 +2,8 @@ package it.unive.lisa.logging;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 
 /**
  * A counter that logs to a given logger while progressing during the count.
@@ -9,6 +11,10 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public final class Counter {
+
+	private static final Marker PROGRESS = MarkerManager.getMarker("PROGRESS");
+
+	private static final int BAR_WIDTH = 50;
 
 	/**
 	 * Whether or not this counter is logging
@@ -21,14 +27,14 @@ public final class Counter {
 	private int count;
 
 	/**
+	 * The last logged ratio
+	 */
+	private int ratio;
+
+	/**
 	 * The cap of the count, meaning the expected maximum number
 	 */
 	private final int cap;
-
-	/**
-	 * The number of advancements between each progress log
-	 */
-	private final int updateEvery;
 
 	/**
 	 * The message to display while counting
@@ -67,21 +73,17 @@ public final class Counter {
 	 * @param objects      the objects being counted
 	 * @param cap          the cap of the count, meaning the expected maximum
 	 *                         number
-	 * @param updateFactor the percentage of {@code cap} to use as interval
-	 *                         between different log updates
 	 */
 	public Counter(
 			Logger logger,
 			Level level,
 			String message,
 			String objects,
-			int cap,
-			double updateFactor) {
+			int cap) {
 		this.level = level;
 		this.logging = false;
 		this.count = 0;
 		this.cap = cap;
-		this.updateEvery = updateFactor < 0 || cap < 1 ? 1 : Math.max((int) Math.floor(cap * updateFactor), 1);
 		this.logger = logger;
 		this.message = message;
 		this.objects = objects;
@@ -145,16 +147,24 @@ public final class Counter {
 	}
 
 	private void step() {
-		if (getCurrentCount() % (updateEvery) != 0)
+		double ratio = (double) count / cap;
+		if (cap > 0 && ratio - this.ratio <= 0.01)
 			return;
 
 		String msg = message + ": ";
-		if (cap > 0)
-			msg += getCurrentCount() + "/" + cap;
-		else
-			msg += "in progress (" + getCurrentCount() + ")";
+		if (cap > 0) {
+			int filled = (int) (ratio * BAR_WIDTH);
+			StringBuilder bar = new StringBuilder("[")
+				.append("#".repeat(filled))
+				.append("-".repeat(BAR_WIDTH - filled))
+				.append("] ")
+				.append((int) (ratio * 100))
+				.append("%");
+			msg += bar.toString();
+		} else
+			msg += "in progress (" + count + ")";
 
-		logger.log(level, msg);
+		logger.log(level, PROGRESS, msg);
 	}
 
 }
