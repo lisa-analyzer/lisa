@@ -40,7 +40,7 @@ public class StringIndexOf
 						stringUnit,
 						true,
 						"indexOf",
-						StringType.INSTANCE,
+						Int32Type.INSTANCE,
 						new Parameter(location, "this", StringType.INSTANCE),
 						new Parameter(location, "search", StringType.INSTANCE)),
 				IMPStringIndexOf.class);

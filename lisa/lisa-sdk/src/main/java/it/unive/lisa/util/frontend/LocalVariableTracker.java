@@ -9,7 +9,12 @@ import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Untyped;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -123,15 +128,18 @@ public class LocalVariableTracker {
 	 * to the descriptor. The given {@code closing} statement is used to
 	 * determine the end of the scope, and is used to set the scope end of the
 	 * variables. The scope is then restored to parent one, which is the one
-	 * that was active before the one being exited.
-	 * 
+	 * that was active before the one being exited. Note that the root scope,
+	 * populated with the parameters of the graph passed at construction time,
+	 * can never be exited: it is always the last scope in this tracker.
+	 *
 	 * @param closing the statement that closes the scope
-	 * 
-	 * @throws IllegalStateException if no scopes are currently active
+	 *
+	 * @throws IllegalStateException if no scope other than the root one is
+	 *                                   currently active
 	 */
 	public void exitScope(
 			Statement closing) {
-		if (visibleIds.isEmpty())
+		if (visibleIds.size() <= 1)
 			throw new IllegalStateException("Cannot exit scope: no scopes are currently active");
 
 		for (Entry<String, LocalVariable> id : latestScope.entrySet())

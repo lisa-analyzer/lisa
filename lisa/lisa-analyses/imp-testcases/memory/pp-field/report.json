@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_A.A(A__this,_untyped_x,_untyped_y).graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061018727.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061017673.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061017983.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061016495.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061013240.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061012992.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061012930.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061013302.graph.json", "untyped_A.f1(A__this).graph.json", "untyped_A.f2(A__this).graph.json", "untyped_A.f3(A__this).graph.json", "untyped_A.f4(A__this).graph.json", "untyped_A.f5(A__this).graph.json", "untyped_A.f6(A__this).graph.json", "untyped_A.f7(A__this).graph.json", "untyped_A.f8(A__this).graph.json", "untyped_A.f9(A__this).graph.json" ],
+  "files" : [ "report.json", "untyped_A.A(A__this,_untyped_x,_untyped_y).graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061008125.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061008187.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061008435.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061008497.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061010946.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061011256.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061011690.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_2061013922.graph.json", "untyped_A.f1(A__this).graph.json", "untyped_A.f2(A__this).graph.json", "untyped_A.f3(A__this).graph.json", "untyped_A.f4(A__this).graph.json", "untyped_A.f5(A__this).graph.json", "untyped_A.f6(A__this).graph.json", "untyped_A.f7(A__this).graph.json", "untyped_A.f8(A__this).graph.json", "untyped_A.f9(A__this).graph.json" ],
   "info" : {
     "cfgs" : "10",
-    "duration" : "60ms",
-    "end" : "2026-01-07T11:13:47.130+01:00",
+    "duration" : "450ms",
+    "end" : "2026-09-18T10:49:46.510+02:00",
     "expressions" : "149",
     "files" : "18",
     "globals" : "2",
     "members" : "10",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:47.070+01:00",
+    "start" : "2026-09-18T10:49:46.060+02:00",
     "statements" : "58",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

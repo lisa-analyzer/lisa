@@ -11,10 +11,10 @@ import java.util.Set;
  * A common implementation for classes implementing {@link BinaryOperator} and
  * {@link ComparisonOperator}, providing a
  * {@link #typeInference(TypeSystem, Set, Set)} implementation that returns an
- * empty set if no {@link NumericType} can be found in one of the arguments or
- * if {@link NumericType#commonNumericalType(Set, Set)} returns an empty set,
- * and a singleton set containing {@link TypeSystem#getBooleanType()} otherwise.
- * 
+ * empty set if {@link NumericType#commonNumericalType(Set, Set)} returns an
+ * empty set, and a singleton set containing {@link TypeSystem#getBooleanType()}
+ * otherwise.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class NumericComparison
@@ -27,8 +27,8 @@ public abstract class NumericComparison
 			TypeSystem types,
 			Set<Type> left,
 			Set<Type> right) {
-		if (left.stream().noneMatch(Type::isNumericType) || right.stream().noneMatch(Type::isNumericType))
-			return Collections.emptySet();
+		// see NumericOperation#typeInference for why there is no additional
+		// per-side numeric-only check before delegating here
 		Set<Type> set = NumericType.commonNumericalType(left, right);
 		if (set.isEmpty())
 			return Collections.emptySet();

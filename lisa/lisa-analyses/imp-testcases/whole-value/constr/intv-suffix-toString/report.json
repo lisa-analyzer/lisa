@@ -1,27 +1,27 @@
 {
   "warnings" : [ {
-    "message" : "['imp-testcases/whole-value/toString.imp':12:36] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
+    "message" : "['imp-testcases/whole-value/toString.imp':12:8] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
   }, {
-    "message" : "['imp-testcases/whole-value/toString.imp':13:31] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
+    "message" : "['imp-testcases/whole-value/toString.imp':13:8] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
   }, {
-    "message" : "['imp-testcases/whole-value/toString.imp':14:33] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
+    "message" : "['imp-testcases/whole-value/toString.imp':14:8] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
   } ],
   "notices" : [ ],
   "files" : [ "report.json", "untyped_toString.main(toString__this,_untyped_names).graph.json" ],
   "info" : {
     "cfgs" : "1",
-    "duration" : "2s 156ms",
-    "end" : "2026-07-01T15:06:34.148+02:00",
+    "duration" : "43ms",
+    "end" : "2026-09-04T15:54:05.724+02:00",
     "expressions" : "39",
     "files" : "1",
     "globals" : "0",
     "members" : "1",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-07-01T15:06:31.992+02:00",
+    "start" : "2026-09-04T15:54:05.681+02:00",
     "statements" : "12",
     "units" : "1",
-    "version" : "0.2",
+    "version" : "1.0",
     "warnings" : "3"
   },
   "configuration" : {

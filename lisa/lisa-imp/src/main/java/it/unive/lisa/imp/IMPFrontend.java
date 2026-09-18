@@ -41,6 +41,7 @@ import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CFG;
@@ -339,6 +340,10 @@ public class IMPFrontend
 		InterfaceUnit unit = (InterfaceUnit) program.getUnit(ctx.name.getText());
 		currentUnit = unit;
 
+		for (Annotation ann : new IMPAnnotationVisitor()
+				.visitAnnotations(ctx.annotations()))
+			unit.addAnnotation(ann);
+
 		if (ctx.superinterfaces != null)
 			for (UnitNameContext inft : ctx.superinterfaces.unitName())
 				implementedInterfaces.get(unit.getName()).add(Pair.of(unit, inft.getText()));
@@ -375,6 +380,10 @@ public class IMPFrontend
 			ClassUnitContext ctx) {
 		ClassUnit unit = (ClassUnit) program.getUnit(ctx.name.getText());
 		currentUnit = unit;
+
+		for (Annotation ann : new IMPAnnotationVisitor()
+				.visitAnnotations(ctx.annotations()))
+			unit.addAnnotation(ann);
 
 		if (ctx.superclass != null)
 			inheritanceMap.put(unit.getName(), Pair.of(unit, ctx.superclass.getText()));

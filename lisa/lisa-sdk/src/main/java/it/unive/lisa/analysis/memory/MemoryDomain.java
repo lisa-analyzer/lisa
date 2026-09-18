@@ -149,9 +149,9 @@ public interface MemoryDomain<L extends MemoryLattice<L>>
 		do {
 			ws.addAll(locs);
 			prev = new HashSet<>(result);
+			locs = new HashSet<>();
 			for (SymbolicExpression id : ws) {
 				ExpressionSet rewritten = rewrite(state, id, pp, oracle);
-				locs = new HashSet<>();
 				for (SymbolicExpression r : rewritten) {
 					if (r instanceof MemoryPointer) {
 						MemoryLocation l = ((MemoryPointer) r).getReferencedLocation();

@@ -56,15 +56,21 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The suffix string abstract domain.
+ * The suffix string abstract domain, approximating a string by its longest
+ * known constant suffix ({@link StrSuffix}). It is the dual of {@link Prefix}:
+ * operators that can only extend a string on the left preserve and refine the
+ * tracked suffix, while operators that can alter its end cause the domain to
+ * lose precision.
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
  *             Salvatore Evola</a>
- * 
+ *
  * @see <a href=
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
- *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
+ *          Giulia Costantini, Pietro Ferrara, Agostino Cortesi. Static Analysis
+ *          of String Values. In Formal Methods and Software Engineering (ICFEM
+ *          2011), LNCS vol. 6991, pages 505-521, Springer, 2011.</a>
  */
 public class Suffix
 		implements

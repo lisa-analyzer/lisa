@@ -44,10 +44,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A worst case modular analysis were all cfg calls are treated as open calls.
- * 
+ * A worst-case modular {@link InterproceduralAnalysis}, where every call to a
+ * {@link CFG} defined in the program (i.e., every {@link CFGCall}) is treated
+ * as an {@link OpenCall} instead, meaning that its result is soundly
+ * approximated according to the configured {@link OpenCallPolicy} without ever
+ * analyzing the body of the callee in the context of the call. Each {@link CFG}
+ * of the application is thus analyzed exactly once, in isolation, with a
+ * forward fixpoint starting from the given entry state: this makes the analysis
+ * cheap and independent of the call graph (see {@link #needsCallGraph()}), at
+ * the cost of losing all context-sensitivity and precision on the effects of
+ * intraprocedural calls.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis

@@ -37,14 +37,14 @@ public class VariableTableEntry
 	private final Type staticType;
 
 	/**
-	 * The statement where this variable is first visible. {@code -1} means that
-	 * this variable is visible since the beginning of the cfg.
+	 * The statement where this variable is first visible. {@code null} means
+	 * that this variable is visible since the beginning of the cfg.
 	 */
 	private Statement scopeStart;
 
 	/**
-	 * The statement where this variable is last visible. {@code -1} means that
-	 * this variable is visible until the end of the cfg.
+	 * The statement where this variable is last visible. {@code null} means
+	 * that this variable is visible until the end of the cfg.
 	 */
 	private Statement scopeEnd;
 

@@ -11,7 +11,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.string.Concat;
-import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.StringType;
 
 /**
@@ -47,10 +46,10 @@ public class StringConcat
 	}
 
 	/**
-	 * An expression modeling the string contains operation. The type of both
-	 * operands must be {@link StringType}. The type of this expression is the
-	 * {@link BoolType}.
-	 * 
+	 * An expression modeling the string concatenation operation. The type of
+	 * both operands must be {@link StringType}. The type of this expression is
+	 * the {@link StringType}.
+	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IMPStringConcat

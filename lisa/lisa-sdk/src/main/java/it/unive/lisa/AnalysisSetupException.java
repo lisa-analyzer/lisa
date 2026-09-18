@@ -9,7 +9,7 @@ public class AnalysisSetupException
 		extends
 		AnalysisException {
 
-	private static final long serialVersionUID = 2005239836054799858L;
+	private static final long serialVersionUID = 8140233782317427532L;
 
 	/**
 	 * Builds the exception.

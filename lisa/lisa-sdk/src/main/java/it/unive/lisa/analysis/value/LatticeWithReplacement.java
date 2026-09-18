@@ -25,16 +25,23 @@ public interface LatticeWithReplacement<L extends LatticeWithReplacement<L>>
 		DomainLattice<L, L> {
 
 	/**
-	 * Applies a substitution of identifiers that is caused by a modification of
 	 * the abstraction provided in the {@link MemoryDomain} of the analysis. A
 	 * substitution is composed by a list of {@link MemoryReplacement}
-	 * instances, that <b>must be applied in order</b>.
-	 * 
+	 * instances, that <b>must be applied in order</b>. Every identifier in
+	 * {@link MemoryReplacement#getTargets()} is assigned the least upper bound
+	 * of the {@link #store(Identifier, Identifier)} of every identifier in
+	 * {@link MemoryReplacement#getSources()}, after which
+	 * {@link MemoryReplacement#getIdsToForget()} is forgotten through
+	 * {@link #forgetIdentifiers(Iterable, ProgramPoint)}. As a consequence, if
+	 * {@code r} has no sources, this element is returned unmodified (there is
+	 * nothing to propagate), while if {@code r} has sources but no targets,
+	 * this is equivalent to just forgetting all the sources.
+	 *
 	 * @param r  the replacement to apply
 	 * @param pp the program point that where this operation is being evaluated
-	 * 
+	 *
 	 * @return the lattice modified by the substitution
-	 * 
+	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")

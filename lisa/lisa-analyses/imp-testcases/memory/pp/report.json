@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_A.A(A__this,_untyped_x,_untyped_y).graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586551.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586613.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586861.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586923.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657581188.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657582180.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657583358.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657581870.graph.json", "untyped_A.f1(A__this).graph.json", "untyped_A.f10(A__this).graph.json", "untyped_A.f2(A__this).graph.json", "untyped_A.f3(A__this).graph.json", "untyped_A.f4(A__this).graph.json", "untyped_A.f5(A__this).graph.json", "untyped_A.f6(A__this).graph.json", "untyped_A.f7(A__this).graph.json", "untyped_A.f8(A__this).graph.json", "untyped_A.f9(A__this).graph.json" ],
+  "files" : [ "report.json", "untyped_A.A(A__this,_untyped_x,_untyped_y).graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657585993.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657586675.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657588163.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657588597.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657588907.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657591356.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657591418.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657591666.graph.json", "untyped_A.A(A__this,_untyped_x,_untyped_y)_-1657591728.graph.json", "untyped_A.f1(A__this).graph.json", "untyped_A.f10(A__this).graph.json", "untyped_A.f2(A__this).graph.json", "untyped_A.f3(A__this).graph.json", "untyped_A.f4(A__this).graph.json", "untyped_A.f5(A__this).graph.json", "untyped_A.f6(A__this).graph.json", "untyped_A.f7(A__this).graph.json", "untyped_A.f8(A__this).graph.json", "untyped_A.f9(A__this).graph.json" ],
   "info" : {
     "cfgs" : "11",
-    "duration" : "53ms",
-    "end" : "2026-01-07T11:13:47.882+01:00",
+    "duration" : "292ms",
+    "end" : "2026-09-18T10:49:48.267+02:00",
     "expressions" : "150",
-    "files" : "19",
+    "files" : "20",
     "globals" : "2",
     "members" : "11",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:47.829+01:00",
+    "start" : "2026-09-18T10:49:47.975+02:00",
     "statements" : "59",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

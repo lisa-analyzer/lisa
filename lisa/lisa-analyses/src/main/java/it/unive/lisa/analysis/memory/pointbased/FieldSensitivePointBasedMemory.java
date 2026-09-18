@@ -21,24 +21,27 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
-import java.util.HashMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A field-insensitive program point-based {@link AllocationSiteBasedAnalysis}.
- * The implementation follows X. Rival and K. Yi, "Introduction to Static
- * Analysis An Abstract Interpretation Perspective", Section 8.3.4
- * 
+ * A field-sensitive, allocation-site-based heap domain: in addition to the
+ * allocation site of an object or array, heap locations also track, for each
+ * allocation site, the fields (or elements) that have been accessed on it and
+ * the allocation sites they in turn point to. The implementation follows X.
+ * Rival and K. Yi, "Introduction to Static Analysis: An Abstract Interpretation
+ * Perspective", Section 8.3.4.
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
- * 
- * @see <a href=
- *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
+ *
+ * @see <a href="https://mitpress.mit.edu/books/introduction-static-analysis">
+ *          Xavier Rival, Kwangkeun Yi. Introduction to Static Analysis: An
+ *          Abstract Interpretation Perspective. MIT Press, 2020.</a>
  */
 public class FieldSensitivePointBasedMemory
 		extends
@@ -65,7 +68,7 @@ public class FieldSensitivePointBasedMemory
 				id.getCodeLocation());
 		MemoryEnvWithFields memory = store(state, id, clone);
 
-		Map<AllocationSite, StringSet> newFields = new HashMap<>(state.fields.getMap());
+		PatriciaTrieMap<AllocationSite, StringSet> newFields = state.fields.mkNewFunction(state.fields.function, false);
 
 		// all the allocation sites fields of star_y
 		if (state.fields.getKeys().contains(site)) {
@@ -89,7 +92,7 @@ public class FieldSensitivePointBasedMemory
 				replacement.addTarget(star_yWithField);
 
 				// need to update also the fields of the clone
-				addField(clone, field, newFields);
+				newFields = addField(clone, field, newFields);
 
 				replacements.add(replacement);
 			}
@@ -122,7 +125,7 @@ public class FieldSensitivePointBasedMemory
 
 		if (expression instanceof AccessChild) {
 			AccessChild<?> accessChild = (AccessChild<?>) expression;
-			Map<AllocationSite, StringSet> mapping = new HashMap<>(st.fields.getMap());
+			PatriciaTrieMap<AllocationSite, StringSet> mapping = st.fields.mkNewFunction(st.fields.function, false);
 
 			ExpressionSet exprs;
 			SymbolicExpression cont = accessChild.getContainer();
@@ -142,10 +145,10 @@ public class FieldSensitivePointBasedMemory
 			for (SymbolicExpression rec : exprs)
 				if (rec instanceof MemoryPointer) {
 					AllocationSite site = (AllocationSite) ((MemoryPointer) rec).getReferencedLocation();
-					addField(site, child, mapping);
+					mapping = addField(site, child, mapping);
 				} else if (rec instanceof AllocationSite) {
 					AllocationSite site = (AllocationSite) rec;
-					addField(site, child, mapping);
+					mapping = addField(site, child, mapping);
 				}
 
 			return Pair.of(
@@ -183,7 +186,7 @@ public class FieldSensitivePointBasedMemory
 
 				if (!replacements.isEmpty()) {
 					// we must apply the replacements to our mapping as well
-					Map<Identifier, AllocationSites> map = new HashMap<>(st.getMap());
+					PatriciaTrieMap<Identifier, AllocationSites> map = st.mkNewFunction(st.function, false);
 					for (Entry<Identifier, AllocationSites> entry : st) {
 						Identifier id = entry.getKey();
 						AllocationSites sites = entry.getValue();
@@ -193,7 +196,7 @@ public class FieldSensitivePointBasedMemory
 								id = repl.getTargets().iterator().next();
 							sites = sites.applyReplacement(repl, pp);
 						}
-						map.put(id, sites);
+						map = map.put(id, sites);
 					}
 					st = new MemoryEnvWithFields(st.lattice, map, st.fields);
 				}
@@ -205,13 +208,25 @@ public class FieldSensitivePointBasedMemory
 		return sss;
 	}
 
-	private void addField(
+	/**
+	 * Tracks a new field for the given allocation site by inserting it in the
+	 * given mapping, returning the updated mapping. If the site is already
+	 * present in the mapping, the field is added to the existing set of fields,
+	 * otherwise a new set is created and added to the mapping.
+	 *
+	 * @param site    the allocation site
+	 * @param field   the field to track
+	 * @param mapping the mapping to update
+	 * 
+	 * @return the updated mapping
+	 */
+	protected PatriciaTrieMap<AllocationSite, StringSet> addField(
 			AllocationSite site,
 			String field,
-			Map<AllocationSite, StringSet> mapping) {
+			PatriciaTrieMap<AllocationSite, StringSet> mapping) {
 		Set<String> tmp = new HashSet<>(mapping.getOrDefault(site, new StringSet()).elements());
 		tmp.add(field);
-		mapping.put(site, new StringSet(tmp));
+		return mapping.put(site, new StringSet(tmp));
 	}
 
 	@Override

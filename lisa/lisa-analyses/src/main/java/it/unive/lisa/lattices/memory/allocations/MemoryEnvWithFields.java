@@ -10,12 +10,12 @@ import it.unive.lisa.lattices.StringSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -25,9 +25,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An instance of {@link FunctionalLattice} representing a map from identifiers
- * to sets of {@link AllocationSite}s, that also tracks the fields of each
- * allocation site that have been assigned to some value.
- * 
+ * to sets of {@link AllocationSite}s (i.e., points-to information), that also
+ * tracks, in {@link #fields}, which fields of each allocation site have been
+ * assigned to some value. This is the lattice backing
+ * {@link it.unive.lisa.analysis.memory.pointbased.FieldSensitivePointBasedMemory}.
+ * Every lattice operation (least upper bound, greatest lower bound, widening,
+ * narrowing, less-or-equal) is computed by applying the corresponding operation
+ * of {@link FunctionalLattice} to the points-to map and combining it with the
+ * same operation applied to {@link #fields}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class MemoryEnvWithFields
@@ -65,7 +71,7 @@ public class MemoryEnvWithFields
 	 */
 	public MemoryEnvWithFields(
 			AllocationSites lattice,
-			Map<Identifier, AllocationSites> function,
+			PatriciaTrieMap<Identifier, AllocationSites> function,
 			GenericMapLattice<AllocationSite, StringSet> fields) {
 		super(lattice, function);
 		this.fields = fields;
@@ -143,7 +149,7 @@ public class MemoryEnvWithFields
 		if (isBottom() || isTop())
 			return Pair.of(this, List.of());
 
-		Map<Identifier, AllocationSites> function = mkNewFunction(null, false);
+		PatriciaTrieMap<Identifier, AllocationSites> result = mkNewFunction(null, false);
 		MemoryReplacement removed = new MemoryReplacement();
 		List<MemoryReplacement> r = new LinkedList<>();
 
@@ -153,20 +159,20 @@ public class MemoryEnvWithFields
 				if (lifted.equals(id))
 					// we track the renaming
 					r.add(new MemoryReplacement().withSource(id).withTarget(lifted));
-				if (!function.containsKey(lifted))
-					function.put(lifted, getState(id));
+				if (!result.containsKey(lifted))
+					result = result.put(lifted, getState(id));
 				else
-					function.put(lifted, getState(id).lub(function.get(lifted)));
+					result = result.put(lifted, getState(id).lub(result.get(lifted)));
 			} else
 				// we track the removal
 				removed.addSource(id);
 		}
 
 		if (r.isEmpty() && removed.getSources().isEmpty())
-			return Pair.of(new MemoryEnvWithFields(lattice, function, fields), Collections.emptyList());
+			return Pair.of(new MemoryEnvWithFields(lattice, result, fields), Collections.emptyList());
 
 		r.addAll(expand(removed));
-		return Pair.of(new MemoryEnvWithFields(lattice, function, fields), r);
+		return Pair.of(new MemoryEnvWithFields(lattice, result, fields), r);
 	}
 
 	@Override
@@ -181,8 +187,8 @@ public class MemoryEnvWithFields
 		if (id instanceof AllocationSite)
 			f = f.remove((AllocationSite) id);
 
-		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
-		result.remove(id);
+		PatriciaTrieMap<Identifier, AllocationSites> result = mkNewFunction(function, false);
+		result = result.remove(id);
 		MemoryReplacement r = new MemoryReplacement().withSource(id);
 
 		return Pair.of(new MemoryEnvWithFields(lattice, result, f), expand(r));
@@ -202,9 +208,9 @@ public class MemoryEnvWithFields
 				sites.add((AllocationSite) id);
 		GenericMapLattice<AllocationSite, StringSet> f = fields.removeAll(sites);
 
-		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, AllocationSites> result = mkNewFunction(function, false);
 		for (Identifier id : ids)
-			result.remove(id);
+			result = result.remove(id);
 
 		MemoryReplacement r = new MemoryReplacement();
 		ids.forEach(r::addSource);
@@ -227,9 +233,10 @@ public class MemoryEnvWithFields
 				.collect(Collectors.toSet());
 		GenericMapLattice<AllocationSite, StringSet> f = fields.removeAll(sites);
 
-		Map<Identifier, AllocationSites> result = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, AllocationSites> result = mkNewFunction(function, false);
 		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
-		keys.forEach(result::remove);
+		for (Identifier id : keys)
+			result = result.remove(id);
 
 		if (keys.isEmpty())
 			return Pair.of(new MemoryEnvWithFields(lattice, function, f), Collections.emptyList());
@@ -334,7 +341,7 @@ public class MemoryEnvWithFields
 	@Override
 	public MemoryEnvWithFields mk(
 			AllocationSites lattice,
-			Map<Identifier, AllocationSites> function) {
+			PatriciaTrieMap<Identifier, AllocationSites> function) {
 		return new MemoryEnvWithFields(lattice, function, fields);
 	}
 

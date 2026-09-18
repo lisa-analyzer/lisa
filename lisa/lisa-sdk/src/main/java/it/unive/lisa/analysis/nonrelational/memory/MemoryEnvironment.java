@@ -9,12 +9,12 @@ import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -61,7 +61,7 @@ public class MemoryEnvironment<L extends MemoryValue<L>>
 	 */
 	public MemoryEnvironment(
 			L domain,
-			Map<Identifier, L> function) {
+			PatriciaTrieMap<Identifier, L> function) {
 		super(domain, function);
 	}
 
@@ -109,13 +109,30 @@ public class MemoryEnvironment<L extends MemoryValue<L>>
 		return result;
 	}
 
+	/**
+	 * Applies {@code lifter} (either
+	 * {@link Identifier#pushScope(ScopeToken, ProgramPoint)} or
+	 * {@link Identifier#popScope(ScopeToken, ProgramPoint)}) to every
+	 * identifier currently mapped by this environment, producing the lifted
+	 * environment together with the list of {@link MemoryReplacement}s needed
+	 * to keep other domains (e.g. value and type environments) in sync.
+	 * Identifiers for which {@code lifter} returns {@code null} are considered
+	 * removed, and are expanded through {@link #expand(MemoryReplacement)} to
+	 * also drop whatever was reachable only from them.
+	 *
+	 * @param lifter the function used to lift each identifier
+	 *
+	 * @return the lifted environment and the list of replacements it requires
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	private Pair<MemoryEnvironment<L>, List<MemoryReplacement>> liftIdentifiers(
 			UnaryOperator<Identifier> lifter)
 			throws SemanticException {
 		if (isBottom() || isTop())
 			return Pair.of(this, List.of());
 
-		Map<Identifier, L> function = mkNewFunction(null, false);
+		PatriciaTrieMap<Identifier, L> result = mkNewFunction(null, false);
 		MemoryReplacement removed = new MemoryReplacement();
 		List<MemoryReplacement> r = new LinkedList<>();
 
@@ -125,20 +142,24 @@ public class MemoryEnvironment<L extends MemoryValue<L>>
 				if (lifted.equals(id))
 					// we track the renaming
 					r.add(new MemoryReplacement().withSource(id).withTarget(lifted));
-				if (!function.containsKey(lifted))
-					function.put(lifted, getState(id));
+				if (!result.containsKey(lifted))
+					result = result.put(lifted, getState(id));
 				else
-					function.put(lifted, getState(id).lub(function.get(lifted)));
+					result = result.put(lifted, getState(id).lub(result.get(lifted)));
 			} else
 				// we track the removal
 				removed.addSource(id);
 		}
 
-		if (r.isEmpty() && removed.getSources().isEmpty())
-			return Pair.of(new MemoryEnvironment<>(lattice, function), Collections.emptyList());
+		if (!removed.getSources().isEmpty())
+			// avoid generating a spurious no-op replacement (with no sources
+			// and no targets) when nothing was actually removed
+			r.addAll(expand(removed));
 
-		r.addAll(expand(removed));
-		return Pair.of(new MemoryEnvironment<>(lattice, function), r);
+		if (r.isEmpty())
+			return Pair.of(new MemoryEnvironment<>(lattice, result), Collections.emptyList());
+
+		return Pair.of(new MemoryEnvironment<>(lattice, result), r);
 	}
 
 	@Override
@@ -149,8 +170,8 @@ public class MemoryEnvironment<L extends MemoryValue<L>>
 		if (isTop() || isBottom() || function == null)
 			return Pair.of(this, List.of());
 
-		Map<Identifier, L> result = mkNewFunction(function, false);
-		result.remove(id);
+		PatriciaTrieMap<Identifier, L> result = mkNewFunction(function, false);
+		result = result.remove(id);
 		MemoryReplacement r = new MemoryReplacement().withSource(id);
 
 		return Pair.of(new MemoryEnvironment<>(lattice, result), expand(r));
@@ -164,9 +185,9 @@ public class MemoryEnvironment<L extends MemoryValue<L>>
 		if (isTop() || isBottom() || function == null)
 			return Pair.of(this, List.of());
 
-		Map<Identifier, L> result = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, L> result = mkNewFunction(function, false);
 		for (Identifier id : ids)
-			result.remove(id);
+			result = result.remove(id);
 
 		MemoryReplacement r = new MemoryReplacement();
 		ids.forEach(r::addSource);
@@ -182,9 +203,10 @@ public class MemoryEnvironment<L extends MemoryValue<L>>
 		if (isTop() || isBottom() || function == null)
 			return Pair.of(this, List.of());
 
-		Map<Identifier, L> result = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, L> result = mkNewFunction(function, false);
 		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
-		keys.forEach(result::remove);
+		for (Identifier id : keys)
+			result = result.remove(id);
 
 		if (keys.isEmpty())
 			return Pair.of(new MemoryEnvironment<>(lattice, result), Collections.emptyList());
@@ -240,7 +262,7 @@ public class MemoryEnvironment<L extends MemoryValue<L>>
 	@Override
 	public MemoryEnvironment<L> mk(
 			L lattice,
-			Map<Identifier, L> function) {
+			PatriciaTrieMap<Identifier, L> function) {
 		return new MemoryEnvironment<>(lattice, function);
 	}
 

@@ -24,12 +24,30 @@ import java.util.Set;
 
 /**
  * A taint analysis, that is, an information-flow analysis tracking only
- * explicit flows. This domain uses annotations to mark variables as tainted
- * ({@link #TAINTED_ANNOTATION}) or clean ({@link #CLEAN_ANNOTATION}).
- * 
+ * explicit flows: taintedness propagates through data dependencies (e.g.,
+ * assignments and operators), but not through control dependencies (e.g., a
+ * variable assigned inside a branch guarded by a tainted condition is not
+ * marked as tainted). This domain uses annotations to mark, respectively,
+ * sources and sanitizers of tainted information as tainted
+ * ({@link #TAINTED_ANNOTATION}) or clean ({@link #CLEAN_ANNOTATION}) variables,
+ * parameters or return values. Concrete subclasses only need to define the
+ * lattice {@code L} tracking taintedness (e.g., with two or three levels, see
+ * {@link TwoLevelsTaint} and {@link ThreeLevelsTaint}), as the propagation
+ * logic implemented here is lattice-agnostic: constants are clean, other
+ * expressions are tainted if any of their operands is, and annotated
+ * identifiers always evaluate to their annotated value. <br/>
+ * <br/>
+ * As an information flow analysis, this domain does not take part in
+ * {@link it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis},
+ * meaning that it will never generate constraints when asked to.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <L> the concrete type of the lattice elements tracked by the analysis
+ *
+ * @see <a href="https://doi.org/10.1145/360051.360056">Dorothy E. Denning. A
+ *          Lattice Model of Secure Information Flow. Communications of the ACM,
+ *          19(5):236-243, 1976.</a>
  */
 public abstract class BaseTaint<L extends TaintLattice<L>>
 		implements

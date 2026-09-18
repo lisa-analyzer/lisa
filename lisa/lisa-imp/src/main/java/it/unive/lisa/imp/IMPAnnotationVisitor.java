@@ -86,14 +86,14 @@ public class IMPAnnotationVisitor
 			BasicAnnotationValueContext ctx) {
 		if (ctx.LITERAL_DECIMAL() != null)
 			if (ctx.SUB() != null)
-				return new IntAnnotationValue(Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
-			else
 				return new IntAnnotationValue(-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
+			else
+				return new IntAnnotationValue(Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 		else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
-				return new FloatAnnotationValue(Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
-			else
 				return new FloatAnnotationValue(-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
+			else
+				return new FloatAnnotationValue(Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 		else if (ctx.LITERAL_BOOL() != null)
 			return new BoolAnnotationValue(Boolean.parseBoolean(ctx.LITERAL_BOOL().getText()));
 		else if (ctx.LITERAL_STRING() != null)

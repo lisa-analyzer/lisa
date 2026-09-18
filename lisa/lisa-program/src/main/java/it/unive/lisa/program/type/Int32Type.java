@@ -12,9 +12,10 @@ import java.util.Set;
  * this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
- * {@link NumericType} interface, and for which {@link #isIntegral()} and
- * {@link #is32Bits()} yield {@code true}. An instance of Int32 is assumed to be
- * assignable to any {@link NumericType}, with possible loss of information.
+ * {@link NumericType} interface, and for which {@link #isIntegral()} yields
+ * {@code true}, {@link #isUnsigned()} yields {@code false}, and
+ * {@link #is32Bits()} yields {@code true}. An instance of Int32 is assumed to
+ * be assignable to any {@link NumericType}, with possible loss of information.
  * <br>
  * <br>
  * The common supertype between an Int32 instance {@code t1} and another type
