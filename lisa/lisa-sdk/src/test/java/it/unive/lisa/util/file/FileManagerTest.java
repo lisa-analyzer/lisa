@@ -1,10 +1,12 @@
 package it.unive.lisa.util.file;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -167,6 +169,101 @@ public class FileManagerTest {
 				manager.createdFiles().iterator().next(),
 				file.getName(),
 				"FileManager did not track the created file");
+	}
+
+	@Test
+	public void testMkJsonFileAppendsExtension() {
+		FileManager manager = new FileManager(TESTDIR);
+		try {
+			manager.mkJsonFile("report", w -> w.write("{}"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("The file has not been created");
+		}
+
+		assertTrue(new File(TESTDIR, "report.json").exists(), "The json file has not been created");
+	}
+
+	@Test
+	public void testMkGraphmlFileAppendsExtension() {
+		FileManager manager = new FileManager(TESTDIR);
+		try {
+			manager.mkGraphmlFile("graph", w -> w.write("<graphml/>"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("The file has not been created");
+		}
+
+		assertTrue(new File(TESTDIR, "graph.graphml").exists(), "The graphml file has not been created");
+	}
+
+	@Test
+	public void testMkHtmlFileAppendsExtension() {
+		FileManager manager = new FileManager(TESTDIR);
+		try {
+			manager.mkHtmlFile("page", w -> w.write("<html/>"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("The file has not been created");
+		}
+
+		assertTrue(new File(TESTDIR, "page.html").exists(), "The html file has not been created");
+	}
+
+	@Test
+	public void testGenerateSupportFilesDoesNothingByDefault() {
+		FileManager manager = new FileManager(TESTDIR);
+		try {
+			manager.generateSupportFiles();
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Generating support files should not fail even without a working directory");
+		}
+		assertTrue(manager.createdFiles().isEmpty(), "No files should be created when usedHtmlViewer() was not called");
+	}
+
+	@Test
+	public void testGenerateSupportFilesAfterUsedHtmlViewer() {
+		FileManager manager = new FileManager(TESTDIR);
+		manager.usedHtmlViewer();
+		try {
+			manager.generateSupportFiles();
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Generating support files failed");
+		}
+
+		assertTrue(
+				new File(TESTDIR, Paths.get("assets", "style.css").toString()).exists(),
+				"The style.css support file has not been created");
+		assertTrue(
+				new File(TESTDIR, Paths.get("assets", "d3.v7.min.js").toString()).exists(),
+				"The d3.v7.min.js support file has not been created");
+		assertTrue(
+				new File(TESTDIR, Paths.get("assets", "d3-graphviz.min.js").toString()).exists(),
+				"The d3-graphviz.min.js support file has not been created");
+		assertEquals(3, manager.createdFiles().size());
+	}
+
+	@Test
+	public void testAbsoluteLookingNameIsTreatedAsRelative() {
+		// the javadoc documents that name is always joined with the workdir,
+		// even if it looks like an absolute path: no exception is raised, no
+		// file is created outside of the working directory, and the leading
+		// slash is sanitized away like any other illegal character
+		FileManager manager = new FileManager(TESTDIR);
+		try {
+			manager.mkOutputFile("/tmp/should-not-escape.txt", w -> w.write("foo"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("The file has not been created");
+		}
+
+		assertTrue(!new File("/tmp/should-not-escape.txt").exists(),
+				"The file must not be created outside of the working directory");
+		assertTrue(new File(TESTDIR, "_tmp_should-not-escape.txt").exists(),
+				"The file should have been created inside the working directory, with its slashes sanitized");
+		assertEquals(1, manager.createdFiles().size());
 	}
 
 	@Test

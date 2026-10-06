@@ -97,7 +97,7 @@ public abstract class BaseCallGraph
 
 			CallGraphNode t = new CallGraphNode(this, cfg);
 			if (!adjacencyMatrix.containsNode(t))
-				addNode(t, app.getEntryPoints().contains(call.getCFG()));
+				addNode(t, app.getEntryPoints().contains(cfg));
 			addEdge(new CallGraphEdge(source, t));
 		}
 	}
@@ -109,8 +109,8 @@ public abstract class BaseCallGraph
 			Set<Type>[] types,
 			SymbolAliasing aliasing)
 			throws CallResolutionException {
-		List<Set<Type>> typeList = Arrays.asList(types);
-		Call cached = resolvedCache.getOrDefault(call, Map.of()).get(typeList);
+		List<Set<Type>> typeList = types == null ? null : Arrays.asList(types);
+		Call cached = typeList == null ? null : resolvedCache.getOrDefault(call, Map.of()).get(typeList);
 		if (cached != null)
 			return cached;
 
@@ -211,7 +211,7 @@ public abstract class BaseCallGraph
 		for (CFG target : SetUtils.union(targets, targetsNoRec)) {
 			CallGraphNode t = new CallGraphNode(this, target);
 			if (!adjacencyMatrix.containsNode(t))
-				addNode(t, app.getEntryPoints().contains(call.getCFG()));
+				addNode(t, app.getEntryPoints().contains(target));
 			addEdge(new CallGraphEdge(source, t));
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
@@ -333,7 +333,10 @@ public abstract class BaseCallGraph
 	 *                     stored
 	 * @param natives  the collection where resolved {@link NativeCFG} targets
 	 *                     will be stored
-	 * @param aliasing aliasing information that may affect resolution
+	 * @param aliasing aliasing information that may affect resolution, or
+	 *                     {@code null} if unavailable (in which case, calls
+	 *                     whose qualifier does not name a known unit are left
+	 *                     unresolved)
 	 *
 	 * @throws CallResolutionException if multiple equally suitable targets are
 	 *                                     found
@@ -359,6 +362,10 @@ public abstract class BaseCallGraph
 			else if (call.getQualifier().equals(call.getProgram().getName())) {
 				possibleUnits.add(call.getProgram());
 			} else {
+				if (aliasing == null)
+					// no aliasing information available: the qualifier cannot
+					// be resolved to any unit, so there is no possible target
+					return;
 				Aliases qAlias = aliasing.getState(new QualifierSymbol(call.getQualifier()));
 				if (qAlias.isEmpty())
 					return;

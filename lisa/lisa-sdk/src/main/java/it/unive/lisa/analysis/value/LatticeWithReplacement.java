@@ -28,13 +28,21 @@ public interface LatticeWithReplacement<L extends LatticeWithReplacement<L>>
 	 * Applies a substitution of identifiers that is caused by a modification of
 	 * the abstraction provided in the {@link HeapDomain} of the analysis. A
 	 * substitution is composed by a list of {@link HeapReplacement} instances,
-	 * that <b>must be applied in order</b>.
-	 * 
+	 * that <b>must be applied in order</b>. Every identifier in
+	 * {@link HeapReplacement#getTargets()} is assigned the least upper bound of
+	 * the {@link #store(Identifier, Identifier)} of every identifier in
+	 * {@link HeapReplacement#getSources()}, after which
+	 * {@link HeapReplacement#getIdsToForget()} is forgotten through
+	 * {@link #forgetIdentifiers(Iterable, ProgramPoint)}. As a consequence, if
+	 * {@code r} has no sources, this element is returned unmodified (there is
+	 * nothing to propagate), while if {@code r} has sources but no targets,
+	 * this is equivalent to just forgetting all the sources.
+	 *
 	 * @param r  the replacement to apply
 	 * @param pp the program point that where this operation is being evaluated
-	 * 
+	 *
 	 * @return the lattice modified by the substitution
-	 * 
+	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")

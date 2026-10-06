@@ -7,9 +7,11 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
- * A lattice structure for string constants, that is, elements of the integer
- * set Sigma* extended with a top and bottom element.
- * 
+ * The lattice structure used by
+ * {@link it.unive.lisa.analysis.string.StringConstantPropagation}: elements of
+ * the set &Sigma;* of all strings over the string alphabet &Sigma;, extended
+ * with a top (unknown value) and a bottom (invalid value) element.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class StringConstant

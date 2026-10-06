@@ -297,7 +297,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extend
 
 			FixpointResults<A> precomputed = interprocedural.getFixpointResults();
 			ScopeToken scope = new ScopeToken(call);
-			ScopeId<A> id = getId().push(call, entryState);
+			ScopeId<A> id = getId().push(call, CompoundState.of(entryState, expressions));
 			AnalysisState<A> state = entryState.bottom();
 			for (CFG target : call.getTargetedCFGs()) {
 				AnalysisState<A> res = precomputed.getState(target).getState(id).getExitState();

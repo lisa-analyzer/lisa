@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_tests.long(tests__this,_untyped_x).graph.json", "untyped_tests.main(tests__this,_untyped_x).graph.json" ],
+  "info" : {
+    "cfgs" : "2",
+    "duration" : "23ms",
+    "end" : "2026-09-04T15:53:47.576+02:00",
+    "expressions" : "16",
+    "files" : "2",
+    "globals" : "1",
+    "members" : "2",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-09-04T15:53:47.553+02:00",
+    "statements" : "8",
+    "units" : "1",
+    "version" : "1.0",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/long/insensitive"
+  }
+}

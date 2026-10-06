@@ -1,7 +1,7 @@
 package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
@@ -24,7 +24,7 @@ public class UniqueScope<A extends AbstractLattice<A>>
 	@Override
 	public ScopeId<A> push(
 			CFGCall scopeToken,
-			AnalysisState<A> state) {
+			CompoundState<A> state) {
 		return this;
 	}
 

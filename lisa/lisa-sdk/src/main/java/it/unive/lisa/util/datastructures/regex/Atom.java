@@ -215,8 +215,7 @@ public class Atom
 		RegularExpression r = Atom.EPSILON;
 		for (long i = 0; i < n; i++)
 			r = new Comp(r, this);
-		r.simplify();
-		return r;
+		return r.simplify();
 	}
 
 	@Override

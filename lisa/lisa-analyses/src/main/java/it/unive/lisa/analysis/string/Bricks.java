@@ -70,7 +70,11 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The bricks string abstract domain.
+ * The Bricks string abstract domain, approximating a string as an ordered list
+ * of {@link Brick}s, each representing a set of possible substrings together
+ * with the range of times it can be repeated in sequence. This allows the
+ * domain to capture structured strings built through repeated concatenations
+ * (e.g., strings produced inside a loop).
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
@@ -78,7 +82,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @see <a href=
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
- *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
+ *          Giulia Costantini, Pietro Ferrara, Agostino Cortesi. Static Analysis
+ *          of String Values. In Formal Methods and Software Engineering (ICFEM
+ *          2011), LNCS vol. 6991, pages 505-521, Springer, 2011.</a>
  */
 public class Bricks
 		implements
@@ -281,10 +287,11 @@ public class Bricks
 		}
 
 		/**
-		 * Helper method to determine if the maximum of the Brick is Finite or
-		 * not.
+		 * Yields whether the maximum repetition count of this brick is finite,
+		 * meaning that this brick represents a finite set of strings.
 		 *
-		 * @return true if the maximum of the Brick is Finite, false otherwise.
+		 * @return {@code true} if the maximum of this brick is finite,
+		 *             {@code false} otherwise
 		 */
 		public boolean isFinite() {
 			return getMax().isFinite() && strings != null;
@@ -306,42 +313,36 @@ public class Bricks
 			Set<String> reps = new TreeSet<>();
 
 			try {
-				if (this.strings.size() == 1) {
-					String element = this.strings.iterator().next();
-					reps.add(element.repeat(this.getMin().toInt()));
-					reps.add(element.repeat(this.getMax().toInt()));
-					return reps;
-				}
+				int min = this.getMin().toInt();
+				int max = this.getMax().toInt();
 
-				this.recGetReps(reps, this.getMin().toInt(), 0, "");
+				if (min == 0)
+					reps.add("");
+
+				if (max == 0 || this.strings.isEmpty())
+					return reps;
+
+				// level holds all the concatenations of exactly `count`
+				// elements of the strings set; it is built once per
+				// repetition count and reused to build the next one,
+				// instead of being recomputed from scratch every time
+				Set<String> level = new TreeSet<>();
+				level.add("");
+				for (int count = 1; count <= max; count++) {
+					Set<String> next = new TreeSet<>();
+					for (String prefix : level)
+						for (String string : this.strings)
+							next.add(prefix + string);
+					level = next;
+
+					if (count >= min)
+						reps.addAll(level);
+				}
 			} catch (MathNumberConversionException e) {
 				throw new IllegalStateException("Brick must be finite.");
 			}
 
 			return reps;
-		}
-
-		// Recursive function that gets all the possible combinations of the set
-		// between min and max
-		private void recGetReps(
-				Set<String> reps,
-				int min,
-				int numberOfReps,
-				String currentStr)
-				throws MathNumberConversionException {
-			if (!isFinite())
-				throw new IllegalStateException("Brick must be finite.");
-
-			if (min > this.getMax().toInt() && numberOfReps >= this.getMin().toInt())
-				reps.add(currentStr);
-			else {
-				for (String string : this.strings) {
-					if ((!currentStr.equals("") || this.getMin().toInt() == 0) && numberOfReps >= this.getMin().toInt())
-						reps.add(currentStr);
-
-					recGetReps(reps, min + 1, numberOfReps + 1, currentStr + string);
-				}
-			}
 		}
 
 		@Override
@@ -632,8 +633,11 @@ public class Bricks
 		}
 
 		/**
-		 * The normalization method of the bricks domain. Modify bricks to its
-		 * normalized form.
+		 * Normalizes this list of bricks in place, according to the
+		 * normalization rules of the Bricks domain (e.g., merging adjacent
+		 * bricks with the same set of strings, or dropping bricks that only
+		 * represent the empty string), so that equivalent brick lists are
+		 * reduced to a canonical form.
 		 */
 		public void normBricks() {
 			if (isTop())
@@ -783,11 +787,12 @@ public class Bricks
 		}
 
 		/**
-		 * Helper method to determine if the list represents a finite set of
-		 * strings or not.
+		 * Yields whether this list represents a finite set of strings, that is,
+		 * whether every {@link Brick} composing it is finite (see
+		 * {@link Brick#isFinite()}).
 		 *
-		 * @return true if the list represents a finite set of strings, false
-		 *             otherwise.
+		 * @return {@code true} if this list represents a finite set of strings,
+		 *             {@code false} otherwise
 		 */
 		public boolean isFinite() {
 			for (Brick b : bricks)
@@ -808,9 +813,11 @@ public class Bricks
 				throw new IllegalStateException("Brick list must be finite.");
 
 			Set<String> reps = new TreeSet<>();
+			boolean first = true;
 			for (Brick b : bricks)
-				if (reps.isEmpty()) {
+				if (first) {
 					reps.addAll(b.getReps());
+					first = false;
 				} else {
 					Set<String> newReps = new TreeSet<>();
 					for (String s1 : reps)
@@ -976,9 +983,10 @@ public class Bricks
 			if (val.isTop())
 				return top();
 			if (operator == StringCharAt.INSTANCE) {
-				left.normBricks();
+				BrickList normalized = new BrickList(new ArrayList<>(left.bricks));
+				normalized.normBricks();
 
-				Brick first = left.bricks.get(0);
+				Brick first = normalized.bricks.get(0);
 				TreeSet<String> result = new TreeSet<>();
 
 				if (first.getMin().equals(MathNumber.ONE)
@@ -991,7 +999,7 @@ public class Bricks
 					});
 				}
 
-				if (result.size() == first.getStrings().size()) {
+				if (first.getStrings() != null && result.size() == first.getStrings().size()) {
 					List<Brick> resultList = new ArrayList<>();
 					resultList.add(new Brick(new IntInterval(1, 1), result));
 					return new BrickList(resultList);
@@ -1000,9 +1008,10 @@ public class Bricks
 				return top();
 			}
 			if (operator == StringSubstringToEnd.INSTANCE) {
-				left.normBricks();
+				BrickList normalized = new BrickList(new ArrayList<>(left.bricks));
+				normalized.normBricks();
 
-				Brick first = left.bricks.get(0);
+				Brick first = normalized.bricks.get(0);
 				TreeSet<String> result = new TreeSet<>();
 
 				if (first.getMin().equals(MathNumber.ONE)
@@ -1015,7 +1024,7 @@ public class Bricks
 					});
 				}
 
-				if (result.size() == first.getStrings().size()) {
+				if (first.getStrings() != null && result.size() == first.getStrings().size()) {
 					List<Brick> resultList = new ArrayList<>();
 					resultList.add(new Brick(new IntInterval(1, 1), result));
 					return new BrickList(resultList);
@@ -1061,8 +1070,9 @@ public class Bricks
 			if (mid.isTop() || rig.isTop())
 				return top();
 
-			left.normBricks();
-			Brick first = left.bricks.get(0);
+			BrickList normalized = new BrickList(new ArrayList<>(left.bricks));
+			normalized.normBricks();
+			Brick first = normalized.bricks.get(0);
 			TreeSet<String> result = new TreeSet<>();
 
 			if (first.getMin().equals(MathNumber.ONE)
@@ -1075,7 +1085,7 @@ public class Bricks
 				});
 			}
 
-			if (result.size() == first.getStrings().size()) {
+			if (first.getStrings() != null && result.size() == first.getStrings().size()) {
 				List<Brick> resultList = new ArrayList<>();
 				resultList.add(new Brick(new IntInterval(1, 1), result));
 				return new BrickList(resultList);
@@ -1185,9 +1195,10 @@ public class Bricks
 			BrickList current,
 			long e,
 			long b) {
-		current.normBricks();
+		BrickList normalized = new BrickList(new ArrayList<>(current.bricks));
+		normalized.normBricks();
 
-		Brick first = current.bricks.get(0);
+		Brick first = normalized.bricks.get(0);
 
 		TreeSet<String> result = new TreeSet<>();
 
@@ -1203,7 +1214,7 @@ public class Bricks
 			});
 		}
 
-		if (result.size() == first.getStrings().size()) {
+		if (first.getStrings() != null && result.size() == first.getStrings().size()) {
 			List<Brick> resultList = new ArrayList<>();
 
 			resultList.add(new Brick(new IntInterval(1, 1), result));
@@ -1275,7 +1286,7 @@ public class Bricks
 
 	@Override
 	public BrickList bottom() {
-		return new BrickList().bottom();
+		return new BrickList(new ArrayList<>());
 	}
 
 	private BrickList generate(

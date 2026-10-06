@@ -74,7 +74,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The character inclusion abstract domain.
+ * The character inclusion abstract domain, approximating a string by a pair of
+ * character sets: the characters that certainly occur in the string, and the
+ * characters that may occur in it (see {@link CI}). This domain is insensitive
+ * to the order and repetition of characters, and does not track any structural
+ * information about the string.
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
@@ -82,7 +86,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @see <a href=
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
- *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
+ *          Giulia Costantini, Pietro Ferrara, Agostino Cortesi. Static Analysis
+ *          of String Values. In Formal Methods and Software Engineering (ICFEM
+ *          2011), LNCS vol. 6991, pages 505-521, Springer, 2011.</a>
  */
 public class CharInclusion
 		implements
@@ -410,10 +416,15 @@ public class CharInclusion
 				return left;
 
 			Set<Character> included = new TreeSet<>(left.certainlyContained);
-			Set<Character> possibly = new TreeSet<>(left.maybeContained);
+			included.removeAll(middle.certainlyContained);
+
+			if (left.maybeContained == null || middle.maybeContained == null || right.maybeContained == null)
+				// we cannot bound the possibly-included characters
+				return new CI(included, null);
+
 			// since we do not know if the replace will happen, we move
 			// everything to the possibly included characters
-			included.removeAll(middle.certainlyContained);
+			Set<Character> possibly = new TreeSet<>(left.maybeContained);
 			possibly.addAll(middle.certainlyContained);
 
 			included.removeAll(middle.maybeContained);

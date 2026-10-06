@@ -47,7 +47,9 @@ public class Untyped
 	@Override
 	public boolean canBeAssignedTo(
 			Type other) {
-		return other == this;
+		// consistent with equals(): any Untyped instance, not just this
+		// exact one, is considered the same type
+		return other instanceof Untyped;
 	}
 
 	@Override

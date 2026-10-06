@@ -29,9 +29,10 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A type-based heap implementation that abstracts heap locations depending on
- * their types, i.e., all the heap locations with the same type are abstracted
- * into a single unique identifier.
+ * A type-based, field-insensitive heap implementation that abstracts heap
+ * locations depending on their types: all the heap locations with the same type
+ * are abstracted into a single unique identifier named after that type,
+ * regardless of where or how many times it was allocated.
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
@@ -214,8 +215,6 @@ public class TypeBasedHeap
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
-		if (state.isTop())
-			return Satisfiability.UNKNOWN;
 		if (state.isBottom())
 			return Satisfiability.BOTTOM;
 

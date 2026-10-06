@@ -29,12 +29,12 @@ import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.FixpointResults;
+import it.unive.lisa.interprocedural.Recursion;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
 import it.unive.lisa.interprocedural.context.KDepthToken;
-import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.inlining.CallStackId;
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.lattices.HistoryState;
@@ -86,6 +86,18 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
@@ -125,6 +137,7 @@ import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
+import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.Comp;
@@ -137,6 +150,11 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieBranch;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieCollision;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieLeaf;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieNode;
 import it.unive.lisa.util.frontend.ParsedBlock;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
@@ -325,6 +343,7 @@ public class EqualityContractVerificationTest {
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
 				.suppress(suppressions)
 				.withPrefabValues(CFG.class, cfg1, cfg2)
+				.withPrefabValues(Graph.class, cfg1, cfg2)
 				.withPrefabValues(AbstractCodeMember.class, signCfg1, signCfg2)
 				.withPrefabValues(CodeMemberDescriptor.class, descr1, descr2)
 				.withPrefabValues(ClassUnit.class, unit1, unit2)
@@ -339,6 +358,10 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(EventQueue.class, new EventQueue(null), new EventQueue(null))
 				.withPrefabValues(Set.class, s1, s2)
+				.withPrefabValues(PatriciaTrieMap.class, PatriciaTrieMap.empty().put(2, 1),
+						PatriciaTrieMap.empty().put(3, 2))
+				.withPrefabValues(PatriciaTrieNode.class, new PatriciaTrieLeaf<>(2, 2, 1),
+						new PatriciaTrieLeaf<>(3, 3, 2))
 				.withPrefabValues(
 						AbstractDomain.class,
 						DefaultConfiguration.simpleDomain(
@@ -380,6 +403,27 @@ public class EqualityContractVerificationTest {
 		verify(CronConfiguration.class, Warning.NONFINAL_FIELDS);
 	}
 
+	private static <T> void verifyFixpoint(
+			Class<T> clazz) {
+		verify(clazz, verifier -> verifier.withIgnoredFields("events"));
+	}
+
+	@Test
+	public void testFixpoints() {
+		verifyFixpoint(ForwardAscendingFixpoint.class);
+		verifyFixpoint(ForwardDescendingGLBFixpoint.class);
+		verifyFixpoint(ForwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(BackwardAscendingFixpoint.class);
+		verifyFixpoint(BackwardDescendingGLBFixpoint.class);
+		verifyFixpoint(BackwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(OptimizedForwardAscendingFixpoint.class);
+		verifyFixpoint(OptimizedForwardDescendingGLBFixpoint.class);
+		verifyFixpoint(OptimizedForwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(OptimizedBackwardAscendingFixpoint.class);
+		verifyFixpoint(OptimizedBackwardDescendingGLBFixpoint.class);
+		verifyFixpoint(OptimizedBackwardDescendingNarrowingFixpoint.class);
+	}
+
 	@Test
 	public void testCollections() {
 		// some of the classes here will need to suppress warnings about
@@ -408,6 +452,11 @@ public class EqualityContractVerificationTest {
 		verify(DuplicateFreeFIFOWorkingSet.class);
 		verify(DuplicateFreeLIFOWorkingSet.class);
 		verify(OrderBasedWorkingSet.class);
+
+		verify(PatriciaTrieMap.class);
+		verify(PatriciaTrieLeaf.class);
+		verify(PatriciaTrieBranch.class, verifier -> verifier.withIgnoredFields("size"));
+		verify(PatriciaTrieCollision.class);
 	}
 
 	@Test

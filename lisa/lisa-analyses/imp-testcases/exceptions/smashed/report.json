@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_A.A(A__this)_2101368133.graph.json", "untyped_B.B(B__this)_2101369311.graph.json", "untyped_D.D(D__this)_2101365777.graph.json", "untyped_E.E(E__this)_2101366955.graph.json", "untyped_exceptions.main(exceptions__this,_untyped_b).graph.json", "untyped_exceptions.thrower1(exceptions__this,_untyped_b)_1005192134.graph.json", "untyped_exceptions.thrower2(exceptions__this,_untyped_b)_1005192165.graph.json", "untyped_exceptions.thrower3(exceptions__this,_untyped_b)_1005192196.graph.json", "untyped_exceptions.thrower4(exceptions__this,_untyped_b)_1005192227.graph.json" ],
+  "files" : [ "report.json", "untyped_A.A(A__this)_2100919346.graph.json", "untyped_B.B(B__this)_2100920524.graph.json", "untyped_D.D(D__this)_2100916990.graph.json", "untyped_E.E(E__this)_2100918168.graph.json", "untyped_exceptions.main(exceptions__this,_untyped_b).graph.json", "untyped_exceptions.thrower1(exceptions__this,_untyped_b)_1005177719.graph.json", "untyped_exceptions.thrower2(exceptions__this,_untyped_b)_1005177750.graph.json", "untyped_exceptions.thrower3(exceptions__this,_untyped_b)_1005177781.graph.json", "untyped_exceptions.thrower4(exceptions__this,_untyped_b)_1005177812.graph.json" ],
   "info" : {
     "cfgs" : "10",
-    "duration" : "61ms",
-    "end" : "2026-01-07T11:13:44.139+01:00",
+    "duration" : "98ms",
+    "end" : "2026-09-04T15:53:26.871+02:00",
     "expressions" : "39",
     "files" : "9",
     "globals" : "0",
     "members" : "10",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:44.078+01:00",
+    "start" : "2026-09-04T15:53:26.773+02:00",
     "statements" : "27",
     "units" : "6",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

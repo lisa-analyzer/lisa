@@ -14,7 +14,7 @@ import it.unive.lisa.type.UnitType;
 import it.unive.lisa.type.Untyped;
 
 /**
- * THe {@link TypeSystem} for the IMP language.
+ * The {@link TypeSystem} for the IMP language.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -66,8 +66,21 @@ public class IMPTypeSystem
 			if (refSecond.getInnerType().isNullType())
 				return 0;
 			else if (refSecond.getInnerType().isArrayType()
-					&& refFirst.getInnerType().isArrayType())
-				return refFirst.getInnerType().equals(refSecond.getInnerType()) ? 0 : -1;
+					&& refFirst.getInnerType().isArrayType()) {
+				// arrays are covariant on their element type (see
+				// ArrayType#canBeAssignedTo): a distance can only be computed
+				// here for element types that this method itself knows how to
+				// compare directly (numeric widening), since array element
+				// types are not wrapped in a ReferenceType the way units are
+				Type elemFirst = refFirst.getInnerType().asArrayType().getInnerType();
+				Type elemSecond = refSecond.getInnerType().asArrayType().getInnerType();
+				if (elemFirst.equals(elemSecond))
+					return 0;
+				else if (elemFirst.isNumericType() && elemSecond.isNumericType())
+					return 1;
+				else
+					return -1;
+			}
 
 			// from here on, we should suppose that the inner types are
 			// units

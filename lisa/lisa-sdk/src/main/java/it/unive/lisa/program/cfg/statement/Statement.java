@@ -118,8 +118,8 @@ public abstract class Statement
 			return false;
 		Statement st = (Statement) obj;
 		if (location == null) {
-			if (st.location == null)
-				return true;
+			if (st.location != null)
+				return false;
 		} else if (!location.equals(st.location))
 			return false;
 		return true;

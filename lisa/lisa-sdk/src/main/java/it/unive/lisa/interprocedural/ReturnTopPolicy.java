@@ -13,10 +13,10 @@ import it.unive.lisa.symbolic.value.Skip;
 
 /**
  * An {@link OpenCallPolicy}, where the post state is exactly the entry state,
- * with the only difference of having a the call's meta variable assigned to top
+ * with the only difference of having the call's meta variable assigned to top
  * <i>only</i> if the call returns a value. This variable, that is also stored
- * as computed expression, represent the unknown result of the call, if any.
- * 
+ * as computed expression, represents the unknown result of the call, if any.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ReturnTopPolicy

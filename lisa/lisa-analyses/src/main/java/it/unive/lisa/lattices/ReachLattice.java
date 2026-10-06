@@ -6,9 +6,9 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
-import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -45,7 +45,7 @@ public class ReachLattice
 	 */
 	public ReachLattice(
 			ReachabilityStatus lattice,
-			Map<ProgramPoint, ReachabilityStatus> function) {
+			PatriciaTrieMap<ProgramPoint, ReachabilityStatus> function) {
 		super(lattice, function);
 	}
 
@@ -119,7 +119,7 @@ public class ReachLattice
 	@Override
 	public ReachLattice mk(
 			ReachabilityStatus lattice,
-			Map<ProgramPoint, ReachabilityStatus> function) {
+			PatriciaTrieMap<ProgramPoint, ReachabilityStatus> function) {
 		return new ReachLattice(lattice, function);
 	}
 

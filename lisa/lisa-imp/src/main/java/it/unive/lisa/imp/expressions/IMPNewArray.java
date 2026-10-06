@@ -28,10 +28,10 @@ import java.util.Objects;
 
 /**
  * An expression modeling the array allocation operation
- * ({@code new type[...]}). The type of this expression is the {@link Type} of
- * the array's elements. Note that the dimensions of the array are ignored. This
- * expression corresponds to a {@link MemoryAllocation}.
- * 
+ * ({@code new type[...]}). The type of this expression is an {@link ArrayType}
+ * wrapping the given element {@link Type}. Note that the dimensions of the
+ * array are ignored. This expression corresponds to a {@link MemoryAllocation}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IMPNewArray

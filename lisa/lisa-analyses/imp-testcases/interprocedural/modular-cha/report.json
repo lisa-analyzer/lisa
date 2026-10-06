@@ -4,18 +4,18 @@
   "files" : [ "report.json", "untyped_A.A(A__this).graph.json", "untyped_A.foo(A__this).graph.json", "untyped_B.B(B__this).graph.json", "untyped_B.foo(B__this).graph.json", "untyped_tests.subtyping(tests__this).graph.json" ],
   "info" : {
     "cfgs" : "5",
-    "duration" : "12ms",
-    "end" : "2026-01-07T11:13:46.715+01:00",
+    "duration" : "27ms",
+    "end" : "2026-09-04T15:53:32.354+02:00",
     "expressions" : "11",
     "files" : "5",
     "globals" : "0",
     "members" : "5",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:46.703+01:00",
+    "start" : "2026-09-04T15:53:32.327+02:00",
     "statements" : "10",
     "units" : "3",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

@@ -8,11 +8,15 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
 /**
- * An abstract domain that tracks the history of fixpoint iterations as a
- * {@link HistoryState}.
- * 
+ * A wrapper {@link AbstractDomain} that pairs an underlying domain {@code D}
+ * with a {@link HistoryState}, recording the sequence of abstract lattice
+ * elements that have been computed for a given program point across the
+ * iterations of a fixpoint computation. This history can be used to inspect the
+ * intermediate states computed during the iterates after the analysis
+ * completes, instead of only being able to inspect the final invariant.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of {@link AbstractLattice} embedded in this state
  * @param <D> the type of {@link AbstractDomain} that produces instances of
  *                {@code A}

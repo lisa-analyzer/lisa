@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 
 /**
  * An {@link Environment} that is also a {@link TypeLattice}, tracking types of
@@ -46,7 +46,7 @@ public class TypeEnvironment<
 	 */
 	public TypeEnvironment(
 			L domain,
-			Map<Identifier, L> function) {
+			PatriciaTrieMap<Identifier, L> function) {
 		super(domain, function);
 	}
 
@@ -63,7 +63,7 @@ public class TypeEnvironment<
 	@Override
 	public TypeEnvironment<L> mk(
 			L lattice,
-			Map<Identifier, L> function) {
+			PatriciaTrieMap<Identifier, L> function) {
 		return new TypeEnvironment<>(lattice, function);
 	}
 

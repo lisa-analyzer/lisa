@@ -37,13 +37,23 @@ import java.util.Set;
 
 /**
  * An implementation of the overflow-insensitive constant propagation dataflow
- * analysis, that focuses only on integers. <br/>
+ * analysis, that focuses only on integers. This is a forward dataflow analysis,
+ * instantiated as a {@link DataflowDomain} over {@link DefiniteSet}s of
+ * {@link CP} elements: whenever an identifier is assigned an expression that
+ * evaluates to a constant integer (see {@link Evaluator}), a new element
+ * pairing the identifier with that constant is generated, while every element
+ * previously associated with the reassigned identifier is killed. <br/>
  * <br/>
  * As a dataflow analysis, this domain does not take part in
  * {@link WholeValueAnalysis}, meaning that it will never generate constraints
  * when asked to.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1145/512927.512945">Gary A. Kildall. A
+ *          Unified Approach to Global Program Optimization. In Proceedings of
+ *          the 1st Annual ACM SIGACT-SIGPLAN Symposium on Principles of
+ *          Programming Languages (POPL '73), pages 194-206, ACM, 1973.</a>
  */
 public class ConstantPropagation
 		extends
@@ -136,7 +146,7 @@ public class ConstantPropagation
 			if (expression.getOperator() instanceof AdditionOperator)
 				return left + right;
 			if (expression.getOperator() instanceof DivisionOperator)
-				return left == 0 ? null : (int) left / right;
+				return right == 0 ? null : left / right;
 			if (expression.getOperator() instanceof ModuloOperator)
 				return right == 0 ? null : left % right;
 			if (expression.getOperator() instanceof MultiplicationOperator)

@@ -3,15 +3,13 @@ package it.unive.lisa.symbolic.value.operator.binary;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import java.util.Collections;
 import java.util.Set;
 
 /**
  * A common implementation for classes implementing {@link BinaryOperator},
  * providing a {@link #typeInference(TypeSystem, Set, Set)} implementation that
- * returns an empty set if no {@link NumericType}, and the result of
- * {@link NumericType#commonNumericalType(Set, Set)} otherwise.
- * 
+ * delegates to {@link NumericType#commonNumericalType(Set, Set)}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class NumericOperation
@@ -23,12 +21,12 @@ public abstract class NumericOperation
 			TypeSystem types,
 			Set<Type> left,
 			Set<Type> right) {
-		if (left.stream().noneMatch(Type::isNumericType) || right.stream().noneMatch(Type::isNumericType))
-			return Collections.emptySet();
-		Set<Type> set = NumericType.commonNumericalType(left, right);
-		if (set.isEmpty())
-			return Collections.emptySet();
-		return set;
+		// commonNumericalType already yields an empty set whenever neither
+		// side has a numeric type; an additional per-side numeric-only check
+		// here would incorrectly discard the case where one side is entirely
+		// Untyped (unknown, but possibly numeric) and the other is numeric,
+		// which commonNumericalType is explicitly designed to pair together
+		return NumericType.commonNumericalType(left, right);
 	}
 
 }

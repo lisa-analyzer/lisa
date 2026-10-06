@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "callgraph.graph.json", "report.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_1934988638.graph.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_1934989630.graph.json", "untyped_A.identity(A__this,_untyped_x)_1934979710.graph.json", "untyped_A.main(A__this).graph.json" ],
+  "files" : [ "callgraph.graph.json", "report.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_1934973262.graph.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_1934973293.graph.json", "untyped_A.identity(A__this,_untyped_x)_1934963373.graph.json", "untyped_A.main(A__this).graph.json" ],
   "info" : {
     "cfgs" : "3",
-    "duration" : "21ms",
-    "end" : "2026-01-07T11:13:46.203+01:00",
+    "duration" : "70ms",
+    "end" : "2026-09-04T15:53:31.463+02:00",
     "expressions" : "33",
     "files" : "5",
     "globals" : "0",
     "members" : "3",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:46.182+01:00",
+    "start" : "2026-09-04T15:53:31.393+02:00",
     "statements" : "10",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

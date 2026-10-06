@@ -1,6 +1,6 @@
 package it.unive.lisa.symbolic.value.operator.ternary;
 
-import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.StringType;
@@ -9,9 +9,11 @@ import it.unive.lisa.type.TypeSystem;
 import java.util.Set;
 
 /**
- * Given two expressions that both evaluate to string values, a
- * {@link BinaryExpression} using this operator checks if the string from the
- * first argument is prefixed by the one of the second argument.<br>
+ * Given two expressions that both evaluate to string values, and a third one
+ * evaluating to an integer value, a {@link TernaryExpression} using this
+ * operator checks if the string from the first argument, starting at the
+ * position identified by the third argument, is prefixed by the one of the
+ * second argument.<br>
  * <br>
  * First argument expression type: {@link StringType}<br>
  * Second argument expression type: {@link StringType}<br>

@@ -16,9 +16,10 @@ import org.apache.commons.lang3.tuple.Pair;
  * containing the same object types. Common objects will can be retrieved
  * through {@link #getCommons()}, while ones available only in one of them can
  * be retrieved through {@link #getOnlyFirst()} and {@link #getOnlySecond()}.
- * 
+ * Neither of the two collections can contain {@code null} elements.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <T> the type of elements within the collections to be compared
  */
 public class CollectionsDiffBuilder<T> {

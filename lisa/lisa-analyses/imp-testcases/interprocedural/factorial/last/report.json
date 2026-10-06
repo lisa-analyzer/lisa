@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_-1504338471.graph.json", "untyped_factorial.main(factorial__this,_untyped_a).graph.json" ],
+  "files" : [ "report.json", "untyped_factorial.factorial(factorial__this,_untyped_n)_-1504353847.graph.json", "untyped_factorial.main(factorial__this,_untyped_a).graph.json" ],
   "info" : {
     "cfgs" : "2",
-    "duration" : "10ms",
-    "end" : "2026-01-07T11:13:49.864+01:00",
+    "duration" : "17ms",
+    "end" : "2026-09-04T15:53:40.392+02:00",
     "expressions" : "16",
     "files" : "2",
     "globals" : "0",
     "members" : "2",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:49.854+01:00",
+    "start" : "2026-09-04T15:53:40.375+02:00",
     "statements" : "6",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

@@ -64,15 +64,21 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The prefix string abstract domain.
+ * The prefix string abstract domain, approximating a string by its longest
+ * known constant prefix ({@link StrPrefix}). Operators that can only extend a
+ * string on the right (e.g., concatenation) preserve and refine the tracked
+ * prefix, while operators that can alter its beginning (e.g., trimming or
+ * reversal) cause the domain to lose precision.
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
  *             Salvatore Evola</a>
- * 
+ *
  * @see <a href=
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
- *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
+ *          Giulia Costantini, Pietro Ferrara, Agostino Cortesi. Static Analysis
+ *          of String Values. In Formal Methods and Software Engineering (ICFEM
+ *          2011), LNCS vol. 6991, pages 505-521, Springer, 2011.</a>
  */
 public class Prefix
 		implements

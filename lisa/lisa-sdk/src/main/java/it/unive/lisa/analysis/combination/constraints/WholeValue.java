@@ -179,14 +179,15 @@ public class WholeValue
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public WholeValue store(
 			Identifier target,
 			Identifier source)
 			throws SemanticException {
-		ValueLattice<?>[] bottom = new ValueLattice<?>[components.length];
+		ValueLattice<?>[] stored = new ValueLattice<?>[components.length];
 		for (int i = 0; i < components.length; i++)
-			bottom[i] = components[i].bottom();
-		return new WholeValue(bottom);
+			stored[i] = (ValueLattice) ((ValueLattice) components[i]).store(target, source);
+		return new WholeValue(stored);
 	}
 
 	@Override

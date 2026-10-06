@@ -27,18 +27,29 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * Relational implementation of the upper bounds analysis of
- * <a href="https://doi.org/10.1016/j.scico.2009.04.004">this paper</a>.
- * 
+ * Relational implementation of the upper bounds analysis, the relational
+ * component of the Pentagons domain (see {@link Pentagon}). For every
+ * identifier, this domain tracks the set of other identifiers that are
+ * certainly strictly greater than it (i.e., its known upper bounds), capturing
+ * relations of the form {@code x < y}. This information is updated on
+ * assignments of the form {@code id = y - c} or {@code id = y + c}, where
+ * {@code c} is a constant, and refined whenever a comparison between two
+ * identifiers is assumed.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1016/j.scico.2009.04.004">Francesco Logozzo,
+ *          Manuel Fähndrich. Pentagons: a weakly relational abstract domain for
+ *          the efficient validation of array accesses. Science of Computer
+ *          Programming, 75(9):796-807, 2010.</a>
  */
 public class UpperBounds
 		implements
@@ -52,20 +63,16 @@ public class UpperBounds
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		PatriciaTrieMap<Identifier, DefiniteIdSet> cleanup = state.mkNewFunction(state.function, false);
 		// cleanup: if a variable is reassigned, it can no longer be an
 		// upperbound of other variables
-		Map<Identifier, DefiniteIdSet> cleanup = new HashMap<>();
-		for (Map.Entry<Identifier, DefiniteIdSet> entry : state) {
-			if (entry.getKey().equals(id))
-				continue;
-			if (!entry.getValue().contains(id))
-				cleanup.put(entry.getKey(), entry.getValue());
-			else {
+		cleanup = cleanup.remove(id);
+		for (Map.Entry<Identifier, DefiniteIdSet> entry : state)
+			if (entry.getValue().contains(id)) {
 				Set<Identifier> copy = new HashSet<>(entry.getValue().elements);
 				copy.remove(id);
-				cleanup.put(entry.getKey(), new DefiniteIdSet(copy));
+				cleanup = cleanup.put(entry.getKey(), new DefiniteIdSet(copy));
 			}
-		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression be = (BinaryExpression) expression;
@@ -82,18 +89,18 @@ public class UpperBounds
 					// id = y - c (where c is the constant)
 					Identifier y = (Identifier) be.getLeft();
 					if (sign > 0)
-						cleanup.put(id, state.getState(y).add(y));
+						cleanup = cleanup.put(id, state.getState(y).add(y));
 					else if (sign < 0)
 						// this is effectively an addition
-						cleanup.put(y, state.getState(y).add(id));
+						cleanup = cleanup.put(y, state.getState(y).add(id));
 				} else if (op instanceof AdditionOperator) {
 					// bonus: id = y + c (where c is the constant)
 					Identifier y = (Identifier) be.getLeft();
 					if (sign > 0)
-						cleanup.put(y, state.getState(y).add(id));
+						cleanup = cleanup.put(y, state.getState(y).add(id));
 					else if (sign < 0)
 						// this is effectively a subtraction
-						cleanup.put(id, state.getState(y).add(y));
+						cleanup = cleanup.put(id, state.getState(y).add(y));
 				}
 			}
 		}

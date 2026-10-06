@@ -21,7 +21,7 @@ import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 
 /**
- * An expression modeling the string contains operation. The type of both
+ * An expression modeling the string concatenation operation. The type of both
  * operands must be {@link StringType}. The type of this expression is the
  * {@link StringType}. <br>
  * <br>
@@ -32,7 +32,7 @@ import it.unive.lisa.type.Type;
  * present, such statement will be used as {@link ProgramPoint} for semantics
  * computations. This allows subclasses to implement {@link PluggableStatement}
  * easily without redefining the semantics provided by this class.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Concat
