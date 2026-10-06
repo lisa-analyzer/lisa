@@ -67,12 +67,11 @@ public final class Counter {
 	 * new message to be logged. Otherwise, a message will be logged every
 	 * {@code max(1, cap * updateFactor)} {@link #count()} call.
 	 * 
-	 * @param logger       the logger to log onto
-	 * @param level        the level to log at
-	 * @param message      the message to display while counting
-	 * @param objects      the objects being counted
-	 * @param cap          the cap of the count, meaning the expected maximum
-	 *                         number
+	 * @param logger  the logger to log onto
+	 * @param level   the level to log at
+	 * @param message the message to display while counting
+	 * @param objects the objects being counted
+	 * @param cap     the cap of the count, meaning the expected maximum number
 	 */
 	public Counter(
 			Logger logger,
@@ -155,11 +154,11 @@ public final class Counter {
 		if (cap > 0) {
 			int filled = (int) (ratio * BAR_WIDTH);
 			StringBuilder bar = new StringBuilder("[")
-				.append("#".repeat(filled))
-				.append("-".repeat(BAR_WIDTH - filled))
-				.append("] ")
-				.append((int) (ratio * 100))
-				.append("%");
+					.append("#".repeat(filled))
+					.append("-".repeat(BAR_WIDTH - filled))
+					.append("] ")
+					.append((int) (ratio * 100))
+					.append("%");
 			msg += bar.toString();
 		} else
 			msg += "in progress (" + count + ")";

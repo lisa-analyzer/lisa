@@ -150,6 +150,7 @@ public class TypeTest {
 		assertFalse(t.isUnitType());
 		assertFalse(t.isErrorType());
 		assertFalse(t.isTypeTokenType());
+		assertFalse(t.isCodeMemberType());
 		assertFalse(t.isReferenceType());
 
 		assertNull(t.asNumericType());
@@ -165,6 +166,7 @@ public class TypeTest {
 		assertNull(t.asUnitType());
 		assertNull(t.asErrorType());
 		assertNull(t.asTypeTokenType());
+		assertNull(t.asCodeMemberType());
 		assertNull(t.asReferenceType());
 	}
 

@@ -1,5 +1,7 @@
 package it.unive.lisa.logging;
 
+import it.unive.lisa.LiSA;
+import it.unive.lisa.conf.LiSAConfiguration;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,9 +18,6 @@ import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.api.LoggerComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
-
-import it.unive.lisa.LiSA;
-import it.unive.lisa.conf.LiSAConfiguration;
 
 /**
  * Utility class to check and initialize Log4j logging configuration. This class
@@ -70,7 +69,8 @@ public class Log4jConfig {
 		String pattern = "%m %ex";
 		String level = "%equals{%level: }{INFO: }{}";
 		if (interactive)
-			pattern = "\u001B[2K\r%highlight{" + level + "}" + "%highlight{" + pattern + "}{INFO=bright_white, DEBUG=bright_white, TRACE=bright_white}";
+			pattern = "\u001B[2K\r%highlight{" + level + "}" + "%highlight{" + pattern
+					+ "}{INFO=bright_white, DEBUG=bright_white, TRACE=bright_white}";
 		else
 			pattern = level + pattern;
 
