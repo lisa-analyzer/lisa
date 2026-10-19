@@ -75,27 +75,29 @@ public class PythonLikeAssigningStrategy
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepareForNative(
-			Call call,
-			AnalysisState<A> callState,
-			InterproceduralAnalysis<A, D> interprocedural,
-			StatementStore<A> expressions,
-			Parameter[] formals,
-			ExpressionSet[] parameters)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepareForNative(
+					Call call,
+					AnalysisState<A> callState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					Parameter[] formals,
+					ExpressionSet[] parameters)
+					throws SemanticException {
 		return doPrepare(call, callState, interprocedural, expressions, formals, parameters, false);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> doPrepare(
-			Call call,
-			AnalysisState<A> callState,
-			InterproceduralAnalysis<A, D> interprocedural,
-			StatementStore<A> expressions,
-			Parameter[] formals,
-			ExpressionSet[] parameters,
-			boolean assignFormals)
-			throws SemanticException {
+	private <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> doPrepare(
+					Call call,
+					AnalysisState<A> callState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					Parameter[] formals,
+					ExpressionSet[] parameters,
+					boolean assignFormals)
+					throws SemanticException {
 
 		ExpressionSet[] slots = new ExpressionSet[formals.length];
 		Set<Type>[] slotsTypes = new Set[formals.length];

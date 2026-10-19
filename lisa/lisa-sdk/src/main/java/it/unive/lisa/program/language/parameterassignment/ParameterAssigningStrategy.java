@@ -70,8 +70,8 @@ public interface ParameterAssigningStrategy {
 	 * {@link Call}, behaving as
 	 * {@link #prepare(Call, AnalysisState, InterproceduralAnalysis, StatementStore, Parameter[], ExpressionSet[])}
 	 * except that actual parameters are not assigned to formal ones, since
-	 * native targets do not have their own scope. This method should be
-	 * invoked only by native calls.
+	 * native targets do not have their own scope. This method should be invoked
+	 * only by native calls.
 	 * 
 	 * @param <A>             the kind of {@link AbstractLattice} produced by
 	 *                            the domain {@code D}
@@ -95,13 +95,14 @@ public interface ParameterAssigningStrategy {
 	 * @throws SemanticException if something goes wrong while preparing the
 	 *                               entry-state
 	 */
-	<A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepareForNative(
-			Call call,
-			AnalysisState<A> callState,
-			InterproceduralAnalysis<A, D> interprocedural,
-			StatementStore<A> expressions,
-			Parameter[] formals,
-			ExpressionSet[] actuals)
-			throws SemanticException;
+	<A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepareForNative(
+					Call call,
+					AnalysisState<A> callState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					Parameter[] formals,
+					ExpressionSet[] actuals)
+					throws SemanticException;
 
 }

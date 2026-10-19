@@ -43,26 +43,28 @@ public class OrderPreservingAssigningStrategy
 	}
 
 	@Override
-	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepareForNative(
-			Call call,
-			AnalysisState<A> callState,
-			InterproceduralAnalysis<A, D> interprocedural,
-			StatementStore<A> expressions,
-			Parameter[] formals,
-			ExpressionSet[] parameters)
-			throws SemanticException {
+	public <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepareForNative(
+					Call call,
+					AnalysisState<A> callState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					Parameter[] formals,
+					ExpressionSet[] parameters)
+					throws SemanticException {
 		return doPrepare(call, callState, interprocedural, expressions, formals, parameters, false);
 	}
 
-	private <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> doPrepare(
-			Call call,
-			AnalysisState<A> callState,
-			InterproceduralAnalysis<A, D> interprocedural,
-			StatementStore<A> expressions,
-			Parameter[] formals,
-			ExpressionSet[] parameters,
-			boolean assignFormals)
-			throws SemanticException {
+	private <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> doPrepare(
+					Call call,
+					AnalysisState<A> callState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					Parameter[] formals,
+					ExpressionSet[] parameters,
+					boolean assignFormals)
+					throws SemanticException {
 		// prepare the state for the call: assign the value to each parameter
 		// (skipped for native calls, as they do not have their own scope)
 		AnalysisState<A> prepared = callState;
