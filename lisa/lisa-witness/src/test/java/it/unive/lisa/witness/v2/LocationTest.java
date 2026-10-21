@@ -35,4 +35,9 @@ public class LocationTest {
 		assertNotEquals(a, new Location("Main.java", 3, 8, "main"));
 		assertNotEquals(a, new Location("Main.java", 3, 7));
 	}
+
+	@Test
+	public void aLocationNamesItsFunction() {
+		assertEquals("Main.java:3:5 (main)", new Location("Main.java", 3, 5, "main").toString());
+	}
 }

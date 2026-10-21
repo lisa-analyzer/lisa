@@ -16,9 +16,19 @@ public class RoundTripTest {
 	private static final List<String> EXAMPLES = List.of(
 			"java/ExDarko_false.witness-2.4.yml",
 			"java/ExDarko_true.witness-2.4.yml",
+			"sum.witness-2.4.yml",
+			"zero_div.witness-2.4.yml",
 			"concurrent-unreach.witness-2.2.yml",
-			"safe-simple-concurrent.witness-2.1.yml",
-			"multivar_1-1.witness-2.1.yml");
+			"concurrent-no-overflow.witness-2.2.yml",
+			"concurrent-data-race.witness-2.2.yml",
+			"nonterminating-program-example.witness-2.1.yml",
+			"unsafe-program-example.cpachecker.witness-2.0.yml",
+			"unsafe-program-example.symbiotic.witness-2.0.yml",
+			"safe-program-example.witness-2.0.yml",
+			"terminating-program-example.witness-2.1.yml",
+			"multivar_1-1.witness-2.0.yml",
+			"multivar_1-1.witness-2.1.yml",
+			"safe-simple-concurrent.witness-2.1.yml");
 
 	// the C examples are older versions with the same content in 2.4: only
 	// their version is changed
@@ -27,7 +37,8 @@ public class RoundTripTest {
 			throws Exception {
 		try (InputStream in = Files.newInputStream(Path.of("witness-testcases", name))) {
 			String text = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-			return WitnessReader.read(text.replaceAll("format_version: \"2\\.[0-3]\"", "format_version: \"2.4\""));
+			return WitnessReader
+					.read(text.replaceAll("format_version: (['\"]?)2\\.[0-3]\\1", "format_version: \"2.4\""));
 		}
 	}
 

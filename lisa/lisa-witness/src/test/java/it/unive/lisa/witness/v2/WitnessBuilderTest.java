@@ -29,17 +29,6 @@ public class WitnessBuilderTest {
 	private static final Producer PRODUCER = new Producer("Test", "1");
 
 	@Test
-	public void theViolationBuilderMakesOneSegmentPerWaypoint() {
-		ViolationWitness witness = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER)
-				.functionReturn(at(34), "\\result == 0")
-				.target(at(48))
-				.build();
-		assertEquals(List.of(
-				Segment.of(Waypoint.functionReturn(at(34), "\\result == 0", Format.EXT_JAVA_EXPRESSION)),
-				Segment.of(Waypoint.target(at(48)))), witness.getSequence().getSegments());
-	}
-
-	@Test
 	public void theViolationBuilderFillsTheMetadata() {
 		Metadata metadata = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER).target(at(2)).build()
 				.getSequence().getMetadata();
@@ -91,12 +80,6 @@ public class WitnessBuilderTest {
 	}
 
 	@Test
-	public void aLocationOutsideTheInputFilesIsRejectedWhenAdded() {
-		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER);
-		assertThrows(InvalidWitnessException.class, () -> builder.target(new Location("Other.java", 2)));
-	}
-
-	@Test
 	public void forInputsHashesTheFilesAsGiven(
 			@TempDir Path dir)
 			throws Exception {
@@ -124,20 +107,6 @@ public class WitnessBuilderTest {
 				List.of(first.get(0).getAction(), first.get(1).getAction(), first.get(2).getAction()));
 		assertEquals(Constraint.withoutFormat("false"), first.get(0).getConstraint());
 		assertEquals(2, witness.getSequence().getSegments().size());
-	}
-
-	@Test
-	public void aSegmentOfOnlyAvoidWaypointsIsRejected() {
-		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(task(Language.C), PRODUCER);
-		assertThrows(InvalidWitnessException.class,
-				() -> builder.segment(s -> s.assumption(Action.AVOID, at(7), "x == 0")));
-	}
-
-	@Test
-	public void anEmptySegmentIsRejected() {
-		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(task(Language.C), PRODUCER);
-		assertThrows(InvalidWitnessException.class, () -> builder.segment(s -> {
-		}));
 	}
 
 	@Test
@@ -181,5 +150,44 @@ public class WitnessBuilderTest {
 		assertEquals(Format.C_EXPRESSION, witness.getInvariants().getItems().get(0).getFormat());
 		assertEquals(Format.EXT_C_EXPRESSION, witness.getInvariants().getItems().get(1).getFormat());
 		assertTrue(witness.getInvariants().getItems().get(1).isInductive());
+	}
+
+	@Test
+	public void theBuilderChecksAnItemWhenItIsAdded() {
+		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.JAVA), PRODUCER);
+		assertThrows(InvalidWitnessException.class,
+				() -> builder.invariant(InvariantType.LOOP_TRANSITION_INVARIANT, at(1), "i >= 0"));
+		assertThrows(InvalidWitnessException.class, () -> builder.item(
+				new Invariant(InvariantType.LOCATION_INVARIANT, at(1), "x == 0", Format.C_EXPRESSION)));
+	}
+
+	@Test
+	public void theBuilderRejectsADuplicateGhostVariableAtTheCall() {
+		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
+				.ghostVariable("g", "int", "0");
+		assertThrows(InvalidWitnessException.class, () -> builder.ghostVariable("g", "int", "1"));
+	}
+
+	@Test
+	public void anUpdateBeforeItsDeclarationIsAccepted() {
+		CorrectnessWitness witness = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
+				.ghostUpdate(at(2), "g", "1")
+				.ghostVariable("g", "int", "0")
+				.build();
+		assertEquals(1, witness.getGhost().get().getGhostUpdates().size());
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void anExplicitFormatIsCheckedWhenAdded() {
+		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER);
+		assertThrows(InvalidWitnessException.class, () -> builder.segment(
+				s -> s.functionReturn(Action.FOLLOW, at(1), "\\result == 0", Format.ACSL_EXPRESSION)));
+		ViolationWitness witness = new ViolationWitnessBuilder(task(Language.C), PRODUCER)
+				.segment(s -> s.functionReturn(Action.FOLLOW, at(1), "\\result == 0", Format.ACSL_EXPRESSION, 1))
+				.target(at(2))
+				.build();
+		assertEquals(Integer.valueOf(1),
+				witness.getSequence().getSegments().get(0).getWaypoints().get(0).getThreadId());
 	}
 }

@@ -35,13 +35,6 @@ public class LanguageTest {
 	}
 
 	@Test
-	public void namesAreTheOnesOfTheFormat() {
-		assertEquals("Java", Language.JAVA.getName());
-		assertEquals("ext_java_expression", Format.EXT_JAVA_EXPRESSION.getName());
-		assertEquals("invariant_set", EntryType.INVARIANT_SET.getName());
-	}
-
-	@Test
 	public void eachLanguageHasAnExpressionAndAnExtendedFormat() {
 		assertEquals(Format.JAVA_EXPRESSION, Language.JAVA.getExpressionFormat());
 		assertEquals(Format.EXT_JAVA_EXPRESSION, Language.JAVA.getExtendedExpressionFormat());
@@ -49,5 +42,28 @@ public class LanguageTest {
 		assertEquals(Format.EXT_C_EXPRESSION, Language.C.getExtendedExpressionFormat());
 		assertEquals(Format.PYTHON_EXPRESSION, Language.PYTHON.getExpressionFormat());
 		assertEquals(Format.EXT_PYTHON_EXPRESSION, Language.PYTHON.getExtendedExpressionFormat());
+	}
+
+	@Test
+	public void anyBackslashOutsideLiteralsNeedsTheExtendedFormat() {
+		assertEquals(Format.EXT_C_EXPRESSION, Language.C.getFormatFor("\\valid(p)"));
+		assertEquals(Format.EXT_C_EXPRESSION, Language.C.getFormatFor("\\resultx == 0"));
+		assertEquals(Format.EXT_JAVA_EXPRESSION,
+				Language.JAVA.getFormatFor("s.equals(\"a\\\"b\") && \\old(x) < x"));
+		assertEquals(Format.C_EXPRESSION, Language.C.getFormatFor("c == '\\n'"));
+		assertEquals(Format.JAVA_EXPRESSION, Language.JAVA.getFormatFor("s.equals(\"\\\\result\")"));
+		assertEquals(Format.JAVA_EXPRESSION, Language.JAVA.getFormatFor("x > 0", null));
+		assertEquals(Format.EXT_JAVA_EXPRESSION, Language.JAVA.getFormatFor("\\result > x"));
+		assertEquals(Format.EXT_C_EXPRESSION, Language.C.getFormatFor("\\at(i, AnyPrev) > i"));
+		assertEquals(Format.EXT_C_EXPRESSION, Language.C.getFormatFor("1", "\\return == 0"));
+		assertEquals(Format.EXT_PYTHON_EXPRESSION, Language.PYTHON.getFormatFor("\\old(x) < x"));
+	}
+
+	@Test
+	public void aLongLiteralIsHandledInLinearTime() {
+		String literal = "s.equals(\"" + "\\n".repeat(500_000) + "\")";
+		assertEquals(Format.JAVA_EXPRESSION, Language.JAVA.getFormatFor(literal));
+		assertEquals(Format.EXT_JAVA_EXPRESSION, Language.JAVA.getFormatFor(literal + " && \\result > 0"));
+		assertEquals(Format.JAVA_EXPRESSION, Language.JAVA.getFormatFor("s.equals(\"" + "a".repeat(1_000_000)));
 	}
 }

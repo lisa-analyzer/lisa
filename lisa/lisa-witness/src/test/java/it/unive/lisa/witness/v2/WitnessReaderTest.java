@@ -121,4 +121,12 @@ public class WitnessReaderTest {
 		WitnessReadException e = rejected(violationText().replace("type: target", "type: assumption"));
 		assertTrue(e.getCause() != null);
 	}
+
+	@Test
+	public void aContractWithOnlyEnsuresSurvivesTheRoundTrip()
+			throws Exception {
+		CorrectnessWitness witness = new CorrectnessWitness(new InvariantSet(metadata(Language.JAVA),
+				List.of(new FunctionContract(at(1), null, "x > 0", Format.JAVA_EXPRESSION, null))));
+		assertEquals(witness, WitnessReader.read(WitnessWriter.write(witness)));
+	}
 }

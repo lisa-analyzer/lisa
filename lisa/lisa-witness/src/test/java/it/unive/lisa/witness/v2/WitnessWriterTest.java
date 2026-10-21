@@ -1,5 +1,7 @@
 package it.unive.lisa.witness.v2;
 
+import static it.unive.lisa.witness.v2.TestValues.at;
+import static it.unive.lisa.witness.v2.TestValues.task;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,6 +13,7 @@ import it.unive.lisa.witness.v2.correctness.Invariant;
 import it.unive.lisa.witness.v2.correctness.InvariantSet;
 import it.unive.lisa.witness.v2.correctness.InvariantSetItem;
 import it.unive.lisa.witness.v2.correctness.InvariantType;
+import it.unive.lisa.witness.v2.metadata.Producer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public class WitnessWriterTest {
+
+	private static final Producer PRODUCER = new Producer("Test", "1");
 
 	private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());
 
@@ -79,5 +84,15 @@ public class WitnessWriterTest {
 		WitnessWriter.write(witness(), out);
 		out.write('#');
 		assertEquals(WitnessWriter.write(witness()) + "#", out.toString(StandardCharsets.UTF_8));
+	}
+
+	@Test
+	// a plain YAML mapper would write the type keys as YAML tags: the writer
+	// turns them off
+	public void aWitnessIsSerializedAsItsEntries()
+			throws Exception {
+		ViolationWitness witness = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER).target(at(2)).build();
+		ObjectMapper yaml = new ObjectMapper(new YAMLFactory());
+		assertEquals(yaml.readTree(WitnessWriter.write(witness)), new ObjectMapper().valueToTree(witness));
 	}
 }

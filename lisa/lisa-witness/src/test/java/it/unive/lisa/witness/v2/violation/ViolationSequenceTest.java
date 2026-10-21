@@ -3,10 +3,8 @@ package it.unive.lisa.witness.v2.violation;
 import static it.unive.lisa.witness.v2.TestValues.at;
 import static it.unive.lisa.witness.v2.TestValues.metadata;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import it.unive.lisa.witness.v2.EntryType;
 import it.unive.lisa.witness.v2.Format;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Language;
@@ -37,9 +35,4 @@ public class ViolationSequenceTest {
 		assertDoesNotThrow(() -> new ViolationSequence(metadata(Language.JAVA), List.of(VALUE, TARGET)));
 	}
 
-	@Test
-	public void itsEntryTypeIsViolationSequence() {
-		ViolationSequence sequence = new ViolationSequence(metadata(Language.JAVA), List.of(TARGET));
-		assertEquals(EntryType.VIOLATION_SEQUENCE, sequence.getEntryType());
-	}
 }

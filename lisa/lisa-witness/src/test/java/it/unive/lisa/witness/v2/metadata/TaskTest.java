@@ -1,6 +1,7 @@
 package it.unive.lisa.witness.v2.metadata;
 
 import static it.unive.lisa.witness.v2.TestValues.HASH;
+import static it.unive.lisa.witness.v2.TestValues.task;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -68,5 +69,30 @@ public class TaskTest {
 	public void aHashIsASha256Hash() {
 		assertThrows(InvalidWitnessException.class,
 				() -> new Task(List.of("Main.java"), Map.of("Main.java", "00"), SPEC, Language.JAVA, null));
+	}
+
+	@Test
+	public void aTaskNeedsAnInputFile() {
+		assertThrows(InvalidWitnessException.class,
+				() -> new Task(List.of(), Map.of(), SPEC, Language.JAVA, null));
+	}
+
+	@Test
+	public void theSameFileUnderTwoSpellingsIsRejected() {
+		assertThrows(InvalidWitnessException.class, () -> new Task(List.of("a/B.java", "./a/B.java"),
+				Map.of("a/B.java", HASH, "./a/B.java", HASH), SPEC, Language.JAVA, null));
+	}
+
+	@Test
+	public void theLoaderKeepsTheSourcesOfTheLanguageOnce(
+			@TempDir Path dir)
+			throws Exception {
+		Path a = Files.createDirectories(dir.resolve("a"));
+		Path source = Files.writeString(a.resolve("B.java"), "class B {}\n", StandardCharsets.UTF_8);
+		Files.writeString(a.resolve("B.class"), "compiled", StandardCharsets.UTF_8);
+		Files.writeString(a.resolve("README.md"), "readme", StandardCharsets.UTF_8);
+		Path prp = Files.writeString(dir.resolve("p.prp"), SPEC);
+		Task task = TaskLoader.load(List.of(a, source, a.resolve(".").resolve("B.java")), prp, Language.JAVA, null);
+		assertEquals(List.of(source.toString()), task.getInputFiles());
 	}
 }
